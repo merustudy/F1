@@ -38,5 +38,8 @@
 *.ttf      filter=lfs diff=lfs merge=lfs -text
 *.otf      filter=lfs diff=lfs merge=lfs -text
 
+# Third-party license texts are kept byte-for-byte.
+Assets/@Fonts/Source/**/LICENSE.txt -whitespace
+
 # Small binaries kept in normal Git
 *.dll binary
