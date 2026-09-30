@@ -60,14 +60,14 @@ Assets/@Scripts
 │  ├─ Manager        # Managers (Service Container)
 │  ├─ Resource       # ResourceManager, ResourceScope
 │  ├─ Scene          # SceneManagerEx
-│  └─ Setting        # SettingManager
+│  └─ Setting        # SettingManager, UnityLocaleAdapter
 ├─ Data              # Definitions/, Json/, Localization/ (LocalePolicy, LocalizedText)
 ├─ Save              # Models/, Storage/
 ├─ Gameplay          # 순수 C# Domain
 ├─ Flow              # Application 계층: RunManager, ExpeditionManager
-├─ UI
+├─ UI                # UiKeys, UiStrings, 화면
 └─ Editor            # F1.Editor asmdef
-   ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, UiPrefabSetup
+   ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, FontSetup, UiPrefabSetup
    └─ Data           # CSV Parser, DataTransformer
 ```
 

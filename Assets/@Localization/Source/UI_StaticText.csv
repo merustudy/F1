@@ -1,0 +1,10 @@
+Key,Shared Comments,ko-KR,en-US
+Common.Confirm,Generic confirm button.,확인,OK
+Common.Cancel,Generic cancel button.,취소,Cancel
+Common.Front,Front row.,전열,Front
+Common.Rear,Rear row.,후열,Rear
+Title.GameName,Working title shown on the title screen.,F1,F1
+Title.NewRun,Starts a fresh run.,새 런,New Run
+Title.Continue,Continues the saved run.,이어하기,Continue
+Title.Language,Button that switches the language. {0} = name of the current language.,언어: {0},Language: {0}
+Title.LanguageName,Name of this language written in itself.,한국어,English

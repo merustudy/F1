@@ -57,7 +57,7 @@ asmdef를 나누지 않고, 시뮬 실행기(`Tools/Sim`)가 이 폴더의 소�
 | `com.unity.ide.rider`, `com.unity.ide.visualstudio` | IDE 연동 |
 | `com.unity.addressables` | Resource Load. 2.x 계열(2.11.2)로 고정한다. 3.x, 4.x는 필요가 생길 때 검토한다 |
 | `com.unity.nuget.newtonsoft-json` | Save와 Static Data JSON (3.2.2) |
-| `com.unity.localization` | UI String Table (6단계에서 추가) |
+| `com.unity.localization` | UI String Table와 Locale (1.5.13). Addressables 위에서 동작한다 |
 
 - Template이 넣었지만 쓰지 않아 제거한 Package: `2d.animation`, `2d.aseprite`, `2d.psdimporter`, `2d.spriteshape`, `2d.tilemap`,
   `2d.tilemap.extras`, `2d.tooling`, `collab-proxy`, `multiplayer.center`, `timeline`, `visualscripting`.

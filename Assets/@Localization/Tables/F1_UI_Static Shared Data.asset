@@ -1,0 +1,110 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: F1_UI_Static Shared Data
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.SharedTableData
+  m_TableCollectionName: F1_UI_Static
+  m_TableCollectionNameGuidString: f6c7eb8a5baa24fc5876afc58dc06d16
+  m_Entries:
+  - m_Id: 263184384
+    m_Key: Common.Confirm
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375835
+  - m_Id: 275767296
+    m_Key: Common.Cancel
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375836
+  - m_Id: 275767297
+    m_Key: Common.Front
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375837
+  - m_Id: 275767298
+    m_Key: Common.Rear
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375838
+  - m_Id: 275767299
+    m_Key: Title.GameName
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375839
+  - m_Id: 275767300
+    m_Key: Title.NewRun
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375840
+  - m_Id: 275767301
+    m_Key: Title.Continue
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375841
+  - m_Id: 275767302
+    m_Key: Title.Language
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375842
+  - m_Id: 279961600
+    m_Key: Title.LanguageName
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375843
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 636489278608375832
+  references:
+    version: 2
+    RefIds:
+    - rid: 636489278608375832
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1790762675498
+    - rid: 636489278608375835
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Generic confirm button.
+    - rid: 636489278608375836
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Generic cancel button.
+    - rid: 636489278608375837
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Front row.
+    - rid: 636489278608375838
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Rear row.
+    - rid: 636489278608375839
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Working title shown on the title screen.
+    - rid: 636489278608375840
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Starts a fresh run.
+    - rid: 636489278608375841
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Continues the saved run.
+    - rid: 636489278608375842
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button that switches the language. {0} = name of the current
+          language.
+    - rid: 636489278608375843
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Name of this language written in itself.

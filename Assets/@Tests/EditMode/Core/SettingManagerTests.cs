@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using F1.Core;
 using F1.Data;
 using F1.Save;
@@ -33,6 +35,12 @@ namespace F1.Tests
         SettingsData ReadSaved()
         {
             return _save.Load<SettingsData>(SettingManager.FileName).Value;
+        }
+
+        /// <summary>The test delegates complete synchronously, so the change is finished when this returns.</summary>
+        static void Change(SettingManager setting, string localeCode)
+        {
+            setting.ChangeLocaleAsync(localeCode).GetAwaiter().GetResult();
         }
 
         [Test]
@@ -116,9 +124,16 @@ namespace F1.Tests
         }
 
         [Test]
-        public void SetLocale_WhenSupported_SavesThenRaisesEvent()
+        public void ChangeLocale_WhenSupported_AppliesRuntimeThenSavesThenRaisesEvent()
         {
-            var setting = new SettingManager(_save);
+            var applied = new List<string>();
+            string savedAtApply = null;
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                savedAtApply = ReadSaved().LocaleCode;
+                return Task.CompletedTask;
+            });
             setting.Load("ko-KR");
             string raised = null;
             string savedAtEvent = null;
@@ -128,40 +143,91 @@ namespace F1.Tests
                 savedAtEvent = ReadSaved().LocaleCode;
             };
 
-            setting.SetLocale("en-US");
+            Change(setting, "en-US");
 
+            CollectionAssert.AreEqual(new[] { "en-US" }, applied);
+            Assert.AreEqual("ko-KR", savedAtApply, "The runtime locale is applied before the setting is saved.");
             Assert.AreEqual("en-US", setting.LocaleCode);
             Assert.AreEqual("en-US", raised);
             Assert.AreEqual("en-US", savedAtEvent, "The event is raised only after the save succeeded.");
         }
 
         [Test]
-        public void SetLocale_WhenSameLocale_DoesNotRaiseEvent()
+        public void ChangeLocale_WhenNoRuntimeToFollow_StillSavesAndRaisesEvent()
         {
             var setting = new SettingManager(_save);
+            setting.Load("ko-KR");
+            string raised = null;
+            setting.LocaleChanged += code => raised = code;
+
+            Change(setting, "en-US");
+
+            Assert.AreEqual("en-US", setting.LocaleCode);
+            Assert.AreEqual("en-US", ReadSaved().LocaleCode);
+            Assert.AreEqual("en-US", raised);
+        }
+
+        [Test]
+        public void ChangeLocale_WhenCodeDiffersOnlyByCase_UsesCanonicalCode()
+        {
+            var applied = new List<string>();
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                return Task.CompletedTask;
+            });
+            setting.Load("ko-KR");
+
+            Change(setting, "EN-us");
+
+            CollectionAssert.AreEqual(new[] { "en-US" }, applied);
+            Assert.AreEqual("en-US", setting.LocaleCode);
+        }
+
+        [Test]
+        public void ChangeLocale_WhenSameLocale_DoesNothing()
+        {
+            var applied = new List<string>();
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                return Task.CompletedTask;
+            });
             setting.Load("ko-KR");
             bool raised = false;
             setting.LocaleChanged += _ => raised = true;
 
-            setting.SetLocale("ko-KR");
+            Change(setting, "ko-KR");
 
+            Assert.IsEmpty(applied);
             Assert.IsFalse(raised);
         }
 
         [Test]
-        public void SetLocale_WhenUnsupported_ThrowsAndKeepsLocale()
+        public void ChangeLocale_WhenUnsupported_ThrowsAndKeepsLocale()
         {
-            var setting = new SettingManager(_save);
+            var applied = new List<string>();
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                return Task.CompletedTask;
+            });
             setting.Load("ko-KR");
 
-            Assert.Throws<ArgumentException>(() => setting.SetLocale("ja-JP"));
+            Assert.Throws<ArgumentException>(() => Change(setting, "ja-JP"));
             Assert.AreEqual("ko-KR", setting.LocaleCode);
+            Assert.IsEmpty(applied);
         }
 
         [Test]
-        public void SetLocale_WhenSaveFails_KeepsLocaleAndDoesNotRaiseEvent()
+        public void ChangeLocale_WhenSaveFails_PutsRuntimeLocaleBackAndDoesNotRaiseEvent()
         {
-            var setting = new SettingManager(_save);
+            var applied = new List<string>();
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                return Task.CompletedTask;
+            });
             setting.Load("ko-KR");
             bool raised = false;
             setting.LocaleChanged += _ => raised = true;
@@ -171,7 +237,8 @@ namespace F1.Tests
             File.WriteAllText(_root, "blocked");
             try
             {
-                Assert.Throws<SaveWriteException>(() => setting.SetLocale("en-US"));
+                Assert.Throws<SaveWriteException>(() => Change(setting, "en-US"));
+                CollectionAssert.AreEqual(new[] { "en-US", "ko-KR" }, applied);
                 Assert.AreEqual("ko-KR", setting.LocaleCode);
                 Assert.IsFalse(raised);
             }
@@ -179,6 +246,29 @@ namespace F1.Tests
             {
                 File.Delete(_root);
             }
+        }
+
+        [Test]
+        public void ChangeLocale_WhenRuntimeApplyFails_PutsRuntimeLocaleBackAndDoesNotSave()
+        {
+            var applied = new List<string>();
+            var setting = new SettingManager(_save, code =>
+            {
+                applied.Add(code);
+                return code == "en-US"
+                    ? Task.FromException(new InvalidOperationException("table load failed"))
+                    : Task.CompletedTask;
+            });
+            setting.Load("ko-KR");
+            bool raised = false;
+            setting.LocaleChanged += _ => raised = true;
+
+            Assert.Throws<InvalidOperationException>(() => Change(setting, "en-US"));
+
+            CollectionAssert.AreEqual(new[] { "en-US", "ko-KR" }, applied);
+            Assert.AreEqual("ko-KR", setting.LocaleCode);
+            Assert.AreEqual("ko-KR", ReadSaved().LocaleCode);
+            Assert.IsFalse(raised);
         }
 
         [TestCase(SystemLanguage.Korean, "ko-KR")]

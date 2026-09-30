@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using F1.Core;
+using F1.Save;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -34,6 +35,14 @@ namespace F1.Tests
             string root = Path.Combine(Path.GetTempPath(), "F1Tests", Guid.NewGuid().ToString("N"));
             AppRoot.SaveRootOverride = root;
             return root;
+        }
+
+        /// <summary>Writes settings.json so the next boot starts in the given locale instead of the OS language.</summary>
+        public static void WriteSettings(string saveRoot, string localeCode)
+        {
+            var save = new SaveManager(saveRoot);
+            save.Initialize();
+            save.Save(SettingManager.FileName, new SettingsData { LocaleCode = localeCode });
         }
 
         /// <summary>

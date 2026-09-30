@@ -39,6 +39,7 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Namespace / asmdef / Package | `Docs/Architecture/03_ASSEMBLY_PACKAGES.md` |
 | Resource / Addressables | `Docs/Architecture/04_RESOURCES_ADDRESSABLES.md` |
 | CSV / 변환 / DataManager | `Docs/Architecture/05_STATIC_DATA.md` |
+| UI 문구 / Locale / Font | `Docs/Architecture/06_LOCALIZATION.md` |
 | Save | `Docs/Architecture/07_SAVE.md` |
 | Gameplay Domain / 시뮬 | `Docs/Architecture/08_GAMEPLAY_DOMAIN.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
@@ -189,6 +190,7 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 | `03_ASSEMBLY_PACKAGES.md` | Namespace, asmdef, Package |
 | `04_RESOURCES_ADDRESSABLES.md` | ResourceManager, Logical Address, Group/Label/Scope |
 | `05_STATIC_DATA.md` | CSV, 변환, Generated JSON, DataManager |
+| `06_LOCALIZATION.md` | UI String Table, `LocalizedText`, Locale 정책, Font |
 | `07_SAVE.md` | Save 파일, Atomic Write/Backup/복구, Migration, 저장 시점 |
 | `08_GAMEPLAY_DOMAIN.md` | Domain 구조, 결정론, 상태 Type, 이벤트 로그, 시뮬 실행기 |
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |

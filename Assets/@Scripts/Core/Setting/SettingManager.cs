@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using F1.Data;
 using F1.Save;
 using UnityEngine;
@@ -11,11 +12,17 @@ namespace F1.Core
         public const string FileName = "settings.json";
 
         readonly SaveManager _save;
+        readonly Func<string, Task> _applyRuntimeLocale;
         SettingsData _data;
 
-        public SettingManager(SaveManager save)
+        /// <param name="applyRuntimeLocale">
+        /// Makes the running app use a locale code (UnityLocaleAdapter.ApplyAsync). Null when there is
+        /// no runtime to follow, as in tests.
+        /// </param>
+        public SettingManager(SaveManager save, Func<string, Task> applyRuntimeLocale = null)
         {
             _save = save ?? throw new ArgumentNullException(nameof(save));
+            _applyRuntimeLocale = applyRuntimeLocale;
         }
 
         /// <summary>Raised after a locale change is saved. The argument is the new locale code.</summary>
@@ -68,8 +75,12 @@ namespace F1.Core
             _data = data;
         }
 
-        /// <summary>Changes the locale. The change is kept only if it was saved.</summary>
-        public void SetLocale(string localeCode)
+        /// <summary>
+        /// Changes the locale: the runtime locale is applied, then the setting is saved, then
+        /// LocaleChanged is raised. If applying or saving fails the runtime locale is put back and
+        /// nothing changes.
+        /// </summary>
+        public async Task ChangeLocaleAsync(string localeCode)
         {
             SettingsData current = Require();
             if (!LocalePolicy.TryNormalize(localeCode, out string canonical))
@@ -87,10 +98,25 @@ namespace F1.Core
                 SchemaVersion = current.SchemaVersion,
                 LocaleCode = canonical,
             };
-            _save.Save(FileName, next);
+            try
+            {
+                await ApplyRuntimeLocale(canonical);
+                _save.Save(FileName, next);
+            }
+            catch
+            {
+                // The saved locale is still the old one; the running app must agree with it.
+                await ApplyRuntimeLocale(current.LocaleCode);
+                throw;
+            }
 
             _data = next;
             LocaleChanged?.Invoke(canonical);
+        }
+
+        Task ApplyRuntimeLocale(string localeCode)
+        {
+            return _applyRuntimeLocale != null ? _applyRuntimeLocale(localeCode) : Task.CompletedTask;
         }
 
         /// <summary>Maps the OS language to a supported locale code, or null when it is not supported.</summary>

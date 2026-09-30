@@ -67,8 +67,9 @@ namespace F1.Core
             {
                 _view.ShowLoading();
                 string saveRoot = SaveRootOverride ?? Path.Combine(Application.persistentDataPath, "Saves");
+                var locale = new UnityLocaleAdapter();
                 var save = new SaveManager(saveRoot);
-                var setting = new SettingManager(save);
+                var setting = new SettingManager(save, locale.ApplyAsync);
                 var resource = new ResourceManager();
                 var data = new DataManager(resource);
                 var scene = new SceneManagerEx();
@@ -93,6 +94,12 @@ namespace F1.Core
                 step = BootStep.InitializeResources;
                 await resource.InitializeAsync();
                 resource.BeginScope(ResourceScope.App);
+
+                step = BootStep.InitializeLocalization;
+                await locale.InitializeAsync();
+
+                step = BootStep.ApplyLocale;
+                await locale.ApplyAsync(setting.LocaleCode);
 
                 step = BootStep.LoadStaticData;
                 await data.LoadAsync();

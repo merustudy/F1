@@ -3,7 +3,7 @@
 단계, 결정 관문, 진행 상태를 소유한다. 규칙은 [CLAUDE.md](../CLAUDE.md)가, 상세는 Owner 문서가 소유한다.
 이 문서는 Authority가 아니다.
 
-- 갱신: 2026-09-30 (2단계 완료, 3~8단계 일괄 승인으로 진행 중)
+- 갱신: 2026-09-30 (6단계까지와 7a, 7b 완료. 7c, 7d, 8단계를 일괄 승인으로 진행 중)
 - 상태 값: 대기 / 진행 / 완료
 - 단계 번호는 고정이다. CLAUDE.md와 대화가 번호로 가리킨다.
 - 모든 단계는 CLAUDE.md §10 "단계 절차"를 따른다. 한 번에 한 단계만, 다음 단계는 시작 지시를 받은 뒤에.
@@ -97,12 +97,14 @@
 - 체인에 `sim` 단계 추가. Boot 단계 BOOT-06(Static Data Load) 추가.
 - 첫 데이터는 직업 6종의 id와 이름이다. 나머지 열과 Definition은 규칙 명세(7a) 뒤에 7b에서 만든다.
 
-### 6. 언어 — 상태: 대기
+### 6. 언어 — 상태: 완료
 
-- 범위: UI String Table과 Sync Setup, Game Data `LocalizedText`, Font(한글 Glyph 포함), Locale 정책.
-  Owner 문서는 Localization 영역(Kit/03).
-- 완료 기준: 누락 Key/번역, Font Family와 Glyph Coverage가 Test로 검증된다. Boot 화면이 Localization에 의존하지 않는다. 체인 통과.
-- 결정할 것: Font 선택과 License, UI String CSV에 `Id` 열을 둘지(Kit/03 "주의").
+- 산출: Localization 1.5.13 도입, `UI_StaticText.csv` -> `LocalizationSetup.Sync` -> `F1_UI_Static` String Table(두 Locale),
+  `UiKeys`와 `UiStrings`, `UnityLocaleAdapter`, `SettingManager.ChangeLocaleAsync`(Runtime 적용 -> 저장 -> 알림, 실패하면 되돌림),
+  Pretendard Medium(SIL OFL 1.1)과 `FontSetup`이 굽는 Static Atlas. Owner 문서 Architecture/06.
+- Boot 단계 추가: BOOT-07(Localization 초기화), BOOT-08(저장된 Locale 적용). Boot 화면은 Localization 없이 동작한다.
+- 결정: UI String CSV에 `Id` 열을 두지 않는다(Key로만 참조). Font Atlas는 화면에 나올 글자만 굽고, 글자 집합이 바뀔 때만 다시 굽는다.
+- Test: CSV와 Table 일치, `UiKeys`와 CSV Key 일치, Font Family와 Glyph Coverage, Locale 전환과 저장.
 
 ### 7. 게임 루프 (Slice A)
 

@@ -28,7 +28,7 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 
 | 단계 | 하는 일 | 성공 판정 |
 |---|---|---|
-| `setup` | `F1.Editor.Setup.ProjectSetup.ApplyMenu` (Player 설정, Scene, Data 변환, Localization, Addressables 동기화) | Log의 `F1_PROJECT_SETUP_DONE` |
+| `setup` | `F1.Editor.Setup.ProjectSetup.ApplyMenu` (Player 설정, Scene, Data 변환, UI String Table, Font Atlas, Addressables 동기화) | Log의 `F1_PROJECT_SETUP_DONE` |
 | `sim` | `Tools/Sim` Build(순수 C# 폴더가 Unity 없이 컴파일되는지)와 `validate`(Generated가 Source와 같고 Load되는지) | 둘 다 성공 |
 | `editmode` | EditMode Test | 결과 XML |
 | `playmode` | PlayMode Test | 결과 XML |

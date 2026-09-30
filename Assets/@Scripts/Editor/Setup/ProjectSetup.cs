@@ -22,6 +22,10 @@ namespace F1.Editor.Setup
             ApplyPlayerSettings();
             SceneSetup.EnsureScenes();
             DataTransformMenu.Transform();
+            LocalizationSetup.Sync();
+
+            // After the data and the UI strings: the atlas holds the characters of both.
+            FontSetup.Sync();
             AddressablesSetup.Sync();
 
             AssetDatabase.SaveAssets();

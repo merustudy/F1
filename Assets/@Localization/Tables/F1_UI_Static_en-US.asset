@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: F1_UI_Static_en-US
+  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Tables.StringTable
+  m_LocaleId:
+    m_Code: en-US
+  m_SharedData: {fileID: 11400000, guid: f6c7eb8a5baa24fc5876afc58dc06d16, type: 2}
+  m_Metadata:
+    m_Items:
+    - rid: 636489278608375844
+  m_TableData:
+  - m_Id: 263184384
+    m_Localized: OK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767296
+    m_Localized: Cancel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767297
+    m_Localized: Front
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767298
+    m_Localized: Rear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767299
+    m_Localized: F1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767300
+    m_Localized: New Run
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767301
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 275767302
+    m_Localized: 'Language: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 279961600
+    m_Localized: English
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 636489278608375844
+      type: {class: SmartFormatTag, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_Entries: 
+        m_SharedEntries:
+        - id: 275767302

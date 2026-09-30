@@ -12,6 +12,8 @@ namespace F1.Core
         public static readonly BootStep LoadSettings = new BootStep("Load settings", "BOOT-04");
         public static readonly BootStep InitializeResources = new BootStep("Initialize resources", "BOOT-05");
         public static readonly BootStep LoadStaticData = new BootStep("Load static data", "BOOT-06");
+        public static readonly BootStep InitializeLocalization = new BootStep("Initialize localization", "BOOT-07");
+        public static readonly BootStep ApplyLocale = new BootStep("Apply locale", "BOOT-08");
         public static readonly BootStep LoadMainScene = new BootStep("Load main scene", "BOOT-10");
         public static readonly BootStep BindMainScene = new BootStep("Bind main scene", "BOOT-11");
 
