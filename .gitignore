@@ -83,3 +83,8 @@ __pycache__/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Tools/Sim (.NET console): keep the project file, ignore build output
+!/Tools/Sim/F1.Sim.csproj
+/Tools/Sim/bin/
+/Tools/Sim/obj/

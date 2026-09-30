@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    F1.Sim: Unity-free console for static data and simulation.
+    It compiles the pure C# folders of the Unity project directly, so a UnityEngine reference
+    in those folders breaks this build. See Docs/Architecture/03_ASSEMBLY_PACKAGES.md.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>F1.Sim</RootNamespace>
+    <AssemblyName>F1.Sim</AssemblyName>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)../..'))</RepoRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="src/**/*.cs" />
+    <Compile Include="$(RepoRoot)/Assets/@Scripts/Data/**/*.cs" LinkBase="Shared/Data" />
+    <Compile Include="$(RepoRoot)/Assets/@Scripts/Gameplay/**/*.cs" LinkBase="Shared/Gameplay" />
+    <Compile Include="$(RepoRoot)/Assets/@Scripts/Editor/Data/Csv/**/*.cs" LinkBase="Shared/Csv" />
+    <Compile Include="$(RepoRoot)/Assets/@Scripts/Editor/Data/Transform/**/*.cs" LinkBase="Shared/Transform" />
+  </ItemGroup>
+
+  <!-- The same Newtonsoft Json.NET build the game uses, taken from the Unity package cache. -->
+  <ItemGroup>
+    <NewtonsoftDll Include="$(RepoRoot)/Library/PackageCache/com.unity.nuget.newtonsoft-json@*/Runtime/Newtonsoft.Json.dll" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>@(NewtonsoftDll)</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <Target Name="RequireUnityPackageCache" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'@(NewtonsoftDll)' == ''"
+           Text="Newtonsoft.Json.dll was not found in Library/PackageCache. Open the project in Unity once (or run Tools/chain.sh setup) so packages are resolved." />
+  </Target>
+
+</Project>

@@ -38,6 +38,7 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Managers / Scene / Bootstrap | `Docs/Architecture/02_BOOTSTRAP_MANAGERS.md` |
 | Namespace / asmdef / Package | `Docs/Architecture/03_ASSEMBLY_PACKAGES.md` |
 | Resource / Addressables | `Docs/Architecture/04_RESOURCES_ADDRESSABLES.md` |
+| CSV / 변환 / DataManager | `Docs/Architecture/05_STATIC_DATA.md` |
 | Save | `Docs/Architecture/07_SAVE.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
 | Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
@@ -87,7 +88,8 @@ CSV -> DataTransformer -> JSON -> Addressables -> ResourceManager -> DataManager
 - CSV가 Source of Truth다. Generated JSON은 Git으로 관리하고 손으로 고치지 않는다. ScriptableObject 중심 구조로 대체하지 않는다.
 - 밸런스 상수는 데이터 파일에서만 읽는다 (§5).
 - 게임과 시뮬은 같은 Generated JSON을 읽는다 (`Docs/Design/09_Implementation_Constraints.md` §3).
-- 식별자 타입과 조회 구조, 변환 도구의 실행 방식은 결정 대기다 (G14). Static Data Owner 문서에서 확정한다.
+- 식별자는 영어 snake_case 문자열 `Id` 하나다. 정수 Id를 병행하지 않는다.
+- 변환 코드는 Unity에 의존하지 않는다. Unity Editor와 `Tools/Sim`이 같은 코드를 돌린다.
 
 ### Direct call and typed event
 
@@ -186,6 +188,7 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 | `02_BOOTSTRAP_MANAGERS.md` | Manager 책임, AppRoot, Boot/Main, 초기화/실패/종료 |
 | `03_ASSEMBLY_PACKAGES.md` | Namespace, asmdef, Package |
 | `04_RESOURCES_ADDRESSABLES.md` | ResourceManager, Logical Address, Group/Label/Scope |
+| `05_STATIC_DATA.md` | CSV, 변환, Generated JSON, DataManager |
 | `07_SAVE.md` | Save 파일, Atomic Write/Backup/복구, Migration, 저장 시점 |
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |
 | `10_TESTING_VALIDATION.md` | Test/Validation, 검증 체인, Definition of Done |

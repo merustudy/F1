@@ -2,7 +2,7 @@
 # F1 validation chain. Rules: Docs/Architecture/10_TESTING_VALIDATION.md
 #
 #   Tools/chain.sh                 run every step
-#   Tools/chain.sh editmode        run only the named steps (setup, editmode, playmode)
+#   Tools/chain.sh editmode        run only the named steps (setup, sim, editmode, playmode)
 #
 # Test results are judged from the result XML, never from Unity's exit code.
 # Logs and result XML go outside the repository.
@@ -16,7 +16,7 @@ OUT="${F1_CHAIN_OUT:-$HOME/Library/Caches/F1/chain}/$(date +%Y%m%d-%H%M%S)"
 SETUP_METHOD="F1.Editor.Setup.ProjectSetup.ApplyMenu"
 SETUP_TOKEN="F1_PROJECT_SETUP_DONE"
 
-ALL_STEPS=(setup editmode playmode)
+ALL_STEPS=(setup sim editmode playmode)
 if [ $# -gt 0 ]; then STEPS=("$@"); else STEPS=("${ALL_STEPS[@]}"); fi
 
 require_unity() {
@@ -51,6 +51,21 @@ run_setup() {
 
   echo "  setup: FAILED (exit $code, log $log)"
   show_errors "$log"
+  return 1
+}
+
+# Builds Tools/Sim, which compiles the pure C# folders without Unity, then checks that the
+# generated data matches its sources and loads through the runtime loader.
+run_sim() {
+  local log="$OUT/sim.log"
+  if DOTNET_CLI_TELEMETRY_OPTOUT=1 DOTNET_NOLOGO=1 dotnet build "$ROOT/Tools/Sim" -c Release -v q -nologo >"$log" 2>&1 \
+     && DOTNET_CLI_TELEMETRY_OPTOUT=1 dotnet run --project "$ROOT/Tools/Sim" -c Release --no-build -- validate --project-root "$ROOT" >>"$log" 2>&1; then
+    echo "  sim: OK ($(tail -1 "$log"))"
+    return 0
+  fi
+
+  echo "  sim: FAILED (log $log)"
+  grep -E "error|FAILED|Stale" "$log" | sort -u | head -20 | sed 's/^/    /'
   return 1
 }
 
@@ -105,6 +120,7 @@ FAILED=()
 for step in "${STEPS[@]}"; do
   case "$step" in
     setup)    run_setup || FAILED+=("$step") ;;
+    sim)      run_sim || FAILED+=("$step") ;;
     editmode) run_tests EditMode || FAILED+=("$step") ;;
     playmode) run_tests PlayMode || FAILED+=("$step") ;;
     *)        echo "  unknown step: $step"; FAILED+=("$step") ;;

@@ -38,6 +38,7 @@ namespace F1.Tests
         [TestCase("Resource")]
         [TestCase("Save")]
         [TestCase("Setting")]
+        [TestCase("Data")]
         [TestCase("Scene")]
         public void Configure_WhenManagerIsMissing_ThrowsAndStaysUnconfigured(string missing)
         {
@@ -59,6 +60,7 @@ namespace F1.Tests
             Assert.AreSame(set.Resource, Managers.Resource);
             Assert.AreSame(set.Save, Managers.Save);
             Assert.AreSame(set.Setting, Managers.Setting);
+            Assert.AreSame(set.Data, Managers.Data);
             Assert.AreSame(set.Scene, Managers.Scene);
         }
 
@@ -66,11 +68,13 @@ namespace F1.Tests
         {
             // Constructors do not touch the disk or Addressables.
             var save = new SaveManager(Path.Combine(Path.GetTempPath(), "F1Tests", "unused"));
+            var resource = new ResourceManager();
             return new ManagerSet
             {
-                Resource = new ResourceManager(),
+                Resource = resource,
                 Save = save,
                 Setting = new SettingManager(save),
+                Data = new DataManager(resource),
                 Scene = new SceneManagerEx(),
             };
         }

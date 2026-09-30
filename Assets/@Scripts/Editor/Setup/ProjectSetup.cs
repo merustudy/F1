@@ -1,3 +1,4 @@
+using F1.Editor.Data;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,6 +21,7 @@ namespace F1.Editor.Setup
         {
             ApplyPlayerSettings();
             SceneSetup.EnsureScenes();
+            DataTransformMenu.Transform();
             AddressablesSetup.Sync();
 
             AssetDatabase.SaveAssets();

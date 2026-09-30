@@ -39,7 +39,6 @@
 | G8 | 결정론 세부 (시간 단위, 동시 발동 순서, 난수 스트림, 수치 타입, 시드 파생) | Design/09 §5, Design/02 §3·§11 (전부 【제안】) | 7a |
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
-| G14 | 식별자 타입(문자열 id 단독 / 정수 `Id` + `Key`)과 조회 구조, 변환 도구를 Unity 밖에서도 돌리는 방식 | Design/09 §1-4, Kit/02 | 5단계 설계 승인 시 |
 | G16 | Slice A의 규칙 정의 (전투, 원정, 로비와 귀환, 포션과 후퇴, 시뮬 정책) | Architecture/09 "규칙 정의가 필요한 항목" | 7a |
 | G17 | 게임 제목(`productName`). Save 경로가 여기서 나온다 | ProjectSettings 현재값 `F1` | 출시 전 |
 
@@ -59,6 +58,7 @@
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
 | G12 | Prefix는 `F1` | CLAUDE.md |
 | G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup`. 기준 해상도 1920x1080(16:9), 기본은 전체 화면 창, 창 크기 조절 가능 | `ProjectSetup`, Architecture/02 |
+| G14 | 식별자는 영어 snake_case 문자열 `Id` 하나(정수 Id 없음), 조회는 `Dictionary<string, T>`. 변환 코드는 Unity 비의존이고 `Tools/Sim`이 같은 코드로 돌린다 | Architecture/05 |
 | G15 | Resource Scope는 `App`, `Lobby`, `Expedition`. 기획의 "런"은 Scope가 아니다 | Architecture/04 |
 
 ## 단계
@@ -89,14 +89,13 @@
 - Boot 단계 추가: Save 저장소 초기화, 설정 Load, Resource 초기화. 실패하면 그 단계의 Error Code를 보이고 멈춘다.
 - Test는 임시 Save Root를 쓴다.
 
-### 5. 데이터 — 상태: 대기
+### 5. 데이터 — 상태: 완료
 
-- 범위: CSV -> DataTransformer -> Generated JSON -> Addressables -> `DataManager`를 첫 CSV 하나로 관통한다(Kit/02).
-  시뮬 우선 루프에 Unity Editor가 끼지 않도록, 변환과 Definition 검증을 Unity 밖에서도 돌릴 수 있게 설계한다.
-  Owner 문서는 Static Data 영역.
-- 완료 기준: 첫 Definition이 Load되고 검증 실패 경우가 Test로 고정됐다. Generated JSON의 stale 검출이 있다.
-  Owner 문서가 아이템과 유물의 데이터 키와 Type 분리를 규정한다. 체인 통과.
-- 결정할 것: G14, 첫 데이터 파일로 무엇을 쓸지.
+- 산출: CSV -> `StaticDataTransformer` -> Generated JSON -> Addressables -> `DataManager` -> `StaticData`를 `JobData.csv` 하나로 관통.
+  `CsvTable`/`CsvRow`(엄격한 Parser와 형 변환), `StaticDataLoader`, `StaticDataFiles`, `LocalizedText`. Owner 문서 Architecture/05.
+- `Tools/Sim`(.NET 콘솔): Unity 없이 `transform`, `validate`. 순수 C# 폴더를 직접 컴파일하므로 그 폴더에 Unity 참조가 생기면 Build가 깨진다.
+- 체인에 `sim` 단계 추가. Boot 단계 BOOT-06(Static Data Load) 추가.
+- 첫 데이터는 직업 6종의 id와 이름이다. 나머지 열과 Definition은 규칙 명세(7a) 뒤에 7b에서 만든다.
 
 ### 6. 언어 — 상태: 대기
 

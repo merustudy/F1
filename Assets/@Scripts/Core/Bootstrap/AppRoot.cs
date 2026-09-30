@@ -70,6 +70,7 @@ namespace F1.Core
                 var save = new SaveManager(saveRoot);
                 var setting = new SettingManager(save);
                 var resource = new ResourceManager();
+                var data = new DataManager(resource);
                 var scene = new SceneManagerEx();
                 _resource = resource;
 
@@ -79,6 +80,7 @@ namespace F1.Core
                     Resource = resource,
                     Save = save,
                     Setting = setting,
+                    Data = data,
                     Scene = scene,
                 });
 
@@ -91,6 +93,9 @@ namespace F1.Core
                 step = BootStep.InitializeResources;
                 await resource.InitializeAsync();
                 resource.BeginScope(ResourceScope.App);
+
+                step = BootStep.LoadStaticData;
+                await data.LoadAsync();
 
                 step = BootStep.LoadMainScene;
                 await scene.LoadMainAsync();

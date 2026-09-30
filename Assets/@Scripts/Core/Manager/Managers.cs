@@ -17,6 +17,7 @@ namespace F1.Core
         public static ResourceManager Resource => Require().Resource;
         public static SaveManager Save => Require().Save;
         public static SettingManager Setting => Require().Setting;
+        public static DataManager Data => Require().Data;
         public static SceneManagerEx Scene => Require().Scene;
 
         public static void Configure(ManagerSet set)
@@ -59,6 +60,7 @@ namespace F1.Core
         public ResourceManager Resource;
         public SaveManager Save;
         public SettingManager Setting;
+        public DataManager Data;
         public SceneManagerEx Scene;
 
         internal void Validate()
@@ -66,6 +68,7 @@ namespace F1.Core
             RequireManager(Resource, nameof(Resource));
             RequireManager(Save, nameof(Save));
             RequireManager(Setting, nameof(Setting));
+            RequireManager(Data, nameof(Data));
             RequireManager(Scene, nameof(Scene));
         }
 

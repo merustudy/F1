@@ -1,0 +1,47 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "archmage",
+      "Name": {
+        "en-US": "Archmage",
+        "ko-KR": "대마법사"
+      }
+    },
+    {
+      "Id": "berserker",
+      "Name": {
+        "en-US": "Berserker",
+        "ko-KR": "광전사"
+      }
+    },
+    {
+      "Id": "bishop",
+      "Name": {
+        "en-US": "Bishop",
+        "ko-KR": "주교"
+      }
+    },
+    {
+      "Id": "knight",
+      "Name": {
+        "en-US": "Knight",
+        "ko-KR": "기사"
+      }
+    },
+    {
+      "Id": "paladin",
+      "Name": {
+        "en-US": "Paladin",
+        "ko-KR": "성기사"
+      }
+    },
+    {
+      "Id": "spellblade",
+      "Name": {
+        "en-US": "Spellblade",
+        "ko-KR": "마검사"
+      }
+    }
+  ]
+}
