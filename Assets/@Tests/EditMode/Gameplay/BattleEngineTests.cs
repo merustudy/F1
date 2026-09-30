@@ -604,6 +604,99 @@ namespace F1.Tests
         }
 
         [Test]
+        public void NextStormDamage_IsWhatTheNextTickDeals()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(("StormStartMs", 1000), ("StormTickMs", 1000), ("StormBaseDamage", 5), ("StormGrowth", 5)),
+                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(IdleEnemy(100)));
+
+            Assert.AreEqual(5, battle.NextStormDamage);
+
+            battle.AdvanceTo(1000);
+            Assert.AreEqual(10, battle.NextStormDamage);
+
+            battle.AdvanceTo(2000);
+            Assert.AreEqual(15, battle.NextStormDamage);
+        }
+
+        // ---- Reading deaths from the log -------------------------------------------------------
+
+        [Test]
+        public void PartyDeaths_WhenTheGraceRanOut_NameTheLastHitAndTheRoll()
+        {
+            // 10 HP against 10 damage every second: at death's door at 1000, grace until 2500,
+            // the hit at 2000 only counts, the hit at 3000 rolls and kills.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100)),
+                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
+                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(1000, 10, "claw"))));
+
+            battle.RunToEnd();
+            DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
+
+            Assert.AreEqual(new UnitRef(BattleSide.Party, 0), death.Unit);
+            Assert.AreEqual(1000, death.DogEnteredMs);
+            Assert.AreEqual(3000, death.DiedMs);
+            Assert.AreEqual(new UnitRef(BattleSide.Enemy, 0), death.LastHitSource);
+            Assert.AreEqual("claw", death.LastHitCause);
+            Assert.AreEqual(100, death.DeathChancePercent);
+            Assert.AreEqual(Of(battle, BattleEventKind.DeathRolled).Single().B, death.DeathRoll);
+            Assert.IsFalse(death.GraceWasBroken);
+            Assert.AreEqual(0, death.GraceHits);
+        }
+
+        [Test]
+        public void PartyDeaths_WhenHitsBrokeTheGrace_SayHowMany()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 60000), ("DogGraceBreakHits", 2), ("DogDeathChancePercent", 100)),
+                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
+                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(1000, 10, "claw"))));
+
+            battle.RunToEnd();
+            DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
+
+            Assert.IsTrue(death.GraceWasBroken);
+            Assert.AreEqual(2, death.GraceHits);
+            Assert.AreEqual(1000, death.DogEnteredMs);
+            Assert.AreEqual(3000, death.DiedMs);
+        }
+
+        [Test]
+        public void PartyDeaths_WhenBurnDealtTheLastHit_NameBurnWithNoSource()
+        {
+            // The enemy applies 5 burn at 500. Burn ticks at 1000 (5, to 0 HP), 2000 (4, counted), 3000 (3, grace over: roll).
+            var ember = new EquippedItem(TestData.Item("ember", 500, EffectKind.Burn, TargetMode.EnemyFront, category: ItemCategory.Support), 5);
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100), ("BurnTickMs", 1000)),
+                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 5)),
+                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, ember)));
+
+            battle.AdvanceTo(600);
+            Assert.AreEqual(5, battle.Party[0].Burn);
+            battle.RunToEnd();
+            DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
+
+            Assert.IsTrue(death.LastHitSource.IsNone);
+            Assert.AreEqual(BattleEvent.CauseBurn, death.LastHitCause);
+        }
+
+        [Test]
+        public void PartyDeaths_ListOnlyMercenariesWhoDied()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(1000, 50))),
+                TestData.Units(IdleEnemy(100)));
+
+            battle.RunToEnd();
+
+            Assert.AreEqual(BattleResult.Victory, battle.Result);
+            Assert.IsEmpty(BattleLog.PartyDeaths(battle.Events), "The enemy died; nobody in the party did.");
+        }
+
+        [Test]
         public void WhenBothSidesFallAtTheSameMoment_ItIsADefeat()
         {
             BattleEngine battle = Battle(

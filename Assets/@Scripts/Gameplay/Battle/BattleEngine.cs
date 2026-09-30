@@ -88,6 +88,9 @@ namespace F1.Gameplay
         public int PotionReadyMs { get; private set; }
         public int RetreatReadyMs { get; private set; }
         public int NextStormTickMs => _nextStormTickMs;
+
+        /// <summary>Damage the next storm tick will deal to every unit.</summary>
+        public int NextStormDamage => _balance.StormBaseDamage + _balance.StormGrowth * _stormTicks;
         public IReadOnlyList<BattleEvent> Events => _events;
 
         /// <summary>The accepted player inputs so far, in order. Replaying them reproduces the battle.</summary>
@@ -728,7 +731,7 @@ namespace F1.Gameplay
 
         void StormTick()
         {
-            int damage = _balance.StormBaseDamage + _balance.StormGrowth * _stormTicks;
+            int damage = NextStormDamage;
             _stormTicks++;
             Log(BattleEventKind.StormTicked, UnitRef.None, UnitRef.None, null, damage, 0, 0);
             if (!TickUnits(_party, isStorm: true, damage))
