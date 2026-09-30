@@ -152,6 +152,7 @@ namespace F1.Core
 
                 State = InitializationState.Initialized;
                 _view.Hide();
+                Debug.Log($"[F1] Boot finished. Locale {setting.LocaleCode}, saved run: {run.LoadStatus}.");
             }
             catch (Exception exception)
             {

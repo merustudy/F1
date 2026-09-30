@@ -42,5 +42,9 @@ Snapshot: 2026-09-30 (완료)
 - 상태를 바꾸는 새 명령을 넣을 때: `_run.RequireWritable()`로 시작하고 `Commit()`으로 끝낸다.
 - DTO에 Field를 넣을 때: `RunSaveMapper`의 양방향 변환과 검증, `RunSaveMapperTests`의 왕복과 거부 사례를 같이 고친다.
   구조가 바뀌면 `RunSaveData.CurrentSchemaVersion`을 올리고 `RunSaveMigrator`에 단계를 넣는다.
-- Save 파일 위치: `<persistentDataPath>/Saves/` (macOS: `~/Library/Application Support/funitup/F1/Saves/`). Test는 임시 폴더를 쓴다.
+- Save 파일 위치: `<persistentDataPath>/Saves/`. macOS에서 Editor로 돌리면 `~/Library/Application Support/funitup/F1/Saves/`,
+  Build한 Player는 `~/Library/Application Support/com.funitup.f1/Saves/`다. Test는 임시 폴더를 쓴다.
+- Player Build 확인(1회, 수동): macOS Mono Build가 성공했고, Build한 Player가 Boot를 끝까지 통과했다(Addressables, Localization, Data, UI).
+  Build 단계는 체인에 없다. Build는 `Assets/Settings/UniversalRP.asset`, `ProjectSettings.asset`을 건드리고
+  `Assets/AddressableAssetsData`에 `link.xml`, `OSX/` 등을 만든다. 무엇을 Git에 둘지는 Build 단계를 만들 때 정한다.
 - 파일을 직접 고치거나 지워서 되돌리는 것은 막지 않는다.

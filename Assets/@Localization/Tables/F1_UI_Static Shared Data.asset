@@ -675,6 +675,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279681331203
+  - m_Id: 19397111439360
+    m_Key: Title.SettingsNotSaved
+    m_Metadata:
+      m_Items:
+      - rid: 636489279820791808
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1222,3 +1227,8 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Writes the unsaved change again.
+    - rid: 636489279820791808
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when changing the language failed because settings could
+          not be written.

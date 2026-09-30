@@ -613,6 +613,10 @@ MonoBehaviour:
     m_Localized: Retry
     m_Metadata:
       m_Items: []
+  - m_Id: 19397111439360
+    m_Localized: The setting could not be saved, so the language was not changed.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

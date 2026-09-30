@@ -53,7 +53,7 @@
 |---|---|---|---|
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
-| G17 | 게임 제목(`productName`). Save 경로가 여기서 나온다 | ProjectSettings 현재값 `F1` | 출시 전 |
+| G17 | 게임 제목(`productName`)과 Bundle Identifier. Save 경로가 여기서 나온다. 바꾸면 그 전의 Save를 찾지 못한다 | 현재값 `F1`, `com.funitup.f1` (`ProjectSetup`), Architecture/07 | 출시 전 |
 
 ## 결정 관문 — 결정됨 (2026-09-30)
 

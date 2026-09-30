@@ -6,6 +6,9 @@ Save 파일의 형식과 I/O, Backup과 복구, Migration, 저장 시점을 소�
 
 경로는 `<persistentDataPath>/Saves/`다. 파일마다 같은 Directory에 `.tmp`와 한 세대 `.bak`이 있다.
 
+`persistentDataPath`는 Windows에서는 `companyName`과 `productName`으로, macOS Player에서는 Bundle Identifier로 정해진다
+(Editor에서는 macOS도 `companyName/productName`이다). 셋 중 하나를 바꾸면 기존 Save를 찾지 못한다. 값은 `ProjectSetup`이 가진다.
+
 | 파일 | 내용 | 주인 |
 |---|---|---|
 | `settings.json` | 전역 설정 (Locale) | `SettingManager` |

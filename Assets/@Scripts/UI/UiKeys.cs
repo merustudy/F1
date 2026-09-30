@@ -27,6 +27,7 @@ namespace F1.UI
             public const string OverwriteWarning = "Title.OverwriteWarning";
             public const string SaveUnreadable = "Title.SaveUnreadable";
             public const string SaveRestored = "Title.SaveRestored";
+            public const string SettingsNotSaved = "Title.SettingsNotSaved";
         }
 
         public static class Lobby

@@ -153,6 +153,28 @@ namespace F1.Tests
         }
 
         [UnityTest]
+        public IEnumerator Title_WhenTheLanguageCannotBeSaved_KeepsTheLanguage_AndSaysSo()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            TitleScreen title = UiTestUtil.Screen<TitleScreen>();
+            Directory.Delete(_saveRoot, true);
+            File.WriteAllText(_saveRoot, "blocked");
+
+            // The language is applied first and put back when the save fails; the notice comes after that.
+            UiTestUtil.Click(title, "Frame/Buttons/Language");
+            float deadline = Time.realtimeSinceStartup + UiTestUtil.DefaultTimeoutSeconds;
+            while (UiTestUtil.TextAt(title, "Frame/Notice").Length == 0 && Time.realtimeSinceStartup < deadline)
+            {
+                yield return null;
+            }
+
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Title.SettingsNotSaved), UiTestUtil.TextAt(title, "Frame/Notice"));
+            Assert.AreEqual("ko-KR", Managers.Setting.LocaleCode);
+            Assert.AreEqual("새 런", UiTestUtil.TextAt(title, "Frame/Buttons/NewRun/NewRunLabel"), "The screen is still in the old language.");
+        }
+
+        [UnityTest]
         public IEnumerator Title_WhenTheSavedRunCannotBeRead_SaysSo_AndOffersOnlyANewRun()
         {
             Directory.CreateDirectory(_saveRoot);

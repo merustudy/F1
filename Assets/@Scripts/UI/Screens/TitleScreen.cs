@@ -101,6 +101,11 @@ namespace F1.UI
                 string next = LocalePolicy.SupportedCodes[(index + 1) % LocalePolicy.SupportedCodes.Count];
                 await Managers.Setting.ChangeLocaleAsync(next);
             }
+            catch (SaveWriteException)
+            {
+                // SettingManager put the language back; the player is told why nothing changed.
+                _notice.text = UiStrings.Get(UiKeys.Title.SettingsNotSaved);
+            }
             finally
             {
                 _changingLocale = false;
