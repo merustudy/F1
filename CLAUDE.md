@@ -34,7 +34,11 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | 작업 영역 | 필수 문서 |
 |---|---|
 | 모든 단계 작업 | `Docs/Roadmap.md` |
+| Folder / Asset 경로 | `Docs/Architecture/01_PROJECT_STRUCTURE.md` |
+| Managers / Scene / Bootstrap | `Docs/Architecture/02_BOOTSTRAP_MANAGERS.md` |
+| Namespace / asmdef / Package | `Docs/Architecture/03_ASSEMBLY_PACKAGES.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
+| Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
 | 기획을 근거로 쓰는 모든 작업 | `Docs/Design/00_INDEX.md`(태그 규칙), `Docs/Design/09_Implementation_Constraints.md` |
 | 전투 | `Docs/Design/02_Combat_System.md` |
 | 던전 / 로비·100일 / 용병 성장 / 유물 | `Docs/Design/03`~`06` 중 해당 문서 |
@@ -108,17 +112,17 @@ Manager는 아래 닫힌 목록이다. 목록 밖의 Manager는 Authority 확인
 ```text
 ResourceManager
 SaveManager
-SettingManager  -> SaveManager
-DataManager     -> ResourceManager
-SoundManager    -> ResourceManager, SettingManager
-UIManager       -> ResourceManager
+SettingManager    -> SaveManager
+DataManager       -> ResourceManager
+SoundManager      -> ResourceManager, SettingManager
+UIManager         -> ResourceManager
 SceneManagerEx
-(Application 계층 Manager: 결정 대기, G6)
+RunManager        -> DataManager, SaveManager
+ExpeditionManager -> DataManager, SaveManager, RunManager
 ```
 
-- 위 일곱 개는 StarterKit 제안(`06_RECOMMENDED_EXTRAS.md` §2)을 초안으로 둔 것이고, 3단계 Owner 문서 승인 때 확정한다.
-- 게임 진행을 조율하는 Application 계층 Manager의 이름과 책임은 결정 대기다 (G6). 기획문서는 Manager 구성을
-  Architecture에 위임한다 (`Docs/Design/00_INDEX.md`, `09_Implementation_Constraints.md` 서두).
+- `RunManager`(런)와 `ExpeditionManager`(원정과 전투)가 Application 계층이다. 규칙은 Domain이 계산한다.
+- 각 Manager는 그 영역이 구현되는 단계에서 만든다. 책임은 `Docs/Architecture/02_BOOTSTRAP_MANAGERS.md`가 소유한다.
 
 만들지 않는다: `GameManager`, `EventManager`, `LocalizationManager`, 초기 `PoolManager`.
 
@@ -176,7 +180,11 @@ SceneManagerEx
 
 | Owner 문서 | 소유 영역 |
 |---|---|
+| `01_PROJECT_STRUCTURE.md` | Asset 물리 경로, `@` Prefix, Folder 생성 시점 |
+| `02_BOOTSTRAP_MANAGERS.md` | Manager 책임, AppRoot, Boot/Main, 초기화/실패/종료 |
+| `03_ASSEMBLY_PACKAGES.md` | Namespace, asmdef, Package |
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |
+| `10_TESTING_VALIDATION.md` | Test/Validation, 검증 체인, Definition of Done |
 
 - Owner 문서를 만들면 같은 변경에서 이 표와 §2 표에 등록한다. 등록되지 않은 문서는 규칙이 아니다.
 - 한 정책의 상세를 여러 문서에 복사하지 않는다. root는 불변조건, Owner는 상세. 교차 영역은 Link로 연결한다.

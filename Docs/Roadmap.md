@@ -35,12 +35,10 @@
 
 | # | 미결 결정 | 근거 문서 위치 | 늦어도 |
 |---|---|---|---|
-| G6 | Application 계층 Manager의 구성과 책임 | Design/00·Design/09 서두 (Architecture에 위임), Kit/06 §2 | 3단계 설계 승인 시 |
 | G7 | Save 파일 구성, 저장 시점, 이어하기의 상세 (방향은 결정됨) | Kit/06 §6·§8, Architecture/09 Acceptance 7 | 설정 파일은 4단계, 진행 Save는 8단계 설계 승인 시 |
 | G8 | 결정론 세부 (시간 단위, 동시 발동 순서, 난수 스트림, 수치 타입, 시드 파생) | Design/09 §5, Design/02 §3·§11 (전부 【제안】) | 7a |
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
-| G13 | 해상도와 창 정책의 구체값 (일반 PC 게임 기준) | ProjectSettings 현재값 | 3단계 설계 승인 시 |
 | G14 | 식별자 타입(문자열 id 단독 / 정수 `Id` + `Key`)과 조회 구조, 변환 도구를 Unity 밖에서도 돌리는 방식 | Design/09 §1-4, Kit/02 | 5단계 설계 승인 시 |
 | G15 | Scope의 이름과 수명 (앱 / 런 / 원정 / 전투) | Kit/06 §3, Architecture/09 "상태 수명" | 4단계 설계 승인 시 |
 | G16 | Slice A의 규칙 정의 (전투, 원정, 로비와 귀환, 포션과 후퇴, 시뮬 정책) | Architecture/09 "규칙 정의가 필요한 항목" | 7a |
@@ -56,11 +54,12 @@
 | G3 | 포션 슬롯과 후퇴를 도입하고 Slice A에 넣는다. 세부는 G16 | Design/02 §10 |
 | G4 | Slice A = 핵심 루프 한 바퀴 + 저장/이어하기 | Architecture/09 |
 | G5 | Locale은 `ko-KR`(기본/Fallback)과 `en-US` | CLAUDE.md §3 |
+| G6 | Application 계층 Manager는 `RunManager`(런)와 `ExpeditionManager`(원정과 전투) | CLAUDE.md §4, Architecture/02 |
 | G7 | 방향: 상태가 확정될 때마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다 | CLAUDE.md §6 |
 | G9 | 다크 중세 흉상, 대규모 로스터, 소영주·공성전은 채택하지 않는다 | Design/10 |
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
 | G12 | Prefix는 `F1` | CLAUDE.md |
-| G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup` (3단계에서 적용) | 이 문서 3단계 |
+| G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup`. 기준 해상도 1920x1080(16:9), 기본은 전체 화면 창, 창 크기 조절 가능 | `ProjectSetup`, Architecture/02 |
 
 ## 단계
 
@@ -75,15 +74,12 @@
 - 산출: `Docs/Architecture/09_VERTICAL_SLICE.md`. Slice A의 구간별 범위, 구현 순서, Acceptance, Deferred, 규칙 정의가 필요한 항목.
 - 권장안(성장·경제·유물·기한 판정 제외, 로비 행동은 쉬기 하나)대로 승인됐다.
 
-### 3. 기반 — 상태: 대기
+### 3. 기반 — 상태: 완료
 
-- 범위: Boot/Main Scene, `AppRoot`, `Managers`, asmdef, 첫 Test, `Tools/chain.sh`(검증 체인), `companyName` 적용.
-  Owner 문서는 구조, Bootstrap/Manager, Assembly/Package, Test/Validation 영역(Kit/01, Kit/06 §1·§2·§4·§5를 줄여서).
-- 완료 기준: Boot에서 Main으로 진입한다. `Managers`의 Fail-fast 규칙이 Test로 고정됐다. 체인이 결과 XML로 판정한다.
-  Template의 `SampleScene`은 Boot/Main 진입이 검증된 뒤 지웠다.
-- 결정할 것: G6, G13, 이 단계에서 실제로 만들 Manager의 범위, Template Package 정리 여부, UI 기술(uGUI + TextMeshPro) 확인.
-- 참고: Domain은 Unity 없이 컴파일돼야 한다(G2). asmdef를 나눠 보장할지, 시뮬 도구가 Domain 소스를 직접 컴파일해 보장할지를
-  이 단계 설계에서 정한다.
+- 산출: Boot/Main Scene(`SceneSetup`이 코드로 생성), `AppRoot`, `Managers`, `SceneManagerEx`, asmdef 4개, EditMode Test 4개,
+  PlayMode Test 3개, `Tools/chain.sh`, `ProjectSetup`(Player 설정). Owner 문서 Architecture/01, 02, 03, 10.
+- 함께 한 것: Template의 쓰지 않는 Package 11개 제거, TMP Essential Resources 반입, Git LFS 설정, `SampleScene` 삭제.
+- Domain의 Unity 비의존은 asmdef 분리가 아니라 시뮬 실행기가 소스를 직접 컴파일하는 것으로 보장한다(Architecture/03). 실행기는 7b에서 만든다.
 
 ### 4. ResourceManager + Addressables + Save/Settings — 상태: 대기
 
