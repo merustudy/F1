@@ -1,4 +1,6 @@
+using System;
 using System.Collections;
+using System.IO;
 using F1.Core;
 using NUnit.Framework;
 using UnityEngine;
@@ -26,16 +28,34 @@ namespace F1.Tests
             }
         }
 
-        /// <summary>Destroys the persistent AppRoot so the next test boots from a clean state.</summary>
+        /// <summary>Points the next boot at a fresh temporary save directory and returns its path.</summary>
+        public static string UseTemporarySaveRoot()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "F1Tests", Guid.NewGuid().ToString("N"));
+            AppRoot.SaveRootOverride = root;
+            return root;
+        }
+
+        /// <summary>
+        /// Destroys the persistent AppRoot so the next test boots from a clean state, and removes the
+        /// temporary save directory.
+        /// </summary>
         public static IEnumerator ShutdownApp()
         {
             if (AppRoot.Current != null)
             {
-                Object.Destroy(AppRoot.Current.gameObject);
+                UnityEngine.Object.Destroy(AppRoot.Current.gameObject);
                 yield return null;
             }
 
             Managers.Reset();
+
+            string root = AppRoot.SaveRootOverride;
+            AppRoot.SaveRootOverride = null;
+            if (root != null && Directory.Exists(root))
+            {
+                Directory.Delete(root, true);
+            }
         }
     }
 }

@@ -37,6 +37,8 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Folder / Asset 경로 | `Docs/Architecture/01_PROJECT_STRUCTURE.md` |
 | Managers / Scene / Bootstrap | `Docs/Architecture/02_BOOTSTRAP_MANAGERS.md` |
 | Namespace / asmdef / Package | `Docs/Architecture/03_ASSEMBLY_PACKAGES.md` |
+| Resource / Addressables | `Docs/Architecture/04_RESOURCES_ADDRESSABLES.md` |
+| Save | `Docs/Architecture/07_SAVE.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
 | Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
 | 기획을 근거로 쓰는 모든 작업 | `Docs/Design/00_INDEX.md`(태그 규칙), `Docs/Design/09_Implementation_Constraints.md` |
@@ -183,6 +185,8 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 | `01_PROJECT_STRUCTURE.md` | Asset 물리 경로, `@` Prefix, Folder 생성 시점 |
 | `02_BOOTSTRAP_MANAGERS.md` | Manager 책임, AppRoot, Boot/Main, 초기화/실패/종료 |
 | `03_ASSEMBLY_PACKAGES.md` | Namespace, asmdef, Package |
+| `04_RESOURCES_ADDRESSABLES.md` | ResourceManager, Logical Address, Group/Label/Scope |
+| `07_SAVE.md` | Save 파일, Atomic Write/Backup/복구, Migration, 저장 시점 |
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |
 | `10_TESTING_VALIDATION.md` | Test/Validation, 검증 체인, Definition of Done |
 

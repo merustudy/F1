@@ -60,11 +60,11 @@ Assets/@Scripts
 │  ├─ Manager        # Managers (Service Container)
 │  ├─ Resource       # ResourceManager, ResourceScope
 │  ├─ Scene          # SceneManagerEx
-│  └─ Setting        # SettingManager, LocalePolicy
-├─ Data              # Definitions/, Json/, Localization/
+│  └─ Setting        # SettingManager
+├─ Data              # Definitions/, Json/, Localization/ (LocalePolicy, LocalizedText)
 ├─ Save              # Models/, Storage/
 ├─ Gameplay          # 순수 C# Domain
-├─ Application       # RunManager, ExpeditionManager
+├─ Flow              # Application 계층: RunManager, ExpeditionManager
 ├─ UI
 └─ Editor            # F1.Editor asmdef
    ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, UiPrefabSetup

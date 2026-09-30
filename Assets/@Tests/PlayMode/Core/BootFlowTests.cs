@@ -1,4 +1,6 @@
 using System.Collections;
+using System.IO;
+using System.Text.RegularExpressions;
 using F1.Core;
 using NUnit.Framework;
 using UnityEngine;
@@ -9,6 +11,14 @@ namespace F1.Tests
 {
     public sealed class BootFlowTests
     {
+        string _saveRoot;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _saveRoot = BootTestUtil.UseTemporarySaveRoot();
+        }
+
         [UnityTearDown]
         public IEnumerator TearDown()
         {
@@ -26,6 +36,9 @@ namespace F1.Tests
             Assert.IsNull(AppRoot.Current.FailedStep);
             Assert.AreEqual(SceneManagerEx.MainSceneName, SceneManager.GetActiveScene().name);
             Assert.IsTrue(Managers.IsConfigured);
+            Assert.AreEqual(_saveRoot, Managers.Save.RootPath, "Tests never use the real save directory.");
+            Assert.IsTrue(Managers.Setting.IsLoaded);
+            Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.App));
 
             MainSceneRoot main = Object.FindFirstObjectByType<MainSceneRoot>();
             Assert.IsNotNull(main);
@@ -43,6 +56,26 @@ namespace F1.Tests
 
             Assert.AreEqual(InitializationState.Initialized, AppRoot.Current.State);
             Assert.AreEqual(SceneManagerEx.MainSceneName, SceneManager.GetActiveScene().name);
+        }
+
+        [UnityTest]
+        public IEnumerator Boot_WhenSaveStorageFails_StopsAtThatStepAndShowsErrorCode()
+        {
+            // A save root that is a file cannot be created as a directory.
+            Directory.CreateDirectory(Path.GetDirectoryName(_saveRoot));
+            File.WriteAllText(_saveRoot, "blocked");
+            LogAssert.Expect(LogType.Exception, new Regex("IOException"));
+
+            SceneManager.LoadScene(SceneManagerEx.BootSceneName);
+            yield return BootTestUtil.WaitForBootToFinish();
+
+            Assert.AreEqual(InitializationState.Failed, AppRoot.Current.State);
+            Assert.AreEqual(BootStep.InitializeSaveStorage.ErrorCode, AppRoot.Current.FailedStep.Value.ErrorCode);
+            Assert.AreEqual(SceneManagerEx.BootSceneName, SceneManager.GetActiveScene().name, "A failed boot never enters Main.");
+            Assert.IsTrue(AppRoot.Current.View.gameObject.activeSelf);
+            StringAssert.Contains(BootStep.InitializeSaveStorage.ErrorCode, AppRoot.Current.View.ErrorText);
+
+            File.Delete(_saveRoot);
         }
 
         [UnityTest]

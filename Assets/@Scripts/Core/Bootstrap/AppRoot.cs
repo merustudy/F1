@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using F1.Save;
 using UnityEngine;
 
 namespace F1.Core
@@ -11,6 +13,11 @@ namespace F1.Core
     public sealed class AppRoot : MonoBehaviour
     {
         [SerializeField] BootstrapView _view;
+
+        /// <summary>Tests point this at a temporary directory so they never touch real saves.</summary>
+        internal static string SaveRootOverride;
+
+        ResourceManager _resource;
 
         public static AppRoot Current { get; private set; }
 
@@ -48,6 +55,7 @@ namespace F1.Core
             }
 
             Current = null;
+            _resource?.ReleaseAllScopes();
             Managers.Reset();
         }
 
@@ -58,13 +66,31 @@ namespace F1.Core
             try
             {
                 _view.ShowLoading();
+                string saveRoot = SaveRootOverride ?? Path.Combine(Application.persistentDataPath, "Saves");
+                var save = new SaveManager(saveRoot);
+                var setting = new SettingManager(save);
+                var resource = new ResourceManager();
                 var scene = new SceneManagerEx();
+                _resource = resource;
 
                 step = BootStep.ConfigureManagers;
                 Managers.Configure(new ManagerSet
                 {
+                    Resource = resource,
+                    Save = save,
+                    Setting = setting,
                     Scene = scene,
                 });
+
+                step = BootStep.InitializeSaveStorage;
+                save.Initialize();
+
+                step = BootStep.LoadSettings;
+                setting.Load(SettingManager.SystemLocaleCode(Application.systemLanguage));
+
+                step = BootStep.InitializeResources;
+                await resource.InitializeAsync();
+                resource.BeginScope(ResourceScope.App);
 
                 step = BootStep.LoadMainScene;
                 await scene.LoadMainAsync();

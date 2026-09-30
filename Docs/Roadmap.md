@@ -35,12 +35,11 @@
 
 | # | 미결 결정 | 근거 문서 위치 | 늦어도 |
 |---|---|---|---|
-| G7 | Save 파일 구성, 저장 시점, 이어하기의 상세 (방향은 결정됨) | Kit/06 §6·§8, Architecture/09 Acceptance 7 | 설정 파일은 4단계, 진행 Save는 8단계 설계 승인 시 |
+| G7 | 런과 원정의 저장 시점, 이어하기의 상세 (방향과 파일 구성은 결정됨) | Architecture/07, Architecture/09 Acceptance 7 | 8단계 |
 | G8 | 결정론 세부 (시간 단위, 동시 발동 순서, 난수 스트림, 수치 타입, 시드 파생) | Design/09 §5, Design/02 §3·§11 (전부 【제안】) | 7a |
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
 | G14 | 식별자 타입(문자열 id 단독 / 정수 `Id` + `Key`)과 조회 구조, 변환 도구를 Unity 밖에서도 돌리는 방식 | Design/09 §1-4, Kit/02 | 5단계 설계 승인 시 |
-| G15 | Scope의 이름과 수명 (앱 / 런 / 원정 / 전투) | Kit/06 §3, Architecture/09 "상태 수명" | 4단계 설계 승인 시 |
 | G16 | Slice A의 규칙 정의 (전투, 원정, 로비와 귀환, 포션과 후퇴, 시뮬 정책) | Architecture/09 "규칙 정의가 필요한 항목" | 7a |
 | G17 | 게임 제목(`productName`). Save 경로가 여기서 나온다 | ProjectSettings 현재값 `F1` | 출시 전 |
 
@@ -55,11 +54,12 @@
 | G4 | Slice A = 핵심 루프 한 바퀴 + 저장/이어하기 | Architecture/09 |
 | G5 | Locale은 `ko-KR`(기본/Fallback)과 `en-US` | CLAUDE.md §3 |
 | G6 | Application 계층 Manager는 `RunManager`(런)와 `ExpeditionManager`(원정과 전투) | CLAUDE.md §4, Architecture/02 |
-| G7 | 방향: 상태가 확정될 때마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다 | CLAUDE.md §6 |
+| G7 | 방향: 상태가 확정될 때마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다. 파일은 `settings.json`과 `run.json`, 슬롯은 하나 | CLAUDE.md §6, Architecture/07 |
 | G9 | 다크 중세 흉상, 대규모 로스터, 소영주·공성전은 채택하지 않는다 | Design/10 |
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
 | G12 | Prefix는 `F1` | CLAUDE.md |
 | G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup`. 기준 해상도 1920x1080(16:9), 기본은 전체 화면 창, 창 크기 조절 가능 | `ProjectSetup`, Architecture/02 |
+| G15 | Resource Scope는 `App`, `Lobby`, `Expedition`. 기획의 "런"은 Scope가 아니다 | Architecture/04 |
 
 ## 단계
 
@@ -81,12 +81,13 @@
 - 함께 한 것: Template의 쓰지 않는 Package 11개 제거, TMP Essential Resources 반입, Git LFS 설정, `SampleScene` 삭제.
 - Domain의 Unity 비의존은 asmdef 분리가 아니라 시뮬 실행기가 소스를 직접 컴파일하는 것으로 보장한다(Architecture/03). 실행기는 7b에서 만든다.
 
-### 4. ResourceManager + Addressables + Save/Settings — 상태: 대기
+### 4. ResourceManager + Addressables + Save/Settings — 상태: 완료
 
-- 범위: Addressables 도입, `ResourceManager`(Logical Address, Scope), Addressables Setup 코드, `SaveManager`(Atomic Write, Backup),
-  `SettingManager`와 설정 파일(Locale 포함). Owner 문서는 Resource/Addressables, Save 영역(Kit/06 §3·§6).
-- 완료 기준: Scope 단위 Load/Release, Atomic Write/Backup/손상 복구가 Test로 고정됐다. Test는 전용 Save Root를 쓴다. 체인 통과.
-- 결정할 것: G15, G7 중 설정 파일.
+- 산출: Addressables 2.11.2와 Newtonsoft JSON 3.2.2 도입, `ResourceManager`(Logical Address, Scope), `AddressablesSetup`(Entry 목록 동기화와 검사),
+  `SaveManager`와 `SaveStorage`(Atomic Write, 한 세대 Backup, 손상 복구), `SettingManager`와 `settings.json`, `LocalePolicy`.
+  Owner 문서 Architecture/04, 07.
+- Boot 단계 추가: Save 저장소 초기화, 설정 Load, Resource 초기화. 실패하면 그 단계의 Error Code를 보이고 멈춘다.
+- Test는 임시 Save Root를 쓴다.
 
 ### 5. 데이터 — 상태: 대기
 

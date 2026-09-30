@@ -36,7 +36,7 @@ asmdef를 나누지 않고, 시뮬 실행기(`Tools/Sim`)가 이 폴더의 소�
 | `F1.Data` | `@Scripts/Data/*` |
 | `F1.Save` | `@Scripts/Save/*` |
 | `F1.Gameplay` | `@Scripts/Gameplay/*` |
-| `F1.Application` | `@Scripts/Application/*` |
+| `F1.Flow` | `@Scripts/Flow/*` (Application 계층. `UnityEngine.Application`과 겹치지 않게 `Application`이라는 Namespace를 쓰지 않는다) |
 | `F1.UI` | `@Scripts/UI/*` |
 | `F1.Editor.Setup`, `F1.Editor.Data` | `@Scripts/Editor/*` |
 | `F1.Tests` | `@Tests/*` |
@@ -55,8 +55,8 @@ asmdef를 나누지 않고, 시뮬 실행기(`Tools/Sim`)가 이 폴더의 소�
 | `com.unity.test-framework` | EditMode/PlayMode Test |
 | `com.unity.2d.sprite` | Sprite Import와 편집 |
 | `com.unity.ide.rider`, `com.unity.ide.visualstudio` | IDE 연동 |
-| `com.unity.addressables` | Resource Load (4단계에서 추가) |
-| `com.unity.nuget.newtonsoft-json` | Save와 Static Data JSON (4단계에서 추가) |
+| `com.unity.addressables` | Resource Load. 2.x 계열(2.11.2)로 고정한다. 3.x, 4.x는 필요가 생길 때 검토한다 |
+| `com.unity.nuget.newtonsoft-json` | Save와 Static Data JSON (3.2.2) |
 | `com.unity.localization` | UI String Table (6단계에서 추가) |
 
 - Template이 넣었지만 쓰지 않아 제거한 Package: `2d.animation`, `2d.aseprite`, `2d.psdimporter`, `2d.spriteshape`, `2d.tilemap`,

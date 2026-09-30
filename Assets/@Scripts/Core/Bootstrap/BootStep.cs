@@ -8,6 +8,9 @@ namespace F1.Core
     {
         public static readonly BootStep CreateManagers = new BootStep("Create managers", "BOOT-01");
         public static readonly BootStep ConfigureManagers = new BootStep("Configure managers", "BOOT-02");
+        public static readonly BootStep InitializeSaveStorage = new BootStep("Initialize save storage", "BOOT-03");
+        public static readonly BootStep LoadSettings = new BootStep("Load settings", "BOOT-04");
+        public static readonly BootStep InitializeResources = new BootStep("Initialize resources", "BOOT-05");
         public static readonly BootStep LoadMainScene = new BootStep("Load main scene", "BOOT-10");
         public static readonly BootStep BindMainScene = new BootStep("Bind main scene", "BOOT-11");
 

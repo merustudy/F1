@@ -1,4 +1,5 @@
 using System;
+using F1.Save;
 using UnityEngine;
 
 namespace F1.Core
@@ -13,6 +14,9 @@ namespace F1.Core
 
         public static bool IsConfigured => _set != null;
 
+        public static ResourceManager Resource => Require().Resource;
+        public static SaveManager Save => Require().Save;
+        public static SettingManager Setting => Require().Setting;
         public static SceneManagerEx Scene => Require().Scene;
 
         public static void Configure(ManagerSet set)
@@ -52,10 +56,16 @@ namespace F1.Core
     /// <summary>The full set of managers. Every field is required.</summary>
     public sealed class ManagerSet
     {
+        public ResourceManager Resource;
+        public SaveManager Save;
+        public SettingManager Setting;
         public SceneManagerEx Scene;
 
         internal void Validate()
         {
+            RequireManager(Resource, nameof(Resource));
+            RequireManager(Save, nameof(Save));
+            RequireManager(Setting, nameof(Setting));
             RequireManager(Scene, nameof(Scene));
         }
 

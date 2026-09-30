@@ -20,6 +20,7 @@ namespace F1.Editor.Setup
         {
             ApplyPlayerSettings();
             SceneSetup.EnsureScenes();
+            AddressablesSetup.Sync();
 
             AssetDatabase.SaveAssets();
             Debug.Log(DoneToken);
