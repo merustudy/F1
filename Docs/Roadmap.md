@@ -125,10 +125,13 @@
 - 시뮬로 출발값을 잡았다. 기본 파티(knight, bishop, spellblade)의 짧은 던전 클리어율은 balanced 정책에서 81.7%, 원정당 사망 0.22명.
   결과와 관찰(화상 절벽 포함)은 Design/08 §5.
 
-#### 7c. Application — 상태: 대기
+#### 7c. Application — 상태: 완료
 
-- 범위: 런, 원정, 전투의 흐름 조율과 명령 처리, 상태 확정 순서.
-- 완료 기준: UI 없이 Test로 루프 한 바퀴를 돌릴 수 있다. 체인 통과.
+- 산출: `Assets/@Scripts/Flow`의 `RunManager`(새 런, 로비 명령, 귀환 정산 적용), `ExpeditionManager`(출발, 노드, 전투 세션, 보상, 보드, 정산 보고),
+  `BattleSession`, `BattleClock`(배속과 일시정지), `GamePhase`. Owner 문서 Architecture/11.
+- 전투가 끝나면 그 호출 안에서 원정에 반영하고, 원정이 끝나면 그 호출 안에서 귀환 정산까지 적용한다. 화면의 확인을 기다리지 않는다.
+- Test: UI 없이 루프 한 바퀴와 두 번째 출발, 전멸과 후퇴, 런 종료, Frame 길이와 무관한 결과(`GameLoopTests`).
+  출고 데이터로 Boot 뒤 원정 한 번을 끝까지 돌리는 PlayMode Test.
 
 #### 7d. UI — 상태: 대기
 

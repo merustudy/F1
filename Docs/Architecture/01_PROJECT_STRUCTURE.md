@@ -64,7 +64,7 @@ Assets/@Scripts
 ├─ Data              # Definitions/, Json/, Localization/ (LocalePolicy, LocalizedText)
 ├─ Save              # Models/, Storage/
 ├─ Gameplay          # 순수 C# Domain
-├─ Flow              # Application 계층: RunManager, ExpeditionManager
+├─ Flow              # Application 계층: RunManager, ExpeditionManager, BattleSession, BattleClock
 ├─ UI                # UiKeys, UiStrings, 화면
 └─ Editor            # F1.Editor asmdef
    ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, FontSetup, UiPrefabSetup

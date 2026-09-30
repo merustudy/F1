@@ -1,4 +1,5 @@
 using System;
+using F1.Flow;
 using F1.Save;
 using UnityEngine;
 
@@ -19,6 +20,8 @@ namespace F1.Core
         public static SettingManager Setting => Require().Setting;
         public static DataManager Data => Require().Data;
         public static SceneManagerEx Scene => Require().Scene;
+        public static RunManager Run => Require().Run;
+        public static ExpeditionManager Expedition => Require().Expedition;
 
         public static void Configure(ManagerSet set)
         {
@@ -62,6 +65,8 @@ namespace F1.Core
         public SettingManager Setting;
         public DataManager Data;
         public SceneManagerEx Scene;
+        public RunManager Run;
+        public ExpeditionManager Expedition;
 
         internal void Validate()
         {
@@ -70,6 +75,8 @@ namespace F1.Core
             RequireManager(Setting, nameof(Setting));
             RequireManager(Data, nameof(Data));
             RequireManager(Scene, nameof(Scene));
+            RequireManager(Run, nameof(Run));
+            RequireManager(Expedition, nameof(Expedition));
         }
 
         static void RequireManager(object manager, string name)

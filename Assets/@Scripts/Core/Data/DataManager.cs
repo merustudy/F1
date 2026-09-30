@@ -20,6 +20,12 @@ namespace F1.Core
             _resource = resource ?? throw new ArgumentNullException(nameof(resource));
         }
 
+        /// <summary>Already loaded data, for tests that do not go through Addressables.</summary>
+        internal DataManager(StaticData data)
+        {
+            _data = data ?? throw new ArgumentNullException(nameof(data));
+        }
+
         public bool IsLoaded => _data != null;
 
         public StaticData Data => _data ?? throw new InvalidOperationException("Static data is not loaded.");

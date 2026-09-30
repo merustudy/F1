@@ -37,7 +37,7 @@ Manager 목록과 의존 방향은 `CLAUDE.md` §4가 소유한다.
 | `SoundManager` | 효과음·배경음 재생 | 음량 값 소유(`SettingManager`가 한다) | 10 |
 
 `RunManager`와 `ExpeditionManager`가 Application 계층이다. 규칙은 Domain의 순수 C# 코드가 계산하고, 이 둘은 명령을 검증하고
-Domain을 호출하고 상태를 확정·저장한 뒤 알린다.
+Domain을 호출하고 상태를 확정·저장한 뒤 알린다. 명령과 단계의 상세는 `11_APPLICATION_FLOW.md`가 소유한다.
 
 ## 초기화 순서
 

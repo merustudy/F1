@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Security.Cryptography;
+using F1.Flow;
 using F1.Save;
 using UnityEngine;
 
@@ -59,6 +61,18 @@ namespace F1.Core
             Managers.Reset();
         }
 
+        /// <summary>The seed of a new run comes from the OS random source, never from game randomness.</summary>
+        static ulong NewRunSeed()
+        {
+            var bytes = new byte[8];
+            using (var random = RandomNumberGenerator.Create())
+            {
+                random.GetBytes(bytes);
+            }
+
+            return BitConverter.ToUInt64(bytes, 0);
+        }
+
         async Awaitable InitializeAsync()
         {
             State = InitializationState.Initializing;
@@ -73,6 +87,8 @@ namespace F1.Core
                 var resource = new ResourceManager();
                 var data = new DataManager(resource);
                 var scene = new SceneManagerEx();
+                var run = new RunManager(data, NewRunSeed);
+                var expedition = new ExpeditionManager(data, run);
                 _resource = resource;
 
                 step = BootStep.ConfigureManagers;
@@ -83,6 +99,8 @@ namespace F1.Core
                     Setting = setting,
                     Data = data,
                     Scene = scene,
+                    Run = run,
+                    Expedition = expedition,
                 });
 
                 step = BootStep.InitializeSaveStorage;
