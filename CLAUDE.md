@@ -40,6 +40,7 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Resource / Addressables | `Docs/Architecture/04_RESOURCES_ADDRESSABLES.md` |
 | CSV / 변환 / DataManager | `Docs/Architecture/05_STATIC_DATA.md` |
 | Save | `Docs/Architecture/07_SAVE.md` |
+| Gameplay Domain / 시뮬 | `Docs/Architecture/08_GAMEPLAY_DOMAIN.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
 | Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
 | 기획을 근거로 쓰는 모든 작업 | `Docs/Design/00_INDEX.md`(태그 규칙), `Docs/Design/09_Implementation_Constraints.md` |
@@ -77,7 +78,6 @@ Unity Presentation
 - Domain은 `Managers`, MonoBehaviour, UI, Scene, Addressables, Save DTO를 직접 참조하지 않는다. Dependency는 생성자/메서드 인자로 받는다.
 - Domain은 Unity 없이 컴파일되고 실행된다. 시뮬 실행기가 같은 Domain 코드를 Unity 밖에서 돌린다 (§5).
 - UI는 State를 표시하고 명령을 전달하며 Gameplay Rule을 계산하지 않는다.
-- Domain의 내부 구조는 규칙 명세가 승인된 뒤 Gameplay Domain Owner 문서에서 정한다.
 
 ### Static Data
 
@@ -190,6 +190,7 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 | `04_RESOURCES_ADDRESSABLES.md` | ResourceManager, Logical Address, Group/Label/Scope |
 | `05_STATIC_DATA.md` | CSV, 변환, Generated JSON, DataManager |
 | `07_SAVE.md` | Save 파일, Atomic Write/Backup/복구, Migration, 저장 시점 |
+| `08_GAMEPLAY_DOMAIN.md` | Domain 구조, 결정론, 상태 Type, 이벤트 로그, 시뮬 실행기 |
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |
 | `10_TESTING_VALIDATION.md` | Test/Validation, 검증 체인, Definition of Done |
 

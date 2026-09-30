@@ -22,7 +22,8 @@ CSV (사람이 편집, Source of Truth)
 
 - 모든 Definition의 기본 키는 `Id` 열이다. 영어 snake_case 문자열(`^[a-z][a-z0-9]*(_[a-z0-9]+)*$`)이고 Definition 안에서 유일하다.
 - 정수 Id를 따로 두지 않는다. 다른 Definition을 가리킬 때도, Save가 가리킬 때도 이 문자열을 쓴다.
-- 조회는 `Dictionary<string, T>`다. 없는 id를 조회하면 예외다. 조용한 기본값이 없다.
+- 조회는 `DataTable<T>`(안에서 `Dictionary<string, T>`)다. 없는 id를 조회하면 예외다. 조용한 기본값이 없다.
+- 규칙이 Definition을 순회할 때는 항상 id 순서(`DataTable.Ordered`)로 한다. Dictionary의 순서에 결과가 달려서는 안 된다.
 
 ## 물리 경로
 
@@ -46,27 +47,29 @@ Assets/@Data
 
 | 위치 | 내용 | Unity 의존 |
 |---|---|---|
-| `Assets/@Scripts/Data` | Definition, JSON Record, `StaticData`, `StaticDataLoader`, `StaticDataFiles`, `LocalizedText`, `LocalePolicy` | 없음 |
+| `Assets/@Scripts/Data` | Definition, `StaticDataJson`, `StaticData`, `StaticDataLoader`, `StaticDataFiles`, `LocalizedText`, `LocalePolicy` | 없음 |
 | `Assets/@Scripts/Editor/Data/Csv` | `CsvTable`, `CsvRow` | 없음 |
-| `Assets/@Scripts/Editor/Data/Transform` | `StaticDataTransformer`, Definition별 Mapper, `StaticDataFileStore` | 없음 |
+| `Assets/@Scripts/Editor/Data/Transform` | `StaticDataTransformer`, Definition별 Mapper(`DefinitionMappers.cs`), `StaticDataFileStore` | 없음 |
 | `Assets/@Scripts/Editor/Data/DataTransformMenu.cs` | Menu와 Batch 진입점 | 있음 |
 | `Assets/@Scripts/Core/Data/DataManager.cs` | `ResourceManager`로 Load | 있음 |
 | `Tools/Sim` | 위의 Unity 의존 없는 폴더를 그대로 컴파일하는 .NET 콘솔 | 없음 |
 
-Mapper는 Definition별 파일로 나눈다. Reflection으로 Header를 Field에 자동 연결하지 않는다.
+Mapper는 Definition마다 Type 하나다. 파일이 커지면 Definition별 파일로 나눈다. Reflection으로 Header를 Field에 자동 연결하지 않는다.
+Definition은 JSON으로 직접 직렬화한다(Property 순서는 Attribute로 고정). Load는 Definition의 생성자를 거치므로 같은 검증이 다시 걸린다.
 
 ## CSV 형식
 
 ```csv
-Id,Name.ko-KR,Name.en-US
-knight,기사,Knight
+Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items
+goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:12
 ```
 
 - UTF-8, Header Row 필수. **Header 이름으로 Mapping**하고 열 순서에 의존하지 않는다.
 - quoted field, escaped quote(`""`), 필드 안 개행을 처리하는 Parser를 쓴다. `Split(',')` 금지.
 - Localization 열은 `<Field>.<LocaleCode>`다. Locale 집합은 `LocalePolicy.SupportedCodes`와 정확히 같아야 한다.
 - 다른 Definition 참조는 그 Definition의 `Id` 문자열이다.
-- 목록 값은 `+`로 잇는다.
+- 목록 값은 `+`로 잇는다. 아이템과 등급의 목록은 `item_id:grade`를 `+`로 잇는다.
+- `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 
 ## 형 변환
@@ -125,13 +128,12 @@ dotnet run --project Tools/Sim -- validate     # Generated가 Source와 같은�
 ## 새 Definition 추가 절차
 
 ```text
-1. Data/Definitions/<Name>Data.cs (불변 Type + 생성자 검증)
-2. Data/Json/<Name>Json.cs (Record와 변환)
-3. StaticDataFiles에 Entry, StaticData에 Dictionary와 Cross-reference, StaticDataLoader에 Load
-4. @Data/Source/<Name>Data.csv
-5. Editor/Data/Transform/<Name>Mapper.cs, StaticDataTransformer에 연결
-6. EditMode Test
-7. Tools/chain.sh (변환 -> Addressables 동기화 -> Test)
+1. Data/Definitions/<Name>Data.cs (불변 Type + 생성자 검증 + JSON Attribute)
+2. StaticDataFiles에 Entry, StaticData에 Table과 Cross-reference, StaticDataLoader의 Load와 Serialize
+3. @Data/Source/<Name>Data.csv
+4. Editor/Data/Transform에 Mapper, StaticDataTransformer에 연결
+5. EditMode Test (TestData, TestCsv에도 추가)
+6. Tools/chain.sh (변환 -> Addressables 동기화 -> Test)
 ```
 
 Addressables Entry는 `StaticDataFiles`에서 자동으로 나온다.

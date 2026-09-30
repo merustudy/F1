@@ -115,13 +115,13 @@
   검토용 목록은 Design/00 "일괄 승인으로 정한 규칙".
 - 수치와 콘텐츠는 문서가 아니라 CSV에 둔다(7b에서 넣는다). 전부 출발값이고 시뮬로 조정한다.
 
-#### 7b. Domain과 시뮬 — 상태: 대기
+#### 7b. Domain과 시뮬 — 상태: 완료
 
-- 범위: Slice A Static Data, 순수 C# Domain(전투 -> 원정 -> 런), 결정론 Test, Unity 밖 시뮬 실행기, 수치 보고.
-  Owner 문서는 Gameplay Domain 영역.
-- 완료 기준: 같은 시드와 입력의 반복 실행 결과가 같다는 Test가 있다. 시뮬 실행기가 게임과 같은 Generated JSON으로
-  전투와 원정을 돌려 수치를 보고한다. 체인 통과.
-- 결정할 것: 시뮬 결과를 본 뒤의 수치 확정.
+- 산출: Slice A Static Data 9종(CSV와 Generated JSON), 순수 C# Domain(`BattleEngine`, `ExpeditionRules`, `RunRules`, `Pcg32`),
+  `Tools/Sim`의 `battle`, `expedition`, `trace` 명령과 입력 정책 셋. Owner 문서 Architecture/08.
+- 결정론: 같은 Setup과 입력의 반복 실행, 진행 간격과 무관함, 재현(Replay)이 Test로 고정됐다.
+- 시뮬로 출발값을 잡았다. 기본 파티(knight, bishop, spellblade)의 짧은 던전 클리어율은 balanced 정책에서 81.7%, 원정당 사망 0.22명.
+  결과와 관찰(화상 절벽 포함)은 Design/08 §5.
 
 #### 7c. Application — 상태: 대기
 
