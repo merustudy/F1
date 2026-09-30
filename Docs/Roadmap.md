@@ -36,10 +36,8 @@
 | # | 미결 결정 | 근거 문서 위치 | 늦어도 |
 |---|---|---|---|
 | G7 | 런과 원정의 저장 시점, 이어하기의 상세 (방향과 파일 구성은 결정됨) | Architecture/07, Architecture/09 Acceptance 7 | 8단계 |
-| G8 | 결정론 세부 (시간 단위, 동시 발동 순서, 난수 스트림, 수치 타입, 시드 파생) | Design/09 §5, Design/02 §3·§11 (전부 【제안】) | 7a |
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
-| G16 | Slice A의 규칙 정의 (전투, 원정, 로비와 귀환, 포션과 후퇴, 시뮬 정책) | Architecture/09 "규칙 정의가 필요한 항목" | 7a |
 | G17 | 게임 제목(`productName`). Save 경로가 여기서 나온다 | ProjectSettings 현재값 `F1` | 출시 전 |
 
 ## 결정 관문 — 결정됨 (2026-09-30)
@@ -54,12 +52,14 @@
 | G5 | Locale은 `ko-KR`(기본/Fallback)과 `en-US` | CLAUDE.md §3 |
 | G6 | Application 계층 Manager는 `RunManager`(런)와 `ExpeditionManager`(원정과 전투) | CLAUDE.md §4, Architecture/02 |
 | G7 | 방향: 상태가 확정될 때마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다. 파일은 `settings.json`과 `run.json`, 슬롯은 하나 | CLAUDE.md §6, Architecture/07 |
+| G8 | 결정론 세부: 정수 밀리초, 고정된 처리 순서, 용도별 PCG32 스트림, 정수 수치, 이벤트 로그 재생 | Design/09 §5, Design/02 §3 |
 | G9 | 다크 중세 흉상, 대규모 로스터, 소영주·공성전은 채택하지 않는다 | Design/10 |
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
 | G12 | Prefix는 `F1` | CLAUDE.md |
 | G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup`. 기준 해상도 1920x1080(16:9), 기본은 전체 화면 창, 창 크기 조절 가능 | `ProjectSetup`, Architecture/02 |
 | G14 | 식별자는 영어 snake_case 문자열 `Id` 하나(정수 Id 없음), 조회는 `Dictionary<string, T>`. 변환 코드는 Unity 비의존이고 `Tools/Sim`이 같은 코드로 돌린다 | Architecture/05 |
 | G15 | Resource Scope는 `App`, `Lobby`, `Expedition`. 기획의 "런"은 Scope가 아니다 | Architecture/04 |
+| G16 | Slice A의 규칙을 권장안으로 정했다. 목록은 Design/00 "일괄 승인으로 정한 규칙" (사후 검토 대상) | Design/02~05, 07, 09 |
 
 ## 단계
 
@@ -109,12 +109,11 @@
 범위와 Acceptance는 Architecture/09가 소유한다. 그림은 도형 Placeholder다.
 7d가 끝나기 전에는 유료 이미지/소리 API를 호출하지 않는다.
 
-#### 7a. 규칙 명세 — 상태: 대기
+#### 7a. 규칙 명세 — 상태: 완료
 
-- 범위: Architecture/09의 "규칙 정의가 필요한 항목"을 전투 -> 원정 -> 로비와 귀환 순으로, 선택지와 함께 제안한다.
-  승인된 것만 `Docs/Design`에 【확정】으로 적는다.
-- 완료 기준: Slice A에 필요한 규칙이 `Docs/Design`에서 전부 【확정】이다.
-- 결정할 것: G16, G8.
+- 산출: Slice A에 필요한 규칙을 권장안으로 정해 `Docs/Design` 02, 03, 04, 05, 07, 09에 `【확정】 (일괄)`로 적었다.
+  검토용 목록은 Design/00 "일괄 승인으로 정한 규칙".
+- 수치와 콘텐츠는 문서가 아니라 CSV에 둔다(7b에서 넣는다). 전부 출발값이고 시뮬로 조정한다.
 
 #### 7b. Domain과 시뮬 — 상태: 대기
 

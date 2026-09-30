@@ -151,7 +151,7 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
    문서화한다. (09 §2, 02 §1)
 
 09 §1-5(【미결】 임의 해결 금지)와 §4(시뮬 우선 워크플로)는 절차 규칙이므로 §10에 둔다.
-결정론의 세부 방식(시간 단위, 난수 스트림, 수치 타입)은 기획에서 【제안】 상태이며 결정 대기다 (G8).
+결정론의 세부 방식(정수 밀리초, 시드에서 파생한 PCG32 스트림, 정수 수치, 이벤트 로그 재생)은 `Docs/Design/09_Implementation_Constraints.md` §5를 따른다.
 
 ## 6. Save Invariants
 

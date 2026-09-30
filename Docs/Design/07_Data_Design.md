@@ -32,7 +32,20 @@
 | spellblade / paladin STR 요구 | 9 / 11 |
 
 ## 4. 스키마
-- 원본 JSON은 없다 (2026-09-30). 스키마는 재정의 대상이고, CSV의 파일 단위와 열은 Docs/Architecture 의 Static Data 문서가 정한다.
-- 【제안】 데이터 분류 초안 (CSV에서는 분류마다 파일 하나가 된다):
-  `items`, `jobs`, `enemies`, `bosses`, `relics`, `affinities`, `dungeons`, `balance`
-  - `items`와 `relics`는 반드시 별도 분류 (06_Relic_System §4)
+- 원본 JSON은 없다 (2026-09-30). CSV의 파일 단위와 열의 형식은 Docs/Architecture 의 Static Data 문서가 정한다.
+- 【확정】 (2026-09-30 일괄 승인) Slice A의 데이터 분류. 분류마다 CSV 하나다 (`Assets/@Data/Source`).
+
+| 파일 | 내용 |
+|---|---|
+| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다 |
+| `JobData.csv` | 직업: 이름, 최대 HP, 아이템 칸 수, 기본 무기와 등급, 패시브, 권장 열 |
+| `ItemData.csv` | 아이템: 분류, 쿨다운, 열 조건, 효과(타입, 타깃, 계수), 보상 가중치 |
+| `PotionData.csv` | 포션: 효과와 크기, 보상 가중치 |
+| `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급 |
+| `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 전열과 후열 |
+| `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
+| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 피로도 비용, 일수, 보상 등급, 시작 포션 |
+| `MercenaryData.csv` | 시작 로스터: 이름, 직업 |
+
+- 【확정】 `items`와 `relics`는 반드시 별도 분류 (06_Relic_System §4). 유물은 Slice A 밖이라 파일이 없다.
+- 위 3절의 "확인된 값" 가운데 Slice A가 쓰는 것은 CSV의 출발값으로 넣었다. 시뮬 결과로 바뀌면 CSV가 기준이다.
