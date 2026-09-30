@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1855ff89a2edf4aab85248cf53064a0f
+    m_Address: ui/app/save-error-overlay
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3f507d437ce284be2abb1c1fcff219b5
     m_Address: ui/lobby/lobby-screen
     m_ReadOnly: 0

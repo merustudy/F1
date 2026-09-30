@@ -32,6 +32,9 @@ namespace F1.Editor.Setup
             ButtonParts quit = UiBuild.LocalizedButton("Quit", buttons, UiKeys.Title.Quit, UiPalette.ButtonQuiet, 32f);
             UiBuild.Size(quit.Rect, width, height);
 
+            TextMeshProUGUI notice = UiBuild.Label("Notice", frame, 26f, UiPalette.Burn, TextAlignmentOptions.Center);
+            UiBuild.Box(notice, 260f, 900f, 1400f, 80f);
+
             // Asked before a new run replaces the one in progress.
             Image overlay = UiBuild.Image("ConfirmPanel", frame, UiPalette.Overlay, raycastTarget: true);
             UiBuild.Stretch(overlay.rectTransform);
@@ -49,6 +52,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_language", language.Button);
             UiBuild.SetReference(screen, "_languageLabel", language.Label);
             UiBuild.SetReference(screen, "_quit", quit.Button);
+            UiBuild.SetReference(screen, "_notice", notice);
             UiBuild.SetReference(screen, "_confirmPanel", overlay.gameObject);
             UiBuild.SetReference(screen, "_confirmYes", yes.Button);
             UiBuild.SetReference(screen, "_confirmNo", no.Button);

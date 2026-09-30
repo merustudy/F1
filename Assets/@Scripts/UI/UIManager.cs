@@ -15,6 +15,7 @@ namespace F1.UI
 
         readonly ResourceManager _resource;
         RectTransform _root;
+        SaveErrorOverlay _saveError;
 
         public UIManager(ResourceManager resource)
         {
@@ -29,10 +30,25 @@ namespace F1.UI
         /// <summary>True while a screen is being replaced.</summary>
         public bool IsBusy { get; private set; }
 
-        /// <summary>Gives the manager the UI root of the Main scene.</summary>
-        public void Bind(RectTransform root)
+        /// <summary>The overlay that blocks the game while a save has failed.</summary>
+        public SaveErrorOverlay SaveError => _saveError;
+
+        /// <summary>
+        /// Gives the manager the UI root of the Main scene and creates what stays for the whole
+        /// session: the overlay shown when saving fails.
+        /// </summary>
+        public async Task BindAsync(RectTransform root)
         {
             _root = root != null ? root : throw new ArgumentNullException(nameof(root));
+
+            GameObject overlay = await _resource.InstantiateAsync(SaveErrorOverlay.Address, _root, ResourceScope.App);
+            _saveError = overlay.GetComponent<SaveErrorOverlay>();
+            if (_saveError == null)
+            {
+                throw new InvalidOperationException("The save error overlay prefab has no SaveErrorOverlay component.");
+            }
+
+            _saveError.Open();
         }
 
         /// <summary>
@@ -41,7 +57,7 @@ namespace F1.UI
         /// </summary>
         public async Task ShowAsync(ScreenId id)
         {
-            if (_root == null)
+            if (_root == null || _saveError == null)
             {
                 throw new InvalidOperationException("UIManager is not bound to a UI root.");
             }
@@ -77,6 +93,9 @@ namespace F1.UI
                 Current = screen;
                 CurrentId = id;
                 screen.Open();
+
+                // Screens are added last, so the overlay is moved back on top of them.
+                _saveError.transform.SetAsLastSibling();
 
                 if (previous != null)
                 {

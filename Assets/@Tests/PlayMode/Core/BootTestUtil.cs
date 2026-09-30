@@ -46,6 +46,23 @@ namespace F1.Tests
         }
 
         /// <summary>
+        /// Closes the app and starts it again over the same save directory: the persistent AppRoot is
+        /// destroyed, the managers are gone, and the Boot scene runs from the start.
+        /// </summary>
+        public static IEnumerator RestartApp()
+        {
+            if (AppRoot.Current != null)
+            {
+                UnityEngine.Object.Destroy(AppRoot.Current.gameObject);
+                yield return null;
+            }
+
+            Managers.Reset();
+            UnityEngine.SceneManagement.SceneManager.LoadScene(SceneManagerEx.BootSceneName);
+            yield return WaitForBootToFinish();
+        }
+
+        /// <summary>
         /// Destroys the persistent AppRoot so the next test boots from a clean state, and removes the
         /// temporary save directory.
         /// </summary>
@@ -64,6 +81,11 @@ namespace F1.Tests
             if (root != null && Directory.Exists(root))
             {
                 Directory.Delete(root, true);
+            }
+            else if (root != null && File.Exists(root))
+            {
+                // A test that blocks saving replaces the directory with a file.
+                File.Delete(root);
             }
         }
     }

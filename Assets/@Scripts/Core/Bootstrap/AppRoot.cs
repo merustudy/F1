@@ -88,7 +88,7 @@ namespace F1.Core
                 var resource = new ResourceManager();
                 var data = new DataManager(resource);
                 var scene = new SceneManagerEx();
-                var run = new RunManager(data, NewRunSeed);
+                var run = new RunManager(data, save, NewRunSeed);
                 var expedition = new ExpeditionManager(data, run);
                 var ui = new UIManager(resource);
                 _resource = resource;
@@ -125,6 +125,15 @@ namespace F1.Core
                 step = BootStep.LoadStaticData;
                 await data.LoadAsync();
 
+                // An unreadable run file is not a boot failure: the game starts without a run.
+                step = BootStep.LoadRun;
+                run.Load();
+                expedition.Restore();
+                if (expedition.LastResume == BattleResume.Diverged || expedition.LastResume == BattleResume.Restarted)
+                {
+                    Debug.LogWarning($"The saved battle could not be reproduced exactly ({expedition.LastResume}). Rules or data changed since it was saved.");
+                }
+
                 step = BootStep.LoadMainScene;
                 await scene.LoadMainAsync();
 
@@ -136,9 +145,9 @@ namespace F1.Core
                 }
 
                 main.Bind();
-                ui.Bind(main.UiRoot);
 
                 step = BootStep.ShowMainUi;
+                await ui.BindAsync(main.UiRoot);
                 await ui.ShowAsync(ScreenId.Title);
 
                 State = InitializationState.Initialized;

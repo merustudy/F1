@@ -136,7 +136,7 @@ namespace F1.Tests
                             Managers.Expedition.AdvanceBattle(250);
                         }
 
-                        yield return null;
+                        yield return UiTestUtil.WaitForRedraw();
                         if (boss || !capturedReward)
                         {
                             yield return Capture(prefix + (boss ? "_10_boss_result" : "_06_battle_result"));
@@ -170,6 +170,17 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<SettlementScreen>(), "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             yield return Capture(prefix + "_12_lobby_after");
+
+            // A failed save: the save directory is made unwritable for one command.
+            Directory.Delete(_saveRoot, true);
+            File.WriteAllText(_saveRoot, "blocked");
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Rest");
+            yield return Capture(prefix + "_14_save_failed");
+            File.Delete(_saveRoot);
+            Directory.CreateDirectory(_saveRoot);
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(Managers.UI.SaveError, "Blocker/Box/Retry");
+            Assert.IsFalse(Managers.Run.IsSaveBlocked);
 
             // The end of a run, staged directly.
             RunState run = Managers.Run.Run;

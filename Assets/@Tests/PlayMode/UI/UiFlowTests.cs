@@ -125,7 +125,7 @@ namespace F1.Tests
                             yield return null;
                         }
 
-                        yield return null;
+                        yield return UiTestUtil.WaitForRedraw();
                         Assert.IsTrue(UiTestUtil.At(battle, "Frame/ResultPanel").gameObject.activeSelf);
                         UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");
                         yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
@@ -246,15 +246,17 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.At(title, "Frame/Buttons/Continue").gameObject.activeSelf);
 
             UiTestUtil.Click(title, "Frame/Buttons/NewRun");
-            yield return null;
+            yield return UiTestUtil.WaitForRedraw();
 
             Assert.IsTrue(UiTestUtil.At(title, "Frame/ConfirmPanel").gameObject.activeSelf);
             Assert.AreEqual(2, Managers.Run.Run.Day, "Nothing is lost until the player confirms.");
 
             UiTestUtil.Click(title, "Frame/ConfirmPanel/ConfirmBox/No");
             Assert.IsFalse(UiTestUtil.At(title, "Frame/ConfirmPanel").gameObject.activeSelf);
+            yield return UiTestUtil.WaitForRedraw();
 
             UiTestUtil.Click(title, "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForRedraw();
             UiTestUtil.Click(title, "Frame/ConfirmPanel/ConfirmBox/Yes");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
 

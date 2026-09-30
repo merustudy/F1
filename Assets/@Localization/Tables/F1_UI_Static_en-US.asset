@@ -596,6 +596,23 @@ MonoBehaviour:
     m_Localized: No mercenary is left in the company
     m_Metadata:
       m_Items: []
+  - m_Id: 17166274387968
+    m_Localized: The saved run cannot be read. Only a new run can be started.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17166291165184
+    m_Localized: The save file was damaged. The previous save was restored.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17166291165185
+    m_Localized: Could not save. Your last action is not confirmed yet. Check disk
+      space and folder permissions, then retry.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 17166291165186
+    m_Localized: Retry
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

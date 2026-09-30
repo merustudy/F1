@@ -27,9 +27,19 @@ namespace F1.Editor.Setup
         const string BuilderDirectory = "Assets/@Scripts/Editor/Setup/Ui";
         const string PalettePath = "Assets/@Scripts/UI/UiPalette.cs";
 
+        public const string SaveErrorOverlayPath = PrefabDirectory + "/SaveErrorOverlay.prefab";
+
         public static string PrefabPath(ScreenId id)
         {
             return $"{PrefabDirectory}/{id}Screen.prefab";
+        }
+
+        /// <summary>Every prefab this setup builds: one per screen and the save error overlay.</summary>
+        public static List<string> AllPrefabPaths()
+        {
+            List<string> paths = ScreenCatalog.All.Select(PrefabPath).ToList();
+            paths.Add(SaveErrorOverlayPath);
+            return paths;
         }
 
         [MenuItem("F1/Setup/Rebuild UI Prefabs")]
@@ -54,7 +64,7 @@ namespace F1.Editor.Setup
         {
             return File.Exists(StampPath)
                 && File.ReadAllText(StampPath).Trim() == stamp
-                && ScreenCatalog.All.All(id => File.Exists(PrefabPath(id)));
+                && AllPrefabPaths().All(File.Exists);
         }
 
         static void Build(string stamp)
@@ -68,12 +78,13 @@ namespace F1.Editor.Setup
             holder.SetActive(false);
             try
             {
-                Save(BuildTitle(holder.transform), ScreenId.Title);
-                Save(BuildLobby(holder.transform), ScreenId.Lobby);
-                Save(BuildNodeMap(holder.transform), ScreenId.NodeMap);
-                Save(BuildBattle(holder.transform), ScreenId.Battle);
-                Save(BuildReward(holder.transform), ScreenId.Reward);
-                Save(BuildSettlement(holder.transform), ScreenId.Settlement);
+                Save(BuildTitle(holder.transform), PrefabPath(ScreenId.Title));
+                Save(BuildLobby(holder.transform), PrefabPath(ScreenId.Lobby));
+                Save(BuildNodeMap(holder.transform), PrefabPath(ScreenId.NodeMap));
+                Save(BuildBattle(holder.transform), PrefabPath(ScreenId.Battle));
+                Save(BuildReward(holder.transform), PrefabPath(ScreenId.Reward));
+                Save(BuildSettlement(holder.transform), PrefabPath(ScreenId.Settlement));
+                Save(BuildSaveErrorOverlay(holder.transform), SaveErrorOverlayPath);
             }
             finally
             {
@@ -85,13 +96,11 @@ namespace F1.Editor.Setup
             Debug.Log("UI prefabs rebuilt.");
         }
 
-        static void Save(UIScreen screen, ScreenId id)
+        static void Save(Component root, string path)
         {
-            string path = PrefabPath(id);
-
             // Unity keeps the ids of a rebuilt prefab by matching object names. A repeated name gets
             // new ids on every rebuild, which would rewrite the file each time.
-            List<string> repeated = screen.GetComponentsInChildren<Transform>(true)
+            List<string> repeated = root.GetComponentsInChildren<Transform>(true)
                 .GroupBy(t => t.name)
                 .Where(g => g.Count() > 1)
                 .Select(g => g.Key)
@@ -100,7 +109,7 @@ namespace F1.Editor.Setup
             {
                 throw new InvalidOperationException($"{path}: object names must be unique; repeated: {string.Join(", ", repeated)}.");
             }
-            PrefabUtility.SaveAsPrefabAsset(screen.gameObject, path, out bool success);
+            PrefabUtility.SaveAsPrefabAsset(root.gameObject, path, out bool success);
             if (!success)
             {
                 throw new InvalidOperationException($"Could not save {path}.");
@@ -140,13 +149,13 @@ namespace F1.Editor.Setup
             TMP_FontAsset font = FontSetup.LoadFontAsset();
             var keys = new HashSet<string>(LocalizationSetup.ReadSource().Rows.Select(r => r.Key), StringComparer.Ordinal);
 
-            foreach (ScreenId id in ScreenCatalog.All)
+            foreach (string path in AllPrefabPaths())
             {
-                string path = PrefabPath(id);
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                if (prefab == null || prefab.GetComponent<UIScreen>() == null)
+                bool isOverlay = path == SaveErrorOverlayPath;
+                if (prefab == null || (isOverlay ? prefab.GetComponent<SaveErrorOverlay>() == null : prefab.GetComponent<UIScreen>() == null))
                 {
-                    problems.Add($"{path}: the root has no UIScreen component.");
+                    problems.Add($"{path}: the root does not have its script.");
                     continue;
                 }
 

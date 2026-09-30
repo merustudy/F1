@@ -1,5 +1,6 @@
 using F1.Core;
 using F1.Data;
+using F1.Save;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ namespace F1.UI
         [SerializeField] Button _language;
         [SerializeField] TMP_Text _languageLabel;
         [SerializeField] Button _quit;
+        [SerializeField] TMP_Text _notice;
         [SerializeField] GameObject _confirmPanel;
         [SerializeField] Button _confirmYes;
         [SerializeField] Button _confirmNo;
@@ -35,6 +37,21 @@ namespace F1.UI
         {
             _continue.gameObject.SetActive(Managers.Run.HasRun);
             _languageLabel.text = UiStrings.Get(UiKeys.Title.Language, UiStrings.Get(UiKeys.Title.LanguageName));
+            _notice.text = SaveNotice();
+        }
+
+        /// <summary>What the player should know about the save file that was found at startup.</summary>
+        static string SaveNotice()
+        {
+            switch (Managers.Run.LoadStatus)
+            {
+                case SaveLoadStatus.Corrupt when !Managers.Run.HasRun:
+                    return UiStrings.Get(UiKeys.Title.SaveUnreadable);
+                case SaveLoadStatus.RestoredFromBackup:
+                    return UiStrings.Get(UiKeys.Title.SaveRestored);
+                default:
+                    return string.Empty;
+            }
         }
 
         void OnNewRun()

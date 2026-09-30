@@ -12,6 +12,8 @@ Title.Language,Button that switches the language. {0} = name of the current lang
 Title.LanguageName,Name of this language written in itself.,한국어,English
 Title.Quit,Closes the game.,종료,Quit
 Title.OverwriteWarning,Asked before a new run replaces the run in progress.,진행 중인 런이 사라집니다. 새로 시작할까요?,The run in progress will be lost. Start a new one?
+Title.SaveUnreadable,Shown when the save file and its backup cannot be read.,저장된 런을 읽을 수 없습니다. 새 런만 시작할 수 있습니다.,The saved run cannot be read. Only a new run can be started.
+Title.SaveRestored,Shown when the save file was damaged and the backup was used.,저장 파일이 손상되어 직전 저장으로 되돌렸습니다.,The save file was damaged. The previous save was restored.
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
 Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 Lobby.Roster,Header of the mercenary list.,로스터,Roster
@@ -127,3 +129,5 @@ Settle.Fatigue,{0} = fatigue cost.,생환자의 피로도 -{0},Fatigue of those 
 Settle.Days,{0} = days passed. {1} = the new day.,{0}일이 지나 {1}일차가 되었습니다,{0} days passed. It is now day {1}
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
+Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
+Save.Retry,Writes the unsaved change again.,다시 시도,Retry

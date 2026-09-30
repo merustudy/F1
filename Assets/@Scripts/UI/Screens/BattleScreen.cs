@@ -66,6 +66,9 @@ namespace F1.UI
             _clock.SpeedPercent = _preferredSpeedPercent;
             BattleEngine engine = _battle.Engine;
 
+            // A battle continued from a save is already under way: let the player look before it moves on.
+            _clock.Paused = engine.TimeMs > 0;
+
             foreach (BattleUnit unit in engine.Party)
             {
                 BattleUnitView view = CreateUnit(unit, unit.Row == BattleRow.Front ? _partyFront : _partyRear);

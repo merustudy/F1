@@ -44,6 +44,16 @@ namespace F1.Tests
             yield return null;
         }
 
+        /// <summary>
+        /// Waits until what a screen just showed or hid can be clicked. A panel that was switched on
+        /// takes part in pointer raycasts only after the canvas has drawn it once.
+        /// </summary>
+        public static IEnumerator WaitForRedraw()
+        {
+            yield return null;
+            yield return null;
+        }
+
         public static T Screen<T>()
             where T : UIScreen
         {
@@ -79,18 +89,29 @@ namespace F1.Tests
             button.onClick.Invoke();
         }
 
-        /// <summary>Casts a pointer ray at the middle of the button, the way the event system does for a mouse click.</summary>
         static void AssertPointerReaches(Button button)
+        {
+            Transform top = TopmostUnderPointer(button);
+            Assert.IsNotNull(top, $"A click in the middle of button '{button.name}' hits nothing.");
+            Assert.IsTrue(top == button.transform || top.IsChildOf(button.transform), $"'{top.name}' covers button '{button.name}'.");
+        }
+
+        /// <summary>True when a mouse click in the middle of the button would land on it and not on something above it.</summary>
+        public static bool PointerReaches(Button button)
+        {
+            Transform top = TopmostUnderPointer(button);
+            return top != null && (top == button.transform || top.IsChildOf(button.transform));
+        }
+
+        /// <summary>Casts a pointer ray at the middle of the button, the way the event system does for a mouse click.</summary>
+        static Transform TopmostUnderPointer(Button button)
         {
             var corners = new Vector3[4];
             ((RectTransform)button.transform).GetWorldCorners(corners);
             var pointer = new PointerEventData(EventSystem.current) { position = (corners[0] + corners[2]) * 0.5f };
             var hits = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointer, hits);
-
-            Assert.IsNotEmpty(hits, $"A click in the middle of button '{button.name}' hits nothing.");
-            Transform top = hits[0].gameObject.transform;
-            Assert.IsTrue(top == button.transform || top.IsChildOf(button.transform), $"'{top.name}' covers button '{button.name}'.");
+            return hits.Count == 0 ? null : hits[0].gameObject.transform;
         }
 
         public static void Click(Component root, string path)

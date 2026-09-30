@@ -25,6 +25,8 @@ namespace F1.UI
             public const string LanguageName = "Title.LanguageName";
             public const string Quit = "Title.Quit";
             public const string OverwriteWarning = "Title.OverwriteWarning";
+            public const string SaveUnreadable = "Title.SaveUnreadable";
+            public const string SaveRestored = "Title.SaveRestored";
         }
 
         public static class Lobby
@@ -188,6 +190,12 @@ namespace F1.UI
             public const string Days = "Settle.Days";
             public const string ItemsLost = "Settle.ItemsLost";
             public const string RunOver = "Settle.RunOver";
+        }
+
+        public static class Save
+        {
+            public const string Failed = "Save.Failed";
+            public const string Retry = "Save.Retry";
         }
     }
 }

@@ -9,6 +9,12 @@ namespace F1.Tests
 {
     public sealed class RunManagerTests
     {
+        [TearDown]
+        public void TearDown()
+        {
+            FlowTestKit.DeleteSaveRoots();
+        }
+
         [Test]
         public void Run_WhenNoRunWasStarted_Throws()
         {

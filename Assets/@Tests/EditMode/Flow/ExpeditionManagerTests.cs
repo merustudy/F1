@@ -9,6 +9,12 @@ namespace F1.Tests
 {
     public sealed class ExpeditionManagerTests
     {
+        [TearDown]
+        public void TearDown()
+        {
+            FlowTestKit.DeleteSaveRoots();
+        }
+
         [Test]
         public void Phase_WithNothingInProgress_IsLobby()
         {

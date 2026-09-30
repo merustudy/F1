@@ -78,7 +78,7 @@ namespace F1.Tests
             var save = new SaveManager(Path.Combine(Path.GetTempPath(), "F1Tests", "unused"));
             var resource = new ResourceManager();
             var data = new DataManager(resource);
-            var run = new RunManager(data, () => 1UL);
+            var run = new RunManager(data, save, () => 1UL);
             return new ManagerSet
             {
                 Resource = resource,

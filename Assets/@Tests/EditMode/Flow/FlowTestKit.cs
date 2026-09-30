@@ -1,28 +1,89 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using F1.Core;
 using F1.Data;
 using F1.Flow;
 using F1.Gameplay;
+using F1.Save;
 
 namespace F1.Tests
 {
-    /// <summary>The application layer over the small test data, without Unity scenes or Addressables.</summary>
+    /// <summary>
+    /// The application layer over the small test data, without Unity scenes or Addressables.
+    /// It saves into a temporary directory of its own; fixtures call <see cref="DeleteSaveRoots"/> on tear down.
+    /// </summary>
     internal sealed class FlowTestKit
     {
         public const ulong Seed = 7;
 
-        public FlowTestKit(StaticData data = null, ulong seed = Seed)
+        static readonly List<string> SaveRoots = new List<string>();
+
+        readonly ulong _seed;
+
+        public FlowTestKit(StaticData data = null, ulong seed = Seed, string saveRoot = null)
         {
             Data = data ?? StrongParty();
+            _seed = seed;
+            if (saveRoot == null)
+            {
+                saveRoot = Path.Combine(Path.GetTempPath(), "F1Tests", Guid.NewGuid().ToString("N"));
+                SaveRoots.Add(saveRoot);
+            }
+
+            SaveRoot = saveRoot;
+            Save = new SaveManager(saveRoot);
+            Save.Initialize();
+
             var dataManager = new DataManager(Data);
-            Run = new RunManager(dataManager, () => seed);
+            Run = new RunManager(dataManager, Save, () => seed);
             Expedition = new ExpeditionManager(dataManager, Run);
         }
 
         public StaticData Data { get; }
+        public string SaveRoot { get; }
+        public SaveManager Save { get; }
         public RunManager Run { get; }
         public ExpeditionManager Expedition { get; }
+
+        public string RunFilePath => Path.Combine(SaveRoot, RunManager.FileName);
+
+        /// <summary>
+        /// Closes the app and starts it again: new managers over the same save directory, then the
+        /// boot steps that read the run.
+        /// </summary>
+        public FlowTestKit Restart(StaticData data = null)
+        {
+            var next = new FlowTestKit(data ?? Data, _seed, SaveRoot);
+            next.Run.Load();
+            next.Expedition.Restore();
+            return next;
+        }
+
+        /// <summary>What run.json holds now, as text.</summary>
+        public string SavedText()
+        {
+            return File.ReadAllText(RunFilePath);
+        }
+
+        /// <summary>Removes the temporary save directories made by kits of the finished test.</summary>
+        public static void DeleteSaveRoots()
+        {
+            foreach (string root in SaveRoots)
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+                else if (File.Exists(root))
+                {
+                    File.Delete(root);
+                }
+            }
+
+            SaveRoots.Clear();
+        }
 
         /// <summary>The test data with weapons strong enough that the default party always clears the dungeon.</summary>
         public static StaticData StrongParty(params (string Key, int Value)[] balanceOverrides)
@@ -92,7 +153,7 @@ namespace F1.Tests
                 Expedition.AdvanceBattle(stepMs);
                 if (++guard > 1000000)
                 {
-                    throw new System.InvalidOperationException("The battle did not end.");
+                    throw new InvalidOperationException("The battle did not end.");
                 }
             }
         }
@@ -118,7 +179,7 @@ namespace F1.Tests
                         Expedition.SkipReward();
                         break;
                     default:
-                        throw new System.InvalidOperationException($"Unexpected phase {Expedition.Phase}.");
+                        throw new InvalidOperationException($"Unexpected phase {Expedition.Phase}.");
                 }
             }
         }

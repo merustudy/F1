@@ -655,6 +655,26 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909302
+  - m_Id: 17166274387968
+    m_Key: Title.SaveUnreadable
+    m_Metadata:
+      m_Items:
+      - rid: 636489279681331200
+  - m_Id: 17166291165184
+    m_Key: Title.SaveRestored
+    m_Metadata:
+      m_Items:
+      - rid: 636489279681331201
+  - m_Id: 17166291165185
+    m_Key: Save.Failed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279681331202
+  - m_Id: 17166291165186
+    m_Key: Save.Retry
+    m_Metadata:
+      m_Items:
+      - rid: 636489279681331203
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1186,3 +1206,19 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The run ended with this expedition.
+    - rid: 636489279681331200
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when the save file and its backup cannot be read.
+    - rid: 636489279681331201
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when the save file was damaged and the backup was used.
+    - rid: 636489279681331202
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown over everything while the last change could not be written.
+    - rid: 636489279681331203
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Writes the unsaved change again.

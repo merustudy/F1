@@ -12,6 +12,12 @@ namespace F1.Tests
     /// </summary>
     public sealed class GameLoopTests
     {
+        [TearDown]
+        public void TearDown()
+        {
+            FlowTestKit.DeleteSaveRoots();
+        }
+
         [Test]
         public void OneLap_ChangesTheLobby_AndASecondExpeditionCanDepart()
         {
