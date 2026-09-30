@@ -30,10 +30,10 @@ Manager 목록과 의존 방향은 `CLAUDE.md` §4가 소유한다.
 | `SaveManager` | Save 파일의 형식과 I/O (Atomic Write, Backup, 손상 복구) | 상태 적용, Gameplay 판단 | 4 |
 | `SettingManager` | 설정 값 소유(Locale), 검증, 저장, `LocaleChanged` 알림 | Unity Localization API 직접 호출(`UnityLocaleAdapter`가 한다, `06_LOCALIZATION.md`) | 4, 6 |
 | `DataManager` | Generated JSON Load, 검증, Definition 조회 | CSV Parse, Handle 소유, Runtime/Save 상태 소유 | 5 |
-| `UIManager` | 화면 Prefab을 Load해 UI Root에 띄우고 닫기 | Gameplay Rule 계산 | 7 |
+| `UIManager` | 화면 Prefab을 Load해 UI Root에 띄우고 닫기, 저장 실패 Overlay 유지 | Gameplay Rule 계산, 어느 화면을 띄울지 결정 | 7 |
 | `SceneManagerEx` | Scene 이름 상수, Main Scene Load | 초기화 순서 결정 | 3 |
-| `RunManager` | 런(100일) 상태의 주인. 새 런, 이어하기, 로비 명령, 귀환 정산 적용, 런 저장 | 전투 계산(Domain이 한다), 화면 표시 | 7, 8 |
-| `ExpeditionManager` | 원정과 전투 진행의 주인. 노드 선택, 전투 세션 진행과 입력 기록, 보상, 원정 종료 | 런 상태 직접 변경(`RunManager`의 명령을 부른다) | 7, 8 |
+| `RunManager` | 런(100일) 상태와 `run.json`의 주인. 새 런, Load, 로비 명령, 귀환 정산 적용, 저장과 저장 실패 처리 | 전투 계산(Domain이 한다), 화면 표시 | 7, 8 |
+| `ExpeditionManager` | 원정과 전투 진행의 주인. 노드 선택, 전투 세션 진행과 입력 기록, 보상, 원정 종료, 저장된 원정과 전투의 복원 | 런 상태 직접 변경, 파일 쓰기(`RunManager`를 부른다) | 7, 8 |
 | `SoundManager` | 효과음·배경음 재생 | 음량 값 소유(`SettingManager`가 한다) | 10 |
 
 `RunManager`와 `ExpeditionManager`가 Application 계층이다. 규칙은 Domain의 순수 C# 코드가 계산하고, 이 둘은 명령을 검증하고
@@ -45,12 +45,13 @@ Domain을 호출하고 상태를 확정·저장한 뒤 알린다. 명령과 단�
 Boot -> AppRoot 중복 검사 -> Manager 생성 -> Managers.Configure
 -> Save 저장소 초기화 -> Settings Load
 -> ResourceManager 초기화, App Scope 열기 -> Localization 초기화 -> 저장 Locale 적용
--> Static Data Load/검증
--> Main Scene Load -> Main Binding -> (런 Save가 있으면 이어하기 준비) -> Main UI 표시 -> Initialized
+-> Static Data Load/검증 -> 런 Save Load와 원정 복원
+-> Main Scene Load -> Main Binding -> Main UI 표시(타이틀) -> Initialized
 ```
 
 - 각 단계는 `BootStep`에 이름과 안정적인 Error Code를 가진다. 단계는 그 영역이 구현되는 Roadmap 단계에서 추가한다.
 - 실패하면 단계 이름과 Error Code를 `BootstrapView`에 보이고 멈춘다. 부분 초기화로 Main에 들어가지 않는다.
+- 런 Save가 없거나 읽을 수 없는 것은 Boot 실패가 아니다. 런 없이 시작하고 타이틀이 알린다(`07_SAVE.md`).
 - `BootstrapView`는 Addressables, Localization 없이 동작한다. 고정 영어 문구와 Latin Font만 쓴다.
 - Editor에서 Main Scene을 직접 Play하면 `MainSceneRoot`가 Boot Scene으로 되돌린다.
 - 초기화 코드에서 Animation/Tween 완료나 `WaitForEndOfFrame`을 기다리지 않는다.

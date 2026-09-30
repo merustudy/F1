@@ -3,7 +3,7 @@
 단계, 결정 관문, 진행 상태를 소유한다. 규칙은 [CLAUDE.md](../CLAUDE.md)가, 상세는 Owner 문서가 소유한다.
 이 문서는 Authority가 아니다.
 
-- 갱신: 2026-09-30 (6단계까지와 7a, 7b 완료. 7c, 7d, 8단계를 일괄 승인으로 진행 중)
+- 갱신: 2026-09-30 (1~8단계 완료. Slice A 구현이 끝났고 사용자 검토와 9단계 시작 지시를 기다린다)
 - 상태 값: 대기 / 진행 / 완료
 - 단계 번호는 고정이다. CLAUDE.md와 대화가 번호로 가리킨다.
 - 모든 단계는 CLAUDE.md §10 "단계 절차"를 따른다. 한 번에 한 단계만, 다음 단계는 시작 지시를 받은 뒤에.
@@ -18,6 +18,22 @@
   기획문서에는 `【확정】 (2026-09-30 일괄 승인)`으로 적는다. 사용자가 바꾸면 기획문서를 먼저 고친다.
 - 단계가 끝날 때마다 주제별로 로컬 커밋한다. 푸시는 하지 않는다. 작업 브랜치는 `feature/slice-a`다.
 - 9단계부터는 다시 단계별 승인을 받는다.
+
+## 사후 검토 대기 (일괄 승인으로 정한 것)
+
+일괄 승인 범위(3~8단계)에서 권장안으로 정한 결정이다. 하나씩 승인받은 것이 아니므로 사용자가 검토하고 바꿀 수 있다.
+바꿀 때는 아래 위치의 문서를 먼저 고친다.
+
+| 무엇 | 어디에 적혀 있나 |
+|---|---|
+| Slice A의 게임 규칙 전부 (전투, 원정, 로비, 귀환 정산) | Design/00 "일괄 승인으로 정한 규칙"과 그 표가 가리키는 절 |
+| 콘텐츠와 수치 (직업, 아이템, 적, 던전, 용병, 상수) | `Assets/@Data/Source/*.csv`, 시뮬 결과는 Design/08 §5 |
+| 화면 구성과 조작 방식 | Architecture/12, `Docs/Workstreams/completed/stage07d-ui.md` "결정" |
+| 저장 시점, 이어하기 방식, 저장 실패 정책 | Architecture/07 "run.json" |
+| Font(Pretendard), Package(Addressables 2.x, Localization, Newtonsoft) | Architecture/03, 06 |
+| 구조 결정 (Manager 의존, Scope, 단계 계산, Prefab을 코드로 생성) | Architecture/02, 04, 11, 12 |
+
+화면은 `Tools/screenshots.sh`로 PNG를 뽑아 볼 수 있다. 직접 플레이하려면 Unity에서 `Assets/@Scenes/Boot.unity`를 열고 Play한다.
 
 ## 진행 순서
 
@@ -35,7 +51,6 @@
 
 | # | 미결 결정 | 근거 문서 위치 | 늦어도 |
 |---|---|---|---|
-| G7 | 런과 원정의 저장 시점, 이어하기의 상세 (방향과 파일 구성은 결정됨) | Architecture/07, Architecture/09 Acceptance 7 | 8단계 |
 | G9 | 그림체와 컨셉 방향 (기존 안은 미채택) | Design/10 | 9단계 시작 전 |
 | G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
 | G17 | 게임 제목(`productName`). Save 경로가 여기서 나온다 | ProjectSettings 현재값 `F1` | 출시 전 |
@@ -51,7 +66,7 @@
 | G4 | Slice A = 핵심 루프 한 바퀴 + 저장/이어하기 | Architecture/09 |
 | G5 | Locale은 `ko-KR`(기본/Fallback)과 `en-US` | CLAUDE.md §3 |
 | G6 | Application 계층 Manager는 `RunManager`(런)와 `ExpeditionManager`(원정과 전투) | CLAUDE.md §4, Architecture/02 |
-| G7 | 방향: 상태가 확정될 때마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다. 파일은 `settings.json`과 `run.json`, 슬롯은 하나 | CLAUDE.md §6, Architecture/07 |
+| G7 | 상태를 바꾸는 명령마다 저장하고, 확정된 손실은 이어하기로 되돌릴 수 없다. 파일은 `settings.json`과 `run.json`, 슬롯은 하나. 전투 도중은 입력 기록과 확정 시각으로 재현한다. 저장 실패는 다음 변경을 막는다 (저장 시점과 실패 정책은 일괄 승인으로 정함) | CLAUDE.md §6, Architecture/07 |
 | G8 | 결정론 세부: 정수 밀리초, 고정된 처리 순서, 용도별 PCG32 스트림, 정수 수치, 이벤트 로그 재생 | Design/09 §5, Design/02 §3 |
 | G9 | 다크 중세 흉상, 대규모 로스터, 소영주·공성전은 채택하지 않는다 | Design/10 |
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
@@ -143,11 +158,14 @@
 - 함께 한 것: 직업 패시브 설명문(`JobData.csv`의 `PassiveText`), 이벤트 로그에서 사망 원인을 읽는 `BattleLog.PartyDeaths`,
   Scene과 함께 사라진 Instance의 Handle 처리(`ResourceManager`), Canvas Scaler를 Expand로 바꾸고 Scene 재생성.
 
-### 8. 저장/이어하기 — 상태: 대기
+### 8. 저장/이어하기 — 상태: 완료
 
-- 범위: 런 상태와 원정 진행 상태의 저장, 이어하기. Owner 문서는 Save 영역에 추가.
-- 완료 기준: Architecture/09의 Acceptance 7번. 저장 실패 시 정책이 Test로 고정됐다. Schema Version과 Migration 골격이 있다.
-- 결정할 것: G7.
+- 산출: `run.json`(런 + 원정 + 전투 기록), `RunSaveData` DTO, `RunSaveMapper`(변환과 검증), `RunSaveMigrator`(Schema Version 골격),
+  명령마다 저장, Boot 단계 BOOT-09(런 Load와 원정 복원), 전투 도중 이어하기(`BattleEngine.Replay`), 저장 실패 시 막힘과 재시도,
+  저장 실패 Overlay, 타이틀의 Save 상태 알림. Owner 문서 Architecture/07에 상세 추가.
+- Acceptance 7: 어느 단계에서 끝내도 이어진다. 저장된 사망과 실패한 후퇴는 다시 시작해도 그대로다(Test로 고정).
+- 저장 실패 정책, 읽을 수 없는 파일, 옛 Backup으로 복구, 버전이 다른 파일의 거부가 Test로 고정됐다.
+- 남긴 것: 전투 시간의 주기적 저장(하지 않는다. 확정되지 않은 구간은 다시 진행한다), 변조 방지, 여러 슬롯.
 
 ### 9. 그림 — 상태: 대기
 

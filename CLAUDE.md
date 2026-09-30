@@ -125,10 +125,11 @@ SoundManager      -> ResourceManager, SettingManager
 UIManager         -> ResourceManager
 SceneManagerEx
 RunManager        -> DataManager, SaveManager
-ExpeditionManager -> DataManager, SaveManager, RunManager
+ExpeditionManager -> DataManager, RunManager
 ```
 
 - `RunManager`(런)와 `ExpeditionManager`(원정과 전투)가 Application 계층이다. 규칙은 Domain이 계산한다.
+- 런 Save 파일은 `RunManager`만 쓴다. `ExpeditionManager`는 자기 상태를 `RunManager`에 넘겨 함께 저장한다.
 - 각 Manager는 그 영역이 구현되는 단계에서 만든다. 책임은 `Docs/Architecture/02_BOOTSTRAP_MANAGERS.md`가 소유한다.
 
 만들지 않는다: `GameManager`, `EventManager`, `LocalizationManager`, 초기 `PoolManager`.
@@ -163,7 +164,9 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 - 상태 변경 순서: `검증 -> 변경 -> Stable State -> Snapshot -> Save 성공 -> Event -> UI`.
 - Build/Quit/Pause의 마지막 저장에 의존하지 않는다. 상태가 확정될 때마다 저장한다.
 - 확정된 손실(용병의 사망)은 이어하기로 되돌릴 수 없어야 한다.
-- 파일 구성, 저장 시점, 이어하기의 상세는 결정 대기다 (G7). Save Owner 문서에서 확정한다.
+- 상태를 바꾸는 명령은 끝에서 저장한다. 저장에 실패하면 그 Snapshot이 저장될 때까지 다음 변경을 막는다.
+- 전투 도중의 이어하기는 Setup과 입력 기록을 확정 시각까지 재현하는 것이다. 전투 중의 상태를 통째로 저장하지 않는다.
+- 파일 구성, 저장 시점, 검증, 실패 정책의 상세는 `Docs/Architecture/07_SAVE.md`가 소유한다.
 
 ## 7. Prohibited Patterns
 

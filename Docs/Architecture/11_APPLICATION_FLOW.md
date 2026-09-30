@@ -7,8 +7,9 @@ Application 계층(`RunManager`, `ExpeditionManager`)이 하는 일, 명령, 상
 
 ```text
 Assets/@Scripts/Flow            Namespace F1.Flow
-├─ RunManager          런 상태의 주인. 새 런, 로비 명령, 귀환 정산 적용
+├─ RunManager          런 상태와 run.json의 주인. 새 런, Load, 로비 명령, 귀환 정산 적용, 저장
 ├─ ExpeditionManager   원정, 전투 세션, 정산 보고의 주인
+├─ RunSaveMapper       Save DTO와 상태 사이의 변환과 검증. RunSaveMigrator는 Schema Version
 ├─ BattleSession       진행 중이거나 막 끝난 전투 하나 (BattleEngine과 그 노드)
 ├─ BattleClock         화면의 Frame 시간을 전투 밀리초로 바꾼다 (배속, 일시정지)
 └─ GamePhase           지금 어느 단계인가
@@ -70,6 +71,26 @@ Application 계층이 하는 일은 넷이다.
 - 원정이 끝나는 순간(클리어, 전멸, 후퇴) 같은 호출 안에서 `RunRules.Settle`을 적용하고 `ExpeditionState`를 버린다.
 - `SettlementReport`는 화면에 보이기 위해 남긴다. 확인(`AcknowledgeReport`)하면 버린다. 저장하지 않는다.
 
+## 확정과 저장
+
+```text
+명령 검증(단계, 막힘 여부) -> Domain 규칙으로 상태 변경 -> Snapshot -> run.json 저장 -> 돌아감 -> 화면이 다시 그림
+```
+
+- 상태를 바꾸는 명령은 모두 끝에서 저장한다. `ExpeditionManager`는 자기 부분을 DTO로 만들어 `RunManager.Save`에 넘긴다.
+  `RunManager`만 파일을 쓴다. 저장 시점의 목록과 파일 내용은 `07_SAVE.md`가 소유한다.
+- 저장에 실패해도 명령은 예외 없이 돌아온다(상태는 이미 바뀌었다). 대신 `RunManager.IsSaveBlocked`가 켜지고,
+  그동안 상태를 바꾸는 명령은 전부 예외이며 전투 시간도 흐르지 않는다. `RetrySave`가 같은 Snapshot을 다시 쓴다.
+- 전투 시간이 흐르는 것만으로는 저장하지 않는다. 입력이 받아들여졌을 때, 아군이 빈사가 되거나 죽었을 때, 전투가 끝났을 때 저장한다.
+
+## 이어하기
+
+- Boot에서 `RunManager.Load`가 `run.json`을 읽고 검증한다. 이어서 `ExpeditionManager.Restore`가 원정을 넘겨받고,
+  전투 중이었다면 `BattleEngine.Replay`로 확정 시각의 전투를 다시 만든다.
+- 그 뒤의 단계(`Phase`)는 평소와 같이 상태에서 계산된다. 이어하기를 위한 별도 상태가 없다.
+- `LastResume`은 전투가 정확히 재현됐는지(`Exact`), 규칙이나 데이터가 바뀌어 달라졌는지(`Diverged`), 입력 기록이 성립하지 않아
+  처음부터 다시 하는지(`Restarted`)를 말한다.
+
 ## 새 런
 
 - 시드는 `AppRoot`가 넣어 준 시드 공급자에서 온다(OS 난수). Test는 고정값을 넣는다. Domain과 Application은 시드를 만들지 않는다.
@@ -78,11 +99,13 @@ Application 계층이 하는 일은 넷이다.
 ## 알림
 
 - 명령은 직접 호출이고, 부른 화면이 돌아온 뒤 상태를 읽어 다시 그린다.
-- Typed Event는 `RunStarted` 하나다. 같은 사실을 여러 곳이 들어야 할 때만 늘린다.
+- Typed Event는 둘이다. `RunStarted`(새 런이 진행 중이던 것을 대체했다)와 `SaveBlockedChanged`(저장이 막혔거나 풀렸다).
+  같은 사실을 여러 곳이 들어야 할 때만 늘린다.
 
 ## Validation
 
 - 새 명령이 단계를 확인하는가? 규칙을 Domain이 계산하는가?
+- 상태를 바꾸는 새 명령이 막힘을 확인하고(`RequireWritable`) 끝에서 저장하는가(`Commit`)?
 - 전투 종료와 귀환 정산이 화면의 확인 없이 적용되는가?
 - 루프 한 바퀴 Test(`GameLoopTests`)가 통과하는가?
 - `Flow` 폴더에 `UnityEngine.Time`, Scene, GameObject 참조가 없는가?
