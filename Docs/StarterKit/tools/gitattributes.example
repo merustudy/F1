@@ -1,0 +1,11 @@
+# Unity serialized assets are tool-generated and keep trailing whitespace by
+# design. Exclude them from whitespace checks so `git diff --check` stays a
+# meaningful gate for hand-authored text.
+*.unity      -whitespace
+*.prefab     -whitespace
+*.asset      -whitespace
+*.meta       -whitespace
+*.mat        -whitespace
+*.anim       -whitespace
+*.controller -whitespace
+*.playable   -whitespace
