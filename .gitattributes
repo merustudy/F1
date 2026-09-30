@@ -6,29 +6,37 @@
 *.cginc text
 *.hlsl text
 
-# Unity YAML (keep LF so merges stay stable across OSes)
-*.meta text eol=lf
-*.unity text eol=lf
-*.prefab text eol=lf
-*.asset text eol=lf
-*.mat text eol=lf
-*.anim text eol=lf
-*.controller text eol=lf
-*.inputactions text eol=lf
-*.scenetemplate text eol=lf
+# Unity serialized assets.
+# - eol=lf keeps merges stable across OSes.
+# - -whitespace: they are tool-generated and keep trailing whitespace by design.
+#   Excluding them keeps `git diff --check` a meaningful gate for hand-authored text.
+# - *.asset stays text=auto because some .asset files are binary even with
+#   Force Text serialization; forcing `text` would rewrite their bytes.
+*.meta          text eol=lf -whitespace
+*.unity         text eol=lf -whitespace
+*.prefab        text eol=lf -whitespace
+*.asset         text=auto eol=lf -whitespace
+*.mat           text eol=lf -whitespace
+*.anim          text eol=lf -whitespace
+*.controller    text eol=lf -whitespace
+*.playable      text eol=lf -whitespace
+*.scenetemplate text eol=lf -whitespace
+*.inputactions  text eol=lf
 
-# Binary assets
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.psd binary
-*.tga binary
-*.aseprite binary
-*.ase binary
-*.wav binary
-*.mp3 binary
-*.ogg binary
-*.fbx binary
-*.ttf binary
-*.otf binary
+# Binary assets are stored with Git LFS (needs `git lfs install` once per machine).
+*.png      filter=lfs diff=lfs merge=lfs -text
+*.jpg      filter=lfs diff=lfs merge=lfs -text
+*.jpeg     filter=lfs diff=lfs merge=lfs -text
+*.psd      filter=lfs diff=lfs merge=lfs -text
+*.tga      filter=lfs diff=lfs merge=lfs -text
+*.aseprite filter=lfs diff=lfs merge=lfs -text
+*.ase      filter=lfs diff=lfs merge=lfs -text
+*.wav      filter=lfs diff=lfs merge=lfs -text
+*.mp3      filter=lfs diff=lfs merge=lfs -text
+*.ogg      filter=lfs diff=lfs merge=lfs -text
+*.fbx      filter=lfs diff=lfs merge=lfs -text
+*.ttf      filter=lfs diff=lfs merge=lfs -text
+*.otf      filter=lfs diff=lfs merge=lfs -text
+
+# Small binaries kept in normal Git
 *.dll binary

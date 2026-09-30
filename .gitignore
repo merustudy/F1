@@ -62,10 +62,24 @@ mono_crash.*
 # Crashlytics
 crashlytics-build.properties
 
-# OS
+# Operating system files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 Desktop.ini
+
+# Python tools (art pipeline, simulation)
+.venv/
+__pycache__/
+*.pyc
+/ArtPipeline/output/
+
+# Local secrets (API keys live in the macOS login keychain, never in files)
+.env
 
 # Claude Code local settings
 .claude/settings.local.json
