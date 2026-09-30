@@ -97,11 +97,46 @@ namespace F1.Editor.Data
             return ids;
         }
 
+        /// <summary>A list of "id:grade" pairs joined with '+', for example "claws:5+bite:4".</summary>
+        public List<ItemGrant> GrantList(string header)
+        {
+            var grants = new List<ItemGrant>();
+            foreach (string part in Text(header).Split(ListSeparator))
+            {
+                string[] pair = part.Split(':');
+                if (pair.Length != 2 || !DataId.IsValid(pair[0]) || !TryParseInt(pair[1], out int grade) || grade < 1)
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not 'item_id:grade'.");
+                }
+
+                grants.Add(new ItemGrant(pair[0], grade));
+            }
+
+            return grants;
+        }
+
+        /// <summary>A PascalCase constant name, for example "DogGraceMs".</summary>
+        public string Key(string header)
+        {
+            string value = Text(header);
+            bool valid = char.IsUpper(value[0]);
+            foreach (char c in value)
+            {
+                valid &= (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+            }
+
+            if (!valid)
+            {
+                throw new DataException($"{Where(header)}: '{value}' is not a PascalCase key.");
+            }
+
+            return value;
+        }
+
         public int Int(string header, int min = int.MinValue, int max = int.MaxValue)
         {
             string value = Text(header);
-            bool plain = value[0] != '+';
-            if (!plain || !int.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out int number))
+            if (!TryParseInt(value, out int number))
             {
                 throw new DataException($"{Where(header)}: '{value}' is not an integer.");
             }
@@ -175,6 +210,15 @@ namespace F1.Editor.Data
             {
                 yield return LocalizedHeader(field, code);
             }
+        }
+
+        /// <summary>Invariant culture, the whole string, no whitespace, no '+' sign, no separators.</summary>
+        static bool TryParseInt(string value, out int number)
+        {
+            number = 0;
+            return value.Length > 0
+                && value[0] != '+'
+                && int.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out number);
         }
 
         string Raw(string header)

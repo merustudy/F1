@@ -1,0 +1,101 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Key": "BurnTickMs",
+      "Value": 1000
+    },
+    {
+      "Key": "DogDeathChancePercent",
+      "Value": 30
+    },
+    {
+      "Key": "DogGraceBreakHits",
+      "Value": 3
+    },
+    {
+      "Key": "DogGraceMs",
+      "Value": 3000
+    },
+    {
+      "Key": "FatigueRecoveryPerDay",
+      "Value": 10
+    },
+    {
+      "Key": "FinalBossLevel",
+      "Value": 14
+    },
+    {
+      "Key": "MapBranchChancePercent",
+      "Value": 50
+    },
+    {
+      "Key": "MaxFatigue",
+      "Value": 100
+    },
+    {
+      "Key": "MinCooldownMs",
+      "Value": 200
+    },
+    {
+      "Key": "MinPartySize",
+      "Value": 1
+    },
+    {
+      "Key": "PartySize",
+      "Value": 3
+    },
+    {
+      "Key": "PostBattleHealPercent",
+      "Value": 10
+    },
+    {
+      "Key": "PotionCooldownMs",
+      "Value": 1500
+    },
+    {
+      "Key": "PotionSlots",
+      "Value": 3
+    },
+    {
+      "Key": "RestDays",
+      "Value": 1
+    },
+    {
+      "Key": "RetreatChancePercent",
+      "Value": 60
+    },
+    {
+      "Key": "RetreatCooldownMs",
+      "Value": 5000
+    },
+    {
+      "Key": "RewardChoices",
+      "Value": 3
+    },
+    {
+      "Key": "RowCapacity",
+      "Value": 3
+    },
+    {
+      "Key": "StormBaseDamage",
+      "Value": 2
+    },
+    {
+      "Key": "StormGrowth",
+      "Value": 2
+    },
+    {
+      "Key": "StormStartMs",
+      "Value": 45000
+    },
+    {
+      "Key": "StormTickMs",
+      "Value": 1000
+    },
+    {
+      "Key": "TotalDays",
+      "Value": 100
+    }
+  ]
+}

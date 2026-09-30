@@ -1,0 +1,148 @@
+using System.Collections.Generic;
+using Newtonsoft.Json;
+
+namespace F1.Data
+{
+    /// <summary>An item at a grade, as carried by an enemy.</summary>
+    public sealed class ItemGrant
+    {
+        [JsonConstructor]
+        public ItemGrant(string itemId, int grade)
+        {
+            ItemId = DataId.Require(itemId, "ItemGrant ItemId");
+            if (grade < 1)
+            {
+                throw new DataException($"Item '{itemId}': grade must be at least 1.");
+            }
+
+            Grade = grade;
+        }
+
+        [JsonProperty(Order = 1, Required = Required.Always)]
+        public string ItemId { get; }
+
+        [JsonProperty(Order = 2, Required = Required.Always)]
+        public int Grade { get; }
+    }
+
+    public sealed class EnemyData
+    {
+        public const string DefinitionName = "Enemy";
+
+        [JsonConstructor]
+        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items)
+        {
+            Id = DataId.Require(id, DefinitionName + " Id");
+            Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
+            if (level < 1)
+            {
+                throw new DataException($"{DefinitionName} '{id}': Level must be at least 1.");
+            }
+
+            if (maxHp < 1)
+            {
+                throw new DataException($"{DefinitionName} '{id}': MaxHp must be at least 1.");
+            }
+
+            if (items == null || items.Count < 1 || items.Count > JobData.MaxItemSlots)
+            {
+                throw new DataException($"{DefinitionName} '{id}': an enemy carries 1..{JobData.MaxItemSlots} items.");
+            }
+
+            Level = level;
+            MaxHp = maxHp;
+            Items = items;
+        }
+
+        [JsonProperty(Order = 1, Required = Required.Always)]
+        public string Id { get; }
+
+        [JsonProperty(Order = 2, Required = Required.Always)]
+        public LocalizedText Name { get; }
+
+        [JsonProperty(Order = 3, Required = Required.Always)]
+        public int Level { get; }
+
+        [JsonProperty(Order = 4, Required = Required.Always)]
+        public int MaxHp { get; }
+
+        [JsonProperty(Order = 5, Required = Required.Always)]
+        public IReadOnlyList<ItemGrant> Items { get; }
+    }
+
+    /// <summary>A set of enemies that fights together, and where in a dungeon it appears.</summary>
+    public sealed class EnemyGroupData
+    {
+        public const string DefinitionName = "EnemyGroup";
+
+        [JsonConstructor]
+        public EnemyGroupData(
+            string id,
+            string dungeonId,
+            int minFloor,
+            int maxFloor,
+            bool isBoss,
+            IReadOnlyList<string> front,
+            IReadOnlyList<string> rear)
+        {
+            Id = DataId.Require(id, DefinitionName + " Id");
+            DungeonId = DataId.Require(dungeonId, $"{DefinitionName} '{id}' DungeonId");
+
+            if (isBoss)
+            {
+                if (minFloor != 0 || maxFloor != 0)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': a boss group has MinFloor and MaxFloor 0.");
+                }
+            }
+            else if (minFloor < 1 || maxFloor < minFloor)
+            {
+                throw new DataException($"{DefinitionName} '{id}': floors must satisfy 1 <= MinFloor <= MaxFloor.");
+            }
+
+            if (front == null || rear == null || front.Count + rear.Count < 1)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a group has at least one enemy.");
+            }
+
+            foreach (string enemyId in front)
+            {
+                DataId.Require(enemyId, $"{DefinitionName} '{id}' Front");
+            }
+
+            foreach (string enemyId in rear)
+            {
+                DataId.Require(enemyId, $"{DefinitionName} '{id}' Rear");
+            }
+
+            MinFloor = minFloor;
+            MaxFloor = maxFloor;
+            IsBoss = isBoss;
+            Front = front;
+            Rear = rear;
+        }
+
+        [JsonProperty(Order = 1, Required = Required.Always)]
+        public string Id { get; }
+
+        [JsonProperty(Order = 2, Required = Required.Always)]
+        public string DungeonId { get; }
+
+        /// <summary>First battle floor (1-based) this group can appear on. 0 for a boss group.</summary>
+        [JsonProperty(Order = 3, Required = Required.Always)]
+        public int MinFloor { get; }
+
+        [JsonProperty(Order = 4, Required = Required.Always)]
+        public int MaxFloor { get; }
+
+        [JsonProperty(Order = 5, Required = Required.Always)]
+        public bool IsBoss { get; }
+
+        /// <summary>Enemy ids in the front row, in slot order.</summary>
+        [JsonProperty(Order = 6, Required = Required.Always)]
+        public IReadOnlyList<string> Front { get; }
+
+        [JsonProperty(Order = 7, Required = Required.Always)]
+        public IReadOnlyList<string> Rear { get; }
+    }
+}

@@ -15,8 +15,56 @@ MonoBehaviour:
   m_GroupName: F1-Data
   m_GUID: 03abbd2b47e32490184befb84e2c4ba2
   m_SerializeEntries:
+  - m_GUID: 34794c07b6c4942af93bb3edc17f92a1
+    m_Address: data/app/affinity
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49ff3dae55fb74c83b126a7dc6deb3f6
+    m_Address: data/app/enemy-group
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6cd190389ccf642e78df516a37d83bea
+    m_Address: data/app/enemy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 71ff0427956ae435eb4e54d1d7b753a2
     m_Address: data/app/job
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7fd5a07d1d69f4565b1e041805b425ac
+    m_Address: data/app/item
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a1cee26c0d4274871856e3b011323ba5
+    m_Address: data/app/potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d74095c1dcabf4a09bf9a294599803ac
+    m_Address: data/app/mercenary
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d876a3ade078b419b8c4ef59761cb2ab
+    m_Address: data/app/balance
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f3817801364c34d7582ceaacb02d82fe
+    m_Address: data/app/dungeon
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-app

@@ -6,6 +6,18 @@
       "Name": {
         "en-US": "Archmage",
         "ko-KR": "대마법사"
+      },
+      "MaxHp": 80,
+      "ItemSlots": 3,
+      "WeaponItemId": "fire_staff",
+      "WeaponGrade": 10,
+      "RecommendedRow": "Rear",
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "Rear",
+        "Effect": "WeaponPowerPercent",
+        "Target": "Self",
+        "Magnitude": 25
       }
     },
     {
@@ -13,6 +25,18 @@
       "Name": {
         "en-US": "Berserker",
         "ko-KR": "광전사"
+      },
+      "MaxHp": 120,
+      "ItemSlots": 3,
+      "WeaponItemId": "greataxe",
+      "WeaponGrade": 12,
+      "RecommendedRow": "Front",
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "SelfInDog",
+        "Effect": "WeaponPowerPercent",
+        "Target": "Self",
+        "Magnitude": 100
       }
     },
     {
@@ -20,6 +44,18 @@
       "Name": {
         "en-US": "Bishop",
         "ko-KR": "주교"
+      },
+      "MaxHp": 90,
+      "ItemSlots": 3,
+      "WeaponItemId": "healing_staff",
+      "WeaponGrade": 10,
+      "RecommendedRow": "Rear",
+      "Passive": {
+        "Trigger": "Heal",
+        "Condition": "None",
+        "Effect": "Shield",
+        "Target": "EventTarget",
+        "Magnitude": 10
       }
     },
     {
@@ -27,6 +63,18 @@
       "Name": {
         "en-US": "Knight",
         "ko-KR": "기사"
+      },
+      "MaxHp": 140,
+      "ItemSlots": 3,
+      "WeaponItemId": "longsword",
+      "WeaponGrade": 10,
+      "RecommendedRow": "Front",
+      "Passive": {
+        "Trigger": "BattleStart",
+        "Condition": "Front",
+        "Effect": "Shield",
+        "Target": "Self",
+        "Magnitude": 20
       }
     },
     {
@@ -34,6 +82,18 @@
       "Name": {
         "en-US": "Paladin",
         "ko-KR": "성기사"
+      },
+      "MaxHp": 130,
+      "ItemSlots": 3,
+      "WeaponItemId": "mace",
+      "WeaponGrade": 9,
+      "RecommendedRow": "Front",
+      "Passive": {
+        "Trigger": "BattleStart",
+        "Condition": "Front",
+        "Effect": "Shield",
+        "Target": "AllyAll",
+        "Magnitude": 8
       }
     },
     {
@@ -41,6 +101,18 @@
       "Name": {
         "en-US": "Spellblade",
         "ko-KR": "마검사"
+      },
+      "MaxHp": 100,
+      "ItemSlots": 3,
+      "WeaponItemId": "sword",
+      "WeaponGrade": 12,
+      "RecommendedRow": "Rear",
+      "Passive": {
+        "Trigger": "WeaponHit",
+        "Condition": "None",
+        "Effect": "Burn",
+        "Target": "EventTarget",
+        "Magnitude": 3
       }
     }
   ]

@@ -1,0 +1,13 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "swift",
+      "Name": {
+        "en-US": "Swift",
+        "ko-KR": "신속"
+      },
+      "EnemyCooldownPermille": -80
+    }
+  ]
+}

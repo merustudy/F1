@@ -1,0 +1,71 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "ambush",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 2,
+      "MaxFloor": 3,
+      "IsBoss": false,
+      "Front": [
+        "goblin_raider"
+      ],
+      "Rear": [
+        "goblin_archer",
+        "goblin_archer"
+      ]
+    },
+    {
+      "Id": "overseer_guard",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 0,
+      "MaxFloor": 0,
+      "IsBoss": true,
+      "Front": [
+        "mine_overseer"
+      ],
+      "Rear": [
+        "goblin_shaman"
+      ]
+    },
+    {
+      "Id": "raider_patrol",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 1,
+      "MaxFloor": 3,
+      "IsBoss": false,
+      "Front": [
+        "goblin_raider",
+        "goblin_raider"
+      ],
+      "Rear": []
+    },
+    {
+      "Id": "raider_warband",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 2,
+      "MaxFloor": 3,
+      "IsBoss": false,
+      "Front": [
+        "goblin_raider",
+        "goblin_raider"
+      ],
+      "Rear": [
+        "goblin_shaman"
+      ]
+    },
+    {
+      "Id": "rat_pack",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 1,
+      "MaxFloor": 2,
+      "IsBoss": false,
+      "Front": [
+        "cave_rat",
+        "cave_rat",
+        "cave_rat"
+      ],
+      "Rear": []
+    }
+  ]
+}

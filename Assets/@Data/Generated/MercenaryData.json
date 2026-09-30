@@ -1,0 +1,53 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "bran",
+      "Name": {
+        "en-US": "Bran",
+        "ko-KR": "브란"
+      },
+      "JobId": "berserker"
+    },
+    {
+      "Id": "cedric",
+      "Name": {
+        "en-US": "Cedric",
+        "ko-KR": "세드릭"
+      },
+      "JobId": "paladin"
+    },
+    {
+      "Id": "ella",
+      "Name": {
+        "en-US": "Ella",
+        "ko-KR": "엘라"
+      },
+      "JobId": "bishop"
+    },
+    {
+      "Id": "kai",
+      "Name": {
+        "en-US": "Kai",
+        "ko-KR": "카이"
+      },
+      "JobId": "spellblade"
+    },
+    {
+      "Id": "mira",
+      "Name": {
+        "en-US": "Mira",
+        "ko-KR": "미라"
+      },
+      "JobId": "archmage"
+    },
+    {
+      "Id": "rowan",
+      "Name": {
+        "en-US": "Rowan",
+        "ko-KR": "로언"
+      },
+      "JobId": "knight"
+    }
+  ]
+}

@@ -30,11 +30,27 @@ namespace F1.Data
             public string Address { get; }
         }
 
+        public static readonly Entry Balance = new Entry(BalanceData.DefinitionName, "balance");
         public static readonly Entry Job = new Entry(JobData.DefinitionName, "job");
+        public static readonly Entry Item = new Entry(ItemData.DefinitionName, "item");
+        public static readonly Entry Potion = new Entry(PotionData.DefinitionName, "potion");
+        public static readonly Entry Enemy = new Entry(EnemyData.DefinitionName, "enemy");
+        public static readonly Entry EnemyGroup = new Entry(EnemyGroupData.DefinitionName, "enemy-group");
+        public static readonly Entry Affinity = new Entry(AffinityData.DefinitionName, "affinity");
+        public static readonly Entry Dungeon = new Entry(DungeonData.DefinitionName, "dungeon");
+        public static readonly Entry Mercenary = new Entry(MercenaryData.DefinitionName, "mercenary");
 
         public static readonly IReadOnlyList<Entry> All = new[]
         {
+            Balance,
             Job,
+            Item,
+            Potion,
+            Enemy,
+            EnemyGroup,
+            Affinity,
+            Dungeon,
+            Mercenary,
         };
     }
 }

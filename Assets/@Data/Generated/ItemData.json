@@ -1,0 +1,352 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "buckler",
+      "Name": {
+        "en-US": "Buckler",
+        "ko-KR": "버클러"
+      },
+      "Category": "Support",
+      "CooldownMs": 5000,
+      "Row": "Front",
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "PowerPercent": 80
+        }
+      ],
+      "RewardWeight": 10
+    },
+    {
+      "Id": "crude_bow",
+      "Name": {
+        "en-US": "Crude Bow",
+        "ko-KR": "조잡한 활"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3400,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyRear",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "dagger",
+      "Name": {
+        "en-US": "Dagger",
+        "ko-KR": "단검"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 1500,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 45
+        }
+      ],
+      "RewardWeight": 10
+    },
+    {
+      "Id": "ember_flask",
+      "Name": {
+        "en-US": "Ember Flask",
+        "ko-KR": "불씨 플라스크"
+      },
+      "Category": "Support",
+      "CooldownMs": 4500,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Burn",
+          "Target": "EnemyFront",
+          "PowerPercent": 25
+        }
+      ],
+      "RewardWeight": 8
+    },
+    {
+      "Id": "fire_staff",
+      "Name": {
+        "en-US": "Fire Staff",
+        "ko-KR": "화염 지팡이"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3500,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyAll",
+          "PowerPercent": 110
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "greataxe",
+      "Name": {
+        "en-US": "Greataxe",
+        "ko-KR": "대도끼"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3600,
+      "Row": "Front",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 190
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "healing_staff",
+      "Name": {
+        "en-US": "Healing Staff",
+        "ko-KR": "치유의 지팡이"
+      },
+      "Category": "Support",
+      "CooldownMs": 4000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Heal",
+          "Target": "AllyLowestHp",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "herb_pouch",
+      "Name": {
+        "en-US": "Herb Pouch",
+        "ko-KR": "약초 주머니"
+      },
+      "Category": "Support",
+      "CooldownMs": 5000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Heal",
+          "Target": "Self",
+          "PowerPercent": 60
+        }
+      ],
+      "RewardWeight": 10
+    },
+    {
+      "Id": "hex_spit",
+      "Name": {
+        "en-US": "Hex Spit",
+        "ko-KR": "저주의 침"
+      },
+      "Category": "Support",
+      "CooldownMs": 3800,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Burn",
+          "Target": "EnemyFront",
+          "PowerPercent": 30
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "longbow",
+      "Name": {
+        "en-US": "Longbow",
+        "ko-KR": "장궁"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3000,
+      "Row": "Rear",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyRear",
+          "PowerPercent": 110
+        }
+      ],
+      "RewardWeight": 10
+    },
+    {
+      "Id": "longsword",
+      "Name": {
+        "en-US": "Longsword",
+        "ko-KR": "롱소드"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 110
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "mace",
+      "Name": {
+        "en-US": "Mace",
+        "ko-KR": "메이스"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3200,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 100
+        },
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "PowerPercent": 40
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "mending_chant",
+      "Name": {
+        "en-US": "Mending Chant",
+        "ko-KR": "치유 주문"
+      },
+      "Category": "Support",
+      "CooldownMs": 5500,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Heal",
+          "Target": "AllyLowestHp",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "overseer_maul",
+      "Name": {
+        "en-US": "Overseer's Maul",
+        "ko-KR": "감독관의 망치"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 4500,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 150
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "overseer_roar",
+      "Name": {
+        "en-US": "Overseer's Roar",
+        "ko-KR": "감독관의 포효"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 6000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyAll",
+          "PowerPercent": 60
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "rat_bite",
+      "Name": {
+        "en-US": "Bite",
+        "ko-KR": "물어뜯기"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 2000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "rusty_blade",
+      "Name": {
+        "en-US": "Rusty Blade",
+        "ko-KR": "녹슨 칼"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 2800,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "sword",
+      "Name": {
+        "en-US": "Sword",
+        "ko-KR": "소드"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 2900,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "PowerPercent": 100
+        }
+      ],
+      "RewardWeight": 0
+    },
+    {
+      "Id": "ward_charm",
+      "Name": {
+        "en-US": "Ward Charm",
+        "ko-KR": "수호 부적"
+      },
+      "Category": "Support",
+      "CooldownMs": 6000,
+      "Row": "Any",
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "AllyLowestHp",
+          "PowerPercent": 70
+        }
+      ],
+      "RewardWeight": 10
+    }
+  ]
+}

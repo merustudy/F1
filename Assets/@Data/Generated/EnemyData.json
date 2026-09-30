@@ -1,0 +1,88 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "cave_rat",
+      "Name": {
+        "en-US": "Cave Rat",
+        "ko-KR": "동굴 쥐"
+      },
+      "Level": 2,
+      "MaxHp": 40,
+      "Items": [
+        {
+          "ItemId": "rat_bite",
+          "Grade": 10
+        }
+      ]
+    },
+    {
+      "Id": "goblin_archer",
+      "Name": {
+        "en-US": "Goblin Archer",
+        "ko-KR": "고블린 궁수"
+      },
+      "Level": 4,
+      "MaxHp": 55,
+      "Items": [
+        {
+          "ItemId": "crude_bow",
+          "Grade": 14
+        }
+      ]
+    },
+    {
+      "Id": "goblin_raider",
+      "Name": {
+        "en-US": "Goblin Raider",
+        "ko-KR": "고블린 약탈자"
+      },
+      "Level": 4,
+      "MaxHp": 80,
+      "Items": [
+        {
+          "ItemId": "rusty_blade",
+          "Grade": 15
+        }
+      ]
+    },
+    {
+      "Id": "goblin_shaman",
+      "Name": {
+        "en-US": "Goblin Shaman",
+        "ko-KR": "고블린 주술사"
+      },
+      "Level": 5,
+      "MaxHp": 60,
+      "Items": [
+        {
+          "ItemId": "hex_spit",
+          "Grade": 10
+        },
+        {
+          "ItemId": "mending_chant",
+          "Grade": 12
+        }
+      ]
+    },
+    {
+      "Id": "mine_overseer",
+      "Name": {
+        "en-US": "Mine Overseer",
+        "ko-KR": "광산 감독관"
+      },
+      "Level": 9,
+      "MaxHp": 260,
+      "Items": [
+        {
+          "ItemId": "overseer_maul",
+          "Grade": 27
+        },
+        {
+          "ItemId": "overseer_roar",
+          "Grade": 22
+        }
+      ]
+    }
+  ]
+}

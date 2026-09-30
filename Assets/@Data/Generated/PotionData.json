@@ -1,0 +1,25 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "barrier_potion",
+      "Name": {
+        "en-US": "Barrier Potion",
+        "ko-KR": "방벽 포션"
+      },
+      "Effect": "Shield",
+      "Magnitude": 40,
+      "RewardWeight": 4
+    },
+    {
+      "Id": "healing_potion",
+      "Name": {
+        "en-US": "Healing Potion",
+        "ko-KR": "치유 포션"
+      },
+      "Effect": "Heal",
+      "Magnitude": 50,
+      "RewardWeight": 6
+    }
+  ]
+}

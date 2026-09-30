@@ -1,7 +1,7 @@
-Id,Name.ko-KR,Name.en-US
-knight,기사,Knight
-berserker,광전사,Berserker
-bishop,주교,Bishop
-paladin,성기사,Paladin
-archmage,대마법사,Archmage
-spellblade,마검사,Spellblade
+Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveEffect,PassiveTarget,PassiveMagnitude
+knight,기사,Knight,140,3,longsword,10,Front,BattleStart,Front,Shield,Self,20
+berserker,광전사,Berserker,120,3,greataxe,12,Front,Always,SelfInDog,WeaponPowerPercent,Self,100
+bishop,주교,Bishop,90,3,healing_staff,10,Rear,Heal,None,Shield,EventTarget,10
+paladin,성기사,Paladin,130,3,mace,9,Front,BattleStart,Front,Shield,AllyAll,8
+archmage,대마법사,Archmage,80,3,fire_staff,10,Rear,Always,Rear,WeaponPowerPercent,Self,25
+spellblade,마검사,Spellblade,100,3,sword,12,Rear,WeaponHit,None,Burn,EventTarget,3

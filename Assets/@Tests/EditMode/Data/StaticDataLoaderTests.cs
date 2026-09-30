@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using F1.Data;
 using F1.Editor.Data;
 using NUnit.Framework;
@@ -8,94 +9,132 @@ namespace F1.Tests
 {
     public sealed class StaticDataLoaderTests
     {
-        const string ValidJobs =
-            "Id,Name.ko-KR,Name.en-US\n" +
-            "knight,기사,Knight\n" +
-            "bishop,주교,Bishop\n";
-
         static IReadOnlyDictionary<string, string> Generate()
         {
-            return StaticDataTransformer.Transform(name => name == StaticDataFiles.Job.SourceFileName ? ValidJobs : null).GeneratedFiles;
+            return StaticDataTransformer.Transform(TestCsv.Reader(TestCsv.ValidSources())).GeneratedFiles;
         }
 
-        static StaticData Load(IReadOnlyDictionary<string, string> generated, string jobJsonOverride = null)
+        /// <summary>Loads the generated files, optionally replacing the JSON of one definition.</summary>
+        static StaticData Load(IReadOnlyDictionary<string, string> generated, StaticDataFiles.Entry replaced = null, string json = null)
         {
-            return StaticDataLoader.Load(file =>
-                jobJsonOverride != null && file == StaticDataFiles.Job ? jobJsonOverride : generated[file.GeneratedFileName]);
+            return StaticDataLoader.Load(file => file == replaced ? json : generated[file.GeneratedFileName]);
+        }
+
+        static string Json(StaticDataFiles.Entry file)
+        {
+            return Generate()[file.GeneratedFileName];
         }
 
         [Test]
-        public void Load_FromGeneratedJson_ReturnsSameDataAsTransform()
+        public void Load_FromGeneratedJson_ReturnsTheSameDataAsTheTransform()
         {
             StaticData data = Load(Generate());
 
             Assert.AreEqual(2, data.Jobs.Count);
-            Assert.AreEqual("Knight", data.Job("knight").Name.Resolve("en-US"));
-            Assert.AreEqual("주교", data.Job("bishop").Name.Resolve("ko-KR"));
+            Assert.AreEqual("Knight", data.Jobs.Get("knight").Name.Resolve("en-US"));
+            Assert.AreEqual(PassiveEffect.Shield, data.Jobs.Get("knight").Passive.Effect);
+            Assert.IsNull(data.Jobs.Get("bishop").Passive);
+            Assert.AreEqual(2, data.Items.Get("mace").Effects.Count);
+            Assert.AreEqual(8, data.Enemies.Get("ogre").Items[1].Grade);
+            Assert.AreEqual(30, data.Balance.DogDeathChancePercent);
+            CollectionAssert.AreEqual(new[] { "tonic" }, data.Dungeons.Get("mine").StartingPotions);
         }
 
         [Test]
-        public void Job_WhenIdUnknown_ThrowsInsteadOfReturningDefault()
+        public void SerializeThenLoad_IsByteStable()
+        {
+            IReadOnlyDictionary<string, string> generated = Generate();
+
+            Dictionary<string, string> again = StaticDataLoader.Serialize(Load(generated));
+
+            foreach (KeyValuePair<string, string> file in generated)
+            {
+                Assert.AreEqual(file.Value, again[file.Key], file.Key);
+            }
+        }
+
+        [Test]
+        public void Tables_IterateInIdOrder_AndThrowForUnknownIds()
         {
             StaticData data = Load(Generate());
 
-            var exception = Assert.Throws<KeyNotFoundException>(() => data.Job("samurai"));
-            StringAssert.Contains("samurai", exception.Message);
-            Assert.Throws<KeyNotFoundException>(() => data.Job(null));
+            CollectionAssert.AreEqual(new[] { "claw", "mace", "staff", "sword" }, data.Items.Ordered.Select(item => item.Id));
+            Assert.IsTrue(data.Items.Contains("mace"));
+            Assert.IsFalse(data.Items.Contains("katana"));
+            Assert.IsFalse(data.Items.Contains(null));
+            var exception = Assert.Throws<KeyNotFoundException>(() => data.Items.Get("katana"));
+            StringAssert.Contains("katana", exception.Message);
+            Assert.Throws<KeyNotFoundException>(() => data.Jobs.Get(null));
         }
 
         [Test]
         public void Load_WhenJsonHasUnknownProperty_Throws()
         {
-            IReadOnlyDictionary<string, string> generated = Generate();
-            string edited = generated[StaticDataFiles.Job.GeneratedFileName].Replace("\"Id\": \"knight\",", "\"Id\": \"knight\",\n      \"Power\": 3,");
+            string edited = Json(StaticDataFiles.Potion).Replace("\"Id\": \"tonic\",", "\"Id\": \"tonic\",\n      \"Power\": 3,");
 
-            var exception = Assert.Throws<DataException>(() => Load(generated, edited));
-            StringAssert.Contains(StaticDataFiles.Job.GeneratedFileName, exception.Message);
+            var exception = Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
+            StringAssert.Contains(StaticDataFiles.Potion.GeneratedFileName, exception.Message);
         }
 
         [Test]
         public void Load_WhenJsonIsMissingAProperty_Throws()
         {
-            const string json = "{\n  \"SchemaVersion\": 1,\n  \"Items\": [\n    { \"Id\": \"knight\" }\n  ]\n}\n";
+            const string json = "{\n  \"SchemaVersion\": 1,\n  \"Items\": [\n    { \"Id\": \"tonic\" }\n  ]\n}\n";
 
-            Assert.Throws<DataException>(() => Load(Generate(), json));
+            Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, json));
         }
 
         [Test]
         public void Load_WhenSchemaVersionDiffers_Throws()
         {
-            IReadOnlyDictionary<string, string> generated = Generate();
-            string edited = generated[StaticDataFiles.Job.GeneratedFileName].Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": 2");
+            string edited = Json(StaticDataFiles.Potion).Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": 2");
 
-            var exception = Assert.Throws<DataException>(() => Load(generated, edited));
+            var exception = Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
             StringAssert.Contains("schema version", exception.Message);
         }
 
         [Test]
-        public void Load_WhenJsonHasDuplicateIds_Throws()
+        public void Load_WhenJsonRecordBreaksADefinitionRule_ThrowsWithTheFileName()
         {
-            IReadOnlyDictionary<string, string> generated = Generate();
-            string edited = generated[StaticDataFiles.Job.GeneratedFileName].Replace("\"bishop\"", "\"knight\"");
+            string edited = Json(StaticDataFiles.Potion).Replace("\"Magnitude\": 50", "\"Magnitude\": 0");
 
-            Assert.Throws<DataValidationException>(() => Load(generated, edited));
+            var exception = Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
+            StringAssert.Contains(StaticDataFiles.Potion.GeneratedFileName, exception.Message);
+            StringAssert.Contains("Magnitude", exception.Message);
         }
 
         [Test]
-        public void Load_WhenJsonRecordBreaksDefinitionRule_Throws()
+        public void Load_WhenEnumNameIsUnknown_Throws()
         {
-            IReadOnlyDictionary<string, string> generated = Generate();
-            string edited = generated[StaticDataFiles.Job.GeneratedFileName].Replace("\"Id\": \"knight\"", "\"Id\": \"Knight\"");
+            string edited = Json(StaticDataFiles.Potion).Replace("\"Effect\": \"Heal\"", "\"Effect\": \"Explode\"");
 
-            Assert.Throws<DataException>(() => Load(generated, edited));
+            Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
+        }
+
+        [Test]
+        public void Load_WhenLocalizedTextIsIncomplete_Throws()
+        {
+            string edited = Json(StaticDataFiles.Potion).Replace("\"en-US\": \"Tonic\",", "");
+
+            Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
+        }
+
+        [Test]
+        public void Load_WhenAReferenceIsBroken_ThrowsValidationException()
+        {
+            string edited = Json(StaticDataFiles.Mercenary).Replace("\"JobId\": \"knight\"", "\"JobId\": \"samurai\"");
+
+            var exception = Assert.Throws<DataValidationException>(() => Load(Generate(), StaticDataFiles.Mercenary, edited));
+            StringAssert.Contains("samurai", exception.Problems[0]);
         }
 
         [TestCase("")]
         [TestCase("not json")]
         [TestCase("{ \"SchemaVersion\": 1 }")]
+        [TestCase("{ \"SchemaVersion\": 1, \"Items\": [ null ] }")]
         public void Load_WhenJsonIsUnreadable_Throws(string json)
         {
-            Assert.Throws<DataException>(() => Load(Generate(), json));
+            Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, json));
         }
 
         [Test]

@@ -29,9 +29,11 @@ namespace F1.Tests
             Assert.IsTrue(Managers.Data.IsLoaded);
 
             StaticData data = Managers.Data.Data;
-            Assert.AreEqual("기사", data.Job("knight").Name.Resolve("ko-KR"));
-            Assert.AreEqual("Knight", data.Job("knight").Name.Resolve("en-US"));
-            Assert.Throws<KeyNotFoundException>(() => data.Job("samurai"));
+            Assert.AreEqual("기사", data.Jobs.Get("knight").Name.Resolve("ko-KR"));
+            Assert.AreEqual("Knight", data.Jobs.Get("knight").Name.Resolve("en-US"));
+            Assert.Throws<KeyNotFoundException>(() => data.Jobs.Get("samurai"));
+            Assert.IsNotEmpty(data.Dungeons.Ordered);
+            Assert.Greater(data.Balance.PartySize, 0);
         }
 
         [UnityTest]

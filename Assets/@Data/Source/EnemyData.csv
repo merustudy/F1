@@ -1,0 +1,6 @@
+Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items
+cave_rat,동굴 쥐,Cave Rat,2,40,rat_bite:10
+goblin_raider,고블린 약탈자,Goblin Raider,4,80,rusty_blade:15
+goblin_archer,고블린 궁수,Goblin Archer,4,55,crude_bow:14
+goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:12
+mine_overseer,광산 감독관,Mine Overseer,9,260,overseer_maul:27+overseer_roar:22

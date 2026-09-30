@@ -44,9 +44,21 @@ namespace F1.Editor.Data
             }
 
             var errors = new List<string>();
+            var parts = new StaticDataParts
+            {
+                Balance = Map(StaticDataFiles.Balance, readSource, BalanceMapper.Map, errors),
+                Jobs = Map(StaticDataFiles.Job, readSource, JobMapper.Map, errors),
+                Items = Map(StaticDataFiles.Item, readSource, ItemMapper.Map, errors),
+                Potions = Map(StaticDataFiles.Potion, readSource, PotionMapper.Map, errors),
+                Enemies = Map(StaticDataFiles.Enemy, readSource, EnemyMapper.Map, errors),
+                EnemyGroups = Map(StaticDataFiles.EnemyGroup, readSource, EnemyGroupMapper.Map, errors),
+                Affinities = Map(StaticDataFiles.Affinity, readSource, AffinityMapper.Map, errors),
+                Dungeons = Map(StaticDataFiles.Dungeon, readSource, DungeonMapper.Map, errors),
+                Mercenaries = Map(StaticDataFiles.Mercenary, readSource, MercenaryMapper.Map, errors),
+            };
 
-            List<JobData> jobs = Map(StaticDataFiles.Job, readSource, JobMapper.Map, errors);
-
+            // Row errors are reported before data set checks: a broken row would only cause
+            // misleading "does not exist" errors further down.
             if (errors.Count > 0)
             {
                 throw new DataTransformException(errors);
@@ -55,19 +67,14 @@ namespace F1.Editor.Data
             StaticData data;
             try
             {
-                data = new StaticData(jobs);
+                data = new StaticData(parts);
             }
             catch (DataValidationException exception)
             {
                 throw new DataTransformException(exception.Problems);
             }
 
-            var generated = new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                { StaticDataFiles.Job.GeneratedFileName, JobJson.Serialize(data.Jobs.Values) },
-            };
-
-            return new TransformResult(data, generated);
+            return new TransformResult(data, StaticDataLoader.Serialize(data));
         }
 
         static List<T> Map<T>(

@@ -1,0 +1,24 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "abandoned_mine",
+      "Name": {
+        "en-US": "Abandoned Mine",
+        "ko-KR": "버려진 광산"
+      },
+      "AffinityId": "swift",
+      "Floors": 3,
+      "MapMinWidth": 2,
+      "MapMaxWidth": 3,
+      "FatigueCost": 30,
+      "DurationDays": 2,
+      "ItemGradeBase": 8,
+      "ItemGradePerFloor": 2,
+      "StartingPotions": [
+        "healing_potion",
+        "healing_potion"
+      ]
+    }
+  ]
+}

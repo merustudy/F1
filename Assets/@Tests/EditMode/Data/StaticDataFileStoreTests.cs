@@ -9,20 +9,23 @@ namespace F1.Tests
 {
     public sealed class StaticDataFileStoreTests
     {
-        const string ValidJobs = "Id,Name.ko-KR,Name.en-US\nknight,기사,Knight\n";
-
         string _root;
         StaticDataFileStore _store;
 
-        string SourcePath => Path.Combine(_root, StaticDataFiles.SourceDirectory, StaticDataFiles.Job.SourceFileName);
-        string GeneratedPath => Path.Combine(_root, StaticDataFiles.GeneratedDirectory, StaticDataFiles.Job.GeneratedFileName);
+        string SourceDirectory => Path.Combine(_root, StaticDataFiles.SourceDirectory);
+        string SourcePath => Path.Combine(SourceDirectory, StaticDataFiles.Potion.SourceFileName);
+        string GeneratedPath => Path.Combine(_root, StaticDataFiles.GeneratedDirectory, StaticDataFiles.Potion.GeneratedFileName);
 
         [SetUp]
         public void SetUp()
         {
             _root = Path.Combine(Path.GetTempPath(), "F1Tests", Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(Path.GetDirectoryName(SourcePath));
-            File.WriteAllText(SourcePath, ValidJobs);
+            Directory.CreateDirectory(SourceDirectory);
+            foreach (KeyValuePair<string, string> source in TestCsv.ValidSources())
+            {
+                File.WriteAllText(Path.Combine(SourceDirectory, source.Key), source.Value);
+            }
+
             _store = new StaticDataFileStore(_root);
         }
 
@@ -45,7 +48,7 @@ namespace F1.Tests
         {
             List<string> changed = _store.WriteGenerated(Transform());
 
-            CollectionAssert.AreEqual(new[] { StaticDataFiles.Job.GeneratedFileName }, changed);
+            Assert.AreEqual(StaticDataFiles.All.Count, changed.Count);
             byte[] bytes = File.ReadAllBytes(GeneratedPath);
             Assert.AreEqual((byte)'{', bytes[0], "No byte order mark.");
             Assert.IsEmpty(Directory.GetFiles(Path.GetDirectoryName(GeneratedPath), "*.tmp"));
@@ -70,12 +73,12 @@ namespace F1.Tests
             _store.WriteGenerated(Transform());
             Assert.IsEmpty(_store.FindStale(Transform()));
 
-            File.WriteAllText(SourcePath, ValidJobs + "bishop,주교,Bishop\n");
-            CollectionAssert.AreEqual(new[] { StaticDataFiles.Job.GeneratedFileName }, _store.FindStale(Transform()));
+            File.WriteAllText(SourcePath, TestCsv.Potions + "salve,연고,Salve,Shield,20,1\n");
+            CollectionAssert.AreEqual(new[] { StaticDataFiles.Potion.GeneratedFileName }, _store.FindStale(Transform()), "Only the changed definition is stale.");
 
-            _store.WriteGenerated(Transform());
+            CollectionAssert.AreEqual(new[] { StaticDataFiles.Potion.GeneratedFileName }, _store.WriteGenerated(Transform()));
             File.AppendAllText(GeneratedPath, " ");
-            CollectionAssert.AreEqual(new[] { StaticDataFiles.Job.GeneratedFileName }, _store.FindStale(Transform()));
+            CollectionAssert.AreEqual(new[] { StaticDataFiles.Potion.GeneratedFileName }, _store.FindStale(Transform()));
         }
 
         [Test]
@@ -84,7 +87,7 @@ namespace F1.Tests
             _store.WriteGenerated(Transform());
             byte[] before = File.ReadAllBytes(GeneratedPath);
 
-            File.WriteAllText(SourcePath, ValidJobs + "Broken Id,깨짐,Broken\n");
+            File.WriteAllText(SourcePath, TestCsv.Potions + "Broken Id,깨짐,Broken,Heal,1,1\n");
 
             Assert.Throws<DataTransformException>(() => _store.WriteGenerated(Transform()));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(GeneratedPath));

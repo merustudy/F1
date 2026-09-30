@@ -1,0 +1,6 @@
+Id,DungeonId,MinFloor,MaxFloor,IsBoss,Front,Rear
+rat_pack,abandoned_mine,1,2,false,cave_rat+cave_rat+cave_rat,
+raider_patrol,abandoned_mine,1,3,false,goblin_raider+goblin_raider,
+raider_warband,abandoned_mine,2,3,false,goblin_raider+goblin_raider,goblin_shaman
+ambush,abandoned_mine,2,3,false,goblin_raider,goblin_archer+goblin_archer
+overseer_guard,abandoned_mine,0,0,true,mine_overseer,goblin_shaman

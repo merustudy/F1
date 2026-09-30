@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using F1.Data;
 using F1.Editor.Data;
+using F1.Gameplay;
 using NUnit.Framework;
 
 namespace F1.Tests
@@ -20,11 +22,10 @@ namespace F1.Tests
         [Test]
         public void GeneratedJson_LoadsThroughTheRuntimeLoader()
         {
-            StaticDataFileStore store = DataTransformMenu.CreateStore();
+            StaticData data = LoadShipped();
 
-            StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
-
-            Assert.IsNotEmpty(data.Jobs);
+            Assert.IsNotEmpty(data.Jobs.Ordered);
+            Assert.IsNotEmpty(data.Dungeons.Ordered);
         }
 
         [Test]
@@ -38,18 +39,51 @@ namespace F1.Tests
         }
 
         [Test]
-        public void EveryShippedText_HasEverySupportedLocale()
+        public void EveryShippedDungeon_ProducesAMapAndBattleSetupsForEveryNode()
         {
-            StaticDataFileStore store = DataTransformMenu.CreateStore();
-            StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
+            StaticData data = LoadShipped();
+            List<PartyMember> party = data.Mercenaries.Ordered
+                .Take(data.Balance.PartySize)
+                .Select(m => new PartyMember(m.Id, m.JobId, data.Jobs.Get(m.JobId).RecommendedRow))
+                .ToList();
 
-            foreach (JobData job in data.Jobs.Values)
+            foreach (DungeonData dungeon in data.Dungeons.Ordered)
             {
-                foreach (string code in LocalePolicy.SupportedCodes)
+                for (ulong seed = 1; seed <= 20; seed++)
                 {
-                    Assert.IsTrue(job.Name.Has(code), $"{job.Id} {code}");
+                    ExpeditionState state = ExpeditionRules.Create(data, dungeon.Id, seed, party);
+                    foreach (MapNode node in state.Map.Nodes)
+                    {
+                        BattleSetup setup = ExpeditionRules.BuildBattleSetup(data, state, node.EnemyGroupId, seed);
+                        Assert.DoesNotThrow(() => new BattleEngine(setup), $"{dungeon.Id} {node.EnemyGroupId}");
+                    }
                 }
             }
+        }
+
+        [Test]
+        public void ShippedBattles_AlwaysEnd()
+        {
+            StaticData data = LoadShipped();
+            List<PartyMember> party = data.Mercenaries.Ordered
+                .Take(data.Balance.PartySize)
+                .Select(m => new PartyMember(m.Id, m.JobId, data.Jobs.Get(m.JobId).RecommendedRow))
+                .ToList();
+
+            foreach (EnemyGroupData group in data.EnemyGroups.Ordered)
+            {
+                ExpeditionState state = ExpeditionRules.Create(data, group.DungeonId, 1, party);
+                var battle = new BattleEngine(ExpeditionRules.BuildBattleSetup(data, state, group.Id, 1));
+
+                Assert.DoesNotThrow(() => battle.RunToEnd(), group.Id);
+                Assert.AreNotEqual(BattleResult.Ongoing, battle.Result);
+            }
+        }
+
+        static StaticData LoadShipped()
+        {
+            StaticDataFileStore store = DataTransformMenu.CreateStore();
+            return StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
         }
     }
 }

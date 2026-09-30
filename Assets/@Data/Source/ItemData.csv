@@ -1,0 +1,20 @@
+Id,Name.ko-KR,Name.en-US,Category,CooldownMs,Row,Effect1Kind,Effect1Target,Effect1Power,Effect2Kind,Effect2Target,Effect2Power,RewardWeight
+sword,소드,Sword,Weapon,2900,Any,Damage,EnemyFront,100,,,,0
+longsword,롱소드,Longsword,Weapon,3000,Any,Damage,EnemyFront,110,,,,0
+greataxe,대도끼,Greataxe,Weapon,3600,Front,Damage,EnemyFront,190,,,,0
+mace,메이스,Mace,Weapon,3200,Any,Damage,EnemyFront,100,Shield,Self,40,0
+healing_staff,치유의 지팡이,Healing Staff,Support,4000,Any,Heal,AllyLowestHp,100,,,,0
+fire_staff,화염 지팡이,Fire Staff,Weapon,3500,Any,Damage,EnemyAll,110,,,,0
+dagger,단검,Dagger,Weapon,1500,Any,Damage,EnemyFront,45,,,,10
+longbow,장궁,Longbow,Weapon,3000,Rear,Damage,EnemyRear,110,,,,10
+buckler,버클러,Buckler,Support,5000,Front,Shield,Self,80,,,,10
+ward_charm,수호 부적,Ward Charm,Support,6000,Any,Shield,AllyLowestHp,70,,,,10
+herb_pouch,약초 주머니,Herb Pouch,Support,5000,Any,Heal,Self,60,,,,10
+ember_flask,불씨 플라스크,Ember Flask,Support,4500,Any,Burn,EnemyFront,25,,,,8
+rat_bite,물어뜯기,Bite,Weapon,2000,Any,Damage,EnemyFront,100,,,,0
+rusty_blade,녹슨 칼,Rusty Blade,Weapon,2800,Any,Damage,EnemyFront,100,,,,0
+crude_bow,조잡한 활,Crude Bow,Weapon,3400,Any,Damage,EnemyRear,100,,,,0
+hex_spit,저주의 침,Hex Spit,Support,3800,Any,Burn,EnemyFront,30,,,,0
+mending_chant,치유 주문,Mending Chant,Support,5500,Any,Heal,AllyLowestHp,100,,,,0
+overseer_maul,감독관의 망치,Overseer's Maul,Weapon,4500,Any,Damage,EnemyFront,150,,,,0
+overseer_roar,감독관의 포효,Overseer's Roar,Weapon,6000,Any,Damage,EnemyAll,60,,,,0
