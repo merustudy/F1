@@ -142,7 +142,7 @@ namespace F1.Core
             {
                 if (state.Instances.Remove(instance, out AsyncOperationHandle<GameObject> handle))
                 {
-                    Addressables.ReleaseInstance(handle);
+                    ReleaseInstanceHandle(handle);
                     return;
                 }
             }
@@ -175,7 +175,7 @@ namespace F1.Core
         {
             foreach (AsyncOperationHandle<GameObject> handle in state.Instances.Values)
             {
-                Addressables.ReleaseInstance(handle);
+                ReleaseInstanceHandle(handle);
             }
 
             foreach (AsyncOperationHandle handle in state.Assets.Values)
@@ -185,6 +185,18 @@ namespace F1.Core
 
             state.Instances.Clear();
             state.Assets.Clear();
+        }
+
+        /// <summary>
+        /// A scene that unloads takes its instances with it, and Addressables then releases their
+        /// handles by itself. Such a handle is no longer valid and must not be released again.
+        /// </summary>
+        static void ReleaseInstanceHandle(AsyncOperationHandle<GameObject> handle)
+        {
+            if (handle.IsValid())
+            {
+                Addressables.ReleaseInstance(handle);
+            }
         }
 
         void RequireInitialized()

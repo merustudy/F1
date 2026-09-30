@@ -3,7 +3,9 @@
     "rootNamespace": "F1.Tests",
     "references": [
         "F1.Runtime",
-        "UnityEngine.TestRunner"
+        "UnityEngine.TestRunner",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

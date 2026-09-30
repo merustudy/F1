@@ -83,6 +83,18 @@ namespace F1.Tests
         }
 
         [Test]
+        public void JobData_APassiveAndItsTextComeTogether()
+        {
+            LocalizedText name = TestData.Text("x");
+            var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.Front, PassiveEffect.Shield, PassiveTarget.Self, 20);
+
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, BattleRow.Front, null));
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, BattleRow.Front, passive, TestData.Text("Shield {0}")));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, BattleRow.Front, passive));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, BattleRow.Front, null, TestData.Text("Shield {0}")));
+        }
+
+        [Test]
         public void EnemyGroupData_BossGroupsHaveFloorZero_OthersHaveARange()
         {
             var one = new List<string> { "rat" };

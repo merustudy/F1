@@ -1,10 +1,129 @@
 Key,Shared Comments,ko-KR,en-US
 Common.Confirm,Generic confirm button.,확인,OK
 Common.Cancel,Generic cancel button.,취소,Cancel
+Common.Continue,Generic continue button.,계속,Continue
 Common.Front,Front row.,전열,Front
 Common.Rear,Rear row.,후열,Rear
+Common.None,Shown in place of an empty list of names.,없음,None
 Title.GameName,Working title shown on the title screen.,F1,F1
 Title.NewRun,Starts a fresh run.,새 런,New Run
-Title.Continue,Continues the saved run.,이어하기,Continue
+Title.Continue,Continues the run in progress.,이어하기,Continue
 Title.Language,Button that switches the language. {0} = name of the current language.,언어: {0},Language: {0}
 Title.LanguageName,Name of this language written in itself.,한국어,English
+Title.Quit,Closes the game.,종료,Quit
+Title.OverwriteWarning,Asked before a new run replaces the run in progress.,진행 중인 런이 사라집니다. 새로 시작할까요?,The run in progress will be lost. Start a new one?
+Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
+Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
+Lobby.Roster,Header of the mercenary list.,로스터,Roster
+Lobby.Fatigue,{0} = fatigue points left. {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
+Lobby.Remove,Takes a mercenary out of the party.,제외,Remove
+Lobby.Expedition,Header of the expedition panel.,원정,Expedition
+Lobby.Affinity,{0} = name of the dungeon's affinity.,지역 속성: {0},Affinity: {0}
+Lobby.Cost,{0} = fatigue cost. {1} = days the dungeon takes.,피로도 -{0} · {1}일 소요,Fatigue -{0} · takes {1} days
+Lobby.Cleared,{0} = times this dungeon was cleared.,클리어 {0}회,Clears: {0}
+Lobby.Party,Header of the party preview.,파티,Party
+Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
+Lobby.Rest,{0} = fatigue restored. {1} = days that pass.,쉬기 (+{0} 피로도 · {1}일),Rest (+{0} fatigue · {1}d)
+Lobby.Depart,Starts the expedition.,원정 출발,Depart
+Lobby.DepartOk,The party can leave.,출발할 수 있습니다,Ready to depart
+Lobby.PartyTooSmall,{0} = minimum party size.,파티에 용병을 {0}명 이상 넣으세요,The party needs at least {0}
+Lobby.NotEnoughFatigue,A party member cannot pay the dungeon's fatigue cost.,피로도가 모자란 용병이 있습니다,Someone in the party is too tired
+Lobby.Fallen,{0} = names of the dead.,전사자: {0},Fallen: {0}
+Lobby.RunOver,No mercenary is left alive.,용병단이 전멸했습니다,The company has fallen
+Lobby.RunOverDay,{0} = day the run ended.,{0}일차에 끝났습니다,It ended on day {0}
+Lobby.ToTitle,Goes back to the title screen.,타이틀로,To Title
+Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}
+Map.Battle,Label of a battle node.,전투,Battle
+Map.Boss,Label of the boss node.,보스,Boss
+Map.SelectNode,Shown until a node is selected.,갈 곳을 고르세요,Choose where to go
+Map.NodeTitle,{0} = floor. {1} = node kind.,{0}층 · {1},Floor {0} · {1}
+Map.EnemyFront,Header of the enemy front row.,적 전열,Enemy front
+Map.EnemyRear,Header of the enemy rear row.,적 후열,Enemy rear
+Map.Enemy,{0} = enemy name. {1} = its max HP.,{0} (HP {1}),{0} (HP {1})
+Map.Enter,Starts the battle at the selected node.,전투 시작,Fight
+Board.Hp,{0} = HP. {1} = max HP.,HP {0}/{1},HP {0}/{1}
+Board.EmptySlot,An empty item or potion slot.,빈 칸,Empty
+Board.Grade,{0} = item grade.,등급 {0},Grade {0}
+Board.Dead,Shown on a dead mercenary.,사망,Dead
+Board.Potions,Header of the potion slots.,포션,Potions
+Board.Hint,How to use the party board.,아이템 칸을 누른 뒤 다른 칸을 누르면 서로 바뀝니다. 열 버튼은 전열과 후열을 바꿉니다.,"Click an item slot, then another, to swap them. The row button switches front and rear."
+Item.Title,{0} = item name. {1} = grade.,{0} · 등급 {1},{0} · Grade {1}
+Item.Weapon,Item category.,무기,Weapon
+Item.Support,Item category.,보조,Support
+Item.Cooldown,{0} = seconds.,쿨다운 {0}초,Cooldown {0}s
+Item.RowFront,The item only works in the front row.,전열에서만 발동,Front row only
+Item.RowRear,The item only works in the rear row.,후열에서만 발동,Rear row only
+Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
+Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
+Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}
+Effect.Burn,{0} = target. {1} = stacks.,{0}에게 화상 {1},{1} Burn to {0}
+Target.EnemyFront,Used as {0} of Effect.*.,적 전열,the front enemy
+Target.EnemyRear,Used as {0} of Effect.*.,적 후열,the rear enemy
+Target.EnemyAll,Used as {0} of Effect.*.,적 전체,all enemies
+Target.Self,Used as {0} of Effect.*.,자신,self
+Target.AllyLowestHp,Used as {0} of Effect.*.,HP가 가장 낮은 아군,the weakest ally
+Target.AllyAll,Used as {0} of Effect.*.,아군 전체,all allies
+Potion.Heal,{0} = amount.,HP {0} 회복,Restores {0} HP
+Potion.Shield,{0} = amount.,보호막 {0},{0} Shield
+Battle.NodeBattle,{0} = floor.,{0}층 전투,Floor {0} battle
+Battle.NodeBoss,Header of a boss battle.,보스전,Boss battle
+Battle.Time,{0} = battle time in seconds.,{0}초,{0}s
+Battle.StormIn,{0} = seconds until the storm starts.,폭풍까지 {0}초,Storm in {0}s
+Battle.StormActive,{0} = damage of the next storm tick.,폭풍! 다음 피해 {0},Storm! Next hit {0}
+Battle.Pause,Pauses the battle.,정지,Pause
+Battle.Speed,{0} = speed multiplier.,x{0},x{0}
+Battle.Hp,{0} = HP. {1} = max HP.,HP {0}/{1},HP {0}/{1}
+Battle.Shield,{0} = shield points.,보호막 {0},Shield {0}
+Battle.Burn,{0} = burn stacks.,화상 {0},Burn {0}
+Battle.DogGrace,At 0 HP during grace. {0} = seconds of grace left. {1} = hits taken. {2} = hits that break the grace.,빈사 · 유예 {0}초 · 피격 {1}/{2},Death's door · grace {0}s · hits {1}/{2}
+Battle.DogRolling,At 0 HP after grace. {0} = death chance per hit.,빈사 · 피격마다 사망 {0}%,Death's door · {0}% death per hit
+Battle.Dead,Shown on a dead unit.,사망,Dead
+Battle.PotionHint,How to use a potion.,포션을 누른 뒤 아군을 누르세요,"Click a potion, then an ally"
+Battle.PotionArmed,{0} = potion name.,{0}: 쓸 아군을 누르세요,{0}: click an ally
+Battle.PotionWait,{0} = seconds until a potion can be used.,포션 대기 {0}초,Potion ready in {0}s
+Battle.Retreat,{0} = success chance.,후퇴 ({0}%),Retreat ({0}%)
+Battle.RetreatWait,{0} = seconds until retreat can be tried again.,후퇴 대기 {0}초,Retreat in {0}s
+Battle.Victory,Battle result.,승리,Victory
+Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
+Battle.Retreated,Battle result.,후퇴 성공,Retreated
+Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
+Log.Line,{0} = battle time in seconds. {1} = the event.,[{0}] {1},[{0}] {1}
+Log.SourceItem,{0} = unit. {1} = item.,{0}의 {1},{0}'s {1}
+Log.SourcePassive,{0} = unit.,{0}의 패시브,{0}'s passive
+Log.SourceBurn,Damage source.,화상,Burn
+Log.SourceStorm,Damage source.,폭풍,Storm
+Log.Damage,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 피해 {2},{0} → {1}: {2} damage
+Log.DamageAbsorbed,{0} = source. {1} = target. {2} = amount. {3} = absorbed by shield.,{0} → {1}: 피해 {2} (보호막이 {3} 흡수),{0} → {1}: {2} damage ({3} absorbed by Shield)
+Log.Heal,{0} = source. {1} = target. {2} = HP restored.,{0} → {1}: 회복 {2},{0} → {1}: healed {2}
+Log.Shield,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 보호막 +{2},{0} → {1}: Shield +{2}
+Log.Burn,{0} = source. {1} = target. {2} = stacks.,{0} → {1}: 화상 +{2},{0} → {1}: Burn +{2}
+Log.DogEntered,{0} = unit. {1} = seconds of grace.,{0}: 빈사 상태! 유예 {1}초,{0} is at death's door! Grace {1}s
+Log.DogExited,{0} = unit.,{0}: 빈사에서 벗어남,{0} is back from death's door
+Log.GraceBroken,{0} = unit. {1} = hits taken.,{0}: 유예가 깨짐 (피격 {1}회),{0}: grace broken ({1} hits)
+Log.DeathSurvived,{0} = unit. {1} = death chance. {2} = roll (dies when below the chance).,{0}: 사망 판정 {1}% · 굴림 {2} · 버팀,{0}: death roll {1}% · rolled {2} · survived
+Log.DeathFailed,{0} = unit. {1} = death chance. {2} = roll (dies when below the chance).,{0}: 사망 판정 {1}% · 굴림 {2} · 사망,{0}: death roll {1}% · rolled {2} · died
+Log.Died,{0} = unit.,{0} 사망,{0} died
+Log.PotionUsed,{0} = potion. {1} = target.,포션 {0} → {1},Potion {0} → {1}
+Log.RetreatFailed,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 실패,Retreat {0}% · rolled {1} · failed
+Log.RetreatSucceeded,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 성공,Retreat {0}% · rolled {1} · succeeded
+Log.Storm,{0} = damage.,폭풍이 모두에게 피해 {0},The storm hits everyone for {0}
+Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
+Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
+Reward.Title,Header of the reward screen.,보상을 고르세요,Choose a reward
+Reward.Hint,How to take an item reward.,아이템을 고른 뒤 넣을 칸을 누르세요. 찬 칸에 넣으면 원래 아이템은 사라집니다.,"Pick an item, then click the slot to put it in. An item already in that slot is lost."
+Reward.Item,Kind of reward.,아이템,Item
+Reward.Potion,Kind of reward.,포션,Potion
+Reward.Select,Button on an item reward.,고르기,Select
+Reward.Selected,Button on the selected item reward.,넣을 칸을 누르세요,Click a slot
+Reward.TakePotion,Button on a potion reward.,받기,Take
+Reward.PotionFull,Button on a potion reward when no potion slot is empty.,포션 칸이 가득 참,Potion slots are full
+Reward.Skip,Takes no reward.,넘기기,Skip
+Settle.Cleared,Expedition result.,던전 클리어,Dungeon cleared
+Settle.Wiped,Expedition result.,파티 전멸,The party was wiped out
+Settle.Retreated,Expedition result.,후퇴,Retreated
+Settle.Survivors,{0} = names.,생환: {0},Returned: {0}
+Settle.Fallen,{0} = names.,전사: {0},Fallen: {0}
+Settle.Fatigue,{0} = fatigue cost.,생환자의 피로도 -{0},Fatigue of those who returned: -{0}
+Settle.Days,{0} = days passed. {1} = the new day.,{0}일이 지나 {1}일차가 되었습니다,{0} days passed. It is now day {1}
+Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
+Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company

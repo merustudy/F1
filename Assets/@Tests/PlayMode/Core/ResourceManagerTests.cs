@@ -2,14 +2,19 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using F1.Core;
+using F1.UI;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace F1.Tests
 {
     public sealed class ResourceManagerTests
     {
+        /// <summary>Any registered prefab will do; this one does nothing until a manager opens it.</summary>
+        static readonly string PrefabAddress = ScreenCatalog.Address(ScreenId.Settlement);
+
         ResourceManager _resource;
 
         [UnitySetUp]
@@ -79,6 +84,56 @@ namespace F1.Tests
             yield return TaskUtil.AwaitIgnoringFailure(task);
 
             Assert.IsInstanceOf<ResourceLoadException>(TaskUtil.FailureOf(task));
+        }
+
+        [UnityTest]
+        public IEnumerator InstantiateAsync_CreatesAnInstance_AndReleaseInstanceDestroysIt()
+        {
+            _resource.BeginScope(ResourceScope.Expedition);
+
+            Task<GameObject> task = _resource.InstantiateAsync(PrefabAddress, null, ResourceScope.Expedition);
+            yield return TaskUtil.Await(task);
+            GameObject instance = task.Result;
+            Assert.IsNotNull(instance);
+
+            _resource.ReleaseInstance(instance);
+            yield return null;
+
+            Assert.IsTrue(instance == null, "The instance is destroyed.");
+            Assert.Throws<InvalidOperationException>(() => _resource.ReleaseInstance(instance), "It cannot be released twice.");
+        }
+
+        [UnityTest]
+        public IEnumerator ReleaseScope_DestroysTheInstancesOfTheScope()
+        {
+            _resource.BeginScope(ResourceScope.Expedition);
+            Task<GameObject> task = _resource.InstantiateAsync(PrefabAddress, null, ResourceScope.Expedition);
+            yield return TaskUtil.Await(task);
+            GameObject instance = task.Result;
+
+            _resource.ReleaseScope(ResourceScope.Expedition);
+            yield return null;
+
+            Assert.IsTrue(instance == null);
+        }
+
+        [UnityTest]
+        public IEnumerator ReleaseScope_AfterASceneUnloadDestroyedAnInstance_StillWorks()
+        {
+            // The instance is created under a parent that lives in a scene of its own.
+            Scene scene = SceneManager.CreateScene("ResourceManagerTestsScene");
+            var parent = new GameObject("Parent");
+            SceneManager.MoveGameObjectToScene(parent, scene);
+
+            _resource.BeginScope(ResourceScope.Expedition);
+            Task<GameObject> task = _resource.InstantiateAsync(PrefabAddress, parent.transform, ResourceScope.Expedition);
+            yield return TaskUtil.Await(task);
+            GameObject instance = task.Result;
+
+            yield return SceneManager.UnloadSceneAsync(scene);
+            Assert.IsTrue(instance == null, "The scene took the instance with it.");
+
+            Assert.DoesNotThrow(() => _resource.ReleaseScope(ResourceScope.Expedition));
         }
 
         [UnityTest]

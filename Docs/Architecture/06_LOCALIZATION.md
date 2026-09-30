@@ -58,6 +58,7 @@ Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 
 - Key는 `F1.UI.UiKeys`의 상수로만 쓴다. 문자열을 코드에 직접 쓰지 않는다. `UiKeys`와 CSV의 Key 집합이 같은지 Test가 확인한다.
 - Prefab의 고정 라벨: `LocalizeStringEvent`가 Table Entry를 참조한다. UI Setup 코드가 붙인다. Locale이 바뀌면 스스로 갱신된다.
+  참조는 Table 이름과 Key 문자열이다(id가 아니다). Prefab에는 문구 대신 Key가 들어 있어서 CSV를 고쳐도 Prefab은 바뀌지 않는다.
 - 실행 중에 만드는 문구(값이 들어가는 라벨, 전투 로그): `UiStrings.Get(key, args)`. `LocaleChanged`를 받으면 다시 만든다.
 - 번역 결과 문자열을 비교하거나 계산하거나 저장하지 않는다. 번역과 값을 코드에서 `+`로 잇지 않는다.
 - 없는 Key는 `[Missing:<Key>]`로 보인다. 빈 문자열로 숨기지 않는다.
@@ -98,8 +99,8 @@ Assets/@Fonts/TMP/                 # TMP Font Asset (생성물)
 
 - UI는 TextMeshPro와 Pretendard를 쓴다. Latin과 한글을 한 Family가 가져서 Fallback 사슬이 필요 없다.
 - Player는 OS Font에 의존하지 않는다. License가 배포를 허용하는 Font만 쓴다.
-- TMP Font Asset은 **Static Atlas**다. `FontSetup.Sync`가 Corpus의 글자만 구워 넣는다. Corpus는 ASCII, `UI_StaticText.csv`의 모든 문구,
-  Static Data의 모든 `LocalizedText`다.
+- TMP Font Asset은 **Static Atlas**다. `FontSetup.Sync`가 Corpus의 글자만 구워 넣는다. Corpus는 ASCII, 말줄임표, `UI_StaticText.csv`의 모든 문구,
+  Static Data CSV의 모든 글자다.
 - Corpus가 바뀌면 setup이 Atlas를 다시 굽는다. 같으면 건드리지 않는다. Font Asset을 손으로 고치지 않는다.
 - Corpus의 글자가 Font Asset에 전부 있는지 EditMode Test가 확인한다. 화면에 나오는 문구는 전부 CSV에서 오므로 빠지는 글자가 없다.
 - Locale별 Font 교체는 하지 않는다.

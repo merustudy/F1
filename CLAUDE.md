@@ -44,6 +44,7 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Gameplay Domain / 시뮬 | `Docs/Architecture/08_GAMEPLAY_DOMAIN.md` |
 | Scope / Vertical Slice | `Docs/Architecture/09_VERTICAL_SLICE.md` |
 | Application 계층 (런, 원정, 전투 진행) | `Docs/Architecture/11_APPLICATION_FLOW.md` |
+| UI (화면, Prefab, UI Test) | `Docs/Architecture/12_UI.md` |
 | Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
 | 기획을 근거로 쓰는 모든 작업 | `Docs/Design/00_INDEX.md`(태그 규칙), `Docs/Design/09_Implementation_Constraints.md` |
 | 전투 | `Docs/Design/02_Combat_System.md` |
@@ -197,6 +198,7 @@ ExpeditionManager -> DataManager, SaveManager, RunManager
 | `09_VERTICAL_SLICE.md` | Slice 범위, 구현 순서, Acceptance, Deferred |
 | `10_TESTING_VALIDATION.md` | Test/Validation, 검증 체인, Definition of Done |
 | `11_APPLICATION_FLOW.md` | `RunManager`와 `ExpeditionManager`의 명령, 게임 단계, 상태를 확정하는 시점 |
+| `12_UI.md` | `UIManager`, 화면과 View, 화면 Prefab을 만드는 Setup, UI Test |
 
 - Owner 문서를 만들면 같은 변경에서 이 표와 §2 표에 등록한다. 등록되지 않은 문서는 규칙이 아니다.
 - 한 정책의 상세를 여러 문서에 복사하지 않는다. root는 불변조건, Owner는 상세. 교차 영역은 Link로 연결한다.

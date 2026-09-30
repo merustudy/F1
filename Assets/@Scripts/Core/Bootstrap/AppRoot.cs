@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using F1.Flow;
 using F1.Save;
+using F1.UI;
 using UnityEngine;
 
 namespace F1.Core
@@ -89,6 +90,7 @@ namespace F1.Core
                 var scene = new SceneManagerEx();
                 var run = new RunManager(data, NewRunSeed);
                 var expedition = new ExpeditionManager(data, run);
+                var ui = new UIManager(resource);
                 _resource = resource;
 
                 step = BootStep.ConfigureManagers;
@@ -101,6 +103,7 @@ namespace F1.Core
                     Scene = scene,
                     Run = run,
                     Expedition = expedition,
+                    UI = ui,
                 });
 
                 step = BootStep.InitializeSaveStorage;
@@ -133,6 +136,10 @@ namespace F1.Core
                 }
 
                 main.Bind();
+                ui.Bind(main.UiRoot);
+
+                step = BootStep.ShowMainUi;
+                await ui.ShowAsync(ScreenId.Title);
 
                 State = InitializationState.Initialized;
                 _view.Hide();

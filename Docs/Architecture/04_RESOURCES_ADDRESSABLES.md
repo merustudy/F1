@@ -52,6 +52,8 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 - 열리지 않은 Scope에 Load하면 예외다. 이미 열린 Scope를 또 열어도, 닫힌 Scope를 Release해도 예외다.
 - 등록되지 않은 Address는 `ResourceLoadException`이다. 에러 로그 없이 예외로만 알린다.
+- Scene이 Unload되면 그 Scene에 있던 Instance는 Scene과 함께 사라지고 Addressables가 그 Handle을 스스로 놓는다.
+  `ResourceManager`는 이미 놓인 Handle을 다시 놓지 않는다.
 
 ## Group과 Entry
 
@@ -59,6 +61,7 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 - Entry는 Inspector에서 등록하지 않는다. `F1.Editor.Setup.AddressablesSetup`의 Entry 목록에 `(assetPath, address, scope)` 한 줄을 넣고
   Sync한다. Sync는 멱등하고 체인의 setup 단계가 부른다.
 - Sync는 목록에 없는 Entry를 `F1-*` Group에서 지운다.
+- Data Entry는 `StaticDataFiles`에서, 화면 Prefab Entry는 `ScreenCatalog`에서 자동으로 나온다. 손으로 적는 목록이 아니다.
 - `AddressablesSetup.FindProblems`가 검사한다: Asset 파일 존재, Address 형식과 중복, Scope Label이 정확히 하나, 목록에 없는 Entry.
   EditMode Test가 이 검사를 부른다.
 - Editor의 Play Mode Script는 "Use Asset Database"다.

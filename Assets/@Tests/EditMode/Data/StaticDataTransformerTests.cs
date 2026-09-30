@@ -49,7 +49,10 @@ namespace F1.Tests
             Assert.AreEqual(PassiveEffect.Shield, knight.Passive.Effect);
             Assert.AreEqual(PassiveTarget.Self, knight.Passive.Target);
             Assert.AreEqual(20, knight.Passive.Magnitude);
+            Assert.AreEqual("보호막 {0}", knight.PassiveText.Resolve("ko-KR"));
+            Assert.AreEqual("Shield {0}", knight.PassiveText.Resolve("en-US"));
             Assert.IsNull(data.Jobs.Get("bishop").Passive, "Empty Passive* cells mean no passive.");
+            Assert.IsNull(data.Jobs.Get("bishop").PassiveText);
 
             ItemData mace = data.Items.Get("mace");
             Assert.AreEqual(ItemCategory.Weapon, mace.Category);
@@ -212,6 +215,18 @@ namespace F1.Tests
             DataTransformException exception = TransformFails(StaticDataFiles.Job, jobs);
 
             StringAssert.StartsWith("JobData.csv(3)", exception.Errors[0]);
+        }
+
+        [Test]
+        public void Transform_WhenPassiveAndItsTextDoNotComeTogether_Reports()
+        {
+            string textOnly = TestCsv.Jobs.Replace("Rear,,,,,,,", "Rear,,,,,,보호막,Shield");
+            string passiveOnly = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,,");
+            string oneLocale = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,보호막 {0},");
+
+            StringAssert.StartsWith("JobData.csv(3)", TransformFails(StaticDataFiles.Job, textOnly).Errors[0]);
+            StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, passiveOnly).Errors[0]);
+            StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, oneLocale).Errors[0]);
         }
 
         [Test]

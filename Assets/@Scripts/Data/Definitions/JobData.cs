@@ -83,7 +83,8 @@ namespace F1.Data
             string weaponItemId,
             int weaponGrade,
             BattleRow recommendedRow,
-            PassiveSpec passive)
+            PassiveSpec passive,
+            LocalizedText passiveText = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -106,8 +107,14 @@ namespace F1.Data
             ItemSlots = itemSlots;
             WeaponItemId = DataId.Require(weaponItemId, $"{DefinitionName} '{id}' WeaponItemId");
             WeaponGrade = weaponGrade;
+            if ((passive == null) != (passiveText == null))
+            {
+                throw new DataException($"{DefinitionName} '{id}': a passive and its PassiveText come together.");
+            }
+
             RecommendedRow = recommendedRow;
             Passive = passive;
+            PassiveText = passiveText;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -136,5 +143,12 @@ namespace F1.Data
         /// <summary>Null when the job has no passive.</summary>
         [JsonProperty(Order = 8, Required = Required.AllowNull)]
         public PassiveSpec Passive { get; }
+
+        /// <summary>
+        /// What the passive does, for the player. "{0}" stands for the passive's magnitude, so the
+        /// number is written in one place only. Null when the job has no passive.
+        /// </summary>
+        [JsonProperty(Order = 9, Required = Required.AllowNull)]
+        public LocalizedText PassiveText { get; }
     }
 }

@@ -16,6 +16,7 @@ namespace F1.Core
         public static readonly BootStep ApplyLocale = new BootStep("Apply locale", "BOOT-08");
         public static readonly BootStep LoadMainScene = new BootStep("Load main scene", "BOOT-10");
         public static readonly BootStep BindMainScene = new BootStep("Bind main scene", "BOOT-11");
+        public static readonly BootStep ShowMainUi = new BootStep("Show main UI", "BOOT-12");
 
         public BootStep(string name, string errorCode)
         {

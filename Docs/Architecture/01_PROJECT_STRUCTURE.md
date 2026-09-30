@@ -16,7 +16,7 @@ Asset의 물리 경로, `@` Prefix, Folder 생성 시점을 소유한다.
 ├─ Assets
 ├─ Packages                  # manifest.json + packages-lock.json (둘 다 Git)
 ├─ ProjectSettings
-├─ Tools                     # Unity 밖 도구: chain.sh(검증 체인), Sim(시뮬 실행기)
+├─ Tools                     # Unity 밖 도구: chain.sh(검증 체인), screenshots.sh(화면 PNG), Sim(시뮬 실행기)
 └─ .gitignore / .gitattributes
 ```
 
@@ -35,7 +35,7 @@ Assets
 ├─ @Data            # Source/*.csv, Generated/*.json
 ├─ @Localization    # Source/UI_StaticText.csv, Settings/, Locales/, Tables/
 ├─ @Fonts           # Source/<Family>/ (ttf + LICENSE + README), TMP/
-├─ @Prefabs         # UI/
+├─ @Prefabs         # UI/ (화면 Prefab. Setup 코드가 만든 생성물)
 │
 ├─ AddressableAssetsData   # Package가 만든 경로 그대로
 ├─ Settings                # URP Template 설정
@@ -65,9 +65,10 @@ Assets/@Scripts
 ├─ Save              # Models/, Storage/
 ├─ Gameplay          # 순수 C# Domain
 ├─ Flow              # Application 계층: RunManager, ExpeditionManager, BattleSession, BattleClock
-├─ UI                # UiKeys, UiStrings, 화면
+├─ UI                # UIManager, UIScreen, Screens/, Views/, UiKeys, UiStrings, UiText, UiPalette
 └─ Editor            # F1.Editor asmdef
-   ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, FontSetup, UiPrefabSetup
+   ├─ Setup          # ProjectSetup, SceneSetup, AddressablesSetup, LocalizationSetup, FontSetup
+   │  └─ Ui          # UiBuild, UiPrefabSetup.* (화면 Prefab Builder. 이 폴더의 Hash가 Prefab Stamp다)
    └─ Data           # CSV Parser, DataTransformer
 ```
 

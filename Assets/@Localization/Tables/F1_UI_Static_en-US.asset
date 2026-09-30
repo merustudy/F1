@@ -56,6 +56,546 @@ MonoBehaviour:
     m_Localized: English
     m_Metadata:
       m_Items: []
+  - m_Id: 9766385475584
+    m_Localized: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864192
+    m_Localized: None
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864193
+    m_Localized: Quit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864194
+    m_Localized: The run in progress will be lost. Start a new one?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864195
+    m_Localized: Company Hall
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864196
+    m_Localized: Day {0} / {1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864197
+    m_Localized: Roster
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864198
+    m_Localized: Fatigue {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864199
+    m_Localized: Remove
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864200
+    m_Localized: Expedition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864201
+    m_Localized: 'Affinity: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864202
+    m_Localized: "Fatigue -{0} \xB7 takes {1} days"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864203
+    m_Localized: 'Clears: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864204
+    m_Localized: Party
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864205
+    m_Localized: Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864206
+    m_Localized: "Rest (+{0} fatigue \xB7 {1}d)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864207
+    m_Localized: Depart
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864208
+    m_Localized: Ready to depart
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864209
+    m_Localized: The party needs at least {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864210
+    m_Localized: Someone in the party is too tired
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864211
+    m_Localized: 'Fallen: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864212
+    m_Localized: The company has fallen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864213
+    m_Localized: It ended on day {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864214
+    m_Localized: To Title
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864215
+    m_Localized: Floor {0} / {1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864216
+    m_Localized: Battle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864217
+    m_Localized: Boss
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864218
+    m_Localized: Choose where to go
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864219
+    m_Localized: "Floor {0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864220
+    m_Localized: Enemy front
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864221
+    m_Localized: Enemy rear
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864222
+    m_Localized: '{0} (HP {1})'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864223
+    m_Localized: Fight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864224
+    m_Localized: HP {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864225
+    m_Localized: Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864226
+    m_Localized: Grade {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864227
+    m_Localized: Dead
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864228
+    m_Localized: Potions
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864229
+    m_Localized: Click an item slot, then another, to swap them. The row button switches
+      front and rear.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864230
+    m_Localized: "{0} \xB7 Grade {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864231
+    m_Localized: Weapon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864232
+    m_Localized: Support
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864233
+    m_Localized: Cooldown {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864234
+    m_Localized: Front row only
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864235
+    m_Localized: Rear row only
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864236
+    m_Localized: '{1} damage to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864237
+    m_Localized: Heals {0} for {1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864238
+    m_Localized: '{1} Shield to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864239
+    m_Localized: '{1} Burn to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864240
+    m_Localized: the front enemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864241
+    m_Localized: the rear enemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864242
+    m_Localized: all enemies
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864243
+    m_Localized: self
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864244
+    m_Localized: the weakest ally
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864245
+    m_Localized: all allies
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864246
+    m_Localized: Restores {0} HP
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864247
+    m_Localized: '{0} Shield'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864248
+    m_Localized: Floor {0} battle
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864249
+    m_Localized: Boss battle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864250
+    m_Localized: '{0}s'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864251
+    m_Localized: Storm in {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864252
+    m_Localized: Storm! Next hit {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864253
+    m_Localized: Pause
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864254
+    m_Localized: x{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864255
+    m_Localized: HP {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864256
+    m_Localized: Shield {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864257
+    m_Localized: Burn {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864258
+    m_Localized: "Death's door \xB7 grace {0}s \xB7 hits {1}/{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864259
+    m_Localized: "Death's door \xB7 {0}% death per hit"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864260
+    m_Localized: Dead
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864261
+    m_Localized: Click a potion, then an ally
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864262
+    m_Localized: '{0}: click an ally'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864263
+    m_Localized: Potion ready in {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864264
+    m_Localized: Retreat ({0}%)
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864265
+    m_Localized: Retreat in {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864266
+    m_Localized: Victory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864267
+    m_Localized: Wiped out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864268
+    m_Localized: Retreated
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864269
+    m_Localized: No one died
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864270
+    m_Localized: '[{0}] {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864271
+    m_Localized: '{0}''s {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864272
+    m_Localized: '{0}''s passive'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864273
+    m_Localized: Burn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864274
+    m_Localized: Storm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864275
+    m_Localized: "{0} \u2192 {1}: {2} damage"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864276
+    m_Localized: "{0} \u2192 {1}: {2} damage ({3} absorbed by Shield)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864277
+    m_Localized: "{0} \u2192 {1}: healed {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864278
+    m_Localized: "{0} \u2192 {1}: Shield +{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864279
+    m_Localized: "{0} \u2192 {1}: Burn +{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864280
+    m_Localized: '{0} is at death''s door! Grace {1}s'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864281
+    m_Localized: '{0} is back from death''s door'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864282
+    m_Localized: '{0}: grace broken ({1} hits)'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864283
+    m_Localized: "{0}: death roll {1}% \xB7 rolled {2} \xB7 survived"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864284
+    m_Localized: "{0}: death roll {1}% \xB7 rolled {2} \xB7 died"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864285
+    m_Localized: '{0} died'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864286
+    m_Localized: "Potion {0} \u2192 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864287
+    m_Localized: "Retreat {0}% \xB7 rolled {1} \xB7 failed"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864288
+    m_Localized: "Retreat {0}% \xB7 rolled {1} \xB7 succeeded"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864289
+    m_Localized: The storm hits everyone for {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864290
+    m_Localized: "{0} \u2014 at death's door at {1}s \u2192 died at {2}s after the
+      grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864291
+    m_Localized: "{0} \u2014 at death's door at {1}s \u2192 grace broken by {6} hits
+      \u2192 died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864292
+    m_Localized: Choose a reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864293
+    m_Localized: Pick an item, then click the slot to put it in. An item already
+      in that slot is lost.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864294
+    m_Localized: Item
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864295
+    m_Localized: Potion
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864296
+    m_Localized: Select
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864297
+    m_Localized: Click a slot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864298
+    m_Localized: Take
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864299
+    m_Localized: Potion slots are full
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864300
+    m_Localized: Skip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864301
+    m_Localized: Dungeon cleared
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864302
+    m_Localized: The party was wiped out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864303
+    m_Localized: Retreated
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864304
+    m_Localized: 'Returned: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864305
+    m_Localized: 'Fallen: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864306
+    m_Localized: 'Fatigue of those who returned: -{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864307
+    m_Localized: '{0} days passed. It is now day {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 9766393864308
+    m_Localized: Items and potions from the expedition are gone
+    m_Metadata:
+      m_Items: []
+  - m_Id: 9766393864309
+    m_Localized: No mercenary is left in the company
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -65,3 +605,63 @@ MonoBehaviour:
         m_Entries: 
         m_SharedEntries:
         - id: 275767302
+        - id: 9766393864196
+        - id: 9766393864198
+        - id: 9766393864201
+        - id: 9766393864202
+        - id: 9766393864203
+        - id: 9766393864206
+        - id: 9766393864209
+        - id: 9766393864211
+        - id: 9766393864213
+        - id: 9766393864215
+        - id: 9766393864219
+        - id: 9766393864222
+        - id: 9766393864224
+        - id: 9766393864226
+        - id: 9766393864230
+        - id: 9766393864233
+        - id: 9766393864236
+        - id: 9766393864237
+        - id: 9766393864238
+        - id: 9766393864239
+        - id: 9766393864246
+        - id: 9766393864247
+        - id: 9766393864248
+        - id: 9766393864250
+        - id: 9766393864251
+        - id: 9766393864252
+        - id: 9766393864254
+        - id: 9766393864255
+        - id: 9766393864256
+        - id: 9766393864257
+        - id: 9766393864258
+        - id: 9766393864259
+        - id: 9766393864262
+        - id: 9766393864263
+        - id: 9766393864264
+        - id: 9766393864265
+        - id: 9766393864270
+        - id: 9766393864271
+        - id: 9766393864272
+        - id: 9766393864275
+        - id: 9766393864276
+        - id: 9766393864277
+        - id: 9766393864278
+        - id: 9766393864279
+        - id: 9766393864280
+        - id: 9766393864281
+        - id: 9766393864282
+        - id: 9766393864283
+        - id: 9766393864284
+        - id: 9766393864285
+        - id: 9766393864286
+        - id: 9766393864287
+        - id: 9766393864288
+        - id: 9766393864289
+        - id: 9766393864290
+        - id: 9766393864291
+        - id: 9766393864304
+        - id: 9766393864305
+        - id: 9766393864306
+        - id: 9766393864307

@@ -133,11 +133,15 @@
 - Test: UI 없이 루프 한 바퀴와 두 번째 출발, 전멸과 후퇴, 런 종료, Frame 길이와 무관한 결과(`GameLoopTests`).
   출고 데이터로 Boot 뒤 원정 한 번을 끝까지 돌리는 PlayMode Test.
 
-#### 7d. UI — 상태: 대기
+#### 7d. UI — 상태: 완료
 
-- 범위: 로비, 노드 맵, 전투, 결과 화면. 도형 Placeholder.
-- 완료 기준: Architecture/09의 Acceptance 중 저장(7번)을 뺀 항목.
-- 결정할 것: 화면 구성(목업으로 선택).
+- 산출: `UIManager`, 화면 여섯(타이틀, 로비, 노드 맵, 전투, 보상, 정산)과 View, 화면 Prefab을 만드는 Builder(`Editor/Setup/Ui`),
+  Addressables Entry, UI 문구 128개(두 Locale), `Tools/screenshots.sh`. Owner 문서 Architecture/12.
+- 그림은 전부 색 사각형이다. 유료 생성 API는 쓰지 않았다.
+- 화면 구성은 목업 선택 없이 권장안으로 정했다(일괄 승인). `Tools/screenshots.sh`로 뽑은 PNG로 사후 검토한다.
+- Acceptance(저장 7번 제외): 1~6, 8~12를 Test와 스크린샷으로 확인했다. 사람이 직접 플레이한 확인은 아직 없다(11단계).
+- 함께 한 것: 직업 패시브 설명문(`JobData.csv`의 `PassiveText`), 이벤트 로그에서 사망 원인을 읽는 `BattleLog.PartyDeaths`,
+  Scene과 함께 사라진 Instance의 Handle 처리(`ResourceManager`), Canvas Scaler를 Expand로 바꾸고 Scene 재생성.
 
 ### 8. 저장/이어하기 — 상태: 대기
 

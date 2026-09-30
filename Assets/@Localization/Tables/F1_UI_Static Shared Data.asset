@@ -60,6 +60,601 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375843
+  - m_Id: 9766385475584
+    m_Key: Common.Continue
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909184
+  - m_Id: 9766393864192
+    m_Key: Common.None
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909185
+  - m_Id: 9766393864193
+    m_Key: Title.Quit
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909186
+  - m_Id: 9766393864194
+    m_Key: Title.OverwriteWarning
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909187
+  - m_Id: 9766393864195
+    m_Key: Lobby.Title
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909188
+  - m_Id: 9766393864196
+    m_Key: Lobby.Day
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909189
+  - m_Id: 9766393864197
+    m_Key: Lobby.Roster
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909190
+  - m_Id: 9766393864198
+    m_Key: Lobby.Fatigue
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909191
+  - m_Id: 9766393864199
+    m_Key: Lobby.Remove
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909192
+  - m_Id: 9766393864200
+    m_Key: Lobby.Expedition
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909193
+  - m_Id: 9766393864201
+    m_Key: Lobby.Affinity
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909194
+  - m_Id: 9766393864202
+    m_Key: Lobby.Cost
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909195
+  - m_Id: 9766393864203
+    m_Key: Lobby.Cleared
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909196
+  - m_Id: 9766393864204
+    m_Key: Lobby.Party
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909197
+  - m_Id: 9766393864205
+    m_Key: Lobby.EmptyRow
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909198
+  - m_Id: 9766393864206
+    m_Key: Lobby.Rest
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909199
+  - m_Id: 9766393864207
+    m_Key: Lobby.Depart
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909200
+  - m_Id: 9766393864208
+    m_Key: Lobby.DepartOk
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909201
+  - m_Id: 9766393864209
+    m_Key: Lobby.PartyTooSmall
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909202
+  - m_Id: 9766393864210
+    m_Key: Lobby.NotEnoughFatigue
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909203
+  - m_Id: 9766393864211
+    m_Key: Lobby.Fallen
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909204
+  - m_Id: 9766393864212
+    m_Key: Lobby.RunOver
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909205
+  - m_Id: 9766393864213
+    m_Key: Lobby.RunOverDay
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909206
+  - m_Id: 9766393864214
+    m_Key: Lobby.ToTitle
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909207
+  - m_Id: 9766393864215
+    m_Key: Map.Progress
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909208
+  - m_Id: 9766393864216
+    m_Key: Map.Battle
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909209
+  - m_Id: 9766393864217
+    m_Key: Map.Boss
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909210
+  - m_Id: 9766393864218
+    m_Key: Map.SelectNode
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909211
+  - m_Id: 9766393864219
+    m_Key: Map.NodeTitle
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909212
+  - m_Id: 9766393864220
+    m_Key: Map.EnemyFront
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909213
+  - m_Id: 9766393864221
+    m_Key: Map.EnemyRear
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909214
+  - m_Id: 9766393864222
+    m_Key: Map.Enemy
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909215
+  - m_Id: 9766393864223
+    m_Key: Map.Enter
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909216
+  - m_Id: 9766393864224
+    m_Key: Board.Hp
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909217
+  - m_Id: 9766393864225
+    m_Key: Board.EmptySlot
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909218
+  - m_Id: 9766393864226
+    m_Key: Board.Grade
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909219
+  - m_Id: 9766393864227
+    m_Key: Board.Dead
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909220
+  - m_Id: 9766393864228
+    m_Key: Board.Potions
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909221
+  - m_Id: 9766393864229
+    m_Key: Board.Hint
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909222
+  - m_Id: 9766393864230
+    m_Key: Item.Title
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909223
+  - m_Id: 9766393864231
+    m_Key: Item.Weapon
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909224
+  - m_Id: 9766393864232
+    m_Key: Item.Support
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909225
+  - m_Id: 9766393864233
+    m_Key: Item.Cooldown
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909226
+  - m_Id: 9766393864234
+    m_Key: Item.RowFront
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909227
+  - m_Id: 9766393864235
+    m_Key: Item.RowRear
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909228
+  - m_Id: 9766393864236
+    m_Key: Effect.Damage
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909229
+  - m_Id: 9766393864237
+    m_Key: Effect.Heal
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909230
+  - m_Id: 9766393864238
+    m_Key: Effect.Shield
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909231
+  - m_Id: 9766393864239
+    m_Key: Effect.Burn
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909232
+  - m_Id: 9766393864240
+    m_Key: Target.EnemyFront
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909233
+  - m_Id: 9766393864241
+    m_Key: Target.EnemyRear
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909234
+  - m_Id: 9766393864242
+    m_Key: Target.EnemyAll
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909235
+  - m_Id: 9766393864243
+    m_Key: Target.Self
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909236
+  - m_Id: 9766393864244
+    m_Key: Target.AllyLowestHp
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909237
+  - m_Id: 9766393864245
+    m_Key: Target.AllyAll
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909238
+  - m_Id: 9766393864246
+    m_Key: Potion.Heal
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909239
+  - m_Id: 9766393864247
+    m_Key: Potion.Shield
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909240
+  - m_Id: 9766393864248
+    m_Key: Battle.NodeBattle
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909241
+  - m_Id: 9766393864249
+    m_Key: Battle.NodeBoss
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909242
+  - m_Id: 9766393864250
+    m_Key: Battle.Time
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909243
+  - m_Id: 9766393864251
+    m_Key: Battle.StormIn
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909244
+  - m_Id: 9766393864252
+    m_Key: Battle.StormActive
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909245
+  - m_Id: 9766393864253
+    m_Key: Battle.Pause
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909246
+  - m_Id: 9766393864254
+    m_Key: Battle.Speed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909247
+  - m_Id: 9766393864255
+    m_Key: Battle.Hp
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909248
+  - m_Id: 9766393864256
+    m_Key: Battle.Shield
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909249
+  - m_Id: 9766393864257
+    m_Key: Battle.Burn
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909250
+  - m_Id: 9766393864258
+    m_Key: Battle.DogGrace
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909251
+  - m_Id: 9766393864259
+    m_Key: Battle.DogRolling
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909252
+  - m_Id: 9766393864260
+    m_Key: Battle.Dead
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909253
+  - m_Id: 9766393864261
+    m_Key: Battle.PotionHint
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909254
+  - m_Id: 9766393864262
+    m_Key: Battle.PotionArmed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909255
+  - m_Id: 9766393864263
+    m_Key: Battle.PotionWait
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909256
+  - m_Id: 9766393864264
+    m_Key: Battle.Retreat
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909257
+  - m_Id: 9766393864265
+    m_Key: Battle.RetreatWait
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909258
+  - m_Id: 9766393864266
+    m_Key: Battle.Victory
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909259
+  - m_Id: 9766393864267
+    m_Key: Battle.Defeat
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909260
+  - m_Id: 9766393864268
+    m_Key: Battle.Retreated
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909261
+  - m_Id: 9766393864269
+    m_Key: Battle.NoDeaths
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909262
+  - m_Id: 9766393864270
+    m_Key: Log.Line
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909263
+  - m_Id: 9766393864271
+    m_Key: Log.SourceItem
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909264
+  - m_Id: 9766393864272
+    m_Key: Log.SourcePassive
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909265
+  - m_Id: 9766393864273
+    m_Key: Log.SourceBurn
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909266
+  - m_Id: 9766393864274
+    m_Key: Log.SourceStorm
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909267
+  - m_Id: 9766393864275
+    m_Key: Log.Damage
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909268
+  - m_Id: 9766393864276
+    m_Key: Log.DamageAbsorbed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909269
+  - m_Id: 9766393864277
+    m_Key: Log.Heal
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909270
+  - m_Id: 9766393864278
+    m_Key: Log.Shield
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909271
+  - m_Id: 9766393864279
+    m_Key: Log.Burn
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909272
+  - m_Id: 9766393864280
+    m_Key: Log.DogEntered
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909273
+  - m_Id: 9766393864281
+    m_Key: Log.DogExited
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909274
+  - m_Id: 9766393864282
+    m_Key: Log.GraceBroken
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909275
+  - m_Id: 9766393864283
+    m_Key: Log.DeathSurvived
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909276
+  - m_Id: 9766393864284
+    m_Key: Log.DeathFailed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909277
+  - m_Id: 9766393864285
+    m_Key: Log.Died
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909278
+  - m_Id: 9766393864286
+    m_Key: Log.PotionUsed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909279
+  - m_Id: 9766393864287
+    m_Key: Log.RetreatFailed
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909280
+  - m_Id: 9766393864288
+    m_Key: Log.RetreatSucceeded
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909281
+  - m_Id: 9766393864289
+    m_Key: Log.Storm
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909282
+  - m_Id: 9766393864290
+    m_Key: Death.AfterGrace
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909283
+  - m_Id: 9766393864291
+    m_Key: Death.GraceBroken
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909284
+  - m_Id: 9766393864292
+    m_Key: Reward.Title
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909285
+  - m_Id: 9766393864293
+    m_Key: Reward.Hint
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909286
+  - m_Id: 9766393864294
+    m_Key: Reward.Item
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909287
+  - m_Id: 9766393864295
+    m_Key: Reward.Potion
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909288
+  - m_Id: 9766393864296
+    m_Key: Reward.Select
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909289
+  - m_Id: 9766393864297
+    m_Key: Reward.Selected
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909290
+  - m_Id: 9766393864298
+    m_Key: Reward.TakePotion
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909291
+  - m_Id: 9766393864299
+    m_Key: Reward.PotionFull
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909292
+  - m_Id: 9766393864300
+    m_Key: Reward.Skip
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909293
+  - m_Id: 9766393864301
+    m_Key: Settle.Cleared
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909294
+  - m_Id: 9766393864302
+    m_Key: Settle.Wiped
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909295
+  - m_Id: 9766393864303
+    m_Key: Settle.Retreated
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909296
+  - m_Id: 9766393864304
+    m_Key: Settle.Survivors
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909297
+  - m_Id: 9766393864305
+    m_Key: Settle.Fallen
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909298
+  - m_Id: 9766393864306
+    m_Key: Settle.Fatigue
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909299
+  - m_Id: 9766393864307
+    m_Key: Settle.Days
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909300
+  - m_Id: 9766393864308
+    m_Key: Settle.ItemsLost
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909301
+  - m_Id: 9766393864309
+    m_Key: Settle.RunOver
+    m_Metadata:
+      m_Items:
+      - rid: 636489279218909302
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -98,7 +693,7 @@ MonoBehaviour:
     - rid: 636489278608375841
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Continues the saved run.
+        m_CommentText: Continues the run in progress.
     - rid: 636489278608375842
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -108,3 +703,486 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Name of this language written in itself.
+    - rid: 636489279218909184
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Generic continue button.
+    - rid: 636489279218909185
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown in place of an empty list of names.
+    - rid: 636489279218909186
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Closes the game.
+    - rid: 636489279218909187
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Asked before a new run replaces the run in progress.
+    - rid: 636489279218909188
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the lobby screen.
+    - rid: 636489279218909189
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = current day. {1} = total days.'
+    - rid: 636489279218909190
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the mercenary list.
+    - rid: 636489279218909191
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = fatigue points left. {1} = maximum.'
+    - rid: 636489279218909192
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Takes a mercenary out of the party.
+    - rid: 636489279218909193
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the expedition panel.
+    - rid: 636489279218909194
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = name of the dungeon''s affinity.'
+    - rid: 636489279218909195
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = fatigue cost. {1} = days the dungeon takes.'
+    - rid: 636489279218909196
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = times this dungeon was cleared.'
+    - rid: 636489279218909197
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the party preview.
+    - rid: 636489279218909198
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown for a row with nobody in it.
+    - rid: 636489279218909199
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = fatigue restored. {1} = days that pass.'
+    - rid: 636489279218909200
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Starts the expedition.
+    - rid: 636489279218909201
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The party can leave.
+    - rid: 636489279218909202
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = minimum party size.'
+    - rid: 636489279218909203
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A party member cannot pay the dungeon's fatigue cost.
+    - rid: 636489279218909204
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = names of the dead.'
+    - rid: 636489279218909205
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: No mercenary is left alive.
+    - rid: 636489279218909206
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = day the run ended.'
+    - rid: 636489279218909207
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Goes back to the title screen.
+    - rid: 636489279218909208
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = floor of the last cleared node. {1} = number of floors.'
+    - rid: 636489279218909209
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Label of a battle node.
+    - rid: 636489279218909210
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Label of the boss node.
+    - rid: 636489279218909211
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown until a node is selected.
+    - rid: 636489279218909212
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = floor. {1} = node kind.'
+    - rid: 636489279218909213
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the enemy front row.
+    - rid: 636489279218909214
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the enemy rear row.
+    - rid: 636489279218909215
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = enemy name. {1} = its max HP.'
+    - rid: 636489279218909216
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Starts the battle at the selected node.
+    - rid: 636489279218909217
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = HP. {1} = max HP.'
+    - rid: 636489279218909218
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: An empty item or potion slot.
+    - rid: 636489279218909219
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = item grade.'
+    - rid: 636489279218909220
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown on a dead mercenary.
+    - rid: 636489279218909221
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the potion slots.
+    - rid: 636489279218909222
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: How to use the party board.
+    - rid: 636489279218909223
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = item name. {1} = grade.'
+    - rid: 636489279218909224
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Item category.
+    - rid: 636489279218909225
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Item category.
+    - rid: 636489279218909226
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = seconds.'
+    - rid: 636489279218909227
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works in the front row.
+    - rid: 636489279218909228
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works in the rear row.
+    - rid: 636489279218909229
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = target. {1} = amount.'
+    - rid: 636489279218909230
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = target. {1} = amount.'
+    - rid: 636489279218909231
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = target. {1} = amount.'
+    - rid: 636489279218909232
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = target. {1} = stacks.'
+    - rid: 636489279218909233
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909234
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909235
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909236
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909237
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909238
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*.
+    - rid: 636489279218909239
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = amount.'
+    - rid: 636489279218909240
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = amount.'
+    - rid: 636489279218909241
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = floor.'
+    - rid: 636489279218909242
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of a boss battle.
+    - rid: 636489279218909243
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = battle time in seconds.'
+    - rid: 636489279218909244
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = seconds until the storm starts.'
+    - rid: 636489279218909245
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = damage of the next storm tick.'
+    - rid: 636489279218909246
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Pauses the battle.
+    - rid: 636489279218909247
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = speed multiplier.'
+    - rid: 636489279218909248
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = HP. {1} = max HP.'
+    - rid: 636489279218909249
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = shield points.'
+    - rid: 636489279218909250
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = burn stacks.'
+    - rid: 636489279218909251
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: At 0 HP during grace. {0} = seconds of grace left. {1} = hits
+          taken. {2} = hits that break the grace.
+    - rid: 636489279218909252
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: At 0 HP after grace. {0} = death chance per hit.
+    - rid: 636489279218909253
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown on a dead unit.
+    - rid: 636489279218909254
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: How to use a potion.
+    - rid: 636489279218909255
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = potion name.'
+    - rid: 636489279218909256
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = seconds until a potion can be used.'
+    - rid: 636489279218909257
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = success chance.'
+    - rid: 636489279218909258
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = seconds until retreat can be tried again.'
+    - rid: 636489279218909259
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Battle result.
+    - rid: 636489279218909260
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Battle result: everyone died.'
+    - rid: 636489279218909261
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Battle result.
+    - rid: 636489279218909262
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown on the result panel when nobody died.
+    - rid: 636489279218909263
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = battle time in seconds. {1} = the event.'
+    - rid: 636489279218909264
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = item.'
+    - rid: 636489279218909265
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit.'
+    - rid: 636489279218909266
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Damage source.
+    - rid: 636489279218909267
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Damage source.
+    - rid: 636489279218909268
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = amount.'
+    - rid: 636489279218909269
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = amount. {3} = absorbed
+          by shield.'
+    - rid: 636489279218909270
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = HP restored.'
+    - rid: 636489279218909271
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = amount.'
+    - rid: 636489279218909272
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = stacks.'
+    - rid: 636489279218909273
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = seconds of grace.'
+    - rid: 636489279218909274
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit.'
+    - rid: 636489279218909275
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = hits taken.'
+    - rid: 636489279218909276
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = death chance. {2} = roll (dies when below
+          the chance).'
+    - rid: 636489279218909277
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = death chance. {2} = roll (dies when below
+          the chance).'
+    - rid: 636489279218909278
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit.'
+    - rid: 636489279218909279
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = potion. {1} = target.'
+    - rid: 636489279218909280
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = success chance. {1} = roll.'
+    - rid: 636489279218909281
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = success chance. {1} = roll.'
+    - rid: 636489279218909282
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = damage.'
+    - rid: 636489279218909283
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Why a mercenary died. {0} = name. {1} = time of reaching 0
+          HP. {2} = time of death. {3} = source of the last hit. {4} = death chance.
+          {5} = roll.
+    - rid: 636489279218909284
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits
+          that broke the grace.
+    - rid: 636489279218909285
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the reward screen.
+    - rid: 636489279218909286
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: How to take an item reward.
+    - rid: 636489279218909287
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Kind of reward.
+    - rid: 636489279218909288
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Kind of reward.
+    - rid: 636489279218909289
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on an item reward.
+    - rid: 636489279218909290
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on the selected item reward.
+    - rid: 636489279218909291
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on a potion reward.
+    - rid: 636489279218909292
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on a potion reward when no potion slot is empty.
+    - rid: 636489279218909293
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Takes no reward.
+    - rid: 636489279218909294
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Expedition result.
+    - rid: 636489279218909295
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Expedition result.
+    - rid: 636489279218909296
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Expedition result.
+    - rid: 636489279218909297
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = names.'
+    - rid: 636489279218909298
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = names.'
+    - rid: 636489279218909299
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = fatigue cost.'
+    - rid: 636489279218909300
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = days passed. {1} = the new day.'
+    - rid: 636489279218909301
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Reminder that expedition items do not last.
+    - rid: 636489279218909302
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The run ended with this expedition.

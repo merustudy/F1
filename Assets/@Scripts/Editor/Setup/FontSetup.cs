@@ -29,6 +29,7 @@ namespace F1.Editor.Setup
         const int AtlasSize = 1024;
         const uint FirstPrintableAscii = 0x20;
         const uint LastPrintableAscii = 0x7E;
+        const uint Ellipsis = 0x2026;
 
         [MenuItem("F1/Setup/Sync Font Asset")]
         public static void SyncMenu()
@@ -58,6 +59,9 @@ namespace F1.Editor.Setup
             {
                 corpus.Add(c);
             }
+
+            // TextMeshPro draws this itself where a text is cut off.
+            corpus.Add(Ellipsis);
 
             foreach (UiStringRow row in LocalizationSetup.ReadSource().Rows)
             {

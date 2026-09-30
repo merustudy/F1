@@ -1,7 +1,7 @@
-Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveEffect,PassiveTarget,PassiveMagnitude
-knight,기사,Knight,140,3,longsword,10,Front,BattleStart,Front,Shield,Self,20
-berserker,광전사,Berserker,120,3,greataxe,12,Front,Always,SelfInDog,WeaponPowerPercent,Self,100
-bishop,주교,Bishop,90,3,healing_staff,10,Rear,Heal,None,Shield,EventTarget,10
-paladin,성기사,Paladin,130,3,mace,9,Front,BattleStart,Front,Shield,AllyAll,8
-archmage,대마법사,Archmage,80,3,fire_staff,10,Rear,Always,Rear,WeaponPowerPercent,Self,25
-spellblade,마검사,Spellblade,100,3,sword,12,Rear,WeaponHit,None,Burn,EventTarget,3
+Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US
+knight,기사,Knight,140,3,longsword,10,Front,BattleStart,Front,Shield,Self,20,전열: 전투 시작 때 자신에게 보호막 {0},Front row: gains {0} Shield at the start of battle
+berserker,광전사,Berserker,120,3,greataxe,12,Front,Always,SelfInDog,WeaponPowerPercent,Self,100,빈사 상태: 무기 피해 +{0}%,At death's door: weapon damage +{0}%
+bishop,주교,Bishop,90,3,healing_staff,10,Rear,Heal,None,Shield,EventTarget,10,회복시킨 대상에게 보호막 {0},Healed targets also gain {0} Shield
+paladin,성기사,Paladin,130,3,mace,9,Front,BattleStart,Front,Shield,AllyAll,8,전열: 전투 시작 때 아군 전체에 보호막 {0},Front row: every ally gains {0} Shield at the start of battle
+archmage,대마법사,Archmage,80,3,fire_staff,10,Rear,Always,Rear,WeaponPowerPercent,Self,25,후열: 무기 피해 +{0}%,Rear row: weapon damage +{0}%
+spellblade,마검사,Spellblade,100,3,sword,12,Rear,WeaponHit,None,Burn,EventTarget,3,무기 적중 시 화상 {0},Weapon hits apply {0} Burn

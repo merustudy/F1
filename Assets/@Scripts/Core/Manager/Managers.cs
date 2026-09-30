@@ -1,6 +1,7 @@
 using System;
 using F1.Flow;
 using F1.Save;
+using F1.UI;
 using UnityEngine;
 
 namespace F1.Core
@@ -22,6 +23,7 @@ namespace F1.Core
         public static SceneManagerEx Scene => Require().Scene;
         public static RunManager Run => Require().Run;
         public static ExpeditionManager Expedition => Require().Expedition;
+        public static UIManager UI => Require().UI;
 
         public static void Configure(ManagerSet set)
         {
@@ -67,6 +69,7 @@ namespace F1.Core
         public SceneManagerEx Scene;
         public RunManager Run;
         public ExpeditionManager Expedition;
+        public UIManager UI;
 
         internal void Validate()
         {
@@ -77,6 +80,7 @@ namespace F1.Core
             RequireManager(Scene, nameof(Scene));
             RequireManager(Run, nameof(Run));
             RequireManager(Expedition, nameof(Expedition));
+            RequireManager(UI, nameof(UI));
         }
 
         static void RequireManager(object manager, string name)

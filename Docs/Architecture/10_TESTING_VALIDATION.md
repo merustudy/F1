@@ -28,7 +28,7 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 
 | 단계 | 하는 일 | 성공 판정 |
 |---|---|---|
-| `setup` | `F1.Editor.Setup.ProjectSetup.ApplyMenu` (Player 설정, Scene, Data 변환, UI String Table, Font Atlas, Addressables 동기화) | Log의 `F1_PROJECT_SETUP_DONE` |
+| `setup` | `F1.Editor.Setup.ProjectSetup.ApplyMenu` (Player 설정, Scene, Data 변환, UI String Table, Font Atlas, 화면 Prefab, Addressables 동기화) | Log의 `F1_PROJECT_SETUP_DONE` |
 | `sim` | `Tools/Sim` Build(순수 C# 폴더가 Unity 없이 컴파일되는지)와 `validate`(Generated가 Source와 같고 Load되는지) | 둘 다 성공 |
 | `editmode` | EditMode Test | 결과 XML |
 | `playmode` | PlayMode Test | 결과 XML |
@@ -43,6 +43,8 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 - Setup 메서드는 멱등하다. 끝에 고정 Log Token을 찍는다.
 - Player Build는 validate-only다. Build 중에 Source, Generated, Addressables Entry, Table을 바꾸지 않는다.
 - 체인이 끝나면 `Assets/InitTestScene*`가 남지 않았는지 확인한다.
+- 화면을 눈으로 볼 때는 `Tools/screenshots.sh`를 쓴다. 모든 화면을 두 Locale로 PNG로 뽑아 저장소 밖에 둔다.
+  그래픽 장치가 필요해서 체인에는 넣지 않는다(`[Explicit]` Test). 끝나면 Render 설정 Asset이 바뀌지 않았는지 스크립트가 확인한다.
 
 ## 작업 후 확인 (Definition of Done)
 

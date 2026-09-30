@@ -16,9 +16,9 @@ namespace F1.Tests
             "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nMapBranchChancePercent,50\nFinalBossLevel,14\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveEffect,PassiveTarget,PassiveMagnitude\n" +
-            "knight,기사,Knight,140,3,sword,10,Front,BattleStart,Front,Shield,Self,20\n" +
-            "bishop,주교,Bishop,90,3,staff,10,Rear,,,,,\n";
+            "Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US\n" +
+            "knight,기사,Knight,140,3,sword,10,Front,BattleStart,Front,Shield,Self,20,보호막 {0},Shield {0}\n" +
+            "bishop,주교,Bishop,90,3,staff,10,Rear,,,,,,,\n";
 
         public const string Items =
             "Id,Name.ko-KR,Name.en-US,Category,CooldownMs,Row,Effect1Kind,Effect1Target,Effect1Power,Effect2Kind,Effect2Target,Effect2Power,RewardWeight\n" +

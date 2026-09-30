@@ -3,6 +3,7 @@ using System.IO;
 using F1.Core;
 using F1.Flow;
 using F1.Save;
+using F1.UI;
 using NUnit.Framework;
 
 namespace F1.Tests
@@ -43,6 +44,7 @@ namespace F1.Tests
         [TestCase("Scene")]
         [TestCase("Run")]
         [TestCase("Expedition")]
+        [TestCase("UI")]
         public void Configure_WhenManagerIsMissing_ThrowsAndStaysUnconfigured(string missing)
         {
             ManagerSet set = CreateFullSet();
@@ -67,6 +69,7 @@ namespace F1.Tests
             Assert.AreSame(set.Scene, Managers.Scene);
             Assert.AreSame(set.Run, Managers.Run);
             Assert.AreSame(set.Expedition, Managers.Expedition);
+            Assert.AreSame(set.UI, Managers.UI);
         }
 
         static ManagerSet CreateFullSet()
@@ -85,6 +88,7 @@ namespace F1.Tests
                 Scene = new SceneManagerEx(),
                 Run = run,
                 Expedition = new ExpeditionManager(data, run),
+                UI = new UIManager(resource),
             };
         }
     }

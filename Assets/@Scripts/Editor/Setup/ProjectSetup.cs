@@ -26,6 +26,7 @@ namespace F1.Editor.Setup
 
             // After the data and the UI strings: the atlas holds the characters of both.
             FontSetup.Sync();
+            UiPrefabSetup.Sync();
             AddressablesSetup.Sync();
 
             AssetDatabase.SaveAssets();

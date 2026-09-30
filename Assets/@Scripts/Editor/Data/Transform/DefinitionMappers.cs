@@ -51,7 +51,8 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "MaxHp", "ItemSlots", "WeaponItemId", "WeaponGrade", "RecommendedRow",
-                "PassiveTrigger", "PassiveCondition", "PassiveEffect", "PassiveTarget", "PassiveMagnitude"));
+                "PassiveTrigger", "PassiveCondition", "PassiveEffect", "PassiveTarget", "PassiveMagnitude")
+                .Concat(CsvRow.LocalizedHeaders(PassiveText)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
                 row.Id(RowMapping.Id),
@@ -61,7 +62,16 @@ namespace F1.Editor.Data
                 row.Id("WeaponItemId"),
                 row.Int("WeaponGrade"),
                 row.Enum<BattleRow>("RecommendedRow"),
-                ReadPassive(row)));
+                ReadPassive(row),
+                ReadPassiveText(row)));
+        }
+
+        const string PassiveText = "PassiveText";
+
+        /// <summary>Empty in every locale when the job has no passive; otherwise required in every locale.</summary>
+        static LocalizedText ReadPassiveText(CsvRow row)
+        {
+            return CsvRow.LocalizedHeaders(PassiveText).All(row.IsEmpty) ? null : row.Localized(PassiveText);
         }
 
         /// <summary>A job without a passive leaves every Passive* cell empty.</summary>
