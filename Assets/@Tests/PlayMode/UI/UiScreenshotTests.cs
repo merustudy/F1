@@ -59,6 +59,15 @@ namespace F1.Tests
             yield return CaptureLap("en-US", "en");
         }
 
+        /// <summary>The boss battle right after an enemy row emptied: who advanced, who fell and which items stopped.</summary>
+        [UnityTest]
+        public IEnumerator AfterAnAdvance_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachAnEnemyAdvanceInTheBossBattle();
+            yield return Capture("ko_15_battle_after_advance");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);
@@ -70,14 +79,13 @@ namespace F1.Tests
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             yield return Capture(prefix + "_02_lobby_empty");
 
+            // knight, spellblade, bishop, archmage from row 1 back: the party the balance was tuned with.
+            string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
             RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
-            for (int i = 0; i < data.Balance.PartySize; i++)
+            for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
             {
-                // knight, bishop and spellblade: the party the balance was tuned with.
-                string[] jobs = { "knight", "bishop", "spellblade" };
                 int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
-                BattleRow row = data.Jobs.Get(jobs[i]).RecommendedRow;
-                UiTestUtil.Click(row == BattleRow.Front ? entries[index].Front : entries[index].Rear);
+                UiTestUtil.Click(entries[index].Rows[i]);
             }
 
             yield return Capture(prefix + "_03_lobby_party");
@@ -140,6 +148,14 @@ namespace F1.Tests
                         if (boss || !capturedReward)
                         {
                             yield return Capture(prefix + (boss ? "_10_boss_result" : "_06_battle_result"));
+                        }
+
+                        if (boss)
+                        {
+                            UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/ShowLog");
+                            yield return Capture(prefix + "_16_battle_log");
+                            UiTestUtil.Click(battle, "Frame/LogPanel/LogBox/LogClose");
+                            yield return UiTestUtil.WaitForRedraw();
                         }
 
                         UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");

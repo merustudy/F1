@@ -21,8 +21,7 @@ namespace F1.UI
         [SerializeField] MapNodeView _nodeTemplate;
         [SerializeField] Image _edgeTemplate;
         [SerializeField] TMP_Text _nodeTitle;
-        [SerializeField] TMP_Text _enemyFront;
-        [SerializeField] TMP_Text _enemyRear;
+        [SerializeField] TMP_Text _enemies;
         [SerializeField] Button _enter;
         [SerializeField] PartyBoardView _board;
 
@@ -89,16 +88,14 @@ namespace F1.UI
             if (!hasSelection)
             {
                 _nodeTitle.text = UiStrings.Get(UiKeys.Map.SelectNode);
-                _enemyFront.text = string.Empty;
-                _enemyRear.text = string.Empty;
+                _enemies.text = string.Empty;
                 return;
             }
 
             MapNode node = expedition.Map.Get(_selectedNodeId);
             EnemyGroupData group = data.EnemyGroups.Get(node.EnemyGroupId);
             _nodeTitle.text = UiStrings.Get(UiKeys.Map.NodeTitle, node.Floor, KindText(node));
-            _enemyFront.text = EnemyLines(data, group.Front);
-            _enemyRear.text = EnemyLines(data, group.Rear);
+            _enemies.text = EnemyLines(data, group);
         }
 
         static string KindText(MapNode node)
@@ -106,18 +103,14 @@ namespace F1.UI
             return UiStrings.Get(node.Kind == MapNodeKind.Boss ? UiKeys.Map.Boss : UiKeys.Map.Battle);
         }
 
-        static string EnemyLines(StaticData data, IReadOnlyList<string> enemyIds)
+        /// <summary>The enemies of a group, one line each, from row 1 back.</summary>
+        static string EnemyLines(StaticData data, EnemyGroupData group)
         {
-            if (enemyIds.Count == 0)
-            {
-                return UiStrings.Get(UiKeys.Common.None);
-            }
-
             var lines = new List<string>();
-            foreach (string id in enemyIds)
+            for (int i = 0; i < group.Enemies.Count; i++)
             {
-                EnemyData enemy = data.Enemies.Get(id);
-                lines.Add(UiStrings.Get(UiKeys.Map.Enemy, UiText.Name(enemy.Name), enemy.MaxHp));
+                EnemyData enemy = data.Enemies.Get(group.Enemies[i]);
+                lines.Add(UiStrings.Get(UiKeys.Map.Enemy, UiText.Row(i + 1), UiText.Name(enemy.Name), enemy.MaxHp));
             }
 
             return string.Join("\n", lines);

@@ -48,12 +48,11 @@ namespace F1.Editor.Setup
             Image info = UiBuild.Panel("NodeInfo", frame, UiPalette.Panel);
             UiBuild.Box(info, 820f, 110f, 1060f, 290f);
             TextMeshProUGUI nodeTitle = UiBuild.Box(UiBuild.Label("NodeTitle", info.transform, 34f, UiPalette.Text), 24f, 16f, 760f, 48f);
-            UiBuild.Box(UiBuild.LocalizedLabel("FrontHeader", info.transform, UiKeys.Map.EnemyFront, 22f, UiPalette.TextDim), 24f, 76f, 370f, 30f);
-            TextMeshProUGUI enemyFront = UiBuild.Label("EnemyFront", info.transform, 26f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(enemyFront, 24f, 110f, 370f, 160f);
-            UiBuild.Box(UiBuild.LocalizedLabel("RearHeader", info.transform, UiKeys.Map.EnemyRear, 22f, UiPalette.TextDim), 410f, 76f, 370f, 30f);
-            TextMeshProUGUI enemyRear = UiBuild.Label("EnemyRear", info.transform, 26f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(enemyRear, 410f, 110f, 370f, 160f);
+
+            // The enemies of the node, one line each from row 1 back. The screen writes the lines.
+            UiBuild.Box(UiBuild.LocalizedLabel("EnemiesHeader", info.transform, UiKeys.Map.Enemies, 22f, UiPalette.TextDim), 24f, 70f, 500f, 30f);
+            TextMeshProUGUI enemies = UiBuild.Label("Enemies", info.transform, 26f, UiPalette.Text, TextAlignmentOptions.TopLeft);
+            UiBuild.Box(enemies, 24f, 106f, 756f, 170f);
             ButtonParts enter = UiBuild.LocalizedButton("Enter", info.transform, UiKeys.Map.Enter, UiPalette.Button, 36f);
             UiBuild.Box(enter.Rect, 800f, 170f, 236f, 96f);
 
@@ -65,8 +64,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_nodeTemplate", nodeTemplate);
             UiBuild.SetReference(screen, "_edgeTemplate", edgeTemplate);
             UiBuild.SetReference(screen, "_nodeTitle", nodeTitle);
-            UiBuild.SetReference(screen, "_enemyFront", enemyFront);
-            UiBuild.SetReference(screen, "_enemyRear", enemyRear);
+            UiBuild.SetReference(screen, "_enemies", enemies);
             UiBuild.SetReference(screen, "_enter", enter.Button);
             UiBuild.SetReference(screen, "_board", board);
             return screen;

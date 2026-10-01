@@ -27,14 +27,6 @@ MonoBehaviour:
     m_Localized: Cancel
     m_Metadata:
       m_Items: []
-  - m_Id: 275767297
-    m_Localized: Front
-    m_Metadata:
-      m_Items: []
-  - m_Id: 275767298
-    m_Localized: Rear
-    m_Metadata:
-      m_Items: []
   - m_Id: 275767299
     m_Localized: F1
     m_Metadata:
@@ -183,16 +175,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864220
-    m_Localized: Enemy front
-    m_Metadata:
-      m_Items: []
-  - m_Id: 9766393864221
-    m_Localized: Enemy rear
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864222
-    m_Localized: '{0} (HP {1})'
+    m_Localized: "{0} \xB7 {1} (HP {2})"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -223,8 +207,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864229
-    m_Localized: Click an item slot, then another, to swap them. The row button switches
-      front and rear.
+    m_Localized: Click an item slot, then another, to swap them. Forward and Back
+      trade places with the mercenary in the next row.
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864230
@@ -245,14 +229,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864234
-    m_Localized: Front row only
-    m_Metadata:
-      m_Items: []
-  - m_Id: 9766393864235
-    m_Localized: Rear row only
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864236
     m_Localized: '{1} damage to {0}'
     m_Metadata:
@@ -275,10 +251,6 @@ MonoBehaviour:
       - rid: 636489278608375844
   - m_Id: 9766393864240
     m_Localized: the front enemy
-    m_Metadata:
-      m_Items: []
-  - m_Id: 9766393864241
-    m_Localized: the rear enemy
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864242
@@ -307,15 +279,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864248
-    m_Localized: Floor {0} battle
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 9766393864249
-    m_Localized: Boss battle
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864250
     m_Localized: '{0}s'
     m_Metadata:
@@ -356,7 +319,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864258
-    m_Localized: "Death's door \xB7 grace {0}s \xB7 hits {1}/{2}"
+    m_Localized: "Death's door \xB7 {0}s \xB7 hits {1}/{2}"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -365,10 +328,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864260
-    m_Localized: Dead
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864261
     m_Localized: Click a potion, then an ally
     m_Metadata:
@@ -617,6 +576,89 @@ MonoBehaviour:
     m_Localized: The setting could not be saved, so the language was not changed.
     m_Metadata:
       m_Items: []
+  - m_Id: 54358996672512
+    m_Localized: Row 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359005061120
+    m_Localized: Row 2
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359005061121
+    m_Localized: Row 3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359005061125
+    m_Localized: Forward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359005061126
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359005061127
+    m_Localized: Only in {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 54359009255426
+    m_Localized: the rearmost enemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 54359009255427
+    m_Localized: 'Fallen: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 54359009255428
+    m_Localized: 'Defeated: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 54359009255429
+    m_Localized: 'Your row {0} is empty: those behind advance'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 54359009255430
+    m_Localized: 'Enemy row {0} is empty: those behind advance'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 66477347561472
+    m_Localized: Row 4
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66477360144384
+    m_Localized: Enemies (from the front)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 66477360144385
+    m_Localized: the front {0} enemies
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 66477360144386
+    m_Localized: the rear {0} enemies
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 206623439052800
+    m_Localized: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206623451635712
+    m_Localized: View log
+    m_Metadata:
+      m_Items: []
+  - m_Id: 206623451635713
+    m_Localized: Battle log
+    m_Metadata:
+      m_Items: []
+  - m_Id: 243114705936384
+    m_Localized: Full-body art here
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -648,7 +690,6 @@ MonoBehaviour:
         - id: 9766393864239
         - id: 9766393864246
         - id: 9766393864247
-        - id: 9766393864248
         - id: 9766393864250
         - id: 9766393864251
         - id: 9766393864252
@@ -686,3 +727,10 @@ MonoBehaviour:
         - id: 9766393864305
         - id: 9766393864306
         - id: 9766393864307
+        - id: 54359005061127
+        - id: 54359009255427
+        - id: 54359009255428
+        - id: 54359009255429
+        - id: 54359009255430
+        - id: 66477360144385
+        - id: 66477360144386

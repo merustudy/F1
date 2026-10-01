@@ -11,7 +11,8 @@ namespace F1.UI
 {
     /// <summary>
     /// The party between battles: each member's HP, row and item slots, and the potions.
-    /// Clicking a slot and then another swaps them; the row button switches front and rear.
+    /// Members are listed from row 1 back. Clicking a slot and then another swaps them; Forward
+    /// and Back trade places with the member in the next row.
     /// The node map and the reward screen both show it.
     /// </summary>
     public sealed class PartyBoardView : MonoBehaviour
@@ -45,7 +46,8 @@ namespace F1.UI
                 _members.Add(view);
 
                 int member = m;
-                view.RowButton.onClick.AddListener(() => OnRowClicked(member));
+                view.Forward.onClick.AddListener(() => OnMoveClicked(member, -1));
+                view.Back.onClick.AddListener(() => OnMoveClicked(member, 1));
                 for (int s = 0; s < view.Slots.Count; s++)
                 {
                     int slot = s;
@@ -76,9 +78,14 @@ namespace F1.UI
             for (int m = 0; m < _members.Count; m++)
             {
                 ExpeditionMember member = expedition.Members[m];
-                BattleRow other = member.Row == BattleRow.Front ? BattleRow.Rear : BattleRow.Front;
-                _members[m].Show(member, manager.CanSetRow(m, other), m == _selectedMember ? _selectedSlot : -1);
+                _members[m].Show(
+                    member,
+                    manager.CanMoveToRow(m, member.Row - 1),
+                    manager.CanMoveToRow(m, member.Row + 1),
+                    m == _selectedMember ? _selectedSlot : -1);
             }
+
+            OrderCards(expedition);
 
             for (int i = 0; i < _potions.Count; i++)
             {
@@ -90,14 +97,42 @@ namespace F1.UI
             _detail.text = selected == null ? string.Empty : UiText.ItemTitle(selected) + "\n" + UiText.ItemSummary(selected);
         }
 
-        void OnRowClicked(int member)
+        /// <summary>Lists the living from row 1 back, then the dead. Only the order on screen changes.</summary>
+        void OrderCards(ExpeditionState expedition)
+        {
+            var order = new List<int>();
+            for (int m = 0; m < _members.Count; m++)
+            {
+                order.Add(m);
+            }
+
+            // Ties fall back to the member order, so the result does not depend on the sort being stable.
+            order.Sort((a, b) =>
+            {
+                ExpeditionMember x = expedition.Members[a];
+                ExpeditionMember y = expedition.Members[b];
+                if (x.Alive != y.Alive)
+                {
+                    return x.Alive ? -1 : 1;
+                }
+
+                return x.Alive && x.Row != y.Row ? x.Row.CompareTo(y.Row) : a.CompareTo(b);
+            });
+
+            foreach (int m in order)
+            {
+                _members[m].transform.SetAsLastSibling();
+            }
+        }
+
+        /// <param name="step">-1 moves the member one row forward, 1 one row back.</param>
+        void OnMoveClicked(int member, int step)
         {
             ExpeditionManager manager = Managers.Expedition;
-            BattleRow row = manager.Expedition.Members[member].Row;
-            BattleRow other = row == BattleRow.Front ? BattleRow.Rear : BattleRow.Front;
-            if (manager.CanSetRow(member, other))
+            int row = manager.Expedition.Members[member].Row + step;
+            if (manager.CanMoveToRow(member, row))
             {
-                manager.SetRow(member, other);
+                manager.MoveToRow(member, row);
                 Refresh();
             }
         }

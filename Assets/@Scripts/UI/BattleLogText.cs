@@ -83,6 +83,8 @@ namespace F1.UI
                     return UiStrings.Get(e.C == 1 ? UiKeys.Log.DeathFailed : UiKeys.Log.DeathSurvived, UnitName(engine, e.Target), e.A, e.B);
                 case BattleEventKind.Died:
                     return UiStrings.Get(UiKeys.Log.Died, UnitName(engine, e.Target));
+                case BattleEventKind.RowsAdvanced:
+                    return UiStrings.Get(e.A == (int)BattleSide.Party ? UiKeys.Log.PartyAdvanced : UiKeys.Log.EnemyAdvanced, e.B);
                 case BattleEventKind.PotionUsed:
                     return UiStrings.Get(UiKeys.Log.PotionUsed, UiText.Name(Managers.Data.Data.Potions.Get(e.Id).Name), UnitName(engine, e.Target));
                 case BattleEventKind.RetreatAttempted:

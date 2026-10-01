@@ -79,17 +79,15 @@ namespace F1.Tests
             Assert.AreEqual(data.Mercenaries.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length);
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Expedition/Depart").interactable, "An empty party cannot depart.");
 
-            // Party: the first three mercenaries of the roster, each in the row its job recommends.
+            // Party: the first mercenaries of the roster, one per row from the front.
             RunState run = Managers.Run.Run;
             RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
-            for (int i = 0; i < data.Balance.PartySize; i++)
-            {
-                BattleRow row = data.Jobs.Get(run.Roster[i].JobId).RecommendedRow;
-                UiTestUtil.Click(row == BattleRow.Front ? entries[i].Front : entries[i].Rear);
-            }
+            UiTestUtil.FillParty(lobby);
 
             Assert.AreEqual(data.Balance.PartySize, run.Party.Count);
-            Assert.IsFalse(entries[data.Balance.PartySize].Front.interactable, "The party is full.");
+            Assert.IsTrue(
+                entries[data.Balance.PartySize].Rows.Where(button => button.gameObject.activeSelf).All(button => !button.interactable),
+                "The party is full.");
 
             // Lobby -> node map
             UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
@@ -181,7 +179,7 @@ namespace F1.Tests
 
             // A potion is armed by clicking it and used by clicking an ally.
             PotionSlotView[] potions = UiTestUtil.Views<PotionSlotView>(screen);
-            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/PartyFront"));
+            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/PartyRow1"));
             Assert.IsFalse(units[0].Button.interactable, "Allies are not clickable until a potion is armed.");
             UiTestUtil.Click(potions[0].Button);
             yield return null;
@@ -193,7 +191,7 @@ namespace F1.Tests
             Assert.IsNull(engine.Potions[0]);
 
             // Retreat is an attempt; whatever the roll, it is recorded.
-            UiTestUtil.Click(screen, "Frame/Controls/Retreat");
+            UiTestUtil.Click(screen, "Frame/Header/Retreat");
             Assert.AreEqual(2, engine.Inputs.Count);
             Assert.AreEqual(BattleInputKind.Retreat, engine.Inputs[1].Kind);
             Assert.AreEqual(1, engine.Events.Count(e => e.Kind == BattleEventKind.RetreatAttempted));
@@ -283,19 +281,200 @@ namespace F1.Tests
             Assert.IsFalse(Managers.UI.IsBusy);
         }
 
-        /// <summary>New run, the first three mercenaries in their recommended rows, depart and enter the first node.</summary>
-        static IEnumerator EnterFirstBattle()
+        [UnityTest]
+        public IEnumerator Lobby_RowButtons_JoinTheFirstEmptyRow_TradePlaces_AndRemove()
         {
-            StaticData data = Managers.Data.Data;
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            RunState run = Managers.Run.Run;
             RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
-            for (int i = 0; i < data.Balance.PartySize; i++)
+            string first = UiText.Mercenary(run.Roster[0].Id);
+            string second = UiText.Mercenary(run.Roster[1].Id);
+            string empty = UiStrings.Get(UiKeys.Lobby.EmptyRow);
+
+            int size = Managers.Data.Data.Balance.PartySize;
+            Assert.GreaterOrEqual(size, 2, "The cases below put two mercenaries in the party.");
+
+            // The party lines, one per row the party can stand in.
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
-                BattleRow row = data.Jobs.Get(Managers.Run.Run.Roster[i].JobId).RecommendedRow;
-                UiTestUtil.Click(row == BattleRow.Front ? entries[i].Front : entries[i].Rear);
+                Assert.AreEqual(row <= size, UiTestUtil.At(lobby, $"Frame/Expedition/PartyRow{row}").gameObject.activeSelf, $"Party row {row}");
             }
+
+            string[] RowTexts()
+            {
+                return Enumerable.Range(1, size).Select(row => UiTestUtil.TextAt(lobby, $"Frame/Expedition/PartyRow{row}/PartyRowNames{row}")).ToArray();
+            }
+
+            // The names from row 1 back; the rows after them are empty.
+            string[] Lined(params string[] fromFront)
+            {
+                return Enumerable.Range(0, size).Select(i => i < fromFront.Length ? fromFront[i] : empty).ToArray();
+            }
+
+            // The shown row buttons of an entry (one per row the party can stand in), by whether they can be clicked.
+            bool[] RowButtons(RosterEntryView entry)
+            {
+                bool[] shown = entry.Rows.Where(button => button.gameObject.activeSelf).Select(button => button.interactable).ToArray();
+                Assert.AreEqual(size, shown.Length, "One button per row the party can stand in.");
+                return shown;
+            }
+
+            bool[] Lit(params int[] rows)
+            {
+                return Enumerable.Range(1, size).Select(rows.Contains).ToArray();
+            }
+
+            // Nobody is in the party: a newcomer can only take row 1, then the next one row 2.
+            CollectionAssert.AreEqual(Lit(1), RowButtons(entries[0]));
+            UiTestUtil.Click(entries[0].Rows[0]);
+            CollectionAssert.AreEqual(Lit(2), RowButtons(entries[1]));
+            UiTestUtil.Click(entries[1].Rows[1]);
+            CollectionAssert.AreEqual(Lined(first, second), RowTexts());
+
+            // A member can move only to a row where someone else stands: the two trade places.
+            // The button of the row the member stands in stays lit, but clicking it changes nothing.
+            CollectionAssert.AreEqual(Lit(1, 2), RowButtons(entries[1]));
+            UiTestUtil.Click(entries[1].Rows[1]);
+            CollectionAssert.AreEqual(Lined(first, second), RowTexts());
+            UiTestUtil.Click(entries[1].Rows[0]);
+            CollectionAssert.AreEqual(Lined(second, first), RowTexts());
+
+            // Taking the one in row 1 out: the one behind advances.
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(entries[1].Remove);
+            CollectionAssert.AreEqual(Lined(first), RowTexts());
+            Assert.AreEqual(1, run.Party.Single().Row);
+            Assert.IsFalse(entries[1].Remove.gameObject.activeSelf, "Only party members can be taken out.");
+        }
+
+        [UnityTest]
+        public IEnumerator Board_ForwardAndBack_TradePlacesWithTheNextRow_AndTheListFollowsTheRows()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            string front = expedition.Members.Single(m => m.Row == 1).MercenaryId;
+            string middle = expedition.Members.Single(m => m.Row == 2).MercenaryId;
+
+            // Cards are listed from row 1 back. Row 1 cannot go further forward, the last row not further back.
+            BoardMemberView[] cards = UiTestUtil.Views<BoardMemberView>(map);
+            Assert.AreEqual(expedition.Members.Count, cards.Length);
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(cards[0], "MemberName"));
+            Assert.IsFalse(cards[0].Forward.interactable);
+            Assert.IsTrue(cards[0].Back.interactable);
+            Assert.IsTrue(cards[cards.Length - 1].Forward.interactable);
+            Assert.IsFalse(cards[cards.Length - 1].Back.interactable);
+
+            UiTestUtil.Click(cards[0].Back);
+            yield return null;
+
+            Assert.AreEqual(2, expedition.Members.Single(m => m.MercenaryId == front).Row);
+            Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == middle).Row);
+            cards = UiTestUtil.Views<BoardMemberView>(map);
+            Assert.AreEqual(UiText.Mercenary(middle), UiTestUtil.TextAt(cards[0], "MemberName"));
+            Assert.AreEqual(UiText.Row(1), UiTestUtil.TextAt(cards[0], "MemberRow"));
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(cards[1], "MemberName"));
+            Assert.AreEqual(UiText.Row(2), UiTestUtil.TextAt(cards[1], "MemberRow"));
+
+            UiTestUtil.Click(cards[1].Forward);
+            Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_WhenARowEmpties_TheCardsBehindMoveForward_AndTheDeadAreNamed()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachAnEnemyAdvanceInTheBossBattle();
+            BattleScreen screen = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            BattleEvent advanced = engine.Events.First(e => e.Kind == BattleEventKind.RowsAdvanced);
+            BattleUnit[] dead = engine.Enemies.Where(u => !u.Alive).ToArray();
+            BattleUnit[] living = engine.Enemies.Where(u => u.Alive).ToArray();
+            Assert.IsNotEmpty(dead);
+            Assert.IsNotEmpty(living);
+
+            // Only the living have a card, one per column, and each stands in the column of the row the engine says.
+            var shown = new System.Collections.Generic.List<BattleUnitView>();
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                BattleUnitView[] inColumn = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/EnemyRow" + row));
+                Assert.LessOrEqual(inColumn.Length, 1, $"Row {row} holds one unit.");
+                foreach (BattleUnitView view in inColumn)
+                {
+                    Assert.AreEqual(row, view.Unit.Row, UiText.Name(view.Unit.Setup.Name));
+                    Assert.IsTrue(view.Unit.Alive);
+                    shown.Add(view);
+                }
+            }
+
+            CollectionAssert.AreEquivalent(living, shown.Select(view => view.Unit));
+            Assert.AreEqual(1, UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/EnemyRow1")).Length, "Someone advanced into row 1.");
+
+            // The party's columns: one per row the party can stand in; the rest of the side's rows are not shown.
+            int partyRows = engine.Setup.Balance.PartySize;
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                Assert.AreEqual(row <= partyRows, UiTestUtil.At(screen, "Frame/Field/PartyRow" + row).gameObject.activeSelf, $"Party row {row}");
+            }
+
+            // An item that cannot be used in the new row is dimmed and its cooldown does not fill.
+            foreach (BattleUnitView view in shown)
+            {
+                BattleItemView[] items = UiTestUtil.Views<BattleItemView>(view);
+                for (int i = 0; i < items.Length; i++)
+                {
+                    Color expected = view.Unit.Items[i].Active ? UiPalette.Text : UiPalette.TextDim;
+                    Assert.AreEqual(expected, items[i].GetComponentInChildren<TMPro.TMP_Text>().color, UiText.Name(view.Unit.Items[i].Equipped.Item.Name));
+                }
+            }
+
+            // While the battle runs there is no log on screen.
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/LogPanel").gameObject.activeSelf);
+
+            // When the battle has ended, the result panel opens the whole log: the dead are named and the advance is a line of it.
+            while (!Managers.Expedition.Battle.IsFinished)
+            {
+                Managers.Expedition.AdvanceBattle(250);
+            }
+
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(BattleResult.Victory, engine.Result);
+            UiTestUtil.Click(screen, "Frame/ResultPanel/ResultBox/ShowLog");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(screen, "Frame/LogPanel").gameObject.activeSelf);
+            Assert.IsEmpty(UiTestUtil.TextAt(screen, "Frame/LogPanel/LogBox/LogPartyFallen"), "Nobody of the party died.");
+            string fallen = UiTestUtil.TextAt(screen, "Frame/LogPanel/LogBox/LogEnemyFallen");
+            foreach (BattleUnit unit in engine.Enemies)
+            {
+                StringAssert.Contains(UiText.Name(unit.Setup.Name), fallen);
+            }
+
+            string log = string.Join("\n", UiTestUtil.Views<TMPro.TMP_Text>(UiTestUtil.At(screen, "Frame/LogPanel/LogBox/LogScroll")).Select(t => t.text));
+            StringAssert.Contains(UiStrings.Get(UiKeys.Log.EnemyAdvanced, advanced.B), log);
+            StringAssert.Contains(UiStrings.Get(UiKeys.Log.Died, UiText.Name(dead[0].Setup.Name)), log);
+
+            UiTestUtil.Click(screen, "Frame/LogPanel/LogBox/LogClose");
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/LogPanel").gameObject.activeSelf);
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(screen, "Frame/ResultPanel/ResultBox/Continue");
+            yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+        }
+
+        /// <summary>New run, the first mercenaries of the roster one per row, depart and enter the first node.</summary>
+        static IEnumerator EnterFirstBattle()
+        {
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            UiTestUtil.FillParty(lobby);
 
             UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);

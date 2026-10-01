@@ -24,8 +24,8 @@ namespace F1.UI
         [SerializeField] TMP_Text _dungeonAffinity;
         [SerializeField] TMP_Text _dungeonCost;
         [SerializeField] TMP_Text _dungeonCleared;
-        [SerializeField] TMP_Text _frontNames;
-        [SerializeField] TMP_Text _rearNames;
+        [SerializeField] GameObject[] _partyRows;
+        [SerializeField] TMP_Text[] _rowNames;
         [SerializeField] TMP_Text _departStatus;
         [SerializeField] Button _rest;
         [SerializeField] TMP_Text _restLabel;
@@ -64,8 +64,12 @@ namespace F1.UI
             run.ClearedDungeons.TryGetValue(dungeon.Id, out int cleared);
             _dungeonCleared.text = UiStrings.Get(UiKeys.Lobby.Cleared, cleared);
 
-            _frontNames.text = RowNames(run, BattleRow.Front);
-            _rearNames.text = RowNames(run, BattleRow.Rear);
+            // One line per row the party can stand in: a side has more rows than the party has members.
+            for (int i = 0; i < _rowNames.Length; i++)
+            {
+                _partyRows[i].SetActive(i < balance.PartySize);
+                _rowNames[i].text = RowNames(run, i + 1);
+            }
 
             DepartCheck check = Managers.Run.CanDepart(dungeon.Id);
             _depart.interactable = check == DepartCheck.Ok;
@@ -93,22 +97,31 @@ namespace F1.UI
                     _entries.Add(mercenary.Id, entry);
 
                     string id = mercenary.Id;
-                    entry.Front.onClick.AddListener(() => PutInParty(id, BattleRow.Front));
-                    entry.Rear.onClick.AddListener(() => PutInParty(id, BattleRow.Rear));
+                    for (int i = 0; i < entry.Rows.Count; i++)
+                    {
+                        int row = i + 1;
+                        entry.Rows[i].onClick.AddListener(() => PutInRow(id, row));
+                    }
+
                     entry.Remove.onClick.AddListener(() => RemoveFromParty(id));
                 }
 
+                // Which rows the mercenary can take is a rule; the lobby only asks.
+                var canTake = new bool[Mathf.Min(entry.Rows.Count, data.Balance.PartySize)];
+                for (int i = 0; i < canTake.Length; i++)
+                {
+                    canTake[i] = Managers.Run.CanPlaceInParty(mercenary.Id, i + 1);
+                }
+
                 JobData job = data.Jobs.Get(mercenary.JobId);
-                BattleRow? row = RowOf(run, mercenary.Id);
                 entry.Show(
                     UiText.Mercenary(mercenary.Id),
                     UiText.Name(job.Name),
                     UiText.Passive(job),
                     mercenary.Fatigue,
                     data.Balance.MaxFatigue,
-                    row,
-                    Managers.Run.PartyProblem(PartyWith(run, mercenary.Id, BattleRow.Front)) == null,
-                    Managers.Run.PartyProblem(PartyWith(run, mercenary.Id, BattleRow.Rear)) == null);
+                    RowOf(run, mercenary.Id),
+                    canTake);
             }
 
             var gone = new List<string>();
@@ -127,7 +140,8 @@ namespace F1.UI
             }
         }
 
-        static BattleRow? RowOf(RunState run, string mercenaryId)
+        /// <summary>The row the mercenary holds in the party, or 0 when it is not in the party.</summary>
+        static int RowOf(RunState run, string mercenaryId)
         {
             foreach (PartySlot slot in run.Party)
             {
@@ -137,30 +151,10 @@ namespace F1.UI
                 }
             }
 
-            return null;
+            return 0;
         }
 
-        /// <summary>The current party with one mercenary put in a row: moved if already in, added at the end otherwise.</summary>
-        static List<PartySlot> PartyWith(RunState run, string mercenaryId, BattleRow row)
-        {
-            var party = new List<PartySlot>();
-            bool found = false;
-            foreach (PartySlot slot in run.Party)
-            {
-                bool isTarget = slot.MercenaryId == mercenaryId;
-                found |= isTarget;
-                party.Add(new PartySlot { MercenaryId = slot.MercenaryId, Row = isTarget ? row : slot.Row });
-            }
-
-            if (!found)
-            {
-                party.Add(new PartySlot { MercenaryId = mercenaryId, Row = row });
-            }
-
-            return party;
-        }
-
-        static string RowNames(RunState run, BattleRow row)
+        static string RowNames(RunState run, int row)
         {
             var ids = new List<string>();
             foreach (PartySlot slot in run.Party)
@@ -185,28 +179,19 @@ namespace F1.UI
             }
         }
 
-        void PutInParty(string mercenaryId, BattleRow row)
+        /// <summary>Joins the party in that row, or trades places with the mercenary standing there.</summary>
+        void PutInRow(string mercenaryId, int row)
         {
-            List<PartySlot> party = PartyWith(Managers.Run.Run, mercenaryId, row);
-            if (Managers.Run.PartyProblem(party) == null)
+            if (Managers.Run.CanPlaceInParty(mercenaryId, row))
             {
-                Managers.Run.SetParty(party);
+                Managers.Run.PlaceInParty(mercenaryId, row);
                 Refresh();
             }
         }
 
         void RemoveFromParty(string mercenaryId)
         {
-            var party = new List<PartySlot>();
-            foreach (PartySlot slot in Managers.Run.Run.Party)
-            {
-                if (slot.MercenaryId != mercenaryId)
-                {
-                    party.Add(new PartySlot { MercenaryId = slot.MercenaryId, Row = slot.Row });
-                }
-            }
-
-            Managers.Run.SetParty(party);
+            Managers.Run.RemoveFromParty(mercenaryId);
             Refresh();
         }
 

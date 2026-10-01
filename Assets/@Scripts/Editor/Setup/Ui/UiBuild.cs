@@ -87,6 +87,18 @@ namespace F1.Editor.Setup
             return image;
         }
 
+        /// <summary>One of Unity's built-in UI sprites (a circle, a rounded frame), for placeholder shapes.</summary>
+        public static Sprite BuiltinSprite(string path)
+        {
+            var sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>(path);
+            if (sprite == null)
+            {
+                throw new InvalidOperationException($"Built-in sprite '{path}' was not found.");
+            }
+
+            return sprite;
+        }
+
         public static TextMeshProUGUI Text(
             string name,
             Transform parent,
@@ -143,6 +155,22 @@ namespace F1.Editor.Setup
             rect.anchoredPosition = new Vector2(x, -y);
             rect.sizeDelta = new Vector2(width, height);
             return rect;
+        }
+
+        /// <summary>
+        /// Stretches the rect across its parent's width, at a fixed distance from the top and with a
+        /// fixed height. For content of a card whose width is set at runtime.
+        /// </summary>
+        public static T Line<T>(T component, float top, float height, float left = 0f, float right = 0f)
+            where T : Component
+        {
+            var rect = (RectTransform)component.transform;
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.offsetMin = new Vector2(left, -(top + height));
+            rect.offsetMax = new Vector2(-right, -top);
+            return component;
         }
 
         /// <summary>Gives a rect a fixed size inside a layout group.</summary>
@@ -350,6 +378,61 @@ namespace F1.Editor.Setup
             group.constraintCount = columns;
             group.childAlignment = TextAnchor.UpperLeft;
             return group;
+        }
+
+        // ---- Scrolling -----------------------------------------------------------------------
+
+        /// <summary>
+        /// A vertically scrolling area with a scrollbar on the right. The content stacks its children
+        /// and grows with them; the mouse wheel over the area scrolls it.
+        /// </summary>
+        public static ScrollRect VerticalScroll(string name, Transform parent, float scrollbarWidth, out RectTransform content)
+        {
+            RectTransform root = Rect(name, parent);
+            var scroll = root.gameObject.AddComponent<ScrollRect>();
+
+            // The viewport is a raycast target so that the wheel reaches the scroll rect.
+            Image viewport = Image(name + "Viewport", root, UiPalette.Slot, raycastTarget: true);
+            Stretch(viewport.rectTransform, 0f, 0f, scrollbarWidth + 8f, 0f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+
+            content = Rect(name + "Content", viewport.transform);
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.offsetMin = Vector2.zero;
+            content.offsetMax = Vector2.zero;
+            VerticalLayoutGroup stack = Vertical(content, 0f, 12);
+            stack.childControlWidth = true;
+            stack.childForceExpandWidth = true;
+            stack.childControlHeight = true;
+            var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            Image track = Image(name + "Scrollbar", root, UiPalette.Slot, raycastTarget: true);
+            track.rectTransform.anchorMin = new Vector2(1f, 0f);
+            track.rectTransform.anchorMax = Vector2.one;
+            track.rectTransform.pivot = new Vector2(1f, 1f);
+            track.rectTransform.offsetMin = new Vector2(-scrollbarWidth, 0f);
+            track.rectTransform.offsetMax = Vector2.zero;
+            RectTransform sliding = Rect(name + "SlidingArea", track.transform);
+            Stretch(sliding, 2f, 2f, 2f, 2f);
+            Image handle = Image(name + "Handle", sliding, UiPalette.ButtonQuiet, raycastTarget: true);
+            Stretch(handle.rectTransform);
+            var scrollbar = track.gameObject.AddComponent<Scrollbar>();
+            scrollbar.targetGraphic = handle;
+            scrollbar.handleRect = handle.rectTransform;
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+            scroll.viewport = viewport.rectTransform;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 40f;
+            scroll.verticalScrollbar = scrollbar;
+            scroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            return scroll;
         }
 
         // ---- Serialized references -----------------------------------------------------------

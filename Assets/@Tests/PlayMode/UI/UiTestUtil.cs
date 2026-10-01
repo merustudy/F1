@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using F1.Core;
+using F1.Data;
+using F1.Flow;
+using F1.Gameplay;
 using F1.UI;
 using NUnit.Framework;
 using TMPro;
@@ -124,6 +127,96 @@ namespace F1.Tests
             where T : Component
         {
             return root.GetComponentsInChildren<T>(false);
+        }
+
+        /// <summary>
+        /// Fills the party from the top of the roster list: the first mercenary takes row 1, the
+        /// second row 2 and so on. Each click is on the only row a newcomer can take.
+        /// </summary>
+        public static void FillParty(LobbyScreen lobby)
+        {
+            RosterEntryView[] entries = Views<RosterEntryView>(lobby);
+            int size = Managers.Data.Data.Balance.PartySize;
+            for (int i = 0; i < size; i++)
+            {
+                Click(entries[i].Rows[i]);
+            }
+        }
+
+        /// <summary>
+        /// From the title: a new run, a full party, and through the first dungeon by its screens up
+        /// to the boss. The mercenary in row 1 is staged so strong that every battle is won and
+        /// nobody falls. The boss battle is left paused at the moment an enemy has died and those
+        /// behind it have advanced.
+        /// </summary>
+        public static IEnumerator ReachAnEnemyAdvanceInTheBossBattle()
+        {
+            StaticData data = Managers.Data.Data;
+            string dungeonId = data.Dungeons.Ordered[0].Id;
+            Assert.Greater(data.BossGroupOf(dungeonId).Enemies.Count, 1, "This needs a boss group with someone behind row 1.");
+
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            FillParty(Screen<LobbyScreen>());
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+
+            // Staged directly: reaching the boss with everyone alive by play alone is a matter of luck.
+            ExpeditionMember champion = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
+            champion.Items[0] = new EquippedItem(champion.Items[0].Item, 999);
+            champion.MaxHp = 100000;
+            champion.Hp = champion.MaxHp;
+
+            int guard = 0;
+            while (true)
+            {
+                Assert.Less(++guard, 50, "The boss was not reached.");
+                switch (Managers.Expedition.Phase)
+                {
+                    case GamePhase.NodeMap:
+                        NodeMapScreen map = Screen<NodeMapScreen>();
+                        Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+                        Click(map, "Frame/NodeInfo/Enter");
+                        yield return WaitForScreen(ScreenId.Battle);
+                        break;
+
+                    case GamePhase.Battle:
+                        BattleScreen battle = Screen<BattleScreen>();
+                        BattleEngine engine = Managers.Expedition.Battle.Engine;
+                        battle.Clock.Paused = true;
+                        if (Managers.Expedition.Battle.Node.Kind == MapNodeKind.Boss)
+                        {
+                            while (!engine.Events.Any(e => e.Kind == BattleEventKind.RowsAdvanced && e.A == (int)BattleSide.Enemy))
+                            {
+                                Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The boss battle ended before an enemy row emptied.");
+                                Managers.Expedition.AdvanceBattle(100);
+                            }
+
+                            yield return WaitForRedraw();
+                            yield break;
+                        }
+
+                        while (!Managers.Expedition.Battle.IsFinished)
+                        {
+                            Managers.Expedition.AdvanceBattle(250);
+                        }
+
+                        Assert.AreEqual(BattleResult.Victory, engine.Result);
+                        yield return WaitForRedraw();
+                        Click(battle, "Frame/ResultPanel/ResultBox/Continue");
+                        yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+                        break;
+
+                    case GamePhase.Reward:
+                        Click(Screen<RewardScreen>(), "Frame/Skip");
+                        yield return WaitForScreen(ScreenId.NodeMap);
+                        break;
+
+                    default:
+                        Assert.Fail($"Unexpected phase {Managers.Expedition.Phase}.");
+                        break;
+                }
+            }
         }
 
         public static T ViewNamed<T>(Component root, string text)

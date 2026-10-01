@@ -31,6 +31,7 @@ namespace F1.UI
         public static readonly Color Gauge = Rgb(0x6B, 0x5B, 0x1E);
         public static readonly Color Dead = Rgb(0x33, 0x33, 0x38);
         public static readonly Color Line = Rgb(0x55, 0x5C, 0x6B);
+        public static readonly Color Icon = Rgb(0x6C, 0x78, 0x91);
 
         static Color Rgb(int r, int g, int b)
         {

@@ -25,16 +25,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375836
-  - m_Id: 275767297
-    m_Key: Common.Front
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375837
-  - m_Id: 275767298
-    m_Key: Common.Rear
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375838
   - m_Id: 275767299
     m_Key: Title.GameName
     m_Metadata:
@@ -205,16 +195,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909212
-  - m_Id: 9766393864220
-    m_Key: Map.EnemyFront
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909213
-  - m_Id: 9766393864221
-    m_Key: Map.EnemyRear
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909214
   - m_Id: 9766393864222
     m_Key: Map.Enemy
     m_Metadata:
@@ -275,16 +255,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909226
-  - m_Id: 9766393864234
-    m_Key: Item.RowFront
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909227
-  - m_Id: 9766393864235
-    m_Key: Item.RowRear
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909228
   - m_Id: 9766393864236
     m_Key: Effect.Damage
     m_Metadata:
@@ -310,11 +280,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909233
-  - m_Id: 9766393864241
-    m_Key: Target.EnemyRear
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909234
   - m_Id: 9766393864242
     m_Key: Target.EnemyAll
     m_Metadata:
@@ -345,16 +310,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909240
-  - m_Id: 9766393864248
-    m_Key: Battle.NodeBattle
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909241
-  - m_Id: 9766393864249
-    m_Key: Battle.NodeBoss
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909242
   - m_Id: 9766393864250
     m_Key: Battle.Time
     m_Metadata:
@@ -405,11 +360,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909252
-  - m_Id: 9766393864260
-    m_Key: Battle.Dead
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909253
   - m_Id: 9766393864261
     m_Key: Battle.PotionHint
     m_Metadata:
@@ -680,6 +630,101 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279820791808
+  - m_Id: 54358996672512
+    m_Key: Common.Row1
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762048
+  - m_Id: 54359005061120
+    m_Key: Common.Row2
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762049
+  - m_Id: 54359005061121
+    m_Key: Common.Row3
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762050
+  - m_Id: 54359005061125
+    m_Key: Board.Forward
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762054
+  - m_Id: 54359005061126
+    m_Key: Board.Back
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762055
+  - m_Id: 54359005061127
+    m_Key: Item.Rows
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762056
+  - m_Id: 54359009255426
+    m_Key: Target.EnemyBack
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762059
+  - m_Id: 54359009255427
+    m_Key: Battle.PartyFallen
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762060
+  - m_Id: 54359009255428
+    m_Key: Battle.EnemyFallen
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762061
+  - m_Id: 54359009255429
+    m_Key: Log.PartyAdvanced
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762062
+  - m_Id: 54359009255430
+    m_Key: Log.EnemyAdvanced
+    m_Metadata:
+      m_Items:
+      - rid: 636489282005762063
+  - m_Id: 66477347561472
+    m_Key: Common.Row4
+    m_Metadata:
+      m_Items:
+      - rid: 636489282763358208
+  - m_Id: 66477360144384
+    m_Key: Map.Enemies
+    m_Metadata:
+      m_Items:
+      - rid: 636489282763358209
+  - m_Id: 66477360144385
+    m_Key: Target.EnemyFrontMany
+    m_Metadata:
+      m_Items:
+      - rid: 636489282763358210
+  - m_Id: 66477360144386
+    m_Key: Target.EnemyBackMany
+    m_Metadata:
+      m_Items:
+      - rid: 636489282763358211
+  - m_Id: 206623439052800
+    m_Key: Common.Close
+    m_Metadata:
+      m_Items:
+      - rid: 636489291522375680
+  - m_Id: 206623451635712
+    m_Key: Battle.ShowLog
+    m_Metadata:
+      m_Items:
+      - rid: 636489291522375681
+  - m_Id: 206623451635713
+    m_Key: Battle.LogTitle
+    m_Metadata:
+      m_Items:
+      - rid: 636489291522375682
+  - m_Id: 243114705936384
+    m_Key: Battle.FigurePlaceholder
+    m_Metadata:
+      m_Items:
+      - rid: 8623673131002232832
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -699,14 +744,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Generic cancel button.
-    - rid: 636489278608375837
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Front row.
-    - rid: 636489278608375838
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Rear row.
     - rid: 636489278608375839
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -844,18 +881,11 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = floor. {1} = node kind.'
-    - rid: 636489279218909213
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the enemy front row.
-    - rid: 636489279218909214
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the enemy rear row.
     - rid: 636489279218909215
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = enemy name. {1} = its max HP.'
+        m_CommentText: One enemy of a node. {0} = the row it stands in. {1} = enemy
+          name. {2} = its max HP.
     - rid: 636489279218909216
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -900,14 +930,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = seconds.'
-    - rid: 636489279218909227
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The item only works in the front row.
-    - rid: 636489279218909228
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The item only works in the rear row.
     - rid: 636489279218909229
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -927,11 +949,7 @@ MonoBehaviour:
     - rid: 636489279218909233
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Used as {0} of Effect.*.
-    - rid: 636489279218909234
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Used as {0} of Effect.*.
+        m_CommentText: Used as {0} of Effect.*. The enemy in row 1.
     - rid: 636489279218909235
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -956,14 +974,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = amount.'
-    - rid: 636489279218909241
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = floor.'
-    - rid: 636489279218909242
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of a boss battle.
     - rid: 636489279218909243
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1005,10 +1015,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: At 0 HP after grace. {0} = death chance per hit.
-    - rid: 636489279218909253
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Shown on a dead unit.
     - rid: 636489279218909254
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1232,3 +1238,84 @@ MonoBehaviour:
       data:
         m_CommentText: Shown when changing the language failed because settings could
           not be written.
+    - rid: 636489282005762048
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row 1: the row facing the other side.'
+    - rid: 636489282005762049
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row 2.
+    - rid: 636489282005762050
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row 3.
+    - rid: 636489282005762054
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Moves a mercenary one row forward; the one standing there
+          moves back.
+    - rid: 636489282005762055
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Moves a mercenary one row back; the one standing there moves
+          forward.
+    - rid: 636489282005762056
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "The item only works while its owner stands in these rows.
+          {0} = row names, for example \"1\uC5F4, 2\uC5F4\"."
+    - rid: 636489282005762059
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*. The rearmost enemy.
+    - rid: 636489282005762060
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Mercenaries who died in this battle. {0} = names.
+    - rid: 636489282005762061
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Enemies killed in this battle. {0} = names.
+    - rid: 636489282005762062
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A row of the party emptied. {0} = that row.
+    - rid: 636489282005762063
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A row of the enemy emptied. {0} = that row.
+    - rid: 636489282763358208
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row 4: the rearmost row.'
+    - rid: 636489282763358209
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the list of enemies waiting at a node.
+    - rid: 636489282763358210
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*. {0} = how many enemies are hit counted
+          from the front (2 or more).
+    - rid: 636489282763358211
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Used as {0} of Effect.*. {0} = how many enemies are hit counted
+          from the back (2 or more).
+    - rid: 636489291522375680
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Closes a panel.
+    - rid: 636489291522375681
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Opens the log of the finished battle from the result panel.
+    - rid: 636489291522375682
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the battle log viewer.
+    - rid: 8623673131002232832
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown in the figure placeholder of a unit until there is art.

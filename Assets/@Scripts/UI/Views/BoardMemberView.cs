@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace F1.UI
 {
-    /// <summary>One party member on the party board: HP, row and item slots.</summary>
+    /// <summary>One party member on the party board: HP, row, the buttons that trade places and item slots.</summary>
     public sealed class BoardMemberView : MonoBehaviour
     {
         [SerializeField] Image _background;
@@ -14,8 +14,9 @@ namespace F1.UI
         [SerializeField] TMP_Text _job;
         [SerializeField] TMP_Text _hp;
         [SerializeField] UiBar _hpBar;
-        [SerializeField] Button _row;
         [SerializeField] TMP_Text _rowLabel;
+        [SerializeField] Button _forward;
+        [SerializeField] Button _back;
         [SerializeField] ItemSlotView _slotTemplate;
         [SerializeField] Transform _slotParent;
 
@@ -23,7 +24,12 @@ namespace F1.UI
 
         readonly List<ItemSlotView> _slots = new List<ItemSlotView>();
 
-        public Button RowButton => _row;
+        /// <summary>Moves the member one row towards the enemy.</summary>
+        public Button Forward => _forward;
+
+        /// <summary>Moves the member one row away from the enemy.</summary>
+        public Button Back => _back;
+
         public IReadOnlyList<ItemSlotView> Slots => _slots;
 
         /// <summary>Creates one slot view per item slot, as wide as the row allows. Called once.</summary>
@@ -44,7 +50,7 @@ namespace F1.UI
         }
 
         /// <param name="selectedSlot">Index of the highlighted slot, or -1.</param>
-        public void Show(ExpeditionMember member, bool canChangeRow, int selectedSlot)
+        public void Show(ExpeditionMember member, bool canMoveForward, bool canMoveBack, int selectedSlot)
         {
             _name.text = UiText.Mercenary(member.MercenaryId);
             _job.text = UiText.Job(member.JobId);
@@ -63,7 +69,10 @@ namespace F1.UI
                 _rowLabel.text = string.Empty;
             }
 
-            _row.interactable = canChangeRow;
+            _forward.gameObject.SetActive(member.Alive);
+            _back.gameObject.SetActive(member.Alive);
+            _forward.interactable = canMoveForward;
+            _back.interactable = canMoveBack;
             for (int i = 0; i < _slots.Count; i++)
             {
                 _slots[i].Show(member.Items[i], i == selectedSlot, member.Alive);

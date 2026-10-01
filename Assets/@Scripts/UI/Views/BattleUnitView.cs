@@ -8,12 +8,15 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One unit in battle: HP, shield, burn, the death's door state and item cooldowns. It shows
-    /// what the engine says; texts are rebuilt only when their numbers change.
+    /// One living unit in battle: the figure (a placeholder until there is art) over the info card
+    /// with HP, shield, burn, the death's door state and the item board. It shows what the engine
+    /// says; texts are rebuilt only when their numbers change. The battle screen takes a dead unit
+    /// off the field.
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
         [SerializeField] Button _button;
+        [SerializeField] Image _figure;
         [SerializeField] Image _frame;
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _status;
@@ -22,7 +25,14 @@ namespace F1.UI
         [SerializeField] TMP_Text _shield;
         [SerializeField] TMP_Text _burn;
         [SerializeField] BattleItemView _itemTemplate;
+        [SerializeField] GameObject _emptyCellTemplate;
         [SerializeField] Transform _itemParent;
+
+        /// <summary>How much of the figure frame's color shows: the background will be seen through it.</summary>
+        const float FigureAlpha = 0.35f;
+
+        /// <summary>Cells an item takes on the board. Items have no size in the data yet, so every item takes one.</summary>
+        const int CellsPerItem = 1;
 
         readonly List<BattleItemView> _items = new List<BattleItemView>();
         BattleUnit _unit;
@@ -32,17 +42,37 @@ namespace F1.UI
         long _shownStatus = -1;
 
         public Button Button => _button;
+        public BattleUnit Unit => _unit;
+
+        /// <summary>The figure frame's color for a side's card color.</summary>
+        public static Color FigureTint(Color frame)
+        {
+            return new Color(frame.r, frame.g, frame.b, FigureAlpha);
+        }
 
         public void Bind(BattleUnit unit)
         {
             _unit = unit;
             _name.text = UiText.Name(unit.Setup.Name);
-            foreach (BattleItemState item in unit.Items)
+
+            // One cell per item slot of the unit, in slot order: an item's cell shows its cooldown,
+            // an empty slot stays a faint cell.
+            int next = 0;
+            int slots = unit.Setup.Items?.Count ?? 0;
+            for (int slot = 0; slot < slots; slot++)
             {
-                BattleItemView view = Instantiate(_itemTemplate, _itemParent);
-                view.gameObject.SetActive(true);
-                view.Bind(item);
-                _items.Add(view);
+                if (next < unit.Items.Count && unit.Items[next].SlotIndex == slot)
+                {
+                    BattleItemView view = Instantiate(_itemTemplate, _itemParent);
+                    view.gameObject.SetActive(true);
+                    view.Bind(unit.Items[next], CellsPerItem);
+                    _items.Add(view);
+                    next++;
+                }
+                else
+                {
+                    Instantiate(_emptyCellTemplate, _itemParent).SetActive(true);
+                }
             }
         }
 
@@ -56,7 +86,7 @@ namespace F1.UI
             _name.text = UiText.Name(_unit.Setup.Name);
             for (int i = 0; i < _items.Count; i++)
             {
-                _items[i].Bind(_unit.Items[i]);
+                _items[i].Bind(_unit.Items[i], CellsPerItem);
             }
         }
 
@@ -88,21 +118,24 @@ namespace F1.UI
             RenderStatus(balance, timeMs);
 
             _button.interactable = targetable && _unit.Alive;
-            if (!_unit.Alive)
+            Color frame;
+            if (_unit.InDog)
             {
-                _frame.color = UiPalette.Dead;
-            }
-            else if (_unit.InDog)
-            {
-                _frame.color = UiPalette.Danger;
+                frame = UiPalette.Danger;
             }
             else if (targetable)
             {
-                _frame.color = UiPalette.PartyTarget;
+                frame = UiPalette.PartyTarget;
             }
             else
             {
-                _frame.color = _unit.Side == BattleSide.Party ? UiPalette.Party : UiPalette.Enemy;
+                frame = _unit.Side == BattleSide.Party ? UiPalette.Party : UiPalette.Enemy;
+            }
+
+            if (_frame.color != frame)
+            {
+                _frame.color = frame;
+                _figure.color = FigureTint(frame);
             }
 
             foreach (BattleItemView item in _items)
@@ -116,11 +149,7 @@ namespace F1.UI
             // One number that changes exactly when the status text has to change.
             long status;
             int graceTenths = 0;
-            if (!_unit.Alive)
-            {
-                status = 1;
-            }
-            else if (!_unit.InDog)
+            if (!_unit.InDog)
             {
                 status = 0;
             }
@@ -143,10 +172,6 @@ namespace F1.UI
             if (status == 0)
             {
                 _status.text = string.Empty;
-            }
-            else if (status == 1)
-            {
-                _status.text = UiStrings.Get(UiKeys.Battle.Dead);
             }
             else if (status == 2)
             {

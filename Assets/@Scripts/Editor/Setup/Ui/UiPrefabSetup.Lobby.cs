@@ -1,3 +1,4 @@
+using F1.Data;
 using F1.UI;
 using TMPro;
 using UnityEngine;
@@ -40,11 +41,19 @@ namespace F1.Editor.Setup
             TextMeshProUGUI dungeonCost = UiBuild.Box(UiBuild.Label("DungeonCost", panel, 26f, UiPalette.Text), 24f, 164f, 612f, 36f);
             TextMeshProUGUI dungeonCleared = UiBuild.Box(UiBuild.Label("DungeonCleared", panel, 26f, UiPalette.TextDim), 24f, 202f, 612f, 36f);
 
+            // The party, one line per row, row 1 (facing the enemy) first. The lobby shows as many
+            // lines as the party has members at most.
             UiBuild.Box(UiBuild.LocalizedLabel("PartyHeader", panel, UiKeys.Lobby.Party, 30f, UiPalette.TextDim), 24f, 280f, 300f, 40f);
-            UiBuild.Box(UiBuild.LocalizedLabel("FrontLabel", panel, UiKeys.Common.Front, 26f, UiPalette.TextDim), 24f, 332f, 110f, 40f);
-            TextMeshProUGUI frontNames = UiBuild.Box(UiBuild.Label("FrontNames", panel, 28f, UiPalette.Text), 140f, 332f, 496f, 40f);
-            UiBuild.Box(UiBuild.LocalizedLabel("RearLabel", panel, UiKeys.Common.Rear, 26f, UiPalette.TextDim), 24f, 382f, 110f, 40f);
-            TextMeshProUGUI rearNames = UiBuild.Box(UiBuild.Label("RearNames", panel, 28f, UiPalette.Text), 140f, 382f, 496f, 40f);
+            var partyRows = new GameObject[BattleRows.Count];
+            var rowNames = new TextMeshProUGUI[BattleRows.Count];
+            for (int i = 0; i < rowNames.Length; i++)
+            {
+                int row = i + 1;
+                RectTransform line = UiBuild.Box(UiBuild.Rect("PartyRow" + row, panel), 24f, 332f + 50f * i, 612f, 40f);
+                UiBuild.Box(UiBuild.LocalizedLabel("PartyRowLabel" + row, line, UiText.RowKey(row), 26f, UiPalette.TextDim), 0f, 0f, 110f, 40f);
+                rowNames[i] = UiBuild.Box(UiBuild.Label("PartyRowNames" + row, line, 28f, UiPalette.Text), 116f, 0f, 496f, 40f);
+                partyRows[i] = line.gameObject;
+            }
 
             TextMeshProUGUI departStatus = UiBuild.Label("DepartStatus", panel, 26f, UiPalette.Text, TextAlignmentOptions.BottomLeft);
             UiBuild.Box(departStatus, 24f, 600f, 612f, 76f);
@@ -75,8 +84,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_dungeonAffinity", dungeonAffinity);
             UiBuild.SetReference(screen, "_dungeonCost", dungeonCost);
             UiBuild.SetReference(screen, "_dungeonCleared", dungeonCleared);
-            UiBuild.SetReference(screen, "_frontNames", frontNames);
-            UiBuild.SetReference(screen, "_rearNames", rearNames);
+            UiBuild.SetReferences(screen, "_partyRows", partyRows);
+            UiBuild.SetReferences(screen, "_rowNames", rowNames);
             UiBuild.SetReference(screen, "_departStatus", departStatus);
             UiBuild.SetReference(screen, "_rest", rest.Button);
             UiBuild.SetReference(screen, "_restLabel", rest.Label);
@@ -96,17 +105,29 @@ namespace F1.Editor.Setup
 
             TextMeshProUGUI name = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryName", entry, 32f, UiPalette.Text), 20f, 8f, 220f, 40f));
             TextMeshProUGUI job = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryJob", entry, 24f, UiPalette.TextDim), 250f, 12f, 190f, 34f));
-            TextMeshProUGUI fatigue = UiBuild.Box(UiBuild.Label("EntryFatigue", entry, 22f, UiPalette.Text, TextAlignmentOptions.Right), 450f, 12f, 310f, 34f);
+            TextMeshProUGUI fatigue = UiBuild.Box(UiBuild.Label("EntryFatigue", entry, 22f, UiPalette.Text, TextAlignmentOptions.Right), 410f, 12f, 200f, 34f);
             UiBar fatigueBar = UiBuild.Bar("EntryFatigueBar", entry, UiPalette.Good);
-            UiBuild.Box(fatigueBar, 20f, 54f, 740f, 14f);
-            TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 20f, UiPalette.TextDim), 20f, 76f, 740f, 32f));
+            UiBuild.Box(fatigueBar, 20f, 54f, 590f, 14f);
+            TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 20f, UiPalette.TextDim), 20f, 76f, 590f, 32f));
 
-            ButtonParts front = UiBuild.LocalizedButton("EntryFront", entry, UiKeys.Common.Front, UiPalette.ButtonQuiet, 26f);
-            UiBuild.Box(front.Rect, 784f, 28f, 96f, 60f);
-            ButtonParts rear = UiBuild.LocalizedButton("EntryRear", entry, UiKeys.Common.Rear, UiPalette.ButtonQuiet, 26f);
-            UiBuild.Box(rear.Rect, 888f, 28f, 96f, 60f);
+            // One button per row, then the button that takes the mercenary out of the party. The row
+            // buttons are lined up against the right edge of their box, so the ones the lobby hides
+            // (rows the party cannot reach) leave no hole next to "remove".
+            RectTransform rowBox = UiBuild.Box(UiBuild.Rect("EntryRows", entry), 628f, 28f, 352f, 60f);
+            UiBuild.Horizontal(rowBox, 8f, 0, TextAnchor.MiddleRight);
+            var rowButtons = new Button[BattleRows.Count];
+            var rowFrames = new Image[BattleRows.Count];
+            for (int i = 0; i < rowButtons.Length; i++)
+            {
+                int row = i + 1;
+                ButtonParts button = UiBuild.LocalizedButton("EntryRow" + row, rowBox, UiText.RowKey(row), UiPalette.ButtonQuiet, 22f);
+                UiBuild.Size(button.Rect, 80f, 60f);
+                rowButtons[i] = button.Button;
+                rowFrames[i] = button.Frame;
+            }
+
             ButtonParts remove = UiBuild.LocalizedButton("EntryRemove", entry, UiKeys.Lobby.Remove, UiPalette.ButtonQuiet, 22f);
-            UiBuild.Box(remove.Rect, 992f, 28f, 108f, 60f);
+            UiBuild.Box(remove.Rect, 988f, 28f, 112f, 60f);
 
             var view = background.gameObject.AddComponent<RosterEntryView>();
             UiBuild.SetReference(view, "_name", name);
@@ -114,10 +135,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_passive", passive);
             UiBuild.SetReference(view, "_fatigue", fatigue);
             UiBuild.SetReference(view, "_fatigueBar", fatigueBar);
-            UiBuild.SetReference(view, "_front", front.Button);
-            UiBuild.SetReference(view, "_frontFrame", front.Frame);
-            UiBuild.SetReference(view, "_rear", rear.Button);
-            UiBuild.SetReference(view, "_rearFrame", rear.Frame);
+            UiBuild.SetReferences(view, "_rows", rowButtons);
+            UiBuild.SetReferences(view, "_rowFrames", rowFrames);
             UiBuild.SetReference(view, "_remove", remove.Button);
 
             background.gameObject.SetActive(false);

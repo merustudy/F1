@@ -54,9 +54,22 @@ namespace F1.UI
             return string.Join(", ", names);
         }
 
-        public static string Row(BattleRow row)
+        /// <summary>The key of a row's name ("Row 1"). Prefab builders use it for fixed labels.</summary>
+        public static string RowKey(int row)
         {
-            return UiStrings.Get(row == BattleRow.Front ? UiKeys.Common.Front : UiKeys.Common.Rear);
+            switch (row)
+            {
+                case 1: return UiKeys.Common.Row1;
+                case 2: return UiKeys.Common.Row2;
+                case 3: return UiKeys.Common.Row3;
+                case 4: return UiKeys.Common.Row4;
+                default: throw new ArgumentOutOfRangeException(nameof(row), row, "No text for this row.");
+            }
+        }
+
+        public static string Row(int row)
+        {
+            return UiStrings.Get(RowKey(row));
         }
 
         /// <summary>Milliseconds as seconds with one decimal, for example "2.9".</summary>
@@ -71,7 +84,7 @@ namespace F1.UI
             return UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), item.Grade);
         }
 
-        /// <summary>Category, cooldown, row requirement and each effect, one per line.</summary>
+        /// <summary>Category, cooldown, the rows it works in and each effect, one per line.</summary>
         public static string ItemDetails(EquippedItem item)
         {
             return string.Join("\n", ItemFacts(item));
@@ -92,13 +105,16 @@ namespace F1.UI
                 UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)),
             };
 
-            if (data.Row == RowRequirement.Front)
+            // An item that works in every row needs no line about rows.
+            if (data.Rows.Count < BattleRows.Count)
             {
-                lines.Add(UiStrings.Get(UiKeys.Item.RowFront));
-            }
-            else if (data.Row == RowRequirement.Rear)
-            {
-                lines.Add(UiStrings.Get(UiKeys.Item.RowRear));
+                var rows = new List<string>();
+                foreach (int row in data.Rows)
+                {
+                    rows.Add(Row(row));
+                }
+
+                lines.Add(UiStrings.Get(UiKeys.Item.Rows, string.Join(", ", rows)));
             }
 
             foreach (ItemEffect effect in data.Effects)
@@ -111,7 +127,7 @@ namespace F1.UI
 
         public static string Effect(ItemEffect effect, int grade)
         {
-            return UiStrings.Get(EffectKey(effect.Kind), UiStrings.Get(TargetKey(effect.Target)), effect.MagnitudeAt(grade));
+            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), effect.MagnitudeAt(grade));
         }
 
         public static string PotionDetails(PotionData potion)
@@ -136,17 +152,20 @@ namespace F1.UI
             }
         }
 
-        static string TargetKey(TargetMode mode)
+        /// <summary>Who an effect hits: "the front enemy", "the rear 2 enemies", "self" and so on.</summary>
+        static string Target(ItemEffect effect)
         {
-            switch (mode)
+            switch (effect.Target)
             {
-                case TargetMode.EnemyFront: return UiKeys.Target.EnemyFront;
-                case TargetMode.EnemyRear: return UiKeys.Target.EnemyRear;
-                case TargetMode.EnemyAll: return UiKeys.Target.EnemyAll;
-                case TargetMode.Self: return UiKeys.Target.Self;
-                case TargetMode.AllyLowestHp: return UiKeys.Target.AllyLowestHp;
-                case TargetMode.AllyAll: return UiKeys.Target.AllyAll;
-                default: throw new ArgumentOutOfRangeException(nameof(mode), mode, "No text for this target.");
+                case TargetMode.EnemyFront:
+                    return effect.Reach == 1 ? UiStrings.Get(UiKeys.Target.EnemyFront) : UiStrings.Get(UiKeys.Target.EnemyFrontMany, effect.Reach);
+                case TargetMode.EnemyBack:
+                    return effect.Reach == 1 ? UiStrings.Get(UiKeys.Target.EnemyBack) : UiStrings.Get(UiKeys.Target.EnemyBackMany, effect.Reach);
+                case TargetMode.EnemyAll: return UiStrings.Get(UiKeys.Target.EnemyAll);
+                case TargetMode.Self: return UiStrings.Get(UiKeys.Target.Self);
+                case TargetMode.AllyLowestHp: return UiStrings.Get(UiKeys.Target.AllyLowestHp);
+                case TargetMode.AllyAll: return UiStrings.Get(UiKeys.Target.AllyAll);
+                default: throw new ArgumentOutOfRangeException(nameof(effect), effect.Target, "No text for this target.");
             }
         }
     }

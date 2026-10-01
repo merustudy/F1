@@ -34,18 +34,12 @@ namespace F1.Tests
             yield return BootTestUtil.ShutdownApp();
         }
 
-        /// <summary>New run and a party of the first three mercenaries in their recommended rows.</summary>
+        /// <summary>New run and a party of the first mercenaries of the roster, one per row.</summary>
         static IEnumerator NewRunWithParty()
         {
-            StaticData data = Managers.Data.Data;
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(UiTestUtil.Screen<LobbyScreen>());
-            for (int i = 0; i < data.Balance.PartySize; i++)
-            {
-                BattleRow row = data.Jobs.Get(Managers.Run.Run.Roster[i].JobId).RecommendedRow;
-                UiTestUtil.Click(row == BattleRow.Front ? entries[i].Front : entries[i].Rear);
-            }
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
         }
 
         [UnityTest]

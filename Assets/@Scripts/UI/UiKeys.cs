@@ -11,9 +11,12 @@ namespace F1.UI
             public const string Confirm = "Common.Confirm";
             public const string Cancel = "Common.Cancel";
             public const string Continue = "Common.Continue";
-            public const string Front = "Common.Front";
-            public const string Rear = "Common.Rear";
+            public const string Row1 = "Common.Row1";
+            public const string Row2 = "Common.Row2";
+            public const string Row3 = "Common.Row3";
+            public const string Row4 = "Common.Row4";
             public const string None = "Common.None";
+            public const string Close = "Common.Close";
         }
 
         public static class Title
@@ -61,8 +64,7 @@ namespace F1.UI
             public const string Boss = "Map.Boss";
             public const string SelectNode = "Map.SelectNode";
             public const string NodeTitle = "Map.NodeTitle";
-            public const string EnemyFront = "Map.EnemyFront";
-            public const string EnemyRear = "Map.EnemyRear";
+            public const string Enemies = "Map.Enemies";
             public const string Enemy = "Map.Enemy";
             public const string Enter = "Map.Enter";
         }
@@ -74,6 +76,8 @@ namespace F1.UI
             public const string Grade = "Board.Grade";
             public const string Dead = "Board.Dead";
             public const string Potions = "Board.Potions";
+            public const string Forward = "Board.Forward";
+            public const string Back = "Board.Back";
             public const string Hint = "Board.Hint";
         }
 
@@ -83,8 +87,7 @@ namespace F1.UI
             public const string Weapon = "Item.Weapon";
             public const string Support = "Item.Support";
             public const string Cooldown = "Item.Cooldown";
-            public const string RowFront = "Item.RowFront";
-            public const string RowRear = "Item.RowRear";
+            public const string Rows = "Item.Rows";
         }
 
         public static class Effect
@@ -98,7 +101,9 @@ namespace F1.UI
         public static class Target
         {
             public const string EnemyFront = "Target.EnemyFront";
-            public const string EnemyRear = "Target.EnemyRear";
+            public const string EnemyFrontMany = "Target.EnemyFrontMany";
+            public const string EnemyBack = "Target.EnemyBack";
+            public const string EnemyBackMany = "Target.EnemyBackMany";
             public const string EnemyAll = "Target.EnemyAll";
             public const string Self = "Target.Self";
             public const string AllyLowestHp = "Target.AllyLowestHp";
@@ -113,8 +118,6 @@ namespace F1.UI
 
         public static class Battle
         {
-            public const string NodeBattle = "Battle.NodeBattle";
-            public const string NodeBoss = "Battle.NodeBoss";
             public const string Time = "Battle.Time";
             public const string StormIn = "Battle.StormIn";
             public const string StormActive = "Battle.StormActive";
@@ -125,7 +128,8 @@ namespace F1.UI
             public const string Burn = "Battle.Burn";
             public const string DogGrace = "Battle.DogGrace";
             public const string DogRolling = "Battle.DogRolling";
-            public const string Dead = "Battle.Dead";
+            public const string PartyFallen = "Battle.PartyFallen";
+            public const string EnemyFallen = "Battle.EnemyFallen";
             public const string PotionHint = "Battle.PotionHint";
             public const string PotionArmed = "Battle.PotionArmed";
             public const string PotionWait = "Battle.PotionWait";
@@ -135,6 +139,9 @@ namespace F1.UI
             public const string Defeat = "Battle.Defeat";
             public const string Retreated = "Battle.Retreated";
             public const string NoDeaths = "Battle.NoDeaths";
+            public const string ShowLog = "Battle.ShowLog";
+            public const string LogTitle = "Battle.LogTitle";
+            public const string FigurePlaceholder = "Battle.FigurePlaceholder";
         }
 
         public static class Log
@@ -155,6 +162,8 @@ namespace F1.UI
             public const string DeathSurvived = "Log.DeathSurvived";
             public const string DeathFailed = "Log.DeathFailed";
             public const string Died = "Log.Died";
+            public const string PartyAdvanced = "Log.PartyAdvanced";
+            public const string EnemyAdvanced = "Log.EnemyAdvanced";
             public const string PotionUsed = "Log.PotionUsed";
             public const string RetreatFailed = "Log.RetreatFailed";
             public const string RetreatSucceeded = "Log.RetreatSucceeded";
