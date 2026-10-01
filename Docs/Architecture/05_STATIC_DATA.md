@@ -68,7 +68,10 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:1
 - quoted field, escaped quote(`""`), 필드 안 개행을 처리하는 Parser를 쓴다. `Split(',')` 금지.
 - Localization 열은 `<Field>.<LocaleCode>`다. Locale 집합은 `LocalePolicy.SupportedCodes`와 정확히 같아야 한다.
 - 다른 Definition 참조는 그 Definition의 `Id` 문자열이다.
-- 목록 값은 `+`로 잇는다. 아이템과 등급의 목록은 `item_id:grade`를 `+`로 잇는다.
+- 목록 값은 `+`로 잇는다. 아이템과 등급의 목록은 `item_id:grade`를 `+`로 잇는다. 정수의 목록도 같다(쓸 수 있는 열 `1+2`).
+  순서에 뜻이 있는 목록은 적힌 순서를 그대로 쓴다(적 무리의 `Enemies`는 앞에서부터 서는 순서다).
+- 다른 열의 값에 따라 비워 두는 칸은 Mapper가 Optional로 읽고, 채워야 하는지는 Definition 생성자가 검증한다
+  (효과의 `Reach`는 앞이나 뒤에서 세는 타깃에만 있다).
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 
