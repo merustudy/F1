@@ -1,6 +1,6 @@
 # Slice A 개정 2~4 — 상대 범위, 아이템 크기, 인벤토리, 화면 통일, 인벤토리 용량
 
-Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 사후 검토 대기)
+Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 개정 1~4 코드 리뷰 5건을 반영하고 체인을 통과해 커밋·푸시했다. 사후 검토 대기)
 
 ## Goal
 
@@ -15,6 +15,8 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 사후 �
 
 - 세 개정 모두 구현, 문서, 검증, 커밋이 끝났다. 2026-10-01 세션 정리에서 `8a778e5` 위에 네 커밋으로 올렸다
   (문서 / 데이터·Domain·저장·시뮬·Test / 화면 / Roadmap·Handoff. 세 개정이 같은 파일을 겹쳐 고쳐서 개정별이 아니라 층별로 나눴다). 작업 브랜치는 `feature/slice-a`.
+- 2026-10-01 개정 1~4(`7458333..ce9fec4`)를 코드 리뷰했다(사용자 지시 "1단계만 수행"). 결과를 바꾸는 버그는 없었고, 5건(정확성 낮음 1, 구조 1, 재사용 1, 단순화 2)을
+  사용자 승인("권장 구현")으로 모두 반영했다(아래 "리뷰 반영"). 체인 통과. 2026-10-01 세션 정리에서 두 커밋(리뷰 반영 / Roadmap·Handoff)으로 올리고 푸시했다.
 - 개정 1(열)의 Handoff는 `completed/a-rows.md`로 옮겼다. 그 사후 검토 가운데 조합 절벽과 아이템 크기가 개정 2로 이어졌고,
   플레이테스트는 사용자가 추후로 미뤘다. 개정 3은 개정 2 직후 목업 여섯 장으로, 개정 4는 개정 3 직후 한 줄의 지시로 정했다.
 - 승인 범위와 사후 검토 목록: `Docs/Roadmap.md` "개정 2의 승인", "개정 3의 승인", "개정 4의 승인", "사후 검토 대기".
@@ -33,7 +35,7 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 사후 �
 - Views: `PartySideView`(파티 쪽 전체: 열, 포션, 팝업, 선택 모델), `PartyColumnView`(열 하나: 그림, 카드, 세로 칸), `InventoryEntryView`(팝업의 한 줄).
   `PartyBoardView`와 `BoardMemberView`는 지웠다. `ItemSlotView`는 한 줄(이름 왼쪽, 등급 오른쪽)이고 높이를 받는다.
 - Screens: `NodeMapScreen`(적 목록 제거, 인벤토리 토글), `RewardScreen`(보상을 위아래로, 인벤토리 토글).
-- Builders: `UiPrefabSetup.PartySide`(옛 Board 파일을 대체. 전투의 열 자리를 `BattleScreen.ColumnGap`·`SideGap`으로 같게 계산), `NodeMap`, `Reward`,
+- Builders: `UiPrefabSetup.PartySide`(옛 Board 파일을 대체. 열의 자리는 `PartySideView`가 열릴 때 전투와 같은 `FieldLayout`으로 계산한다 — 리뷰 반영), `NodeMap`, `Reward`,
   `Battle`의 `BuildFigure`·`BuildSilhouette(prefix)` 공용화.
 - 문구: `Map.Unknown`, `Board.InventoryShow`·`InventoryHide`·`InventoryTitle`·`InventoryHint`, `Board.Hint` 갱신(영어는 파티 아래 두 줄에 맞게 짧게). 지운 것: `Map.Enemies`·`Enemy`, `Board.Dead`·`Potions`·`Inventory`.
   보상 카드가 넓고 낮아져서 `UiText.ItemDetails`는 종류·크기·쿨다운·자리를 한 줄에, 효과를 줄마다 적는다(스크린샷에서 다섯 줄이 카드 밖으로 넘친 것을 고침).
@@ -62,6 +64,21 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 사후 �
 - 문서: Design/03 §5, 00("개정 4", 현황, 개정 2의 표), 01(용어), Architecture/07(검증, Schema Version), 08(인벤토리), 11(질의), 12(팝업, Test). Roadmap.
 - Test: `ExpeditionRulesTests` 둘(칸으로 세는 것과 집기 / 밀려나는 아이템의 자리), `DefinitionTests`(하한), `RunSaveMapperTests`(넘침 거부, 꽉 찬 것 허용),
   `ExpeditionManagerTests`(질의), PlayMode 팝업 Test에 제목과 가득 찬 상태.
+
+## 리뷰 반영 (2026-10-01)
+
+개정 1~4의 코드 리뷰에서 나온 5건. 규칙과 데이터는 바뀌지 않았다(시뮬 수치 그대로).
+
+- `ExpeditionRules.CanMoveItem`: 같은 보드 안에서 **이미 끝에 있는 아이템을 빈 칸으로** 옮기는 것은 바뀌는 게 없으므로 거부한다(전에는 "가능"이라 화면이 빈 칸을 켜 주고 눌러도 아무 일이 없었다).
+  `ExpeditionRulesTests.MoveItem_WithinOneBoard_ReordersIt`에 고정.
+- `FieldLayout`(새 파일, `UI/`): 전장 Column의 폭과 x를 계산하는 공식 한 곳(`ColumnGap`·`SideGap`도 여기로. 옛 `BattleScreen` 상수는 지웠다).
+  `BattleScreen.LayoutColumns`와 새 `PartySideView.LayoutColumns`가 같은 공식을 쓴다. 전에는 파티 쪽 Column의 자리가 Prefab 생성 때 4인 기준으로 고정이어서
+  `PartySize`가 4가 아니면 전투 화면과 어긋났다. Builder(`UiPrefabSetup.PartySide`)는 전투 전장과 같은 상자 `PartyField` 안에 Column을 두고, Column 안은 전투 유닛처럼 `UiBuild.Line`으로 만든다
+  (`_columnRoots` 참조는 없앴고 `_field`·`_floor`가 생겼다. Prefab 둘과 스탬프가 다시 만들어졌다).
+- `PartyColumnView`: 칸 높이·간격 상수를 지우고 `BattleItemView.CellHeight`·`CellGap`·`BoardHeight`를 쓴다. Builder의 카드 높이도 같은 공식.
+- `PartySideView.ToggleInventory`: 자기 `Refresh()`를 뺐다. 토글 뒤에는 화면(`NodeMapScreen`·`RewardScreen`)의 `Refresh()`가 한 번만 다시 그린다.
+- `BattleEngine`: `RearmostRow`를 지우고 `EnemyBack` 타깃도 `LineLength`를 쓴다(살아 있는 줄은 1..n에 빈 열이 없으므로 같은 값).
+- 문서: Architecture/12("파티 쪽", "전투 화면"의 Column 자리 계산).
 
 ## 결정
 
@@ -125,6 +142,10 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 사후 �
 
 ## Verification
 
+- 리뷰 반영 뒤 `Tools/chain.sh`: setup OK, sim OK, EditMode 587/587, PlayMode 40/40(`[Explicit]` 스크린샷 3개 제외). `git diff --check` 깨끗.
+  바뀐 생성물: `NodeMapScreen.prefab`, `RewardScreen.prefab`, `UiPrefabStamp.txt`. ProjectSettings, Packages, Scene, Generated JSON은 그대로.
+  `Tools/screenshots.sh` 33장: 노드 맵(`_04`)·보상(`_07`)·인벤토리 팝업(`_17`)의 파티 열 넷이 전투(`_05`)의 아군 열과 같은 x와 폭에 서고, 카드 안 요소가 열 폭을 따른다.
+  (관찰: 파티 쪽의 열은 전투보다 50px 위에 선다 — `PartyTop` 186 vs `BattleFieldTop` 236. 전투의 배경 그림 여백 때문이며 개정 3 때부터 그랬다. 사후 검토 거리.)
 - `Tools/chain.sh` (개정 2~4를 합친 상태): setup OK, sim OK, EditMode 587/587, PlayMode 40/40(`[Explicit]` 스크린샷 3개 제외).
   개정 4 뒤의 시뮬(같은 명령): 81.2% / 0.26, 인벤토리 0.01개로 같다(Design/08 §8 "상태").
   개정 2만 있던 상태에서는 setup을 두 번 더 돌려도 파일이 바뀌지 않는 것을 확인했다.
