@@ -194,7 +194,9 @@ namespace F1.Sim
 
         /// <summary>
         /// Takes a potion while a slot is free and fewer than two are held, otherwise the first item
-        /// that fits an empty slot of a mercenary standing in a row the item works in.
+        /// that fits the free cells of a mercenary standing where the item works, otherwise the first
+        /// item that fits the inventory, otherwise skips. Then equips from the inventory whatever
+        /// fits someone.
         /// </summary>
         public void ChooseReward(StaticData data, ExpeditionState state)
         {
@@ -224,25 +226,58 @@ namespace F1.Sim
                     continue;
                 }
 
-                ItemData item = data.Items.Get(option.Id);
-                for (int m = 0; m < state.Members.Count; m++)
+                int member = MemberWithRoomFor(state, data.Items.Get(option.Id));
+                if (member >= 0)
                 {
-                    ExpeditionMember member = state.Members[m];
-                    if (!member.Alive || !item.UsableIn(member.Row))
-                    {
-                        continue;
-                    }
+                    ExpeditionRules.TakeItemReward(data, state, i, member, ItemBoard.UsedCells(state.Members[member].Items));
+                    EquipFromInventory(data, state);
+                    return;
+                }
+            }
 
-                    int slot = Array.IndexOf(member.Items, null);
-                    if (slot >= 0)
-                    {
-                        ExpeditionRules.TakeItemReward(data, state, i, m, slot);
-                        return;
-                    }
+            for (int i = 0; i < state.PendingRewards.Count; i++)
+            {
+                if (ExpeditionRules.CanTakeRewardToInventory(data, state, i))
+                {
+                    ExpeditionRules.TakeItemRewardToInventory(data, state, i);
+                    EquipFromInventory(data, state);
+                    return;
                 }
             }
 
             ExpeditionRules.SkipReward(state);
+        }
+
+        /// <summary>The first living member standing where the item works with free cells for it, or -1.</summary>
+        static int MemberWithRoomFor(ExpeditionState state, ItemData item)
+        {
+            int living = ExpeditionRules.LivingCount(state);
+            for (int m = 0; m < state.Members.Count; m++)
+            {
+                ExpeditionMember member = state.Members[m];
+                if (member.Alive && item.UsableIn(member.Row, living) && ItemBoard.FreeCells(member.Items, member.ItemSlots) >= item.Size)
+                {
+                    return m;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>Puts every inventory item that fits someone's free cells on that board, in inventory order.</summary>
+        static void EquipFromInventory(StaticData data, ExpeditionState state)
+        {
+            for (int i = 0; i < state.Inventory.Count;)
+            {
+                int member = MemberWithRoomFor(state, state.Inventory[i].Item);
+                if (member < 0)
+                {
+                    i++;
+                    continue;
+                }
+
+                ExpeditionRules.PlaceFromInventory(data, state, i, member, ItemBoard.UsedCells(state.Members[member].Items));
+            }
         }
     }
 }

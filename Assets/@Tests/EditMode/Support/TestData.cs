@@ -47,6 +47,7 @@ namespace F1.Tests
                 { "PostBattleHealPercent", 10 },
                 { "MinCooldownMs", 200 },
                 { "RewardChoices", 3 },
+                { "InventoryCells", 10 },
                 { "MapBranchChancePercent", 50 },
                 { "FinalBossLevel", 14 },
             };
@@ -58,6 +59,8 @@ namespace F1.Tests
             return values.Select(pair => new BalanceEntry(pair.Key, pair.Value)).ToList();
         }
 
+        /// <param name="rows">Where the owner must stand for the item to work. Everywhere when omitted.</param>
+        /// <param name="size">Cells the item takes on a board. One when omitted.</param>
         public static ItemData Item(
             string id,
             int cooldownMs,
@@ -65,10 +68,11 @@ namespace F1.Tests
             TargetMode target,
             int powerPercent = 100,
             ItemCategory category = ItemCategory.Weapon,
-            int[] rows = null,
+            RowSpan rows = null,
             int rewardWeight = 0,
             ItemEffect second = null,
-            int reach = DefaultReach)
+            int reach = DefaultReach,
+            int size = 1)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, powerPercent, reach) };
             if (second != null)
@@ -76,11 +80,8 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, cooldownMs, rows ?? AllRows, effects, rewardWeight);
+            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, rewardWeight);
         }
-
-        /// <summary>Every battle row: what an item without a row limit lists.</summary>
-        public static readonly int[] AllRows = Enumerable.Range(BattleRows.Front, BattleRows.Count).ToArray();
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
         public const int DefaultReach = -1;
@@ -102,6 +103,7 @@ namespace F1.Tests
             return new EquippedItem(Item(id, cooldownMs, EffectKind.Damage, TargetMode.EnemyFront), damage);
         }
 
+        /// <summary>A mercenary whose board is exactly its items: no empty cells.</summary>
         public static BattleUnitSetup Mercenary(string id, int row, int hp, params EquippedItem[] items)
         {
             return new BattleUnitSetup
@@ -112,6 +114,7 @@ namespace F1.Tests
                 MaxHp = hp,
                 Hp = hp,
                 Items = items,
+                ItemSlots = Cells(items),
                 Passive = null,
                 HasDog = true,
             };
@@ -127,11 +130,19 @@ namespace F1.Tests
                 MaxHp = hp,
                 Hp = hp,
                 Items = items,
+                ItemSlots = Cells(items),
                 Passive = null,
                 HasDog = false,
             };
         }
 
+        /// <summary>The cells the items take. A null entry (which only a test of the setup validation passes) takes none.</summary>
+        static int Cells(EquippedItem[] items)
+        {
+            return items.Where(item => item != null).Sum(item => item.Item.Size);
+        }
+
+        /// <param name="rows">Where the unit must stand for an InRows condition; null for the other conditions.</param>
         public static BattleUnitSetup WithPassive(
             this BattleUnitSetup unit,
             PassiveTrigger trigger,
@@ -139,7 +150,7 @@ namespace F1.Tests
             PassiveEffect effect,
             PassiveTarget target,
             int magnitude,
-            params int[] rows)
+            RowSpan rows = null)
         {
             unit.Passive = new PassiveSpec(trigger, condition, rows, effect, target, magnitude);
             return unit;
@@ -183,7 +194,8 @@ namespace F1.Tests
 
         /// <summary>
         /// A complete, valid data set: one dungeon of two battle floors and a boss, three jobs,
-        /// three mercenaries and a few reward items.
+        /// four mercenaries and a few reward items. The big items ("pike", "ballista") are never
+        /// offered as rewards; board tests put them on boards directly.
         /// </summary>
         public static StaticDataParts Parts(params (string Key, int Value)[] balanceOverrides)
         {
@@ -203,7 +215,9 @@ namespace F1.Tests
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, rewardWeight: 5),
                     Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, rewardWeight: 5),
-                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: new[] { 2, 3 }, rewardWeight: 5),
+                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), rewardWeight: 5),
+                    Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, size: 2),
+                    Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, size: 3),
                 },
                 Potions = new List<PotionData>
                 {

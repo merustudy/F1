@@ -26,6 +26,10 @@
       "Value": 14
     },
     {
+      "Key": "InventoryCells",
+      "Value": 10
+    },
+    {
       "Key": "MapBranchChancePercent",
       "Value": 50
     },

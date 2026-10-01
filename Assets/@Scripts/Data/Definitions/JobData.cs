@@ -6,14 +6,12 @@ namespace F1.Data
     /// <summary>"When, under which condition, what, to whom, how much" of a job passive.</summary>
     public sealed class PassiveSpec
     {
-        static readonly int[] NoRows = new int[0];
-
-        /// <param name="rows">The rows of an InRows condition. Empty or null for every other condition.</param>
+        /// <param name="rows">Where the unit must stand for an InRows condition. Null for every other condition.</param>
         [JsonConstructor]
         public PassiveSpec(
             PassiveTrigger trigger,
             PassiveCondition condition,
-            IReadOnlyList<int> rows,
+            RowSpan rows,
             PassiveEffect effect,
             PassiveTarget target,
             int magnitude)
@@ -23,12 +21,14 @@ namespace F1.Data
                 throw new DataException("Passive magnitude must be at least 1.");
             }
 
-            rows = rows ?? NoRows;
             if (condition == PassiveCondition.InRows)
             {
-                BattleRows.RequireSet(rows, "Passive Rows");
+                if (rows == null)
+                {
+                    throw new DataException("Passive condition InRows needs Rows.");
+                }
             }
-            else if (rows.Count > 0)
+            else if (rows != null)
             {
                 throw new DataException($"Passive condition {condition} does not take rows.");
             }
@@ -74,9 +74,9 @@ namespace F1.Data
         [JsonProperty(Order = 2, Required = Required.Always)]
         public PassiveCondition Condition { get; }
 
-        /// <summary>The rows of an InRows condition; empty otherwise.</summary>
-        [JsonProperty(Order = 3, Required = Required.Always)]
-        public IReadOnlyList<int> Rows { get; }
+        /// <summary>Where the unit must stand for an InRows condition, counted from the front or the back; null otherwise.</summary>
+        [JsonProperty(Order = 3, Required = Required.AllowNull)]
+        public RowSpan Rows { get; }
 
         [JsonProperty(Order = 4, Required = Required.Always)]
         public PassiveEffect Effect { get; }
@@ -92,6 +92,8 @@ namespace F1.Data
     public sealed class JobData
     {
         public const string DefinitionName = "Job";
+
+        /// <summary>The most cells any board has. The battle screen draws every board this tall.</summary>
         public const int MaxItemSlots = 6;
 
         [JsonConstructor]
@@ -151,6 +153,7 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public int MaxHp { get; }
 
+        /// <summary>Cells of the item board. Items take their size in cells.</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
         public int ItemSlots { get; }
 

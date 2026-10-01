@@ -74,6 +74,7 @@ namespace F1.Flow
                 DungeonId = expedition.DungeonId,
                 Seed = Text(expedition.Seed),
                 Members = new List<MemberRecord>(),
+                Inventory = ToRecords(expedition.Inventory),
                 Potions = new List<string>(expedition.Potions),
                 Phase = expedition.Phase.ToString(),
                 CurrentNodeId = expedition.CurrentNodeId,
@@ -83,12 +84,6 @@ namespace F1.Flow
 
             foreach (ExpeditionMember member in expedition.Members)
             {
-                var items = new List<ItemRecord>();
-                foreach (EquippedItem item in member.Items)
-                {
-                    items.Add(item == null ? null : new ItemRecord { ItemId = item.Item.Id, Grade = item.Grade });
-                }
-
                 record.Members.Add(new MemberRecord
                 {
                     MercenaryId = member.MercenaryId,
@@ -97,7 +92,7 @@ namespace F1.Flow
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
                     Alive = member.Alive,
-                    Items = items,
+                    Items = ToRecords(member.Items),
                 });
             }
 
@@ -129,6 +124,17 @@ namespace F1.Flow
             }
 
             return record;
+        }
+
+        static List<ItemRecord> ToRecords(IReadOnlyList<EquippedItem> items)
+        {
+            var records = new List<ItemRecord>();
+            foreach (EquippedItem item in items)
+            {
+                records.Add(new ItemRecord { ItemId = item.Item.Id, Grade = item.Grade });
+            }
+
+            return records;
         }
 
         // ---- DTO -> state --------------------------------------------------------------------
@@ -203,7 +209,7 @@ namespace F1.Flow
         {
             Require(record != null, "Expedition is missing.");
             Require(data.Dungeons.Contains(record.DungeonId), $"Unknown dungeon '{record.DungeonId}'.");
-            Require(record.Members != null && record.Potions != null && record.PendingRewards != null, "A list of the expedition is missing.");
+            Require(record.Members != null && record.Inventory != null && record.Potions != null && record.PendingRewards != null, "A list of the expedition is missing.");
             Require(record.BattlesWon >= 0, "BattlesWon is negative.");
 
             // The expedition seed is derived from the run, so the two must agree.
@@ -237,20 +243,12 @@ namespace F1.Flow
                 Require(seen.Add(member.MercenaryId), $"Member '{member.MercenaryId}' is listed twice.");
                 Require(member.MaxHp >= 1 && member.Hp >= 0 && member.Hp <= member.MaxHp, $"HP of '{member.MercenaryId}' is out of range.");
                 Require(member.Alive || member.Hp == 0, $"Dead member '{member.MercenaryId}' has HP.");
-                Require(member.Items != null && member.Items.Count >= 1 && member.Items.Count <= JobData.MaxItemSlots, $"Item slots of '{member.MercenaryId}' are out of range.");
                 Require(BattleRows.IsValid(member.Row), $"Row of '{member.MercenaryId}' is out of range.");
 
-                var items = new EquippedItem[member.Items.Count];
-                for (int i = 0; i < items.Length; i++)
-                {
-                    ItemRecord item = member.Items[i];
-                    if (item != null)
-                    {
-                        Require(data.Items.Contains(item.ItemId), $"Unknown item '{item.ItemId}'.");
-                        Require(item.Grade >= 1, $"Grade of '{item.ItemId}' must be at least 1.");
-                        items[i] = new EquippedItem(data.Items.Get(item.ItemId), item.Grade);
-                    }
-                }
+                // The board's cells come from the job; the items must still fit them.
+                int cells = data.Jobs.Get(member.JobId).ItemSlots;
+                List<EquippedItem> items = ToItems(member.Items, data, $"The board of '{member.MercenaryId}'");
+                Require(ItemBoard.UsedCells(items) <= cells, $"The board of '{member.MercenaryId}' holds more than its {cells} cells.");
 
                 if (member.Alive)
                 {
@@ -266,10 +264,13 @@ namespace F1.Flow
                     Hp = member.Hp,
                     Alive = member.Alive,
                     Items = items,
+                    ItemSlots = cells,
                 });
             }
 
             Require(alive >= 1, "Nobody on the expedition is alive.");
+            state.Inventory = ToItems(record.Inventory, data, "The inventory");
+            Require(ItemBoard.UsedCells(state.Inventory) <= balance.InventoryCells, $"The inventory holds more than its {balance.InventoryCells} cells.");
 
             // The living stand one per row from the front, with no empty row between them.
             string formationProblem = Formation.Problem(ExpeditionRules.LivingRows(state, out _));
@@ -288,6 +289,22 @@ namespace F1.Flow
             ReadRewards(record, data, state);
             ValidateBattle(record, phase);
             return state;
+        }
+
+        /// <summary>A list of items (a board or the inventory): every entry present, known and graded.</summary>
+        static List<EquippedItem> ToItems(List<ItemRecord> records, StaticData data, string what)
+        {
+            Require(records != null, $"{what} is missing.");
+            var items = new List<EquippedItem>();
+            foreach (ItemRecord item in records)
+            {
+                Require(item != null, $"{what} has an empty entry.");
+                Require(data.Items.Contains(item.ItemId), $"Unknown item '{item.ItemId}'.");
+                Require(item.Grade >= 1, $"Grade of '{item.ItemId}' must be at least 1.");
+                items.Add(new EquippedItem(data.Items.Get(item.ItemId), item.Grade));
+            }
+
+            return items;
         }
 
         /// <summary>The recorded inputs of the battle in progress, in order.</summary>

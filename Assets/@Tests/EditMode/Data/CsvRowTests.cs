@@ -103,15 +103,17 @@ namespace F1.Tests
         }
 
         [Test]
-        public void IntList_SplitsOnPlus_AndEmptyCellIsEmptyList()
+        public void Rows_ReadsASpanOfTheLine_AndOptionalRowsTakesAnEmptyCell()
         {
-            CollectionAssert.AreEqual(new List<int> { 1, 2 }, Row("Rows", "1+2").IntList("Rows"));
-            CollectionAssert.AreEqual(new List<int> { 3 }, Row("Rows", "3").IntList("Rows"));
-            CollectionAssert.IsEmpty(Row("Rows", "").IntList("Rows"));
+            Assert.AreEqual("front:2", Row("Rows", "front:2").Rows("Rows").ToString());
+            Assert.AreEqual("back:3", Row("Rows", "back:3").Rows("Rows").ToString());
+            Assert.IsTrue(Row("Rows", "all").Rows("Rows").IsEveryRow);
+            Assert.IsNull(Row("Rows", "").OptionalRows("Rows"));
+            Assert.AreEqual("back:1", Row("Rows", "back:1").OptionalRows("Rows").ToString());
 
-            foreach (string text in new[] { "1+", "+1", "1+x", "1 + 2", "1,2", "1.0" })
+            foreach (string text in new[] { "", "1", "1+2", "front", "front:0", "back:5", "middle:2", "front: 2" })
             {
-                var exception = Assert.Throws<DataException>(() => Row("Rows", text).IntList("Rows"), text);
+                var exception = Assert.Throws<DataException>(() => Row("Rows", text).Rows("Rows"), text);
                 StringAssert.Contains("Test.csv(2) [Rows]", exception.Message);
             }
         }

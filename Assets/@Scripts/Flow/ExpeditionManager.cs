@@ -226,13 +226,33 @@ namespace F1.Flow
             Battle = null;
         }
 
-        // ---- Rewards and the item board ------------------------------------------------------
+        // ---- Rewards, the item boards and the inventory --------------------------------------
 
-        public void TakeItemReward(int optionIndex, int memberIndex, int slotIndex)
+        /// <summary>True when the item reward could be put at that cell now: into free cells, or in place of the item there.</summary>
+        public bool CanPlaceReward(int optionIndex, int memberIndex, int cell)
+        {
+            return Phase == GamePhase.Reward && ExpeditionRules.CanPlaceReward(_data.Data, Expedition, optionIndex, memberIndex, cell);
+        }
+
+        public void TakeItemReward(int optionIndex, int memberIndex, int cell)
         {
             _run.RequireWritable();
             Require(GamePhase.Reward);
-            ExpeditionRules.TakeItemReward(_data.Data, Expedition, optionIndex, memberIndex, slotIndex);
+            ExpeditionRules.TakeItemReward(_data.Data, Expedition, optionIndex, memberIndex, cell);
+            Commit();
+        }
+
+        /// <summary>True when the item reward fits the inventory's free cells now.</summary>
+        public bool CanTakeRewardToInventory(int optionIndex)
+        {
+            return Phase == GamePhase.Reward && ExpeditionRules.CanTakeRewardToInventory(_data.Data, Expedition, optionIndex);
+        }
+
+        public void TakeItemRewardToInventory(int optionIndex)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Reward);
+            ExpeditionRules.TakeItemRewardToInventory(_data.Data, Expedition, optionIndex);
             Commit();
         }
 
@@ -255,11 +275,50 @@ namespace F1.Flow
             Commit();
         }
 
-        public void SwapItems(int memberA, int slotA, int memberB, int slotB)
+        /// <summary>True when the item at a cell can go to a cell of a board now (free cells, or trading places with the item there).</summary>
+        public bool CanMoveItem(int fromMember, int fromCell, int toMember, int toCell)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanMoveItem(Expedition, fromMember, fromCell, toMember, toCell);
+        }
+
+        public void MoveItem(int fromMember, int fromCell, int toMember, int toCell)
         {
             _run.RequireWritable();
             RequireBetweenBattles();
-            ExpeditionRules.SwapItems(Expedition, memberA, slotA, memberB, slotB);
+            ExpeditionRules.MoveItem(Expedition, fromMember, fromCell, toMember, toCell);
+            Commit();
+        }
+
+        /// <summary>True when a cell holds an item that can be picked up now; where it may go is asked with the other Can... queries.</summary>
+        public bool CanPickItem(int memberIndex, int cell)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanPickItem(Expedition, memberIndex, cell);
+        }
+
+        /// <summary>True when the item at a cell can go to the inventory now: it must fit the inventory's free cells.</summary>
+        public bool CanMoveToInventory(int memberIndex, int cell)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanMoveToInventory(_data.Data, Expedition, memberIndex, cell);
+        }
+
+        public void MoveToInventory(int memberIndex, int cell)
+        {
+            _run.RequireWritable();
+            RequireBetweenBattles();
+            ExpeditionRules.MoveToInventory(_data.Data, Expedition, memberIndex, cell);
+            Commit();
+        }
+
+        public bool CanPlaceFromInventory(int inventoryIndex, int memberIndex, int cell)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanPlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, cell);
+        }
+
+        public void PlaceFromInventory(int inventoryIndex, int memberIndex, int cell)
+        {
+            _run.RequireWritable();
+            RequireBetweenBattles();
+            ExpeditionRules.PlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, cell);
             Commit();
         }
 

@@ -185,11 +185,32 @@ namespace F1.Tests
             int itemOption = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
             RewardOption option = state.PendingRewards[itemOption];
 
+            Assert.IsTrue(kit.Expedition.CanPlaceReward(itemOption, 0, 1), "An empty cell behind the weapon.");
+            Assert.IsFalse(kit.Expedition.CanPlaceReward(itemOption, 0, 9));
             kit.Expedition.TakeItemReward(itemOption, 0, 1);
 
             Assert.AreEqual(option.Id, state.Members[0].Items[1].Item.Id);
             Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
+            Assert.IsFalse(kit.Expedition.CanPlaceReward(itemOption, 0, 2), "No reward is pending any more.");
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.SkipReward(), "There is no reward to skip any more.");
+        }
+
+        [Test]
+        public void AnItemReward_CanGoStraightToTheInventory()
+        {
+            FlowTestKit kit = new FlowTestKit().InBattle();
+            kit.FightToTheEnd();
+            kit.Expedition.CloseBattle();
+            ExpeditionState state = kit.Expedition.Expedition;
+            int itemOption = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            RewardOption option = state.PendingRewards[itemOption];
+            Assert.IsTrue(kit.Expedition.CanTakeRewardToInventory(itemOption), "The inventory is empty.");
+
+            kit.Expedition.TakeItemRewardToInventory(itemOption);
+
+            Assert.AreEqual(option.Id, state.Inventory.Single().Item.Id);
+            Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
+            Assert.IsFalse(kit.Expedition.CanTakeRewardToInventory(itemOption), "No reward is pending any more.");
         }
 
         [Test]
@@ -199,9 +220,21 @@ namespace F1.Tests
             ExpeditionState state = kit.Expedition.Expedition;
             string weapon = state.Members[0].Items[0].Item.Id;
 
-            kit.Expedition.SwapItems(0, 0, 0, 2);
-            Assert.IsNull(state.Members[0].Items[0]);
-            Assert.AreEqual(weapon, state.Members[0].Items[2].Item.Id);
+            Assert.IsTrue(kit.Expedition.CanMoveItem(0, 0, 1, 1));
+            kit.Expedition.MoveItem(0, 0, 1, 1);
+            Assert.IsEmpty(state.Members[0].Items);
+            Assert.AreEqual(weapon, state.Members[1].Items[1].Item.Id);
+
+            Assert.IsTrue(kit.Expedition.CanPickItem(1, 1));
+            Assert.IsFalse(kit.Expedition.CanPickItem(0, 0), "The board is empty now.");
+            Assert.IsTrue(kit.Expedition.CanMoveToInventory(1, 1));
+            kit.Expedition.MoveToInventory(1, 1);
+            Assert.AreEqual(weapon, state.Inventory.Single().Item.Id);
+
+            Assert.IsTrue(kit.Expedition.CanPlaceFromInventory(0, 0, 0));
+            kit.Expedition.PlaceFromInventory(0, 0, 0);
+            Assert.AreEqual(weapon, state.Members[0].Items.Single().Item.Id);
+            Assert.IsEmpty(state.Inventory);
 
             Assert.IsTrue(kit.Expedition.CanMoveToRow(1, 1));
             Assert.IsFalse(kit.Expedition.CanMoveToRow(1, 2), "Already there.");
@@ -211,8 +244,14 @@ namespace F1.Tests
             kit.Expedition.EnterNode(kit.Expedition.AvailableNodes()[0].Id);
 
             Assert.IsFalse(kit.Expedition.CanMoveToRow(1, 2));
+            Assert.IsFalse(kit.Expedition.CanMoveItem(0, 0, 1, 1));
+            Assert.IsFalse(kit.Expedition.CanPickItem(0, 0));
+            Assert.IsFalse(kit.Expedition.CanMoveToInventory(0, 0));
+            Assert.IsFalse(kit.Expedition.CanPlaceFromInventory(0, 0, 1));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToRow(1, 2));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.SwapItems(0, 0, 0, 2));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveItem(0, 0, 1, 1));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToInventory(0, 0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.PlaceFromInventory(0, 0, 1));
         }
 
         [Test]
@@ -271,8 +310,16 @@ namespace F1.Tests
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.SkipReward());
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakePotionReward(0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeItemReward(0, 0, 0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeItemRewardToInventory(0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveItem(0, 0, 1, 0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToInventory(0, 0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.PlaceFromInventory(0, 0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.AcknowledgeReport());
             Assert.IsFalse(kit.Expedition.CanTakePotionReward);
+            Assert.IsFalse(kit.Expedition.CanPlaceReward(0, 0, 0));
+            Assert.IsFalse(kit.Expedition.CanMoveItem(0, 0, 1, 0));
+            Assert.IsFalse(kit.Expedition.CanMoveToInventory(0, 0));
+            Assert.IsFalse(kit.Expedition.CanPlaceFromInventory(0, 0, 0));
         }
     }
 }

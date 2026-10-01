@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using F1.Save;
 
 namespace F1.Flow
@@ -21,9 +22,34 @@ namespace F1.Flow
                 throw new RunSaveException($"Schema version {save.SchemaVersion} cannot be read.");
             }
 
-            // When the schema changes and older files should still load, add one step per version here:
-            //     if (save.SchemaVersion == 2) { From2To3(save); }
             // Each step edits the DTO in place and sets SchemaVersion to the next number.
+            if (save.SchemaVersion == 2)
+            {
+                From2To3(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 2 stored a board as one entry per slot, null for an empty one, and had no inventory.
+        /// The entries that hold an item become the board in order; the inventory starts empty.
+        /// Whether the board still fits its cells, now that items have sizes, is for the validation.
+        /// </summary>
+        static void From2To3(RunSaveData save)
+        {
+            if (save.Expedition != null)
+            {
+                if (save.Expedition.Members != null)
+                {
+                    foreach (MemberRecord member in save.Expedition.Members)
+                    {
+                        member?.Items?.RemoveAll(item => item == null);
+                    }
+                }
+
+                save.Expedition.Inventory = new List<ItemRecord>();
+            }
+
+            save.SchemaVersion = 3;
         }
     }
 }

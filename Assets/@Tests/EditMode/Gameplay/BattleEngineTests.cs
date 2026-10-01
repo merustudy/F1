@@ -22,7 +22,7 @@ namespace F1.Tests
             return battle.Events.Where(e => e.Kind == kind).ToList();
         }
 
-        /// <param name="rows">The rows the item can be used in. Every row when omitted.</param>
+        /// <param name="rows">Where the owner must stand for the item to work. Everywhere when omitted.</param>
         /// <param name="reach">How many enemies it hits from the end its target counts from. One when omitted.</param>
         static EquippedItem Item(
             string id,
@@ -31,7 +31,7 @@ namespace F1.Tests
             TargetMode target,
             int grade,
             ItemCategory category = ItemCategory.Weapon,
-            int[] rows = null,
+            RowSpan rows = null,
             int reach = TestData.DefaultReach)
         {
             return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), grade);
@@ -167,13 +167,13 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Item_WhoseOwnerStandsOutsideItsRows_NeverFires()
+        public void Item_WhoseOwnerStandsOutsideItsSpan_NeverFires()
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
                     Idle("front", 1),
-                    TestData.Mercenary("a", 2, 100, Item("axe", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 1 }))),
+                    TestData.Mercenary("a", 2, 100, Item("axe", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: RowSpan.Front(1)))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(10000);
@@ -184,25 +184,41 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Item_WorksInEveryRowItLists()
+        public void Item_CountedFromTheFront_WorksInRows1ToN_WhateverTheLineLength()
         {
-            EquippedItem Staff()
+            EquippedItem Spear()
             {
-                return Item("staff", 1000, EffectKind.Damage, TargetMode.EnemyFront, 1, rows: new[] { 2, 3 });
+                return Item("spear", 1000, EffectKind.Damage, TargetMode.EnemyFront, 1, rows: RowSpan.Front(2));
             }
 
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
-                    TestData.Mercenary("one", 1, 100, Staff()),
-                    TestData.Mercenary("two", 2, 100, Staff()),
-                    TestData.Mercenary("three", 3, 100, Staff())),
+                    TestData.Mercenary("one", 1, 100, Spear()),
+                    TestData.Mercenary("two", 2, 100, Spear()),
+                    TestData.Mercenary("three", 3, 100, Spear()),
+                    TestData.Mercenary("four", 4, 100, Spear())),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
 
-            CollectionAssert.AreEqual(new[] { false, true, true }, battle.Party.Select(u => u.Items[0].Active));
-            Assert.AreEqual(98, battle.Enemies[0].Hp, "Only the two behind row 1 fired.");
+            CollectionAssert.AreEqual(new[] { true, true, false, false }, battle.Party.Select(u => u.Items[0].Active));
+            Assert.AreEqual(98, battle.Enemies[0].Hp, "Only the front two fired.");
+        }
+
+        [TestCase(4, new[] { false, true, true, true })]
+        [TestCase(3, new[] { true, true, true })]
+        [TestCase(2, new[] { true, true })]
+        public void Item_CountedFromTheBack_WorksInTheRearNOfTheLivingLine(int partySize, bool[] expectedActive)
+        {
+            // "back:3" is rows 2..4 of four, and everywhere once three or fewer stand.
+            BattleUnitSetup[] party = Enumerable.Range(1, partySize)
+                .Select(row => TestData.Mercenary("m" + row, row, 100, Item("staff", 1000, EffectKind.Damage, TargetMode.EnemyFront, 1, rows: RowSpan.Back(3))))
+                .ToArray();
+
+            BattleEngine battle = Battle(TestData.Balance(), party, TestData.Units(IdleEnemy(100)));
+
+            CollectionAssert.AreEqual(expectedActive, battle.Party.Select(u => u.Items[0].Active));
         }
 
         [Test]
@@ -472,14 +488,14 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AnItem_StartsAFreshCooldown_WhenItsOwnerAdvancesIntoItsRows()
+        public void AnItem_StartsAFreshCooldown_WhenItsOwnerAdvancesIntoItsSpan()
         {
-            // The front mercenary falls at 500 and dies at 1000. The axe (row 1 only, cooldown 700) was idle in row 2.
+            // The front mercenary falls at 500 and dies at 1000. The axe (front row only, cooldown 700) was idle in row 2.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
                 TestData.Units(
                     Idle("front", 1, 1),
-                    TestData.Mercenary("reserve", 2, 100, Item("axe", 700, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 1 }))),
+                    TestData.Mercenary("reserve", 2, 100, Item("axe", 700, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: RowSpan.Front(1)))),
                 TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
 
             battle.AdvanceTo(999);
@@ -497,32 +513,61 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AnItem_Stops_WhenItsOwnerAdvancesOutOfItsRows()
+        public void AnItemCountedFromTheBack_KeepsWorking_WhenItsOwnerIsPulledToTheFront()
         {
-            // The staff (rows 2 and 3) fires at 400 and 800, then its owner is pulled into row 1 at 1000.
+            // The staff works in the rear two. Its owner stands second of two, and alone in row 1 after the
+            // front dies at 1000: still within the rear two of a line of one. The cooldown is not touched.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
                 TestData.Units(
                     Idle("front", 1, 1),
-                    TestData.Mercenary("healer", 2, 100, Item("staff", 400, EffectKind.Shield, TargetMode.Self, 5, ItemCategory.Support, new[] { 2, 3 }))),
+                    TestData.Mercenary("healer", 2, 100, Item("staff", 400, EffectKind.Shield, TargetMode.Self, 5, ItemCategory.Support, RowSpan.Back(2)))),
                 TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
 
-            battle.AdvanceTo(5000);
+            battle.AdvanceTo(2000);
 
-            Assert.IsFalse(battle.Party[1].Items[0].Active);
-            CollectionAssert.AreEqual(new[] { 400, 800 }, Of(battle, BattleEventKind.ItemActivated).Where(e => e.Id == "staff").Select(e => e.TimeMs));
+            Assert.AreEqual(1, battle.Party[1].Row);
+            Assert.IsTrue(battle.Party[1].Items[0].Active);
+            CollectionAssert.AreEqual(new[] { 400, 800, 1200, 1600, 2000 }, Of(battle, BattleEventKind.ItemActivated).Where(e => e.Id == "staff").Select(e => e.TimeMs));
         }
 
         [Test]
-        public void AnItem_KeepsItsCooldown_WhenItsOwnerAdvancesWithinItsRows()
+        public void WhenTheRearmostUnitDies_AnItemCountedFromTheBack_CanTurnOnForTheFrontUnit()
         {
-            // The owner moves from row 3 to row 2 at 1000; the bow works in both, so it still fires at 1500.
+            // The front enemy's bow works in the rear two: idle while three stand, on from the moment the
+            // party's shot kills the rearmost enemy and the line is two long. Nobody moved; the line got shorter.
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("shot", 1000, EffectKind.Damage, TargetMode.EnemyBack, 9))),
+                TestData.Units(
+                    TestData.Enemy("front", 1, 100, Item("bow", 600, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: RowSpan.Back(2))),
+                    TestData.Enemy("middle", 2, 100),
+                    TestData.Enemy("rear", 3, 5)));
+
+            battle.AdvanceTo(999);
+            Assert.IsFalse(battle.Enemies[0].Items[0].Active);
+            Assert.AreEqual(100, battle.Party[0].Hp);
+
+            battle.AdvanceTo(1000);
+            Assert.IsFalse(battle.Enemies[2].Alive);
+            Assert.AreEqual(0, Of(battle, BattleEventKind.RowsAdvanced).Count, "Nobody stood behind the dead.");
+            Assert.IsTrue(battle.Enemies[0].Items[0].Active);
+            Assert.AreEqual(1600, battle.Enemies[0].Items[0].NextFireMs, "A whole cooldown from the moment the line shortened.");
+
+            battle.AdvanceTo(1600);
+            Assert.AreEqual(91, battle.Party[0].Hp);
+        }
+
+        [Test]
+        public void AnItem_KeepsItsCooldown_WhenItsOwnerAdvancesWithinItsSpan()
+        {
+            // The owner moves from row 3 to row 2 at 1000; the bow (rear two) works in both, so it still fires at 1500.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
                 TestData.Units(
                     Idle("front", 1, 1),
                     Idle("middle", 2),
-                    TestData.Mercenary("archer", 3, 100, Item("bow", 1500, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 2, 3 }))),
+                    TestData.Mercenary("archer", 3, 100, Item("bow", 1500, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: RowSpan.Back(2)))),
                 TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
 
             battle.AdvanceTo(1500);
@@ -532,21 +577,26 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AnItemDueAtTheMomentItsOwnerIsPulledOutOfItsRows_DoesNotFire()
+        public void AnItemThatTurnsOnAtTheMomentOfADeath_DoesNotFireThatMoment_ButAWholeCooldownLater()
         {
-            // The party's attack kills the front enemy at 1000. The enemy bow (rows 2 and 3) was due at 1000 as well,
-            // but party items go first and the archer is already in row 1 when the enemy items are processed.
+            // The archer's bow works in the rearmost row only, and the archer stands in front of a guard: idle.
+            // The party's shot kills the guard at 1000; the archer is the rearmost of a line of one from then on.
+            // Its cooldown starts at 1000, so it does not fire at 1000 even though a cooldown had passed.
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 50))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("shot", 1000, EffectKind.Damage, TargetMode.EnemyBack, 50))),
                 TestData.Units(
-                    TestData.Enemy("front", 1, 50),
-                    TestData.Enemy("archer", 2, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 2, 3 }))));
+                    TestData.Enemy("archer", 1, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: RowSpan.Back(1))),
+                    TestData.Enemy("guard", 2, 50)));
 
-            battle.AdvanceTo(5000);
+            battle.AdvanceTo(1000);
+            Assert.IsFalse(battle.Enemies[1].Alive);
+            Assert.IsTrue(battle.Enemies[0].Items[0].Active);
+            Assert.AreEqual(100, battle.Party[0].Hp, "Nothing fired the moment the bow turned on.");
 
-            Assert.AreEqual(100, battle.Party[0].Hp);
-            Assert.AreEqual(0, Of(battle, BattleEventKind.ItemActivated).Count(e => e.Id == "bow"));
+            battle.AdvanceTo(2000);
+            Assert.AreEqual(91, battle.Party[0].Hp);
+            Assert.AreEqual(2000, Of(battle, BattleEventKind.ItemActivated).Single(e => e.Id == "bow").TimeMs);
         }
 
         [Test]
@@ -558,12 +608,12 @@ namespace F1.Tests
                     TestData.Balance(("DogGraceMs", 1000), ("DogDeathChancePercent", 50)),
                     TestData.Units(
                         TestData.Mercenary("front", 1, 30, TestData.Attack(900, 20, "sword")),
-                        TestData.Mercenary("middle", 2, 30, Item("spear", 1100, EffectKind.Damage, TargetMode.EnemyFront, 12, rows: new[] { 1, 2 }, reach: 2)),
-                        TestData.Mercenary("back", 3, 30, Item("bow", 1300, EffectKind.Damage, TargetMode.EnemyBack, 15, rows: new[] { 2, 3 }))),
+                        TestData.Mercenary("middle", 2, 30, Item("spear", 1100, EffectKind.Damage, TargetMode.EnemyFront, 12, rows: RowSpan.Front(2), reach: 2)),
+                        TestData.Mercenary("back", 3, 30, Item("bow", 1300, EffectKind.Damage, TargetMode.EnemyBack, 15, rows: RowSpan.Back(2)))),
                     TestData.Units(
                         TestData.Enemy("brute", 1, 120, TestData.Attack(700, 12, "club")),
-                        TestData.Enemy("archer", 2, 60, Item("shot", 1000, EffectKind.Damage, TargetMode.EnemyBack, 9, rows: new[] { 2, 3 })),
-                        TestData.Enemy("shaman", 3, 60, Item("hex", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3, ItemCategory.Support, new[] { 2, 3 }))));
+                        TestData.Enemy("archer", 2, 60, Item("shot", 1000, EffectKind.Damage, TargetMode.EnemyBack, 9, rows: RowSpan.Back(2))),
+                        TestData.Enemy("shaman", 3, 60, Item("hex", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3, ItemCategory.Support, RowSpan.Back(2)))));
             }
 
             var whole = new BattleEngine(Setup());
@@ -814,10 +864,10 @@ namespace F1.Tests
 
         [TestCase(1, 20)]
         [TestCase(2, 0)]
-        public void Passive_BattleStartShield_AppliesOnlyInItsRows(int knightRow, int expectedShield)
+        public void Passive_BattleStartShield_AppliesOnlyInItsSpan(int knightRow, int expectedShield)
         {
             BattleUnitSetup knight = TestData.Mercenary("knight", knightRow, 100)
-                .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.Self, 20, 1);
+                .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.Self, 20, RowSpan.Front(1));
             BattleUnitSetup other = Idle("other", knightRow == 1 ? 2 : 1);
 
             BattleEngine battle = Battle(
@@ -835,7 +885,7 @@ namespace F1.Tests
                 TestData.Balance(),
                 TestData.Units(
                     TestData.Mercenary("paladin", 1, 100)
-                        .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.AllyAll, 8, 1),
+                        .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.AllyAll, 8, RowSpan.Front(1)),
                     TestData.Mercenary("other", 2, 100)),
                 TestData.Units(IdleEnemy(100)));
 
@@ -898,18 +948,22 @@ namespace F1.Tests
             Assert.AreEqual(80, atDeathsDoor.Enemies[0].Hp);
         }
 
-        [TestCase(2, 10)]
         [TestCase(1, 8)]
-        public void Passive_WeaponPowerInRows_UsesTheActualRow(int archmageRow, int expectedDamage)
+        [TestCase(2, 10)]
+        [TestCase(3, 10)]
+        public void Passive_WeaponPowerInASpan_UsesTheActualRowAndTheLivingLine(int archmageRow, int expectedDamage)
         {
-            BattleUnitSetup archmage = TestData.Mercenary("archmage", archmageRow, 100, TestData.Attack(1000, 8))
-                .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, 2, 3);
-            BattleUnitSetup other = Idle("other", archmageRow == 1 ? 2 : 1);
+            // The rear two of a line of three are rows 2 and 3.
+            var party = new List<BattleUnitSetup>();
+            for (int row = 1; row <= 3; row++)
+            {
+                party.Add(row == archmageRow
+                    ? TestData.Mercenary("archmage", row, 100, TestData.Attack(1000, 8))
+                        .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, RowSpan.Back(2))
+                    : Idle("other" + row, row));
+            }
 
-            BattleEngine battle = Battle(
-                TestData.Balance(),
-                archmageRow == 1 ? TestData.Units(archmage, other) : TestData.Units(other, archmage),
-                TestData.Units(IdleEnemy(100)));
+            BattleEngine battle = Battle(TestData.Balance(), party.ToArray(), TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
 
@@ -917,23 +971,44 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Passive_WeaponPowerInRows_IsLostWhenTheOwnerAdvancesOutOfThem()
+        public void Passive_WeaponPowerInASpanCountedFromTheBack_IsKeptWhenTheOwnerIsPulledForward()
         {
-            // The front mercenary (1 HP) falls at 500 and dies at 1000; the archmage moves from row 2 to row 1.
+            // The front mercenary (1 HP) falls at 500 and dies at 1000; the archmage moves from row 2 to row 1,
+            // which is still within the rear two of a line of one.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
                 TestData.Units(
                     Idle("front", 1, 1),
                     TestData.Mercenary("archmage", 2, 100, TestData.Attack(900, 8))
-                        .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, 2, 3)),
+                        .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, RowSpan.Back(2))),
                 TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
 
             battle.AdvanceTo(900);
-            Assert.AreEqual(990, battle.Enemies[0].Hp, "In row 2: 8 x 1.25.");
+            Assert.AreEqual(990, battle.Enemies[0].Hp, "In row 2 of two: 8 x 1.25.");
 
             battle.AdvanceTo(1800);
             Assert.AreEqual(1, battle.Party[1].Row);
-            Assert.AreEqual(982, battle.Enemies[0].Hp, "In row 1: 8.");
+            Assert.AreEqual(980, battle.Enemies[0].Hp, "Alone in row 1: still 8 x 1.25.");
+        }
+
+        [Test]
+        public void Passive_WeaponPowerInASpanCountedFromTheFront_IsLostWhenTheLineGrowsNoLonger_ButGainedWhenPulledIn()
+        {
+            // The front mercenary dies at 1000; the one in row 2 with a front-row passive moves into row 1 and gains it.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
+                TestData.Units(
+                    Idle("front", 1, 1),
+                    TestData.Mercenary("duelist", 2, 100, TestData.Attack(900, 8))
+                        .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, RowSpan.Front(1))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(900);
+            Assert.AreEqual(992, battle.Enemies[0].Hp, "In row 2: 8.");
+
+            battle.AdvanceTo(1800);
+            Assert.AreEqual(1, battle.Party[1].Row);
+            Assert.AreEqual(982, battle.Enemies[0].Hp, "In row 1: 8 x 1.25.");
         }
 
         // ---- Storm and battle end ------------------------------------------------------------
@@ -1290,6 +1365,14 @@ namespace F1.Tests
             Assert.Throws<ArgumentException>(
                 () => Battle(balance, TestData.Units(TestData.Mercenary("a", 1, 150).WithMaxHp(100)), enemies),
                 "HP above max.");
+
+            BattleUnitSetup overloaded = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 1), TestData.Attack(1000, 1, "b"));
+            overloaded.ItemSlots = 1;
+            Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(overloaded), enemies), "More items than the board holds.");
+
+            BattleUnitSetup gap = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 1), null);
+            gap.ItemSlots = 2;
+            Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(gap), enemies), "An empty entry on the board.");
         }
     }
 }

@@ -84,19 +84,23 @@ namespace F1.Tests
         }
 
         [Test]
-        public void EveryShippedJob_CanUseItsWeaponInItsRecommendedRow()
+        public void EveryShippedJob_CanUseItsWeaponInItsRecommendedRow_OfAFullParty()
         {
             StaticData data = LoadShipped();
 
             foreach (JobData job in data.Jobs.Ordered)
             {
-                Assert.IsTrue(data.Items.Get(job.WeaponItemId).UsableIn(job.RecommendedRow), $"{job.Id}: {job.WeaponItemId} in row {job.RecommendedRow}");
+                Assert.IsTrue(
+                    data.Items.Get(job.WeaponItemId).UsableIn(job.RecommendedRow, data.Balance.PartySize),
+                    $"{job.Id}: {job.WeaponItemId} in row {job.RecommendedRow} of {data.Balance.PartySize}");
             }
         }
 
         [Test]
-        public void EveryShippedEnemyGroup_ThreatensFromTheStart_AndNobodyInItIsDeadWeight()
+        public void EveryShippedEnemyGroup_ThreatensFromTheStart()
         {
+            // Where an item works is counted on the living line, so nobody stays dead weight for good: the
+            // line only shortens. What matters is that the group acts before anyone has died.
             StaticData data = LoadShipped();
 
             foreach (EnemyGroupData group in data.EnemyGroups.Ordered)
@@ -106,12 +110,7 @@ namespace F1.Tests
                 {
                     int row = BattleRows.Front + i;
                     EnemyData enemy = data.Enemies.Get(group.Enemies[i]);
-                    someoneActsAtTheStart |= enemy.Items.Any(grant => data.Items.Get(grant.ItemId).UsableIn(row));
-
-                    // An enemy only ever moves forward: it must have an item for its row or for one in front of it.
-                    Assert.IsTrue(
-                        enemy.Items.Any(grant => data.Items.Get(grant.ItemId).Rows.Any(usable => usable <= row)),
-                        $"{group.Id}: {enemy.Id} in row {row} can never use any of its items");
+                    someoneActsAtTheStart |= enemy.Items.Any(grant => data.Items.Get(grant.ItemId).UsableIn(row, group.Enemies.Count));
                 }
 
                 Assert.IsTrue(someoneActsAtTheStart, $"{group.Id}: nobody can use an item where they stand at the start");

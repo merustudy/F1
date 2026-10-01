@@ -87,7 +87,7 @@ namespace F1.Editor.Data
             return new PassiveSpec(
                 row.Enum<PassiveTrigger>("PassiveTrigger"),
                 row.Enum<PassiveCondition>("PassiveCondition"),
-                row.IntList("PassiveRows"),
+                row.OptionalRows("PassiveRows"),
                 row.Enum<PassiveEffect>("PassiveEffect"),
                 row.Enum<PassiveTarget>("PassiveTarget"),
                 row.Int("PassiveMagnitude"));
@@ -99,7 +99,7 @@ namespace F1.Editor.Data
         public static List<ItemData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "Category", "CooldownMs", "Rows",
+                "Category", "Size", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
                 "RewardWeight"));
@@ -117,8 +117,9 @@ namespace F1.Editor.Data
                     row.Id(RowMapping.Id),
                     row.Localized(RowMapping.Name),
                     row.Enum<ItemCategory>("Category"),
+                    row.Int("Size"),
                     row.Int("CooldownMs"),
-                    row.IntList("Rows"),
+                    row.Rows("Rows"),
                     effects,
                     row.Int("RewardWeight"));
             });

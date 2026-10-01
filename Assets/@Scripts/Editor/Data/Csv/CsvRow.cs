@@ -97,26 +97,23 @@ namespace F1.Editor.Data
             return ids;
         }
 
-        /// <summary>A list of integers joined with '+', for example "1+2". An empty cell is an empty list.</summary>
-        public List<int> IntList(string header)
+        /// <summary>A span of a line: "front:N", "back:N" or "all".</summary>
+        public RowSpan Rows(string header)
         {
-            var numbers = new List<int>();
-            if (IsEmpty(header))
+            string value = Text(header);
+            if (!RowSpan.TryParse(value, out RowSpan span))
             {
-                return numbers;
+                throw new DataException(
+                    $"{Where(header)}: '{value}' is not 'front:N', 'back:N' or '{RowSpan.Everywhere}' (N is 1..{BattleRows.Count}).");
             }
 
-            foreach (string part in Text(header).Split(ListSeparator))
-            {
-                if (!TryParseInt(part, out int number))
-                {
-                    throw new DataException($"{Where(header)}: '{part}' is not an integer.");
-                }
+            return span;
+        }
 
-                numbers.Add(number);
-            }
-
-            return numbers;
+        /// <summary>A span of a line, or null for an empty cell.</summary>
+        public RowSpan OptionalRows(string header)
+        {
+            return IsEmpty(header) ? null : Rows(header);
         }
 
         /// <summary>A list of "id:grade" pairs joined with '+', for example "claws:5+bite:4".</summary>

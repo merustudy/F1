@@ -15,12 +15,14 @@ namespace F1.Gameplay
             NextFireMs = cooldownMs;
         }
 
+        /// <summary>Position on the owner's board: the activation order.</summary>
         public int SlotIndex { get; }
         public EquippedItem Equipped { get; }
 
         /// <summary>
-        /// False while the owner stands in a row the item cannot be used in. An inactive item does
-        /// not fill its cooldown and never fires. It changes when the owner advances.
+        /// False while the owner stands outside the span of the line the item works in. An inactive
+        /// item does not fill its cooldown and never fires. It is judged again whenever someone on
+        /// the owner's side dies, because the span is counted on the living line.
         /// </summary>
         public bool Active { get; internal set; }
 

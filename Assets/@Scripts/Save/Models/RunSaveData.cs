@@ -7,11 +7,13 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 2: rows are numbers (1..3). Version 1 stored "Front"/"Rear" and is not read any more.
+    /// Version 3: a member's Items is the board in order with no empty entries, and the expedition
+    /// has an Inventory. Version 2 stored one entry per slot (null for an empty one) and no inventory;
+    /// RunSaveMigrator brings it up. Version 1 stored "Front"/"Rear" rows and is not read any more.
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 2;
+        public const int CurrentSchemaVersion = 3;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -57,6 +59,9 @@ namespace F1.Save
         public string Seed;
         public List<MemberRecord> Members;
 
+        /// <summary>Items kept outside the boards, in order.</summary>
+        public List<ItemRecord> Inventory;
+
         /// <summary>Potion ids per slot. A null entry is an empty slot.</summary>
         public List<string> Potions;
 
@@ -78,7 +83,7 @@ namespace F1.Save
         public int Hp;
         public bool Alive;
 
-        /// <summary>Item slots in order. A null entry is an empty slot.</summary>
+        /// <summary>The item board in order. No null entries; the cells come from the job.</summary>
         public List<ItemRecord> Items;
     }
 

@@ -1,12 +1,11 @@
-using System.Collections.Generic;
-
 namespace F1.Data
 {
     /// <summary>
     /// The rows of a battle side. Each side has rows 1..<see cref="Count"/>; row 1 faces the other
-    /// side, and a row holds one unit. A row is a plain number so that units can advance (row - 1)
-    /// and data can list rows. The count is structure, not balance: a side is a line of at most
-    /// this many units and the battle screen has one column per row.
+    /// side, and a row holds one unit. A row is a plain number so that units can advance (row - 1).
+    /// Where in a line something applies is a <see cref="RowSpan"/>, counted from an end of the line.
+    /// The count is structure, not balance: a side is a line of at most this many units and the
+    /// battle screen has one column per row.
     /// </summary>
     public static class BattleRows
     {
@@ -16,44 +15,6 @@ namespace F1.Data
         public static bool IsValid(int row)
         {
             return row >= Front && row <= Count;
-        }
-
-        /// <summary>A set of rows in data: at least one row, each valid, in ascending order without repeats.</summary>
-        public static void RequireSet(IReadOnlyList<int> rows, string what)
-        {
-            if (rows == null || rows.Count == 0)
-            {
-                throw new DataException($"{what}: at least one row is required.");
-            }
-
-            int previous = 0;
-            foreach (int row in rows)
-            {
-                if (!IsValid(row))
-                {
-                    throw new DataException($"{what}: row {row} is outside {Front}..{Count}.");
-                }
-
-                if (row <= previous)
-                {
-                    throw new DataException($"{what}: rows must be listed in ascending order without repeats.");
-                }
-
-                previous = row;
-            }
-        }
-
-        public static bool Contains(IReadOnlyList<int> rows, int row)
-        {
-            for (int i = 0; i < rows.Count; i++)
-            {
-                if (rows[i] == row)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 
@@ -103,7 +64,7 @@ namespace F1.Data
     public enum PassiveCondition
     {
         None,
-        /// <summary>The unit stands in one of the rows listed by the passive.</summary>
+        /// <summary>The unit stands within the span of its line the passive names (front N or rear N).</summary>
         InRows,
         SelfInDog,
     }

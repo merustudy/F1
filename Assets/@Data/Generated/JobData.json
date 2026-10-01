@@ -8,24 +8,24 @@
         "ko-KR": "대마법사"
       },
       "MaxHp": 80,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "fire_staff",
       "WeaponGrade": 10,
       "RecommendedRow": 3,
       "Passive": {
         "Trigger": "Always",
         "Condition": "InRows",
-        "Rows": [
-          3,
-          4
-        ],
+        "Rows": {
+          "From": "Back",
+          "Reach": 2
+        },
         "Effect": "WeaponPowerPercent",
         "Target": "Self",
         "Magnitude": 25
       },
       "PassiveText": {
-        "en-US": "Row 3 or behind: weapon damage +{0}%",
-        "ko-KR": "3열 이후: 무기 피해 +{0}%"
+        "en-US": "Rear 2 rows: weapon damage +{0}%",
+        "ko-KR": "뒤에서 2번째 자리까지: 무기 피해 +{0}%"
       }
     },
     {
@@ -35,14 +35,14 @@
         "ko-KR": "광전사"
       },
       "MaxHp": 120,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "greataxe",
       "WeaponGrade": 12,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "Always",
         "Condition": "SelfInDog",
-        "Rows": [],
+        "Rows": null,
         "Effect": "WeaponPowerPercent",
         "Target": "Self",
         "Magnitude": 100
@@ -59,14 +59,14 @@
         "ko-KR": "주교"
       },
       "MaxHp": 90,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "healing_staff",
       "WeaponGrade": 10,
       "RecommendedRow": 3,
       "Passive": {
         "Trigger": "Heal",
         "Condition": "None",
-        "Rows": [],
+        "Rows": null,
         "Effect": "Shield",
         "Target": "EventTarget",
         "Magnitude": 10
@@ -83,23 +83,24 @@
         "ko-KR": "기사"
       },
       "MaxHp": 140,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "longsword",
       "WeaponGrade": 10,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "BattleStart",
         "Condition": "InRows",
-        "Rows": [
-          1
-        ],
+        "Rows": {
+          "From": "Front",
+          "Reach": 1
+        },
         "Effect": "Shield",
         "Target": "Self",
         "Magnitude": 20
       },
       "PassiveText": {
-        "en-US": "Row 1: gains {0} Shield at the start of battle",
-        "ko-KR": "1열: 전투 시작 때 자신에게 보호막 {0}"
+        "en-US": "Front row: gains {0} Shield at the start of battle",
+        "ko-KR": "맨 앞: 전투 시작 때 자신에게 보호막 {0}"
       }
     },
     {
@@ -109,23 +110,24 @@
         "ko-KR": "성기사"
       },
       "MaxHp": 130,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "mace",
       "WeaponGrade": 9,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "BattleStart",
         "Condition": "InRows",
-        "Rows": [
-          1
-        ],
+        "Rows": {
+          "From": "Front",
+          "Reach": 1
+        },
         "Effect": "Shield",
         "Target": "AllyAll",
         "Magnitude": 8
       },
       "PassiveText": {
-        "en-US": "Row 1: every ally gains {0} Shield at the start of battle",
-        "ko-KR": "1열: 전투 시작 때 아군 전체에 보호막 {0}"
+        "en-US": "Front row: every ally gains {0} Shield at the start of battle",
+        "ko-KR": "맨 앞: 전투 시작 때 아군 전체에 보호막 {0}"
       }
     },
     {
@@ -135,14 +137,14 @@
         "ko-KR": "마검사"
       },
       "MaxHp": 100,
-      "ItemSlots": 3,
+      "ItemSlots": 4,
       "WeaponItemId": "sword",
       "WeaponGrade": 12,
       "RecommendedRow": 2,
       "Passive": {
         "Trigger": "WeaponHit",
         "Condition": "None",
-        "Rows": [],
+        "Rows": null,
         "Effect": "Burn",
         "Target": "EventTarget",
         "Magnitude": 3

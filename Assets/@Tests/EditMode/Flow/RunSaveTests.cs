@@ -127,7 +127,8 @@ namespace F1.Tests
         public void Restart_OnTheNodeMap_ComesBackToTheSameExpedition()
         {
             FlowTestKit kit = new FlowTestKit().OnNodeMap();
-            kit.Expedition.SwapItems(0, 0, 0, 2);
+            kit.Expedition.MoveItem(0, 0, 1, 2);
+            kit.Expedition.MoveToInventory(1, 0);
             kit.Expedition.MoveToRow(1, 1);
 
             FlowTestKit restarted = kit.Restart();
@@ -161,7 +162,7 @@ namespace F1.Tests
             FlowTestKit again = restarted.Restart();
 
             Assert.AreEqual(GamePhase.NodeMap, again.Expedition.Phase);
-            Assert.AreEqual(itemId, again.Expedition.Expedition.Members[1].Items[2].Item.Id);
+            Assert.AreEqual(itemId, again.Expedition.Expedition.Members[1].Items[1].Item.Id, "Behind the weapon on the board.");
         }
 
         [Test]

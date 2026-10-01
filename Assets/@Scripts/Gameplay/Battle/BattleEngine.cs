@@ -13,7 +13,8 @@ namespace F1.Gameplay
     /// storm tick, then player inputs made at that time.
     ///
     /// Rows: each side is a line, one unit per row from row 1 back. When a unit dies, the ones
-    /// behind it advance one row at once, before anything else is processed.
+    /// behind it advance one row at once, before anything else is processed, and every item of
+    /// that side is judged again: where an item works is counted on the living line.
     /// </summary>
     public sealed class BattleEngine
     {
@@ -47,12 +48,12 @@ namespace F1.Gameplay
 
             for (int i = 0; i < setup.Party.Count; i++)
             {
-                _party.Add(CreateUnit(BattleSide.Party, i, setup.Party[i], 0));
+                _party.Add(CreateUnit(BattleSide.Party, i, setup.Party[i], 0, setup.Party.Count));
             }
 
             for (int i = 0; i < setup.Enemies.Count; i++)
             {
-                _enemies.Add(CreateUnit(BattleSide.Enemy, i, setup.Enemies[i], setup.EnemyCooldownPermille));
+                _enemies.Add(CreateUnit(BattleSide.Enemy, i, setup.Enemies[i], setup.EnemyCooldownPermille, setup.Enemies.Count));
             }
 
             _potions = new PotionData[_balance.PotionSlots];
@@ -267,7 +268,8 @@ namespace F1.Gameplay
             }
         }
 
-        BattleUnit CreateUnit(BattleSide side, int index, BattleUnitSetup setup, int cooldownPermille)
+        /// <param name="lineLength">How many units the side starts with; they stand in rows 1..lineLength.</param>
+        BattleUnit CreateUnit(BattleSide side, int index, BattleUnitSetup setup, int cooldownPermille, int lineLength)
         {
             if (setup.MaxHp < 1 || setup.Hp < 0 || setup.Hp > setup.MaxHp)
             {
@@ -282,11 +284,16 @@ namespace F1.Gameplay
                     EquippedItem equipped = setup.Items[slot];
                     if (equipped == null)
                     {
-                        continue;
+                        throw new ArgumentException($"Unit '{setup.SourceId}' has an empty entry on its board.");
                     }
 
-                    bool active = equipped.Item.UsableIn(setup.Row);
+                    bool active = equipped.Item.UsableIn(setup.Row, lineLength);
                     items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille)));
+                }
+
+                if (ItemBoard.UsedCells(setup.Items) > setup.ItemSlots)
+                {
+                    throw new ArgumentException($"Unit '{setup.SourceId}' carries more than its board of {setup.ItemSlots} cells holds.");
                 }
             }
 
@@ -563,16 +570,39 @@ namespace F1.Gameplay
             return lowest;
         }
 
-        /// <summary>Whether the condition of a unit's passive holds right now. Rows are judged by where the unit stands at this moment.</summary>
-        static bool ConditionHolds(BattleUnit unit, PassiveSpec passive)
+        /// <summary>
+        /// Whether the condition of a unit's passive holds right now. A span of the line is judged by
+        /// where the unit stands at this moment and how many of its side are alive.
+        /// </summary>
+        bool ConditionHolds(BattleUnit unit, PassiveSpec passive)
         {
             switch (passive.Condition)
             {
                 case PassiveCondition.None: return true;
-                case PassiveCondition.InRows: return BattleRows.Contains(passive.Rows, unit.Row);
+                case PassiveCondition.InRows: return passive.Rows.Contains(unit.Row, LineLength(SideOf(unit)));
                 case PassiveCondition.SelfInDog: return unit.InDog;
                 default: throw new InvalidOperationException($"Passive condition {passive.Condition} is not implemented.");
             }
+        }
+
+        List<BattleUnit> SideOf(BattleUnit unit)
+        {
+            return unit.Side == BattleSide.Party ? _party : _enemies;
+        }
+
+        /// <summary>How many units of a side are alive. They always stand in rows 1..n.</summary>
+        static int LineLength(List<BattleUnit> units)
+        {
+            int alive = 0;
+            foreach (BattleUnit unit in units)
+            {
+                if (unit.Alive)
+                {
+                    alive++;
+                }
+            }
+
+            return alive;
         }
 
         int WithWeaponPower(BattleUnit owner, int magnitude)
@@ -740,6 +770,7 @@ namespace F1.Gameplay
             target.Burn = 0;
             Log(BattleEventKind.Died, UnitRef.None, target.Ref, null, 0, 0, 0);
             AdvanceBehind(target);
+            RefreshSide(SideOf(target));
         }
 
         /// <summary>
@@ -748,14 +779,12 @@ namespace F1.Gameplay
         /// </summary>
         void AdvanceBehind(BattleUnit fallen)
         {
-            List<BattleUnit> units = fallen.Side == BattleSide.Party ? _party : _enemies;
             bool moved = false;
-            foreach (BattleUnit unit in units)
+            foreach (BattleUnit unit in SideOf(fallen))
             {
                 if (unit.Alive && unit.Row > fallen.Row)
                 {
                     unit.Row--;
-                    RefreshItems(unit);
                     moved = true;
                 }
             }
@@ -767,21 +796,31 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// After the owner changed rows: an item that can be used in the new row but could not in the
-        /// old one starts a fresh cooldown now; one that no longer can be used stops and loses its
-        /// progress. An item usable in both rows is not touched.
+        /// After a death on a side, every living unit of that side judges its items again: the ones
+        /// behind the dead moved, and the line got shorter for everyone. An item that works now but
+        /// did not before starts a fresh cooldown; one that no longer works would stop and lose its
+        /// progress, but the line only ever shortens, so an item never stops during a battle.
         /// </summary>
-        void RefreshItems(BattleUnit unit)
+        void RefreshSide(List<BattleUnit> units)
         {
-            foreach (BattleItemState item in unit.Items)
+            int lineLength = LineLength(units);
+            foreach (BattleUnit unit in units)
             {
-                bool usable = item.Equipped.Item.UsableIn(unit.Row);
-                if (usable && !item.Active)
+                if (!unit.Alive)
                 {
-                    item.NextFireMs = TimeMs + item.CooldownMs;
+                    continue;
                 }
 
-                item.Active = usable;
+                foreach (BattleItemState item in unit.Items)
+                {
+                    bool usable = item.Equipped.Item.UsableIn(unit.Row, lineLength);
+                    if (usable && !item.Active)
+                    {
+                        item.NextFireMs = TimeMs + item.CooldownMs;
+                    }
+
+                    item.Active = usable;
+                }
             }
         }
 

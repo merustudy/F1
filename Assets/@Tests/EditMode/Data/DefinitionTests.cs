@@ -8,10 +8,10 @@ namespace F1.Tests
     /// <summary>Each definition type enforces its own rules in its constructor.</summary>
     public sealed class DefinitionTests
     {
-        /// <summary>The rows an InRows condition needs; none for the other conditions.</summary>
-        static int[] RowsFor(PassiveCondition condition)
+        /// <summary>The span an InRows condition needs; none for the other conditions.</summary>
+        static RowSpan RowsFor(PassiveCondition condition)
         {
-            return condition == PassiveCondition.InRows ? new[] { 1 } : new int[0];
+            return condition == PassiveCondition.InRows ? RowSpan.Front(1) : null;
         }
 
         [TestCase(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.Self)]
@@ -44,24 +44,79 @@ namespace F1.Tests
         }
 
         [Test]
-        public void PassiveSpec_InRowsNeedsAValidSetOfRows_OtherConditionsTakeNone()
+        public void PassiveSpec_InRowsNeedsASpan_OtherConditionsTakeNone()
         {
-            PassiveSpec InRows(params int[] rows)
+            PassiveSpec InRows(RowSpan rows)
             {
                 return new PassiveSpec(PassiveTrigger.Always, PassiveCondition.InRows, rows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 5);
             }
 
-            CollectionAssert.AreEqual(new[] { 2, 3 }, InRows(2, 3).Rows);
-            Assert.Throws<DataException>(() => InRows(), "No rows.");
-            Assert.Throws<DataException>(() => InRows(0), "Below row 1.");
-            Assert.Throws<DataException>(() => InRows(BattleRows.Count + 1), "Beyond the last row.");
-            Assert.Throws<DataException>(() => InRows(2, 1), "Not ascending.");
-            Assert.Throws<DataException>(() => InRows(1, 1), "Repeated.");
+            Assert.AreEqual(RowEnd.Back, InRows(RowSpan.Back(2)).Rows.From);
+            Assert.AreEqual(2, InRows(RowSpan.Back(2)).Rows.Reach);
+            Assert.Throws<DataException>(() => InRows(null), "No span.");
 
             Assert.Throws<DataException>(
-                () => new PassiveSpec(PassiveTrigger.Heal, PassiveCondition.None, new[] { 1 }, PassiveEffect.Shield, PassiveTarget.EventTarget, 5),
-                "Rows without the InRows condition.");
-            CollectionAssert.IsEmpty(new PassiveSpec(PassiveTrigger.Heal, PassiveCondition.None, null, PassiveEffect.Shield, PassiveTarget.EventTarget, 5).Rows);
+                () => new PassiveSpec(PassiveTrigger.Heal, PassiveCondition.None, RowSpan.Front(1), PassiveEffect.Shield, PassiveTarget.EventTarget, 5),
+                "A span without the InRows condition.");
+            Assert.IsNull(new PassiveSpec(PassiveTrigger.Heal, PassiveCondition.None, null, PassiveEffect.Shield, PassiveTarget.EventTarget, 5).Rows);
+        }
+
+        [Test]
+        public void RowSpan_CountsFromAnEnd_OverTheLivingLine()
+        {
+            RowSpan front2 = RowSpan.Front(2);
+            Assert.IsTrue(front2.Contains(1, 4) && front2.Contains(2, 4));
+            Assert.IsFalse(front2.Contains(3, 4) || front2.Contains(4, 4));
+            Assert.IsTrue(front2.Contains(2, 2), "The front N does not depend on the line length.");
+
+            RowSpan back3 = RowSpan.Back(3);
+            Assert.IsFalse(back3.Contains(1, 4));
+            Assert.IsTrue(back3.Contains(2, 4) && back3.Contains(3, 4) && back3.Contains(4, 4), "Rows 2..4 of four.");
+            Assert.IsTrue(back3.Contains(1, 3), "Rows 1..3 of three.");
+            Assert.IsTrue(back3.Contains(1, 1), "A line shorter than the reach is covered whole.");
+
+            Assert.IsTrue(RowSpan.All.IsEveryRow);
+            Assert.IsTrue(RowSpan.Back(BattleRows.Count).IsEveryRow);
+            Assert.IsFalse(RowSpan.Back(BattleRows.Count - 1).IsEveryRow);
+            Assert.IsTrue(RowSpan.All.Contains(BattleRows.Count, BattleRows.Count));
+        }
+
+        [Test]
+        public void RowSpan_ReachIsWithinTheRowsOfASide()
+        {
+            Assert.DoesNotThrow(() => RowSpan.Front(BattleRows.Count));
+            Assert.Throws<DataException>(() => RowSpan.Front(0));
+            Assert.Throws<DataException>(() => RowSpan.Back(BattleRows.Count + 1));
+        }
+
+        [TestCase("front:1", RowEnd.Front, 1)]
+        [TestCase("front:2", RowEnd.Front, 2)]
+        [TestCase("back:3", RowEnd.Back, 3)]
+        [TestCase("all", RowEnd.Front, BattleRows.Count)]
+        public void RowSpan_ReadsFrontBackAndAll(string text, RowEnd from, int reach)
+        {
+            Assert.IsTrue(RowSpan.TryParse(text, out RowSpan span));
+            Assert.AreEqual(from, span.From);
+            Assert.AreEqual(reach, span.Reach);
+            Assert.AreEqual(text, span.ToString());
+        }
+
+        [TestCase("")]
+        [TestCase("1")]
+        [TestCase("1+2")]
+        [TestCase("front")]
+        [TestCase("front:")]
+        [TestCase("front:0")]
+        [TestCase("back:5")]
+        [TestCase("middle:2")]
+        [TestCase("Front:2")]
+        [TestCase("front:+2")]
+        [TestCase("front: 2")]
+        [TestCase("front:2:1")]
+        public void RowSpan_RejectsAnythingElse(string text)
+        {
+            Assert.IsFalse(RowSpan.TryParse(text, out RowSpan span), text);
+            Assert.IsNull(span);
         }
 
         [TestCase(EffectKind.Damage, TargetMode.EnemyFront, true)]
@@ -105,42 +160,36 @@ namespace F1.Tests
         }
 
         [Test]
-        public void ItemData_RejectsBadCooldownEffectCountAndWeight()
+        public void ItemData_RejectsBadSizeCooldownEffectCountAndWeight()
         {
             ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
             LocalizedText name = TestData.Text("x");
+            RowSpan rows = RowSpan.All;
 
-            int[] rows = TestData.AllRows;
-
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 99, rows, new[] { effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1000, rows, new ItemEffect[0], 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1000, rows, new[] { effect, effect, effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1000, rows, new[] { effect }, -1));
-            Assert.Throws<DataException>(() => new ItemData("x", null, ItemCategory.Weapon, 1000, rows, new[] { effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("Bad Id", name, ItemCategory.Weapon, 1000, rows, new[] { effect }, 0));
+            Assert.DoesNotThrow(() => new ItemData("x", name, ItemCategory.Weapon, ItemData.MaxSize, 1000, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 0, 1000, rows, new[] { effect }, 0), "No size.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, ItemData.MaxSize + 1, 1000, rows, new[] { effect }, 0), "Too big.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 99, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, null, new[] { effect }, 0), "Rows missing.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new ItemEffect[0], 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect, effect, effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, -1));
+            Assert.Throws<DataException>(() => new ItemData("x", null, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("Bad Id", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0));
         }
 
         [Test]
-        public void ItemData_RowsAreAnAscendingSetOfValidRows_AndSayWhereTheItemWorks()
+        public void ItemData_Rows_SayWhereTheItemWorks_OnTheLivingLine()
         {
-            ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
-            LocalizedText name = TestData.Text("x");
-            ItemData Item(params int[] rows)
-            {
-                return new ItemData("x", name, ItemCategory.Weapon, 1000, rows, new[] { effect }, 0);
-            }
+            ItemData melee = TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, rows: RowSpan.Front(2));
+            Assert.IsTrue(melee.UsableIn(1, 4));
+            Assert.IsTrue(melee.UsableIn(2, 4));
+            Assert.IsFalse(melee.UsableIn(3, 4));
 
-            ItemData melee = Item(1, 2);
-            Assert.IsTrue(melee.UsableIn(1));
-            Assert.IsTrue(melee.UsableIn(2));
-            Assert.IsFalse(melee.UsableIn(3));
-
-            Assert.Throws<DataException>(() => Item(), "No rows.");
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1000, null, new[] { effect }, 0), "Rows missing.");
-            Assert.Throws<DataException>(() => Item(0));
-            Assert.Throws<DataException>(() => Item(BattleRows.Count + 1));
-            Assert.Throws<DataException>(() => Item(3, 2), "Not ascending.");
-            Assert.Throws<DataException>(() => Item(2, 2), "Repeated.");
+            ItemData staff = TestData.Item("y", 1000, EffectKind.Damage, TargetMode.EnemyFront, rows: RowSpan.Back(3));
+            Assert.IsFalse(staff.UsableIn(1, 4));
+            Assert.IsTrue(staff.UsableIn(2, 4));
+            Assert.IsTrue(staff.UsableIn(1, 2), "First of two is within the rear three.");
         }
 
         [Test]
@@ -161,7 +210,7 @@ namespace F1.Tests
         public void JobData_APassiveAndItsTextComeTogether()
         {
             LocalizedText name = TestData.Text("x");
-            var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.InRows, new[] { 1 }, PassiveEffect.Shield, PassiveTarget.Self, 20);
+            var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.InRows, RowSpan.Front(1), PassiveEffect.Shield, PassiveTarget.Self, 20);
 
             Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, 1, null));
             Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, 1, passive, TestData.Text("Shield {0}")));
@@ -228,6 +277,13 @@ namespace F1.Tests
             Assert.Throws<DataException>(() => TestData.Balance(("MinPartySize", 4), ("PartySize", 3)));
             Assert.DoesNotThrow(() => TestData.Balance(("PartySize", BattleRows.Count), ("MinPartySize", BattleRows.Count)));
             Assert.Throws<DataException>(() => TestData.Balance(("PartySize", BattleRows.Count + 1)), "One mercenary per row: no more than there are rows.");
+        }
+
+        [Test]
+        public void BalanceData_InventoryCells_HoldAtLeastTheBiggestItem()
+        {
+            Assert.Throws<DataException>(() => TestData.Balance(("InventoryCells", ItemData.MaxSize - 1)));
+            Assert.DoesNotThrow(() => TestData.Balance(("InventoryCells", ItemData.MaxSize)));
         }
 
         [Test]

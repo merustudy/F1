@@ -46,7 +46,8 @@ namespace F1.Tests
             Assert.AreEqual(1, knight.RecommendedRow);
             Assert.AreEqual(PassiveTrigger.BattleStart, knight.Passive.Trigger);
             Assert.AreEqual(PassiveCondition.InRows, knight.Passive.Condition);
-            CollectionAssert.AreEqual(new[] { 1 }, knight.Passive.Rows);
+            Assert.AreEqual(RowEnd.Front, knight.Passive.Rows.From);
+            Assert.AreEqual(1, knight.Passive.Rows.Reach);
             Assert.AreEqual(PassiveEffect.Shield, knight.Passive.Effect);
             Assert.AreEqual(PassiveTarget.Self, knight.Passive.Target);
             Assert.AreEqual(20, knight.Passive.Magnitude);
@@ -57,10 +58,13 @@ namespace F1.Tests
 
             ItemData mace = data.Items.Get("mace");
             Assert.AreEqual(ItemCategory.Weapon, mace.Category);
+            Assert.AreEqual(2, mace.Size);
+            Assert.AreEqual(1, data.Items.Get("sword").Size);
             Assert.AreEqual(3200, mace.CooldownMs);
-            CollectionAssert.AreEqual(new[] { 1 }, mace.Rows);
-            CollectionAssert.AreEqual(new[] { 1, 2 }, data.Items.Get("sword").Rows);
-            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, data.Items.Get("claw").Rows);
+            Assert.AreEqual("front:1", mace.Rows.ToString());
+            Assert.AreEqual("front:2", data.Items.Get("sword").Rows.ToString());
+            Assert.AreEqual("back:2", data.Items.Get("staff").Rows.ToString());
+            Assert.IsTrue(data.Items.Get("claw").Rows.IsEveryRow);
             Assert.AreEqual(2, mace.Effects.Count);
             Assert.AreEqual(TargetMode.EnemyFront, mace.Effects[0].Target);
             Assert.AreEqual(2, mace.Effects[0].Reach);
@@ -112,6 +116,7 @@ namespace F1.Tests
             StringAssert.Contains("기사", json, "Non-ASCII text is written as is, not escaped.");
             StringAssert.Contains("\"Trigger\": \"BattleStart\"", json, "Enums are written by name.");
             StringAssert.Contains("\"RecommendedRow\": 1", json, "Rows are written as numbers.");
+            StringAssert.Contains("\"Rows\": {\n          \"From\": \"Front\",\n          \"Reach\": 1\n        }", json, "A span is written as its end and reach.");
         }
 
         [Test]
@@ -240,16 +245,30 @@ namespace F1.Tests
         }
 
         [TestCase("")]
-        [TestCase("0")]
-        [TestCase("5")]
-        [TestCase("2+1")]
-        [TestCase("1+1")]
-        [TestCase("1+x")]
+        [TestCase("1")]
+        [TestCase("1+2")]
+        [TestCase("front:0")]
+        [TestCase("back:5")]
+        [TestCase("middle:2")]
         [TestCase("1,2")]
-        public void Transform_WhenItemRowsAreNotAnAscendingSetOfRows_Reports(string rows)
+        public void Transform_WhenItemRowsAreNotASpan_Reports(string rows)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2500,1+2,", "sword,소드,Sword,Weapon,2500," + (rows.Contains(",") ? "\"" + rows + "\"" : rows) + ",");
-            StringAssert.DoesNotContain("2500,1+2,", items);
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,front:2,", "sword,소드,Sword,Weapon,1,2500," + (rows.Contains(",") ? "\"" + rows + "\"" : rows) + ",");
+            StringAssert.DoesNotContain("2500,front:2,", items);
+
+            DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
+
+            StringAssert.StartsWith("ItemData.csv(2)", exception.Errors[0]);
+            StringAssert.Contains("[Rows]", exception.Errors[0]);
+        }
+
+        [TestCase("0")]
+        [TestCase("4")]
+        [TestCase("x")]
+        public void Transform_WhenItemSizeIsNotOneToThree_Reports(string size)
+        {
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,", "sword,소드,Sword,Weapon," + size + ",2500,");
+            StringAssert.DoesNotContain("Weapon,1,2500,front:2", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
 
@@ -259,14 +278,17 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenPassiveRowsDoNotMatchTheCondition_Reports()
         {
-            // InRows needs rows; every other condition takes none.
-            string withoutRows = TestCsv.Jobs.Replace("BattleStart,InRows,1,Shield", "BattleStart,InRows,,Shield");
-            string rowsNotAsked = TestCsv.Jobs.Replace("BattleStart,InRows,1,Shield", "BattleStart,None,1,Shield");
+            // InRows needs a span; every other condition takes none.
+            string withoutRows = TestCsv.Jobs.Replace("BattleStart,InRows,front:1,Shield", "BattleStart,InRows,,Shield");
+            string rowsNotAsked = TestCsv.Jobs.Replace("BattleStart,InRows,front:1,Shield", "BattleStart,None,front:1,Shield");
+            string notASpan = TestCsv.Jobs.Replace("BattleStart,InRows,front:1,Shield", "BattleStart,InRows,1,Shield");
             StringAssert.Contains("InRows,,Shield", withoutRows);
-            StringAssert.Contains("None,1,Shield", rowsNotAsked);
+            StringAssert.Contains("None,front:1,Shield", rowsNotAsked);
+            StringAssert.Contains("InRows,1,Shield", notASpan);
 
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, withoutRows).Errors[0]);
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, rowsNotAsked).Errors[0]);
+            StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, notASpan).Errors[0]);
         }
 
         [TestCase("EnemyFront,,100", Description = "A target counted from an end needs a reach.")]
@@ -275,7 +297,7 @@ namespace F1.Tests
         [TestCase("EnemyAll,2,100", Description = "All enemies: no reach to give.")]
         public void Transform_WhenTheReachDoesNotFitTheTarget_Reports(string targetReachPower)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2500,1+2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,2500,1+2,Damage," + targetReachPower + ",");
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,front:2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,1,2500,front:2,Damage," + targetReachPower + ",");
             StringAssert.Contains("Damage," + targetReachPower + ",", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);

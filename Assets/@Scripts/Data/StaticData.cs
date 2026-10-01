@@ -127,20 +127,36 @@ namespace F1.Data
         {
             foreach (JobData job in Jobs.Ordered)
             {
-                Require(Items, job.WeaponItemId, $"{JobData.DefinitionName} '{job.Id}' WeaponItemId", problems);
+                string what = $"{JobData.DefinitionName} '{job.Id}'";
+                Require(Items, job.WeaponItemId, what + " WeaponItemId", problems);
+                if (Items.Contains(job.WeaponItemId) && Items.Get(job.WeaponItemId).Size > job.ItemSlots)
+                {
+                    problems.Add($"{what}: the weapon '{job.WeaponItemId}' takes {Items.Get(job.WeaponItemId).Size} cells but the board has {job.ItemSlots}.");
+                }
             }
 
             foreach (EnemyData enemy in Enemies.Ordered)
             {
+                string what = $"{EnemyData.DefinitionName} '{enemy.Id}'";
+                int cells = 0;
                 foreach (ItemGrant grant in enemy.Items)
                 {
-                    Require(Items, grant.ItemId, $"{EnemyData.DefinitionName} '{enemy.Id}' Items", problems);
+                    Require(Items, grant.ItemId, what + " Items", problems);
+                    if (Items.Contains(grant.ItemId))
+                    {
+                        cells += Items.Get(grant.ItemId).Size;
+                    }
+                }
+
+                // The battle screen draws every board at most MaxItemSlots cells tall.
+                if (cells > JobData.MaxItemSlots)
+                {
+                    problems.Add($"{what}: its items take {cells} cells, more than a board can have ({JobData.MaxItemSlots}).");
                 }
 
                 if (enemy.Level >= Balance.FinalBossLevel)
                 {
-                    problems.Add(
-                        $"{EnemyData.DefinitionName} '{enemy.Id}': level {enemy.Level} is reserved for the final boss (FinalBossLevel {Balance.FinalBossLevel}).");
+                    problems.Add($"{what}: level {enemy.Level} is reserved for the final boss (FinalBossLevel {Balance.FinalBossLevel}).");
                 }
             }
 

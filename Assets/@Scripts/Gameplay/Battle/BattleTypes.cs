@@ -47,8 +47,10 @@ namespace F1.Gameplay
         public int Row;
         public int MaxHp;
         public int Hp;
-        /// <summary>Item slots in order. A null entry is an empty slot.</summary>
+        /// <summary>The item board in order: no empty entries. The order is the activation order (see ItemBoard).</summary>
         public IReadOnlyList<EquippedItem> Items;
+        /// <summary>Cells of the board, for the screen to draw the empty ones. At least what the items take.</summary>
+        public int ItemSlots;
         /// <summary>Null when the unit has no passive.</summary>
         public PassiveSpec Passive;
         /// <summary>Mercenaries enter Death-or-Glory at 0 HP. Enemies die.</summary>

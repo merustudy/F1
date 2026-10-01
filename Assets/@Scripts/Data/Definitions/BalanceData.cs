@@ -74,6 +74,7 @@ namespace F1.Data
             new KeySpec(nameof(PostBattleHealPercent), 0, 100),
             new KeySpec(nameof(MinCooldownMs), 50, Big),
             new KeySpec(nameof(RewardChoices), 1, 5),
+            new KeySpec(nameof(InventoryCells), ItemData.MaxSize, 100),
             new KeySpec(nameof(MapBranchChancePercent), 0, 100),
             new KeySpec(nameof(FinalBossLevel), 2, Big),
         };
@@ -158,6 +159,8 @@ namespace F1.Data
         public int PostBattleHealPercent => _values[nameof(PostBattleHealPercent)];
         public int MinCooldownMs => _values[nameof(MinCooldownMs)];
         public int RewardChoices => _values[nameof(RewardChoices)];
+        /// <summary>Cells of the expedition inventory. An item takes its size there as on a board, so it holds at least the biggest item.</summary>
+        public int InventoryCells => _values[nameof(InventoryCells)];
         /// <summary>Chance that a map node also leads to the neighbour of its nearest node on the next floor.</summary>
         public int MapBranchChancePercent => _values[nameof(MapBranchChancePercent)];
         /// <summary>The enemy level reserved for the final boss. No other enemy may use it or a higher one.</summary>

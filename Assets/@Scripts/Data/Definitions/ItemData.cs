@@ -84,24 +84,33 @@ namespace F1.Data
         public const int MaxEffects = 2;
         public const int MinCooldownMs = 100;
 
+        /// <summary>The biggest item: small, medium and large take 1, 2 and 3 cells of a board.</summary>
+        public const int MaxSize = 3;
+
         [JsonConstructor]
         public ItemData(
             string id,
             LocalizedText name,
             ItemCategory category,
+            int size,
             int cooldownMs,
-            IReadOnlyList<int> rows,
+            RowSpan rows,
             IReadOnlyList<ItemEffect> effects,
             int rewardWeight)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
+            if (size < 1 || size > MaxSize)
+            {
+                throw new DataException($"{DefinitionName} '{id}': Size must be 1..{MaxSize}.");
+            }
+
             if (cooldownMs < MinCooldownMs)
             {
                 throw new DataException($"{DefinitionName} '{id}': CooldownMs must be at least {MinCooldownMs}.");
             }
 
-            BattleRows.RequireSet(rows, $"{DefinitionName} '{id}' Rows");
+            Rows = rows ?? throw new DataException($"{DefinitionName} '{id}': Rows is missing.");
             if (effects == null || effects.Count < 1 || effects.Count > MaxEffects)
             {
                 throw new DataException($"{DefinitionName} '{id}': an item has 1..{MaxEffects} effects.");
@@ -121,8 +130,8 @@ namespace F1.Data
             }
 
             Category = category;
+            Size = size;
             CooldownMs = cooldownMs;
-            Rows = rows;
             Effects = effects;
             RewardWeight = rewardWeight;
         }
@@ -136,23 +145,29 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public ItemCategory Category { get; }
 
+        /// <summary>How many cells of a board the item takes.</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
+        public int Size { get; }
+
+        [JsonProperty(Order = 5, Required = Required.Always)]
         public int CooldownMs { get; }
 
-        /// <summary>The rows the owner can use the item in. It works only while the owner stands in one of them.</summary>
-        [JsonProperty(Order = 5, Required = Required.Always)]
-        public IReadOnlyList<int> Rows { get; }
-
+        /// <summary>Where in its line the owner must stand for the item to work, counted from the front or the back.</summary>
         [JsonProperty(Order = 6, Required = Required.Always)]
+        public RowSpan Rows { get; }
+
+        [JsonProperty(Order = 7, Required = Required.Always)]
         public IReadOnlyList<ItemEffect> Effects { get; }
 
         /// <summary>Relative chance to be offered as a battle reward. 0 means it is never offered.</summary>
-        [JsonProperty(Order = 7, Required = Required.Always)]
+        [JsonProperty(Order = 8, Required = Required.Always)]
         public int RewardWeight { get; }
 
-        public bool UsableIn(int row)
+        /// <param name="row">The row the owner stands in.</param>
+        /// <param name="lineLength">How many units of the owner's side are alive.</param>
+        public bool UsableIn(int row, int lineLength)
         {
-            return BattleRows.Contains(Rows, row);
+            return Rows.Contains(row, lineLength);
         }
     }
 }

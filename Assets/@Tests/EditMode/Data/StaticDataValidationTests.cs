@@ -109,11 +109,37 @@ namespace F1.Tests
         {
             string problem = ProblemOf(p =>
             {
-                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.CooldownMs, i.Rows, i.Effects, 0)).ToList();
+                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.Size, i.CooldownMs, i.Rows, i.Effects, 0)).ToList();
                 p.Potions = p.Potions.Select(x => new PotionData(x.Id, x.Name, x.Effect, x.Magnitude, 0)).ToList();
             });
 
             StringAssert.Contains("RewardWeight", problem);
+        }
+
+        [Test]
+        public void AJobsWeapon_MustFitItsBoard()
+        {
+            // The striker has two cells; a three-cell weapon cannot even be carried.
+            string problem = ProblemOf(p =>
+                p.Jobs = Replace(p.Jobs, j => j.Id == "striker", new JobData("striker", TestData.Text("striker"), 80, 2, "ballista", 12, 3, null)));
+
+            StringAssert.Contains("Job 'striker'", problem);
+            StringAssert.Contains("'ballista' takes 3 cells but the board has 2", problem);
+        }
+
+        [Test]
+        public void AnEnemysItems_CannotTakeMoreCellsThanABoardCanHave()
+        {
+            string problem = ProblemOf(p =>
+                p.Enemies = Replace(p.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 9, 120, new List<ItemGrant>
+                {
+                    new ItemGrant("ballista", 12),
+                    new ItemGrant("ballista", 12),
+                    new ItemGrant("claw", 12),
+                })));
+
+            StringAssert.Contains("Enemy 'chief'", problem);
+            StringAssert.Contains("take 7 cells", problem);
         }
 
         [Test]

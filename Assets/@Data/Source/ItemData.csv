@@ -1,22 +1,22 @@
-Id,Name.ko-KR,Name.en-US,Category,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,RewardWeight
-sword,소드,Sword,Weapon,2900,1+2,Damage,EnemyFront,1,100,,,,,0
-longsword,롱소드,Longsword,Weapon,3000,1+2,Damage,EnemyFront,1,110,,,,,0
-greataxe,대도끼,Greataxe,Weapon,3600,1,Damage,EnemyFront,1,190,,,,,0
-mace,메이스,Mace,Weapon,3200,1+2,Damage,EnemyFront,1,100,Shield,Self,,40,0
-healing_staff,치유의 지팡이,Healing Staff,Support,4000,2+3+4,Heal,AllyLowestHp,,100,,,,,0
-fire_staff,화염 지팡이,Fire Staff,Weapon,3500,2+3+4,Damage,EnemyAll,,110,,,,,0
-dagger,단검,Dagger,Weapon,1500,1+2,Damage,EnemyFront,1,45,,,,,10
-longbow,장궁,Longbow,Weapon,3000,2+3+4,Damage,EnemyBack,2,70,,,,,10
-spear,창,Spear,Weapon,3200,1+2,Damage,EnemyFront,2,70,,,,,10
-halberd,미늘창,Halberd,Weapon,3600,1,Damage,EnemyFront,3,55,,,,,10
-buckler,버클러,Buckler,Support,5000,1,Shield,Self,,80,,,,,10
-ward_charm,수호 부적,Ward Charm,Support,6000,1+2+3+4,Shield,AllyLowestHp,,70,,,,,10
-herb_pouch,약초 주머니,Herb Pouch,Support,5000,1+2+3+4,Heal,Self,,60,,,,,10
-ember_flask,불씨 플라스크,Ember Flask,Support,4500,1+2+3+4,Burn,EnemyFront,1,25,,,,,8
-rat_bite,물어뜯기,Bite,Weapon,2000,1+2,Damage,EnemyFront,1,100,,,,,0
-rusty_blade,녹슨 칼,Rusty Blade,Weapon,2800,1+2,Damage,EnemyFront,1,100,,,,,0
-crude_bow,조잡한 활,Crude Bow,Weapon,3400,2+3+4,Damage,EnemyBack,1,100,,,,,0
-hex_spit,저주의 침,Hex Spit,Support,3800,2+3+4,Burn,EnemyFront,1,30,,,,,0
-mending_chant,치유 주문,Mending Chant,Support,5500,2+3+4,Heal,AllyLowestHp,,100,,,,,0
-overseer_maul,감독관의 망치,Overseer's Maul,Weapon,4500,1+2,Damage,EnemyFront,1,150,,,,,0
-overseer_roar,감독관의 포효,Overseer's Roar,Weapon,6000,1+2,Damage,EnemyAll,,60,,,,,0
+Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,RewardWeight
+sword,소드,Sword,Weapon,1,2900,front:2,Damage,EnemyFront,1,100,,,,,0
+longsword,롱소드,Longsword,Weapon,1,3000,front:2,Damage,EnemyFront,1,110,,,,,0
+greataxe,대도끼,Greataxe,Weapon,1,3600,front:1,Damage,EnemyFront,1,190,,,,,0
+mace,메이스,Mace,Weapon,1,3200,front:2,Damage,EnemyFront,1,100,Shield,Self,,40,0
+healing_staff,치유의 지팡이,Healing Staff,Support,1,4000,back:3,Heal,AllyLowestHp,,100,,,,,0
+fire_staff,화염 지팡이,Fire Staff,Weapon,1,3500,back:3,Damage,EnemyAll,,110,,,,,0
+dagger,단검,Dagger,Weapon,1,1500,front:2,Damage,EnemyFront,1,45,,,,,10
+longbow,장궁,Longbow,Weapon,2,3000,back:3,Damage,EnemyBack,2,85,,,,,10
+spear,창,Spear,Weapon,2,3200,front:2,Damage,EnemyFront,2,85,,,,,10
+halberd,미늘창,Halberd,Weapon,3,3600,front:1,Damage,EnemyFront,3,80,,,,,10
+buckler,버클러,Buckler,Support,1,5000,front:1,Shield,Self,,80,,,,,10
+ward_charm,수호 부적,Ward Charm,Support,1,6000,all,Shield,AllyLowestHp,,70,,,,,10
+herb_pouch,약초 주머니,Herb Pouch,Support,1,5000,all,Heal,Self,,60,,,,,10
+ember_flask,불씨 플라스크,Ember Flask,Support,1,4500,all,Burn,EnemyFront,1,25,,,,,8
+rat_bite,물어뜯기,Bite,Weapon,1,2000,front:2,Damage,EnemyFront,1,100,,,,,0
+rusty_blade,녹슨 칼,Rusty Blade,Weapon,1,2800,front:2,Damage,EnemyFront,1,100,,,,,0
+crude_bow,조잡한 활,Crude Bow,Weapon,1,3400,back:3,Damage,EnemyBack,1,90,,,,,0
+hex_spit,저주의 침,Hex Spit,Support,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0
+mending_chant,치유 주문,Mending Chant,Support,1,5500,back:3,Heal,AllyLowestHp,,100,,,,,0
+overseer_maul,감독관의 망치,Overseer's Maul,Weapon,1,4500,front:2,Damage,EnemyFront,1,150,,,,,0
+overseer_roar,감독관의 포효,Overseer's Roar,Weapon,1,6000,front:2,Damage,EnemyAll,,60,,,,,0

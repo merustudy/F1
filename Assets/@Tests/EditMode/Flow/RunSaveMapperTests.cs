@@ -133,6 +133,11 @@ namespace F1.Tests
                 return new TestCaseData(breakIt, phase).SetName("Read_Refuses_Expedition_" + name);
             }
 
+            ItemRecord Ballista()
+            {
+                return new ItemRecord { ItemId = "ballista", Grade = 8 };
+            }
+
             yield return Case("UnknownDungeon", e => e.DungeonId = "nowhere");
             yield return Case("SeedOfAnotherRun", e => e.Seed = "1");
             yield return Case("PhaseFinished", e => e.Phase = "Finished");
@@ -144,9 +149,15 @@ namespace F1.Tests
             yield return Case("HpAboveMaximum", e => e.Members[0].Hp = e.Members[0].MaxHp + 1);
             yield return Case("HpNegative", e => e.Members[0].Hp = -1);
             yield return Case("DeadWithHp", e => e.Members[0].Alive = false);
-            yield return Case("NoItemSlots", e => e.Members[0].Items.Clear());
+            yield return Case("BoardMissing", e => e.Members[0].Items = null);
+            yield return Case("EmptyEntryOnTheBoard", e => e.Members[0].Items.Add(null));
             yield return Case("UnknownItem", e => e.Members[0].Items[0].ItemId = "excalibur");
             yield return Case("ItemGradeZero", e => e.Members[0].Items[0].Grade = 0);
+            yield return Case("BoardOverItsCells", e => e.Members[0].Items.Add(new ItemRecord { ItemId = "ballista", Grade = 8 }), ExpeditionPhase.ChoosingNode);
+            yield return Case("InventoryMissing", e => e.Inventory = null);
+            yield return Case("InventoryUnknownItem", e => e.Inventory.Add(new ItemRecord { ItemId = "excalibur", Grade = 8 }));
+            yield return Case("InventoryEmptyEntry", e => e.Inventory.Add(null));
+            yield return Case("InventoryOverItsCells", e => e.Inventory.AddRange(new[] { Ballista(), Ballista(), Ballista(), Ballista() }));
             yield return Case("EveryoneDead", e => e.Members.ForEach(m => { m.Alive = false; m.Hp = 0; }));
             yield return Case("RowZero", e => e.Members[0].Row = 0);
             yield return Case("RowBeyondTheLast", e => e.Members[2].Row = BattleRows.Count + 1);
@@ -200,11 +211,67 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Read_KeepsTheInventory_AndAnEmptyBoard()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "pike", Grade = 9 });
+            save.Expedition.Members[0].Items.Clear();
+
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+
+            CollectionAssert.AreEqual(new[] { "knife", "pike" }, expedition.Inventory.ConvertAll(i => i.Item.Id));
+            Assert.AreEqual(9, expedition.Inventory[1].Grade);
+            Assert.IsEmpty(expedition.Members[0].Items);
+            Assert.AreEqual(3, expedition.Members[0].ItemSlots, "The cells come from the job.");
+        }
+
+        [Test]
+        public void Read_AcceptsAnInventoryFilledToItsCells()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            for (int i = 0; i < 3; i++)
+            {
+                save.Expedition.Inventory.Add(new ItemRecord { ItemId = "ballista", Grade = 8 });
+            }
+
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
+
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+
+            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, expedition), "Ten cells: three ballistas and a knife.");
+        }
+
+        [Test]
         public void Migrate_AcceptsTheCurrentVersion_AndRefusesOthers()
         {
             Assert.DoesNotThrow(() => RunSaveMigrator.Migrate(new RunSaveData()));
             Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveMigrator.OldestReadableVersion - 1 }));
             Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveData.CurrentSchemaVersion + 1 }));
+        }
+
+        [Test]
+        public void Migrate_From2To3_CompactsTheBoards_AndAddsAnEmptyInventory()
+        {
+            // Version 2 stored one entry per slot, null for an empty one, and no inventory.
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 2;
+            save.Expedition.Inventory = null;
+            save.Expedition.Members[0].Items = new List<ItemRecord> { null, new ItemRecord { ItemId = "blade", Grade = 10 }, null };
+            save.Expedition.Members[1].Items = new List<ItemRecord> { null, null, null };
+
+            RunSaveMigrator.Migrate(save);
+
+            Assert.AreEqual(3, save.SchemaVersion);
+            Assert.IsEmpty(save.Expedition.Inventory);
+            CollectionAssert.AreEqual(new[] { "blade" }, save.Expedition.Members[0].Items.ConvertAll(i => i.ItemId));
+            Assert.IsEmpty(save.Expedition.Members[1].Items);
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
+
+            var home = new RunSaveData { SchemaVersion = 2, Run = save.Run, Expedition = null };
+            RunSaveMigrator.Migrate(home);
+            Assert.AreEqual(3, home.SchemaVersion);
+            Assert.IsNull(home.Expedition);
         }
     }
 }

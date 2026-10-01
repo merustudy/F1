@@ -8,10 +8,12 @@
         "ko-KR": "버클러"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 5000,
-      "Rows": [
-        1
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
       "Effects": [
         {
           "Kind": "Shield",
@@ -29,18 +31,18 @@
         "ko-KR": "조잡한 활"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 3400,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 1,
-          "PowerPercent": 100
+          "PowerPercent": 90
         }
       ],
       "RewardWeight": 0
@@ -52,11 +54,12 @@
         "ko-KR": "단검"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 1500,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -74,13 +77,12 @@
         "ko-KR": "불씨 플라스크"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 4500,
-      "Rows": [
-        1,
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
       "Effects": [
         {
           "Kind": "Burn",
@@ -98,12 +100,12 @@
         "ko-KR": "화염 지팡이"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 3500,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -121,10 +123,12 @@
         "ko-KR": "대도끼"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 3600,
-      "Rows": [
-        1
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -142,16 +146,18 @@
         "ko-KR": "미늘창"
       },
       "Category": "Weapon",
+      "Size": 3,
       "CooldownMs": 3600,
-      "Rows": [
-        1
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 3,
-          "PowerPercent": 55
+          "PowerPercent": 80
         }
       ],
       "RewardWeight": 10
@@ -163,12 +169,12 @@
         "ko-KR": "치유의 지팡이"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 4000,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Heal",
@@ -186,13 +192,12 @@
         "ko-KR": "약초 주머니"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 5000,
-      "Rows": [
-        1,
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
       "Effects": [
         {
           "Kind": "Heal",
@@ -210,12 +215,12 @@
         "ko-KR": "저주의 침"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 3800,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Burn",
@@ -233,18 +238,18 @@
         "ko-KR": "장궁"
       },
       "Category": "Weapon",
+      "Size": 2,
       "CooldownMs": 3000,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 2,
-          "PowerPercent": 70
+          "PowerPercent": 85
         }
       ],
       "RewardWeight": 10
@@ -256,11 +261,12 @@
         "ko-KR": "롱소드"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 3000,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -278,11 +284,12 @@
         "ko-KR": "메이스"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 3200,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -306,12 +313,12 @@
         "ko-KR": "치유 주문"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 5500,
-      "Rows": [
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
       "Effects": [
         {
           "Kind": "Heal",
@@ -329,11 +336,12 @@
         "ko-KR": "감독관의 망치"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 4500,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -351,11 +359,12 @@
         "ko-KR": "감독관의 포효"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 6000,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -373,11 +382,12 @@
         "ko-KR": "물어뜯기"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 2000,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -395,11 +405,12 @@
         "ko-KR": "녹슨 칼"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 2800,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -417,17 +428,18 @@
         "ko-KR": "창"
       },
       "Category": "Weapon",
+      "Size": 2,
       "CooldownMs": 3200,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 2,
-          "PowerPercent": 70
+          "PowerPercent": 85
         }
       ],
       "RewardWeight": 10
@@ -439,11 +451,12 @@
         "ko-KR": "소드"
       },
       "Category": "Weapon",
+      "Size": 1,
       "CooldownMs": 2900,
-      "Rows": [
-        1,
-        2
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
       "Effects": [
         {
           "Kind": "Damage",
@@ -461,13 +474,12 @@
         "ko-KR": "수호 부적"
       },
       "Category": "Support",
+      "Size": 1,
       "CooldownMs": 6000,
-      "Rows": [
-        1,
-        2,
-        3,
-        4
-      ],
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
       "Effects": [
         {
           "Kind": "Shield",

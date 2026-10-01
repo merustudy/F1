@@ -58,8 +58,11 @@ namespace F1.Gameplay
         public int Hp;
         public bool Alive;
 
-        /// <summary>Item slots. A null entry is empty.</summary>
-        public EquippedItem[] Items;
+        /// <summary>The item board: items in order, each taking its size in cells (see <see cref="ItemBoard"/>). No null entries.</summary>
+        public List<EquippedItem> Items;
+
+        /// <summary>Cells of the board, from the job.</summary>
+        public int ItemSlots;
     }
 
     /// <summary>Who goes on an expedition and where they stand.</summary>
@@ -90,6 +93,9 @@ namespace F1.Gameplay
 
         /// <summary>Potion ids per slot. A null entry is empty.</summary>
         public string[] Potions;
+
+        /// <summary>Items kept outside the boards. They do nothing in battle and are gone with the expedition.</summary>
+        public List<EquippedItem> Inventory = new List<EquippedItem>();
 
         public ExpeditionPhase Phase;
         public ExpeditionResult Result;

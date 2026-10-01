@@ -20,5 +20,6 @@ RetreatCooldownMs,5000
 PostBattleHealPercent,10
 MinCooldownMs,200
 RewardChoices,3
+InventoryCells,10
 MapBranchChancePercent,50
 FinalBossLevel,14

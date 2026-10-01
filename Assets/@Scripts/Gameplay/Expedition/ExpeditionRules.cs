@@ -6,8 +6,9 @@ namespace F1.Gameplay
 {
     /// <summary>
     /// The expedition rules (Docs/Design/03_Dungeon_Structure.md): node choice, battles, rewards,
-    /// item board and how an expedition ends. Pure functions over <see cref="ExpeditionState"/>.
-    /// A command that is not allowed in the current state throws; callers check first.
+    /// item boards and the inventory, and how an expedition ends. Pure functions over
+    /// <see cref="ExpeditionState"/>. A command that is not allowed in the current state throws;
+    /// callers check first with the matching Can... query.
     /// </summary>
     public static class ExpeditionRules
     {
@@ -38,8 +39,6 @@ namespace F1.Gameplay
                 }
 
                 JobData job = data.Jobs.Get(member.JobId);
-                var items = new EquippedItem[job.ItemSlots];
-                items[0] = new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade);
                 state.Members.Add(new ExpeditionMember
                 {
                     MercenaryId = member.MercenaryId,
@@ -48,7 +47,8 @@ namespace F1.Gameplay
                     MaxHp = job.MaxHp,
                     Hp = job.MaxHp,
                     Alive = true,
-                    Items = items,
+                    Items = new List<EquippedItem> { new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade) },
+                    ItemSlots = job.ItemSlots,
                 });
             }
 
@@ -205,13 +205,59 @@ namespace F1.Gameplay
             state.Phase = state.PendingRewards.Count > 0 ? ExpeditionPhase.ChoosingReward : ExpeditionPhase.ChoosingNode;
         }
 
-        public static void TakeItemReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int slotIndex)
+        /// <summary>
+        /// Whether an item reward could be put at a cell of a member's board: into the free cells, or
+        /// in place of the item there, which goes to the inventory and so must fit its free cells
+        /// (Docs/Design/03_Dungeon_Structure.md §5).
+        /// </summary>
+        public static bool CanPlaceReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int cell)
+        {
+            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
+            {
+                return false;
+            }
+
+            RewardOption option = state.PendingRewards[optionIndex];
+            return option.Kind == RewardKind.Item && CanPlaceItem(data, state, data.Items.Get(option.Id).Size, memberIndex, cell);
+        }
+
+        public static void TakeItemReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int cell)
         {
             RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
             ExpeditionMember member = RequireLivingMember(state, memberIndex);
-            RequireSlot(member, slotIndex);
+            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade);
+            if (!CanPlaceItem(data, state, item.Item.Size, memberIndex, cell))
+            {
+                throw new InvalidOperationException($"'{item.Item.Id}' cannot go at cell {cell} of '{member.MercenaryId}': it does not fit there, or what is there would not fit the inventory.");
+            }
 
-            member.Items[slotIndex] = new EquippedItem(data.Items.Get(option.Id), option.Grade);
+            PutOnBoard(state, member, cell, item);
+            EndReward(state);
+        }
+
+        /// <summary>Whether an item reward could be taken straight into the inventory: it must fit the inventory's free cells.</summary>
+        public static bool CanTakeRewardToInventory(StaticData data, ExpeditionState state, int optionIndex)
+        {
+            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
+            {
+                return false;
+            }
+
+            RewardOption option = state.PendingRewards[optionIndex];
+            return option.Kind == RewardKind.Item && data.Items.Get(option.Id).Size <= FreeInventoryCells(data, state);
+        }
+
+        /// <summary>Takes an item reward straight into the inventory.</summary>
+        public static void TakeItemRewardToInventory(StaticData data, ExpeditionState state, int optionIndex)
+        {
+            RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
+            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade);
+            if (item.Item.Size > FreeInventoryCells(data, state))
+            {
+                throw new InvalidOperationException($"'{item.Item.Id}' does not fit the inventory's free cells.");
+            }
+
+            state.Inventory.Add(item);
             EndReward(state);
         }
 
@@ -234,18 +280,173 @@ namespace F1.Gameplay
             EndReward(state);
         }
 
-        /// <summary>Swaps the contents of two item slots (either may be empty). Allowed between battles.</summary>
-        public static void SwapItems(ExpeditionState state, int memberA, int slotA, int memberB, int slotB)
+        /// <summary>
+        /// Whether an item of a size could be put at a cell of a member's board now: between battles,
+        /// a living member, into the free cells or in place of the item there, which must then fit
+        /// the inventory's free cells.
+        /// </summary>
+        public static bool CanPlaceItem(StaticData data, ExpeditionState state, int size, int memberIndex, int cell)
         {
-            RequireBetweenBattles(state);
-            ExpeditionMember a = RequireLivingMember(state, memberA);
-            ExpeditionMember b = RequireLivingMember(state, memberB);
-            RequireSlot(a, slotA);
-            RequireSlot(b, slotB);
+            return CanPlaceItem(state, size, memberIndex, cell, FreeInventoryCells(data, state));
+        }
 
-            EquippedItem moved = a.Items[slotA];
-            a.Items[slotA] = b.Items[slotB];
-            b.Items[slotB] = moved;
+        /// <param name="inventoryRoom">The inventory cells free for whatever the item displaces.</param>
+        static bool CanPlaceItem(ExpeditionState state, int size, int memberIndex, int cell, int inventoryRoom)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
+            {
+                return false;
+            }
+
+            ExpeditionMember member = state.Members[memberIndex];
+            return ItemBoard.CanPut(member.Items, member.ItemSlots, cell, size) && SizeAt(member, cell) <= inventoryRoom;
+        }
+
+        /// <summary>
+        /// Whether the item at a cell of one board can go to a cell of a board (the same or another
+        /// member's): into the free cells, or trading places with the item there. Both boards must
+        /// hold what they end up with. Allowed between battles.
+        /// </summary>
+        public static bool CanMoveItem(ExpeditionState state, int fromMember, int fromCell, int toMember, int toCell)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, fromMember) || !IsLivingMember(state, toMember))
+            {
+                return false;
+            }
+
+            ExpeditionMember from = state.Members[fromMember];
+            ExpeditionMember to = state.Members[toMember];
+            int fromIndex = ItemBoard.IndexAtCell(from.Items, fromCell);
+            if (fromIndex < 0 || toCell < 0 || toCell >= to.ItemSlots)
+            {
+                return false;
+            }
+
+            int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
+            if (from == to)
+            {
+                // Within one board the item only changes place: to the end, or trading with another.
+                return toIndex != fromIndex;
+            }
+
+            int size = from.Items[fromIndex].Item.Size;
+            if (toIndex < 0)
+            {
+                return ItemBoard.FreeCells(to.Items, to.ItemSlots) >= size;
+            }
+
+            int other = to.Items[toIndex].Item.Size;
+            return ItemBoard.UsedCells(to.Items) - other + size <= to.ItemSlots
+                && ItemBoard.UsedCells(from.Items) - size + other <= from.ItemSlots;
+        }
+
+        public static void MoveItem(ExpeditionState state, int fromMember, int fromCell, int toMember, int toCell)
+        {
+            if (!CanMoveItem(state, fromMember, fromCell, toMember, toCell))
+            {
+                throw new InvalidOperationException($"The item at cell {fromCell} of member {fromMember} cannot go to cell {toCell} of member {toMember}.");
+            }
+
+            ExpeditionMember from = state.Members[fromMember];
+            ExpeditionMember to = state.Members[toMember];
+            int fromIndex = ItemBoard.IndexAtCell(from.Items, fromCell);
+            int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
+            EquippedItem moved = from.Items[fromIndex];
+            if (toIndex < 0)
+            {
+                from.Items.RemoveAt(fromIndex);
+                to.Items.Add(moved);
+            }
+            else
+            {
+                from.Items[fromIndex] = to.Items[toIndex];
+                to.Items[toIndex] = moved;
+            }
+        }
+
+        /// <summary>
+        /// Whether the item at a cell of a member's board can be picked up now: between battles, a
+        /// living member, a cell that holds an item. Where it may go is asked separately
+        /// (<see cref="CanMoveItem"/>, <see cref="CanMoveToInventory"/>).
+        /// </summary>
+        public static bool CanPickItem(ExpeditionState state, int memberIndex, int cell)
+        {
+            return IsBetweenBattles(state)
+                && IsLivingMember(state, memberIndex)
+                && ItemBoard.IndexAtCell(state.Members[memberIndex].Items, cell) >= 0;
+        }
+
+        /// <summary>Whether a cell of a member's board holds an item that can go to the inventory now: it must fit the inventory's free cells.</summary>
+        public static bool CanMoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int cell)
+        {
+            return CanPickItem(state, memberIndex, cell)
+                && SizeAt(state.Members[memberIndex], cell) <= FreeInventoryCells(data, state);
+        }
+
+        /// <summary>Takes the item at a cell off the board into the inventory. The items behind it close up.</summary>
+        public static void MoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int cell)
+        {
+            if (!CanMoveToInventory(data, state, memberIndex, cell))
+            {
+                throw new InvalidOperationException($"Cell {cell} of member {memberIndex} holds nothing that can go to the inventory now.");
+            }
+
+            ExpeditionMember member = state.Members[memberIndex];
+            int index = ItemBoard.IndexAtCell(member.Items, cell);
+            state.Inventory.Add(member.Items[index]);
+            member.Items.RemoveAt(index);
+        }
+
+        /// <summary>
+        /// Whether an item of the inventory could go at a cell of a member's board now. The cells it
+        /// leaves in the inventory are free for whatever it displaces there.
+        /// </summary>
+        public static bool CanPlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, int cell)
+        {
+            if (inventoryIndex < 0 || inventoryIndex >= state.Inventory.Count)
+            {
+                return false;
+            }
+
+            int size = state.Inventory[inventoryIndex].Item.Size;
+            return CanPlaceItem(state, size, memberIndex, cell, FreeInventoryCells(data, state) + size);
+        }
+
+        /// <summary>Puts an item of the inventory at a cell of a member's board. An item displaced there goes to the inventory.</summary>
+        public static void PlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, int cell)
+        {
+            if (!CanPlaceFromInventory(data, state, inventoryIndex, memberIndex, cell))
+            {
+                throw new InvalidOperationException($"Inventory item {inventoryIndex} cannot go to cell {cell} of member {memberIndex} now.");
+            }
+
+            EquippedItem item = state.Inventory[inventoryIndex];
+            state.Inventory.RemoveAt(inventoryIndex);
+            PutOnBoard(state, state.Members[memberIndex], cell, item);
+        }
+
+        /// <summary>
+        /// The inventory's free cells. It has <c>BalanceData.InventoryCells</c> and an item takes its
+        /// size there as on a board (Docs/Design/03_Dungeon_Structure.md §5).
+        /// </summary>
+        public static int FreeInventoryCells(StaticData data, ExpeditionState state)
+        {
+            return data.Balance.InventoryCells - ItemBoard.UsedCells(state.Inventory);
+        }
+
+        /// <summary>How many members are alive. They stand in rows 1..n, which is what a span of the line is counted on.</summary>
+        public static int LivingCount(ExpeditionState state)
+        {
+            int alive = 0;
+            foreach (ExpeditionMember member in state.Members)
+            {
+                if (member.Alive)
+                {
+                    alive++;
+                }
+            }
+
+            return alive;
         }
 
         /// <summary>
@@ -363,7 +564,8 @@ namespace F1.Gameplay
                     Row = row,
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
-                    Items = (EquippedItem[])member.Items.Clone(),
+                    Items = new List<EquippedItem>(member.Items),
+                    ItemSlots = member.ItemSlots,
                     Passive = data.Jobs.Get(member.JobId).Passive,
                     HasDog = true,
                 });
@@ -378,6 +580,7 @@ namespace F1.Gameplay
                 items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade));
             }
 
+            // An enemy's board is exactly what it carries: there are no empty cells to show.
             return new BattleUnitSetup
             {
                 SourceId = enemy.Id,
@@ -386,6 +589,7 @@ namespace F1.Gameplay
                 MaxHp = enemy.MaxHp,
                 Hp = enemy.MaxHp,
                 Items = items,
+                ItemSlots = ItemBoard.UsedCells(items),
                 Passive = null,
                 HasDog = false,
             };
@@ -425,6 +629,33 @@ namespace F1.Gameplay
             throw new InvalidOperationException($"Mercenary '{mercenaryId}' is not on this expedition.");
         }
 
+        /// <summary>The cells the item at a cell of a board takes; 0 for an empty cell.</summary>
+        static int SizeAt(ExpeditionMember member, int cell)
+        {
+            int index = ItemBoard.IndexAtCell(member.Items, cell);
+            return index < 0 ? 0 : member.Items[index].Item.Size;
+        }
+
+        /// <summary>Puts an item at a cell of a member's board; whatever it displaces goes to the inventory, which the caller has checked has room.</summary>
+        static void PutOnBoard(ExpeditionState state, ExpeditionMember member, int cell, EquippedItem item)
+        {
+            EquippedItem left = ItemBoard.Put(member.Items, member.ItemSlots, cell, item);
+            if (left != null)
+            {
+                state.Inventory.Add(left);
+            }
+        }
+
+        static bool IsBetweenBattles(ExpeditionState state)
+        {
+            return state.Phase == ExpeditionPhase.ChoosingNode || state.Phase == ExpeditionPhase.ChoosingReward;
+        }
+
+        static bool IsLivingMember(ExpeditionState state, int memberIndex)
+        {
+            return memberIndex >= 0 && memberIndex < state.Members.Count && state.Members[memberIndex].Alive;
+        }
+
         static void Finish(ExpeditionState state, ExpeditionResult result)
         {
             state.Result = result;
@@ -443,14 +674,6 @@ namespace F1.Gameplay
             if (state.Phase != phase)
             {
                 throw new InvalidOperationException($"Expedition is in phase {state.Phase}, not {phase}.");
-            }
-        }
-
-        static void RequireBetweenBattles(ExpeditionState state)
-        {
-            if (state.Phase != ExpeditionPhase.ChoosingNode && state.Phase != ExpeditionPhase.ChoosingReward)
-            {
-                throw new InvalidOperationException($"Not allowed in phase {state.Phase}.");
             }
         }
 
@@ -485,14 +708,6 @@ namespace F1.Gameplay
             }
 
             return member;
-        }
-
-        static void RequireSlot(ExpeditionMember member, int slotIndex)
-        {
-            if (slotIndex < 0 || slotIndex >= member.Items.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(slotIndex), slotIndex, "Unknown item slot.");
-            }
         }
     }
 }

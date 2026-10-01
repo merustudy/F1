@@ -245,6 +245,8 @@ namespace F1.Sim
             public int Deaths;
             public int ExpeditionsWithDeath;
             public int BattlesWon;
+            public int ItemsOnBoards;
+            public int ItemsInInventory;
             public readonly BattleStats All = new BattleStats();
             public readonly SortedDictionary<int, BattleStats> ByFloor = new SortedDictionary<int, BattleStats>();
         }
@@ -257,6 +259,7 @@ namespace F1.Sim
             Console.WriteLine($"dungeon {dungeonId}, party {Describe(party)}, policy {policy.Name}, seed {baseSeed}");
             Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
+            Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
             stats.All.Print("all battles");
             foreach (KeyValuePair<int, BattleStats> floor in stats.ByFloor)
             {
@@ -358,6 +361,8 @@ namespace F1.Sim
                 }
 
                 stats.BattlesWon += state.BattlesWon;
+                stats.ItemsOnBoards += state.Members.Sum(m => m.Items.Count);
+                stats.ItemsInInventory += state.Inventory.Count;
             }
 
             return stats;
