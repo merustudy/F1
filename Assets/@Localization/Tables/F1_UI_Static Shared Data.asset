@@ -195,11 +195,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909212
-  - m_Id: 9766393864222
-    m_Key: Map.Enemy
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909215
   - m_Id: 9766393864223
     m_Key: Map.Enter
     m_Metadata:
@@ -220,16 +215,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909219
-  - m_Id: 9766393864227
-    m_Key: Board.Dead
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909220
-  - m_Id: 9766393864228
-    m_Key: Board.Potions
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909221
   - m_Id: 9766393864229
     m_Key: Board.Hint
     m_Metadata:
@@ -655,11 +640,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489282005762055
-  - m_Id: 54359005061127
-    m_Key: Item.Rows
-    m_Metadata:
-      m_Items:
-      - rid: 636489282005762056
   - m_Id: 54359009255426
     m_Key: Target.EnemyBack
     m_Metadata:
@@ -690,11 +670,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489282763358208
-  - m_Id: 66477360144384
-    m_Key: Map.Enemies
-    m_Metadata:
-      m_Items:
-      - rid: 636489282763358209
   - m_Id: 66477360144385
     m_Key: Target.EnemyFrontMany
     m_Metadata:
@@ -725,6 +700,71 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673131002232832
+  - m_Id: 293762654789632
+    m_Key: Board.InventoryEmpty
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883777
+  - m_Id: 293762654789633
+    m_Key: Board.ToInventory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883778
+  - m_Id: 293762654789634
+    m_Key: Item.Size
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883779
+  - m_Id: 293762654789635
+    m_Key: Item.RowsFront
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883780
+  - m_Id: 293762654789636
+    m_Key: Item.RowsFrontOne
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883781
+  - m_Id: 293762654789637
+    m_Key: Item.RowsBack
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883782
+  - m_Id: 293762654789638
+    m_Key: Item.RowsBackOne
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883783
+  - m_Id: 293762654789639
+    m_Key: Reward.ToInventory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673134167883784
+  - m_Id: 344090062348288
+    m_Key: Map.Unknown
+    m_Metadata:
+      m_Items:
+      - rid: 8623673137313349632
+  - m_Id: 344090074931200
+    m_Key: Board.InventoryShow
+    m_Metadata:
+      m_Items:
+      - rid: 8623673137313349633
+  - m_Id: 344090074931201
+    m_Key: Board.InventoryHide
+    m_Metadata:
+      m_Items:
+      - rid: 8623673137313349634
+  - m_Id: 344090074931202
+    m_Key: Board.InventoryTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673137313349635
+  - m_Id: 344090074931203
+    m_Key: Board.InventoryHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673137313349636
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -881,11 +921,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = floor. {1} = node kind.'
-    - rid: 636489279218909215
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: One enemy of a node. {0} = the row it stands in. {1} = enemy
-          name. {2} = its max HP.
     - rid: 636489279218909216
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -902,18 +937,10 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = item grade.'
-    - rid: 636489279218909220
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Shown on a dead mercenary.
-    - rid: 636489279218909221
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the potion slots.
     - rid: 636489279218909222
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: How to use the party board.
+        m_CommentText: How to use the boards on the party side.
     - rid: 636489279218909223
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1253,18 +1280,13 @@ MonoBehaviour:
     - rid: 636489282005762054
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Moves a mercenary one row forward; the one standing there
-          moves back.
+        m_CommentText: Moves a mercenary one row forward (towards row 1); the one
+          standing there moves back.
     - rid: 636489282005762055
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Moves a mercenary one row back; the one standing there moves
           forward.
-    - rid: 636489282005762056
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: "The item only works while its owner stands in these rows.
-          {0} = row names, for example \"1\uC5F4, 2\uC5F4\"."
     - rid: 636489282005762059
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1289,10 +1311,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'Row 4: the rearmost row.'
-    - rid: 636489282763358209
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the list of enemies waiting at a node.
     - rid: 636489282763358210
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1319,3 +1337,59 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Shown in the figure placeholder of a unit until there is art.
+    - rid: 8623673134167883777
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown in the inventory popup when it holds nothing.
+    - rid: 8623673134167883778
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Sends the selected board item to the inventory.
+    - rid: 8623673134167883779
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = cells the item takes on a board.'
+    - rid: 8623673134167883780
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works while its owner stands within the front
+          N rows. {0} = N (2 or more).
+    - rid: 8623673134167883781
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works in the front row.
+    - rid: 8623673134167883782
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works while its owner stands within the rear
+          N rows of the living line. {0} = N (2 or more).
+    - rid: 8623673134167883783
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The item only works in the rearmost row.
+    - rid: 8623673134167883784
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Takes the selected item reward straight into the inventory.
+    - rid: 8623673137313349632
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Shown in place of an enemy list: who waits at a node is not
+          shown before the battle.'
+    - rid: 8623673137313349633
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Opens the inventory popup.
+    - rid: 8623673137313349634
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Closes the inventory popup.
+    - rid: 8623673137313349635
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the inventory popup. {0} = cells in use. {1} = all
+          its cells.
+    - rid: 8623673137313349636
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: How to use the inventory popup.

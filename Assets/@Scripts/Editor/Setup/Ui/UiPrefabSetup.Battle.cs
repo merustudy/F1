@@ -178,15 +178,9 @@ namespace F1.Editor.Setup
             RectTransform root = UiBuild.Rect("UnitTemplate", parent);
             UiBuild.Size(root, BattleFieldWidth / (BattleRows.Count * 2), BattleUnitHeight);
 
-            // Figure placeholder: a faint rounded frame in the side's color with a silhouette in it.
-            Image figure = UiBuild.Image("UnitFigure", root, BattleUnitView.FigureTint(UiPalette.Party), raycastTarget: true);
-            figure.sprite = UiBuild.BuiltinSprite("UI/Skin/UISprite.psd");
-            figure.type = Image.Type.Sliced;
+            // Figure placeholder, as wide as the column.
+            Image figure = BuildFigure(root, "UnitFigure", BattleUnitView.FigureTint(UiPalette.Party), raycastTarget: true);
             UiBuild.Line(figure, 0f, BattleFigureHeight);
-            BuildSilhouette(figure.transform);
-            UiBuild.Line(
-                UiBuild.LocalizedLabel("FigureLabel", figure.transform, UiKeys.Battle.FigurePlaceholder, 16f, UiPalette.TextDim, TextAlignmentOptions.Center),
-                BattleFigureHeight - 32f, 26f);
 
             // Info card: name, status, HP, shield and burn, then the item board.
             Image frame = UiBuild.Image("UnitCard", root, UiPalette.Party, raycastTarget: true);
@@ -250,17 +244,34 @@ namespace F1.Editor.Setup
             return view;
         }
 
-        /// <summary>A standing figure made of simple shapes: head, body and two legs, feet at the bottom of the frame.</summary>
-        static void BuildSilhouette(Transform figure)
+        /// <summary>
+        /// The figure placeholder of a unit (a faint rounded frame in the side's color with a
+        /// silhouette in it), until there is art. The caller places and sizes it; the silhouette
+        /// stands on the frame's bottom. The battle screen and the party side both use it.
+        /// </summary>
+        static Image BuildFigure(Transform parent, string name, Color tint, bool raycastTarget)
         {
-            Image head = UiBuild.Image("FigureHead", figure, UiPalette.ButtonQuiet);
+            Image figure = UiBuild.Image(name, parent, tint, raycastTarget);
+            figure.sprite = UiBuild.BuiltinSprite("UI/Skin/UISprite.psd");
+            figure.type = Image.Type.Sliced;
+            BuildSilhouette(figure.transform, name);
+            UiBuild.Line(
+                UiBuild.LocalizedLabel(name + "Label", figure.transform, UiKeys.Battle.FigurePlaceholder, 16f, UiPalette.TextDim, TextAlignmentOptions.Center),
+                BattleFigureHeight - 32f, 26f);
+            return figure;
+        }
+
+        /// <summary>A standing figure made of simple shapes: head, body and two legs, feet at the bottom of the frame.</summary>
+        static void BuildSilhouette(Transform figure, string prefix)
+        {
+            Image head = UiBuild.Image(prefix + "Head", figure, UiPalette.ButtonQuiet);
             head.sprite = UiBuild.BuiltinSprite("UI/Skin/Knob.psd");
             UiBuild.Place(head.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -28f), new Vector2(56f, 56f));
-            Image body = UiBuild.Image("FigureBody", figure, UiPalette.ButtonQuiet);
+            Image body = UiBuild.Image(prefix + "Body", figure, UiPalette.ButtonQuiet);
             UiBuild.Place(body.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -88f), new Vector2(90f, 112f));
-            Image leftLeg = UiBuild.Image("FigureLegLeft", figure, UiPalette.ButtonQuiet);
+            Image leftLeg = UiBuild.Image(prefix + "LegLeft", figure, UiPalette.ButtonQuiet);
             UiBuild.Place(leftLeg.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-24f, -200f), new Vector2(34f, 84f));
-            Image rightLeg = UiBuild.Image("FigureLegRight", figure, UiPalette.ButtonQuiet);
+            Image rightLeg = UiBuild.Image(prefix + "LegRight", figure, UiPalette.ButtonQuiet);
             UiBuild.Place(rightLeg.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(24f, -200f), new Vector2(34f, 84f));
         }
 

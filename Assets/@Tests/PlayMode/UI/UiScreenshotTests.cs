@@ -115,12 +115,21 @@ namespace F1.Tests
                 {
                     case GamePhase.NodeMap:
                         map = UiTestUtil.Screen<NodeMapScreen>();
-                        if (!capturedBoard)
+                        PartySideView party = map.GetComponentInChildren<PartySideView>();
+                        if (!capturedBoard && Managers.Expedition.Expedition.Inventory.Count > 0)
                         {
+                            // The first reward went to the inventory: the weapon of the row-1 member selected, then the popup with its item picked.
                             capturedBoard = true;
-                            UiTestUtil.Click(UiTestUtil.Views<ItemSlotView>(map)[1].Button);
+                            ItemSlotView weapon = party.ColumnOfRow(1).Slots[0];
+                            UiTestUtil.Click(weapon.Button);
                             yield return Capture(prefix + "_08_map_item_selected");
-                            UiTestUtil.Click(UiTestUtil.Views<ItemSlotView>(map)[1].Button);
+                            UiTestUtil.Click(weapon.Button);
+                            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(party.InventoryEntries[0].Button);
+                            yield return Capture(prefix + "_17_map_inventory_selected");
+                            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+                            yield return UiTestUtil.WaitForRedraw();
                         }
 
                         UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
@@ -167,14 +176,19 @@ namespace F1.Tests
                         RewardOptionView[] options = UiTestUtil.Views<RewardOptionView>(reward);
                         int item = Managers.Expedition.Expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
                         UiTestUtil.Click(options[item].Button);
+                        yield return UiTestUtil.WaitForRedraw();
                         if (!capturedReward)
                         {
+                            // The first reward goes to the inventory; the later ones behind the row-1 member's weapon.
                             capturedReward = true;
                             yield return Capture(prefix + "_07_reward");
+                            UiTestUtil.Click(reward, "Frame/RewardToInventory");
+                        }
+                        else
+                        {
+                            UiTestUtil.Click(reward.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[1].Button);
                         }
 
-                        // Put the item in the second slot of the first member.
-                        UiTestUtil.Click(UiTestUtil.Views<ItemSlotView>(reward)[1].Button);
                         yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
                         break;
                 }

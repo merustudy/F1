@@ -175,11 +175,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864222
-    m_Localized: "{0} \xB7 {1} (HP {2})"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864223
     m_Localized: Fight
     m_Metadata:
@@ -198,17 +193,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864227
-    m_Localized: Dead
-    m_Metadata:
-      m_Items: []
-  - m_Id: 9766393864228
-    m_Localized: Potions
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864229
-    m_Localized: Click an item slot, then another, to swap them. Forward and Back
-      trade places with the mercenary in the next row.
+    m_Localized: Click an item, then another cell, to move or swap it. To inventory
+      sends it away; Show inventory brings it back. Forward and Back swap with the
+      next row.
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864230
@@ -483,8 +471,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864293
-    m_Localized: Pick an item, then click the slot to put it in. An item already
-      in that slot is lost.
+    m_Localized: Pick an item, then click the cell to put it in. An item already
+      there goes to the inventory. Or take it straight into the inventory.
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864294
@@ -596,11 +584,6 @@ MonoBehaviour:
     m_Localized: Back
     m_Metadata:
       m_Items: []
-  - m_Id: 54359005061127
-    m_Localized: Only in {0}
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 54359009255426
     m_Localized: the rearmost enemy
     m_Metadata:
@@ -629,10 +612,6 @@ MonoBehaviour:
     m_Localized: Row 4
     m_Metadata:
       m_Items: []
-  - m_Id: 66477360144384
-    m_Localized: Enemies (from the front)
-    m_Metadata:
-      m_Items: []
   - m_Id: 66477360144385
     m_Localized: the front {0} enemies
     m_Metadata:
@@ -659,6 +638,63 @@ MonoBehaviour:
     m_Localized: Full-body art here
     m_Metadata:
       m_Items: []
+  - m_Id: 293762654789632
+    m_Localized: Empty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 293762654789633
+    m_Localized: To inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 293762654789634
+    m_Localized: Size {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 293762654789635
+    m_Localized: Only within the front {0} rows
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 293762654789636
+    m_Localized: Only in the front row
+    m_Metadata:
+      m_Items: []
+  - m_Id: 293762654789637
+    m_Localized: Only within the rear {0} rows
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 293762654789638
+    m_Localized: Only in the rearmost row
+    m_Metadata:
+      m_Items: []
+  - m_Id: 293762654789639
+    m_Localized: Take to inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 344090062348288
+    m_Localized: Who waits inside is found out inside.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 344090074931200
+    m_Localized: Show inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 344090074931201
+    m_Localized: Close inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 344090074931202
+    m_Localized: Inventory ({0}/{1} cells)
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 344090074931203
+    m_Localized: Click an item, then a cell of a board on the left, to put it there.
+      An item already there comes to the inventory.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -679,7 +715,6 @@ MonoBehaviour:
         - id: 9766393864213
         - id: 9766393864215
         - id: 9766393864219
-        - id: 9766393864222
         - id: 9766393864224
         - id: 9766393864226
         - id: 9766393864230
@@ -727,10 +762,13 @@ MonoBehaviour:
         - id: 9766393864305
         - id: 9766393864306
         - id: 9766393864307
-        - id: 54359005061127
         - id: 54359009255427
         - id: 54359009255428
         - id: 54359009255429
         - id: 54359009255430
         - id: 66477360144385
         - id: 66477360144386
+        - id: 293762654789634
+        - id: 293762654789635
+        - id: 293762654789637
+        - id: 344090074931202

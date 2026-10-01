@@ -10,8 +10,9 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// The expedition map. The player picks the next node, sees who waits there and arranges the
-    /// party board before the fight.
+    /// The expedition map. The player arranges the party on the left (the battle screen's shape)
+    /// and picks the next node on the right. Who waits at a node is not shown: that is found out
+    /// in the battle (Docs/Design/03_Dungeon_Structure.md §1).
     /// </summary>
     public sealed class NodeMapScreen : UIScreen
     {
@@ -21,9 +22,10 @@ namespace F1.UI
         [SerializeField] MapNodeView _nodeTemplate;
         [SerializeField] Image _edgeTemplate;
         [SerializeField] TMP_Text _nodeTitle;
-        [SerializeField] TMP_Text _enemies;
         [SerializeField] Button _enter;
-        [SerializeField] PartyBoardView _board;
+        [SerializeField] Button _inventoryToggle;
+        [SerializeField] TMP_Text _inventoryToggleLabel;
+        [SerializeField] PartySideView _party;
 
         readonly Dictionary<int, MapNodeView> _nodes = new Dictionary<int, MapNodeView>();
         int _selectedNodeId = -1;
@@ -32,7 +34,8 @@ namespace F1.UI
         {
             BuildMap(Managers.Expedition.Expedition.Map);
             _enter.onClick.AddListener(OnEnter);
-            _board.Open();
+            _inventoryToggle.onClick.AddListener(OnInventoryToggle);
+            _party.Open();
 
             // With a single way forward there is nothing to choose: select it.
             IReadOnlyList<MapNode> available = Managers.Expedition.AvailableNodes();
@@ -77,43 +80,18 @@ namespace F1.UI
                 _nodes[node.Id].Show(KindText(node), state, node.Id == _selectedNodeId);
             }
 
-            RefreshNodeInfo(data, expedition);
-            _board.Refresh();
-        }
-
-        void RefreshNodeInfo(StaticData data, ExpeditionState expedition)
-        {
             bool hasSelection = _selectedNodeId >= 0;
             _enter.interactable = hasSelection;
-            if (!hasSelection)
-            {
-                _nodeTitle.text = UiStrings.Get(UiKeys.Map.SelectNode);
-                _enemies.text = string.Empty;
-                return;
-            }
-
-            MapNode node = expedition.Map.Get(_selectedNodeId);
-            EnemyGroupData group = data.EnemyGroups.Get(node.EnemyGroupId);
-            _nodeTitle.text = UiStrings.Get(UiKeys.Map.NodeTitle, node.Floor, KindText(node));
-            _enemies.text = EnemyLines(data, group);
+            _nodeTitle.text = hasSelection
+                ? UiStrings.Get(UiKeys.Map.NodeTitle, expedition.Map.Get(_selectedNodeId).Floor, KindText(expedition.Map.Get(_selectedNodeId)))
+                : UiStrings.Get(UiKeys.Map.SelectNode);
+            _inventoryToggleLabel.text = UiStrings.Get(_party.InventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
+            _party.Refresh();
         }
 
         static string KindText(MapNode node)
         {
             return UiStrings.Get(node.Kind == MapNodeKind.Boss ? UiKeys.Map.Boss : UiKeys.Map.Battle);
-        }
-
-        /// <summary>The enemies of a group, one line each, from row 1 back.</summary>
-        static string EnemyLines(StaticData data, EnemyGroupData group)
-        {
-            var lines = new List<string>();
-            for (int i = 0; i < group.Enemies.Count; i++)
-            {
-                EnemyData enemy = data.Enemies.Get(group.Enemies[i]);
-                lines.Add(UiStrings.Get(UiKeys.Map.Enemy, UiText.Row(i + 1), UiText.Name(enemy.Name), enemy.MaxHp));
-            }
-
-            return string.Join("\n", lines);
         }
 
         /// <summary>Lays the nodes out floor by floor, first floor at the bottom, and draws the paths between them.</summary>
@@ -171,6 +149,12 @@ namespace F1.UI
         void OnNodeClicked(int nodeId)
         {
             _selectedNodeId = nodeId;
+            Refresh();
+        }
+
+        void OnInventoryToggle()
+        {
+            _party.ToggleInventory();
             Refresh();
         }
 

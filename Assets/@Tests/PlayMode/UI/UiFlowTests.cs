@@ -351,7 +351,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Board_ForwardAndBack_TradePlacesWithTheNextRow_AndTheListFollowsTheRows()
+        public IEnumerator PartySide_ForwardAndBack_TradePlacesWithTheNextRow_AndTheColumnsFollowTheRows()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
@@ -360,31 +360,37 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
             ExpeditionState expedition = Managers.Expedition.Expedition;
+            int partySize = Managers.Data.Data.Balance.PartySize;
             string front = expedition.Members.Single(m => m.Row == 1).MercenaryId;
-            string middle = expedition.Members.Single(m => m.Row == 2).MercenaryId;
+            string second = expedition.Members.Single(m => m.Row == 2).MercenaryId;
 
-            // Cards are listed from row 1 back. Row 1 cannot go further forward, the last row not further back.
-            BoardMemberView[] cards = UiTestUtil.Views<BoardMemberView>(map);
-            Assert.AreEqual(expedition.Members.Count, cards.Length);
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(cards[0], "MemberName"));
-            Assert.IsFalse(cards[0].Forward.interactable);
-            Assert.IsTrue(cards[0].Back.interactable);
-            Assert.IsTrue(cards[cards.Length - 1].Forward.interactable);
-            Assert.IsFalse(cards[cards.Length - 1].Back.interactable);
+            // One column per row the party can stand in, showing the member of that row.
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                Assert.AreEqual(row <= partySize, party.ColumnOfRow(row).gameObject.activeSelf, $"Row {row}");
+            }
 
-            UiTestUtil.Click(cards[0].Back);
+            // Row 1 cannot go further forward, the last row not further back.
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            Assert.AreEqual(front, expedition.Members[row1.Member].MercenaryId);
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1, "Party1Card/Party1Name"));
+            Assert.IsFalse(row1.Forward.interactable);
+            Assert.IsTrue(row1.Back.interactable);
+            PartyColumnView last = party.ColumnOfRow(partySize);
+            Assert.IsTrue(last.Forward.interactable);
+            Assert.IsFalse(last.Back.interactable);
+
+            UiTestUtil.Click(row1.Back);
             yield return null;
 
             Assert.AreEqual(2, expedition.Members.Single(m => m.MercenaryId == front).Row);
-            Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == middle).Row);
-            cards = UiTestUtil.Views<BoardMemberView>(map);
-            Assert.AreEqual(UiText.Mercenary(middle), UiTestUtil.TextAt(cards[0], "MemberName"));
-            Assert.AreEqual(UiText.Row(1), UiTestUtil.TextAt(cards[0], "MemberRow"));
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(cards[1], "MemberName"));
-            Assert.AreEqual(UiText.Row(2), UiTestUtil.TextAt(cards[1], "MemberRow"));
+            Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == second).Row);
+            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1, "Party1Card/Party1Name"), "A column shows whoever stands in its row now.");
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2), "Party2Card/Party2Name"));
 
-            UiTestUtil.Click(cards[1].Forward);
+            UiTestUtil.Click(party.ColumnOfRow(2).Forward);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
         }
 
@@ -466,6 +472,117 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForRedraw();
             UiTestUtil.Click(screen, "Frame/ResultPanel/ResultBox/Continue");
             yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+        }
+
+        [UnityTest]
+        public IEnumerator PartySide_InventoryPopup_TakesARewardAndItemsMoveBetweenTheBoardsAndTheInventory()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            UiTestUtil.StageChampion();
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            map.Refresh();
+            yield return null;
+
+            // With nothing selected only a cell that holds an item can be picked up; the popup is closed.
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            Assert.IsTrue(row1.Slots[0].Button.interactable, "The weapon.");
+            Assert.IsFalse(row1.Slots[1].Button.interactable, "An empty cell.");
+            Assert.IsFalse(party.InventoryPanel.activeSelf);
+            Assert.IsFalse(party.ToInventory.interactable);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.InventoryShow), UiTestUtil.TextAt(map, "Frame/NodeInfo/InventoryToggle/InventoryToggleLabel"));
+
+            // Win the first battle; its reward goes straight into the inventory.
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/NodeInfo/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            yield return UiTestUtil.FinishBattle();
+            RewardScreen reward = UiTestUtil.Screen<RewardScreen>();
+            Assert.IsFalse(UiTestUtil.ButtonAt(reward, "Frame/RewardToInventory").interactable, "Nothing is picked yet.");
+            int item = expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            string rewardId = expedition.PendingRewards[item].Id;
+            UiTestUtil.Click(UiTestUtil.Views<RewardOptionView>(reward)[item].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(reward, "Frame/RewardToInventory");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            map = UiTestUtil.Screen<NodeMapScreen>();
+            party = map.GetComponentInChildren<PartySideView>();
+            Assert.AreEqual(rewardId, expedition.Inventory.Single().Item.Id);
+
+            // The popup opens from the node panel and lists the item.
+            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(party.InventoryPanel.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.InventoryHide), UiTestUtil.TextAt(map, "Frame/NodeInfo/InventoryToggle/InventoryToggleLabel"));
+            InventoryEntryView entry = party.InventoryEntries[0];
+            Assert.IsTrue(entry.gameObject.activeSelf);
+            Assert.AreEqual(rewardId, entry.Item.Item.Id);
+            StaticData data = Managers.Data.Data;
+            Assert.AreEqual(
+                UiStrings.Get(UiKeys.Board.InventoryTitle, ItemBoard.UsedCells(expedition.Inventory), data.Balance.InventoryCells),
+                UiTestUtil.TextAt(map, "Frame/InventoryPanel/InventoryBox/InventoryTitle"),
+                "The title counts cells in use out of all the cells.");
+
+            // The entry, then the row-1 member's weapon cell: the item takes the weapon's place and the weapon goes to the inventory.
+            row1 = party.ColumnOfRow(1);
+            int frontIndex = row1.Member;
+            string weapon = expedition.Members[frontIndex].Items[0].Item.Id;
+            UiTestUtil.Click(entry.Button);
+            yield return null;
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            Assert.AreEqual(rewardId, expedition.Members[frontIndex].Items[0].Item.Id);
+            Assert.AreEqual(weapon, expedition.Inventory.Single().Item.Id);
+            Assert.IsTrue(party.InventoryPanel.activeSelf, "The popup stays open.");
+            Assert.AreEqual(weapon, party.InventoryEntries[0].Item.Item.Id);
+
+            // The board item, then "to inventory": the board is empty and the inventory holds both.
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            Assert.IsTrue(party.ToInventory.interactable);
+            UiTestUtil.Click(party.ToInventory);
+            yield return null;
+            Assert.IsEmpty(expedition.Members[frontIndex].Items);
+            CollectionAssert.AreEqual(new[] { weapon, rewardId }, expedition.Inventory.Select(i => i.Item.Id));
+            Assert.IsFalse(party.ToInventory.interactable);
+
+            // Filled to its cells, the inventory takes nothing more: an empty board still takes an item out of it,
+            // but a board item cannot go in ("to inventory" is off) while it can still go to another board.
+            while (ExpeditionRules.FreeInventoryCells(data, expedition) > 0)
+            {
+                expedition.Inventory.Add(new EquippedItem(data.Items.Get(weapon), 1));
+            }
+
+            UiTestUtil.Click(party.InventoryEntries[0].Button);
+            yield return null;
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            Assert.AreEqual(weapon, expedition.Members[frontIndex].Items.Single().Item.Id);
+            expedition.Inventory.Add(new EquippedItem(data.Items.Get(weapon), 1));
+            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, expedition));
+            map.Refresh();
+            yield return null;
+            Assert.AreEqual(
+                UiStrings.Get(UiKeys.Board.InventoryTitle, data.Balance.InventoryCells, data.Balance.InventoryCells),
+                UiTestUtil.TextAt(map, "Frame/InventoryPanel/InventoryBox/InventoryTitle"));
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            Assert.IsFalse(party.ToInventory.interactable, "No room for it in the inventory.");
+            Assert.IsTrue(party.ColumnOfRow(2).Slots[1].Button.interactable, "Another board's empty cell still takes it.");
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+
+            // Closing the popup.
+            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+            yield return null;
+            Assert.IsFalse(party.InventoryPanel.activeSelf);
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, depart and enter the first node.</summary>

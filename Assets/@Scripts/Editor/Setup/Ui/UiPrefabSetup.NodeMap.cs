@@ -7,21 +7,25 @@ namespace F1.Editor.Setup
 {
     public static partial class UiPrefabSetup
     {
+        /// <summary>
+        /// The node map: the party on the left as in battle, the map on the right with the chosen
+        /// node's panel under it. The panel names no enemies: who waits at a node is not shown
+        /// (Docs/Design/03_Dungeon_Structure.md §1).
+        /// </summary>
         static UIScreen BuildNodeMap(Transform holder)
         {
             NodeMapScreen screen = Screen<NodeMapScreen>("NodeMapScreen", holder, out RectTransform frame);
 
-            // Header
             Image header = UiBuild.Panel("Header", frame, UiPalette.Panel);
-            UiBuild.Box(header, 0f, 0f, 1920f, 90f);
-            TextMeshProUGUI dungeon = UiBuild.Box(UiBuild.Label("Dungeon", header.transform, 40f, UiPalette.Text), 40f, 18f, 900f, 54f);
-            TextMeshProUGUI progress = UiBuild.Label("Progress", header.transform, 32f, UiPalette.TextDim, TextAlignmentOptions.Right);
-            UiBuild.Box(progress, 1280f, 24f, 600f, 44f);
+            UiBuild.Box(header, 0f, 0f, 1920f, 80f);
+            TextMeshProUGUI dungeon = UiBuild.Box(UiBuild.Label("Dungeon", header.transform, 36f, UiPalette.Text), 40f, 14f, 900f, 52f);
+            TextMeshProUGUI progress = UiBuild.Label("Progress", header.transform, 30f, UiPalette.TextDim, TextAlignmentOptions.Right);
+            UiBuild.Box(progress, 1280f, 18f, 600f, 44f);
 
             // Map: nodes and paths are created at runtime inside the area, measured from its bottom-left corner.
             Image map = UiBuild.Panel("Map", frame, UiPalette.Panel);
-            UiBuild.Box(map, 40f, 110f, 760f, 930f);
-            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 700f, 870f);
+            UiBuild.Box(map, 980f, 110f, 920f, 690f);
+            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 860f, 630f);
 
             Image edgeTemplate = UiBuild.Image("EdgeTemplate", mapArea, UiPalette.Line);
             UiBuild.Place(edgeTemplate.rectTransform, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 6f));
@@ -44,19 +48,17 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(nodeTemplate, "_label", nodeLabel);
             nodeFrame.gameObject.SetActive(false);
 
-            // Who waits at the selected node.
+            // The chosen node: its floor and kind, the note that the enemies stay unknown, the inventory and the fight.
             Image info = UiBuild.Panel("NodeInfo", frame, UiPalette.Panel);
-            UiBuild.Box(info, 820f, 110f, 1060f, 290f);
-            TextMeshProUGUI nodeTitle = UiBuild.Box(UiBuild.Label("NodeTitle", info.transform, 34f, UiPalette.Text), 24f, 16f, 760f, 48f);
+            UiBuild.Box(info, 980f, 812f, 920f, 228f);
+            TextMeshProUGUI nodeTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("NodeTitle", info.transform, 34f, UiPalette.Text), 24f, 18f, 700f, 48f));
+            UiBuild.Box(UiBuild.LocalizedLabel("NodeHint", info.transform, UiKeys.Map.Unknown, 20f, UiPalette.TextDim), 24f, 72f, 880f, 30f);
+            ButtonParts inventoryToggle = UiBuild.Button("InventoryToggle", info.transform, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Box(inventoryToggle.Rect, 24f, 116f, 236f, 76f);
+            ButtonParts enter = UiBuild.LocalizedButton("Enter", info.transform, UiKeys.Map.Enter, UiPalette.Button, 34f);
+            UiBuild.Box(enter.Rect, 660f, 116f, 236f, 76f);
 
-            // The enemies of the node, one line each from row 1 back. The screen writes the lines.
-            UiBuild.Box(UiBuild.LocalizedLabel("EnemiesHeader", info.transform, UiKeys.Map.Enemies, 22f, UiPalette.TextDim), 24f, 70f, 500f, 30f);
-            TextMeshProUGUI enemies = UiBuild.Label("Enemies", info.transform, 26f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(enemies, 24f, 106f, 756f, 170f);
-            ButtonParts enter = UiBuild.LocalizedButton("Enter", info.transform, UiKeys.Map.Enter, UiPalette.Button, 36f);
-            UiBuild.Box(enter.Rect, 800f, 170f, 236f, 96f);
-
-            PartyBoardView board = BuildBoard(frame, 820f, 420f);
+            PartySideView party = BuildPartySide(frame);
 
             UiBuild.SetReference(screen, "_dungeon", dungeon);
             UiBuild.SetReference(screen, "_progress", progress);
@@ -64,9 +66,10 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_nodeTemplate", nodeTemplate);
             UiBuild.SetReference(screen, "_edgeTemplate", edgeTemplate);
             UiBuild.SetReference(screen, "_nodeTitle", nodeTitle);
-            UiBuild.SetReference(screen, "_enemies", enemies);
             UiBuild.SetReference(screen, "_enter", enter.Button);
-            UiBuild.SetReference(screen, "_board", board);
+            UiBuild.SetReference(screen, "_inventoryToggle", inventoryToggle.Button);
+            UiBuild.SetReference(screen, "_inventoryToggleLabel", inventoryToggle.Label);
+            UiBuild.SetReference(screen, "_party", party);
             return screen;
         }
     }

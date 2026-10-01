@@ -31,9 +31,6 @@ namespace F1.UI
         /// <summary>How much of the figure frame's color shows: the background will be seen through it.</summary>
         const float FigureAlpha = 0.35f;
 
-        /// <summary>Cells an item takes on the board. Items have no size in the data yet, so every item takes one.</summary>
-        const int CellsPerItem = 1;
-
         readonly List<BattleItemView> _items = new List<BattleItemView>();
         BattleUnit _unit;
         int _shownHp = -1;
@@ -55,24 +52,21 @@ namespace F1.UI
             _unit = unit;
             _name.text = UiText.Name(unit.Setup.Name);
 
-            // One cell per item slot of the unit, in slot order: an item's cell shows its cooldown,
-            // an empty slot stays a faint cell.
-            int next = 0;
-            int slots = unit.Setup.Items?.Count ?? 0;
-            for (int slot = 0; slot < slots; slot++)
+            // The board in order: an item takes as many cells as its size and shows its cooldown;
+            // the cells after the last item stay faint.
+            int cells = 0;
+            foreach (BattleItemState item in unit.Items)
             {
-                if (next < unit.Items.Count && unit.Items[next].SlotIndex == slot)
-                {
-                    BattleItemView view = Instantiate(_itemTemplate, _itemParent);
-                    view.gameObject.SetActive(true);
-                    view.Bind(unit.Items[next], CellsPerItem);
-                    _items.Add(view);
-                    next++;
-                }
-                else
-                {
-                    Instantiate(_emptyCellTemplate, _itemParent).SetActive(true);
-                }
+                BattleItemView view = Instantiate(_itemTemplate, _itemParent);
+                view.gameObject.SetActive(true);
+                view.Bind(item, item.Equipped.Item.Size);
+                _items.Add(view);
+                cells += item.Equipped.Item.Size;
+            }
+
+            for (; cells < unit.Setup.ItemSlots; cells++)
+            {
+                Instantiate(_emptyCellTemplate, _itemParent).SetActive(true);
             }
         }
 
@@ -86,7 +80,7 @@ namespace F1.UI
             _name.text = UiText.Name(_unit.Setup.Name);
             for (int i = 0; i < _items.Count; i++)
             {
-                _items[i].Bind(_unit.Items[i], CellsPerItem);
+                _items[i].Bind(_unit.Items[i], _unit.Items[i].Equipped.Item.Size);
             }
         }
 

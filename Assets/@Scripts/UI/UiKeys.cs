@@ -64,8 +64,7 @@ namespace F1.UI
             public const string Boss = "Map.Boss";
             public const string SelectNode = "Map.SelectNode";
             public const string NodeTitle = "Map.NodeTitle";
-            public const string Enemies = "Map.Enemies";
-            public const string Enemy = "Map.Enemy";
+            public const string Unknown = "Map.Unknown";
             public const string Enter = "Map.Enter";
         }
 
@@ -74,11 +73,15 @@ namespace F1.UI
             public const string Hp = "Board.Hp";
             public const string EmptySlot = "Board.EmptySlot";
             public const string Grade = "Board.Grade";
-            public const string Dead = "Board.Dead";
-            public const string Potions = "Board.Potions";
             public const string Forward = "Board.Forward";
             public const string Back = "Board.Back";
             public const string Hint = "Board.Hint";
+            public const string InventoryShow = "Board.InventoryShow";
+            public const string InventoryHide = "Board.InventoryHide";
+            public const string InventoryTitle = "Board.InventoryTitle";
+            public const string InventoryHint = "Board.InventoryHint";
+            public const string InventoryEmpty = "Board.InventoryEmpty";
+            public const string ToInventory = "Board.ToInventory";
         }
 
         public static class Item
@@ -86,8 +89,12 @@ namespace F1.UI
             public const string Title = "Item.Title";
             public const string Weapon = "Item.Weapon";
             public const string Support = "Item.Support";
+            public const string Size = "Item.Size";
             public const string Cooldown = "Item.Cooldown";
-            public const string Rows = "Item.Rows";
+            public const string RowsFront = "Item.RowsFront";
+            public const string RowsFrontOne = "Item.RowsFrontOne";
+            public const string RowsBack = "Item.RowsBack";
+            public const string RowsBackOne = "Item.RowsBackOne";
         }
 
         public static class Effect
@@ -187,6 +194,7 @@ namespace F1.UI
             public const string TakePotion = "Reward.TakePotion";
             public const string PotionFull = "Reward.PotionFull";
             public const string Skip = "Reward.Skip";
+            public const string ToInventory = "Reward.ToInventory";
         }
 
         public static class Settle

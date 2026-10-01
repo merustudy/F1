@@ -161,11 +161,7 @@ namespace F1.Tests
             Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
             yield return WaitForScreen(ScreenId.NodeMap);
 
-            // Staged directly: reaching the boss with everyone alive by play alone is a matter of luck.
-            ExpeditionMember champion = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
-            champion.Items[0] = new EquippedItem(champion.Items[0].Item, 999);
-            champion.MaxHp = 100000;
-            champion.Hp = champion.MaxHp;
+            StageChampion();
 
             int guard = 0;
             while (true)
@@ -217,6 +213,33 @@ namespace F1.Tests
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Makes the mercenary in row 1 of the expedition so strong that every battle is won and
+        /// nobody falls. Staged directly: winning by play alone is a matter of luck.
+        /// </summary>
+        public static void StageChampion()
+        {
+            ExpeditionMember champion = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
+            champion.Items[0] = new EquippedItem(champion.Items[0].Item, 999);
+            champion.MaxHp = 100000;
+            champion.Hp = champion.MaxHp;
+        }
+
+        /// <summary>Runs the shown battle to its end without input and returns to the phase after it.</summary>
+        public static IEnumerator FinishBattle()
+        {
+            BattleScreen battle = Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            while (!Managers.Expedition.Battle.IsFinished)
+            {
+                Managers.Expedition.AdvanceBattle(250);
+            }
+
+            yield return WaitForRedraw();
+            Click(battle, "Frame/ResultPanel/ResultBox/Continue");
+            yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
         }
 
         public static T ViewNamed<T>(Component root, string text)

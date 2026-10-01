@@ -10,15 +10,21 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// The reward choice after a won battle. An item is picked first and then put into a slot on
-    /// the party board; a potion is taken with one click; or the reward is skipped.
+    /// The reward choice after a won battle. The party stands on the left as in battle; the rewards
+    /// are stacked on the right. An item is picked first and then put at a cell of a board (whatever
+    /// was there goes to the inventory) or taken straight into the inventory; a potion is taken with
+    /// one click; or the reward is skipped. While an item is picked, the boards enable only the
+    /// cells that can take it.
     /// </summary>
     public sealed class RewardScreen : UIScreen
     {
         [SerializeField] RewardOptionView _optionTemplate;
         [SerializeField] Transform _optionParent;
         [SerializeField] Button _skip;
-        [SerializeField] PartyBoardView _board;
+        [SerializeField] Button _toInventory;
+        [SerializeField] Button _inventoryToggle;
+        [SerializeField] TMP_Text _inventoryToggleLabel;
+        [SerializeField] PartySideView _party;
 
         readonly List<RewardOptionView> _options = new List<RewardOptionView>();
         int _selectedOption = -1;
@@ -36,8 +42,10 @@ namespace F1.UI
             }
 
             _skip.onClick.AddListener(OnSkip);
-            _board.Open();
-            _board.SlotClickOverride = PlaceSelectedItem;
+            _toInventory.onClick.AddListener(OnToInventory);
+            _inventoryToggle.onClick.AddListener(OnInventoryToggle);
+            _party.Open();
+            _party.CellClickOverride = PlaceSelectedItem;
         }
 
         public override void Refresh()
@@ -75,7 +83,12 @@ namespace F1.UI
                 }
             }
 
-            _board.Refresh();
+            // With an item picked, the boards show where it can go; otherwise the party side is its usual self.
+            int option = _selectedOption;
+            _party.ExternalCanPlace = option < 0 ? null : (member, cell) => manager.CanPlaceReward(option, member, cell);
+            _toInventory.interactable = option >= 0 && manager.CanTakeRewardToInventory(option);
+            _inventoryToggleLabel.text = UiStrings.Get(_party.InventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
+            _party.Refresh();
         }
 
         void OnOptionClicked(int option)
@@ -94,21 +107,44 @@ namespace F1.UI
             }
 
             _selectedOption = _selectedOption == option ? -1 : option;
-            _board.ClearSelection();
+            _party.ClearSelection();
             Refresh();
         }
 
-        /// <summary>With an item reward selected, a click on a living member's slot puts the item there.</summary>
-        bool PlaceSelectedItem(int member, int slot)
+        /// <summary>With an item reward picked, a click on a cell that can take it puts the item there.</summary>
+        bool PlaceSelectedItem(int member, int cell)
         {
             if (_selectedOption < 0)
             {
                 return false;
             }
 
-            Managers.Expedition.TakeItemReward(_selectedOption, member, slot);
-            GoToCurrentPhase();
+            ExpeditionManager manager = Managers.Expedition;
+            if (manager.CanPlaceReward(_selectedOption, member, cell))
+            {
+                manager.TakeItemReward(_selectedOption, member, cell);
+                GoToCurrentPhase();
+            }
+
             return true;
+        }
+
+        void OnToInventory()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (_selectedOption < 0 || !manager.CanTakeRewardToInventory(_selectedOption))
+            {
+                return;
+            }
+
+            manager.TakeItemRewardToInventory(_selectedOption);
+            GoToCurrentPhase();
+        }
+
+        void OnInventoryToggle()
+        {
+            _party.ToggleInventory();
+            Refresh();
         }
 
         void OnSkip()

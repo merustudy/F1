@@ -24,9 +24,9 @@ namespace F1.UI
         /// <summary>Lines per text of the log viewer: a long log is split over several texts.</summary>
         const int LogLinesPerChunk = 40;
 
-        /// <summary>Space between two columns of one side, and between the two sides (their row 1 columns).</summary>
-        const float ColumnGap = 10f;
-        const float SideGap = 40f;
+        /// <summary>Space between two columns of one side, and between the two sides (their row 1 columns). The party side of the other screens uses the same.</summary>
+        public const float ColumnGap = 10f;
+        public const float SideGap = 40f;
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] TMP_Text _time;

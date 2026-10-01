@@ -84,45 +84,63 @@ namespace F1.UI
             return UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), item.Grade);
         }
 
-        /// <summary>Category, cooldown, the rows it works in and each effect, one per line.</summary>
+        const string FactSeparator = " / ";
+
+        /// <summary>Category, size, cooldown and where it works on one line, then each effect on its own line.</summary>
         public static string ItemDetails(EquippedItem item)
         {
-            return string.Join("\n", ItemFacts(item));
+            var lines = new List<string> { string.Join(FactSeparator, ItemFacts(item)) };
+            lines.AddRange(ItemEffects(item));
+            return string.Join("\n", lines);
         }
 
-        /// <summary>The same facts as <see cref="ItemDetails"/> on one line.</summary>
+        /// <summary>The same facts and effects as <see cref="ItemDetails"/> on one line.</summary>
         public static string ItemSummary(EquippedItem item)
         {
-            return string.Join(" / ", ItemFacts(item));
+            List<string> parts = ItemFacts(item);
+            parts.AddRange(ItemEffects(item));
+            return string.Join(FactSeparator, parts);
         }
 
         static List<string> ItemFacts(EquippedItem item)
         {
             ItemData data = item.Item;
-            var lines = new List<string>
+            var facts = new List<string>
             {
                 UiStrings.Get(data.Category == ItemCategory.Weapon ? UiKeys.Item.Weapon : UiKeys.Item.Support),
+                UiStrings.Get(UiKeys.Item.Size, data.Size),
                 UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)),
             };
 
-            // An item that works in every row needs no line about rows.
-            if (data.Rows.Count < BattleRows.Count)
+            // An item that works anywhere in the line needs no fact about where.
+            if (!data.Rows.IsEveryRow)
             {
-                var rows = new List<string>();
-                foreach (int row in data.Rows)
-                {
-                    rows.Add(Row(row));
-                }
-
-                lines.Add(UiStrings.Get(UiKeys.Item.Rows, string.Join(", ", rows)));
+                facts.Add(Rows(data.Rows));
             }
 
-            foreach (ItemEffect effect in data.Effects)
+            return facts;
+        }
+
+        static List<string> ItemEffects(EquippedItem item)
+        {
+            var effects = new List<string>();
+            foreach (ItemEffect effect in item.Item.Effects)
             {
-                lines.Add(Effect(effect, item.Grade));
+                effects.Add(Effect(effect, item.Grade));
             }
 
-            return lines;
+            return effects;
+        }
+
+        /// <summary>Where in its line the owner must stand: "only in the front row", "only within the rear 3 rows".</summary>
+        public static string Rows(RowSpan rows)
+        {
+            if (rows.From == RowEnd.Front)
+            {
+                return rows.Reach == 1 ? UiStrings.Get(UiKeys.Item.RowsFrontOne) : UiStrings.Get(UiKeys.Item.RowsFront, rows.Reach);
+            }
+
+            return rows.Reach == 1 ? UiStrings.Get(UiKeys.Item.RowsBackOne) : UiStrings.Get(UiKeys.Item.RowsBack, rows.Reach);
         }
 
         public static string Effect(ItemEffect effect, int grade)
