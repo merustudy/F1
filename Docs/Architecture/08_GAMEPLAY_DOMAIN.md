@@ -9,7 +9,7 @@ Domain 코드의 구조, 결정론을 지키는 방법, 상태 Type, 시뮬 실�
 Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Managers, Save DTO를 참조하지 않는다
 ├─ Random       Pcg32, RngStream, SeedDeriver
 ├─ Battle       BattleEngine, BattleSetup, BattleUnit, BattleEvent, BattleInput, BattleLog, Formation
-├─ Expedition   ExpeditionState, ExpeditionRules, NodeMap, MapGenerator
+├─ Expedition   ExpeditionState, ExpeditionRules, ItemBoard, NodeMap, MapGenerator
 └─ Run          RunState, RunRules, SettlementReport
 ```
 
@@ -22,7 +22,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 | 수명 | 상태 | 규칙 | 끝나면 |
 |---|---|---|---|
 | 런 | `RunState`: 시드, 날짜, 로스터(피로도), 파티, 원정 횟수, 클리어 기록 | `RunRules` | 용병이 하나도 없으면 `IsOver` |
-| 원정 | `ExpeditionState`: 던전, 시드, 맵, 구성원(HP, 아이템 칸), 포션, 단계 | `ExpeditionRules` | `RunRules.Settle`로 런에 반영하고 버린다 |
+| 원정 | `ExpeditionState`: 던전, 시드, 맵, 구성원(HP, 보드), 인벤토리, 포션, 단계 | `ExpeditionRules` | `RunRules.Settle`로 런에 반영하고 버린다 |
 | 전투 | `BattleEngine` 안의 유닛, 쿨다운, 포션, 이벤트 로그, 입력 기록 | `BattleEngine` | `ExpeditionRules.CompleteBattle`로 원정에 반영하고 버린다 |
 
 - 상태 Type은 Plain 객체다. 규칙은 상태를 인자로 받는 static 함수(`RunRules`, `ExpeditionRules`)와 `BattleEngine`에만 있다.
@@ -49,11 +49,32 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 - 전투 중의 전진은 죽음을 처리하는 코드(`Kill`) 안에서 일어난다. 죽은 유닛 뒤의 유닛을 한 칸씩 옮기고
   `RowsAdvanced`를 로그에 남긴다. 유닛의 `Index`(유닛 순서)는 바뀌지 않고 `Row`만 바뀐다.
-- 아이템을 쓸 수 있는지(`BattleItemState.Active`)는 주인의 자리가 바뀔 때 다시 정한다(`RefreshItems`).
-  쓸 수 있게 된 아이템은 그 시각부터 쿨다운을 새로 채운다.
+- 줄에서 세는 자리는 `RowSpan`(`F1.Data`: 기준 `Front`/`Back`과 깊이) 하나다. 아이템을 쓸 수 있는 자리(`ItemData.Rows`)와 패시브의
+  자리 조건(`PassiveSpec.Rows`)이 같은 Type이고, 판정은 `Contains(row, 살아 있는 줄의 길이)` 한 함수다. 공격 범위와 같은 어휘다.
+- 아이템을 쓸 수 있는지(`BattleItemState.Active`)는 그 쪽에서 누가 죽을 때마다 **살아 있는 전원**을 다시 본다(`RefreshSide`):
+  자리가 바뀐 유닛뿐 아니라 줄이 짧아져 자리가 달라진 유닛도 있기 때문이다. 쓸 수 있게 된 아이템은 그 시각부터 쿨다운을 새로 채운다.
+  줄은 짧아지기만 하므로 전투 중에 꺼지는 일은 없다(코드는 일반적으로 쓰되 Test가 그 성질을 고정한다).
 - 타깃은 효과 하나마다 적용 직전에 한 번 고른다(`ResolveTargets`). 그래서 효과 도중의 전진은 그 효과의 대상을 바꾸지 않는다.
 - 공격 범위는 효과의 타깃(`EnemyFront`, `EnemyBack`)과 깊이(`Reach`)다. 살아 있는 유닛은 늘 1열부터 빈 열 없이 서 있으므로
   "앞에서 N번째까지"는 1~N열, "뒤에서 N번째까지"는 맨 뒤에서 N열이다. 그 안의 살아 있는 유닛만 고르니 빈 열을 치는 일이 없다.
+
+## 아이템 보드와 인벤토리
+
+규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §5가 소유한다.
+
+- 보드는 아이템(`EquippedItem`)의 순서 있는 목록과 칸 수(`ExpeditionMember.ItemSlots`, 직업에서 온다)다. 아이템은 크기(`ItemData.Size`)만큼
+  칸을 앞에서부터 빈 칸 없이 차지한다. 칸과 목록 사이의 계산(차지한 칸 수, 어느 칸에 어느 아이템이 있는지, 넣을 수 있는지, 넣기)은
+  `ItemBoard` 한 곳에 있다. 목록과 칸 수만 받는 순수 함수다.
+- 인벤토리는 `ExpeditionState.Inventory`(목록)다. 보드에서 밀려나거나 빼낸 아이템이 들어가고, 전투 Setup에는 들어가지 않는다.
+  칸 수는 `BalanceData.InventoryCells`이고 아이템은 보드처럼 크기만큼 차지한다(`ItemBoard.UsedCells`). 남은 칸은 `ExpeditionRules.FreeInventoryCells`.
+- 명령은 `ExpeditionRules`에 있다: 보상을 보드에 넣기(`TakeItemReward`)와 인벤토리로 받기(`TakeItemRewardToInventory`), 보드 사이 옮기기와
+  바꾸기(`MoveItem`), 인벤토리로 빼기(`MoveToInventory`), 인벤토리에서 넣기(`PlaceFromInventory`). 각각 `Can...` 질의가 있고,
+  화면은 칸마다 물어서 누를 수 있는지 정한다. 자리(칸)는 화면이 고르는 것이고 규칙은 Domain이 계산한다.
+- 인벤토리로 가는 아이템(받는 보상, 빼는 아이템, 찬 자리에 넣어 밀려나는 아이템)은 남은 칸에 들어갈 때만 허용한다. 인벤토리에서 보드의 찬 자리로
+  넣을 때는 나가는 아이템의 칸을 더해 센다. "칸에 아이템이 있어 집을 수 있는가"(`CanPickItem`)는 어디로 갈 수 있는가와 따로 묻는다:
+  보드 사이의 옮기기는 인벤토리가 차도 된다.
+- 전투의 `BattleUnitSetup.Items`는 보드 그대로의 목록(빈 칸 없음)이고 `ItemSlots`는 화면이 빈 칸을 그리기 위한 칸 수다
+  (적은 가진 아이템의 크기 합). `BattleItemState.SlotIndex`는 보드의 순서이고 발동 순서다.
 
 ## 전투: 결정론
 
@@ -119,7 +140,8 @@ dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy
 - 규칙 Test는 출고 CSV가 아니라 Test용 작은 데이터(`TestData`)를 쓴다. 밸런스를 바꿔도 Test가 깨지지 않는다.
 - 규칙 하나에 Test 하나를 둔다. 기획문서의 규칙을 바꾸면 그 Test를 같이 바꾼다.
 - 결정론 Test: 같은 Setup과 입력의 반복 실행, 진행 간격과 무관함, `Replay`와 실제 진행의 일치. 전진이 일어나는 전투도 포함한다.
-- 자리 규칙은 `FormationTests`가, 전투 중의 전진과 아이템의 시작·멈춤은 `BattleEngineTests`의 "Advancing" 묶음이 고정한다.
+- 자리 규칙은 `FormationTests`가, 전투 중의 전진과 아이템이 켜지는 것은 `BattleEngineTests`의 "Advancing" 묶음이 고정한다.
+  보드와 인벤토리는 `ItemBoardTests`와 `ExpeditionRulesTests`의 "Rewards and the item board" 묶음이 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
 ## Validation
@@ -128,6 +150,7 @@ dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy
 - 새 규칙이 `Docs/Design`에서 【확정】이고 Test가 있는가?
 - 새 상수가 `BalanceData`나 Definition에 있는가? 코드에 숫자로 들어가지 않았는가?
 - 자리를 바꾸는 새 코드가 `Formation`을 거치는가? 빈 열을 사이에 둔 줄이 상태에 남지 않는가?
+- 보드를 바꾸는 새 코드가 `ItemBoard`를 거치는가? 칸 수를 넘는 보드가 상태에 남지 않는가?
 - 결과에 영향을 주는 새 난수 사용이 시드에서 파생한 `Pcg32`인가?
 
 ## Deferred and Forbidden

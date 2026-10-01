@@ -24,7 +24,8 @@ Application 계층이 하는 일은 넷이다.
 
 - 상태 객체(`RunState`, `ExpeditionState`, `BattleEngine`)를 바꾸는 것은 Domain 규칙 코드뿐이다. Application 계층은 규칙 함수를 부르고,
   UI는 상태를 읽기만 한다.
-- UI는 `StaticData`와 규칙 함수를 직접 부르지 않아도 되게, 필요한 질의(`CanDepart`, `CanPlaceInParty`, `AvailableNodes`, `CanMoveToRow` 등)를 Manager가 내놓는다.
+- UI는 `StaticData`와 규칙 함수를 직접 부르지 않아도 되게, 필요한 질의(`CanDepart`, `CanPlaceInParty`, `AvailableNodes`, `CanMoveToRow`,
+  `CanPlaceReward`, `CanTakeRewardToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory` 등)를 Manager가 내놓는다.
 - Application 계층은 `UnityEngine`의 시간, Scene, GameObject를 모른다. EditMode Test로 루프 전체를 돌린다.
 
 ## 주인
@@ -45,9 +46,9 @@ Application 계층이 하는 일은 넷이다.
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
 | `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발 |
-| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기, 아이템 옮기기, 자리 바꾸기 |
+| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기, 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기 |
-| `Reward` | 원정 중이고 보상을 고를 차례 | 보상 받기, 넘기기, 아이템 옮기기, 자리 바꾸기 |
+| `Reward` | 원정 중이고 보상을 고를 차례 | 보상 받기(보드나 인벤토리로), 넘기기, 아이템 옮기기, 자리 바꾸기 |
 | `Settlement` | 확인하지 않은 정산 보고가 있다 | 확인 |
 
 - 런이 없는 상태(`RunManager.HasRun`이 거짓)는 단계가 아니다. 화면이 타이틀을 보인다.
