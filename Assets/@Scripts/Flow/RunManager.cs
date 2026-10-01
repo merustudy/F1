@@ -121,6 +121,26 @@ namespace F1.Flow
             Save(null);
         }
 
+        /// <summary>True when the mercenary can take that row of the party now (join it, or trade places inside it).</summary>
+        public bool CanPlaceInParty(string mercenaryId, int row)
+        {
+            return HasRun && !IsAway && RunRules.CanPlaceInParty(_data.Data, _run, mercenaryId, row);
+        }
+
+        public void PlaceInParty(string mercenaryId, int row)
+        {
+            RequireAtHome();
+            RunRules.PlaceInParty(_data.Data, _run, mercenaryId, row);
+            Save(null);
+        }
+
+        public void RemoveFromParty(string mercenaryId)
+        {
+            RequireAtHome();
+            RunRules.RemoveFromParty(_run, mercenaryId);
+            Save(null);
+        }
+
         public void Rest()
         {
             RequireAtHome();

@@ -43,9 +43,10 @@ namespace F1.Tests
             Assert.AreEqual(3, knight.ItemSlots);
             Assert.AreEqual("sword", knight.WeaponItemId);
             Assert.AreEqual(10, knight.WeaponGrade);
-            Assert.AreEqual(BattleRow.Front, knight.RecommendedRow);
+            Assert.AreEqual(1, knight.RecommendedRow);
             Assert.AreEqual(PassiveTrigger.BattleStart, knight.Passive.Trigger);
-            Assert.AreEqual(PassiveCondition.Front, knight.Passive.Condition);
+            Assert.AreEqual(PassiveCondition.InRows, knight.Passive.Condition);
+            CollectionAssert.AreEqual(new[] { 1 }, knight.Passive.Rows);
             Assert.AreEqual(PassiveEffect.Shield, knight.Passive.Effect);
             Assert.AreEqual(PassiveTarget.Self, knight.Passive.Target);
             Assert.AreEqual(20, knight.Passive.Magnitude);
@@ -57,11 +58,18 @@ namespace F1.Tests
             ItemData mace = data.Items.Get("mace");
             Assert.AreEqual(ItemCategory.Weapon, mace.Category);
             Assert.AreEqual(3200, mace.CooldownMs);
-            Assert.AreEqual(RowRequirement.Front, mace.Row);
+            CollectionAssert.AreEqual(new[] { 1 }, mace.Rows);
+            CollectionAssert.AreEqual(new[] { 1, 2 }, data.Items.Get("sword").Rows);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, data.Items.Get("claw").Rows);
             Assert.AreEqual(2, mace.Effects.Count);
+            Assert.AreEqual(TargetMode.EnemyFront, mace.Effects[0].Target);
+            Assert.AreEqual(2, mace.Effects[0].Reach);
             Assert.AreEqual(EffectKind.Shield, mace.Effects[1].Kind);
             Assert.AreEqual(TargetMode.Self, mace.Effects[1].Target);
+            Assert.AreEqual(0, mace.Effects[1].Reach, "An empty Reach cell: the target takes none.");
             Assert.AreEqual(40, mace.Effects[1].PowerPercent);
+            Assert.AreEqual(TargetMode.EnemyBack, data.Items.Get("claw").Effects[0].Target);
+            Assert.AreEqual(1, data.Items.Get("claw").Effects[0].Reach);
             Assert.AreEqual(10, mace.RewardWeight);
             Assert.AreEqual(1, data.Items.Get("sword").Effects.Count);
 
@@ -77,9 +85,8 @@ namespace F1.Tests
 
             EnemyGroupData lair = data.EnemyGroups.Get("ogre_lair");
             Assert.IsTrue(lair.IsBoss);
-            CollectionAssert.AreEqual(new[] { "ogre" }, lair.Front);
-            CollectionAssert.AreEqual(new[] { "rat" }, lair.Rear);
-            CollectionAssert.IsEmpty(data.EnemyGroups.Get("rats").Rear);
+            CollectionAssert.AreEqual(new[] { "ogre", "rat", "rat" }, lair.Enemies, "From the front: row 1 first.");
+            CollectionAssert.AreEqual(new[] { "rat", "rat" }, data.EnemyGroups.Get("rats").Enemies);
 
             Assert.AreEqual(-80, data.Affinities.Get("swift").EnemyCooldownPermille);
 
@@ -103,7 +110,8 @@ namespace F1.Tests
             StringAssert.EndsWith("}\n", json);
             Assert.IsFalse(json.Contains("\r"), "Generated JSON uses \\n only.");
             StringAssert.Contains("기사", json, "Non-ASCII text is written as is, not escaped.");
-            StringAssert.Contains("\"RecommendedRow\": \"Front\"", json, "Enums are written by name.");
+            StringAssert.Contains("\"Trigger\": \"BattleStart\"", json, "Enums are written by name.");
+            StringAssert.Contains("\"RecommendedRow\": 1", json, "Rows are written as numbers.");
         }
 
         [Test]
@@ -210,7 +218,8 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenPassiveIsOnlyPartlyFilled_Reports()
         {
-            string jobs = TestCsv.Jobs.Replace("bishop,주교,Bishop,90,3,staff,10,Rear,,,,,", "bishop,주교,Bishop,90,3,staff,10,Rear,Heal,,,,");
+            string jobs = TestCsv.Jobs.Replace("staff,10,3,,", "staff,10,3,Heal,");
+            StringAssert.Contains("staff,10,3,Heal,", jobs);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Job, jobs);
 
@@ -220,13 +229,71 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenPassiveAndItsTextDoNotComeTogether_Reports()
         {
-            string textOnly = TestCsv.Jobs.Replace("Rear,,,,,,,", "Rear,,,,,,보호막,Shield");
+            string textOnly = TestCsv.Jobs.Replace("staff,10,3,,,,,,,,", "staff,10,3,,,,,,,보호막,Shield");
+            StringAssert.Contains("보호막,Shield", textOnly);
             string passiveOnly = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,,");
             string oneLocale = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,보호막 {0},");
 
             StringAssert.StartsWith("JobData.csv(3)", TransformFails(StaticDataFiles.Job, textOnly).Errors[0]);
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, passiveOnly).Errors[0]);
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, oneLocale).Errors[0]);
+        }
+
+        [TestCase("")]
+        [TestCase("0")]
+        [TestCase("5")]
+        [TestCase("2+1")]
+        [TestCase("1+1")]
+        [TestCase("1+x")]
+        [TestCase("1,2")]
+        public void Transform_WhenItemRowsAreNotAnAscendingSetOfRows_Reports(string rows)
+        {
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2500,1+2,", "sword,소드,Sword,Weapon,2500," + (rows.Contains(",") ? "\"" + rows + "\"" : rows) + ",");
+            StringAssert.DoesNotContain("2500,1+2,", items);
+
+            DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
+
+            StringAssert.StartsWith("ItemData.csv(2)", exception.Errors[0]);
+        }
+
+        [Test]
+        public void Transform_WhenPassiveRowsDoNotMatchTheCondition_Reports()
+        {
+            // InRows needs rows; every other condition takes none.
+            string withoutRows = TestCsv.Jobs.Replace("BattleStart,InRows,1,Shield", "BattleStart,InRows,,Shield");
+            string rowsNotAsked = TestCsv.Jobs.Replace("BattleStart,InRows,1,Shield", "BattleStart,None,1,Shield");
+            StringAssert.Contains("InRows,,Shield", withoutRows);
+            StringAssert.Contains("None,1,Shield", rowsNotAsked);
+
+            StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, withoutRows).Errors[0]);
+            StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, rowsNotAsked).Errors[0]);
+        }
+
+        [TestCase("EnemyFront,,100", Description = "A target counted from an end needs a reach.")]
+        [TestCase("EnemyFront,0,100")]
+        [TestCase("EnemyBack,5,100", Description = "Deeper than a side has rows.")]
+        [TestCase("EnemyAll,2,100", Description = "All enemies: no reach to give.")]
+        public void Transform_WhenTheReachDoesNotFitTheTarget_Reports(string targetReachPower)
+        {
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2500,1+2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,2500,1+2,Damage," + targetReachPower + ",");
+            StringAssert.Contains("Damage," + targetReachPower + ",", items);
+
+            DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
+
+            StringAssert.StartsWith("ItemData.csv(2)", exception.Errors[0]);
+            StringAssert.Contains("Reach", exception.Errors[0]);
+        }
+
+        [TestCase("", Description = "Nobody.")]
+        [TestCase("rat+rat+rat+rat+rat", Description = "More than one per row can hold.")]
+        public void Transform_WhenAnEnemyGroupDoesNotFitOnePerRow_Reports(string enemies)
+        {
+            string groups = TestCsv.EnemyGroups.Replace("rats,mine,1,2,false,rat+rat", "rats,mine,1,2,false," + enemies);
+            StringAssert.Contains("rats,mine,1,2,false," + enemies + "\n", groups);
+
+            DataTransformException exception = TransformFails(StaticDataFiles.EnemyGroup, groups);
+
+            StringAssert.StartsWith("EnemyGroupData.csv(2)", exception.Errors[0]);
         }
 
         [Test]

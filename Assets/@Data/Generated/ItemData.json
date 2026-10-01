@@ -9,11 +9,14 @@
       },
       "Category": "Support",
       "CooldownMs": 5000,
-      "Row": "Front",
+      "Rows": [
+        1
+      ],
       "Effects": [
         {
           "Kind": "Shield",
           "Target": "Self",
+          "Reach": 0,
           "PowerPercent": 80
         }
       ],
@@ -27,11 +30,16 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3400,
-      "Row": "Any",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Damage",
-          "Target": "EnemyRear",
+          "Target": "EnemyBack",
+          "Reach": 1,
           "PowerPercent": 100
         }
       ],
@@ -45,11 +53,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 1500,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 45
         }
       ],
@@ -63,11 +75,17 @@
       },
       "Category": "Support",
       "CooldownMs": 4500,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Burn",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 25
         }
       ],
@@ -81,11 +99,16 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3500,
-      "Row": "Any",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyAll",
+          "Reach": 0,
           "PowerPercent": 110
         }
       ],
@@ -99,15 +122,39 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3600,
-      "Row": "Front",
+      "Rows": [
+        1
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 190
         }
       ],
       "RewardWeight": 0
+    },
+    {
+      "Id": "halberd",
+      "Name": {
+        "en-US": "Halberd",
+        "ko-KR": "미늘창"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3600,
+      "Rows": [
+        1
+      ],
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 3,
+          "PowerPercent": 55
+        }
+      ],
+      "RewardWeight": 10
     },
     {
       "Id": "healing_staff",
@@ -117,11 +164,16 @@
       },
       "Category": "Support",
       "CooldownMs": 4000,
-      "Row": "Any",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Heal",
           "Target": "AllyLowestHp",
+          "Reach": 0,
           "PowerPercent": 100
         }
       ],
@@ -135,11 +187,17 @@
       },
       "Category": "Support",
       "CooldownMs": 5000,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Heal",
           "Target": "Self",
+          "Reach": 0,
           "PowerPercent": 60
         }
       ],
@@ -153,11 +211,16 @@
       },
       "Category": "Support",
       "CooldownMs": 3800,
-      "Row": "Any",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Burn",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 30
         }
       ],
@@ -171,12 +234,17 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3000,
-      "Row": "Rear",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Damage",
-          "Target": "EnemyRear",
-          "PowerPercent": 110
+          "Target": "EnemyBack",
+          "Reach": 2,
+          "PowerPercent": 70
         }
       ],
       "RewardWeight": 10
@@ -189,11 +257,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3000,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 110
         }
       ],
@@ -207,16 +279,21 @@
       },
       "Category": "Weapon",
       "CooldownMs": 3200,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 100
         },
         {
           "Kind": "Shield",
           "Target": "Self",
+          "Reach": 0,
           "PowerPercent": 40
         }
       ],
@@ -230,11 +307,16 @@
       },
       "Category": "Support",
       "CooldownMs": 5500,
-      "Row": "Any",
+      "Rows": [
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Heal",
           "Target": "AllyLowestHp",
+          "Reach": 0,
           "PowerPercent": 100
         }
       ],
@@ -248,11 +330,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 4500,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 150
         }
       ],
@@ -266,11 +352,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 6000,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyAll",
+          "Reach": 0,
           "PowerPercent": 60
         }
       ],
@@ -284,11 +374,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 2000,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 100
         }
       ],
@@ -302,15 +396,41 @@
       },
       "Category": "Weapon",
       "CooldownMs": 2800,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 100
         }
       ],
       "RewardWeight": 0
+    },
+    {
+      "Id": "spear",
+      "Name": {
+        "en-US": "Spear",
+        "ko-KR": "창"
+      },
+      "Category": "Weapon",
+      "CooldownMs": 3200,
+      "Rows": [
+        1,
+        2
+      ],
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "PowerPercent": 70
+        }
+      ],
+      "RewardWeight": 10
     },
     {
       "Id": "sword",
@@ -320,11 +440,15 @@
       },
       "Category": "Weapon",
       "CooldownMs": 2900,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2
+      ],
       "Effects": [
         {
           "Kind": "Damage",
           "Target": "EnemyFront",
+          "Reach": 1,
           "PowerPercent": 100
         }
       ],
@@ -338,11 +462,17 @@
       },
       "Category": "Support",
       "CooldownMs": 6000,
-      "Row": "Any",
+      "Rows": [
+        1,
+        2,
+        3,
+        4
+      ],
       "Effects": [
         {
           "Kind": "Shield",
           "Target": "AllyLowestHp",
+          "Reach": 0,
           "PowerPercent": 70
         }
       ],

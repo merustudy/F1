@@ -97,6 +97,28 @@ namespace F1.Editor.Data
             return ids;
         }
 
+        /// <summary>A list of integers joined with '+', for example "1+2". An empty cell is an empty list.</summary>
+        public List<int> IntList(string header)
+        {
+            var numbers = new List<int>();
+            if (IsEmpty(header))
+            {
+                return numbers;
+            }
+
+            foreach (string part in Text(header).Split(ListSeparator))
+            {
+                if (!TryParseInt(part, out int number))
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not an integer.");
+                }
+
+                numbers.Add(number);
+            }
+
+            return numbers;
+        }
+
         /// <summary>A list of "id:grade" pairs joined with '+', for example "claws:5+bite:4".</summary>
         public List<ItemGrant> GrantList(string header)
         {

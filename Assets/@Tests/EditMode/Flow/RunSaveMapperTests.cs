@@ -71,12 +71,14 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Save_StoresEnumsByName_AndSeedsAsText()
+        public void Save_StoresEnumsByName_RowsAsNumbers_AndSeedsAsText()
         {
             RunSaveData save = ValidSave(out StaticData _, ExpeditionPhase.InBattle);
 
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
             Assert.AreEqual("InBattle", save.Expedition.Phase);
-            Assert.AreEqual("Front", save.Expedition.Members[0].Row);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, save.Expedition.Members.ConvertAll(m => m.Row));
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, save.Run.Party.ConvertAll(p => p.Row));
             Assert.AreEqual("UsePotion", save.Expedition.Battle.Inputs[0].Kind);
             Assert.AreEqual(FlowTestKit.Seed.ToString(), save.Run.Seed);
             Assert.AreEqual(900, save.Expedition.Battle.ConfirmedTimeMs);
@@ -101,8 +103,10 @@ namespace F1.Tests
             yield return Case("FallenIsAlsoAlive", r => r.Fallen.Add(r.Roster[3].Id));
             yield return Case("FallenUnknown", r => r.Fallen.Add("nobody"));
             yield return Case("PartyMemberNotInRoster", r => r.Party[0].MercenaryId = "nobody");
-            yield return Case("PartyRowUnknown", r => r.Party[0].Row = "Middle");
-            yield return Case("PartyRowIsANumber", r => r.Party[0].Row = "0");
+            yield return Case("PartyRowZero", r => r.Party[0].Row = 0);
+            yield return Case("PartyRowBeyondTheLast", r => r.Party[2].Row = BattleRows.Count + 1);
+            yield return Case("PartyRowTakenTwice", r => r.Party[1].Row = r.Party[0].Row);
+            yield return Case("PartyLeavesARowEmptyInFront", r => r.Party.RemoveAt(1));
             yield return Case("ClearedUnknownDungeon", r => r.ClearedDungeons.Add(new ClearRecord { DungeonId = "nowhere", Count = 1 }));
             yield return Case("ClearedZeroTimes", r => r.ClearedDungeons.Add(new ClearRecord { DungeonId = "cave", Count = 0 }));
             yield return Case("OverWithALivingRoster", r => r.IsOver = true);
@@ -144,7 +148,10 @@ namespace F1.Tests
             yield return Case("UnknownItem", e => e.Members[0].Items[0].ItemId = "excalibur");
             yield return Case("ItemGradeZero", e => e.Members[0].Items[0].Grade = 0);
             yield return Case("EveryoneDead", e => e.Members.ForEach(m => { m.Alive = false; m.Hp = 0; }));
-            yield return Case("RowUnknown", e => e.Members[0].Row = "Top");
+            yield return Case("RowZero", e => e.Members[0].Row = 0);
+            yield return Case("RowBeyondTheLast", e => e.Members[2].Row = BattleRows.Count + 1);
+            yield return Case("RowTakenTwice", e => e.Members[1].Row = e.Members[0].Row);
+            yield return Case("TheLivingLeaveARowEmptyInFront", e => { e.Members[1].Alive = false; e.Members[1].Hp = 0; });
             yield return Case("PotionSlotMissing", e => e.Potions.RemoveAt(0));
             yield return Case("UnknownPotion", e => e.Potions[1] = "elixir");
             yield return Case("NodeNotOnTheMap", e => e.CurrentNodeId = 999);

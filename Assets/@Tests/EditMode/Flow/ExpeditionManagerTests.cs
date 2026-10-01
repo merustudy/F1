@@ -203,14 +203,15 @@ namespace F1.Tests
             Assert.IsNull(state.Members[0].Items[0]);
             Assert.AreEqual(weapon, state.Members[0].Items[2].Item.Id);
 
-            Assert.IsTrue(kit.Expedition.CanSetRow(1, BattleRow.Front));
-            kit.Expedition.SetRow(1, BattleRow.Front);
-            Assert.AreEqual(BattleRow.Front, state.Members[1].Row);
+            Assert.IsTrue(kit.Expedition.CanMoveToRow(1, 1));
+            Assert.IsFalse(kit.Expedition.CanMoveToRow(1, 2), "Already there.");
+            kit.Expedition.MoveToRow(1, 1);
+            CollectionAssert.AreEqual(new[] { 2, 1, 3 }, state.Members.Select(m => m.Row), "The two traded places.");
 
             kit.Expedition.EnterNode(kit.Expedition.AvailableNodes()[0].Id);
 
-            Assert.IsFalse(kit.Expedition.CanSetRow(1, BattleRow.Rear));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.SetRow(1, BattleRow.Rear));
+            Assert.IsFalse(kit.Expedition.CanMoveToRow(1, 2));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToRow(1, 2));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.SwapItems(0, 0, 0, 2));
         }
 
@@ -235,12 +236,12 @@ namespace F1.Tests
         {
             var kit = new FlowTestKit(FlowTestKit.DeadlyEnemies());
             kit.Run.StartNewRun();
-            kit.Run.SetParty(FlowTestKit.Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear), ("cora", BattleRow.Rear)));
+            kit.Run.SetParty(FlowTestKit.Party(("anna", 1), ("ben", 2), ("cora", 3)));
             kit.Expedition.Depart("cave");
             kit.PlayExpeditionToTheEnd();
             kit.Expedition.AcknowledgeReport();
 
-            kit.Run.SetParty(FlowTestKit.Party(("dan", BattleRow.Front)));
+            kit.Run.SetParty(FlowTestKit.Party(("dan", 1)));
             kit.Expedition.Depart("cave");
             kit.PlayExpeditionToTheEnd();
 

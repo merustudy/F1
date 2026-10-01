@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace F1.Data
@@ -5,10 +6,14 @@ namespace F1.Data
     /// <summary>"When, under which condition, what, to whom, how much" of a job passive.</summary>
     public sealed class PassiveSpec
     {
+        static readonly int[] NoRows = new int[0];
+
+        /// <param name="rows">The rows of an InRows condition. Empty or null for every other condition.</param>
         [JsonConstructor]
         public PassiveSpec(
             PassiveTrigger trigger,
             PassiveCondition condition,
+            IReadOnlyList<int> rows,
             PassiveEffect effect,
             PassiveTarget target,
             int magnitude)
@@ -16,6 +21,16 @@ namespace F1.Data
             if (magnitude < 1)
             {
                 throw new DataException("Passive magnitude must be at least 1.");
+            }
+
+            rows = rows ?? NoRows;
+            if (condition == PassiveCondition.InRows)
+            {
+                BattleRows.RequireSet(rows, "Passive Rows");
+            }
+            else if (rows.Count > 0)
+            {
+                throw new DataException($"Passive condition {condition} does not take rows.");
             }
 
             bool valid;
@@ -47,6 +62,7 @@ namespace F1.Data
 
             Trigger = trigger;
             Condition = condition;
+            Rows = rows;
             Effect = effect;
             Target = target;
             Magnitude = magnitude;
@@ -58,13 +74,17 @@ namespace F1.Data
         [JsonProperty(Order = 2, Required = Required.Always)]
         public PassiveCondition Condition { get; }
 
+        /// <summary>The rows of an InRows condition; empty otherwise.</summary>
         [JsonProperty(Order = 3, Required = Required.Always)]
-        public PassiveEffect Effect { get; }
+        public IReadOnlyList<int> Rows { get; }
 
         [JsonProperty(Order = 4, Required = Required.Always)]
-        public PassiveTarget Target { get; }
+        public PassiveEffect Effect { get; }
 
         [JsonProperty(Order = 5, Required = Required.Always)]
+        public PassiveTarget Target { get; }
+
+        [JsonProperty(Order = 6, Required = Required.Always)]
         public int Magnitude { get; }
     }
 
@@ -82,7 +102,7 @@ namespace F1.Data
             int itemSlots,
             string weaponItemId,
             int weaponGrade,
-            BattleRow recommendedRow,
+            int recommendedRow,
             PassiveSpec passive,
             LocalizedText passiveText = null)
         {
@@ -101,6 +121,11 @@ namespace F1.Data
             if (weaponGrade < 1)
             {
                 throw new DataException($"{DefinitionName} '{id}': WeaponGrade must be at least 1.");
+            }
+
+            if (!BattleRows.IsValid(recommendedRow))
+            {
+                throw new DataException($"{DefinitionName} '{id}': RecommendedRow must be {BattleRows.Front}..{BattleRows.Count}.");
             }
 
             MaxHp = maxHp;
@@ -136,9 +161,9 @@ namespace F1.Data
         [JsonProperty(Order = 6, Required = Required.Always)]
         public int WeaponGrade { get; }
 
-        /// <summary>A default for initial placement only. Rules always use the actual row.</summary>
+        /// <summary>Where the job usually stands. The simulator lines a party up by it; rules always use the actual row.</summary>
         [JsonProperty(Order = 7, Required = Required.Always)]
-        public BattleRow RecommendedRow { get; }
+        public int RecommendedRow { get; }
 
         /// <summary>Null when the job has no passive.</summary>
         [JsonProperty(Order = 8, Required = Required.AllowNull)]

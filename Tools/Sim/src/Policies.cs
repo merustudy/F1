@@ -228,7 +228,7 @@ namespace F1.Sim
                 for (int m = 0; m < state.Members.Count; m++)
                 {
                     ExpeditionMember member = state.Members[m];
-                    if (!member.Alive || !RowFits(item.Row, member.Row))
+                    if (!member.Alive || !item.UsableIn(member.Row))
                     {
                         continue;
                     }
@@ -243,13 +243,6 @@ namespace F1.Sim
             }
 
             ExpeditionRules.SkipReward(state);
-        }
-
-        static bool RowFits(RowRequirement requirement, BattleRow row)
-        {
-            return requirement == RowRequirement.Any
-                || (requirement == RowRequirement.Front && row == BattleRow.Front)
-                || (requirement == RowRequirement.Rear && row == BattleRow.Rear);
         }
     }
 }

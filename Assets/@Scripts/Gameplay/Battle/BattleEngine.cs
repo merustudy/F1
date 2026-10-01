@@ -11,6 +11,9 @@ namespace F1.Gameplay
     ///
     /// Order at one timestamp: burn tick, item activations (party first, unit order, slot order),
     /// storm tick, then player inputs made at that time.
+    ///
+    /// Rows: each side is a line, one unit per row from row 1 back. When a unit dies, the ones
+    /// behind it advance one row at once, before anything else is processed.
     /// </summary>
     public sealed class BattleEngine
     {
@@ -39,8 +42,8 @@ namespace F1.Gameplay
                 throw new ArgumentException("A battle needs at least one unit on each side.", nameof(setup));
             }
 
-            RequireRowOrder(setup.Party, "Party");
-            RequireRowOrder(setup.Enemies, "Enemies");
+            RequireFormation(setup.Party, "Party");
+            RequireFormation(setup.Enemies, "Enemies");
 
             for (int i = 0; i < setup.Party.Count; i++)
             {
@@ -246,18 +249,20 @@ namespace F1.Gameplay
             }
         }
 
-        static void RequireRowOrder(IReadOnlyList<BattleUnitSetup> units, string what)
+        /// <summary>Units come in unit order and stand one per row from row 1 back: the first in row 1, the next in row 2.</summary>
+        static void RequireFormation(IReadOnlyList<BattleUnitSetup> units, string what)
         {
-            bool seenRear = false;
-            foreach (BattleUnitSetup unit in units)
+            if (units.Count > BattleRows.Count)
             {
-                if (unit.Row == BattleRow.Rear)
+                throw new ArgumentException($"{what}: a side has at most {BattleRows.Count} units, one per row.");
+            }
+
+            for (int i = 0; i < units.Count; i++)
+            {
+                if (units[i].Row != BattleRows.Front + i)
                 {
-                    seenRear = true;
-                }
-                else if (seenRear)
-                {
-                    throw new ArgumentException($"{what} must list front row units before rear row units.");
+                    throw new ArgumentException(
+                        $"{what}: unit {i} stands in row {units[i].Row}, but units are listed one per row from row {BattleRows.Front} back.");
                 }
             }
         }
@@ -280,7 +285,7 @@ namespace F1.Gameplay
                         continue;
                     }
 
-                    bool active = RowAllows(equipped.Item.Row, setup.Row);
+                    bool active = equipped.Item.UsableIn(setup.Row);
                     items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille)));
                 }
             }
@@ -294,16 +299,6 @@ namespace F1.Gameplay
             }
 
             return unit;
-        }
-
-        static bool RowAllows(RowRequirement requirement, BattleRow row)
-        {
-            switch (requirement)
-            {
-                case RowRequirement.Front: return row == BattleRow.Front;
-                case RowRequirement.Rear: return row == BattleRow.Rear;
-                default: return true;
-            }
         }
 
         /// <summary>base x (1000 + permille) / 1000, rounded to the nearest millisecond, never below MinCooldownMs.</summary>
@@ -414,7 +409,7 @@ namespace F1.Gameplay
                     magnitude = WithWeaponPower(owner, magnitude);
                 }
 
-                foreach (BattleUnit target in ResolveTargets(owner, effect.Target))
+                foreach (BattleUnit target in ResolveTargets(owner, effect))
                 {
                     if (!target.Alive)
                     {
@@ -454,20 +449,43 @@ namespace F1.Gameplay
             }
         }
 
-        /// <summary>Living targets, in unit order. "Enemy" and "ally" are relative to the owner.</summary>
-        List<BattleUnit> ResolveTargets(BattleUnit owner, TargetMode mode)
+        /// <summary>
+        /// The living targets of an effect, in the order it is applied to them. "Enemy" and "ally"
+        /// are relative to the owner. They are chosen once, before the effect is applied: an advance
+        /// caused by the effect does not change who it hits.
+        ///
+        /// The living always stand in rows 1..n with no gap, so "the first N from the front" are
+        /// rows 1..N and "the first N from the back" are rows n-N+1..n. With fewer than N alive,
+        /// everyone alive is hit: an attack never lands on an empty row.
+        /// </summary>
+        List<BattleUnit> ResolveTargets(BattleUnit owner, ItemEffect effect)
         {
             List<BattleUnit> allies = owner.Side == BattleSide.Party ? _party : _enemies;
             List<BattleUnit> foes = owner.Side == BattleSide.Party ? _enemies : _party;
             var targets = new List<BattleUnit>();
 
-            switch (mode)
+            switch (effect.Target)
             {
                 case TargetMode.EnemyFront:
-                    AddIfNotNull(targets, FirstAlive(foes, BattleRow.Front) ?? FirstAlive(foes, BattleRow.Rear));
+                    foreach (BattleUnit foe in foes)
+                    {
+                        if (foe.Alive && foe.Row <= effect.Reach)
+                        {
+                            targets.Add(foe);
+                        }
+                    }
+
                     break;
-                case TargetMode.EnemyRear:
-                    AddIfNotNull(targets, FirstAlive(foes, BattleRow.Rear) ?? FirstAlive(foes, BattleRow.Front));
+                case TargetMode.EnemyBack:
+                    int rearmost = RearmostRow(foes);
+                    for (int i = foes.Count - 1; i >= 0; i--)
+                    {
+                        if (foes[i].Alive && foes[i].Row > rearmost - effect.Reach)
+                        {
+                            targets.Add(foes[i]);
+                        }
+                    }
+
                     break;
                 case TargetMode.EnemyAll:
                     AddAlive(targets, foes);
@@ -482,7 +500,7 @@ namespace F1.Gameplay
                     AddAlive(targets, allies);
                     break;
                 default:
-                    throw new InvalidOperationException($"Target mode {mode} is not implemented.");
+                    throw new InvalidOperationException($"Target mode {effect.Target} is not implemented.");
             }
 
             return targets;
@@ -507,17 +525,19 @@ namespace F1.Gameplay
             }
         }
 
-        static BattleUnit FirstAlive(List<BattleUnit> units, BattleRow row)
+        /// <summary>The rearmost row a living unit stands in, or 0 when nobody is alive.</summary>
+        static int RearmostRow(List<BattleUnit> units)
         {
+            int rearmost = 0;
             foreach (BattleUnit unit in units)
             {
-                if (unit.Alive && unit.Row == row)
+                if (unit.Alive && unit.Row > rearmost)
                 {
-                    return unit;
+                    rearmost = unit.Row;
                 }
             }
 
-            return null;
+            return rearmost;
         }
 
         /// <summary>Lowest HP ratio; ties go to the earlier unit.</summary>
@@ -543,15 +563,15 @@ namespace F1.Gameplay
             return lowest;
         }
 
-        static bool ConditionHolds(BattleUnit unit, PassiveCondition condition)
+        /// <summary>Whether the condition of a unit's passive holds right now. Rows are judged by where the unit stands at this moment.</summary>
+        static bool ConditionHolds(BattleUnit unit, PassiveSpec passive)
         {
-            switch (condition)
+            switch (passive.Condition)
             {
                 case PassiveCondition.None: return true;
-                case PassiveCondition.Front: return unit.Row == BattleRow.Front;
-                case PassiveCondition.Rear: return unit.Row == BattleRow.Rear;
+                case PassiveCondition.InRows: return BattleRows.Contains(passive.Rows, unit.Row);
                 case PassiveCondition.SelfInDog: return unit.InDog;
-                default: throw new InvalidOperationException($"Passive condition {condition} is not implemented.");
+                default: throw new InvalidOperationException($"Passive condition {passive.Condition} is not implemented.");
             }
         }
 
@@ -561,7 +581,7 @@ namespace F1.Gameplay
             if (passive == null
                 || passive.Trigger != PassiveTrigger.Always
                 || passive.Effect != PassiveEffect.WeaponPowerPercent
-                || !ConditionHolds(owner, passive.Condition))
+                || !ConditionHolds(owner, passive))
             {
                 return magnitude;
             }
@@ -574,7 +594,7 @@ namespace F1.Gameplay
             foreach (BattleUnit unit in units)
             {
                 PassiveSpec passive = unit.Setup.Passive;
-                if (passive == null || passive.Trigger != PassiveTrigger.BattleStart || !ConditionHolds(unit, passive.Condition))
+                if (passive == null || passive.Trigger != PassiveTrigger.BattleStart || !ConditionHolds(unit, passive))
                 {
                     continue;
                 }
@@ -600,7 +620,7 @@ namespace F1.Gameplay
         void ApplyTriggeredPassive(BattleUnit owner, PassiveTrigger trigger, BattleUnit eventTarget)
         {
             PassiveSpec passive = owner.Setup.Passive;
-            if (passive == null || passive.Trigger != trigger || !ConditionHolds(owner, passive.Condition) || !eventTarget.Alive)
+            if (passive == null || passive.Trigger != trigger || !ConditionHolds(owner, passive) || !eventTarget.Alive)
             {
                 return;
             }
@@ -719,6 +739,50 @@ namespace F1.Gameplay
             target.Shield = 0;
             target.Burn = 0;
             Log(BattleEventKind.Died, UnitRef.None, target.Ref, null, 0, 0, 0);
+            AdvanceBehind(target);
+        }
+
+        /// <summary>
+        /// The advance rule: when a unit has died, every unit behind it moves one row forward.
+        /// It happens with the death itself, before anything else is processed.
+        /// </summary>
+        void AdvanceBehind(BattleUnit fallen)
+        {
+            List<BattleUnit> units = fallen.Side == BattleSide.Party ? _party : _enemies;
+            bool moved = false;
+            foreach (BattleUnit unit in units)
+            {
+                if (unit.Alive && unit.Row > fallen.Row)
+                {
+                    unit.Row--;
+                    RefreshItems(unit);
+                    moved = true;
+                }
+            }
+
+            if (moved)
+            {
+                Log(BattleEventKind.RowsAdvanced, UnitRef.None, UnitRef.None, null, (int)fallen.Side, fallen.Row, 0);
+            }
+        }
+
+        /// <summary>
+        /// After the owner changed rows: an item that can be used in the new row but could not in the
+        /// old one starts a fresh cooldown now; one that no longer can be used stops and loses its
+        /// progress. An item usable in both rows is not touched.
+        /// </summary>
+        void RefreshItems(BattleUnit unit)
+        {
+            foreach (BattleItemState item in unit.Items)
+            {
+                bool usable = item.Equipped.Item.UsableIn(unit.Row);
+                if (usable && !item.Active)
+                {
+                    item.NextFireMs = TimeMs + item.CooldownMs;
+                }
+
+                item.Active = usable;
+            }
         }
 
         void BurnTick()

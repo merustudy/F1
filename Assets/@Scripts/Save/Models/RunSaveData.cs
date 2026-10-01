@@ -6,10 +6,12 @@ namespace F1.Save
     /// Save DTO of run.json: the run, the expedition in progress and the record of the battle in
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
+    ///
+    /// Version 2: rows are numbers (1..3). Version 1 stored "Front"/"Rear" and is not read any more.
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 1;
+        public const int CurrentSchemaVersion = 2;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -40,7 +42,7 @@ namespace F1.Save
     public sealed class PartySlotRecord
     {
         public string MercenaryId;
-        public string Row;
+        public int Row;
     }
 
     public sealed class ClearRecord
@@ -71,7 +73,7 @@ namespace F1.Save
     {
         public string MercenaryId;
         public string JobId;
-        public string Row;
+        public int Row;
         public int MaxHp;
         public int Hp;
         public bool Alive;

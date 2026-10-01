@@ -10,7 +10,7 @@ namespace F1.Tests
     /// <summary>The lobby and run rules of Docs/Design/04_Lobby_100Day_Economy.md.</summary>
     public sealed class RunRulesTests
     {
-        static List<PartySlot> Party(params (string Id, BattleRow Row)[] slots)
+        static List<PartySlot> Party(params (string Id, int Row)[] slots)
         {
             return slots.Select(s => new PartySlot { MercenaryId = s.Id, Row = s.Row }).ToList();
         }
@@ -18,8 +18,14 @@ namespace F1.Tests
         static RunState RunWithParty(StaticData data)
         {
             RunState run = RunRules.NewRun(data, 7);
-            RunRules.SetParty(data, run, Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear), ("cora", BattleRow.Rear)));
+            RunRules.SetParty(data, run, Party(("anna", 1), ("ben", 2), ("cora", 3)));
             return run;
+        }
+
+        /// <summary>Who stands where, as "anna:1 ben:2", in the order the party lists them.</summary>
+        static string Rows(RunState run)
+        {
+            return string.Join(" ", run.Party.Select(slot => $"{slot.MercenaryId}:{slot.Row}"));
         }
 
         /// <summary>An expedition that has ended, with the given members dead.</summary>
@@ -63,27 +69,111 @@ namespace F1.Tests
         {
             StaticData data = TestData.Data();
             RunState run = RunRules.NewRun(data, 1);
-            List<PartySlot> party = Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear));
+            List<PartySlot> party = Party(("anna", 1), ("ben", 2));
 
             RunRules.SetParty(data, run, party);
-            party[0].Row = BattleRow.Rear;
+            party[0].Row = 3;
 
             Assert.AreEqual(2, run.Party.Count);
-            Assert.AreEqual(BattleRow.Front, run.Party[0].Row);
+            Assert.AreEqual(1, run.Party[0].Row);
         }
 
         [Test]
-        public void SetParty_RejectsUnknownDuplicateOversizedAndOvercrowdedParties()
+        public void SetParty_RejectsUnknownDuplicateAndOversizedParties()
         {
-            StaticData data = TestData.Data(("PartySize", 3), ("RowCapacity", 2));
+            StaticData data = TestData.Data(("PartySize", 3));
             RunState run = RunRules.NewRun(data, 1);
 
-            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("nobody", BattleRow.Front))));
-            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", BattleRow.Front), ("anna", BattleRow.Rear))));
-            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", BattleRow.Front), ("ben", BattleRow.Front), ("cora", BattleRow.Front))));
-            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear), ("cora", BattleRow.Rear), ("dan", BattleRow.Front))));
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("nobody", 1))));
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("anna", 2))));
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("ben", 2), ("cora", 3), ("dan", 4))), "Four in a party of three.");
             Assert.IsNull(RunRules.PartyProblem(data, run, Party()));
-            Assert.Throws<InvalidOperationException>(() => RunRules.SetParty(data, run, Party(("nobody", BattleRow.Front))));
+            Assert.Throws<InvalidOperationException>(() => RunRules.SetParty(data, run, Party(("nobody", 1))));
+        }
+
+        [Test]
+        public void SetParty_RejectsFormationsThatAreNotOnePerRowFromTheFront()
+        {
+            StaticData data = TestData.Data();
+            RunState run = RunRules.NewRun(data, 1);
+
+            Assert.IsNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("ben", 2), ("cora", 3))));
+            Assert.IsNull(RunRules.PartyProblem(data, run, Party(("ben", 2), ("anna", 1))), "The order of the list does not matter.");
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("ben", 1))), "Two in one row.");
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 2))), "Nobody in row 1.");
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("ben", 3))), "Nobody in row 2.");
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 0))));
+            Assert.IsNotNull(RunRules.PartyProblem(data, run, Party(("anna", 1), ("ben", 2), ("cora", BattleRows.Count + 1))));
+        }
+
+        [Test]
+        public void PlaceInParty_AMercenaryOutsideTheParty_JoinsTheFirstEmptyRowOnly()
+        {
+            StaticData data = TestData.Data(("PartySize", 3));
+            RunState run = RunRules.NewRun(data, 1);
+
+            Assert.IsTrue(RunRules.CanPlaceInParty(data, run, "anna", 1));
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "anna", 2), "Row 1 would be empty in front.");
+            Assert.Throws<InvalidOperationException>(() => RunRules.PlaceInParty(data, run, "anna", 2));
+
+            RunRules.PlaceInParty(data, run, "anna", 1);
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "ben", 1), "Taken: one mercenary per row.");
+            Assert.IsTrue(RunRules.CanPlaceInParty(data, run, "ben", 2));
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "ben", 3));
+
+            RunRules.PlaceInParty(data, run, "ben", 2);
+            RunRules.PlaceInParty(data, run, "cora", 3);
+            Assert.AreEqual("anna:1 ben:2 cora:3", Rows(run));
+
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "dan", row), "The party is full.");
+            }
+
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "nobody", 1));
+            Assert.IsNull(RunRules.PartyProblem(data, run, run.Party));
+        }
+
+        [Test]
+        public void PlaceInParty_AMember_TradesPlacesWithWhoStandsInThatRow()
+        {
+            StaticData data = TestData.Data();
+            RunState run = RunWithParty(data);
+
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "anna", 1), "Already there.");
+            Assert.IsTrue(RunRules.CanPlaceInParty(data, run, "anna", 3));
+
+            RunRules.PlaceInParty(data, run, "anna", 3);
+            Assert.AreEqual("anna:3 ben:2 cora:1", Rows(run));
+
+            RunRules.PlaceInParty(data, run, "ben", 1);
+            Assert.AreEqual("anna:3 ben:1 cora:2", Rows(run));
+        }
+
+        [Test]
+        public void PlaceInParty_AMemberOfASmallerParty_CannotMoveToAnEmptyRow()
+        {
+            StaticData data = TestData.Data();
+            RunState run = RunRules.NewRun(data, 1);
+            RunRules.SetParty(data, run, Party(("anna", 1), ("ben", 2)));
+
+            Assert.IsFalse(RunRules.CanPlaceInParty(data, run, "anna", 3), "Nobody stands in row 3.");
+            Assert.IsTrue(RunRules.CanPlaceInParty(data, run, "anna", 2));
+        }
+
+        [Test]
+        public void RemoveFromParty_ThoseBehindAdvance()
+        {
+            StaticData data = TestData.Data();
+            RunState run = RunWithParty(data);
+
+            RunRules.RemoveFromParty(run, "anna");
+            Assert.AreEqual("ben:1 cora:2", Rows(run));
+
+            RunRules.RemoveFromParty(run, "cora");
+            Assert.AreEqual("ben:1", Rows(run));
+
+            Assert.Throws<InvalidOperationException>(() => RunRules.RemoveFromParty(run, "cora"), "Not in the party.");
         }
 
         [Test]
@@ -94,7 +184,7 @@ namespace F1.Tests
 
             Assert.AreEqual(DepartCheck.PartyTooSmall, RunRules.CanDepart(data, run, "cave"));
 
-            RunRules.SetParty(data, run, Party(("anna", BattleRow.Front)));
+            RunRules.SetParty(data, run, Party(("anna", 1)));
             Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"));
 
             RunRules.FindMercenary(run, "anna").Fatigue = 29;
@@ -117,7 +207,7 @@ namespace F1.Tests
 
             Assert.AreEqual(1, run.ExpeditionCount);
             CollectionAssert.AreEqual(new[] { "anna", "ben", "cora" }, first.Members.Select(m => m.MercenaryId));
-            Assert.AreEqual(BattleRow.Front, first.Members[0].Row);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, first.Members.Select(m => m.Row));
             Assert.AreEqual(SeedDeriver.Derive(7, "expedition", 0), first.Seed);
 
             ExpeditionState second = RunRules.BeginExpedition(data, run, "cave");
@@ -185,7 +275,7 @@ namespace F1.Tests
 
             Assert.IsNull(RunRules.FindMercenary(run, "anna"));
             CollectionAssert.AreEqual(new[] { "anna" }, run.Fallen);
-            CollectionAssert.AreEqual(new[] { "ben", "cora" }, run.Party.Select(s => s.MercenaryId));
+            Assert.AreEqual("ben:1 cora:2", Rows(run), "Those who stood behind the dead advance.");
             CollectionAssert.AreEqual(new[] { "anna" }, report.FallenIds);
             Assert.IsFalse(run.ClearedDungeons.ContainsKey("cave"), "A retreat is not a clear.");
             Assert.AreEqual(3, run.Roster.Count);
@@ -197,7 +287,7 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             RunState run = RunRules.NewRun(data, 1);
             run.Roster.RemoveAll(m => m.Id == "dan");
-            RunRules.SetParty(data, run, Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear), ("cora", BattleRow.Rear)));
+            RunRules.SetParty(data, run, Party(("anna", 1), ("ben", 2), ("cora", 3)));
             ExpeditionState expedition = FinishedExpedition(data, run, ExpeditionResult.Wiped, "anna", "ben", "cora");
 
             SettlementReport report = RunRules.Settle(data, run, expedition);

@@ -59,8 +59,7 @@ namespace F1.Gameplay
             }
 
             var seen = new HashSet<string>();
-            int front = 0;
-            int rear = 0;
+            var rows = new List<int>();
             foreach (PartySlot slot in party)
             {
                 if (slot == null || FindMercenary(state, slot.MercenaryId) == null)
@@ -73,22 +72,10 @@ namespace F1.Gameplay
                     return $"Mercenary '{slot.MercenaryId}' is in the party twice.";
                 }
 
-                if (slot.Row == BattleRow.Front)
-                {
-                    front++;
-                }
-                else
-                {
-                    rear++;
-                }
+                rows.Add(slot.Row);
             }
 
-            if (front > data.Balance.RowCapacity || rear > data.Balance.RowCapacity)
-            {
-                return $"A row holds at most {data.Balance.RowCapacity} mercenaries.";
-            }
-
-            return null;
+            return Formation.Problem(rows);
         }
 
         /// <summary>Sets the lobby party. An empty party is allowed; it just cannot depart.</summary>
@@ -107,6 +94,61 @@ namespace F1.Gameplay
             }
 
             state.Party = copy;
+        }
+
+        /// <summary>
+        /// True when the mercenary can take that row now. One who is not in the party joins the
+        /// first empty row. One who is in the party moves to a row where someone else stands.
+        /// </summary>
+        public static bool CanPlaceInParty(StaticData data, RunState state, string mercenaryId, int row)
+        {
+            if (FindMercenary(state, mercenaryId) == null)
+            {
+                return false;
+            }
+
+            int[] rows = PartyRows(state);
+            int index = state.Party.FindIndex(slot => slot.MercenaryId == mercenaryId);
+            if (index >= 0)
+            {
+                return Formation.CanMove(rows, index, row);
+            }
+
+            return state.Party.Count < data.Balance.PartySize && Formation.CanJoin(rows, row);
+        }
+
+        /// <summary>
+        /// Puts a mercenary in a row of the party. A member who moves trades places with the
+        /// mercenary standing there.
+        /// </summary>
+        public static void PlaceInParty(StaticData data, RunState state, string mercenaryId, int row)
+        {
+            if (!CanPlaceInParty(data, state, mercenaryId, row))
+            {
+                throw new InvalidOperationException($"Mercenary '{mercenaryId}' cannot take row {row} now.");
+            }
+
+            int index = state.Party.FindIndex(slot => slot.MercenaryId == mercenaryId);
+            if (index < 0)
+            {
+                state.Party.Add(new PartySlot { MercenaryId = mercenaryId, Row = row });
+                return;
+            }
+
+            int[] rows = PartyRows(state);
+            Formation.Move(rows, index, row);
+            SetPartyRows(state, rows);
+        }
+
+        /// <summary>Takes a mercenary out of the party. Those who stood behind advance.</summary>
+        public static void RemoveFromParty(RunState state, string mercenaryId)
+        {
+            if (state.Party.RemoveAll(slot => slot.MercenaryId == mercenaryId) == 0)
+            {
+                throw new InvalidOperationException($"Mercenary '{mercenaryId}' is not in the party.");
+            }
+
+            CloseGaps(state);
         }
 
         public static DepartCheck CanDepart(StaticData data, RunState state, string dungeonId)
@@ -210,6 +252,8 @@ namespace F1.Gameplay
                 }
             }
 
+            // The lobby party keeps the formation chosen before leaving; those behind the dead advance.
+            CloseGaps(state);
             PassDays(data, state, dungeon.DurationDays, participants);
 
             if (expedition.Result == ExpeditionResult.Cleared)
@@ -222,6 +266,32 @@ namespace F1.Gameplay
             report.DayAfter = state.Day;
             report.RunIsOver = state.IsOver;
             return report;
+        }
+
+        static int[] PartyRows(RunState state)
+        {
+            var rows = new int[state.Party.Count];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                rows[i] = state.Party[i].Row;
+            }
+
+            return rows;
+        }
+
+        static void SetPartyRows(RunState state, int[] rows)
+        {
+            for (int i = 0; i < rows.Length; i++)
+            {
+                state.Party[i].Row = rows[i];
+            }
+        }
+
+        static void CloseGaps(RunState state)
+        {
+            int[] rows = PartyRows(state);
+            Formation.CloseGaps(rows);
+            SetPartyRows(state, rows);
         }
 
         /// <summary>Advances the day counter. Mercenaries not in <paramref name="away"/> recover fatigue for each day.</summary>

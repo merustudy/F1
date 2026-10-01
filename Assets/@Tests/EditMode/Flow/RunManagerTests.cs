@@ -53,8 +53,42 @@ namespace F1.Tests
             kit.Run.SetParty(FlowTestKit.DefaultParty());
 
             CollectionAssert.AreEqual(new[] { "anna", "ben", "cora" }, kit.Run.Run.Party.Select(p => p.MercenaryId));
-            Assert.IsNotNull(kit.Run.PartyProblem(FlowTestKit.Party(("nobody", BattleRow.Front))));
-            Assert.Throws<InvalidOperationException>(() => kit.Run.SetParty(FlowTestKit.Party(("nobody", BattleRow.Front))));
+            Assert.IsNotNull(kit.Run.PartyProblem(FlowTestKit.Party(("nobody", 1))));
+            Assert.Throws<InvalidOperationException>(() => kit.Run.SetParty(FlowTestKit.Party(("nobody", 1))));
+        }
+
+        [Test]
+        public void PlaceInParty_AndRemoveFromParty_ChangeThePartyOneMercenaryAtATime()
+        {
+            FlowTestKit kit = new FlowTestKit();
+            kit.Run.StartNewRun();
+
+            Assert.IsTrue(kit.Run.CanPlaceInParty("ben", 1));
+            Assert.IsFalse(kit.Run.CanPlaceInParty("ben", 2), "Row 1 is empty.");
+            kit.Run.PlaceInParty("ben", 1);
+            kit.Run.PlaceInParty("anna", 2);
+            kit.Run.PlaceInParty("anna", 1);
+
+            string Rows()
+            {
+                return string.Join(" ", kit.Run.Run.Party.Select(p => $"{p.MercenaryId}:{p.Row}"));
+            }
+
+            Assert.AreEqual("ben:2 anna:1", Rows(), "Anna traded places with Ben.");
+
+            kit.Run.RemoveFromParty("anna");
+            Assert.AreEqual("ben:1", Rows(), "Ben advanced into the empty row.");
+            Assert.Throws<InvalidOperationException>(() => kit.Run.PlaceInParty("ben", 3));
+        }
+
+        [Test]
+        public void PartyCommands_AreNotAllowedWhileThePartyIsAway()
+        {
+            FlowTestKit kit = new FlowTestKit().OnNodeMap();
+
+            Assert.IsFalse(kit.Run.CanPlaceInParty("anna", 2));
+            Assert.Throws<InvalidOperationException>(() => kit.Run.PlaceInParty("anna", 2));
+            Assert.Throws<InvalidOperationException>(() => kit.Run.RemoveFromParty("anna"));
         }
 
         [Test]

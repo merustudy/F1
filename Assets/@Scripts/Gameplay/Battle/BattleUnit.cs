@@ -18,8 +18,11 @@ namespace F1.Gameplay
         public int SlotIndex { get; }
         public EquippedItem Equipped { get; }
 
-        /// <summary>False when the owner does not stand in the row the item requires. An inactive item never fires.</summary>
-        public bool Active { get; }
+        /// <summary>
+        /// False while the owner stands in a row the item cannot be used in. An inactive item does
+        /// not fill its cooldown and never fires. It changes when the owner advances.
+        /// </summary>
+        public bool Active { get; internal set; }
 
         /// <summary>Effective cooldown after modifiers.</summary>
         public int CooldownMs { get; }
@@ -36,21 +39,27 @@ namespace F1.Gameplay
             Index = index;
             Setup = setup;
             Items = items;
+            Row = setup.Row;
             Hp = setup.Hp;
             Alive = true;
         }
 
         public BattleSide Side { get; }
 
-        /// <summary>Position in the unit order of its side: front row first, then rear row.</summary>
+        /// <summary>Position in the unit order of its side: row 1 first. It never changes, even when the unit advances.</summary>
         public int Index { get; }
 
         public BattleUnitSetup Setup { get; }
         public IReadOnlyList<BattleItemState> Items { get; }
 
         public UnitRef Ref => new UnitRef(Side, Index);
-        public BattleRow Row => Setup.Row;
         public int MaxHp => Setup.MaxHp;
+
+        /// <summary>
+        /// The row the unit stands in now. It starts at Setup.Row and goes down when the rows in
+        /// front empty. A dead unit keeps the row it died in.
+        /// </summary>
+        public int Row { get; internal set; }
 
         public int Hp { get; internal set; }
         public int Shield { get; internal set; }

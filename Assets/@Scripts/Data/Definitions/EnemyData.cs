@@ -82,8 +82,7 @@ namespace F1.Data
             int minFloor,
             int maxFloor,
             bool isBoss,
-            IReadOnlyList<string> front,
-            IReadOnlyList<string> rear)
+            IReadOnlyList<string> enemies)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             DungeonId = DataId.Require(dungeonId, $"{DefinitionName} '{id}' DungeonId");
@@ -100,26 +99,20 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': floors must satisfy 1 <= MinFloor <= MaxFloor.");
             }
 
-            if (front == null || rear == null || front.Count + rear.Count < 1)
+            if (enemies == null || enemies.Count < 1 || enemies.Count > BattleRows.Count)
             {
-                throw new DataException($"{DefinitionName} '{id}': a group has at least one enemy.");
+                throw new DataException($"{DefinitionName} '{id}': a group has 1..{BattleRows.Count} enemies, one per row.");
             }
 
-            foreach (string enemyId in front)
+            foreach (string enemyId in enemies)
             {
-                DataId.Require(enemyId, $"{DefinitionName} '{id}' Front");
-            }
-
-            foreach (string enemyId in rear)
-            {
-                DataId.Require(enemyId, $"{DefinitionName} '{id}' Rear");
+                DataId.Require(enemyId, $"{DefinitionName} '{id}' Enemies");
             }
 
             MinFloor = minFloor;
             MaxFloor = maxFloor;
             IsBoss = isBoss;
-            Front = front;
-            Rear = rear;
+            Enemies = enemies;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -138,11 +131,8 @@ namespace F1.Data
         [JsonProperty(Order = 5, Required = Required.Always)]
         public bool IsBoss { get; }
 
-        /// <summary>Enemy ids in the front row, in slot order.</summary>
+        /// <summary>Enemy ids from the front: the first stands in row 1, the next in row 2 and so on.</summary>
         [JsonProperty(Order = 6, Required = Required.Always)]
-        public IReadOnlyList<string> Front { get; }
-
-        [JsonProperty(Order = 7, Required = Required.Always)]
-        public IReadOnlyList<string> Rear { get; }
+        public IReadOnlyList<string> Enemies { get; }
     }
 }

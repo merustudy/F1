@@ -43,7 +43,8 @@ namespace F1.Gameplay
         /// <summary>Mercenary id or enemy id.</summary>
         public string SourceId;
         public LocalizedText Name;
-        public BattleRow Row;
+        /// <summary>The row the unit starts in (1 = facing the enemy).</summary>
+        public int Row;
         public int MaxHp;
         public int Hp;
         /// <summary>Item slots in order. A null entry is an empty slot.</summary>
@@ -62,8 +63,9 @@ namespace F1.Gameplay
     {
         public ulong Seed;
         public BalanceData Balance;
-        /// <summary>Front row units first, then rear row units.</summary>
+        /// <summary>Units in unit order: row 1 first. No row may be empty in front of an occupied one.</summary>
         public IReadOnlyList<BattleUnitSetup> Party;
+        /// <summary>The same order and rule as <see cref="Party"/>.</summary>
         public IReadOnlyList<BattleUnitSetup> Enemies;
         /// <summary>Affinity modifier on enemy item cooldowns, in thousandths.</summary>
         public int EnemyCooldownPermille;
@@ -153,6 +155,11 @@ namespace F1.Gameplay
         DeathRolled,
         /// <summary>Target.</summary>
         Died,
+        /// <summary>
+        /// A row of one side emptied and the rows behind it moved one step forward.
+        /// A = (int)BattleSide, B = the row that emptied.
+        /// </summary>
+        RowsAdvanced,
         /// <summary>Target, Id = potion id, A = potion slot.</summary>
         PotionUsed,
         /// <summary>A = success chance percent, B = roll 0..99, C = 1 on success.</summary>

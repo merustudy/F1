@@ -82,7 +82,7 @@ namespace F1.Tests
             FlowTestKit kit = new FlowTestKit().InLobby();
             kit.Run.Rest();
             RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue = 55;
-            kit.Run.SetParty(FlowTestKit.Party(("dan", BattleRow.Front), ("ben", BattleRow.Rear)));
+            kit.Run.SetParty(FlowTestKit.Party(("dan", 1), ("ben", 2)));
 
             FlowTestKit restarted = kit.Restart();
 
@@ -90,8 +90,21 @@ namespace F1.Tests
             Assert.AreEqual(2, run.Day);
             Assert.AreEqual(55, RunRules.FindMercenary(run, "anna").Fatigue);
             CollectionAssert.AreEqual(new[] { "dan", "ben" }, run.Party.Select(p => p.MercenaryId));
-            Assert.AreEqual(BattleRow.Rear, run.Party[1].Row);
+            Assert.AreEqual(2, run.Party[1].Row);
             Assert.IsFalse(restarted.Run.IsAway);
+        }
+
+        [Test]
+        public void PlacingAndRemovingPartyMembers_IsSaved()
+        {
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            kit.Run.RemoveFromParty("anna");
+            kit.Run.PlaceInParty("dan", 3);
+            kit.Run.PlaceInParty("dan", 1);
+
+            RunState run = kit.Restart().Run.Run;
+
+            Assert.AreEqual("ben:3 cora:2 dan:1", string.Join(" ", run.Party.Select(p => $"{p.MercenaryId}:{p.Row}")));
         }
 
         [Test]
@@ -115,7 +128,7 @@ namespace F1.Tests
         {
             FlowTestKit kit = new FlowTestKit().OnNodeMap();
             kit.Expedition.SwapItems(0, 0, 0, 2);
-            kit.Expedition.SetRow(1, BattleRow.Front);
+            kit.Expedition.MoveToRow(1, 1);
 
             FlowTestKit restarted = kit.Restart();
 
@@ -359,16 +372,45 @@ namespace F1.Tests
         }
 
         [TestCase(0)]
+        [TestCase(1, Description = "The version with front and rear rows is not read any more.")]
         [TestCase(RunSaveData.CurrentSchemaVersion + 1)]
         public void Load_WhenTheSchemaVersionCannotBeRead_Refuses(int version)
         {
             var kit = new FlowTestKit();
             kit.Run.StartNewRun();
             string text = kit.SavedText();
-            StringAssert.Contains("\"SchemaVersion\": 1", text);
-            File.WriteAllText(kit.RunFilePath, text.Replace("\"SchemaVersion\": 1", "\"SchemaVersion\": " + version));
+            string current = "\"SchemaVersion\": " + RunSaveData.CurrentSchemaVersion;
+            StringAssert.Contains(current, text);
+            File.WriteAllText(kit.RunFilePath, text.Replace(current, "\"SchemaVersion\": " + version));
+            File.Delete(kit.RunFilePath + SaveStorage.BackupSuffix);
 
-            Assert.AreEqual(SaveLoadStatus.Corrupt, kit.Restart().Run.LoadStatus);
+            FlowTestKit restarted = kit.Restart();
+
+            Assert.AreEqual(SaveLoadStatus.Corrupt, restarted.Run.LoadStatus);
+            Assert.IsFalse(restarted.Run.HasRun);
+        }
+
+        [Test]
+        public void Load_AFileFromTheTwoRowVersion_Refuses_AndANewRunCanStart()
+        {
+            // What version 1 wrote: rows by name.
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            string text = kit.SavedText()
+                .Replace("\"SchemaVersion\": " + RunSaveData.CurrentSchemaVersion, "\"SchemaVersion\": 1")
+                .Replace("\"Row\": 1", "\"Row\": \"Front\"")
+                .Replace("\"Row\": 2", "\"Row\": \"Rear\"")
+                .Replace("\"Row\": 3", "\"Row\": \"Rear\"");
+            StringAssert.Contains("\"Row\": \"Front\"", text);
+            File.WriteAllText(kit.RunFilePath, text);
+            File.Delete(kit.RunFilePath + SaveStorage.BackupSuffix);
+
+            FlowTestKit restarted = kit.Restart();
+
+            Assert.AreEqual(SaveLoadStatus.Corrupt, restarted.Run.LoadStatus);
+            Assert.IsFalse(restarted.Run.HasRun);
+
+            restarted.Run.StartNewRun();
+            Assert.AreEqual(SaveLoadStatus.Loaded, restarted.Restart().Run.LoadStatus);
         }
 
         [Test]

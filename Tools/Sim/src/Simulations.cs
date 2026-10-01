@@ -22,6 +22,7 @@ namespace F1.Sim
         public int Deaths;
         public int PotionsUsed;
         public int RetreatAttempts;
+        public int PartyAdvances;
         public readonly Dictionary<string, int> DeathsByMercenary = new Dictionary<string, int>();
 
         public void Add(BattleEngine battle)
@@ -63,6 +64,13 @@ namespace F1.Sim
                         }
 
                         break;
+                    case BattleEventKind.RowsAdvanced:
+                        if (e.A == (int)BattleSide.Party)
+                        {
+                            PartyAdvances++;
+                        }
+
+                        break;
                     case BattleEventKind.PotionUsed:
                         PotionsUsed++;
                         break;
@@ -90,7 +98,7 @@ namespace F1.Sim
             Console.WriteLine($"  battles {Battles}: victory {Percent(Victories, Battles)}, defeat {Percent(Defeats, Battles)}, retreat {Percent(Retreats, Battles)}");
             Console.WriteLine($"  duration avg {DurationMs / Battles / 1000.0:F1}s, longest {LongestMs / 1000.0:F1}s, reached storm {Percent(ReachedStorm, Battles)}");
             Console.WriteLine($"  per battle: deaths {Ratio(Deaths, Battles)}, DoG entries {Ratio(DogEntries, Battles)}, grace breaks {Ratio(GraceBreaks, Battles)}, death rolls {Ratio(DeathRolls, Battles)}");
-            Console.WriteLine($"  per battle: potions {Ratio(PotionsUsed, Battles)}, retreat attempts {Ratio(RetreatAttempts, Battles)}");
+            Console.WriteLine($"  per battle: potions {Ratio(PotionsUsed, Battles)}, retreat attempts {Ratio(RetreatAttempts, Battles)}, party advances {Ratio(PartyAdvances, Battles)}");
             if (DeathsByMercenary.Count > 0)
             {
                 string byMercenary = string.Join(", ", DeathsByMercenary.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key} {p.Value}"));
@@ -111,10 +119,15 @@ namespace F1.Sim
 
     public static class Simulations
     {
-        /// <summary>Resolves "rowan" (mercenary id) or "knight" (job id), with an optional ":Front"/":Rear".</summary>
+        /// <summary>
+        /// Resolves "rowan" (mercenary id) or "knight" (job id). With a row (":1", ":2", ...) on every
+        /// member the rows are taken as written. Without them the party lines up by the recommended
+        /// row of each job (ties keep the order given), one per row from the front.
+        /// </summary>
         public static List<PartyMember> ParseParty(StaticData data, string spec)
         {
-            var party = new List<PartyMember>();
+            var members = new List<(MercenaryData Mercenary, JobData Job, int Row)>();
+            int explicitRows = 0;
             foreach (string token in spec.Split(','))
             {
                 string[] parts = token.Trim().Split(':');
@@ -127,17 +140,36 @@ namespace F1.Sim
                     throw new ArgumentException($"'{name}' is neither a mercenary id nor a job with a mercenary.");
                 }
 
-                JobData job = data.Jobs.Get(mercenary.JobId);
-                BattleRow row = job.RecommendedRow;
-                if (parts.Length > 1 && !Enum.TryParse(parts[1], false, out row))
+                int row = 0;
+                if (parts.Length > 1)
                 {
-                    throw new ArgumentException($"'{parts[1]}' is not Front or Rear.");
+                    if (!int.TryParse(parts[1], out row) || !BattleRows.IsValid(row))
+                    {
+                        throw new ArgumentException($"'{parts[1]}' is not a row ({BattleRows.Front}..{BattleRows.Count}).");
+                    }
+
+                    explicitRows++;
                 }
 
-                party.Add(new PartyMember(mercenary.Id, job.Id, row));
+                members.Add((mercenary, data.Jobs.Get(mercenary.JobId), row));
             }
 
-            return party;
+            if (explicitRows != 0 && explicitRows != members.Count)
+            {
+                throw new ArgumentException("Give a row to every party member or to none.");
+            }
+
+            if (explicitRows == 0)
+            {
+                // OrderBy is stable: jobs with the same recommended row keep the order given.
+                members = members.OrderBy(m => m.Job.RecommendedRow).ToList();
+                for (int i = 0; i < members.Count; i++)
+                {
+                    members[i] = (members[i].Mercenary, members[i].Job, BattleRows.Front + i);
+                }
+            }
+
+            return members.Select(m => new PartyMember(m.Mercenary.Id, m.Job.Id, m.Row)).ToList();
         }
 
         /// <summary>One fresh party against one enemy group, many seeds.</summary>
@@ -191,6 +223,7 @@ namespace F1.Sim
                     case BattleEventKind.GraceBroken: detail = $"{Name(e.Target)} grace broken after {e.A} hits"; break;
                     case BattleEventKind.DeathRolled: detail = $"{Name(e.Target)} death roll {e.B} vs {e.A}% -> {(e.C == 1 ? "DIED" : "survived")}"; break;
                     case BattleEventKind.Died: detail = $"{Name(e.Target)} died"; break;
+                    case BattleEventKind.RowsAdvanced: detail = $"{(BattleSide)e.A} row {e.B} is empty: those behind advance"; break;
                     case BattleEventKind.PotionUsed: detail = $"potion {e.Id} on {Name(e.Target)}"; break;
                     case BattleEventKind.RetreatAttempted: detail = $"retreat roll {e.B} vs {e.A}% -> {(e.C == 1 ? "success" : "failed")}"; break;
                     case BattleEventKind.StormTicked: detail = $"storm {e.A}"; break;
@@ -202,17 +235,87 @@ namespace F1.Sim
             }
         }
 
+        /// <summary>What many expeditions of one party came to.</summary>
+        sealed class ExpeditionStats
+        {
+            public int Runs;
+            public int Cleared;
+            public int Wiped;
+            public int Retreated;
+            public int Deaths;
+            public int ExpeditionsWithDeath;
+            public int BattlesWon;
+            public readonly BattleStats All = new BattleStats();
+            public readonly SortedDictionary<int, BattleStats> ByFloor = new SortedDictionary<int, BattleStats>();
+        }
+
         /// <summary>Whole expeditions: node choices, battles, rewards, until cleared, wiped or retreated.</summary>
         public static void Expedition(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
         {
-            int cleared = 0;
-            int wiped = 0;
-            int retreated = 0;
-            int deaths = 0;
-            int expeditionsWithDeath = 0;
-            int battlesWon = 0;
-            var all = new BattleStats();
-            var byFloor = new SortedDictionary<int, BattleStats>();
+            ExpeditionStats stats = RunExpeditions(data, dungeonId, party, policy, runs, baseSeed);
+
+            Console.WriteLine($"dungeon {dungeonId}, party {Describe(party)}, policy {policy.Name}, seed {baseSeed}");
+            Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
+            Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
+            stats.All.Print("all battles");
+            foreach (KeyValuePair<int, BattleStats> floor in stats.ByFloor)
+            {
+                floor.Value.Print($"floor {floor.Key}");
+            }
+        }
+
+        /// <summary>
+        /// The same party in every order, front to back, with the same seeds: shows how much the
+        /// rows matter. Best formation first.
+        /// </summary>
+        public static void Formations(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
+        {
+            var results = new List<(List<PartyMember> Party, ExpeditionStats Stats)>();
+            foreach (List<PartyMember> order in Orders(party))
+            {
+                var lined = new List<PartyMember>();
+                for (int i = 0; i < order.Count; i++)
+                {
+                    lined.Add(new PartyMember(order[i].MercenaryId, order[i].JobId, BattleRows.Front + i));
+                }
+
+                results.Add((lined, RunExpeditions(data, dungeonId, lined, policy, runs, baseSeed)));
+            }
+
+            Console.WriteLine($"dungeon {dungeonId}, policy {policy.Name}, seed {baseSeed}, expeditions {runs} per formation");
+            foreach ((List<PartyMember> lined, ExpeditionStats stats) in results.OrderByDescending(r => r.Stats.Cleared).ThenBy(r => r.Stats.Deaths))
+            {
+                Console.WriteLine(
+                    $"  {Describe(lined),-46} cleared {BattleStats.Percent(stats.Cleared, runs),6}, wiped {BattleStats.Percent(stats.Wiped, runs),6}, retreated {BattleStats.Percent(stats.Retreated, runs),6}, deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}");
+            }
+        }
+
+        /// <summary>Every ordering of the members, in a fixed order.</summary>
+        static IEnumerable<List<PartyMember>> Orders(List<PartyMember> members)
+        {
+            if (members.Count <= 1)
+            {
+                yield return new List<PartyMember>(members);
+                yield break;
+            }
+
+            for (int i = 0; i < members.Count; i++)
+            {
+                var rest = new List<PartyMember>(members);
+                rest.RemoveAt(i);
+                foreach (List<PartyMember> tail in Orders(rest))
+                {
+                    tail.Insert(0, members[i]);
+                    yield return tail;
+                }
+            }
+        }
+
+        static ExpeditionStats RunExpeditions(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
+        {
+            var stats = new ExpeditionStats { Runs = runs };
+            BattleStats all = stats.All;
+            SortedDictionary<int, BattleStats> byFloor = stats.ByFloor;
 
             for (int run = 0; run < runs; run++)
             {
@@ -242,29 +345,22 @@ namespace F1.Sim
 
                 switch (state.Result)
                 {
-                    case ExpeditionResult.Cleared: cleared++; break;
-                    case ExpeditionResult.Wiped: wiped++; break;
-                    case ExpeditionResult.Retreated: retreated++; break;
+                    case ExpeditionResult.Cleared: stats.Cleared++; break;
+                    case ExpeditionResult.Wiped: stats.Wiped++; break;
+                    case ExpeditionResult.Retreated: stats.Retreated++; break;
                 }
 
                 int dead = state.Members.Count(m => !m.Alive);
-                deaths += dead;
+                stats.Deaths += dead;
                 if (dead > 0)
                 {
-                    expeditionsWithDeath++;
+                    stats.ExpeditionsWithDeath++;
                 }
 
-                battlesWon += state.BattlesWon;
+                stats.BattlesWon += state.BattlesWon;
             }
 
-            Console.WriteLine($"dungeon {dungeonId}, party {Describe(party)}, policy {policy.Name}, seed {baseSeed}");
-            Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(cleared, runs)}, wiped {BattleStats.Percent(wiped, runs)}, retreated {BattleStats.Percent(retreated, runs)}");
-            Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(deaths, runs)}, expeditions with a death {BattleStats.Percent(expeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(battlesWon, runs)}");
-            all.Print("all battles");
-            foreach (KeyValuePair<int, BattleStats> floor in byFloor)
-            {
-                floor.Value.Print($"floor {floor.Key}");
-            }
+            return stats;
         }
 
         static string Describe(List<PartyMember> party)

@@ -22,14 +22,36 @@ namespace F1.Tests
             return battle.Events.Where(e => e.Kind == kind).ToList();
         }
 
-        static EquippedItem Item(string id, int cooldownMs, EffectKind kind, TargetMode target, int grade, ItemCategory category = ItemCategory.Weapon, RowRequirement row = RowRequirement.Any)
+        /// <param name="rows">The rows the item can be used in. Every row when omitted.</param>
+        /// <param name="reach">How many enemies it hits from the end its target counts from. One when omitted.</param>
+        static EquippedItem Item(
+            string id,
+            int cooldownMs,
+            EffectKind kind,
+            TargetMode target,
+            int grade,
+            ItemCategory category = ItemCategory.Weapon,
+            int[] rows = null,
+            int reach = TestData.DefaultReach)
         {
-            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, row), grade);
+            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), grade);
         }
 
-        static BattleUnitSetup IdleEnemy(int hp, BattleRow row = BattleRow.Front)
+        /// <summary>Enemies that do nothing, one per row from row 1, with the given HP.</summary>
+        static BattleUnitSetup[] IdleLine(params int[] hp)
+        {
+            return hp.Select((value, index) => TestData.Enemy("e" + index, index + 1, value)).ToArray();
+        }
+
+        static BattleUnitSetup IdleEnemy(int hp, int row = 1)
         {
             return TestData.Enemy("dummy", row, hp);
+        }
+
+        /// <summary>A mercenary who does nothing, to stand in a row.</summary>
+        static BattleUnitSetup Idle(string id, int row, int hp = 100)
+        {
+            return TestData.Mercenary(id, row, hp);
         }
 
         // ---- Time and cooldowns -------------------------------------------------------------
@@ -39,7 +61,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(1000, 5))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 5))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(999);
@@ -61,9 +83,9 @@ namespace F1.Tests
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
-                    TestData.Mercenary("front", BattleRow.Front, 100, TestData.Attack(1000, 1, "f0"), TestData.Attack(1000, 1, "f1")),
-                    TestData.Mercenary("rear", BattleRow.Rear, 100, TestData.Attack(1000, 1, "r0"))),
-                TestData.Units(TestData.Enemy("enemy", BattleRow.Front, 100, TestData.Attack(1000, 1, "e0"))));
+                    TestData.Mercenary("front", 1, 100, TestData.Attack(1000, 1, "f0"), TestData.Attack(1000, 1, "f1")),
+                    TestData.Mercenary("rear", 2, 100, TestData.Attack(1000, 1, "r0"))),
+                TestData.Units(TestData.Enemy("enemy", 1, 100, TestData.Attack(1000, 1, "e0"))));
 
             battle.AdvanceTo(1000);
 
@@ -76,7 +98,7 @@ namespace F1.Tests
             // Burn item: grade 3 -> 3 stacks, fires at 1500 and 3000. Ticks are at 1000, 2000, 3000...
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, Item("torch", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("torch", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(2999);
@@ -93,8 +115,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(2800, 1, "sword"))),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(2800, 1, "blade"))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(2800, 1, "sword"))),
+                TestData.Units(TestData.Enemy("e", 1, 100, TestData.Attack(2800, 1, "blade"))),
                 setup => setup.EnemyCooldownPermille = -80);
 
             battle.AdvanceTo(3000);
@@ -109,8 +131,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("MinCooldownMs", 200)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(300, 1))),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
+                TestData.Units(TestData.Enemy("e", 1, 100, TestData.Attack(300, 1))),
                 setup => setup.EnemyCooldownPermille = -900);
 
             Assert.AreEqual(200, battle.Enemies[0].Items[0].CooldownMs);
@@ -119,7 +141,7 @@ namespace F1.Tests
         [Test]
         public void AdvanceTo_WhenTimeGoesBackwards_Throws()
         {
-            BattleEngine battle = Battle(TestData.Balance(), TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)), TestData.Units(IdleEnemy(100)));
+            BattleEngine battle = Battle(TestData.Balance(), TestData.Units(TestData.Mercenary("a", 1, 100)), TestData.Units(IdleEnemy(100)));
             battle.AdvanceTo(500);
 
             Assert.Throws<ArgumentOutOfRangeException>(() => battle.AdvanceTo(499));
@@ -136,7 +158,7 @@ namespace F1.Tests
             var item = new EquippedItem(TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, powerPercent), grade);
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, item)),
+                TestData.Units(TestData.Mercenary("a", 1, 100, item)),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
@@ -145,27 +167,51 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Item_WhoseRowRequirementIsNotMet_NeverFires()
+        public void Item_WhoseOwnerStandsOutsideItsRows_NeverFires()
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Rear, 100, Item("axe", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, row: RowRequirement.Front))),
+                TestData.Units(
+                    Idle("front", 1),
+                    TestData.Mercenary("a", 2, 100, Item("axe", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 1 }))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(10000);
 
-            Assert.IsFalse(battle.Party[0].Items[0].Active);
+            Assert.IsFalse(battle.Party[1].Items[0].Active);
             Assert.AreEqual(0, Of(battle, BattleEventKind.ItemActivated).Count);
             Assert.AreEqual(100, battle.Enemies[0].Hp);
         }
 
         [Test]
-        public void Item_WithTwoEffects_AppliesBothInOrder()
+        public void Item_WorksInEveryRowItLists()
         {
-            ItemData mace = TestData.Item("mace", 1000, EffectKind.Damage, TargetMode.EnemyFront, 100, second: new ItemEffect(EffectKind.Shield, TargetMode.Self, 50));
+            EquippedItem Staff()
+            {
+                return Item("staff", 1000, EffectKind.Damage, TargetMode.EnemyFront, 1, rows: new[] { 2, 3 });
+            }
+
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, new EquippedItem(mace, 10))),
+                TestData.Units(
+                    TestData.Mercenary("one", 1, 100, Staff()),
+                    TestData.Mercenary("two", 2, 100, Staff()),
+                    TestData.Mercenary("three", 3, 100, Staff())),
+                TestData.Units(IdleEnemy(100)));
+
+            battle.AdvanceTo(1000);
+
+            CollectionAssert.AreEqual(new[] { false, true, true }, battle.Party.Select(u => u.Items[0].Active));
+            Assert.AreEqual(98, battle.Enemies[0].Hp, "Only the two behind row 1 fired.");
+        }
+
+        [Test]
+        public void Item_WithTwoEffects_AppliesBothInOrder()
+        {
+            ItemData mace = TestData.Item("mace", 1000, EffectKind.Damage, TargetMode.EnemyFront, 100, second: TestData.Effect(EffectKind.Shield, TargetMode.Self, 50));
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(mace, 10))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
@@ -177,35 +223,96 @@ namespace F1.Tests
         // ---- Targeting -----------------------------------------------------------------------
 
         [Test]
-        public void EnemyFront_HitsFirstFrontUnit_AndFallsBackToRear()
+        public void EnemyFront_WithReach1_HitsOnlyTheFrontEnemy_ThenWhoeverAdvancesIntoRow1()
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(1000, 40))),
-                TestData.Units(TestData.Enemy("front", BattleRow.Front, 40), TestData.Enemy("rear", BattleRow.Rear, 100)));
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 40))),
+                IdleLine(80, 100, 100));
 
             battle.AdvanceTo(1000);
-            Assert.IsFalse(battle.Enemies[0].Alive);
-            Assert.AreEqual(100, battle.Enemies[1].Hp);
+            CollectionAssert.AreEqual(new[] { 40, 100, 100 }, battle.Enemies.Select(e => e.Hp));
 
             battle.AdvanceTo(2000);
-            Assert.AreEqual(60, battle.Enemies[1].Hp, "With the front row empty, the rear unit is hit.");
+            Assert.IsFalse(battle.Enemies[0].Alive);
+
+            battle.AdvanceTo(3000);
+            CollectionAssert.AreEqual(new[] { 0, 60, 100 }, battle.Enemies.Select(e => e.Hp), "The one who advanced into row 1.");
+        }
+
+        [TestCase(2, new[] { 93, 93, 100, 100 })]
+        [TestCase(3, new[] { 93, 93, 93, 100 })]
+        [TestCase(4, new[] { 93, 93, 93, 93 })]
+        public void EnemyFront_HitsAsManyAsItsReach_CountedFromTheFront(int reach, int[] expectedHp)
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("sweep", 1000, EffectKind.Damage, TargetMode.EnemyFront, 7, reach: reach))),
+                IdleLine(100, 100, 100, 100));
+
+            battle.AdvanceTo(1000);
+
+            CollectionAssert.AreEqual(expectedHp, battle.Enemies.Select(e => e.Hp));
+            CollectionAssert.AreEqual(
+                Enumerable.Range(0, reach),
+                Of(battle, BattleEventKind.Damaged).Select(e => e.Target.Index),
+                "Applied from the front back.");
         }
 
         [Test]
-        public void EnemyRear_HitsRearUnit_AndFallsBackToFront()
+        public void EnemyBack_WithReach1_HitsTheRearmostEnemy_WhoeverThatIsNow()
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyRear, 30))),
-                TestData.Units(TestData.Enemy("front", BattleRow.Front, 100), TestData.Enemy("rear", BattleRow.Rear, 30)));
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyBack, 30))),
+                IdleLine(100, 100, 30));
 
             battle.AdvanceTo(1000);
-            Assert.AreEqual(100, battle.Enemies[0].Hp);
-            Assert.IsFalse(battle.Enemies[1].Alive);
+            CollectionAssert.AreEqual(new[] { 100, 100, 0 }, battle.Enemies.Select(e => e.Hp));
+            Assert.AreEqual(0, Of(battle, BattleEventKind.RowsAdvanced).Count, "Nobody stood behind the rearmost.");
 
             battle.AdvanceTo(2000);
-            Assert.AreEqual(70, battle.Enemies[0].Hp);
+            CollectionAssert.AreEqual(new[] { 100, 70, 0 }, battle.Enemies.Select(e => e.Hp), "Row 2 is the rearmost now.");
+        }
+
+        [TestCase(2, new[] { 100, 100, 93, 93 })]
+        [TestCase(3, new[] { 100, 93, 93, 93 })]
+        public void EnemyBack_HitsAsManyAsItsReach_CountedFromTheBack(int reach, int[] expectedHp)
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("volley", 1000, EffectKind.Damage, TargetMode.EnemyBack, 7, reach: reach))),
+                IdleLine(100, 100, 100, 100));
+
+            battle.AdvanceTo(1000);
+
+            CollectionAssert.AreEqual(expectedHp, battle.Enemies.Select(e => e.Hp));
+            CollectionAssert.AreEqual(
+                Enumerable.Range(0, reach).Select(i => 3 - i),
+                Of(battle, BattleEventKind.Damaged).Select(e => e.Target.Index),
+                "Applied from the rearmost forward.");
+        }
+
+        [TestCase(TargetMode.EnemyFront)]
+        [TestCase(TargetMode.EnemyBack)]
+        public void AReachDeeperThanTheLivingLine_HitsEveryoneAliveOnce_AndNeverAnEmptyRow(TargetMode target)
+        {
+            // Three enemies, the middle one killed at 700: two are left, in rows 1 and 2. Reach 3 finds both and nothing else.
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(
+                    TestData.Mercenary("opener", 1, 100, Item("opener", 700, EffectKind.Damage, TargetMode.EnemyFront, 50, reach: 2)),
+                    TestData.Mercenary("a", 2, 100, Item("wide", 1200, EffectKind.Damage, target, 7, reach: 3))),
+                IdleLine(100, 50, 100));
+
+            battle.AdvanceTo(700);
+            Assert.IsFalse(battle.Enemies[1].Alive);
+            CollectionAssert.AreEqual(new[] { 1, 2, 2 }, battle.Enemies.Select(e => e.Row), "The dead one keeps the row it died in; the one behind advanced into it.");
+
+            battle.AdvanceTo(1200);
+
+            List<BattleEvent> hits = Of(battle, BattleEventKind.Damaged).Where(e => e.Id == "wide").ToList();
+            CollectionAssert.AreEquivalent(new[] { 0, 2 }, hits.Select(e => e.Target.Index), "Each living enemy once; the dead one is not a target.");
         }
 
         [Test]
@@ -213,12 +320,12 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, Item("fire", 1000, EffectKind.Damage, TargetMode.EnemyAll, 7))),
-                TestData.Units(TestData.Enemy("e0", BattleRow.Front, 100), TestData.Enemy("e1", BattleRow.Front, 100), TestData.Enemy("e2", BattleRow.Rear, 100)));
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("fire", 1000, EffectKind.Damage, TargetMode.EnemyAll, 7))),
+                IdleLine(100, 100, 100, 100));
 
             battle.AdvanceTo(1000);
 
-            CollectionAssert.AreEqual(new[] { 93, 93, 93 }, battle.Enemies.Select(e => e.Hp));
+            CollectionAssert.AreEqual(new[] { 93, 93, 93, 93 }, battle.Enemies.Select(e => e.Hp));
         }
 
         [Test]
@@ -228,9 +335,9 @@ namespace F1.Tests
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
-                    TestData.Mercenary("half", BattleRow.Front, 50).WithMaxHp(100),
-                    TestData.Mercenary("sixty", BattleRow.Front, 30).WithMaxHp(50),
-                    TestData.Mercenary("healer", BattleRow.Rear, 80, heal)),
+                    TestData.Mercenary("half", 1, 50).WithMaxHp(100),
+                    TestData.Mercenary("sixty", 2, 30).WithMaxHp(50),
+                    TestData.Mercenary("healer", 3, 80, heal)),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
@@ -246,13 +353,233 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("front", BattleRow.Front, 100), TestData.Mercenary("rear", BattleRow.Rear, 100)),
-                TestData.Units(TestData.Enemy("archer", BattleRow.Rear, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyRear, 9))));
+                TestData.Units(TestData.Mercenary("front", 1, 100), TestData.Mercenary("rear", 2, 100)),
+                TestData.Units(TestData.Enemy("archer", 1, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyBack, 9))));
 
             battle.AdvanceTo(1000);
 
             Assert.AreEqual(100, battle.Party[0].Hp);
             Assert.AreEqual(91, battle.Party[1].Hp);
+        }
+
+        // ---- Advancing -----------------------------------------------------------------------
+
+        [Test]
+        public void WhenAUnitDies_EveryoneBehindItMovesOneRowForward()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 50))),
+                TestData.Units(TestData.Enemy("front", 1, 50), TestData.Enemy("middle", 2, 100), TestData.Enemy("back", 3, 100)));
+
+            battle.AdvanceTo(1000);
+
+            Assert.IsFalse(battle.Enemies[0].Alive);
+            Assert.AreEqual(1, battle.Enemies[0].Row, "The dead stay where they fell.");
+            Assert.AreEqual(1, battle.Enemies[1].Row);
+            Assert.AreEqual(2, battle.Enemies[2].Row);
+            CollectionAssert.AreEqual(new[] { 0, 1, 2 }, battle.Enemies.Select(u => u.Index), "Unit order does not change.");
+
+            BattleEvent advanced = Of(battle, BattleEventKind.RowsAdvanced).Single();
+            Assert.AreEqual(1000, advanced.TimeMs);
+            Assert.AreEqual((int)BattleSide.Enemy, advanced.A);
+            Assert.AreEqual(1, advanced.B, "The row that emptied.");
+            Assert.Less(battle.Events.ToList().FindIndex(e => e.Kind == BattleEventKind.Died), battle.Events.ToList().IndexOf(advanced), "The advance follows the death.");
+        }
+
+        [Test]
+        public void WhenAUnitInTheMiddleDies_OnlyThoseBehindItMove()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("spear", 1000, EffectKind.Damage, TargetMode.EnemyFront, 50, reach: 2))),
+                TestData.Units(TestData.Enemy("front", 1, 100), TestData.Enemy("middle", 2, 50), TestData.Enemy("back", 3, 100), TestData.Enemy("last", 4, 100)));
+
+            battle.AdvanceTo(1000);
+
+            Assert.IsFalse(battle.Enemies[1].Alive);
+            CollectionAssert.AreEqual(new[] { 1, 2, 2, 3 }, battle.Enemies.Select(e => e.Row), "The front stays; the two behind the dead one move up.");
+            Assert.AreEqual(2, Of(battle, BattleEventKind.RowsAdvanced).Single().B);
+        }
+
+        [Test]
+        public void WhenTheRearmostUnitDies_NobodyMoves()
+        {
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyBack, 50))),
+                TestData.Units(TestData.Enemy("front", 1, 100), TestData.Enemy("back", 2, 50)));
+
+            battle.AdvanceTo(1000);
+
+            Assert.IsFalse(battle.Enemies[1].Alive);
+            Assert.AreEqual(1, battle.Enemies[0].Row);
+            Assert.AreEqual(0, Of(battle, BattleEventKind.RowsAdvanced).Count);
+        }
+
+        [Test]
+        public void AMercenaryAtDeathsDoor_KeepsTheRow_UntilDeath()
+        {
+            // Hits at 500 (to 0 HP), then 1000, 1500, 2000 during a long grace: the third counted hit breaks it and kills.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 100000), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100)),
+                TestData.Units(Idle("front", 1, 1), Idle("behind", 2)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(1999);
+            Assert.IsTrue(battle.Party[0].InDog);
+            Assert.AreEqual(2, battle.Party[1].Row, "At death's door is not dead.");
+            Assert.AreEqual(100, battle.Party[1].Hp, "Row 1 still shields the one behind.");
+
+            battle.AdvanceTo(2000);
+            Assert.IsFalse(battle.Party[0].Alive);
+            Assert.AreEqual(1, battle.Party[1].Row);
+            Assert.AreEqual((int)BattleSide.Party, Of(battle, BattleEventKind.RowsAdvanced).Single().A);
+
+            battle.AdvanceTo(2500);
+            Assert.AreEqual(99, battle.Party[1].Hp, "Now in row 1, the next hit lands on them.");
+        }
+
+        [Test]
+        public void TheAdvance_HappensBeforeTheNextEffectChoosesItsTarget()
+        {
+            // Two effects of one item, both aimed at the front enemy: the first kills row 1, the second hits whoever advanced.
+            ItemData doubleStrike = TestData.Item("double", 1000, EffectKind.Damage, TargetMode.EnemyFront, 100, second: TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 50));
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(doubleStrike, 20))),
+                TestData.Units(TestData.Enemy("front", 1, 20), TestData.Enemy("behind", 2, 100)));
+
+            battle.AdvanceTo(1000);
+
+            Assert.IsFalse(battle.Enemies[0].Alive);
+            Assert.AreEqual(90, battle.Enemies[1].Hp);
+        }
+
+        [Test]
+        public void TargetsOfOneEffect_AreChosenBeforeItIsApplied()
+        {
+            // Reach 2 from the front picks rows 1 and 2. Row 1 dies and row 2 advances, but each is hit exactly once.
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("spear", 1000, EffectKind.Damage, TargetMode.EnemyFront, 20, reach: 2))),
+                TestData.Units(TestData.Enemy("front", 1, 20), TestData.Enemy("middle", 2, 100), TestData.Enemy("back", 3, 100)));
+
+            battle.AdvanceTo(1000);
+
+            CollectionAssert.AreEqual(new[] { 0, 80, 100 }, battle.Enemies.Select(e => e.Hp));
+            CollectionAssert.AreEqual(new[] { 1, 1, 2 }, battle.Enemies.Select(e => e.Row));
+        }
+
+        [Test]
+        public void AnItem_StartsAFreshCooldown_WhenItsOwnerAdvancesIntoItsRows()
+        {
+            // The front mercenary falls at 500 and dies at 1000. The axe (row 1 only, cooldown 700) was idle in row 2.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
+                TestData.Units(
+                    Idle("front", 1, 1),
+                    TestData.Mercenary("reserve", 2, 100, Item("axe", 700, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 1 }))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(999);
+            Assert.IsFalse(battle.Party[1].Items[0].Active);
+
+            battle.AdvanceTo(1000);
+            Assert.IsTrue(battle.Party[1].Items[0].Active);
+            Assert.AreEqual(1700, battle.Party[1].Items[0].NextFireMs, "A whole cooldown from the moment of the advance.");
+
+            battle.AdvanceTo(1699);
+            Assert.AreEqual(0, Of(battle, BattleEventKind.ItemActivated).Count(e => e.Id == "axe"));
+
+            battle.AdvanceTo(2400);
+            CollectionAssert.AreEqual(new[] { 1700, 2400 }, Of(battle, BattleEventKind.ItemActivated).Where(e => e.Id == "axe").Select(e => e.TimeMs));
+        }
+
+        [Test]
+        public void AnItem_Stops_WhenItsOwnerAdvancesOutOfItsRows()
+        {
+            // The staff (rows 2 and 3) fires at 400 and 800, then its owner is pulled into row 1 at 1000.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
+                TestData.Units(
+                    Idle("front", 1, 1),
+                    TestData.Mercenary("healer", 2, 100, Item("staff", 400, EffectKind.Shield, TargetMode.Self, 5, ItemCategory.Support, new[] { 2, 3 }))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(5000);
+
+            Assert.IsFalse(battle.Party[1].Items[0].Active);
+            CollectionAssert.AreEqual(new[] { 400, 800 }, Of(battle, BattleEventKind.ItemActivated).Where(e => e.Id == "staff").Select(e => e.TimeMs));
+        }
+
+        [Test]
+        public void AnItem_KeepsItsCooldown_WhenItsOwnerAdvancesWithinItsRows()
+        {
+            // The owner moves from row 3 to row 2 at 1000; the bow works in both, so it still fires at 1500.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
+                TestData.Units(
+                    Idle("front", 1, 1),
+                    Idle("middle", 2),
+                    TestData.Mercenary("archer", 3, 100, Item("bow", 1500, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 2, 3 }))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(1500);
+
+            Assert.AreEqual(2, battle.Party[2].Row);
+            Assert.AreEqual(1500, Of(battle, BattleEventKind.ItemActivated).Single(e => e.Id == "bow").TimeMs);
+        }
+
+        [Test]
+        public void AnItemDueAtTheMomentItsOwnerIsPulledOutOfItsRows_DoesNotFire()
+        {
+            // The party's attack kills the front enemy at 1000. The enemy bow (rows 2 and 3) was due at 1000 as well,
+            // but party items go first and the archer is already in row 1 when the enemy items are processed.
+            BattleEngine battle = Battle(
+                TestData.Balance(),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 50))),
+                TestData.Units(
+                    TestData.Enemy("front", 1, 50),
+                    TestData.Enemy("archer", 2, 100, Item("bow", 1000, EffectKind.Damage, TargetMode.EnemyFront, 9, rows: new[] { 2, 3 }))));
+
+            battle.AdvanceTo(5000);
+
+            Assert.AreEqual(100, battle.Party[0].Hp);
+            Assert.AreEqual(0, Of(battle, BattleEventKind.ItemActivated).Count(e => e.Id == "bow"));
+        }
+
+        [Test]
+        public void ABattleWithAdvances_ReplaysToTheSameLog()
+        {
+            BattleSetup Setup()
+            {
+                return TestData.Setup(
+                    TestData.Balance(("DogGraceMs", 1000), ("DogDeathChancePercent", 50)),
+                    TestData.Units(
+                        TestData.Mercenary("front", 1, 30, TestData.Attack(900, 20, "sword")),
+                        TestData.Mercenary("middle", 2, 30, Item("spear", 1100, EffectKind.Damage, TargetMode.EnemyFront, 12, rows: new[] { 1, 2 }, reach: 2)),
+                        TestData.Mercenary("back", 3, 30, Item("bow", 1300, EffectKind.Damage, TargetMode.EnemyBack, 15, rows: new[] { 2, 3 }))),
+                    TestData.Units(
+                        TestData.Enemy("brute", 1, 120, TestData.Attack(700, 12, "club")),
+                        TestData.Enemy("archer", 2, 60, Item("shot", 1000, EffectKind.Damage, TargetMode.EnemyBack, 9, rows: new[] { 2, 3 })),
+                        TestData.Enemy("shaman", 3, 60, Item("hex", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3, ItemCategory.Support, new[] { 2, 3 }))));
+            }
+
+            var whole = new BattleEngine(Setup());
+            whole.RunToEnd();
+
+            var stepped = new BattleEngine(Setup());
+            for (int time = 37; stepped.Result == BattleResult.Ongoing; time += 37)
+            {
+                stepped.AdvanceTo(time);
+            }
+
+            BattleEngine replayed = BattleEngine.Replay(Setup(), whole.Inputs, whole.TimeMs);
+
+            Assert.Greater(Of(whole, BattleEventKind.RowsAdvanced).Count, 0, "The battle is meant to have advances.");
+            Assert.AreEqual(BattleLog.Hash(whole.Events), BattleLog.Hash(stepped.Events));
+            Assert.AreEqual(BattleLog.Hash(whole.Events), BattleLog.Hash(replayed.Events));
         }
 
         // ---- Damage, heal, shield, burn ------------------------------------------------------
@@ -262,9 +589,9 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)
+                TestData.Units(TestData.Mercenary("a", 1, 100)
                     .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.None, PassiveEffect.Shield, PassiveTarget.Self, 5)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(1000, 8))));
+                TestData.Units(TestData.Enemy("e", 1, 100, TestData.Attack(1000, 8))));
 
             battle.AdvanceTo(1000);
 
@@ -281,7 +608,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 95, Item("herb", 1000, EffectKind.Heal, TargetMode.Self, 10, ItemCategory.Support)).WithMaxHp(100)),
+                TestData.Units(TestData.Mercenary("a", 1, 95, Item("herb", 1000, EffectKind.Heal, TargetMode.Self, 10, ItemCategory.Support)).WithMaxHp(100)),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
@@ -295,7 +622,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, Item("ward", 1000, EffectKind.Shield, TargetMode.Self, 6, ItemCategory.Support))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("ward", 1000, EffectKind.Shield, TargetMode.Self, 6, ItemCategory.Support))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(3999);
@@ -310,7 +637,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(1000, 50))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 50))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(5000);
@@ -327,8 +654,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 3000)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(900, 1))),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 60))));
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(900, 1))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 60))));
 
             battle.AdvanceTo(2000);
 
@@ -349,8 +676,8 @@ namespace F1.Tests
             // Hits at 500 (enters), 1000, 1500, 2000. With 3 hits to break, the 2000 hit breaks and rolls.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 10000), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(500, 100))));
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 100))));
 
             battle.AdvanceTo(1999);
             Assert.AreEqual(2, battle.Party[0].GraceHits);
@@ -372,8 +699,8 @@ namespace F1.Tests
             // Enters at 1000, grace until 2500. Hits at 2000 (counted), 3000 and 4000 (rolled).
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 10), ("DogDeathChancePercent", 0)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 100))));
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 100))));
 
             battle.AdvanceTo(4000);
 
@@ -384,8 +711,8 @@ namespace F1.Tests
         [Test]
         public void Dog_WithZeroDeathChance_NeverKills_WithFullChance_KillsOnFirstRoll()
         {
-            BattleUnitSetup[] party = TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10));
-            BattleUnitSetup[] enemies = TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(500, 10)));
+            BattleUnitSetup[] party = TestData.Units(TestData.Mercenary("a", 1, 10));
+            BattleUnitSetup[] enemies = TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 10)));
 
             BattleEngine safe = Battle(TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 0)), party, enemies);
             safe.AdvanceTo(30000);
@@ -404,8 +731,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 35)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(500, 10))));
+                TestData.Units(TestData.Mercenary("a", 1, 10)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 10))));
 
             battle.RunToEnd();
 
@@ -424,8 +751,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 3000), ("DogGraceBreakHits", 10), ("DogDeathChancePercent", 0)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, Item("herb", 1500, EffectKind.Heal, TargetMode.Self, 10, ItemCategory.Support))),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 100))));
+                TestData.Units(TestData.Mercenary("a", 1, 100, Item("herb", 1500, EffectKind.Heal, TargetMode.Self, 10, ItemCategory.Support))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 100))));
 
             battle.AdvanceTo(1500);
             Assert.AreEqual(10, battle.Party[0].Hp);
@@ -444,8 +771,8 @@ namespace F1.Tests
             // Would die on the first counted hit (break at 1, chance 100) if absorbed damage counted.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 100000), ("DogGraceBreakHits", 1), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 5, Item("ward", 1200, EffectKind.Shield, TargetMode.Self, 50, ItemCategory.Support))),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 5))));
+                TestData.Units(TestData.Mercenary("a", 1, 5, Item("ward", 1200, EffectKind.Shield, TargetMode.Self, 50, ItemCategory.Support))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 5))));
 
             battle.AdvanceTo(8000);
 
@@ -460,8 +787,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 3)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, Item("hex", 500, EffectKind.Burn, TargetMode.EnemyFront, 3, ItemCategory.Support))));
+                TestData.Units(TestData.Mercenary("a", 1, 3)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, Item("hex", 500, EffectKind.Burn, TargetMode.EnemyFront, 3, ItemCategory.Support))));
 
             battle.RunToEnd();
 
@@ -476,7 +803,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 2000)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 0).WithMaxHp(100)),
+                TestData.Units(TestData.Mercenary("a", 1, 0).WithMaxHp(100)),
                 TestData.Units(IdleEnemy(100)));
 
             Assert.IsTrue(battle.Party[0].InDog);
@@ -485,17 +812,20 @@ namespace F1.Tests
 
         // ---- Passives ------------------------------------------------------------------------
 
-        [TestCase(BattleRow.Front, 20)]
-        [TestCase(BattleRow.Rear, 0)]
-        public void Passive_BattleStartShield_AppliesOnlyInTheRequiredRow(BattleRow row, int expectedShield)
+        [TestCase(1, 20)]
+        [TestCase(2, 0)]
+        public void Passive_BattleStartShield_AppliesOnlyInItsRows(int knightRow, int expectedShield)
         {
+            BattleUnitSetup knight = TestData.Mercenary("knight", knightRow, 100)
+                .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.Self, 20, 1);
+            BattleUnitSetup other = Idle("other", knightRow == 1 ? 2 : 1);
+
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("knight", row, 100)
-                    .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.Front, PassiveEffect.Shield, PassiveTarget.Self, 20)),
+                knightRow == 1 ? TestData.Units(knight, other) : TestData.Units(other, knight),
                 TestData.Units(IdleEnemy(100)));
 
-            Assert.AreEqual(expectedShield, battle.Party[0].Shield);
+            Assert.AreEqual(expectedShield, battle.Party.Single(u => u.Setup.SourceId == "knight").Shield);
         }
 
         [Test]
@@ -504,9 +834,9 @@ namespace F1.Tests
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
-                    TestData.Mercenary("paladin", BattleRow.Front, 100)
-                        .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.Front, PassiveEffect.Shield, PassiveTarget.AllyAll, 8),
-                    TestData.Mercenary("other", BattleRow.Rear, 100)),
+                    TestData.Mercenary("paladin", 1, 100)
+                        .WithPassive(PassiveTrigger.BattleStart, PassiveCondition.InRows, PassiveEffect.Shield, PassiveTarget.AllyAll, 8, 1),
+                    TestData.Mercenary("other", 2, 100)),
                 TestData.Units(IdleEnemy(100)));
 
             CollectionAssert.AreEqual(new[] { 8, 8 }, battle.Party.Select(u => u.Shield));
@@ -519,8 +849,8 @@ namespace F1.Tests
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(
-                    TestData.Mercenary("hurt", BattleRow.Front, 50).WithMaxHp(100),
-                    TestData.Mercenary("bishop", BattleRow.Rear, 90, Item("staff", 1000, EffectKind.Heal, TargetMode.AllyLowestHp, 10, ItemCategory.Support))
+                    TestData.Mercenary("hurt", 1, 50).WithMaxHp(100),
+                    TestData.Mercenary("bishop", 2, 90, Item("staff", 1000, EffectKind.Heal, TargetMode.AllyLowestHp, 10, ItemCategory.Support))
                         .WithPassive(PassiveTrigger.Heal, PassiveCondition.None, PassiveEffect.Shield, PassiveTarget.EventTarget, 10)),
                 TestData.Units(IdleEnemy(100)));
 
@@ -537,7 +867,7 @@ namespace F1.Tests
         {
             BattleUnitSetup Spellblade(ItemCategory category)
             {
-                return TestData.Mercenary("spellblade", BattleRow.Front, 100, Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, 12, category))
+                return TestData.Mercenary("spellblade", 1, 100, Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, 12, category))
                     .WithPassive(PassiveTrigger.WeaponHit, PassiveCondition.None, PassiveEffect.Burn, PassiveTarget.EventTarget, 3);
             }
 
@@ -555,7 +885,7 @@ namespace F1.Tests
         {
             BattleUnitSetup Berserker(int hp)
             {
-                return TestData.Mercenary("berserker", BattleRow.Front, hp, TestData.Attack(1000, 10)).WithMaxHp(100)
+                return TestData.Mercenary("berserker", 1, hp, TestData.Attack(1000, 10)).WithMaxHp(100)
                     .WithPassive(PassiveTrigger.Always, PassiveCondition.SelfInDog, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 100);
             }
 
@@ -568,19 +898,42 @@ namespace F1.Tests
             Assert.AreEqual(80, atDeathsDoor.Enemies[0].Hp);
         }
 
-        [TestCase(BattleRow.Rear, 10)]
-        [TestCase(BattleRow.Front, 8)]
-        public void Passive_WeaponPowerInRow_UsesTheActualRow(BattleRow row, int expectedDamage)
+        [TestCase(2, 10)]
+        [TestCase(1, 8)]
+        public void Passive_WeaponPowerInRows_UsesTheActualRow(int archmageRow, int expectedDamage)
         {
+            BattleUnitSetup archmage = TestData.Mercenary("archmage", archmageRow, 100, TestData.Attack(1000, 8))
+                .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, 2, 3);
+            BattleUnitSetup other = Idle("other", archmageRow == 1 ? 2 : 1);
+
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("archmage", row, 100, TestData.Attack(1000, 8))
-                    .WithPassive(PassiveTrigger.Always, PassiveCondition.Rear, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25)),
+                archmageRow == 1 ? TestData.Units(archmage, other) : TestData.Units(other, archmage),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
 
             Assert.AreEqual(100 - expectedDamage, battle.Enemies[0].Hp);
+        }
+
+        [Test]
+        public void Passive_WeaponPowerInRows_IsLostWhenTheOwnerAdvancesOutOfThem()
+        {
+            // The front mercenary (1 HP) falls at 500 and dies at 1000; the archmage moves from row 2 to row 1.
+            BattleEngine battle = Battle(
+                TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
+                TestData.Units(
+                    Idle("front", 1, 1),
+                    TestData.Mercenary("archmage", 2, 100, TestData.Attack(900, 8))
+                        .WithPassive(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 25, 2, 3)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))));
+
+            battle.AdvanceTo(900);
+            Assert.AreEqual(990, battle.Enemies[0].Hp, "In row 2: 8 x 1.25.");
+
+            battle.AdvanceTo(1800);
+            Assert.AreEqual(1, battle.Party[1].Row);
+            Assert.AreEqual(982, battle.Enemies[0].Hp, "In row 1: 8.");
         }
 
         // ---- Storm and battle end ------------------------------------------------------------
@@ -592,7 +945,7 @@ namespace F1.Tests
             // reaches 0 HP on that same tick but mercenaries are processed first and do not die from it.
             BattleEngine battle = Battle(
                 TestData.Balance(("StormStartMs", 1000), ("StormTickMs", 1000), ("StormBaseDamage", 5), ("StormGrowth", 5)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
                 TestData.Units(IdleEnemy(100)));
 
             battle.RunToEnd();
@@ -608,7 +961,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("StormStartMs", 1000), ("StormTickMs", 1000), ("StormBaseDamage", 5), ("StormGrowth", 5)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
                 TestData.Units(IdleEnemy(100)));
 
             Assert.AreEqual(5, battle.NextStormDamage);
@@ -629,8 +982,8 @@ namespace F1.Tests
             // the hit at 2000 only counts, the hit at 3000 rolls and kills.
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(1000, 10, "claw"))));
+                TestData.Units(TestData.Mercenary("a", 1, 10)),
+                TestData.Units(TestData.Enemy("e", 1, 100, TestData.Attack(1000, 10, "claw"))));
 
             battle.RunToEnd();
             DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
@@ -651,8 +1004,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 60000), ("DogGraceBreakHits", 2), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, TestData.Attack(1000, 10, "claw"))));
+                TestData.Units(TestData.Mercenary("a", 1, 10)),
+                TestData.Units(TestData.Enemy("e", 1, 100, TestData.Attack(1000, 10, "claw"))));
 
             battle.RunToEnd();
             DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
@@ -670,8 +1023,8 @@ namespace F1.Tests
             var ember = new EquippedItem(TestData.Item("ember", 500, EffectKind.Burn, TargetMode.EnemyFront, category: ItemCategory.Support), 5);
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100), ("BurnTickMs", 1000)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 5)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 100, ember)));
+                TestData.Units(TestData.Mercenary("a", 1, 5)),
+                TestData.Units(TestData.Enemy("e", 1, 100, ember)));
 
             battle.AdvanceTo(600);
             Assert.AreEqual(5, battle.Party[0].Burn);
@@ -687,7 +1040,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100, TestData.Attack(1000, 50))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 50))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.RunToEnd();
@@ -701,7 +1054,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("StormStartMs", 1000), ("StormBaseDamage", 100), ("StormGrowth", 0), ("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
+                TestData.Units(TestData.Mercenary("a", 1, 10)),
                 TestData.Units(IdleEnemy(150)));
 
             battle.RunToEnd();
@@ -715,8 +1068,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10), TestData.Mercenary("b", BattleRow.Rear, 10)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, Item("cleave", 1000, EffectKind.Damage, TargetMode.EnemyAll, 10))));
+                TestData.Units(TestData.Mercenary("a", 1, 10), TestData.Mercenary("b", 2, 10)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, Item("cleave", 1000, EffectKind.Damage, TargetMode.EnemyAll, 10))));
 
             battle.RunToEnd();
 
@@ -731,7 +1084,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("PotionCooldownMs", 1500)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 50).WithMaxHp(100)),
+                TestData.Units(TestData.Mercenary("a", 1, 50).WithMaxHp(100)),
                 TestData.Units(IdleEnemy(100)),
                 setup => setup.Potions = new[] { TestData.HealPotion(30), TestData.HealPotion(30) });
 
@@ -754,8 +1107,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 5000)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 10))),
+                TestData.Units(TestData.Mercenary("a", 1, 10)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 10))),
                 setup => setup.Potions = new[] { TestData.HealPotion(5) });
 
             battle.AdvanceTo(1000);
@@ -772,7 +1125,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
                 TestData.Units(IdleEnemy(100)),
                 setup => setup.Potions = new[] { TestData.ShieldPotion(40) });
 
@@ -786,8 +1139,8 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 0), ("DogDeathChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("dies", BattleRow.Front, 1), TestData.Mercenary("lives", BattleRow.Rear, 100)),
-                TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(500, 1))),
+                TestData.Units(TestData.Mercenary("dies", 1, 1), TestData.Mercenary("lives", 2, 100)),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(500, 1))),
                 setup => setup.Potions = new[] { TestData.HealPotion(10) });
             battle.AdvanceTo(1000);
             Assert.IsFalse(battle.Party[0].Alive);
@@ -806,7 +1159,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("RetreatChancePercent", 100)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
                 TestData.Units(IdleEnemy(100)));
             battle.AdvanceTo(700);
 
@@ -823,7 +1176,7 @@ namespace F1.Tests
         {
             BattleEngine battle = Battle(
                 TestData.Balance(("RetreatChancePercent", 0), ("RetreatCooldownMs", 5000)),
-                TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100)),
                 TestData.Units(IdleEnemy(100)));
             battle.AdvanceTo(1000);
 
@@ -845,8 +1198,8 @@ namespace F1.Tests
             {
                 return Battle(
                     TestData.Balance(("RetreatChancePercent", 0), ("RetreatCooldownMs", 0), ("DogGraceMs", 0), ("DogDeathChancePercent", 5)),
-                    TestData.Units(TestData.Mercenary("a", BattleRow.Front, 10)),
-                    TestData.Units(TestData.Enemy("e", BattleRow.Front, 100000, TestData.Attack(500, 10))),
+                    TestData.Units(TestData.Mercenary("a", 1, 10)),
+                    TestData.Units(TestData.Enemy("e", 1, 100000, TestData.Attack(500, 10))),
                     setup => setup.Seed = 77);
             }
 
@@ -873,8 +1226,8 @@ namespace F1.Tests
             {
                 BattleSetup setup = TestData.Setup(
                     TestData.Balance(),
-                    TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100).WithMaxHp(200)),
-                    TestData.Units(TestData.Enemy("e", BattleRow.Front, 1000, TestData.Attack(1000, 30))));
+                    TestData.Units(TestData.Mercenary("a", 1, 100).WithMaxHp(200)),
+                    TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 30))));
                 setup.Potions = new[] { TestData.HealPotion(50) };
                 return setup;
             }
@@ -895,7 +1248,7 @@ namespace F1.Tests
         [Test]
         public void ApplyRecordedInput_WhenNoLongerValid_Throws()
         {
-            BattleEngine battle = Battle(TestData.Balance(), TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100)), TestData.Units(IdleEnemy(100)));
+            BattleEngine battle = Battle(TestData.Balance(), TestData.Units(TestData.Mercenary("a", 1, 100)), TestData.Units(IdleEnemy(100)));
 
             Assert.Throws<InvalidOperationException>(() => battle.ApplyRecordedInput(new BattleInput(500, BattleInputKind.UsePotion, 0, 0)));
         }
@@ -906,20 +1259,36 @@ namespace F1.Tests
         public void Constructor_RejectsInvalidSetups()
         {
             BalanceData balance = TestData.Balance(("PotionSlots", 1));
-            BattleUnitSetup[] party = TestData.Units(TestData.Mercenary("a", BattleRow.Front, 100));
+            BattleUnitSetup[] party = TestData.Units(TestData.Mercenary("a", 1, 100));
             BattleUnitSetup[] enemies = TestData.Units(IdleEnemy(100));
 
             Assert.Throws<ArgumentNullException>(() => new BattleEngine(null));
             Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(), enemies), "Empty party.");
             Assert.Throws<ArgumentException>(() => Battle(balance, party, TestData.Units()), "No enemies.");
             Assert.Throws<ArgumentException>(
-                () => Battle(balance, TestData.Units(TestData.Mercenary("r", BattleRow.Rear, 100), TestData.Mercenary("f", BattleRow.Front, 100)), enemies),
-                "Rear listed before front.");
+                () => Battle(balance, TestData.Units(TestData.Mercenary("r", 2, 100), TestData.Mercenary("f", 1, 100)), enemies),
+                "Row 2 listed before row 1.");
+            Assert.Throws<ArgumentException>(
+                () => Battle(balance, TestData.Units(TestData.Mercenary("alone", 2, 100)), enemies),
+                "Nobody in row 1.");
+            Assert.Throws<ArgumentException>(
+                () => Battle(balance, party, TestData.Units(IdleEnemy(100, 1), IdleEnemy(100, 3))),
+                "Row 3 behind an empty row 2.");
+            Assert.Throws<ArgumentException>(
+                () => Battle(balance, TestData.Units(TestData.Mercenary("a", 0, 100)), enemies),
+                "Row 0.");
+            Assert.Throws<ArgumentException>(
+                () => Battle(balance, party, TestData.Units(IdleEnemy(100, 1), IdleEnemy(100, 1))),
+                "Two in one row.");
+            Assert.Throws<ArgumentException>(
+                () => Battle(balance, party, IdleLine(Enumerable.Repeat(100, BattleRows.Count + 1).ToArray())),
+                "More units than a side has rows.");
+            Assert.DoesNotThrow(() => Battle(balance, party, IdleLine(Enumerable.Repeat(100, BattleRows.Count).ToArray())), "A full line.");
             Assert.Throws<ArgumentException>(
                 () => Battle(balance, party, enemies, setup => setup.Potions = new[] { TestData.HealPotion(1), TestData.HealPotion(1) }),
                 "More potions than slots.");
             Assert.Throws<ArgumentException>(
-                () => Battle(balance, TestData.Units(TestData.Mercenary("a", BattleRow.Front, 150).WithMaxHp(100)), enemies),
+                () => Battle(balance, TestData.Units(TestData.Mercenary("a", 1, 150).WithMaxHp(100)), enemies),
                 "HP above max.");
         }
     }

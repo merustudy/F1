@@ -148,14 +148,9 @@ namespace F1.Data
             {
                 string what = $"{EnemyGroupData.DefinitionName} '{group.Id}'";
                 Require(Dungeons, group.DungeonId, what + " DungeonId", problems);
-                foreach (string enemyId in group.Front.Concat(group.Rear))
+                foreach (string enemyId in group.Enemies)
                 {
                     Require(Enemies, enemyId, what + " enemies", problems);
-                }
-
-                if (group.Front.Count > Balance.RowCapacity || group.Rear.Count > Balance.RowCapacity)
-                {
-                    problems.Add($"{what}: a row holds at most RowCapacity ({Balance.RowCapacity}) enemies.");
                 }
             }
 

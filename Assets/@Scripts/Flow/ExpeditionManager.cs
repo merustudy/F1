@@ -263,16 +263,18 @@ namespace F1.Flow
             Commit();
         }
 
-        public bool CanSetRow(int memberIndex, BattleRow row)
+        /// <summary>True when the member can move to that row now: between battles, to a row where another living member stands.</summary>
+        public bool CanMoveToRow(int memberIndex, int row)
         {
-            return IsBetweenBattles && ExpeditionRules.CanSetRow(_data.Data, Expedition, memberIndex, row);
+            return IsBetweenBattles && ExpeditionRules.CanMoveToRow(Expedition, memberIndex, row);
         }
 
-        public void SetRow(int memberIndex, BattleRow row)
+        /// <summary>Moves a member to a row. The member standing there takes the mover's old row.</summary>
+        public void MoveToRow(int memberIndex, int row)
         {
             _run.RequireWritable();
             RequireBetweenBattles();
-            ExpeditionRules.SetRow(_data.Data, Expedition, memberIndex, row);
+            ExpeditionRules.MoveToRow(Expedition, memberIndex, row);
             Commit();
         }
 

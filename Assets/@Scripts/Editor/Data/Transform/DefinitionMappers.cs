@@ -51,7 +51,7 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "MaxHp", "ItemSlots", "WeaponItemId", "WeaponGrade", "RecommendedRow",
-                "PassiveTrigger", "PassiveCondition", "PassiveEffect", "PassiveTarget", "PassiveMagnitude")
+                "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude")
                 .Concat(CsvRow.LocalizedHeaders(PassiveText)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
@@ -61,7 +61,7 @@ namespace F1.Editor.Data
                 row.Int("ItemSlots"),
                 row.Id("WeaponItemId"),
                 row.Int("WeaponGrade"),
-                row.Enum<BattleRow>("RecommendedRow"),
+                row.Int("RecommendedRow"),
                 ReadPassive(row),
                 ReadPassiveText(row)));
         }
@@ -77,15 +77,17 @@ namespace F1.Editor.Data
         /// <summary>A job without a passive leaves every Passive* cell empty.</summary>
         static PassiveSpec ReadPassive(CsvRow row)
         {
-            string[] headers = { "PassiveTrigger", "PassiveCondition", "PassiveEffect", "PassiveTarget", "PassiveMagnitude" };
+            string[] headers = { "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude" };
             if (headers.All(row.IsEmpty))
             {
                 return null;
             }
 
+            // PassiveRows is filled only for the InRows condition; PassiveSpec checks that.
             return new PassiveSpec(
                 row.Enum<PassiveTrigger>("PassiveTrigger"),
                 row.Enum<PassiveCondition>("PassiveCondition"),
+                row.IntList("PassiveRows"),
                 row.Enum<PassiveEffect>("PassiveEffect"),
                 row.Enum<PassiveTarget>("PassiveTarget"),
                 row.Int("PassiveMagnitude"));
@@ -97,15 +99,15 @@ namespace F1.Editor.Data
         public static List<ItemData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "Category", "CooldownMs", "Row",
-                "Effect1Kind", "Effect1Target", "Effect1Power",
-                "Effect2Kind", "Effect2Target", "Effect2Power",
+                "Category", "CooldownMs", "Rows",
+                "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
+                "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
                 "RewardWeight"));
 
             return RowMapping.MapRows(table, errors, row =>
             {
                 var effects = new List<ItemEffect> { ReadEffect(row, "Effect1") };
-                string[] second = { "Effect2Kind", "Effect2Target", "Effect2Power" };
+                string[] second = { "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power" };
                 if (!second.All(row.IsEmpty))
                 {
                     effects.Add(ReadEffect(row, "Effect2"));
@@ -116,17 +118,19 @@ namespace F1.Editor.Data
                     row.Localized(RowMapping.Name),
                     row.Enum<ItemCategory>("Category"),
                     row.Int("CooldownMs"),
-                    row.Enum<RowRequirement>("Row"),
+                    row.IntList("Rows"),
                     effects,
                     row.Int("RewardWeight"));
             });
         }
 
+        /// <summary>Reach is filled only for targets counted from an end of the enemy line; ItemEffect checks that.</summary>
         static ItemEffect ReadEffect(CsvRow row, string prefix)
         {
             return new ItemEffect(
                 row.Enum<EffectKind>(prefix + "Kind"),
                 row.Enum<TargetMode>(prefix + "Target"),
+                row.OptionalInt(prefix + "Reach", 0),
                 row.Int(prefix + "Power"));
         }
     }
@@ -163,15 +167,14 @@ namespace F1.Editor.Data
     {
         public static List<EnemyGroupData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(new[] { RowMapping.Id, "DungeonId", "MinFloor", "MaxFloor", "IsBoss", "Front", "Rear" });
+            table.RequireHeaders(new[] { RowMapping.Id, "DungeonId", "MinFloor", "MaxFloor", "IsBoss", "Enemies" });
             return RowMapping.MapRows(table, errors, row => new EnemyGroupData(
                 row.Id(RowMapping.Id),
                 row.Id("DungeonId"),
                 row.Int("MinFloor"),
                 row.Int("MaxFloor"),
                 row.Bool("IsBoss"),
-                row.IdList("Front"),
-                row.IdList("Rear")));
+                row.IdList("Enemies")));
         }
     }
 

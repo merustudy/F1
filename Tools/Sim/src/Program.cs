@@ -34,6 +34,7 @@ namespace F1.Sim
                     case "validate": return Validate(store);
                     case "battle": return Battle(store, options);
                     case "expedition": return Expedition(store, options);
+                    case "formations": return Formations(store, options);
                     case "trace": return Trace(store, options);
                     default:
                         PrintUsage();
@@ -114,6 +115,19 @@ namespace F1.Sim
             return 0;
         }
 
+        static int Formations(StaticDataFileStore store, Dictionary<string, string> options)
+        {
+            StaticData data = LoadGenerated(store);
+            Simulations.Formations(
+                data,
+                Option(options, "dungeon", data.Dungeons.Ordered[0].Id),
+                Simulations.ParseParty(data, Option(options, "party", DefaultParty)),
+                SimPolicy.Parse(Option(options, "policy", "balanced")),
+                int.Parse(Option(options, "runs", "1000"), CultureInfo.InvariantCulture),
+                ulong.Parse(Option(options, "seed", "1"), CultureInfo.InvariantCulture));
+            return 0;
+        }
+
         static int Trace(StaticDataFileStore store, Dictionary<string, string> options)
         {
             StaticData data = LoadGenerated(store);
@@ -128,7 +142,7 @@ namespace F1.Sim
             return 0;
         }
 
-        const string DefaultParty = "knight,bishop,spellblade";
+        const string DefaultParty = "knight,spellblade,bishop,archmage";
 
         /// <summary>Loads static data exactly as the game does: generated JSON through StaticDataLoader.</summary>
         internal static StaticData LoadGenerated(StaticDataFileStore store)
@@ -191,9 +205,12 @@ namespace F1.Sim
             Console.WriteLine("               --dungeon id  --group id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  expedition   Many whole expeditions");
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
+            Console.WriteLine("  formations   Whole expeditions for every order of the party, front to back");
+            Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  trace        Event log of one battle");
             Console.WriteLine("               --dungeon id  --group id  --party a,b,c  --policy none|balanced|safe  --seed n");
-            Console.WriteLine("  A party member is a mercenary id or a job id, optionally with :Front or :Rear.");
+            Console.WriteLine("  A party member is a mercenary id or a job id. Add a row (:1, :2, ...) to every member to set the rows;");
+            Console.WriteLine("  without them the party lines up by each job's recommended row.");
             Console.WriteLine("  Common: --project-root <path>");
         }
     }

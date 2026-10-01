@@ -38,16 +38,16 @@ namespace F1.Tests
         public void MissingReferences_AreReportedWithTheReferringDefinition()
         {
             StringAssert.Contains("Job 'tank' WeaponItemId: 'axe' does not exist", ProblemOf(p =>
-                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, 3, "axe", 10, BattleRow.Front, null))));
+                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, 3, "axe", 10, 1, null))));
 
             StringAssert.Contains("Enemy 'grunt' Items: 'fang' does not exist", ProblemOf(p =>
                 p.Enemies = Replace(p.Enemies, e => e.Id == "grunt", new EnemyData("grunt", TestData.Text("grunt"), 2, 30, new List<ItemGrant> { new ItemGrant("fang", 5) }))));
 
             StringAssert.Contains("EnemyGroup 'pair' enemies: 'ghost' does not exist", ProblemOf(p =>
-                p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "cave", 1, 2, false, new List<string> { "ghost" }, new List<string>()))));
+                p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "cave", 1, 2, false, new[] { "ghost" }))));
 
             StringAssert.Contains("EnemyGroup 'pair' DungeonId: 'tower' does not exist", ProblemOf(p =>
-                p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "tower", 1, 2, false, new List<string> { "grunt" }, new List<string>()))));
+                p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "tower", 1, 2, false, new[] { "grunt" }))));
 
             StringAssert.Contains("Dungeon 'cave' AffinityId: 'regen' does not exist", ProblemOf(p =>
                 p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "regen", 2, 2, 3, 30, 2, 8, 2, new List<string> { "tonic" }) }));
@@ -77,7 +77,7 @@ namespace F1.Tests
                 p.EnemyGroups = p.EnemyGroups.Where(g => !g.IsBoss).ToList()));
 
             StringAssert.Contains("needs exactly one boss group, found 2", ProblemOf(p =>
-                p.EnemyGroups = p.EnemyGroups.Concat(new[] { new EnemyGroupData("lair_two", "cave", 0, 0, true, new List<string> { "chief" }, new List<string>()) }).ToList()));
+                p.EnemyGroups = p.EnemyGroups.Concat(new[] { new EnemyGroupData("lair_two", "cave", 0, 0, true, new[] { "chief" }) }).ToList()));
         }
 
         [Test]
@@ -86,15 +86,6 @@ namespace F1.Tests
             string problem = ProblemOf(p => p.EnemyGroups = p.EnemyGroups.Where(g => g.Id != "pair").ToList());
 
             StringAssert.Contains("no enemy group can appear on floor 1", problem);
-        }
-
-        [Test]
-        public void EnemyGroupRow_CannotExceedRowCapacity()
-        {
-            string problem = ProblemOf(p => { }, ("RowCapacity", 1), ("PartySize", 2));
-
-            StringAssert.Contains("EnemyGroup 'pair'", problem);
-            StringAssert.Contains("RowCapacity", problem);
         }
 
         [Test]
@@ -118,7 +109,7 @@ namespace F1.Tests
         {
             string problem = ProblemOf(p =>
             {
-                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.CooldownMs, i.Row, i.Effects, 0)).ToList();
+                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.CooldownMs, i.Rows, i.Effects, 0)).ToList();
                 p.Potions = p.Potions.Select(x => new PotionData(x.Id, x.Name, x.Effect, x.Magnitude, 0)).ToList();
             });
 
@@ -129,7 +120,7 @@ namespace F1.Tests
         public void DuplicateIds_AndMissingDefinitions_AreAllReported()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, 3, "blade", 10, BattleRow.Front, null) }).ToList();
+            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, 3, "blade", 10, 1, null) }).ToList();
             parts.Affinities = null;
 
             var exception = Assert.Throws<DataValidationException>(() => new StaticData(parts));

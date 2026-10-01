@@ -72,7 +72,7 @@
         "ko-KR": "광산 감독관"
       },
       "Level": 9,
-      "MaxHp": 260,
+      "MaxHp": 300,
       "Items": [
         {
           "ItemId": "overseer_maul",

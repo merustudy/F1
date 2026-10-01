@@ -55,7 +55,6 @@ namespace F1.Data
         {
             new KeySpec(nameof(PartySize), 1, 6),
             new KeySpec(nameof(MinPartySize), 1, 6),
-            new KeySpec(nameof(RowCapacity), 1, 4),
             new KeySpec(nameof(TotalDays), 1, Big),
             new KeySpec(nameof(MaxFatigue), 1, Big),
             new KeySpec(nameof(FatigueRecoveryPerDay), 0, Big),
@@ -122,9 +121,10 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: MinPartySize cannot exceed PartySize.");
             }
 
-            if (PartySize > RowCapacity * 2)
+            // One mercenary stands in each row.
+            if (PartySize > BattleRows.Count)
             {
-                throw new DataException($"{DefinitionName}: PartySize does not fit in two rows of RowCapacity.");
+                throw new DataException($"{DefinitionName}: PartySize cannot exceed the {BattleRows.Count} rows of a side.");
             }
         }
 
@@ -139,8 +139,6 @@ namespace F1.Data
 
         public int PartySize => _values[nameof(PartySize)];
         public int MinPartySize => _values[nameof(MinPartySize)];
-        /// <summary>Slots in each of the front and rear rows.</summary>
-        public int RowCapacity => _values[nameof(RowCapacity)];
         public int TotalDays => _values[nameof(TotalDays)];
         public int MaxFatigue => _values[nameof(MaxFatigue)];
         public int FatigueRecoveryPerDay => _values[nameof(FatigueRecoveryPerDay)];

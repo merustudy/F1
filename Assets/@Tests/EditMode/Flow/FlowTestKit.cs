@@ -91,9 +91,9 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts(balanceOverrides);
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, 3, "blade", 200, BattleRow.Front, null),
-                new JobData("healer", TestData.Text("healer"), 60, 3, "staff", 10, BattleRow.Rear, null),
-                new JobData("striker", TestData.Text("striker"), 80, 2, "blade", 200, BattleRow.Rear, null),
+                new JobData("tank", TestData.Text("tank"), 100, 3, "blade", 200, 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, 3, "staff", 10, 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, 2, "blade", 200, 3, null),
             };
             return new StaticData(parts);
         }
@@ -110,14 +110,14 @@ namespace F1.Tests
             return new StaticData(parts);
         }
 
-        public static List<PartySlot> Party(params (string Id, BattleRow Row)[] slots)
+        public static List<PartySlot> Party(params (string Id, int Row)[] slots)
         {
             return slots.Select(s => new PartySlot { MercenaryId = s.Id, Row = s.Row }).ToList();
         }
 
         public static List<PartySlot> DefaultParty()
         {
-            return Party(("anna", BattleRow.Front), ("ben", BattleRow.Rear), ("cora", BattleRow.Rear));
+            return Party(("anna", 1), ("ben", 2), ("cora", 3));
         }
 
         /// <summary>A new run with the default party, standing in the lobby.</summary>

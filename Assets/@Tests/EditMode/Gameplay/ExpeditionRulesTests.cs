@@ -12,10 +12,16 @@ namespace F1.Tests
     {
         static readonly PartyMember[] DefaultParty =
         {
-            new PartyMember("anna", "tank", BattleRow.Front),
-            new PartyMember("ben", "healer", BattleRow.Rear),
-            new PartyMember("cora", "striker", BattleRow.Rear),
+            new PartyMember("anna", "tank", 1),
+            new PartyMember("ben", "healer", 2),
+            new PartyMember("cora", "striker", 3),
         };
+
+        /// <summary>Who stands where, as "anna:1 ben:2"; the dead are marked with "x".</summary>
+        static string Rows(ExpeditionState state)
+        {
+            return string.Join(" ", state.Members.Select(m => m.Alive ? $"{m.MercenaryId}:{m.Row}" : $"{m.MercenaryId}:x"));
+        }
 
         static ExpeditionState Create(StaticData data, ulong seed = 1)
         {
@@ -115,20 +121,32 @@ namespace F1.Tests
         [Test]
         public void Create_RejectsInvalidParties()
         {
-            StaticData data = TestData.Data(("RowCapacity", 2), ("PartySize", 3));
+            StaticData data = TestData.Data(("PartySize", 3));
 
             Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new PartyMember[0]));
             Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[]
             {
-                new PartyMember("anna", "tank", BattleRow.Front),
-                new PartyMember("anna", "tank", BattleRow.Front),
+                new PartyMember("anna", "tank", 1),
+                new PartyMember("anna", "tank", 2),
             }));
             Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[]
             {
-                new PartyMember("anna", "tank", BattleRow.Front),
-                new PartyMember("ben", "healer", BattleRow.Front),
-                new PartyMember("cora", "striker", BattleRow.Front),
-            }), "Three in a row of two.");
+                new PartyMember("anna", "tank", 1),
+                new PartyMember("ben", "healer", 1),
+            }), "Two in one row.");
+            Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[]
+            {
+                new PartyMember("anna", "tank", 1),
+                new PartyMember("ben", "healer", 3),
+            }), "Row 2 is empty in front of row 3.");
+            Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[]
+            {
+                new PartyMember("anna", "tank", 2),
+            }), "Row 1 is empty.");
+            Assert.Throws<ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[]
+            {
+                new PartyMember("anna", "tank", 0),
+            }));
             Assert.Throws<KeyNotFoundException>(() => ExpeditionRules.Create(data, "nowhere", 1, DefaultParty));
         }
 
@@ -164,7 +182,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void BattleSetup_ListsFrontBeforeRear_AppliesAffinity_AndIsRebuiltIdentically()
+        public void BattleSetup_ListsUnitsRowByRow_AppliesAffinity_AndIsRebuiltIdentically()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
@@ -174,7 +192,8 @@ namespace F1.Tests
 
             Assert.AreEqual(ExpeditionPhase.InBattle, state.Phase);
             CollectionAssert.AreEqual(new[] { "anna", "ben", "cora" }, setup.Party.Select(u => u.SourceId));
-            Assert.AreEqual(BattleRow.Front, setup.Party[0].Row);
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, setup.Party.Select(u => u.Row));
+            CollectionAssert.AreEqual(Enumerable.Range(1, setup.Enemies.Count), setup.Enemies.Select(u => u.Row), "Enemies stand one per row from row 1, in the order the group lists them.");
             Assert.IsTrue(setup.Party.All(u => u.HasDog));
             Assert.IsTrue(setup.Enemies.All(u => !u.HasDog && u.Hp == u.MaxHp));
             Assert.AreEqual(-80, setup.EnemyCooldownPermille);
@@ -436,18 +455,80 @@ namespace F1.Tests
         }
 
         [Test]
-        public void SetRow_MovesAMember_UnlessTheRowIsFull()
+        public void BattleSetup_FollowsTheRows_NotTheOrderOfTheMembers()
         {
-            StaticData data = TestData.Data(("RowCapacity", 2));
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionRules.MoveToRow(state, 2, 1);
+
+            BattleSetup setup = ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+
+            CollectionAssert.AreEqual(new[] { "cora", "ben", "anna" }, setup.Party.Select(u => u.SourceId));
+            CollectionAssert.AreEqual(new[] { 1, 2, 3 }, setup.Party.Select(u => u.Row));
+        }
+
+        [Test]
+        public void MoveToRow_TradesPlacesWithTheMemberStandingThere()
+        {
+            StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
 
-            Assert.IsFalse(ExpeditionRules.CanSetRow(data, state, 0, BattleRow.Rear), "The rear row already holds two.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.SetRow(data, state, 0, BattleRow.Rear));
+            Assert.IsTrue(ExpeditionRules.CanMoveToRow(state, 0, 2));
+            Assert.IsTrue(ExpeditionRules.CanMoveToRow(state, 0, 3));
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 0, 1), "Already there.");
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 0, 0));
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 9, 1), "No such member.");
 
-            ExpeditionRules.SetRow(data, state, 1, BattleRow.Front);
-            Assert.AreEqual(BattleRow.Front, state.Members[1].Row);
-            Assert.IsTrue(ExpeditionRules.CanSetRow(data, state, 0, BattleRow.Rear));
-            Assert.IsTrue(ExpeditionRules.CanSetRow(data, state, 0, BattleRow.Front), "Staying in the same row is always allowed.");
+            ExpeditionRules.MoveToRow(state, 0, 2);
+            Assert.AreEqual("anna:2 ben:1 cora:3", Rows(state));
+
+            ExpeditionRules.MoveToRow(state, 2, 1);
+            Assert.AreEqual("anna:2 ben:3 cora:1", Rows(state));
+
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToRow(state, 0, 2));
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 0, BattleRows.Count), "The party of three never reaches the last row.");
+        }
+
+        [Test]
+        public void MoveToRow_OnlyBetweenBattles_AndOnlyAmongTheLiving()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            state.Members[2].Alive = false;
+            state.Members[2].Hp = 0;
+
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 0, 3), "Only a dead member is in row 3.");
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 2, 1), "The dead do not move.");
+            Assert.IsTrue(ExpeditionRules.CanMoveToRow(state, 0, 2));
+
+            ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+            Assert.IsFalse(ExpeditionRules.CanMoveToRow(state, 0, 2), "Not during a battle.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToRow(state, 0, 2));
+        }
+
+        [Test]
+        public void CompleteBattle_ThoseWhoAdvancedKeepTheirRow_ForTheNextBattle()
+        {
+            // Anna starts at death's door with no grace and dies to the first hit. Cora ends the battle alone.
+            StaticData data = TestData.Data(("DogGraceMs", 0), ("DogDeathChancePercent", 100));
+            ExpeditionState state = Create(data);
+            state.Members[0].Hp = 0;
+            state.Members[2].Items[0] = new EquippedItem(data.Items.Get("blade"), 200);
+
+            BattleEngine battle = Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+
+            Assert.AreEqual(BattleResult.Victory, battle.Result);
+            Assert.AreEqual("anna:x ben:1 cora:2", Rows(state));
+            Assert.IsNull(Formation.Problem(ExpeditionRules.LivingRows(state, out _)));
+
+            if (state.Phase == ExpeditionPhase.ChoosingReward)
+            {
+                ExpeditionRules.SkipReward(state);
+            }
+
+            BattleSetup next = ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+            CollectionAssert.AreEqual(new[] { "ben", "cora" }, next.Party.Select(u => u.SourceId));
+            CollectionAssert.AreEqual(new[] { 1, 2 }, next.Party.Select(u => u.Row));
         }
 
         [Test]

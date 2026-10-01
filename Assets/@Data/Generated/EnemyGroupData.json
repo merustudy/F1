@@ -7,12 +7,11 @@
       "MinFloor": 2,
       "MaxFloor": 3,
       "IsBoss": false,
-      "Front": [
-        "goblin_raider"
-      ],
-      "Rear": [
+      "Enemies": [
+        "goblin_raider",
         "goblin_archer",
-        "goblin_archer"
+        "goblin_archer",
+        "goblin_shaman"
       ]
     },
     {
@@ -21,10 +20,9 @@
       "MinFloor": 0,
       "MaxFloor": 0,
       "IsBoss": true,
-      "Front": [
-        "mine_overseer"
-      ],
-      "Rear": [
+      "Enemies": [
+        "mine_overseer",
+        "goblin_raider",
         "goblin_shaman"
       ]
     },
@@ -34,11 +32,11 @@
       "MinFloor": 1,
       "MaxFloor": 3,
       "IsBoss": false,
-      "Front": [
+      "Enemies": [
+        "goblin_raider",
         "goblin_raider",
         "goblin_raider"
-      ],
-      "Rear": []
+      ]
     },
     {
       "Id": "raider_warband",
@@ -46,11 +44,10 @@
       "MinFloor": 2,
       "MaxFloor": 3,
       "IsBoss": false,
-      "Front": [
+      "Enemies": [
         "goblin_raider",
-        "goblin_raider"
-      ],
-      "Rear": [
+        "goblin_raider",
+        "goblin_archer",
         "goblin_shaman"
       ]
     },
@@ -60,12 +57,12 @@
       "MinFloor": 1,
       "MaxFloor": 2,
       "IsBoss": false,
-      "Front": [
+      "Enemies": [
+        "cave_rat",
         "cave_rat",
         "cave_rat",
         "cave_rat"
-      ],
-      "Rear": []
+      ]
     }
   ]
 }

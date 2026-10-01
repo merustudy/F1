@@ -103,6 +103,20 @@ namespace F1.Tests
         }
 
         [Test]
+        public void IntList_SplitsOnPlus_AndEmptyCellIsEmptyList()
+        {
+            CollectionAssert.AreEqual(new List<int> { 1, 2 }, Row("Rows", "1+2").IntList("Rows"));
+            CollectionAssert.AreEqual(new List<int> { 3 }, Row("Rows", "3").IntList("Rows"));
+            CollectionAssert.IsEmpty(Row("Rows", "").IntList("Rows"));
+
+            foreach (string text in new[] { "1+", "+1", "1+x", "1 + 2", "1,2", "1.0" })
+            {
+                var exception = Assert.Throws<DataException>(() => Row("Rows", text).IntList("Rows"), text);
+                StringAssert.Contains("Test.csv(2) [Rows]", exception.Message);
+            }
+        }
+
+        [Test]
         public void IdList_SplitsOnPlus_AndEmptyCellIsEmptyList()
         {
             CollectionAssert.AreEqual(new List<string> { "sword", "shield" }, Row("Items", "sword+shield").IdList("Items"));

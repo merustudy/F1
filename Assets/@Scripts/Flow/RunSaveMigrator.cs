@@ -8,8 +8,11 @@ namespace F1.Flow
     /// </summary>
     public static class RunSaveMigrator
     {
-        /// <summary>The oldest schema this build can still read.</summary>
-        public const int OldestReadableVersion = 1;
+        /// <summary>
+        /// The oldest schema this build can still read. Version 1 had two rows (front, rear); a run
+        /// saved under those rules is not converted to numbered rows.
+        /// </summary>
+        public const int OldestReadableVersion = 2;
 
         public static void Migrate(RunSaveData save)
         {
@@ -18,8 +21,8 @@ namespace F1.Flow
                 throw new RunSaveException($"Schema version {save.SchemaVersion} cannot be read.");
             }
 
-            // When the schema changes, add one step per version here:
-            //     if (save.SchemaVersion == 1) { From1To2(save); }
+            // When the schema changes and older files should still load, add one step per version here:
+            //     if (save.SchemaVersion == 2) { From2To3(save); }
             // Each step edits the DTO in place and sets SchemaVersion to the next number.
         }
     }

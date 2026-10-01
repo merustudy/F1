@@ -43,7 +43,7 @@
     },
     {
       "Key": "PartySize",
-      "Value": 3
+      "Value": 4
     },
     {
       "Key": "PostBattleHealPercent",
@@ -71,10 +71,6 @@
     },
     {
       "Key": "RewardChoices",
-      "Value": 3
-    },
-    {
-      "Key": "RowCapacity",
       "Value": 3
     },
     {

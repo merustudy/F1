@@ -17,7 +17,9 @@ namespace F1.Gameplay
     public sealed class PartySlot
     {
         public string MercenaryId;
-        public BattleRow Row;
+
+        /// <summary>The row the mercenary stands in (1 = facing the enemy).</summary>
+        public int Row;
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ namespace F1.Gameplay
         public List<MercenaryState> Roster = new List<MercenaryState>();
         public List<string> Fallen = new List<string>();
 
-        /// <summary>The party chosen in the lobby, in party order.</summary>
+        /// <summary>The party chosen in the lobby, in the order the mercenaries joined. It never has an empty row in front of an occupied one.</summary>
         public List<PartySlot> Party = new List<PartySlot>();
 
         /// <summary>Number of expeditions started. Used to derive each expedition's seed.</summary>

@@ -55,7 +55,7 @@ namespace F1.Flow
 
             foreach (PartySlot slot in run.Party)
             {
-                record.Party.Add(new PartySlotRecord { MercenaryId = slot.MercenaryId, Row = slot.Row.ToString() });
+                record.Party.Add(new PartySlotRecord { MercenaryId = slot.MercenaryId, Row = slot.Row });
             }
 
             foreach (KeyValuePair<string, int> cleared in run.ClearedDungeons)
@@ -93,7 +93,7 @@ namespace F1.Flow
                 {
                     MercenaryId = member.MercenaryId,
                     JobId = member.JobId,
-                    Row = member.Row.ToString(),
+                    Row = member.Row,
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
                     Alive = member.Alive,
@@ -179,7 +179,7 @@ namespace F1.Flow
             foreach (PartySlotRecord slot in record.Party)
             {
                 Require(slot != null, "A party slot is missing.");
-                party.Add(new PartySlot { MercenaryId = slot.MercenaryId, Row = Parse<BattleRow>(slot.Row) });
+                party.Add(new PartySlot { MercenaryId = slot.MercenaryId, Row = slot.Row });
             }
 
             string problem = RunRules.PartyProblem(data, run, party);
@@ -227,8 +227,6 @@ namespace F1.Flow
 
             Require(record.Members.Count >= balance.MinPartySize && record.Members.Count <= balance.PartySize, "The party size is out of range.");
             var seen = new HashSet<string>(StringComparer.Ordinal);
-            int front = 0;
-            int rear = 0;
             int alive = 0;
             foreach (MemberRecord member in record.Members)
             {
@@ -240,8 +238,8 @@ namespace F1.Flow
                 Require(member.MaxHp >= 1 && member.Hp >= 0 && member.Hp <= member.MaxHp, $"HP of '{member.MercenaryId}' is out of range.");
                 Require(member.Alive || member.Hp == 0, $"Dead member '{member.MercenaryId}' has HP.");
                 Require(member.Items != null && member.Items.Count >= 1 && member.Items.Count <= JobData.MaxItemSlots, $"Item slots of '{member.MercenaryId}' are out of range.");
+                Require(BattleRows.IsValid(member.Row), $"Row of '{member.MercenaryId}' is out of range.");
 
-                BattleRow row = Parse<BattleRow>(member.Row);
                 var items = new EquippedItem[member.Items.Count];
                 for (int i = 0; i < items.Length; i++)
                 {
@@ -257,21 +255,13 @@ namespace F1.Flow
                 if (member.Alive)
                 {
                     alive++;
-                    if (row == BattleRow.Front)
-                    {
-                        front++;
-                    }
-                    else
-                    {
-                        rear++;
-                    }
                 }
 
                 state.Members.Add(new ExpeditionMember
                 {
                     MercenaryId = member.MercenaryId,
                     JobId = member.JobId,
-                    Row = row,
+                    Row = member.Row,
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
                     Alive = member.Alive,
@@ -280,7 +270,10 @@ namespace F1.Flow
             }
 
             Require(alive >= 1, "Nobody on the expedition is alive.");
-            Require(front <= balance.RowCapacity && rear <= balance.RowCapacity, "A row holds too many members.");
+
+            // The living stand one per row from the front, with no empty row between them.
+            string formationProblem = Formation.Problem(ExpeditionRules.LivingRows(state, out _));
+            Require(formationProblem == null, formationProblem);
 
             Require(record.Potions.Count == balance.PotionSlots, "The number of potion slots does not match.");
             state.Potions = new string[balance.PotionSlots];

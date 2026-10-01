@@ -1,7 +1,6 @@
 Key,Value
-PartySize,3
+PartySize,4
 MinPartySize,1
-RowCapacity,3
 TotalDays,100
 MaxFatigue,100
 FatigueRecoveryPerDay,10

@@ -51,7 +51,9 @@ namespace F1.Gameplay
     {
         public string MercenaryId;
         public string JobId;
-        public BattleRow Row;
+
+        /// <summary>The row the mercenary stands in (1 = facing the enemy). A dead member keeps the row it died in.</summary>
+        public int Row;
         public int MaxHp;
         public int Hp;
         public bool Alive;
@@ -63,7 +65,7 @@ namespace F1.Gameplay
     /// <summary>Who goes on an expedition and where they stand.</summary>
     public readonly struct PartyMember
     {
-        public PartyMember(string mercenaryId, string jobId, BattleRow row)
+        public PartyMember(string mercenaryId, string jobId, int row)
         {
             MercenaryId = mercenaryId;
             JobId = jobId;
@@ -72,7 +74,7 @@ namespace F1.Gameplay
 
         public string MercenaryId { get; }
         public string JobId { get; }
-        public BattleRow Row { get; }
+        public int Row { get; }
     }
 
     /// <summary>

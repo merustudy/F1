@@ -50,7 +50,7 @@ namespace F1.Tests
             run.StartNewRun();
             List<PartySlot> party = run.Run.Roster
                 .Take(data.Balance.PartySize)
-                .Select(m => new PartySlot { MercenaryId = m.Id, Row = data.Jobs.Get(m.JobId).RecommendedRow })
+                .Select((m, index) => new PartySlot { MercenaryId = m.Id, Row = BattleRows.Front + index })
                 .ToList();
             Assert.IsNull(run.PartyProblem(party));
             run.SetParty(party);

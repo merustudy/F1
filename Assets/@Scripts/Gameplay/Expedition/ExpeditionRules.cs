@@ -52,9 +52,10 @@ namespace F1.Gameplay
                 });
             }
 
-            if (CountInRow(state, BattleRow.Front) > balance.RowCapacity || CountInRow(state, BattleRow.Rear) > balance.RowCapacity)
+            string problem = Formation.Problem(LivingRows(state, out _));
+            if (problem != null)
             {
-                throw new ArgumentException($"A row holds at most {balance.RowCapacity} mercenaries.", nameof(party));
+                throw new ArgumentException(problem, nameof(party));
             }
 
             for (int i = 0; i < dungeon.StartingPotions.Count; i++)
@@ -119,13 +120,18 @@ namespace F1.Gameplay
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
             AffinityData affinity = data.Affinities.Get(dungeon.AffinityId);
 
+            // Both sides are listed from row 1 back: the unit order of the battle.
             var party = new List<BattleUnitSetup>();
-            AddPartyRow(data, state, BattleRow.Front, party);
-            AddPartyRow(data, state, BattleRow.Rear, party);
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                AddPartyRow(data, state, row, party);
+            }
 
             var enemies = new List<BattleUnitSetup>();
-            AddEnemyRow(data, group.Front, BattleRow.Front, enemies);
-            AddEnemyRow(data, group.Rear, BattleRow.Rear, enemies);
+            for (int i = 0; i < group.Enemies.Count; i++)
+            {
+                enemies.Add(EnemySetup(data.Enemies.Get(group.Enemies[i]), BattleRows.Front + i, data));
+            }
 
             var potions = new List<PotionData>();
             foreach (string potionId in state.Potions)
@@ -158,6 +164,9 @@ namespace F1.Gameplay
                 ExpeditionMember member = FindMember(state, unit.Setup.SourceId);
                 member.Alive = unit.Alive;
                 member.Hp = unit.Alive ? unit.Hp : 0;
+
+                // Those who advanced during the battle keep the row they ended in.
+                member.Row = unit.Row;
             }
 
             for (int i = 0; i < state.Potions.Length; i++)
@@ -239,7 +248,11 @@ namespace F1.Gameplay
             b.Items[slotB] = moved;
         }
 
-        public static bool CanSetRow(StaticData data, ExpeditionState state, int memberIndex, BattleRow row)
+        /// <summary>
+        /// Between battles a living member can move to another row where a living member stands.
+        /// An empty row cannot be chosen: the party always stands without gaps.
+        /// </summary>
+        public static bool CanMoveToRow(ExpeditionState state, int memberIndex, int row)
         {
             if (state.Phase != ExpeditionPhase.ChoosingNode && state.Phase != ExpeditionPhase.ChoosingReward)
             {
@@ -251,17 +264,24 @@ namespace F1.Gameplay
                 return false;
             }
 
-            return state.Members[memberIndex].Row == row || CountInRow(state, row) < data.Balance.RowCapacity;
+            int[] rows = LivingRows(state, out List<int> members);
+            return Formation.CanMove(rows, members.IndexOf(memberIndex), row);
         }
 
-        public static void SetRow(StaticData data, ExpeditionState state, int memberIndex, BattleRow row)
+        /// <summary>Moves a member to a row: it trades places with the member standing there.</summary>
+        public static void MoveToRow(ExpeditionState state, int memberIndex, int row)
         {
-            if (!CanSetRow(data, state, memberIndex, row))
+            if (!CanMoveToRow(state, memberIndex, row))
             {
-                throw new InvalidOperationException($"Member {memberIndex} cannot move to the {row} row now.");
+                throw new InvalidOperationException($"Member {memberIndex} cannot move to row {row} now.");
             }
 
-            state.Members[memberIndex].Row = row;
+            int[] rows = LivingRows(state, out List<int> members);
+            Formation.Move(rows, members.IndexOf(memberIndex), row);
+            for (int i = 0; i < rows.Length; i++)
+            {
+                state.Members[members[i]].Row = rows[i];
+            }
         }
 
         /// <summary>Index of the first empty potion slot, or -1.</summary>
@@ -327,7 +347,7 @@ namespace F1.Gameplay
             return options;
         }
 
-        static void AddPartyRow(StaticData data, ExpeditionState state, BattleRow row, List<BattleUnitSetup> party)
+        static void AddPartyRow(StaticData data, ExpeditionState state, int row, List<BattleUnitSetup> party)
         {
             foreach (ExpeditionMember member in state.Members)
             {
@@ -350,43 +370,46 @@ namespace F1.Gameplay
             }
         }
 
-        static void AddEnemyRow(StaticData data, IReadOnlyList<string> enemyIds, BattleRow row, List<BattleUnitSetup> enemies)
+        static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data)
         {
-            foreach (string enemyId in enemyIds)
+            var items = new List<EquippedItem>();
+            foreach (ItemGrant grant in enemy.Items)
             {
-                EnemyData enemy = data.Enemies.Get(enemyId);
-                var items = new List<EquippedItem>();
-                foreach (ItemGrant grant in enemy.Items)
-                {
-                    items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade));
-                }
-
-                enemies.Add(new BattleUnitSetup
-                {
-                    SourceId = enemy.Id,
-                    Name = enemy.Name,
-                    Row = row,
-                    MaxHp = enemy.MaxHp,
-                    Hp = enemy.MaxHp,
-                    Items = items,
-                    Passive = null,
-                    HasDog = false,
-                });
+                items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade));
             }
+
+            return new BattleUnitSetup
+            {
+                SourceId = enemy.Id,
+                Name = enemy.Name,
+                Row = row,
+                MaxHp = enemy.MaxHp,
+                Hp = enemy.MaxHp,
+                Items = items,
+                Passive = null,
+                HasDog = false,
+            };
         }
 
-        static int CountInRow(ExpeditionState state, BattleRow row)
+        /// <summary>The rows of the living members, and which member each one belongs to.</summary>
+        public static int[] LivingRows(ExpeditionState state, out List<int> memberIndices)
         {
-            int count = 0;
-            foreach (ExpeditionMember member in state.Members)
+            memberIndices = new List<int>();
+            for (int i = 0; i < state.Members.Count; i++)
             {
-                if (member.Alive && member.Row == row)
+                if (state.Members[i].Alive)
                 {
-                    count++;
+                    memberIndices.Add(i);
                 }
             }
 
-            return count;
+            var rows = new int[memberIndices.Count];
+            for (int i = 0; i < rows.Length; i++)
+            {
+                rows[i] = state.Members[memberIndices[i]].Row;
+            }
+
+            return rows;
         }
 
         static ExpeditionMember FindMember(ExpeditionState state, string mercenaryId)

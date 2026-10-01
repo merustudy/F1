@@ -38,14 +38,20 @@ namespace F1.Tests
             }
         }
 
+        /// <summary>The first mercenaries of the roster, lined up from row 1 back.</summary>
+        static List<PartyMember> FirstParty(StaticData data)
+        {
+            return data.Mercenaries.Ordered
+                .Take(data.Balance.PartySize)
+                .Select((m, index) => new PartyMember(m.Id, m.JobId, BattleRows.Front + index))
+                .ToList();
+        }
+
         [Test]
         public void EveryShippedDungeon_ProducesAMapAndBattleSetupsForEveryNode()
         {
             StaticData data = LoadShipped();
-            List<PartyMember> party = data.Mercenaries.Ordered
-                .Take(data.Balance.PartySize)
-                .Select(m => new PartyMember(m.Id, m.JobId, data.Jobs.Get(m.JobId).RecommendedRow))
-                .ToList();
+            List<PartyMember> party = FirstParty(data);
 
             foreach (DungeonData dungeon in data.Dungeons.Ordered)
             {
@@ -65,10 +71,7 @@ namespace F1.Tests
         public void ShippedBattles_AlwaysEnd()
         {
             StaticData data = LoadShipped();
-            List<PartyMember> party = data.Mercenaries.Ordered
-                .Take(data.Balance.PartySize)
-                .Select(m => new PartyMember(m.Id, m.JobId, data.Jobs.Get(m.JobId).RecommendedRow))
-                .ToList();
+            List<PartyMember> party = FirstParty(data);
 
             foreach (EnemyGroupData group in data.EnemyGroups.Ordered)
             {
@@ -77,6 +80,41 @@ namespace F1.Tests
 
                 Assert.DoesNotThrow(() => battle.RunToEnd(), group.Id);
                 Assert.AreNotEqual(BattleResult.Ongoing, battle.Result);
+            }
+        }
+
+        [Test]
+        public void EveryShippedJob_CanUseItsWeaponInItsRecommendedRow()
+        {
+            StaticData data = LoadShipped();
+
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                Assert.IsTrue(data.Items.Get(job.WeaponItemId).UsableIn(job.RecommendedRow), $"{job.Id}: {job.WeaponItemId} in row {job.RecommendedRow}");
+            }
+        }
+
+        [Test]
+        public void EveryShippedEnemyGroup_ThreatensFromTheStart_AndNobodyInItIsDeadWeight()
+        {
+            StaticData data = LoadShipped();
+
+            foreach (EnemyGroupData group in data.EnemyGroups.Ordered)
+            {
+                bool someoneActsAtTheStart = false;
+                for (int i = 0; i < group.Enemies.Count; i++)
+                {
+                    int row = BattleRows.Front + i;
+                    EnemyData enemy = data.Enemies.Get(group.Enemies[i]);
+                    someoneActsAtTheStart |= enemy.Items.Any(grant => data.Items.Get(grant.ItemId).UsableIn(row));
+
+                    // An enemy only ever moves forward: it must have an item for its row or for one in front of it.
+                    Assert.IsTrue(
+                        enemy.Items.Any(grant => data.Items.Get(grant.ItemId).Rows.Any(usable => usable <= row)),
+                        $"{group.Id}: {enemy.Id} in row {row} can never use any of its items");
+                }
+
+                Assert.IsTrue(someoneActsAtTheStart, $"{group.Id}: nobody can use an item where they stand at the start");
             }
         }
 

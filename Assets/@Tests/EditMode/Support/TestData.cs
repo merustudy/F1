@@ -28,7 +28,6 @@ namespace F1.Tests
             {
                 { "PartySize", 3 },
                 { "MinPartySize", 1 },
-                { "RowCapacity", 3 },
                 { "TotalDays", 100 },
                 { "MaxFatigue", 100 },
                 { "FatigueRecoveryPerDay", 10 },
@@ -66,17 +65,35 @@ namespace F1.Tests
             TargetMode target,
             int powerPercent = 100,
             ItemCategory category = ItemCategory.Weapon,
-            RowRequirement row = RowRequirement.Any,
+            int[] rows = null,
             int rewardWeight = 0,
-            ItemEffect second = null)
+            ItemEffect second = null,
+            int reach = DefaultReach)
         {
-            var effects = new List<ItemEffect> { new ItemEffect(kind, target, powerPercent) };
+            var effects = new List<ItemEffect> { Effect(kind, target, powerPercent, reach) };
             if (second != null)
             {
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, cooldownMs, row, effects, rewardWeight);
+            return new ItemData(id, Text(id), category, cooldownMs, rows ?? AllRows, effects, rewardWeight);
+        }
+
+        /// <summary>Every battle row: what an item without a row limit lists.</summary>
+        public static readonly int[] AllRows = Enumerable.Range(BattleRows.Front, BattleRows.Count).ToArray();
+
+        /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
+        public const int DefaultReach = -1;
+
+        /// <summary>An item effect. Without a reach it hits one enemy (the front or the rearmost one).</summary>
+        public static ItemEffect Effect(EffectKind kind, TargetMode target, int powerPercent = 100, int reach = DefaultReach)
+        {
+            if (reach == DefaultReach)
+            {
+                reach = ItemEffect.TakesReach(target) ? 1 : 0;
+            }
+
+            return new ItemEffect(kind, target, reach, powerPercent);
         }
 
         /// <summary>A plain attack: grade x 100% damage to the front enemy.</summary>
@@ -85,7 +102,7 @@ namespace F1.Tests
             return new EquippedItem(Item(id, cooldownMs, EffectKind.Damage, TargetMode.EnemyFront), damage);
         }
 
-        public static BattleUnitSetup Mercenary(string id, BattleRow row, int hp, params EquippedItem[] items)
+        public static BattleUnitSetup Mercenary(string id, int row, int hp, params EquippedItem[] items)
         {
             return new BattleUnitSetup
             {
@@ -100,7 +117,7 @@ namespace F1.Tests
             };
         }
 
-        public static BattleUnitSetup Enemy(string id, BattleRow row, int hp, params EquippedItem[] items)
+        public static BattleUnitSetup Enemy(string id, int row, int hp, params EquippedItem[] items)
         {
             return new BattleUnitSetup
             {
@@ -121,9 +138,10 @@ namespace F1.Tests
             PassiveCondition condition,
             PassiveEffect effect,
             PassiveTarget target,
-            int magnitude)
+            int magnitude,
+            params int[] rows)
         {
-            unit.Passive = new PassiveSpec(trigger, condition, effect, target, magnitude);
+            unit.Passive = new PassiveSpec(trigger, condition, rows, effect, target, magnitude);
             return unit;
         }
 
@@ -174,9 +192,9 @@ namespace F1.Tests
                 Balance = BalanceEntries(balanceOverrides),
                 Jobs = new List<JobData>
                 {
-                    new JobData("tank", Text("tank"), 100, 3, "blade", 10, BattleRow.Front, null),
-                    new JobData("healer", Text("healer"), 60, 3, "staff", 10, BattleRow.Rear, null),
-                    new JobData("striker", Text("striker"), 80, 2, "blade", 12, BattleRow.Rear, null),
+                    new JobData("tank", Text("tank"), 100, 3, "blade", 10, 1, null),
+                    new JobData("healer", Text("healer"), 60, 3, "staff", 10, 2, null),
+                    new JobData("striker", Text("striker"), 80, 2, "blade", 12, 3, null),
                 },
                 Items = new List<ItemData>
                 {
@@ -185,7 +203,7 @@ namespace F1.Tests
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, rewardWeight: 5),
                     Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, rewardWeight: 5),
-                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyRear, row: RowRequirement.Rear, rewardWeight: 5),
+                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: new[] { 2, 3 }, rewardWeight: 5),
                 },
                 Potions = new List<PotionData>
                 {
@@ -198,9 +216,9 @@ namespace F1.Tests
                 },
                 EnemyGroups = new List<EnemyGroupData>
                 {
-                    new EnemyGroupData("pair", "cave", 1, 2, false, new List<string> { "grunt", "grunt" }, new List<string>()),
-                    new EnemyGroupData("trio", "cave", 2, 2, false, new List<string> { "grunt", "grunt" }, new List<string> { "grunt" }),
-                    new EnemyGroupData("lair", "cave", 0, 0, true, new List<string> { "chief" }, new List<string> { "grunt" }),
+                    new EnemyGroupData("pair", "cave", 1, 2, false, new[] { "grunt", "grunt" }),
+                    new EnemyGroupData("trio", "cave", 2, 2, false, new[] { "grunt", "grunt", "grunt" }),
+                    new EnemyGroupData("lair", "cave", 0, 0, true, new[] { "chief", "grunt" }),
                 },
                 Affinities = new List<AffinityData>
                 {
