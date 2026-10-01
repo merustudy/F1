@@ -9,11 +9,12 @@ namespace F1.Editor.Setup
     public static partial class UiPrefabSetup
     {
         /// <summary>
-        /// The party side of the node map and the reward screen: the battle screen's party columns
-        /// in the battle screen's places (row 1 next to the middle), each with the figure, the info
-        /// card and the board stacked under it; the potions in the strip under the header; the
-        /// inventory as a popup over the right half. Built after the right half so the popup draws
-        /// over it.
+        /// The party side of the node map and the reward screen: the battle screen's party columns,
+        /// each with the figure, the info card and the board stacked under it; the potions in the
+        /// strip under the header; the inventory as a popup over the right half. The columns stand
+        /// in a field shaped like the battle's, and the view puts them in the battle screen's places
+        /// when it opens (FieldLayout), so everything inside a column is laid out as lines that
+        /// stretch across it. Built after the right half so the popup draws over it.
         /// </summary>
         const float PartyTop = 186f;
         const float PartyLabelHeight = 28f;
@@ -30,16 +31,8 @@ namespace F1.Editor.Setup
 
         static float PartyFigureTop => PartyTop + PartyLabelHeight - 2f;
         static float PartyCardTop => PartyFigureTop + BattleFigureHeight + 14f;
-        static float PartyCardHeight => PartyCardCellsTop + JobData.MaxItemSlots * PartyColumnView.CellHeight + (JobData.MaxItemSlots - 1) * PartyColumnView.CellGap + PartyCardMargin;
+        static float PartyCardHeight => PartyCardCellsTop + BattleItemView.BoardHeight(JobData.MaxItemSlots) + PartyCardMargin;
         static float PartyBottom => PartyCardTop + PartyCardHeight;
-
-        /// <summary>The width of a column as the battle screen lays its columns out for a full party.</summary>
-        static float PartyColumnWidth => (BattleFieldWidth - BattleScreen.SideGap - BattleScreen.ColumnGap * (BattleRows.Count * 2 - 2)) / (BattleRows.Count * 2);
-
-        static float PartyColumnX(int row)
-        {
-            return PartyLeft + (PartyColumnWidth + BattleScreen.ColumnGap) * (BattleRows.Count - row);
-        }
 
         static PartySideView BuildPartySide(RectTransform frame)
         {
@@ -50,16 +43,17 @@ namespace F1.Editor.Setup
             UiBuild.Horizontal(potions, 10f);
             PotionSlotView potionTemplate = BuildPotionSlot(potions, 190f);
 
+            // The field is the battle field's box, so that the view can place the columns with the
+            // battle's formula. The columns and the floor line under them live in it.
+            RectTransform field = UiBuild.Box(UiBuild.Rect("PartyField", frame), PartyLeft, PartyTop, BattleFieldWidth, PartyBottom - PartyTop);
             var columns = new PartyColumnView[BattleRows.Count];
-            var roots = new GameObject[BattleRows.Count];
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
-                columns[row - 1] = BuildPartyColumn(frame, row);
-                roots[row - 1] = columns[row - 1].gameObject;
+                columns[row - 1] = BuildPartyColumn(field, row);
             }
 
-            Image floor = UiBuild.Image("PartyFloor", frame, UiPalette.Line);
-            UiBuild.Box(floor, PartyLeft, PartyFigureTop + BattleFigureHeight + 2f, PartyWidth, 2f);
+            Image floor = UiBuild.Image("PartyFloor", field, UiPalette.Line);
+            UiBuild.Box(floor, 0f, PartyFigureTop + BattleFigureHeight + 2f - PartyTop, PartyWidth, 2f);
 
             // Under the columns: the selected item's facts (or how to use the boards), and the button that takes it off its board.
             TextMeshProUGUI detail = UiBuild.Label("PartyDetail", frame, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
@@ -70,8 +64,9 @@ namespace F1.Editor.Setup
             GameObject popup = BuildInventoryPopup(frame, out TMP_Text inventoryTitle, out GameObject inventoryEmpty, out InventoryEntryView entryTemplate, out RectTransform entryParent);
 
             var view = frame.gameObject.AddComponent<PartySideView>();
+            UiBuild.SetReference(view, "_field", field);
+            UiBuild.SetReference(view, "_floor", floor.rectTransform);
             UiBuild.SetReferences(view, "_columns", columns);
-            UiBuild.SetReferences(view, "_columnRoots", roots);
             UiBuild.SetReference(view, "_potionTemplate", potionTemplate);
             UiBuild.SetReference(view, "_potionParent", potions);
             UiBuild.SetReference(view, "_detail", detail);
@@ -86,43 +81,45 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's column: the row's name, the figure placeholder, then the info card with the
-        /// board stacked under it. Every object is named after the row, because a prefab must not
-        /// repeat a name.
+        /// board stacked under it. The view sets its place and width when the screen opens, so
+        /// every part is a line that stretches across the column. Every object is named after the
+        /// row, because a prefab must not repeat a name.
         /// </summary>
-        static PartyColumnView BuildPartyColumn(Transform frame, int row)
+        static PartyColumnView BuildPartyColumn(RectTransform field, int row)
         {
             string p = "Party" + row;
-            float x = PartyColumnX(row);
-            float w = PartyColumnWidth;
-            RectTransform column = UiBuild.Box(UiBuild.Rect(p + "Column", frame), x, PartyTop, w, PartyBottom - PartyTop);
-            UiBuild.Box(UiBuild.LocalizedLabel(p + "Label", column, UiText.RowKey(row), 20f, UiPalette.TextDim, TextAlignmentOptions.Center), 0f, 0f, w, PartyLabelHeight);
+            float w = BattleFieldWidth / (BattleRows.Count * 2);
+            RectTransform column = UiBuild.Box(UiBuild.Rect(p + "Column", field), w * (BattleRows.Count - row), 0f, w, PartyBottom - PartyTop);
+            UiBuild.Line(UiBuild.LocalizedLabel(p + "Label", column, UiText.RowKey(row), 20f, UiPalette.TextDim, TextAlignmentOptions.Center), 0f, PartyLabelHeight);
 
             Image figure = BuildFigure(column, p + "Figure", BattleUnitView.FigureTint(UiPalette.Party), raycastTarget: false);
-            UiBuild.Box(figure, 0f, PartyFigureTop - PartyTop, w, BattleFigureHeight);
+            UiBuild.Line(figure, PartyFigureTop - PartyTop, BattleFigureHeight);
 
             Image card = UiBuild.Image(p + "Card", column, UiPalette.Party);
-            UiBuild.Box(card, 0f, PartyCardTop - PartyTop, w, PartyCardHeight);
+            UiBuild.Line(card, PartyCardTop - PartyTop, PartyCardHeight);
             const float m = PartyCardMargin;
-            float inner = w - 2f * m;
-            TextMeshProUGUI name = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label(p + "Name", card.transform, 28f, UiPalette.Text), m, 10f, inner, 38f));
-            TextMeshProUGUI job = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label(p + "Job", card.transform, 20f, UiPalette.TextDim), m, 44f, inner, 24f));
+            TextMeshProUGUI name = UiBuild.SingleLine(UiBuild.Line(UiBuild.Label(p + "Name", card.transform, 28f, UiPalette.Text), 10f, 38f, m, m));
+            TextMeshProUGUI job = UiBuild.SingleLine(UiBuild.Line(UiBuild.Label(p + "Job", card.transform, 20f, UiPalette.TextDim), 44f, 24f, m, m));
             UiBar hpBar = UiBuild.Bar(p + "HpBar", card.transform, UiPalette.Good);
-            UiBuild.Box(hpBar, m, 76f, inner, 24f);
-            TextMeshProUGUI hp = UiBuild.Box(UiBuild.Label(p + "Hp", card.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center), m, 76f, inner, 24f);
+            UiBuild.Line(hpBar, 76f, 24f, m, m);
+            TextMeshProUGUI hp = UiBuild.Line(UiBuild.Label(p + "Hp", card.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center), 76f, 24f, m, m);
 
-            // Forward goes towards row 1 (to the right), back the other way.
-            float buttonWidth = (inner - 8f) / 2f;
+            // Forward goes towards row 1 (to the right), back the other way: the left and the right half of one line.
             ButtonParts forward = UiBuild.LocalizedButton(p + "Forward", card.transform, UiKeys.Board.Forward, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(forward.Rect, m, 110f, buttonWidth, 40f);
+            UiBuild.Line(forward.Rect, 110f, 40f, m, m);
+            forward.Rect.anchorMax = new Vector2(0.5f, 1f);
+            forward.Rect.offsetMax = new Vector2(-4f, forward.Rect.offsetMax.y);
             ButtonParts back = UiBuild.LocalizedButton(p + "Back", card.transform, UiKeys.Board.Back, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(back.Rect, m + buttonWidth + 8f, 110f, buttonWidth, 40f);
+            UiBuild.Line(back.Rect, 110f, 40f, m, m);
+            back.Rect.anchorMin = new Vector2(0.5f, 1f);
+            back.Rect.offsetMin = new Vector2(4f, back.Rect.offsetMin.y);
 
-            // The board: cells stacked top to bottom, as many as a board can have at most. The view sizes them at runtime.
-            RectTransform cells = UiBuild.Box(UiBuild.Rect(p + "Cells", card.transform), m, PartyCardCellsTop, inner, PartyCardHeight - PartyCardCellsTop - m);
-            VerticalLayoutGroup stack = UiBuild.Vertical(cells, PartyColumnView.CellGap);
+            // The board: the battle card's cells stacked top to bottom, as many as a board can have at most. The view sizes them at runtime.
+            RectTransform cells = UiBuild.Line(UiBuild.Rect(p + "Cells", card.transform), PartyCardCellsTop, PartyCardHeight - PartyCardCellsTop - m, m, m);
+            VerticalLayoutGroup stack = UiBuild.Vertical(cells, BattleItemView.CellGap);
             stack.childControlWidth = true;
             stack.childForceExpandWidth = true;
-            ItemSlotView slotTemplate = BuildItemSlot(cells, PartyColumnView.CellHeight, p + "CellTemplate", inner);
+            ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
 
             var view = column.gameObject.AddComponent<PartyColumnView>();
             UiBuild.SetReference(view, "_figure", figure.gameObject);
@@ -138,11 +135,11 @@ namespace F1.Editor.Setup
             return view;
         }
 
-        /// <summary>One cell of a board: the name on the left, the grade on the right, in one line. Its height is set at runtime.</summary>
-        static ItemSlotView BuildItemSlot(Transform parent, float height, string name, float width)
+        /// <summary>One cell of a board: the name on the left, the grade on the right, in one line. Its width follows the stack; its height is set at runtime.</summary>
+        static ItemSlotView BuildItemSlot(Transform parent, string name)
         {
             Image frame = UiBuild.Image(name, parent, UiPalette.Slot);
-            UiBuild.Size(frame, width, height);
+            UiBuild.Size(frame, 100f, BattleItemView.CellHeight);
             Button button = UiBuild.MakeButton(frame);
 
             TextMeshProUGUI itemName = UiBuild.SingleLine(UiBuild.Label(name + "Name", frame.transform, 19f, UiPalette.Text));

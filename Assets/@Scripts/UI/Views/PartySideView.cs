@@ -12,8 +12,9 @@ namespace F1.UI
 {
     /// <summary>
     /// The party between battles, in the battle screen's shape: one column per row (row 1 on the
-    /// right) with the figure, the info card and the board stacked under it, the potions in the
-    /// strip under the header, and the inventory as a popup over the other half of the screen.
+    /// right) with the figure, the info card and the board stacked under it, placed where the battle
+    /// screen places its party columns (<see cref="FieldLayout"/>), the potions in the strip under
+    /// the header, and the inventory as a popup over the other half of the screen.
     /// Clicking an item and then a cell moves it or trades places; "to inventory" takes the clicked
     /// item off its board; an inventory item and then a cell puts it on a board (whatever was there
     /// goes to the inventory). The inventory has a fixed number of cells, so what would not fit
@@ -22,8 +23,9 @@ namespace F1.UI
     /// </summary>
     public sealed class PartySideView : MonoBehaviour
     {
+        [SerializeField] RectTransform _field;
+        [SerializeField] RectTransform _floor;
         [SerializeField] PartyColumnView[] _columns;
-        [SerializeField] GameObject[] _columnRoots;
         [SerializeField] PotionSlotView _potionTemplate;
         [SerializeField] Transform _potionParent;
         [SerializeField] TMP_Text _detail;
@@ -72,15 +74,13 @@ namespace F1.UI
             return _columns[row - BattleRows.Front];
         }
 
-        /// <summary>Wires the columns and makes the potion slots. Called once by the owning screen.</summary>
+        /// <summary>Places and wires the columns and makes the potion slots. Called once by the owning screen.</summary>
         public void Open()
         {
             ExpeditionState expedition = Managers.Expedition.Expedition;
-            int partySize = Managers.Data.Data.Balance.PartySize;
+            LayoutColumns(Mathf.Min(Managers.Data.Data.Balance.PartySize, _columns.Length));
             for (int i = 0; i < _columns.Length; i++)
             {
-                // The rows the party cannot stand in are not shown, as in battle.
-                _columnRoots[i].SetActive(i < partySize);
                 PartyColumnView column = _columns[i];
                 column.Forward.onClick.AddListener(() => OnMoveClicked(column, -1));
                 column.Back.onClick.AddListener(() => OnMoveClicked(column, 1));
@@ -98,6 +98,29 @@ namespace F1.UI
             _inventoryPanel.SetActive(false);
         }
 
+        /// <summary>
+        /// Puts each column where the battle screen puts the party column of the same row for a
+        /// party of this size, and runs the floor line under them. The rows the party cannot stand
+        /// in are not shown, as in battle.
+        /// </summary>
+        void LayoutColumns(int partyRows)
+        {
+            float width = FieldLayout.ColumnWidth(_field.rect.width, partyRows, BattleRows.Count);
+            for (int i = 0; i < _columns.Length; i++)
+            {
+                bool used = i < partyRows;
+                _columns[i].gameObject.SetActive(used);
+                if (used)
+                {
+                    var column = (RectTransform)_columns[i].transform;
+                    column.anchoredPosition = new Vector2(FieldLayout.PartyColumnX(width, partyRows, i), column.anchoredPosition.y);
+                    column.sizeDelta = new Vector2(width, column.sizeDelta.y);
+                }
+            }
+
+            _floor.sizeDelta = new Vector2(FieldLayout.SideWidth(width, partyRows), _floor.sizeDelta.y);
+        }
+
         public void ClearSelection()
         {
             _selectedMember = -1;
@@ -105,12 +128,14 @@ namespace F1.UI
             _selectedInventory = -1;
         }
 
-        /// <summary>Opens or closes the inventory popup. Closing it drops whatever was picked there.</summary>
+        /// <summary>
+        /// Opens or closes the inventory popup. Closing it drops whatever was picked there. The
+        /// owning screen refreshes afterwards (its toggle label changes too), which refreshes this view.
+        /// </summary>
         public void ToggleInventory()
         {
             InventoryOpen = !InventoryOpen;
             _selectedInventory = -1;
-            Refresh();
         }
 
         public void Refresh()

@@ -10,13 +10,11 @@ namespace F1.UI
     /// <summary>
     /// One row's column on the party side of the node map and the reward screen: the figure, the
     /// info card (name, job, HP, forward and back) and the item board stacked under it, in the
-    /// battle screen's shape. It shows whoever stands in its row; an empty row shows only its label.
+    /// battle screen's shape; the board's cells are the battle card's (<see cref="BattleItemView"/>).
+    /// It shows whoever stands in its row; an empty row shows only its label.
     /// </summary>
     public sealed class PartyColumnView : MonoBehaviour
     {
-        public const float CellHeight = 48f;
-        public const float CellGap = 4f;
-
         [SerializeField] GameObject _figure;
         [SerializeField] GameObject _card;
         [SerializeField] TMP_Text _name;
@@ -82,13 +80,13 @@ namespace F1.UI
             foreach (EquippedItem item in member.Items)
             {
                 int size = item.Item.Size;
-                ShowCell(_views[next++], cell, item, CellHeight * size + CellGap * (size - 1), selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, item, BattleItemView.BoardHeight(size), selectedCell, canClickCell);
                 cell += size;
             }
 
             for (; cell < member.ItemSlots; cell++)
             {
-                ShowCell(_views[next++], cell, null, CellHeight, selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, null, BattleItemView.CellHeight, selectedCell, canClickCell);
             }
 
             for (; next < _views.Count; next++)

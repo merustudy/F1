@@ -325,8 +325,9 @@ namespace F1.Gameplay
             int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
             if (from == to)
             {
-                // Within one board the item only changes place: to the end, or trading with another.
-                return toIndex != fromIndex;
+                // Within one board the item only changes place: to the end (unless it is there
+                // already), or trading with another.
+                return toIndex < 0 ? fromIndex != from.Items.Count - 1 : toIndex != fromIndex;
             }
 
             int size = from.Items[fromIndex].Item.Size;

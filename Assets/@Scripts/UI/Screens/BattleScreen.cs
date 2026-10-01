@@ -24,9 +24,6 @@ namespace F1.UI
         /// <summary>Lines per text of the log viewer: a long log is split over several texts.</summary>
         const int LogLinesPerChunk = 40;
 
-        /// <summary>Space between two columns of one side, and between the two sides (their row 1 columns). The party side of the other screens uses the same.</summary>
-        public const float ColumnGap = 10f;
-        public const float SideGap = 40f;
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] TMP_Text _time;
@@ -172,16 +169,14 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Spreads the columns over the field: the rows the party can stand in on the left (row 1
-        /// next to the middle), every row of the enemy on the right. The party is smaller than a
-        /// full line, so its columns beyond the party size are not shown.
+        /// Spreads the columns over the field (<see cref="FieldLayout"/>): the rows the party can
+        /// stand in on the left (row 1 next to the middle), every row of the enemy on the right. The
+        /// party is smaller than a full line, so its columns beyond the party size are not shown.
         /// </summary>
         void LayoutColumns(int partyRows)
         {
             partyRows = Mathf.Min(partyRows, _partyRows.Length);
-            int columns = partyRows + _enemyRows.Length;
-            float width = (_field.rect.width - SideGap - ColumnGap * (columns - 2)) / columns;
-            float step = width + ColumnGap;
+            float width = FieldLayout.ColumnWidth(_field.rect.width, partyRows, _enemyRows.Length);
 
             for (int i = 0; i < _partyRows.Length; i++)
             {
@@ -190,14 +185,13 @@ namespace F1.UI
                 _partyRowLabels[i].gameObject.SetActive(used);
                 if (used)
                 {
-                    PlaceColumn(_partyRows[i], _partyRowLabels[i], step * (partyRows - 1 - i), width);
+                    PlaceColumn(_partyRows[i], _partyRowLabels[i], FieldLayout.PartyColumnX(width, partyRows, i), width);
                 }
             }
 
-            float enemyLeft = step * partyRows - ColumnGap + SideGap;
             for (int i = 0; i < _enemyRows.Length; i++)
             {
-                PlaceColumn(_enemyRows[i], _enemyRowLabels[i], enemyLeft + step * i, width);
+                PlaceColumn(_enemyRows[i], _enemyRowLabels[i], FieldLayout.EnemyColumnX(width, partyRows, i), width);
             }
         }
 

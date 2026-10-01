@@ -574,6 +574,9 @@ namespace F1.Tests
             Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 0, 2), "An empty cell behind the items.");
             ExpeditionRules.MoveItem(state, 0, 0, 0, 2);
             Assert.AreEqual("blade charm", Board(tank), "To the end of the board.");
+
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 1, 0, 2), "The last item is at the end already: nothing would change.");
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 0, 2), "The first item can still go to the end.");
         }
 
         [Test]

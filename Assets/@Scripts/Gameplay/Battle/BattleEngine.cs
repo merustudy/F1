@@ -484,7 +484,8 @@ namespace F1.Gameplay
 
                     break;
                 case TargetMode.EnemyBack:
-                    int rearmost = RearmostRow(foes);
+                    // The rearmost living unit stands in row n: the length of the living line.
+                    int rearmost = LineLength(foes);
                     for (int i = foes.Count - 1; i >= 0; i--)
                     {
                         if (foes[i].Alive && foes[i].Row > rearmost - effect.Reach)
@@ -530,21 +531,6 @@ namespace F1.Gameplay
                     targets.Add(unit);
                 }
             }
-        }
-
-        /// <summary>The rearmost row a living unit stands in, or 0 when nobody is alive.</summary>
-        static int RearmostRow(List<BattleUnit> units)
-        {
-            int rearmost = 0;
-            foreach (BattleUnit unit in units)
-            {
-                if (unit.Alive && unit.Row > rearmost)
-                {
-                    rearmost = unit.Row;
-                }
-            }
-
-            return rearmost;
         }
 
         /// <summary>Lowest HP ratio; ties go to the earlier unit.</summary>
