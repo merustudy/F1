@@ -17,14 +17,14 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The margin between an item cell and its icon. The icon is scaled into the place inside
-        /// it, in proportion. (The icons on hand were drawn for the former cell of 180x60; their
-        /// shape and the cell's are settled together when the items are revised: Docs/Architecture/13_ART_PIPELINE.md "후처리 (`cell`)".)
+        /// it, in proportion. The icons were drawn for cells of this width stacked like these
+        /// (Docs/Architecture/13_ART_PIPELINE.md "후처리 (`cell`)"), so they fill the place.
         /// </summary>
-        const float ItemIconMarginX = 6f;
-        const float ItemIconMarginY = 6f;
+        const float ItemIconMarginX = 8f;
+        const float ItemIconMarginY = 5f;
 
-        /// <summary>How far the bag behind a board reaches out past its cells, sideways and up and down (the bags of two lines must not touch).</summary>
-        const float BoardBagPadX = 8f;
+        /// <summary>How far the bag behind a board reaches out past its cells, sideways (the bags of two columns, FieldLayout.ColumnGap apart, must not touch) and up and down.</summary>
+        const float BoardBagPadX = 4f;
         const float BoardBagPadY = 3f;
 
         /// <summary>The grade badge of an item on the party side: its size, and its distance from the cell's bottom-left corner.</summary>
@@ -197,13 +197,14 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The strip of potion slots under the header, on a panel so that the slots show against
-        /// whatever is behind them. The battle screen and the party side have it in the same place.
+        /// whatever is behind them. The battle screen has it on the left; the party side, whose
+        /// party stands higher, above the right half (2026-10-03 mockup V).
         /// </summary>
-        static PotionSlotView BuildPotionStrip(Transform frame, out RectTransform potions)
+        static PotionSlotView BuildPotionStrip(Transform frame, float x, out RectTransform potions)
         {
             Image panel = KitFrame("PotionsPanel", frame, UiArt.Panel, 0.75f);
-            UiBuild.Box(panel, 30f, 92f, 610f, 84f);
-            potions = UiBuild.Box(UiBuild.Rect("Potions", frame), 42f, 102f, 586f, 64f);
+            UiBuild.Box(panel, x, 92f, 610f, 84f);
+            potions = UiBuild.Box(UiBuild.Rect("Potions", frame), x + 12f, 102f, 586f, 64f);
             UiBuild.Horizontal(potions, 8f);
             return BuildPotionSlot(potions, 190f);
         }

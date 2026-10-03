@@ -14,9 +14,9 @@ namespace F1.UI
     /// The party between battles, in the battle screen's shape: on the stage, one column per row
     /// (row 1 on the right) with the figure, the plate and the move buttons under it, placed where
     /// the battle screen places its party columns (<see cref="FieldLayout"/>); in the board panel
-    /// under the stage, one line per row with the face and the board side by side, as in battle;
-    /// the potions in the strip under the header; and the inventory as a popup over the other half
-    /// of the screen above the panel. Clicking an item and then a cell moves it or trades places;
+    /// under the stage, each row's board stacked in the panel column under its figure, as in
+    /// battle; the potions in the strip above the right half; and the inventory as a popup over
+    /// the other half of the screen under the potions, above the panel. Clicking an item and then a cell moves it or trades places;
     /// "to inventory" takes the clicked item off its board; an inventory item and then a cell puts
     /// it on a board (whatever was there goes to the inventory). The inventory has a fixed number
     /// of cells, so what would not fit there is not offered. Which cells and buttons take a click
@@ -103,22 +103,28 @@ namespace F1.UI
 
         /// <summary>
         /// Puts each column where the battle screen puts the party column of the same row for a
-        /// party of this size. The rows the party cannot stand in are not shown, as in battle:
-        /// neither their column on the stage nor their line in the panel.
+        /// party of this size, and the row's column of the panel right under it (the panel spans
+        /// the frame, so it is offset by the field's left edge). The rows the party cannot stand
+        /// in are not shown, as in battle: neither their column on the stage nor their column in the panel.
         /// </summary>
         void LayoutColumns(int partyRows)
         {
             float width = FieldLayout.ColumnWidth(_field.rect.width, partyRows, BattleRows.Count);
+            float panelLeft = _field.anchoredPosition.x;
             for (int i = 0; i < _columns.Length; i++)
             {
                 bool used = i < partyRows;
                 _columns[i].gameObject.SetActive(used);
-                _columns[i].Line.SetActive(used);
+                _columns[i].Board.SetActive(used);
                 if (used)
                 {
+                    float x = FieldLayout.PartyColumnX(width, partyRows, i);
                     var column = (RectTransform)_columns[i].transform;
-                    column.anchoredPosition = new Vector2(FieldLayout.PartyColumnX(width, partyRows, i), column.anchoredPosition.y);
+                    column.anchoredPosition = new Vector2(x, column.anchoredPosition.y);
                     column.sizeDelta = new Vector2(width, column.sizeDelta.y);
+                    var board = (RectTransform)_columns[i].Board.transform;
+                    board.anchoredPosition = new Vector2(panelLeft + x, board.anchoredPosition.y);
+                    board.sizeDelta = new Vector2(width, board.sizeDelta.y);
                 }
             }
         }

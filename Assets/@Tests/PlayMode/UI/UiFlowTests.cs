@@ -182,28 +182,24 @@ namespace F1.Tests
             BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/PartyRow1"));
             Assert.IsFalse(units[0].Button.interactable, "Allies are not clickable until a potion is armed.");
 
-            // A unit's plate says whose side it is on, and that a potion can be used on it. Its line
-            // of the board panel says the same with the frame of its face.
+            // A unit's plate says whose side it is on, and that a potion can be used on it. Its board
+            // in the panel takes the click too, but only while a potion is armed.
             BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(screen).First(u => u.Unit.Side == BattleSide.Enemy);
             BattleBoardView[] boards = UiTestUtil.Views<BattleBoardView>(screen);
             BattleBoardView board = boards.Single(b => b.Unit == units[0].Unit);
             BattleBoardView enemyBoard = boards.Single(b => b.Unit == enemy.Unit);
             Assert.AreEqual("plate_party", units[0].Plate.name);
             Assert.AreEqual("plate_enemy", enemy.Plate.name);
-            Assert.AreEqual("plate_party", board.Frame.name);
-            Assert.AreEqual("plate_enemy", enemyBoard.Frame.name);
-            Assert.IsFalse(board.Button.interactable, "The line of the panel is not clickable either until a potion is armed.");
+            Assert.IsFalse(board.Button.interactable, "The board in the panel is not clickable either until a potion is armed.");
             UiTestUtil.Click(potions[0].Button);
             yield return null;
             Assert.AreEqual("plate_target", units[0].Plate.name, "The potion can be used on this ally.");
-            Assert.AreEqual("plate_target", board.Frame.name, "The line of the panel says so too.");
             Assert.AreEqual("plate_enemy", enemy.Plate.name, "Not on an enemy.");
-            Assert.AreEqual("plate_enemy", enemyBoard.Frame.name);
-            Assert.IsTrue(board.Button.interactable, "The line of the panel takes the click too.");
+            Assert.IsTrue(board.Button.interactable, "The board in the panel takes the click too.");
+            Assert.IsFalse(enemyBoard.Button.interactable, "An enemy's board never does.");
             UiTestUtil.Click(units[0].Button);
             yield return null;
             Assert.AreEqual("plate_party", units[0].Plate.name, "The potion is used: nothing waits for a target.");
-            Assert.AreEqual("plate_party", board.Frame.name);
 
             Assert.AreEqual(1, engine.Inputs.Count);
             Assert.AreEqual(BattleInputKind.UsePotion, engine.Inputs[0].Kind);
@@ -451,13 +447,13 @@ namespace F1.Tests
                 Assert.AreEqual(row <= partyRows, UiTestUtil.At(screen, "Frame/Field/PartyRow" + row).gameObject.activeSelf, $"Party row {row}");
             }
 
-            // The board panel follows the stage: a living enemy's line is in the panel's line of its row, and the dead have none.
+            // The board panel follows the stage: a living enemy's board is in the panel's column of its row, and the dead have none.
             var shownBoards = new System.Collections.Generic.List<BattleBoardView>();
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
-                BattleBoardView[] inLine = UiTestUtil.Views<BattleBoardView>(UiTestUtil.At(screen, "Frame/BoardPanel/EnemyLine" + row));
-                Assert.LessOrEqual(inLine.Length, 1, $"Line {row} holds one unit's board.");
-                foreach (BattleBoardView board in inLine)
+                BattleBoardView[] inColumn = UiTestUtil.Views<BattleBoardView>(UiTestUtil.At(screen, "Frame/BoardPanel/EnemyBoard" + row));
+                Assert.LessOrEqual(inColumn.Length, 1, $"Column {row} holds one unit's board.");
+                foreach (BattleBoardView board in inColumn)
                 {
                     Assert.AreEqual(row, board.Unit.Row, UiText.Name(board.Unit.Setup.Name));
                     Assert.IsTrue(board.Unit.Alive);
@@ -645,18 +641,16 @@ namespace F1.Tests
                 string jobFigure = data.Jobs.Get(member.JobId).Figure;
                 AssertShows(column.Figure, jobFigure, member.MercenaryId);
 
-                // The row's line of the board panel starts with the face cut out of that figure, named like it.
-                Assert.IsTrue(column.Line.activeSelf, member.MercenaryId);
+                // The row's board in the panel is shown with the column.
+                Assert.IsTrue(column.Board.activeSelf, member.MercenaryId);
                 Assert.IsNotNull(jobFigure, "The jobs of the game have figures.");
-                Assert.IsNotNull(column.Face, member.MercenaryId);
-                Assert.AreEqual(jobFigure.Substring(jobFigure.LastIndexOf('/') + 1).Replace('-', '_'), column.Face.name, member.MercenaryId);
 
                 Assert.IsNotEmpty(member.Items, member.MercenaryId);
                 Assert.Greater(member.ItemSlots, member.Items.Count, member.MercenaryId);
 
-                // The board is as wide as the member's cells, and the bag behind the cells is stretched over it.
-                Assert.AreEqual(BattleItemView.BoardWidth(member.ItemSlots), column.BoardWidth, 0.01f, member.MercenaryId);
-                Assert.IsTrue(UiTestUtil.At(column.Line.transform, "Party" + member.Row + "Cells/Party" + member.Row + "Bag").GetComponent<Image>().enabled, member.MercenaryId);
+                // The board is as high as the member's cells stacked, and the bag behind the cells is stretched over it.
+                Assert.AreEqual(BattleItemView.BoardHeight(member.ItemSlots), column.BoardHeight, 0.01f, member.MercenaryId);
+                Assert.IsTrue(UiTestUtil.At(column.Board.transform, "Party" + member.Row + "Cells/Party" + member.Row + "Bag").GetComponent<Image>().enabled, member.MercenaryId);
                 for (int i = 0; i < member.Items.Count; i++)
                 {
                     EquippedItem item = member.Items[i];
@@ -709,24 +703,14 @@ namespace F1.Tests
                     Assert.Greater(art.rect.width, place.rect.width, id);
                 }
 
-                // The unit's line of the board panel: the face cut out of the figure it is shown as, with the row on
-                // its badge; an enemy's line reads from the right.
+                // The unit's board of the panel is in the column of its row, under its stage column.
                 BattleBoardView board = boards.Single(b => b.Unit == unit.Unit);
-                Assert.AreEqual(unit.Unit.Row.ToString(), UiTestUtil.TextAt(board, "BoardFace/BoardBadge/BoardRow"), id);
-                Assert.AreEqual(unit.Unit.Side == BattleSide.Enemy, board.Mirrored, id);
-                if (address == null)
-                {
-                    Assert.IsNull(board.Face, id);
-                }
-                else
-                {
-                    Assert.IsNotNull(board.Face, id);
-                    Assert.AreEqual(address.Substring(address.LastIndexOf('/') + 1).Replace('-', '_'), board.Face.name, id);
-                }
+                string side = unit.Unit.Side == BattleSide.Party ? "Party" : "Enemy";
+                Assert.AreEqual(side + "Board" + unit.Unit.Row, board.transform.parent.name, id);
 
-                // The board is as wide as the unit's cells, with the bag behind them; each cell shows the icon
+                // The board is as high as the unit's cells stacked, with the bag behind them; each cell shows the icon
                 // its item's data names instead of the name; an enemy's icons are mirrored.
-                Assert.AreEqual(BattleItemView.BoardWidth(unit.Unit.Setup.ItemSlots), board.BoardWidth, 0.01f, id);
+                Assert.AreEqual(BattleItemView.BoardHeight(unit.Unit.Setup.ItemSlots), board.BoardHeight, 0.01f, id);
                 Assert.IsTrue(UiTestUtil.At(board, "BoardCells/BoardBag").GetComponent<Image>().enabled, id);
                 BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(board);
                 Assert.AreEqual(unit.Unit.Items.Count, cells.Length, id);
@@ -763,10 +747,6 @@ namespace F1.Tests
 
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Single(u => u.Unit.InDog);
             Assert.AreEqual("plate_danger", unit.Plate.name);
-            Assert.AreEqual(
-                "plate_danger",
-                UiTestUtil.Views<BattleBoardView>(UiTestUtil.Screen<BattleScreen>()).Single(b => b.Unit == unit.Unit).Frame.name,
-                "Its line of the board panel says so too.");
 
             // The state line holds the death's door state with its words, and nothing else.
             Assert.IsTrue(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);

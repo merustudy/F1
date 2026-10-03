@@ -16,14 +16,14 @@ namespace F1.UI
     /// passes potion and retreat clicks on. Speed and pause change only how fast the battle is
     /// shown; the engine decides every outcome.
     ///
-    /// Each side has one column of the stage and one line of the board panel per row, and a row
-    /// holds one unit. A unit's figure and plate stand in the column of the row the engine says it
-    /// is in, and its face and item cells lie in the panel's line of that row, so both move when
-    /// the unit advances. The dead leave the stage and the panel. The event log is not shown
-    /// while the battle runs; the result panel opens a viewer with the whole log. What happens
-    /// is played as it happens (<see cref="BattlePresenter"/>): numbers rise, units lunge and
-    /// recoil, cells flash, the storm's clock in the middle of the panel fills and darkens the
-    /// stage, and the last few events read as captions under the clock.
+    /// Each side has one column of the stage and, right under it, one column of the board panel
+    /// per row, and a row holds one unit. A unit's figure and plate stand in the stage column of
+    /// the row the engine says it is in, and its item cells in the panel column under it, so both
+    /// move when the unit advances. The dead leave the stage and the panel. The event log is not
+    /// shown while the battle runs; the result panel opens a viewer with the whole log. What
+    /// happens is played as it happens (<see cref="BattlePresenter"/>): numbers rise, units lunge
+    /// and recoil, cells flash, the storm's clock between the two sides of the panel fills and
+    /// darkens the stage, and the last few events read as captions in the header.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
@@ -52,8 +52,8 @@ namespace F1.UI
         [SerializeField] RectTransform[] _partyRows;
         [SerializeField] RectTransform[] _enemyRows;
         [SerializeField] BattleBoardView _boardTemplate;
-        [SerializeField] RectTransform[] _partyLines;
-        [SerializeField] RectTransform[] _enemyLines;
+        [SerializeField] RectTransform[] _partyBoardColumns;
+        [SerializeField] RectTransform[] _enemyBoardColumns;
         [SerializeField] PotionSlotView _potionTemplate;
         [SerializeField] Transform _potionParent;
         [SerializeField] TMP_Text _potionHint;
@@ -103,7 +103,7 @@ namespace F1.UI
         /// <summary>How far the storm's ring has filled: 0 at the start, 1 when the storm is here.</summary>
         public float StormRingFill => _clockRing.fillAmount;
 
-        /// <summary>The captions under the clock, oldest first.</summary>
+        /// <summary>The captions in the header, oldest first.</summary>
         public IReadOnlyList<string> Captions => _captionLines;
 
         /// <summary>The dungeon's background behind the battle, or null when the dungeon has none.</summary>
@@ -139,11 +139,11 @@ namespace F1.UI
             LayoutColumns(engine.Setup.Balance.PartySize);
             RenderTitle();
 
-            // A unit has a view on the stage and a line in the panel; for an ally, both take the click a potion is aimed with.
+            // A unit has a view on the stage and a board in the panel; for an ally, both take the click a potion is aimed with.
             foreach (BattleUnit unit in engine.Party)
             {
                 BattleUnitView view = CreateUnit(unit, _partyRows[unit.Row - 1]);
-                BattleBoardView board = CreateBoard(unit, _partyLines[unit.Row - 1]);
+                BattleBoardView board = CreateBoard(unit, _partyBoardColumns[unit.Row - 1]);
                 _partyViews.Add(view);
                 _partyBoards.Add(board);
                 int index = unit.Index;
@@ -154,7 +154,7 @@ namespace F1.UI
             foreach (BattleUnit unit in engine.Enemies)
             {
                 _enemyViews.Add(CreateUnit(unit, _enemyRows[unit.Row - 1]));
-                _enemyBoards.Add(CreateBoard(unit, _enemyLines[unit.Row - 1]));
+                _enemyBoards.Add(CreateBoard(unit, _enemyBoardColumns[unit.Row - 1]));
             }
 
             for (int i = 0; i < engine.Potions.Count; i++)
@@ -205,7 +205,7 @@ namespace F1.UI
             return unit.Index >= 0 && unit.Index < boards.Count ? boards[unit.Index] : null;
         }
 
-        /// <summary>A new line under the clock; the oldest line goes when there are more than fit.</summary>
+        /// <summary>A new caption in the header; the oldest goes when there are more than fit.</summary>
         void PushCaption(string line)
         {
             _captionLines.Add(line);
@@ -294,25 +294,33 @@ namespace F1.UI
         /// Spreads the columns over the field (<see cref="FieldLayout"/>): the rows the party can
         /// stand in on the left (row 1 next to the middle), every row of the enemy on the right. The
         /// party is smaller than a full line, so its columns beyond the party size are not shown.
+        /// The board panel's columns stand right under the stage's; the panel spans the frame, so
+        /// they are offset by the field's left edge.
         /// </summary>
         void LayoutColumns(int partyRows)
         {
             partyRows = Mathf.Min(partyRows, _partyRows.Length);
             float width = FieldLayout.ColumnWidth(_field.rect.width, partyRows, _enemyRows.Length);
+            float panelLeft = _field.anchoredPosition.x;
 
             for (int i = 0; i < _partyRows.Length; i++)
             {
                 bool used = i < partyRows;
                 _partyRows[i].gameObject.SetActive(used);
+                _partyBoardColumns[i].gameObject.SetActive(used);
                 if (used)
                 {
-                    PlaceColumn(_partyRows[i], FieldLayout.PartyColumnX(width, partyRows, i), width);
+                    float x = FieldLayout.PartyColumnX(width, partyRows, i);
+                    PlaceColumn(_partyRows[i], x, width);
+                    PlaceColumn(_partyBoardColumns[i], panelLeft + x, width);
                 }
             }
 
             for (int i = 0; i < _enemyRows.Length; i++)
             {
-                PlaceColumn(_enemyRows[i], FieldLayout.EnemyColumnX(width, partyRows, i), width);
+                float x = FieldLayout.EnemyColumnX(width, partyRows, i);
+                PlaceColumn(_enemyRows[i], x, width);
+                PlaceColumn(_enemyBoardColumns[i], panelLeft + x, width);
             }
         }
 
@@ -333,13 +341,12 @@ namespace F1.UI
             return view;
         }
 
-        /// <summary>The unit's line of the board panel: the face cut out of the figure the unit is shown as, and its cells.</summary>
-        BattleBoardView CreateBoard(BattleUnit unit, Transform line)
+        /// <summary>The unit's board of the board panel: its cells, in the panel column of its row.</summary>
+        BattleBoardView CreateBoard(BattleUnit unit, Transform column)
         {
-            BattleBoardView board = Instantiate(_boardTemplate, line);
+            BattleBoardView board = Instantiate(_boardTemplate, column);
             board.gameObject.SetActive(true);
-            string id = unit.Setup.SourceId;
-            board.Bind(unit, unit.Side == BattleSide.Party ? _art.FaceOfMercenary(id) : _art.FaceOfEnemy(id), _art);
+            board.Bind(unit, _art);
             return board;
         }
 
@@ -371,8 +378,8 @@ namespace F1.UI
 
             Place(_partyViews, _partyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
             Place(_enemyViews, _enemyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
-            Place(_partyBoards, _partyLines, board => board.Unit, null);
-            Place(_enemyBoards, _enemyLines, board => board.Unit, null);
+            Place(_partyBoards, _partyBoardColumns, board => board.Unit, null);
+            Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, null);
             bool targeting = ongoing && _armedPotion >= 0;
             foreach (BattleUnitView view in _partyViews)
             {

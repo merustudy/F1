@@ -9,7 +9,7 @@ namespace F1.Editor.Setup
     {
         /// <summary>
         /// The reward screen: the party as in battle (the stage on the left, the boards in the panel
-        /// under it), the rewards stacked on the right above the panel, and the hint and the buttons
+        /// under it), the potions and the rewards stacked on the right above the panel, and the hint and the buttons
         /// in the panel's right half.
         /// </summary>
         static UIScreen BuildReward(Transform holder)
@@ -20,8 +20,8 @@ namespace F1.Editor.Setup
             UiBuild.Box(header, 0f, 0f, 1920f, 80f);
             UiBuild.Box(UiBuild.LocalizedLabel("RewardTitle", header.transform, UiKeys.Reward.Title, 36f, UiPalette.Text), 40f, 14f, 900f, 52f);
 
-            // The rewards, one under the other, as wide as the right half, above the panel. Three cards fit the room.
-            RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, 110f, 920f, BoardPanelTop - 16f - 110f);
+            // The rewards, one under the other, as wide as the right half, under the potions and above the panel. Three cards fit the room.
+            RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, PartyRightTop, 920f, BoardPanelTop - 16f - PartyRightTop);
             VerticalLayoutGroup stack = UiBuild.Vertical(options, RewardCardGap);
             stack.childControlWidth = true;
             stack.childForceExpandWidth = true;
@@ -48,11 +48,11 @@ namespace F1.Editor.Setup
             return screen;
         }
 
-        /// <summary>A reward card's height and the gap between two: three cards fill the room above the panel.</summary>
-        const float RewardCardHeight = 188f;
+        /// <summary>A reward card's height and the gap between two: three cards fill the room between the potions and the panel (2026-10-03 mockup V).</summary>
+        const float RewardCardHeight = 132f;
         const float RewardCardGap = 8f;
 
-        /// <summary>One reward card. The whole card is the button; the action text sits at its bottom right.</summary>
+        /// <summary>One reward card. The whole card is the button; the kind, the title and the action share the first line, the facts fill the rest.</summary>
         static RewardOptionView BuildRewardOption(Transform parent)
         {
             Image frame = UiBuild.Image("OptionTemplate", parent, UiPalette.PanelLight);
@@ -60,12 +60,11 @@ namespace F1.Editor.Setup
             Button button = UiBuild.MakeButton(frame);
             Transform option = frame.transform;
 
-            TextMeshProUGUI kind = UiBuild.Box(UiBuild.Label("OptionKind", option, 22f, UiPalette.TextDim), 20f, 12f, 300f, 30f);
-            TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionTitle", option, 32f, UiPalette.Text), 20f, 44f, 880f, 44f));
-            TextMeshProUGUI body = UiBuild.Label("OptionBody", option, 22f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(body, 20f, 92f, 880f, RewardCardHeight - 100f);
-            TextMeshProUGUI action = UiBuild.Label("OptionAction", option, 26f, UiPalette.Text, TextAlignmentOptions.Right);
-            UiBuild.Box(action, 20f, RewardCardHeight - 42f, 880f, 34f);
+            TextMeshProUGUI kind = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionKind", option, 19f, UiPalette.TextDim), 20f, 12f, 110f, 28f));
+            TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionTitle", option, 26f, UiPalette.Text), 130f, 6f, 500f, 38f));
+            TextMeshProUGUI action = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionAction", option, 22f, UiPalette.Text, TextAlignmentOptions.Right), 640f, 8f, 260f, 34f));
+            TextMeshProUGUI body = UiBuild.Label("OptionBody", option, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
+            UiBuild.Box(body, 20f, 46f, 880f, RewardCardHeight - 52f);
 
             var view = frame.gameObject.AddComponent<RewardOptionView>();
             UiBuild.SetReference(view, "_button", button);

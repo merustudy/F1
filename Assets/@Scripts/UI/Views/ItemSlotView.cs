@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One item on a member's board (as wide as the cells it takes, side by side as in battle) or
+    /// One item on a member's board (as high as the cells it takes, stacked as in battle) or
     /// one empty cell. An item shows its icon, as in battle, with its grade on the badge at the
     /// bottom-left corner; an item without an icon shows its name with the grade under it, smaller
     /// and dimmer; an empty cell says so. The chosen item's cell is the brass one. A cell that
@@ -63,11 +63,11 @@ namespace F1.UI
             _button.interactable = interactable;
         }
 
-        /// <summary>The width of the view in its line: the cells the item takes, side by side.</summary>
-        public void SetWidth(float width)
+        /// <summary>The height of the view in its column: the cells the item takes, stacked.</summary>
+        public void SetHeight(float height)
         {
             var rect = (RectTransform)transform;
-            rect.sizeDelta = new Vector2(width, rect.sizeDelta.y);
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, height);
         }
     }
 }

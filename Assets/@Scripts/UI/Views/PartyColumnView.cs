@@ -10,10 +10,10 @@ namespace F1.UI
     /// <summary>
     /// One row of the party side of the node map and the reward screen, in the battle screen's
     /// shape: on the stage, the row's column with the figure, the plate (the row, the name, HP and
-    /// the job) and forward and back under it; in the board panel under the stage, the row's line
-    /// with the face cut out of the figure and the item board side by side on its bag, whose cells
-    /// are the battle's (<see cref="BattleItemView"/>) and show the same icons, each with its grade
-    /// on a badge. It shows whoever stands in its row; an empty row shows nothing.
+    /// the job) and forward and back under it; in the board panel under the stage, the row's
+    /// column with the item board stacked on its bag, whose cells are the battle's
+    /// (<see cref="BattleItemView"/>) and show the same icons, each with its grade on a badge. It
+    /// shows whoever stands in its row; an empty row shows nothing.
     /// </summary>
     public sealed class PartyColumnView : MonoBehaviour
     {
@@ -26,9 +26,7 @@ namespace F1.UI
         [SerializeField] UiBar _hpBar;
         [SerializeField] Button _forward;
         [SerializeField] Button _back;
-        [SerializeField] GameObject _line;
-        [SerializeField] Image _face;
-        [SerializeField] GameObject _facePlaceholder;
+        [SerializeField] GameObject _board;
         [SerializeField] ItemSlotView _slotTemplate;
         [SerializeField] RectTransform _slotParent;
 
@@ -46,17 +44,14 @@ namespace F1.UI
         /// <summary>The art of whoever stands here, or its placeholder.</summary>
         public FigureView Figure => _figureView;
 
-        /// <summary>The row's line of the board panel: the face and the cells. Shown and hidden with the column.</summary>
-        public GameObject Line => _line;
-
-        /// <summary>The face on show in the panel, or null while the placeholder stands in.</summary>
-        public Sprite Face => _face.enabled ? _face.sprite : null;
+        /// <summary>The row's column of the board panel, under the stage column: the cells. Shown and hidden with the column, and placed under it by the party side.</summary>
+        public GameObject Board => _board;
 
         /// <summary>The cell views in board order: one per item, then one per empty cell. The rest are hidden.</summary>
         public IReadOnlyList<ItemSlotView> Slots => _views;
 
-        /// <summary>The width of the board on show: the member's cells side by side. The bag behind them is as long.</summary>
-        public float BoardWidth => _slotParent.sizeDelta.x;
+        /// <summary>The height of the board on show: the member's cells stacked. The bag behind them is as long.</summary>
+        public float BoardHeight => _slotParent.sizeDelta.y;
 
         /// <summary>A cell of the board was clicked: the first cell of an item, or an empty cell.</summary>
         public event Action<int> CellClicked;
@@ -67,10 +62,10 @@ namespace F1.UI
             Member = -1;
             _figure.SetActive(false);
             _card.SetActive(false);
-            _line.SetActive(false);
+            _board.SetActive(false);
         }
 
-        /// <param name="art">Where the figure and the face of the member's job and the icons of its items come from.</param>
+        /// <param name="art">Where the figure of the member's job and the icons of its items come from.</param>
         /// <param name="selectedCell">The first cell of the highlighted item, or -1.</param>
         /// <param name="canClickCell">Whether a cell (the first of an item, or an empty one) takes a click now.</param>
         public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, int selectedCell, Func<int, bool> canClickCell)
@@ -86,14 +81,10 @@ namespace F1.UI
             _forward.interactable = canMoveForward;
             _back.interactable = canMoveBack;
 
-            _line.SetActive(true);
-            Sprite face = art.FaceOfJob(member.JobId);
-            _face.sprite = face;
-            _face.enabled = face != null;
-            _facePlaceholder.SetActive(face == null);
+            _board.SetActive(true);
 
-            // The board is as wide as the member's cells, so the bag behind the cells is as long as the board.
-            _slotParent.sizeDelta = new Vector2(BattleItemView.BoardWidth(member.ItemSlots), BattleItemView.CellHeight);
+            // The board is as high as the member's cells, so the bag behind the cells is as long as the board.
+            _slotParent.sizeDelta = new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(member.ItemSlots));
 
             // One view per cell at most; whoever stands here decides how many are used.
             while (_views.Count < member.ItemSlots)
@@ -104,19 +95,19 @@ namespace F1.UI
                 _views.Add(view);
             }
 
-            // Views in board order: one per item, as wide as its cells, then one per empty cell.
+            // Views in board order from the top: one per item, as high as its cells, then one per empty cell.
             int next = 0;
             int cell = 0;
             foreach (EquippedItem item in member.Items)
             {
                 int size = item.Item.Size;
-                ShowCell(_views[next++], cell, item, art.OfItem(item.Item.Id), BattleItemView.BoardWidth(size), selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, item, art.OfItem(item.Item.Id), BattleItemView.BoardHeight(size), selectedCell, canClickCell);
                 cell += size;
             }
 
             for (; cell < member.ItemSlots; cell++)
             {
-                ShowCell(_views[next++], cell, null, null, BattleItemView.CellWidth, selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, null, null, BattleItemView.CellHeight, selectedCell, canClickCell);
             }
 
             for (; next < _views.Count; next++)
@@ -125,10 +116,10 @@ namespace F1.UI
             }
         }
 
-        static void ShowCell(ItemSlotView view, int cell, EquippedItem item, Sprite icon, float width, int selectedCell, Func<int, bool> canClickCell)
+        static void ShowCell(ItemSlotView view, int cell, EquippedItem item, Sprite icon, float height, int selectedCell, Func<int, bool> canClickCell)
         {
             view.Index = cell;
-            view.SetWidth(width);
+            view.SetHeight(height);
             view.Show(item, icon, cell == selectedCell, canClickCell(cell));
             view.gameObject.SetActive(true);
         }

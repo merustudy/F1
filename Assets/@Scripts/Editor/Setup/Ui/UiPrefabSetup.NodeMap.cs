@@ -9,7 +9,7 @@ namespace F1.Editor.Setup
     {
         /// <summary>
         /// The node map: the party as in battle (the stage on the left, the boards in the panel
-        /// under it), the map on the right above the panel, and the chosen node's words and the
+        /// under it), the potions and the map on the right above the panel, and the chosen node's words and the
         /// buttons in the panel's right half. The panel names no enemies: who waits at a node is
         /// not shown (Docs/Design/03_Dungeon_Structure.md §1).
         /// </summary>
@@ -23,10 +23,11 @@ namespace F1.Editor.Setup
             TextMeshProUGUI progress = UiBuild.Label("Progress", header.transform, 30f, UiPalette.TextDim, TextAlignmentOptions.Right);
             UiBuild.Box(progress, 1280f, 18f, 600f, 44f);
 
-            // Map: nodes and paths are created at runtime inside the area, measured from its bottom-left corner. It ends above the panel.
+            // Map: nodes and paths are created at runtime inside the area, measured from its bottom-left corner.
+            // It starts under the potions and ends above the panel.
             Image map = UiBuild.Panel("Map", frame, UiPalette.Panel);
-            UiBuild.Box(map, 980f, 110f, 920f, BoardPanelTop - 16f - 110f);
-            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 860f, BoardPanelTop - 16f - 110f - 60f);
+            UiBuild.Box(map, 980f, PartyRightTop, 920f, BoardPanelTop - 16f - PartyRightTop);
+            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 860f, BoardPanelTop - 16f - PartyRightTop - 60f);
 
             Image edgeTemplate = UiBuild.Image("EdgeTemplate", mapArea, UiPalette.Line);
             UiBuild.Place(edgeTemplate.rectTransform, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 6f));

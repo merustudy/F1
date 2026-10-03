@@ -12,8 +12,8 @@ namespace F1.UI
     /// has none) and the plate under its feet. The plate holds the row the unit stands in, its
     /// name, its HP, and a line of states: shield and burn as an icon with a number, or the
     /// death's door state. The plate's color says whose side the unit is on, that it is at death's
-    /// door or that a potion can be used on it. The unit's items are not here: they are its line
-    /// of the board panel under the stage (<see cref="BattleBoardView"/>). It shows what the
+    /// door or that a potion can be used on it. The unit's items are not here: they are its board
+    /// in the panel column under the stage (<see cref="BattleBoardView"/>). It shows what the
     /// engine says; texts are rebuilt only when their numbers change. The battle screen takes a
     /// dead unit off the stage.
     ///

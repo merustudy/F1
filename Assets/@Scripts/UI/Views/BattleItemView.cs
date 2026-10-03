@@ -9,10 +9,10 @@ namespace F1.UI
     /// One item of a unit in battle: a cell of the item board. The cell itself is the cooldown
     /// gauge: it fills from the left and the item fires when it is full. The item's icon lies over
     /// the gauge, inside the cell's rim; an item without an icon shows its name instead. The cells
-    /// of a board lie side by side in the unit's line of the board panel, so a big item takes more
-    /// than one cell and the cell grows to the right; its icon is scaled to fit that shape.
-    /// An enemy's icon is mirrored so that its weapon points at the party. When the item fires,
-    /// the cell flashes and the icon pops for a moment (<see cref="Pulse"/>).
+    /// of a board are stacked top to bottom in the unit's column of the board panel (2026-10-03
+    /// mockup V), so a big item takes more than one cell and the cell grows downwards; its icon is
+    /// scaled to fit that shape. An enemy's icon is mirrored so that its weapon points at the
+    /// party. When the item fires, the cell flashes and the icon pops for a moment (<see cref="Pulse"/>).
     /// </summary>
     public sealed class BattleItemView : MonoBehaviour
     {
@@ -24,13 +24,13 @@ namespace F1.UI
         static readonly Color FlashLight = new Color(1f, 0.92f, 0.66f, 1f);
 
         /// <summary>
-        /// A cell of the board panel: a square (2026-10-03 mockup G), and the gap between two cells
-        /// side by side. A big item's cells make a wider rectangle. The party side of the node map
-        /// and the reward screen uses the same cells.
+        /// A cell of the board panel: a strip as wide as a column of the stage (2026-10-03 mockup V),
+        /// and the gap between two cells stacked. A big item's cells make a taller strip. The party
+        /// side of the node map and the reward screen uses the same cells.
         /// </summary>
-        public const float CellWidth = 72f;
-        public const float CellHeight = 72f;
-        public const float CellGapX = 4f;
+        public const float CellWidth = 180f;
+        public const float CellHeight = 50f;
+        public const float CellGapY = 4f;
 
         [SerializeField] UiBar _cooldown;
         [SerializeField] Image _icon;
@@ -42,10 +42,10 @@ namespace F1.UI
         float _mirror = 1f;
         float _pulseAge = -1f;
 
-        /// <summary>The width of a board of this many cells side by side.</summary>
-        public static float BoardWidth(int cells)
+        /// <summary>The height of a board of this many cells stacked.</summary>
+        public static float BoardHeight(int cells)
         {
-            return cells * CellWidth + (cells - 1) * CellGapX;
+            return cells * CellHeight + (cells - 1) * CellGapY;
         }
 
         /// <summary>The icon on show, or null while the name stands in for it.</summary>
@@ -68,7 +68,7 @@ namespace F1.UI
             _icon.rectTransform.localScale = new Vector3(_mirror, 1f, 1f);
 
             var rect = (RectTransform)transform;
-            rect.sizeDelta = new Vector2(BoardWidth(cells), CellHeight);
+            rect.sizeDelta = new Vector2(CellWidth, BoardHeight(cells));
 
             ShowActive(item.Active);
         }
