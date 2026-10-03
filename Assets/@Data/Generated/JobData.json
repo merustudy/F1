@@ -8,7 +8,7 @@
         "ko-KR": "대마법사"
       },
       "MaxHp": 80,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "fire_staff",
       "WeaponGrade": 10,
       "RecommendedRow": 3,
@@ -36,7 +36,7 @@
         "ko-KR": "주교"
       },
       "MaxHp": 90,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "healing_staff",
       "WeaponGrade": 10,
       "RecommendedRow": 3,
@@ -61,7 +61,7 @@
         "ko-KR": "기사"
       },
       "MaxHp": 140,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "longsword",
       "WeaponGrade": 10,
       "RecommendedRow": 1,
@@ -89,7 +89,7 @@
         "ko-KR": "성기사"
       },
       "MaxHp": 130,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "mace",
       "WeaponGrade": 9,
       "RecommendedRow": 1,
@@ -117,7 +117,7 @@
         "ko-KR": "마검사"
       },
       "MaxHp": 100,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "sword",
       "WeaponGrade": 12,
       "RecommendedRow": 2,
@@ -142,7 +142,7 @@
         "ko-KR": "발키리"
       },
       "MaxHp": 120,
-      "ItemSlots": 4,
+      "ItemSlots": 5,
       "WeaponItemId": "greataxe",
       "WeaponGrade": 12,
       "RecommendedRow": 1,

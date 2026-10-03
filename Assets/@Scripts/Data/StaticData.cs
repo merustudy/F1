@@ -148,7 +148,7 @@ namespace F1.Data
                     }
                 }
 
-                // The battle screen draws every board at most MaxItemSlots cells tall.
+                // A unit's line of the board panel holds at most MaxItemSlots cells side by side.
                 if (cells > JobData.MaxItemSlots)
                 {
                     problems.Add($"{what}: its items take {cells} cells, more than a board can have ({JobData.MaxItemSlots}).");

@@ -135,11 +135,11 @@ namespace F1.Tests
                 {
                     new ItemGrant("ballista", 12),
                     new ItemGrant("ballista", 12),
-                    new ItemGrant("claw", 12),
+                    new ItemGrant("ballista", 12),
                 })));
 
             StringAssert.Contains("Enemy 'chief'", problem);
-            StringAssert.Contains("take 7 cells", problem);
+            StringAssert.Contains("take 9 cells", problem);
         }
 
         [Test]
