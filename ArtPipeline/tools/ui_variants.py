@@ -5,7 +5,8 @@ A frame is generated once. The colors it comes in (a side's plate, a selected sl
 button the game tints) are made here by giving its fill another color, so that every variant has
 the same shape, outline and details. Rosters/ui_variant.csv says which: Key (the name of the
 sprite), Source (a key of Rosters/ui_frame.csv), Fill (#RRGGBB, or empty for the frame's own
-color). No API call is made.
+color), Mode (flatten: the fill becomes one flat color; tint: the fill keeps its drawn grain and
+is recolored, for a frame generated with Flat = no). No API call is made.
 """
 
 import argparse
@@ -16,7 +17,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from gen_image import OUTPUT_DIR, ROSTERS, PipelineError, flatten_fill, require_file
+from gen_image import OUTPUT_DIR, ROSTERS, PipelineError, flatten_fill, require_file, tint_fill
 
 SOURCE_DIR = OUTPUT_DIR / "ui_frame"
 VARIANT_DIR = OUTPUT_DIR / "ui_variant"
@@ -51,9 +52,13 @@ def read_variants() -> list:
                 raise PipelineError(f"{where}: Fill '{fill}' 은 #RRGGBB 이거나 비어 있어야 한다.")
             target = tuple(int(match.group(1)[i:i + 2], 16) for i in (0, 2, 4))
 
+        mode = (row.get("Mode") or "flatten").strip().lower()
+        if mode not in ("flatten", "tint"):
+            raise PipelineError(f"{where}: Mode '{mode}' 는 flatten 이나 tint 여야 한다.")
+
         path = SOURCE_DIR / f"{source}.png"
         require_file(path, f"{where} 의 Source '{source}' 의 맞춘 그림")
-        variants.append((key, path, target))
+        variants.append((key, path, target, mode))
     return variants
 
 
@@ -65,15 +70,19 @@ def main() -> int:
 
     try:
         variants = read_variants()
-        unknown = only - {key for key, _, _ in variants}
+        unknown = only - {key for key, _, _, _ in variants}
         if unknown:
             raise PipelineError(f"Roster에 없는 Key: {', '.join(sorted(unknown))}")
 
         VARIANT_DIR.mkdir(parents=True, exist_ok=True)
-        for key, source, target in variants:
+        for key, source, target, mode in variants:
             if only and key not in only:
                 continue
-            image = flatten_fill(Image.open(source).convert("RGBA"), target)
+            image = Image.open(source).convert("RGBA")
+            if mode == "tint":
+                image = image if target is None else tint_fill(image, target)
+            else:
+                image = flatten_fill(image, target)
             output = VARIANT_DIR / f"{key}.png"
             image.save(output, format="PNG")
             color = "틀의 색 그대로" if target is None else "#%02X%02X%02X" % target

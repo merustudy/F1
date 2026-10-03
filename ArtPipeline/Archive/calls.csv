@@ -52,3 +52,9 @@ Time,Type,Key,Name,Model,Quality,Size,TextInTokens,ImageInTokens,OutputTokens,Es
 2026-10-03T12:50:00+09:00,item,longbow,longbow,gpt-image-2.5-sunburst,medium,1536x512,751,1521,134,0.0199
 2026-10-03T12:50:12+09:00,item,spear,spear,gpt-image-2.5-sunburst,medium,1536x512,756,1521,134,0.0200
 2026-10-03T12:50:26+09:00,item,halberd,halberd,gpt-image-2.5-sunburst,medium,1536x512,767,1521,134,0.0200
+2026-10-03T17:25:18+09:00,ui_frame,panel,panel,gpt-image-2.5-sunburst,medium,1024x1024,746,1521,439,0.0291
+2026-10-03T17:25:33+09:00,ui_frame,plate,plate,gpt-image-2.5-sunburst,medium,1536x768,718,1521,229,0.0226
+2026-10-03T17:25:47+09:00,ui_frame,slot,slot,gpt-image-2.5-sunburst,medium,1536x512,728,1521,134,0.0198
+2026-10-03T17:25:59+09:00,ui_frame,button,button,gpt-image-2.5-sunburst,medium,1536x512,713,1521,134,0.0198
+2026-10-03T17:26:16+09:00,ui_frame,bag,bag,gpt-image-2.5-sunburst,medium,1536x768,736,1521,229,0.0227
+2026-10-03T17:26:34+09:00,ui_piece,dial,dial,gpt-image-2.5-sunburst,medium,1024x1024,612,1521,439,0.0284

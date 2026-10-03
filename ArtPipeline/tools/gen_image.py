@@ -181,6 +181,20 @@ TYPES = {
         "tail": "Draw this one symbol as an icon.",
         "fit": "glyph",
     },
+    "ui_piece": {
+        "shared_section": 14,
+        "section": 22,
+        "forbidden_section": 17,
+        "reference_section": 18,
+        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "mirror_references": False,
+        # A decorative piece shown whole (the storm clock's dial), named by its use on the screens.
+        "data": None,
+        "dungeon_theme": None,
+        "quality": "medium",
+        "tail": "Draw this one piece.",
+        "fit": "glyph",
+    },
 }
 
 # The figure fit: every full-body figure stands on the same floor line of the same 3:4
@@ -418,10 +432,15 @@ def read_ui_columns(row: dict, key: str, path: Path) -> dict:
     if not match:
         raise PipelineError(f"Roster의 '{key}' 의 Size 는 '너비x높이' 여야 한다.\n  파일: {path}")
     width, height = int(match.group(1)), int(match.group(2))
+
+    # A frame's fill is flattened to one color unless the row keeps its drawn grain (Flat = no).
+    flat = (row.get("Flat") or "yes").strip().lower()
+    if flat not in ("yes", "no"):
+        raise PipelineError(f"Roster의 '{key}' 의 Flat 은 yes 나 no 여야 한다.\n  파일: {path}")
     if not all(UI_SIZE_RANGE[0] <= side <= UI_SIZE_RANGE[1] for side in (width, height)):
         raise PipelineError(f"Roster의 '{key}' 의 Size {width}x{height} 가 범위 {UI_SIZE_RANGE[0]}~{UI_SIZE_RANGE[1]} 밖이다.")
 
-    return {"size": (width, height), "outline": number("Outline", *UI_OUTLINE_RANGE)}
+    return {"size": (width, height), "outline": number("Outline", *UI_OUTLINE_RANGE), "flat": flat == "yes"}
 
 
 def generation_size(width: int, height: int) -> str:
@@ -770,6 +789,31 @@ def flatten_fill(image: Image.Image, target=None) -> Image.Image:
     return result
 
 
+def tint_fill(image: Image.Image, target) -> Image.Image:
+    """Gives the body of a piece another color and keeps its drawn grain.
+
+    Every pixel of the fill's own hue is scaled, channel by channel, by the ratio of the target
+    color to the fill color, so the two tones of a grain stay two tones in the new color. The
+    outline and the lines of another hue are left as they are. For a frame whose fill was not
+    flattened (Flat = no in its roster row).
+    """
+    fill = fill_of(image)
+    norm = sum(channel * channel for channel in fill) ** 0.5
+    scale = tuple(target[i] / max(1, fill[i]) for i in range(3))
+    result = image.copy()
+    pixels = result.load()
+    for y in range(result.height):
+        for x in range(result.width):
+            red, green, blue, alpha = pixels[x, y]
+            length = (red * red + green * green + blue * blue) ** 0.5
+            if alpha == 0 or length <= UI_FILL_MIN_LENGTH:
+                continue
+            likeness = (red * fill[0] + green * fill[1] + blue * fill[2]) / (length * norm)
+            if likeness > UI_FILL_LIKENESS:
+                pixels[x, y] = (min(255, round(red * scale[0])), min(255, round(green * scale[1])), min(255, round(blue * scale[2])), alpha)
+    return result
+
+
 def fill_tones(steps) -> list:
     """The flat tones of a piece's fill, as brightness against the fill: 1.0 and the tone of each band.
 
@@ -801,7 +845,7 @@ def fill_tones(steps) -> list:
     return [1.0 if tone == nearest else tone for tone in tones] or [1.0]
 
 
-def fit_ui(png_bytes: bytes, size, outline: int, stretch: bool, fill: float = UI_GLYPH_FILL):
+def fit_ui(png_bytes: bytes, size, outline: int, stretch: bool, fill: float = UI_GLYPH_FILL, flatten: bool = True):
     """Cuts a piece of the user interface, or an item's icon, out and gives it its size and its outline.
 
     stretch: a frame fills its size exactly, whatever its drawn proportions were (it is
@@ -843,7 +887,7 @@ def fit_ui(png_bytes: bytes, size, outline: int, stretch: bool, fill: float = UI
         result.putalpha(grow(body, ring))
     result.alpha_composite(canvas)
     result = result.resize(size, Image.LANCZOS)
-    if stretch:
+    if stretch and flatten:
         result = flatten_fill(result)
 
     buffer = BytesIO()
@@ -870,7 +914,7 @@ def fit(kind: str, png_bytes: bytes, row: dict):
     if TYPES[kind]["fit"] == "scene":
         return fit_scene(png_bytes, row["floor_line"])
     if TYPES[kind]["fit"] in ("frame", "glyph"):
-        return fit_ui(png_bytes, row["ui"]["size"], row["ui"]["outline"], stretch=TYPES[kind]["fit"] == "frame")
+        return fit_ui(png_bytes, row["ui"]["size"], row["ui"]["outline"], stretch=TYPES[kind]["fit"] == "frame", flatten=row["ui"]["flat"])
     if TYPES[kind]["fit"] == "cell":
         png, report = fit_ui(png_bytes, ITEM_CELLS[row["cells"]]["canvas"], ITEM_OUTLINE, stretch=False, fill=ITEM_FILL)
         report["cells"] = row["cells"]

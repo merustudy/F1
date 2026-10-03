@@ -197,23 +197,27 @@ Prepend verbatim to a `ui_frame` or `ui_icon` prompt, in place of §1.
 
 ```text
 Style: one piece of the user interface of a fantasy mercenary game, drawn in the same
-hand as its characters: flat 2D cartoon art with bold, simple shapes. Calm and plain.
+hand as its characters: flat 2D cartoon art with bold, simple shapes. Calm, worn and
+well made, like the gear of a mercenary company: leather, iron and brass.
 Linework: a bold, even, dark outline around the piece, thinner lines inside it,
 closed contours, no sketchy or broken lines.
 Color: flat solid fills in muted colors: dark navy, deep red, cream, dull brass,
 brown and grey. No gradients, no neon, no pastel.
 Shading: flat color, with at most one hard-edged darker tone. No soft shading.
+Material: where a material shows (leather grain, hammered iron, aged brass), it is
+drawn as a few simple flat shapes in two close tones, even all over. Never a
+photo-like texture.
 View: seen exactly from the front, like a paper cut-out lying flat. No perspective,
 no depth and no thickness.
 ```
 
 ## 15. UI Frame
 
-- Draw one empty frame alone: a flat rectangle with slightly rounded corners. Nothing else is in the picture.
+- Draw one empty frame alone: a flat rectangle with slightly rounded corners, a plate of worked material (leather, iron or brass-bound wood) as the subject says. Nothing else is in the picture.
 - It fills the picture: its sides run parallel to the sides of the picture, with a small even margin of empty space around it. It is not tilted and not seen from an angle.
 - All four sides are straight and all four corners are alike: the left half mirrors the right half and the top half mirrors the bottom half.
-- The border is the same on all four sides and narrow: the inside takes up most of the frame.
-- The inside is one plain flat color with nothing in it: nothing written, nothing drawn and no pattern.
+- The border is the same on all four sides and narrow: a band of the material with its small fittings (rivets, studs, stitches or a brass fillet) spaced evenly, and one small matching ornament in each corner (a rivet, a stud or a corner cap) that stays inside the corner. The inside takes up most of the frame.
+- The inside is one flat color. It may carry a faint, even, flat two-tone grain of the material (leather or hammered metal as simple shapes), the same everywhere, because the frame is stretched on screen. Nothing is written or drawn in it and no picture or emblem is in it.
 - Never add text, letters, numbers, icons, symbols, a shadow under it or a glow around it. Output a transparent PNG with all four corner pixels at alpha 0.
 
 ## 16. UI Icon
@@ -232,9 +236,9 @@ Paste as the AVOID block of a `ui_frame` or `ui_icon` prompt, in place of §2.
 ```text
 avoid: perspective, a tilted or angled view, 3D render, bevel, emboss, thickness,
 drop shadow, cast shadow, glow, bloom, gradients, soft shading, airbrush, glossy
-highlights, realistic materials, wood grain, stone texture, grain, cracks, scratches,
-ornaments along the border, scrollwork, filigree, gems, text, letters, numbers,
-watermark, a background, a scene, a character, a hand, more than one object
+highlights, photo-like or realistic textures, cracks, scratches, scrollwork, filigree,
+gems, an emblem or a picture inside the frame, text, letters, numbers, watermark,
+a background, a scene, a character, a hand, more than one object
 ```
 
 ## 18. UI Reference Rule
@@ -269,6 +273,16 @@ Added to §7 for an item that takes three cells of a board: a very long strip, t
 
 - The picture is a very long, thin strip, about twelve times as wide as it is tall. The item fills the strip from its left end to its right end and is only as thick as the strip is tall.
 - Lay a long item (a halberd, a pike) flat and level along the strip: its grip or lower end at the left, its point or head at the right. It is not tilted. Draw it as long and as slender as it really is.
+
+## 22. UI Piece
+
+For a decorative piece of the interface that is shown whole, never stretched: the dial of the storm clock.
+
+- Draw one piece alone, whole and centered, seen exactly from the front like a paper cut-out lying flat. Nothing else is in the picture.
+- It fills the picture with a small even margin of empty space around it.
+- It is made of the same materials as the frames (brass, iron, leather, dark navy) in a few flat shapes and two or three colors, with the same bold dark outline, and its fittings (rivets, ticks, a rim) are even and symmetrical.
+- Its face is empty where the subject says so: numbers are written on it by the game.
+- Never add text, letters, numbers, a shadow under it or a glow around it. Output a transparent PNG with all four corner pixels at alpha 0.
 
 ## Dungeon: abandoned_mine
 
