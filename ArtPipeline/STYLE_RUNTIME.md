@@ -256,23 +256,23 @@ interface, alone, in the same drawing style on a transparent background.
 
 Added to §7 for an item that takes one cell of a board: a wide strip.
 
-- The picture is a wide strip, three times as wide as it is tall. The item fills the strip from its left end to its right end.
+- The picture is a wide strip, about four times as wide as it is tall. The item fills the strip from its left end to its right end.
 - Lay a long item (a sword, an axe, a mace, a staff, a bow) flat and level along the strip: its grip or lower end at the left, its point, blade or head at the right. It is not tilted.
 - Lay a compact item (a shield, a flask, a pouch, a charm) on its side, or spread what belongs to it (a cord, a strap, leaves) out to the left and to the right, so that it is clearly wider than it is tall.
 
 ## 20. Item Shape: Two Cells
 
-Added to §7 for an item that takes two cells of a board: a long strip, two cells side by side.
+Added to §7 for an item that takes two cells of a board: two cells stacked, a wide rectangle.
 
-- The picture is a very long, thin strip, about eight times as wide as it is tall. The item fills the strip from its left end to its right end and is only as thick as the strip is tall.
-- Lay a long item (a bow, a spear) flat and level along the strip: its grip or lower end at the left, its point or head at the right. It is not tilted. Draw it as long and as slender as it really is.
+- The picture is a wide rectangle, about seven units wide to four tall. The item fills it from corner to corner.
+- Lay a long item (a bow, a spear) diagonally across it: its grip or lower end at the bottom left, its point or head at the top right. Draw it as long and as slender as it really is.
 
 ## 21. Item Shape: Three Cells
 
-Added to §7 for an item that takes three cells of a board: a very long strip, three cells side by side.
+Added to §7 for an item that takes three cells of a board: three cells stacked, nearly a square.
 
-- The picture is a very long, thin strip, about twelve times as wide as it is tall. The item fills the strip from its left end to its right end and is only as thick as the strip is tall.
-- Lay a long item (a halberd, a pike) flat and level along the strip: its grip or lower end at the left, its point or head at the right. It is not tilted. Draw it as long and as slender as it really is.
+- The picture is nearly square, a little wider than it is tall (about ten to nine). The item fills it from corner to corner.
+- Lay a long item (a halberd, a pike) diagonally across it: its grip or lower end at the bottom left, its point or head at the top right. Draw it as long and as slender as it really is.
 
 ## 22. UI Piece
 
