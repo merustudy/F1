@@ -14,6 +14,12 @@ namespace F1.UI
             return body == null ? null : UiStrings.Get(UiKeys.Log.Line, UiText.Seconds(e.TimeMs), body);
         }
 
+        /// <summary>The event as one short sentence without its time, for the panel's captions; null for events that are not shown.</summary>
+        public static string Caption(BattleEvent e, BattleEngine engine)
+        {
+            return Body(e, engine);
+        }
+
         public static string UnitName(BattleEngine engine, UnitRef unit)
         {
             return UiText.Name(engine.Unit(unit).Setup.Name);

@@ -19,11 +19,15 @@ namespace F1.Editor.Setup
 
         public readonly struct Piece
         {
-            public Piece(string name, int border = 0)
+            public Piece(string name, int border = 0, bool tiled = false)
             {
                 Name = name;
                 Border = border;
+                Tiled = tiled;
             }
+
+            /// <summary>True for a frame whose edges and middle are tiled instead of stretched: its border carries rivets or stitches that must keep their shape.</summary>
+            public bool Tiled { get; }
 
             /// <summary>The folder under the UI art directory and the file without its extension: "Frame/panel".</summary>
             public string Name { get; }
@@ -34,7 +38,7 @@ namespace F1.Editor.Setup
             public string AssetPath => ArtDirectory + "/" + Name + ".png";
         }
 
-        /// <summary>The dark panel behind a header, a strip of slots or a box.</summary>
+        /// <summary>The dark leather panel behind a header, a strip of slots or a box. Tiled: rivets run along its edges.</summary>
         public const string Panel = "Frame/panel";
 
         /// <summary>The plate under a unit, in the color of its side or state.</summary>
@@ -53,6 +57,18 @@ namespace F1.Editor.Setup
         /// <summary>A white button: the screen tints it.</summary>
         public const string Button = "Frame/button";
 
+        /// <summary>The leather bag behind a unit's item cells, as long as its board. Tiled: a stitch runs along its edges.</summary>
+        public const string Bag = "Frame/bag";
+
+        /// <summary>The dial of the storm clock in the middle of the board panel: a whole piece, never stretched (ui_piece).</summary>
+        public const string Dial = "Frame/dial";
+
+        /// <summary>The ring of the storm clock, filled radially as the storm comes. Drawn (same script).</summary>
+        public const string Ring = "Icon/ring";
+
+        /// <summary>A soft darkening towards the edges, stretched over the stage: the storm's dusk and the red of death's door. Drawn (same script).</summary>
+        public const string Vignette = "Icon/vignette";
+
         public const string Shield = "Icon/shield";
         public const string Burn = "Icon/burn";
         public const string DeathsDoor = "Icon/deaths_door";
@@ -61,7 +77,7 @@ namespace F1.Editor.Setup
         /// <summary>Every piece, with the border of each frame in the pixels of its sprite.</summary>
         public static readonly IReadOnlyList<Piece> All = new[]
         {
-            new Piece(Panel, 40),
+            new Piece(Panel, 40, tiled: true),
             new Piece(PlateParty, 44),
             new Piece(PlateEnemy, 44),
             new Piece(PlateDanger, 44),
@@ -70,11 +86,29 @@ namespace F1.Editor.Setup
             new Piece(Slot, 30),
             new Piece(SlotSelected, 30),
             new Piece(Button, 32),
+            new Piece(Bag, 40, tiled: true),
+            new Piece(Dial),
+            new Piece(Ring),
+            new Piece(Vignette),
             new Piece(Shield),
             new Piece(Burn),
             new Piece(DeathsDoor),
             new Piece(Storm),
         };
+
+        /// <summary>Whether the piece of this name is tiled rather than stretched.</summary>
+        public static bool IsTiled(string name)
+        {
+            foreach (Piece piece in All)
+            {
+                if (piece.Name == name)
+                {
+                    return piece.Tiled;
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>The sprite of a piece. Its file must have been imported as a sprite (ArtSetup.Sync).</summary>
         public static Sprite Load(string name)

@@ -9,6 +9,9 @@ namespace F1.UI
         [SerializeField] RectTransform _fill;
         [SerializeField] Image _fillImage;
 
+        /// <summary>The ratio on show, 0..1.</summary>
+        public float Ratio { get; private set; }
+
         public void Set(int value, int max)
         {
             SetRatio(max > 0 ? (float)value / max : 0f);
@@ -16,15 +19,22 @@ namespace F1.UI
 
         public void SetRatio(float ratio)
         {
-            _fill.anchorMin = Vector2.zero;
-            _fill.anchorMax = new Vector2(Mathf.Clamp01(ratio), 1f);
-            _fill.offsetMin = Vector2.zero;
-            _fill.offsetMax = Vector2.zero;
+            Ratio = Mathf.Clamp01(ratio);
+            Fill(_fill, Ratio);
         }
 
         public void SetColor(Color color)
         {
             _fillImage.color = color;
+        }
+
+        /// <summary>Stretches a fill of a bar to this share of its area, from the left.</summary>
+        public static void Fill(RectTransform rect, float ratio)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = new Vector2(Mathf.Clamp01(ratio), 1f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
     }
 }

@@ -16,12 +16,16 @@ namespace F1.Editor.Setup
         const float PlateHeight = 92f;
 
         /// <summary>
-        /// The margin between an item cell and its icon. The icons are drawn for the cell less this
-        /// margin, at twice that size (ArtPipeline/tools/gen_image.py: ITEM_CELLS), so the icon's
-        /// place has the icon's proportions and the icon fills it.
+        /// The margin between an item cell and its icon. The icon is scaled into the place inside
+        /// it, in proportion. (The icons on hand were drawn for the former cell of 180x60; their
+        /// shape and the cell's are settled together when the items are revised: Docs/Architecture/13_ART_PIPELINE.md "후처리 (`cell`)".)
         /// </summary>
-        const float ItemIconMarginX = 10f;
-        const float ItemIconMarginY = 8f;
+        const float ItemIconMarginX = 6f;
+        const float ItemIconMarginY = 6f;
+
+        /// <summary>How far the bag behind a board reaches out past its cells, sideways and up and down (the bags of two lines must not touch).</summary>
+        const float BoardBagPadX = 8f;
+        const float BoardBagPadY = 3f;
 
         /// <summary>The grade badge of an item on the party side: its size, and its distance from the cell's bottom-left corner.</summary>
         const float GradeBadgeSize = 24f;
@@ -57,12 +61,30 @@ namespace F1.Editor.Setup
             return image;
         }
 
-        /// <summary>Draws an image with a frame of the kit. The image's color tints the frame.</summary>
+        /// <summary>
+        /// Draws an image with a frame of the kit. The image's color tints the frame. A frame
+        /// whose edges carry rivets or stitches is tiled, so that they keep their shape however
+        /// far the frame reaches; the others are stretched.
+        /// </summary>
         static void Skin(Image image, string art, float borderScale = 1f)
         {
             image.sprite = UiArt.Load(art);
-            image.type = Image.Type.Sliced;
+            image.type = UiArt.IsTiled(art) ? Image.Type.Tiled : Image.Type.Sliced;
             image.pixelsPerUnitMultiplier = 1f / borderScale;
+        }
+
+        /// <summary>
+        /// The bag behind a board: a leather slab stretched over the cells and a little past them,
+        /// so it is as long as the board. It is the first child of the cells' rect and the layout
+        /// skips it, so the cells are laid out over it.
+        /// </summary>
+        static Image BuildBoardBag(RectTransform cells, string name)
+        {
+            Image bag = KitFrame(name, cells, UiArt.Bag);
+            bag.transform.SetAsFirstSibling();
+            UiBuild.Stretch(bag.rectTransform, -BoardBagPadX, -BoardBagPadY, -BoardBagPadX, -BoardBagPadY);
+            bag.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            return bag;
         }
 
         /// <summary>An icon of the kit, in proportion inside wherever the caller puts it.</summary>
@@ -92,19 +114,34 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// A bar in a frame of the kit: the fill grows from the left inside the frame's rim.
-        /// The caller places it.
+        /// The caller places it. With a ghost (<see cref="UiBarGhost"/>), a trailing fill behind the
+        /// fill lingers where the value just was (the HP bars: a hit reads as a red tail that is eaten away).
         /// </summary>
-        static UiBar KitBar(string name, Transform parent, string art, float borderScale, float inset, Color fillColor)
+        static UiBar KitBar(string name, Transform parent, string art, float borderScale, float inset, Color fillColor, bool ghost = false)
         {
             Image track = KitFrame(name, parent, art, borderScale);
             RectTransform area = UiBuild.Rect(name + "Area", track.transform);
             UiBuild.Stretch(area, inset, inset, inset, inset);
+            Image ghostFill = null;
+            if (ghost)
+            {
+                ghostFill = UiBuild.Image(name + "Ghost", area, UiPalette.Danger);
+                UiBuild.Stretch(ghostFill.rectTransform);
+            }
+
             Image fill = UiBuild.Image(name + "Fill", area, fillColor);
             UiBuild.Stretch(fill.rectTransform);
 
             var bar = track.gameObject.AddComponent<UiBar>();
             UiBuild.SetReference(bar, "_fill", fill.rectTransform);
             UiBuild.SetReference(bar, "_fillImage", fill);
+            if (ghost)
+            {
+                var trail = track.gameObject.AddComponent<UiBarGhost>();
+                UiBuild.SetReference(trail, "_bar", bar);
+                UiBuild.SetReference(trail, "_ghost", ghostFill.rectTransform);
+            }
+
             return bar;
         }
 
@@ -143,7 +180,7 @@ namespace F1.Editor.Setup
                 UiBuild.SingleLine(UiBuild.Line(UiBuild.Label(prefix + "Name", t, 20f, UiPalette.Text), 10f, 26f, 45f, 11f)),
                 UnitNameMinSize);
 
-            UiBar hpBar = KitBar(prefix + "HpBar", t, UiArt.Slot, 0.4f, 4f, UiPalette.Good);
+            UiBar hpBar = KitBar(prefix + "HpBar", t, UiArt.Slot, 0.4f, 4f, UiPalette.Good, ghost: true);
             UiBuild.Line(hpBar, 39f, 23f, 11f, 11f);
             TextMeshProUGUI hp = UiBuild.SingleLine(UiBuild.Label(prefix + "Hp", t, 15f, UiPalette.Text, TextAlignmentOptions.Center));
             UiBuild.Line(hp, 39f, 23f, 11f, 11f);

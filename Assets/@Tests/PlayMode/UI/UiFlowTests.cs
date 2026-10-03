@@ -653,6 +653,10 @@ namespace F1.Tests
 
                 Assert.IsNotEmpty(member.Items, member.MercenaryId);
                 Assert.Greater(member.ItemSlots, member.Items.Count, member.MercenaryId);
+
+                // The board is as wide as the member's cells, and the bag behind the cells is stretched over it.
+                Assert.AreEqual(BattleItemView.BoardWidth(member.ItemSlots), column.BoardWidth, 0.01f, member.MercenaryId);
+                Assert.IsTrue(UiTestUtil.At(column.Line.transform, "Party" + member.Row + "Cells/Party" + member.Row + "Bag").GetComponent<Image>().enabled, member.MercenaryId);
                 for (int i = 0; i < member.Items.Count; i++)
                 {
                     EquippedItem item = member.Items[i];
@@ -720,7 +724,10 @@ namespace F1.Tests
                     Assert.AreEqual(address.Substring(address.LastIndexOf('/') + 1).Replace('-', '_'), board.Face.name, id);
                 }
 
-                // Each cell shows the icon its item's data names instead of the name; an enemy's icons are mirrored.
+                // The board is as wide as the unit's cells, with the bag behind them; each cell shows the icon
+                // its item's data names instead of the name; an enemy's icons are mirrored.
+                Assert.AreEqual(BattleItemView.BoardWidth(unit.Unit.Setup.ItemSlots), board.BoardWidth, 0.01f, id);
+                Assert.IsTrue(UiTestUtil.At(board, "BoardCells/BoardBag").GetComponent<Image>().enabled, id);
                 BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(board);
                 Assert.AreEqual(unit.Unit.Items.Count, cells.Length, id);
                 for (int i = 0; i < cells.Length; i++)
@@ -772,6 +779,48 @@ namespace F1.Tests
             {
                 Assert.AreEqual(other.Unit.Side == BattleSide.Party ? "plate_party" : "plate_enemy", other.Plate.name);
                 Assert.IsFalse(UiTestUtil.At(other, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);
+            }
+        }
+
+        /// <summary>
+        /// What happens is played: once a hit has landed, a number has risen from the unit, the
+        /// caption line says what happened, every event so far has been passed, and the storm's
+        /// ring has filled as far as the time has gone.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_PlaysWhatHappens_AsRisingNumbersCaptionsAndTheStormRing()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+
+            // Small steps with a frame between them, so that what each step logs is still recent when it is drawn.
+            int guard = 0;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.Damaged) && !Managers.Expedition.Battle.IsFinished && guard++ < 300)
+            {
+                Managers.Expedition.AdvanceBattle(100);
+                yield return null;
+            }
+
+            Assert.IsTrue(engine.Events.Any(e => e.Kind == BattleEventKind.Damaged), "Somebody was hit within the first seconds.");
+            yield return null;
+
+            Assert.AreEqual(engine.Events.Count, battle.PlayedEvents, "Every event so far was passed.");
+            Assert.Greater(battle.Fx.FloatingPlayed, 0, "A hit rose as a number.");
+            Assert.IsNotEmpty(battle.Captions, "The hit reads as a caption.");
+            Assert.AreEqual(Mathf.Clamp01((float)engine.TimeMs / engine.Setup.Balance.StormStartMs), battle.StormRingFill, 0.001f);
+            Assert.AreEqual(engine.Events.Count(e => e.Kind == BattleEventKind.StormTicked), 0, "No storm yet.");
+            Assert.IsFalse(battle.Fx.DangerShown);
+
+            // The storm: the ring is full, the stage is dark, and a tick flashes and names its damage.
+            Managers.Expedition.AdvanceBattle(engine.Setup.Balance.StormStartMs - engine.TimeMs + engine.Setup.Balance.StormTickMs);
+            yield return null;
+            if (!Managers.Expedition.Battle.IsFinished)
+            {
+                Assert.AreEqual(1f, battle.StormRingFill, 0.001f);
+                Assert.AreEqual(1f, battle.Fx.StormDarkness, 0.001f);
             }
         }
 

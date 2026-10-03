@@ -16,9 +16,21 @@ namespace F1.UI
     /// of the board panel under the stage (<see cref="BattleBoardView"/>). It shows what the
     /// engine says; texts are rebuilt only when their numbers change. The battle screen takes a
     /// dead unit off the stage.
+    ///
+    /// The presenter moves it for a moment when something happens: it lunges when its weapon
+    /// fires, recoils and flashes when it is hit, and walks into its new column when it advances.
+    /// The motion moves the figure and the plate together and never the column they are in.
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
+        const float LungeOut = 0.1f;
+        const float LungeBack = 0.2f;
+        const float LungeDistance = 26f;
+        const float RecoilDuration = 0.26f;
+        const float RecoilDistance = 12f;
+        const float WalkDuration = 0.35f;
+        const float DangerPulse = 5f;
+
         [SerializeField] Button _button;
         [SerializeField] FigureView _figureView;
         [SerializeField] Image _plate;
@@ -44,14 +56,32 @@ namespace F1.UI
         int _shownBurn = -1;
         long _shownStatus = -1;
 
+        Vector2 _plateBase;
+        bool _plateBaseKnown;
+        float _lungeAge = -1f;
+        float _lungeDirection;
+        float _recoilAge = -1f;
+        float _recoilDirection;
+        float _walkAge = -1f;
+        float _walkFrom;
+
         public Button Button => _button;
         public BattleUnit Unit => _unit;
 
         /// <summary>The unit's art, or its placeholder.</summary>
         public FigureView Figure => _figureView;
 
+        /// <summary>The place of the figure: where numbers rise from.</summary>
+        public RectTransform FigureRect => (RectTransform)_figureView.transform;
+
+        /// <summary>The image of the art, for a ghost of a fallen unit.</summary>
+        public Image FigureArt => _figureView.ArtImage;
+
         /// <summary>The plate on show: the one of the unit's side or state.</summary>
         public Sprite Plate => _plate.sprite;
+
+        /// <summary>True while a lunge, a recoil or a walk moves the unit.</summary>
+        public bool Moving => _lungeAge >= 0f || _recoilAge >= 0f || _walkAge >= 0f;
 
         /// <param name="figure">The unit's art, or null when it has none.</param>
         public void Bind(BattleUnit unit, Sprite figure)
@@ -69,6 +99,33 @@ namespace F1.UI
             _shownBurn = -1;
             _shownStatus = -1;
             _name.text = UiText.Name(_unit.Setup.Name);
+        }
+
+        /// <summary>A step towards the other side and back: the unit's weapon fired.</summary>
+        /// <param name="direction">1 to the right, -1 to the left.</param>
+        public void Lunge(float direction)
+        {
+            _lungeAge = 0f;
+            _lungeDirection = direction;
+        }
+
+        /// <summary>A knock away from the blow that dies down.</summary>
+        public void Recoil(float direction)
+        {
+            _recoilAge = 0f;
+            _recoilDirection = direction;
+        }
+
+        /// <summary>The unit was put in a new column: it starts this far from it (where it was) and walks in.</summary>
+        public void Walk(float fromDeltaX)
+        {
+            _walkAge = 0f;
+            _walkFrom = fromDeltaX;
+        }
+
+        public void Flash(Color tint)
+        {
+            _figureView.Flash(tint);
         }
 
         /// <summary>The plate a unit shows in a state: at death's door, as the target of a potion, or just its side's.</summary>
@@ -131,6 +188,78 @@ namespace F1.UI
             if (_plate.sprite != plate)
             {
                 _plate.sprite = plate;
+            }
+        }
+
+        void Update()
+        {
+            float dt = Time.deltaTime;
+            float x = 0f;
+
+            if (_lungeAge >= 0f)
+            {
+                _lungeAge += dt;
+                if (_lungeAge < LungeOut)
+                {
+                    x += _lungeDirection * LungeDistance * (_lungeAge / LungeOut);
+                }
+                else if (_lungeAge < LungeOut + LungeBack)
+                {
+                    x += _lungeDirection * LungeDistance * (1f - (_lungeAge - LungeOut) / LungeBack);
+                }
+                else
+                {
+                    _lungeAge = -1f;
+                }
+            }
+
+            if (_recoilAge >= 0f)
+            {
+                _recoilAge += dt;
+                float t = _recoilAge / RecoilDuration;
+                if (t < 1f)
+                {
+                    x += _recoilDirection * RecoilDistance * (1f - t) * (1f - t);
+                }
+                else
+                {
+                    _recoilAge = -1f;
+                }
+            }
+
+            if (_walkAge >= 0f)
+            {
+                _walkAge += dt;
+                float t = _walkAge / WalkDuration;
+                if (t < 1f)
+                {
+                    x += _walkFrom * (1f - t) * (1f - t);
+                }
+                else
+                {
+                    _walkAge = -1f;
+                }
+            }
+
+            var offset = new Vector2(x, 0f);
+            _figureView.SetMotion(offset);
+            if (!_plateBaseKnown)
+            {
+                _plateBase = _plate.rectTransform.anchoredPosition;
+                _plateBaseKnown = true;
+            }
+
+            _plate.rectTransform.anchoredPosition = _plateBase + offset;
+
+            // At death's door the plate pulses.
+            if (_unit != null && _unit.InDog)
+            {
+                float alpha = 0.8f + 0.2f * (0.5f + 0.5f * Mathf.Sin(Time.time * DangerPulse));
+                _plate.color = new Color(1f, 1f, 1f, alpha);
+            }
+            else if (_plate.color.a < 1f)
+            {
+                _plate.color = Color.white;
             }
         }
 

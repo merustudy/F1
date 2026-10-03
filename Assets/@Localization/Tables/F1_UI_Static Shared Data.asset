@@ -765,6 +765,66 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673137313349636
+  - m_Id: 1060957030703104
+    m_Key: Battle.Title
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429248
+  - m_Id: 1060957215252480
+    m_Key: Fx.Damage
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429249
+  - m_Id: 1060957215252481
+    m_Key: Fx.Absorbed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429250
+  - m_Id: 1060957215252482
+    m_Key: Fx.Heal
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429251
+  - m_Id: 1060957215252483
+    m_Key: Fx.Shield
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429252
+  - m_Id: 1060957215252484
+    m_Key: Fx.Burn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429253
+  - m_Id: 1060957215252485
+    m_Key: Fx.DogEntered
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429254
+  - m_Id: 1060957215252486
+    m_Key: Fx.Survived
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429255
+  - m_Id: 1060957215252487
+    m_Key: Fx.Died
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429256
+  - m_Id: 1060957215252488
+    m_Key: Fx.RetreatSucceeded
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429257
+  - m_Id: 1060957215252489
+    m_Key: Fx.RetreatFailed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429258
+  - m_Id: 1060957215252490
+    m_Key: Fx.Storm
+    m_Metadata:
+      m_Items:
+      - rid: 8623673182117429259
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1394,3 +1454,51 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: How to use the inventory popup.
+    - rid: 8623673182117429248
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = dungeon name. {1} = floor of the battle. In the header.'
+    - rid: 8623673182117429249
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = HP lost. Rises from the unit hit.'
+    - rid: 8623673182117429250
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = damage the shield took.'
+    - rid: 8623673182117429251
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = HP restored.'
+    - rid: 8623673182117429252
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = shield gained.'
+    - rid: 8623673182117429253
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = burn stacks applied.'
+    - rid: 8623673182117429254
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A mercenary reached death's door.
+    - rid: 8623673182117429255
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A mercenary at death's door survived a death roll.
+    - rid: 8623673182117429256
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A unit died.
+    - rid: 8623673182117429257
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The retreat roll succeeded.
+    - rid: 8623673182117429258
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The retreat roll failed.
+    - rid: 8623673182117429259
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = damage of this storm tick. Rises from the clock.'

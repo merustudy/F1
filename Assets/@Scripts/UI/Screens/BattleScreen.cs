@@ -20,18 +20,28 @@ namespace F1.UI
     /// holds one unit. A unit's figure and plate stand in the column of the row the engine says it
     /// is in, and its face and item cells lie in the panel's line of that row, so both move when
     /// the unit advances. The dead leave the stage and the panel. The event log is not shown
-    /// while the battle runs; the result panel opens a viewer with the whole log.
+    /// while the battle runs; the result panel opens a viewer with the whole log. What happens
+    /// is played as it happens (<see cref="BattlePresenter"/>): numbers rise, units lunge and
+    /// recoil, cells flash, the storm's clock in the middle of the panel fills and darkens the
+    /// stage, and the last few events read as captions under the clock.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
         /// <summary>Lines per text of the log viewer: a long log is split over several texts.</summary>
         const int LogLinesPerChunk = 40;
 
+        /// <summary>The stage darkens over this long before the storm, until it is here.</summary>
+        const int StormDuskMs = 10000;
+
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] Image _background;
-        [SerializeField] TMP_Text _time;
-        [SerializeField] TMP_Text _storm;
+        [SerializeField] TMP_Text _title;
+        [SerializeField] TMP_Text _clockTime;
+        [SerializeField] TMP_Text _clockLabel;
+        [SerializeField] Image _clockRing;
+        [SerializeField] TMP_Text[] _captions;
+        [SerializeField] BattleFxLayer _fx;
         [SerializeField] Button _pause;
         [SerializeField] Image _pauseFrame;
         [SerializeField] Button[] _speedButtons;
@@ -72,15 +82,29 @@ namespace F1.UI
         readonly List<BattleBoardView> _enemyBoards = new List<BattleBoardView>();
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
         readonly List<TMP_Text> _logChunks = new List<TMP_Text>();
+        readonly List<string> _captionLines = new List<string>();
         BattleSession _battle;
         ExpeditionArt _art;
         Sprite _backgroundArt;
+        BattlePresenter _presenter;
         int _armedPotion = -1;
         int _shownTimeTenths = -1;
         bool _resultShown;
 
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
         public BattleClock Clock => _clock;
+
+        /// <summary>What the battle shows when something happens. For tests.</summary>
+        public BattleFxLayer Fx => _fx;
+
+        /// <summary>How many events of the log the presenter has passed.</summary>
+        public int PlayedEvents => _presenter == null ? 0 : _presenter.Played;
+
+        /// <summary>How far the storm's ring has filled: 0 at the start, 1 when the storm is here.</summary>
+        public float StormRingFill => _clockRing.fillAmount;
+
+        /// <summary>The captions under the clock, oldest first.</summary>
+        public IReadOnlyList<string> Captions => _captionLines;
 
         /// <summary>The dungeon's background behind the battle, or null when the dungeon has none.</summary>
         public Sprite Background => _background.enabled ? _background.sprite : null;
@@ -113,6 +137,7 @@ namespace F1.UI
             _background.sprite = _backgroundArt;
             _background.enabled = _backgroundArt != null;
             LayoutColumns(engine.Setup.Balance.PartySize);
+            RenderTitle();
 
             // A unit has a view on the stage and a line in the panel; for an ally, both take the click a potion is aimed with.
             foreach (BattleUnit unit in engine.Party)
@@ -154,6 +179,55 @@ namespace F1.UI
             _logClose.onClick.AddListener(OnCloseLog);
             _resultPanel.SetActive(false);
             _logPanel.SetActive(false);
+
+            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _clockRing.rectTransform, PushCaption);
+            RenderCaptions();
+        }
+
+        /// <summary>The dungeon and the floor the battle is fought on, in the header.</summary>
+        void RenderTitle()
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            string dungeon = UiText.Name(Managers.Data.Data.Dungeons.Get(expedition.DungeonId).Name);
+            int floor = expedition.CurrentNodeId < 0 ? 0 : expedition.Map.Get(expedition.CurrentNodeId).Floor;
+            _title.text = UiStrings.Get(UiKeys.Battle.Title, dungeon, floor);
+        }
+
+        BattleUnitView UnitViewOf(UnitRef unit)
+        {
+            List<BattleUnitView> views = unit.Side == BattleSide.Party ? _partyViews : _enemyViews;
+            return unit.Index >= 0 && unit.Index < views.Count ? views[unit.Index] : null;
+        }
+
+        BattleBoardView BoardViewOf(UnitRef unit)
+        {
+            List<BattleBoardView> boards = unit.Side == BattleSide.Party ? _partyBoards : _enemyBoards;
+            return unit.Index >= 0 && unit.Index < boards.Count ? boards[unit.Index] : null;
+        }
+
+        /// <summary>A new line under the clock; the oldest line goes when there are more than fit.</summary>
+        void PushCaption(string line)
+        {
+            _captionLines.Add(line);
+            while (_captionLines.Count > _captions.Length)
+            {
+                _captionLines.RemoveAt(0);
+            }
+
+            RenderCaptions();
+        }
+
+        /// <summary>The captions, newest at the bottom and brightest; the older ones fade.</summary>
+        void RenderCaptions()
+        {
+            int first = _captions.Length - _captionLines.Count;
+            for (int i = 0; i < _captions.Length; i++)
+            {
+                int line = i - first;
+                _captions[i].text = line >= 0 ? _captionLines[line] : string.Empty;
+                float age = _captions.Length - 1 - i;
+                _captions[i].color = age == 0 ? UiPalette.Text : new Color(UiPalette.TextDim.r, UiPalette.TextDim.g, UiPalette.TextDim.b, 1f - 0.25f * age);
+            }
         }
 
         public override void Refresh()
@@ -186,6 +260,9 @@ namespace F1.UI
 
             _shownTimeTenths = -1;
             _resultShown = false;
+            RenderTitle();
+            _captionLines.Clear();
+            RenderCaptions();
             if (_logPanel.activeSelf)
             {
                 BuildLog();
@@ -272,22 +349,30 @@ namespace F1.UI
             BalanceData balance = engine.Setup.Balance;
             bool ongoing = !_battle.IsFinished;
 
+            // What happened since the last frame is played before the dead leave the stage, so that a
+            // fallen unit's ghost starts where it stood.
+            _presenter.Play();
+
             int tenths = engine.TimeMs / 100;
             if (tenths != _shownTimeTenths)
             {
                 _shownTimeTenths = tenths;
-                _time.text = UiStrings.Get(UiKeys.Battle.Time, UiText.Seconds(engine.TimeMs));
-                _storm.text = engine.TimeMs < balance.StormStartMs
-                    ? UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs))
-                    : UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage);
-                _storm.color = engine.TimeMs < balance.StormStartMs ? UiPalette.TextDim : UiPalette.Burn;
+                RenderClock(engine, balance);
                 RenderControls(engine, balance, ongoing);
             }
 
-            Place(_partyViews, _partyRows, view => view.Unit);
-            Place(_enemyViews, _enemyRows, view => view.Unit);
-            Place(_partyBoards, _partyLines, board => board.Unit);
-            Place(_enemyBoards, _enemyLines, board => board.Unit);
+            bool danger = false;
+            foreach (BattleUnit unit in engine.Party)
+            {
+                danger |= unit.Alive && unit.InDog;
+            }
+
+            _fx.SetDanger(ongoing && danger);
+
+            Place(_partyViews, _partyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
+            Place(_enemyViews, _enemyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
+            Place(_partyBoards, _partyLines, board => board.Unit, null);
+            Place(_enemyBoards, _enemyLines, board => board.Unit, null);
             bool targeting = ongoing && _armedPotion >= 0;
             foreach (BattleUnitView view in _partyViews)
             {
@@ -322,11 +407,30 @@ namespace F1.UI
         }
 
         /// <summary>
+        /// The clock in the middle of the panel: the battle time, and the storm as a ring that
+        /// fills until the storm is here, when it turns the storm's color and the label says what
+        /// the next tick takes. The stage darkens over the last seconds before the storm.
+        /// </summary>
+        void RenderClock(BattleEngine engine, BalanceData balance)
+        {
+            _clockTime.text = UiStrings.Get(UiKeys.Battle.Time, UiText.Seconds(engine.TimeMs));
+            bool storm = engine.TimeMs >= balance.StormStartMs;
+            _clockRing.fillAmount = storm ? 1f : Mathf.Clamp01((float)engine.TimeMs / balance.StormStartMs);
+            _clockRing.color = storm ? UiPalette.Burn : UiPalette.Text;
+            _clockLabel.text = storm
+                ? UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage)
+                : UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs));
+            _clockLabel.color = storm ? UiPalette.Burn : UiPalette.TextDim;
+            _fx.SetStorm(storm ? 1f : Mathf.Clamp01((float)(engine.TimeMs - (balance.StormStartMs - StormDuskMs)) / StormDuskMs));
+        }
+
+        /// <summary>
         /// Puts each unit's view (on the stage, or in the panel) in the place of the row the unit
         /// stands in now and takes the dead away. Views are visited in unit order, so those that
-        /// advance into a place together keep their order.
+        /// advance into a place together keep their order. A view that changes place is told how
+        /// far it came from, so that it can walk in instead of appearing.
         /// </summary>
-        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf)
+        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf, Action<T, float> moved)
             where T : Component
         {
             foreach (T view in views)
@@ -337,10 +441,12 @@ namespace F1.UI
                     view.gameObject.SetActive(unit.Alive);
                 }
 
-                Transform place = places[unit.Row - 1];
+                RectTransform place = places[unit.Row - 1];
                 if (unit.Alive && view.transform.parent != place)
                 {
+                    var from = (RectTransform)view.transform.parent;
                     view.transform.SetParent(place, false);
+                    moved?.Invoke(view, from.anchoredPosition.x - place.anchoredPosition.x);
                 }
             }
         }

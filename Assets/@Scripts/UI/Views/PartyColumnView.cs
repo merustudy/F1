@@ -11,9 +11,9 @@ namespace F1.UI
     /// One row of the party side of the node map and the reward screen, in the battle screen's
     /// shape: on the stage, the row's column with the figure, the plate (the row, the name, HP and
     /// the job) and forward and back under it; in the board panel under the stage, the row's line
-    /// with the face cut out of the figure and the item board side by side, whose cells are the
-    /// battle's (<see cref="BattleItemView"/>) and show the same icons, each with its grade on a
-    /// badge. It shows whoever stands in its row; an empty row shows nothing.
+    /// with the face cut out of the figure and the item board side by side on its bag, whose cells
+    /// are the battle's (<see cref="BattleItemView"/>) and show the same icons, each with its grade
+    /// on a badge. It shows whoever stands in its row; an empty row shows nothing.
     /// </summary>
     public sealed class PartyColumnView : MonoBehaviour
     {
@@ -30,7 +30,7 @@ namespace F1.UI
         [SerializeField] Image _face;
         [SerializeField] GameObject _facePlaceholder;
         [SerializeField] ItemSlotView _slotTemplate;
-        [SerializeField] Transform _slotParent;
+        [SerializeField] RectTransform _slotParent;
 
         readonly List<ItemSlotView> _views = new List<ItemSlotView>();
 
@@ -54,6 +54,9 @@ namespace F1.UI
 
         /// <summary>The cell views in board order: one per item, then one per empty cell. The rest are hidden.</summary>
         public IReadOnlyList<ItemSlotView> Slots => _views;
+
+        /// <summary>The width of the board on show: the member's cells side by side. The bag behind them is as long.</summary>
+        public float BoardWidth => _slotParent.sizeDelta.x;
 
         /// <summary>A cell of the board was clicked: the first cell of an item, or an empty cell.</summary>
         public event Action<int> CellClicked;
@@ -88,6 +91,9 @@ namespace F1.UI
             _face.sprite = face;
             _face.enabled = face != null;
             _facePlaceholder.SetActive(face == null);
+
+            // The board is as wide as the member's cells, so the bag behind the cells is as long as the board.
+            _slotParent.sizeDelta = new Vector2(BattleItemView.BoardWidth(member.ItemSlots), BattleItemView.CellHeight);
 
             // One view per cell at most; whoever stands here decides how many are used.
             while (_views.Count < member.ItemSlots)

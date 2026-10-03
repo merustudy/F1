@@ -695,6 +695,61 @@ MonoBehaviour:
       An item already there comes to the inventory.
     m_Metadata:
       m_Items: []
+  - m_Id: 1060957030703104
+    m_Localized: "{0} \xB7 Floor {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252480
+    m_Localized: -{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252481
+    m_Localized: Blocked {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252482
+    m_Localized: +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252483
+    m_Localized: Shield +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252484
+    m_Localized: Burn +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1060957215252485
+    m_Localized: Death's door!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060957215252486
+    m_Localized: Held on
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060957215252487
+    m_Localized: Fallen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060957215252488
+    m_Localized: Retreat!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060957215252489
+    m_Localized: Retreat failed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1060957215252490
+    m_Localized: Storm -{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -772,3 +827,10 @@ MonoBehaviour:
         - id: 293762654789635
         - id: 293762654789637
         - id: 344090074931202
+        - id: 1060957030703104
+        - id: 1060957215252480
+        - id: 1060957215252481
+        - id: 1060957215252482
+        - id: 1060957215252483
+        - id: 1060957215252484
+        - id: 1060957215252490

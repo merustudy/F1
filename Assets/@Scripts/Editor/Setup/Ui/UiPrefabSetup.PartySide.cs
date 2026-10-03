@@ -14,7 +14,7 @@ namespace F1.Editor.Setup
         /// (2026-10-03 mockup A): on the stage, the battle's party columns, each with the figure,
         /// the plate under its feet and the two buttons that move the member a row; under the stage,
         /// the battle's board panel, whose left half holds one line per row (the face, then the
-        /// board side by side) and whose right half holds the screen's own words and buttons; the
+        /// board side by side on its bag) and whose right half holds the screen's own words and buttons; the
         /// potions in the strip under the header; the inventory as a popup over the right half of
         /// the screen above the panel. The columns stand in a field shaped like the battle's, and
         /// the view puts them in the battle screen's places when it opens (FieldLayout), so
@@ -41,7 +41,7 @@ namespace F1.Editor.Setup
         const float PanelTitleTop = 24f;
         const float PanelHintTop = 72f;
         const float PanelDetailTop = 122f;
-        const float PanelButtonsTop = 224f;
+        const float PanelButtonsTop = 258f;
         const float PanelButtonHeight = 76f;
 
         /// <param name="toInventoryX">Where the "to inventory" button stands in the panel's button line; the screen puts its own buttons next to it.</param>
@@ -153,8 +153,8 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's line of the board panel, as in battle: the face in a plate frame with the row
-        /// badge at its corner, then the board's cells side by side. The row's column view shows
-        /// and fills it. Every object is named after the row.
+        /// badge at its corner, then the board's cells side by side on their bag. The row's column
+        /// view shows and fills it. Every object is named after the row.
         /// </summary>
         static void BuildPartyLine(RectTransform line, int row, PartyColumnView view)
         {
@@ -172,13 +172,15 @@ namespace F1.Editor.Setup
             face.enabled = false;
             // Named apart from the plate's badge in the column of the same row.
             TextMeshProUGUI number = KitBadge(frame.transform, p + "FaceBadge", p + "FaceRow", 14f, out Image badge);
-            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(2f, 2f), new Vector2(22f, 22f));
+            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(2f, 2f), new Vector2(BoardFaceBadgeSize, BoardFaceBadgeSize));
             number.text = row.ToString(CultureInfo.InvariantCulture);
 
-            // The board: the battle's cells side by side, as many as a board can have at most. The view sizes them at runtime.
+            // The board: the battle's cells side by side on their bag, as many as a board can have at most.
+            // The view sizes the board to the member's cells at runtime (the bag follows) and makes the cells.
             RectTransform cells = UiBuild.Rect(p + "Cells", line);
             UiBuild.Size(cells, BattleItemView.BoardWidth(JobData.MaxItemSlots), BattleItemView.CellHeight);
             UiBuild.Horizontal(cells, BattleItemView.CellGapX, 0, TextAnchor.MiddleLeft);
+            BuildBoardBag(cells, p + "Bag");
             ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
 
             UiBuild.SetReference(view, "_line", line.gameObject);

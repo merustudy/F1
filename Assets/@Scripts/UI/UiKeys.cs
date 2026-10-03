@@ -128,6 +128,7 @@ namespace F1.UI
             public const string Time = "Battle.Time";
             public const string StormIn = "Battle.StormIn";
             public const string StormActive = "Battle.StormActive";
+            public const string Title = "Battle.Title";
             public const string Pause = "Battle.Pause";
             public const string Speed = "Battle.Speed";
             public const string Hp = "Battle.Hp";
@@ -149,6 +150,22 @@ namespace F1.UI
             public const string ShowLog = "Battle.ShowLog";
             public const string LogTitle = "Battle.LogTitle";
             public const string FigurePlaceholder = "Battle.FigurePlaceholder";
+        }
+
+        /// <summary>The texts that rise from a unit or the clock when something happens in battle.</summary>
+        public static class Fx
+        {
+            public const string Damage = "Fx.Damage";
+            public const string Absorbed = "Fx.Absorbed";
+            public const string Heal = "Fx.Heal";
+            public const string Shield = "Fx.Shield";
+            public const string Burn = "Fx.Burn";
+            public const string DogEntered = "Fx.DogEntered";
+            public const string Survived = "Fx.Survived";
+            public const string Died = "Fx.Died";
+            public const string RetreatSucceeded = "Fx.RetreatSucceeded";
+            public const string RetreatFailed = "Fx.RetreatFailed";
+            public const string Storm = "Fx.Storm";
         }
 
         public static class Log

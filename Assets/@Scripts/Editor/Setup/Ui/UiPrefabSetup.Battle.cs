@@ -16,8 +16,8 @@ namespace F1.Editor.Setup
         /// feet. The stage's box leaves room at both ends of the frame; the screen sets the columns'
         /// places and widths when it opens (FieldLayout). The board panel has one line per row on
         /// each side: the party's lines read from the left edge (the face, then the item cells side
-        /// by side), the enemy's from the right edge, and the two sides stand apart in the middle as
-        /// they do on the stage (2026-10-03 mockup A).
+        /// by side on a bag), the enemy's from the right edge, and the two sides stand apart in the
+        /// middle as they do on the stage (2026-10-03 mockups A, E and G).
         /// </summary>
         const float BattleFieldLeft = 120f;
         const float BattleFieldTop = 262f;
@@ -49,14 +49,41 @@ namespace F1.Editor.Setup
         /// the face's size, the inset of the face inside its frame and the gap to the first cell;
         /// the gap between two lines; and how far the seam in the middle stays from the panel's edges.
         /// </summary>
-        const float BoardPanelTop = 756f;
-        const float BoardPanelHeight = 324f;
-        const float BoardLineMargin = 40f;
-        const float BoardFaceSize = 60f;
-        const float BoardFaceInset = 5f;
+        const float BoardPanelTop = 722f;
+        const float BoardPanelHeight = 358f;
+        const float BoardLineMargin = 24f;
+        const float BoardFaceSize = 72f;
+        const float BoardFaceInset = 6f;
         const float BoardFaceGap = 8f;
-        const float BoardLineGap = 8f;
+        const float BoardFaceBadgeSize = 24f;
+        const float BoardLineGap = 10f;
         const float BoardSeamInset = 28f;
+
+        /// <summary>
+        /// The middle of the board panel, between the two sides' lines: the storm clock (a dial
+        /// with the ring that fills as the storm comes and the battle time on its face), the storm's
+        /// words under it, and the last few events as captions at the bottom.
+        /// </summary>
+        const float ClockSize = 200f;
+        const float ClockTop = 18f;
+        const float ClockX = 960f - ClockSize / 2f;
+
+        /// <summary>The dial's sprite holds the disc at 84% of its canvas (ui_piece fit), so its box is larger than the disc.</summary>
+        const float DialBox = ClockSize / 0.84f;
+        const float StormLineTop = 224f;
+        const float CaptionTop = 258f;
+        const float CaptionHeight = 26f;
+        const int CaptionLines = 3;
+        const float CaptionWidth = 520f;
+
+        /// <summary>The stage's box the storm's dusk, the red of death's door and the lightning cover: from under the header to the panel.</summary>
+        const float StageFxTop = 84f;
+        const float StageFxHeight = BoardPanelTop - StageFxTop;
+
+        /// <summary>The shadow under a figure's feet: a dark ellipse.</summary>
+        const float ShadowWidth = 150f;
+        const float ShadowHeight = 26f;
+        const float ShadowAlpha = 0.35f;
 
         static UIScreen BuildBattle(Transform holder)
         {
@@ -67,15 +94,14 @@ namespace F1.Editor.Setup
             UiBuild.Box(background, 0f, BattleFieldTop + BattleFloorY - BattleBackgroundFloor * BattleBackgroundHeight, BattleBackgroundWidth, BattleBackgroundHeight);
             background.enabled = false;
 
-            // Header: retreat on the left, battle time, storm, pause and speed.
+            // Header: retreat on the left, the dungeon and the floor in the middle, pause and speed on the right.
+            // The battle time and the storm are on the clock in the middle of the board panel.
             Image header = KitFrame("Header", frame, UiArt.Panel);
             UiBuild.Box(header, 0f, 0f, 1920f, 84f);
             ButtonParts retreat = KitButton("Retreat", header.transform, UiPalette.Danger, 28f);
             UiBuild.Box(retreat.Rect, 40f, 16f, 300f, 52f);
-            TextMeshProUGUI time = UiBuild.Label("Time", header.transform, 40f, UiPalette.Text, TextAlignmentOptions.Center);
-            UiBuild.Box(time, 760f, 16f, 400f, 52f);
-            UiBuild.Box(KitIcon("StormIcon", header.transform, UiArt.Storm), 1168f, 20f, 44f, 44f);
-            TextMeshProUGUI storm = UiBuild.Box(UiBuild.Label("Storm", header.transform, 26f, UiPalette.TextDim), 1220f, 24f, 300f, 36f);
+            TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Label("Title", header.transform, 30f, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Box(title, 560f, 16f, 800f, 52f);
 
             ButtonParts pause = KitLocalizedButton("Pause", header.transform, UiKeys.Battle.Pause, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(pause.Rect, 1530f, 16f, 110f, 52f);
@@ -145,6 +171,67 @@ namespace F1.Editor.Setup
 
             BattleBoardView boardTemplate = BuildBattleBoard(panel.transform);
 
+            // The storm clock in the middle of the panel: the dial, the ring that fills on it, the time on its face,
+            // the storm's words under it with the storm icon, and the captions at the bottom.
+            Image dial = KitIcon("Dial", panel.transform, UiArt.Dial);
+            UiBuild.Box(dial, 960f - DialBox / 2f, ClockTop - (DialBox - ClockSize) / 2f, DialBox, DialBox);
+            Image ring = KitIcon("StormRing", panel.transform, UiArt.Ring);
+            UiBuild.Box(ring, ClockX, ClockTop, ClockSize, ClockSize);
+            ring.type = Image.Type.Filled;
+            ring.fillMethod = Image.FillMethod.Radial360;
+            ring.fillOrigin = (int)Image.Origin360.Top;
+            ring.fillClockwise = true;
+            ring.fillAmount = 0f;
+            ring.color = UiPalette.Text;
+            TextMeshProUGUI clockTime = UiBuild.SingleLine(UiBuild.Label("ClockTime", panel.transform, 40f, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Box(clockTime, ClockX, ClockTop + ClockSize / 2f - 30f, ClockSize, 60f);
+
+            RectTransform stormLine = UiBuild.Box(UiBuild.Rect("StormLine", panel.transform), 960f - CaptionWidth / 2f, StormLineTop, CaptionWidth, 30f);
+            HorizontalLayoutGroup stormLayout = UiBuild.Horizontal(stormLine, 8f, 0, TextAnchor.MiddleCenter);
+            stormLayout.childControlWidth = true;
+            stormLayout.childControlHeight = true;
+            Image stormIcon = KitIcon("StormIcon", stormLine, UiArt.Storm);
+            var stormIconSize = stormIcon.gameObject.AddComponent<LayoutElement>();
+            stormIconSize.preferredWidth = 26f;
+            stormIconSize.preferredHeight = 26f;
+            TextMeshProUGUI clockLabel = UiBuild.Label("ClockLabel", stormLine, 22f, UiPalette.TextDim);
+            clockLabel.textWrappingMode = TextWrappingModes.NoWrap;
+
+            var captions = new TextMeshProUGUI[CaptionLines];
+            for (int i = 0; i < CaptionLines; i++)
+            {
+                captions[i] = UiBuild.SingleLine(UiBuild.Label("Caption" + i, panel.transform, 20f, UiPalette.TextDim, TextAlignmentOptions.Center));
+                UiBuild.Box(captions[i], 960f - CaptionWidth / 2f, CaptionTop + i * CaptionHeight, CaptionWidth, CaptionHeight);
+            }
+
+            // The fx layer over the stage and the panel: the storm's dusk, the red of death's door and the
+            // lightning over the stage's box, and the numbers and ghosts anywhere. Built before the result so
+            // that the result is drawn over it. Nothing in it takes a click.
+            RectTransform fx = UiBuild.Rect("Fx", frame);
+            UiBuild.Stretch(fx);
+            Image stormVignette = UiBuild.Image("StormVignette", fx, new Color(0f, 0f, 0f, 0f));
+            stormVignette.sprite = UiArt.Load(UiArt.Vignette);
+            UiBuild.Box(stormVignette, 0f, StageFxTop, 1920f, StageFxHeight);
+            stormVignette.enabled = false;
+            Image dangerVignette = UiBuild.Image("DangerVignette", fx, new Color(UiPalette.Danger.r, UiPalette.Danger.g, UiPalette.Danger.b, 0f));
+            dangerVignette.sprite = UiArt.Load(UiArt.Vignette);
+            UiBuild.Box(dangerVignette, 0f, StageFxTop, 1920f, StageFxHeight);
+            dangerVignette.enabled = false;
+            Image flash = UiBuild.Image("Flash", fx, new Color(1f, 1f, 1f, 0f));
+            UiBuild.Box(flash, 0f, StageFxTop, 1920f, StageFxHeight);
+            flash.enabled = false;
+            Image ghostTemplate = UiBuild.Image("GhostTemplate", fx, Color.white);
+            ghostTemplate.preserveAspect = true;
+            ghostTemplate.gameObject.SetActive(false);
+            FloatingTextView floatingTemplate = BuildFloatingText(fx);
+            var fxLayer = fx.gameObject.AddComponent<BattleFxLayer>();
+            UiBuild.SetReference(fxLayer, "_floatingTemplate", floatingTemplate);
+            UiBuild.SetReference(fxLayer, "_ghostTemplate", ghostTemplate);
+            UiBuild.SetReference(fxLayer, "_flash", flash);
+            UiBuild.SetReference(fxLayer, "_stormVignette", stormVignette);
+            UiBuild.SetReference(fxLayer, "_dangerVignette", dangerVignette);
+            UiBuild.SetReference(fxLayer, "_shaken", field);
+
             // Result: covers the field when the battle has ended.
             Image overlay = UiBuild.Image("ResultPanel", frame, UiPalette.Overlay, raycastTarget: true);
             UiBuild.Stretch(overlay.rectTransform);
@@ -179,8 +266,12 @@ namespace F1.Editor.Setup
             logOverlay.gameObject.SetActive(false);
 
             UiBuild.SetReference(screen, "_background", background);
-            UiBuild.SetReference(screen, "_time", time);
-            UiBuild.SetReference(screen, "_storm", storm);
+            UiBuild.SetReference(screen, "_title", title);
+            UiBuild.SetReference(screen, "_clockTime", clockTime);
+            UiBuild.SetReference(screen, "_clockLabel", clockLabel);
+            UiBuild.SetReference(screen, "_clockRing", ring);
+            UiBuild.SetReferences(screen, "_captions", captions);
+            UiBuild.SetReference(screen, "_fx", fxLayer);
             UiBuild.SetReference(screen, "_pause", pause.Button);
             UiBuild.SetReference(screen, "_pauseFrame", pause.Frame);
             UiBuild.SetReferences(screen, "_speedButtons", speedButtons);
@@ -279,7 +370,7 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One unit's line of the board panel: the face in a plate frame with the row badge at its
-        /// corner, then the cells of the board side by side. The line fills whichever line of the
+        /// corner, then the cells of the board side by side on their bag. The line fills whichever line of the
         /// panel it is put in; the view turns it around for an enemy, whose face stands at the right
         /// edge and whose cells run towards the middle. The whole line is the button a potion is aimed at.
         /// </summary>
@@ -301,12 +392,14 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(face.rectTransform, BoardFaceInset, BoardFaceInset, BoardFaceInset, BoardFaceInset);
             face.enabled = false;
             TextMeshProUGUI row = KitBadge(frame.transform, "BoardBadge", "BoardRow", 14f, out Image badge);
-            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(2f, 2f), new Vector2(22f, 22f));
+            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(2f, 2f), new Vector2(BoardFaceBadgeSize, BoardFaceBadgeSize));
 
-            // The cells, side by side. The view sizes the strip to the unit's cells and makes the cells in it.
+            // The cells, side by side on the bag. The view sizes the board to the unit's cells (the bag
+            // follows) and makes the cells in it.
             RectTransform cells = UiBuild.Rect("BoardCells", root);
             UiBuild.Size(cells, BattleItemView.BoardWidth(JobData.MaxItemSlots), BattleItemView.CellHeight);
             HorizontalLayoutGroup cellsLayout = UiBuild.Horizontal(cells, BattleItemView.CellGapX, 0, TextAnchor.MiddleLeft);
+            BuildBoardBag(cells, "BoardBag");
             BattleItemView itemTemplate = BuildBattleItem(cells);
             GameObject emptyCell = BuildEmptyCell(cells);
 
@@ -389,6 +482,11 @@ namespace F1.Editor.Setup
                 clicks.raycastTarget = true;
             }
 
+            // The shadow under the feet, behind whatever stands there, so that the unit stands on the floor instead of floating.
+            Image shadow = UiBuild.Image(name + "Shadow", figure, new Color(0f, 0f, 0f, ShadowAlpha));
+            shadow.sprite = UiBuild.BuiltinSprite("UI/Skin/Knob.psd");
+            UiBuild.Place(shadow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 6f), new Vector2(ShadowWidth, ShadowHeight));
+
             // The stand-in for a unit without art. The silhouette stands on the place's bottom.
             RectTransform placeholder = UiBuild.Rect(name + "Placeholder", figure);
             UiBuild.Stretch(placeholder);
@@ -445,12 +543,40 @@ namespace F1.Editor.Setup
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
 
+            // The flash over the cell when the item fires, inside the rim. Off until then.
+            Image flash = UiBuild.Image("ItemFlash", cooldown.transform, new Color(1f, 1f, 1f, 0f));
+            UiBuild.Stretch(flash.rectTransform, 6f, 6f, 6f, 6f);
+            flash.enabled = false;
+
             var view = cooldown.gameObject.AddComponent<BattleItemView>();
             UiBuild.SetReference(view, "_cooldown", cooldown);
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_flash", flash);
 
             cooldown.gameObject.SetActive(false);
+            return view;
+        }
+
+        /// <summary>
+        /// A text that rises from a unit: the colored text in front and a dark copy a little behind
+        /// it. The fx layer makes one per text in flight from this template.
+        /// </summary>
+        static FloatingTextView BuildFloatingText(RectTransform fx)
+        {
+            RectTransform root = UiBuild.Rect("FloatingTemplate", fx);
+            UiBuild.Size(root, 320f, 60f);
+            TextMeshProUGUI shadow = UiBuild.Label("FloatingShadow", root, 34f, UiPalette.Ink, TextAlignmentOptions.Center);
+            shadow.textWrappingMode = TextWrappingModes.NoWrap;
+            UiBuild.Stretch(shadow.rectTransform, 2f, 2f, -2f, -2f);
+            TextMeshProUGUI text = UiBuild.Label("FloatingText", root, 34f, UiPalette.Text, TextAlignmentOptions.Center);
+            text.textWrappingMode = TextWrappingModes.NoWrap;
+            UiBuild.Stretch(text.rectTransform);
+
+            var view = root.gameObject.AddComponent<FloatingTextView>();
+            UiBuild.SetReference(view, "_text", text);
+            UiBuild.SetReference(view, "_shadow", shadow);
+            root.gameObject.SetActive(false);
             return view;
         }
 

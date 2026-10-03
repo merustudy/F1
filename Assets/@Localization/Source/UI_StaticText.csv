@@ -83,6 +83,7 @@ Potion.Shield,{0} = amount.,보호막 {0},{0} Shield
 Battle.Time,{0} = battle time in seconds.,{0}초,{0}s
 Battle.StormIn,{0} = seconds until the storm starts.,폭풍까지 {0}초,Storm in {0}s
 Battle.StormActive,{0} = damage of the next storm tick.,폭풍! 다음 피해 {0},Storm! Next hit {0}
+Battle.Title,{0} = dungeon name. {1} = floor of the battle. In the header.,{0} · {1}층,{0} · Floor {1}
 Battle.Pause,Pauses the battle.,정지,Pause
 Battle.Speed,{0} = speed multiplier.,x{0},x{0}
 Battle.Hp,On the HP bar of a plate. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
@@ -149,3 +150,14 @@ Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
 Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
 Save.Retry,Writes the unsaved change again.,다시 시도,Retry
+Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}
+Fx.Absorbed,{0} = damage the shield took.,막힘 {0},Blocked {0}
+Fx.Heal,{0} = HP restored.,+{0},+{0}
+Fx.Shield,{0} = shield gained.,방어 +{0},Shield +{0}
+Fx.Burn,{0} = burn stacks applied.,화상 +{0},Burn +{0}
+Fx.DogEntered,A mercenary reached death's door.,빈사!,Death's door!
+Fx.Survived,A mercenary at death's door survived a death roll.,버텼다,Held on
+Fx.Died,A unit died.,쓰러짐,Fallen
+Fx.RetreatSucceeded,The retreat roll succeeded.,후퇴!,Retreat!
+Fx.RetreatFailed,The retreat roll failed.,후퇴 실패,Retreat failed
+Fx.Storm,{0} = damage of this storm tick. Rises from the clock.,폭풍 -{0},Storm -{0}
