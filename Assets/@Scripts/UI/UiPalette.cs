@@ -28,10 +28,17 @@ namespace F1.UI
         public static readonly Color Enemy = Rgb(0x70, 0x35, 0x2C);
         public static readonly Color Shield = Rgb(0x8F, 0xD3, 0xF4);
         public static readonly Color Burn = Rgb(0xF3, 0x9C, 0x12);
-        public static readonly Color Gauge = Rgb(0x6B, 0x5B, 0x1E);
+        public static readonly Color Gauge = Rgb(0x84, 0x6A, 0x2C);
         public static readonly Color Dead = Rgb(0x33, 0x33, 0x38);
         public static readonly Color Line = Rgb(0x55, 0x5C, 0x6B);
-        public static readonly Color Icon = Rgb(0x6C, 0x78, 0x91);
+        /// <summary>The brass of the art: the row badge of a unit's plate.</summary>
+        public static readonly Color Brass = Rgb(0xB8, 0x94, 0x4E);
+
+        /// <summary>The outline tone of the art, for a shape that stands next to it without a sprite.</summary>
+        public static readonly Color Ink = Rgb(0x18, 0x09, 0x07);
+
+        /// <summary>Multiplied into an icon that is shown but cannot be used now, as TextDim is for a name.</summary>
+        public static readonly Color IconDim = Rgb(0x6E, 0x6E, 0x74);
 
         static Color Rgb(int r, int g, int b)
         {

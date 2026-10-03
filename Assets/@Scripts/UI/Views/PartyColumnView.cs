@@ -9,13 +9,15 @@ namespace F1.UI
 {
     /// <summary>
     /// One row's column on the party side of the node map and the reward screen: the figure, the
-    /// info card (name, job, HP, forward and back) and the item board stacked under it, in the
-    /// battle screen's shape; the board's cells are the battle card's (<see cref="BattleItemView"/>).
-    /// It shows whoever stands in its row; an empty row shows only its label.
+    /// plate (the row, the name, HP and the job), forward and back, and the item board stacked
+    /// under them, in the battle screen's shape; the board's cells are as tall as the battle's
+    /// (<see cref="BattleItemView"/>) and show the same icons, each with its grade on a badge.
+    /// It shows whoever stands in its row; an empty row shows nothing.
     /// </summary>
     public sealed class PartyColumnView : MonoBehaviour
     {
         [SerializeField] GameObject _figure;
+        [SerializeField] FigureView _figureView;
         [SerializeField] GameObject _card;
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _job;
@@ -37,6 +39,9 @@ namespace F1.UI
         /// <summary>Moves the member one row away from the enemy.</summary>
         public Button Back => _back;
 
+        /// <summary>The art of whoever stands here, or its placeholder.</summary>
+        public FigureView Figure => _figureView;
+
         /// <summary>The cell views in board order: one per item, then one per empty cell. The rest are hidden.</summary>
         public IReadOnlyList<ItemSlotView> Slots => _views;
 
@@ -51,12 +56,14 @@ namespace F1.UI
             _card.SetActive(false);
         }
 
+        /// <param name="art">Where the figure of the member's job and the icons of its items come from.</param>
         /// <param name="selectedCell">The first cell of the highlighted item, or -1.</param>
         /// <param name="canClickCell">Whether a cell (the first of an item, or an empty one) takes a click now.</param>
-        public void Show(int memberIndex, ExpeditionMember member, bool canMoveForward, bool canMoveBack, int selectedCell, Func<int, bool> canClickCell)
+        public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, int selectedCell, Func<int, bool> canClickCell)
         {
             Member = memberIndex;
             _figure.SetActive(true);
+            _figureView.Show(art.OfJob(member.JobId));
             _card.SetActive(true);
             _name.text = UiText.Mercenary(member.MercenaryId);
             _job.text = UiText.Job(member.JobId);
@@ -80,13 +87,13 @@ namespace F1.UI
             foreach (EquippedItem item in member.Items)
             {
                 int size = item.Item.Size;
-                ShowCell(_views[next++], cell, item, BattleItemView.BoardHeight(size), selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, item, art.OfItem(item.Item.Id), BattleItemView.BoardHeight(size), selectedCell, canClickCell);
                 cell += size;
             }
 
             for (; cell < member.ItemSlots; cell++)
             {
-                ShowCell(_views[next++], cell, null, BattleItemView.CellHeight, selectedCell, canClickCell);
+                ShowCell(_views[next++], cell, null, null, BattleItemView.CellHeight, selectedCell, canClickCell);
             }
 
             for (; next < _views.Count; next++)
@@ -95,11 +102,11 @@ namespace F1.UI
             }
         }
 
-        static void ShowCell(ItemSlotView view, int cell, EquippedItem item, float height, int selectedCell, Func<int, bool> canClickCell)
+        static void ShowCell(ItemSlotView view, int cell, EquippedItem item, Sprite icon, float height, int selectedCell, Func<int, bool> canClickCell)
         {
             view.Index = cell;
             view.SetHeight(height);
-            view.Show(item, cell == selectedCell, canClickCell(cell));
+            view.Show(item, icon, cell == selectedCell, canClickCell(cell));
             view.gameObject.SetActive(true);
         }
     }

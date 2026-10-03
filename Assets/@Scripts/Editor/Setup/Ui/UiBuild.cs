@@ -282,6 +282,18 @@ namespace F1.Editor.Setup
             return text;
         }
 
+        /// <summary>
+        /// Lets a text shrink, down to a smallest size, when it does not fit its rect at its own
+        /// size. For a name on a card whose width is set at runtime.
+        /// </summary>
+        public static TextMeshProUGUI ShrinkToFit(TextMeshProUGUI text, float minSize)
+        {
+            text.enableAutoSizing = true;
+            text.fontSizeMax = text.fontSize;
+            text.fontSizeMin = minSize;
+            return text;
+        }
+
         // ---- Buttons and bars ----------------------------------------------------------------
 
         /// <summary>A button whose label code fills in at runtime.</summary>

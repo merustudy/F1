@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
 using TMPro;
@@ -8,31 +9,41 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One living unit in battle: the figure (a placeholder until there is art) over the info card
-    /// with HP, shield, burn, the death's door state and the item board. It shows what the engine
-    /// says; texts are rebuilt only when their numbers change. The battle screen takes a dead unit
-    /// off the field.
+    /// One living unit in battle: the figure (its art, or a placeholder when it has none), the
+    /// plate under its feet and its item cells under the plate, each cell showing its item's icon. The plate holds the row the unit
+    /// stands in, its name, its HP, and a line of states: shield and burn as an icon with a
+    /// number, or the death's door state. The plate's color says whose side the unit is on, that
+    /// it is at death's door or that a potion can be used on it. It shows what the engine says;
+    /// texts are rebuilt only when their numbers change. The battle screen takes a dead unit off
+    /// the field.
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
         [SerializeField] Button _button;
-        [SerializeField] Image _figure;
-        [SerializeField] Image _frame;
+        [SerializeField] FigureView _figureView;
+        [SerializeField] Image _plate;
+        [SerializeField] Sprite _plateParty;
+        [SerializeField] Sprite _plateEnemy;
+        [SerializeField] Sprite _plateDanger;
+        [SerializeField] Sprite _plateTarget;
+        [SerializeField] TMP_Text _row;
         [SerializeField] TMP_Text _name;
-        [SerializeField] TMP_Text _status;
         [SerializeField] TMP_Text _hp;
         [SerializeField] UiBar _hpBar;
+        [SerializeField] GameObject _shieldChip;
         [SerializeField] TMP_Text _shield;
+        [SerializeField] GameObject _burnChip;
         [SerializeField] TMP_Text _burn;
+        [SerializeField] GameObject _statusChip;
+        [SerializeField] TMP_Text _status;
         [SerializeField] BattleItemView _itemTemplate;
         [SerializeField] GameObject _emptyCellTemplate;
         [SerializeField] Transform _itemParent;
 
-        /// <summary>How much of the figure frame's color shows: the background will be seen through it.</summary>
-        const float FigureAlpha = 0.35f;
-
         readonly List<BattleItemView> _items = new List<BattleItemView>();
         BattleUnit _unit;
+        ExpeditionArt _art;
+        int _shownRow = -1;
         int _shownHp = -1;
         int _shownShield = -1;
         int _shownBurn = -1;
@@ -41,25 +52,29 @@ namespace F1.UI
         public Button Button => _button;
         public BattleUnit Unit => _unit;
 
-        /// <summary>The figure frame's color for a side's card color.</summary>
-        public static Color FigureTint(Color frame)
-        {
-            return new Color(frame.r, frame.g, frame.b, FigureAlpha);
-        }
+        /// <summary>The unit's art, or its placeholder.</summary>
+        public FigureView Figure => _figureView;
 
-        public void Bind(BattleUnit unit)
+        /// <summary>The plate on show: the one of the unit's side or state.</summary>
+        public Sprite Plate => _plate.sprite;
+
+        /// <param name="figure">The unit's art, or null when it has none.</param>
+        /// <param name="art">Where the icons of the items come from.</param>
+        public void Bind(BattleUnit unit, Sprite figure, ExpeditionArt art)
         {
             _unit = unit;
+            _art = art;
             _name.text = UiText.Name(unit.Setup.Name);
+            _figureView.Show(figure);
 
             // The board in order: an item takes as many cells as its size and shows its cooldown;
-            // the cells after the last item stay faint.
+            // the cells after the last item stay faint. An enemy's icons point at the party.
             int cells = 0;
             foreach (BattleItemState item in unit.Items)
             {
                 BattleItemView view = Instantiate(_itemTemplate, _itemParent);
                 view.gameObject.SetActive(true);
-                view.Bind(item, item.Equipped.Item.Size);
+                BindItem(view, item);
                 _items.Add(view);
                 cells += item.Equipped.Item.Size;
             }
@@ -80,8 +95,14 @@ namespace F1.UI
             _name.text = UiText.Name(_unit.Setup.Name);
             for (int i = 0; i < _items.Count; i++)
             {
-                _items[i].Bind(_unit.Items[i], _unit.Items[i].Equipped.Item.Size);
+                BindItem(_items[i], _unit.Items[i]);
             }
+        }
+
+        void BindItem(BattleItemView view, BattleItemState item)
+        {
+            ItemData data = item.Equipped.Item;
+            view.Bind(item, data.Size, _art.OfItem(data.Id), mirrored: _unit.Side == BattleSide.Enemy);
         }
 
         /// <param name="targetable">True while a potion is waiting for this unit to be clicked.</param>
@@ -89,6 +110,13 @@ namespace F1.UI
         {
             BalanceData balance = engine.Setup.Balance;
             int timeMs = engine.TimeMs;
+
+            // The unit moves to another column when it advances; its badge follows.
+            if (_unit.Row != _shownRow)
+            {
+                _shownRow = _unit.Row;
+                _row.text = _unit.Row.ToString(CultureInfo.InvariantCulture);
+            }
 
             if (_unit.Hp != _shownHp)
             {
@@ -100,41 +128,53 @@ namespace F1.UI
             if (_unit.Shield != _shownShield)
             {
                 _shownShield = _unit.Shield;
-                _shield.text = _unit.Shield > 0 ? UiStrings.Get(UiKeys.Battle.Shield, _unit.Shield) : string.Empty;
+                _shield.text = UiStrings.Get(UiKeys.Battle.Shield, _unit.Shield);
             }
 
             if (_unit.Burn != _shownBurn)
             {
                 _shownBurn = _unit.Burn;
-                _burn.text = _unit.Burn > 0 ? UiStrings.Get(UiKeys.Battle.Burn, _unit.Burn) : string.Empty;
+                _burn.text = UiStrings.Get(UiKeys.Battle.Burn, _unit.Burn);
             }
 
             RenderStatus(balance, timeMs);
 
+            // The state line holds either the death's door state or what the unit carries.
+            SetShown(_statusChip, _unit.InDog);
+            SetShown(_shieldChip, !_unit.InDog && _unit.Shield > 0);
+            SetShown(_burnChip, !_unit.InDog && _unit.Burn > 0);
+
             _button.interactable = targetable && _unit.Alive;
-            Color frame;
+            Sprite plate;
             if (_unit.InDog)
             {
-                frame = UiPalette.Danger;
+                plate = _plateDanger;
             }
             else if (targetable)
             {
-                frame = UiPalette.PartyTarget;
+                plate = _plateTarget;
             }
             else
             {
-                frame = _unit.Side == BattleSide.Party ? UiPalette.Party : UiPalette.Enemy;
+                plate = _unit.Side == BattleSide.Party ? _plateParty : _plateEnemy;
             }
 
-            if (_frame.color != frame)
+            if (_plate.sprite != plate)
             {
-                _frame.color = frame;
-                _figure.color = FigureTint(frame);
+                _plate.sprite = plate;
             }
 
             foreach (BattleItemView item in _items)
             {
                 item.Render(timeMs, _unit.Alive);
+            }
+        }
+
+        static void SetShown(GameObject chip, bool shown)
+        {
+            if (chip.activeSelf != shown)
+            {
+                chip.SetActive(shown);
             }
         }
 

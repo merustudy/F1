@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using F1.Core;
 using F1.Data;
 using F1.Flow;
@@ -14,10 +15,10 @@ namespace F1.UI
     /// passes potion and retreat clicks on. Speed and pause change only how fast the battle is
     /// shown; the engine decides every outcome.
     ///
-    /// Each side has one column per row, and a row holds one unit. A unit's card stands in the
-    /// column of the row the engine says it is in, so it moves when the unit advances. The dead
-    /// leave the field. The event log is not shown while the battle runs; the result panel opens
-    /// a viewer with the whole log.
+    /// Each side has one column per row, and a row holds one unit. A unit (its figure, its plate
+    /// and its item cells) stands in the column of the row the engine says it is in, so it moves
+    /// when the unit advances. The dead leave the field. The event log is not shown while the
+    /// battle runs; the result panel opens a viewer with the whole log.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
@@ -26,6 +27,7 @@ namespace F1.UI
 
         static readonly int[] Speeds = { 100, 200, 400 };
 
+        [SerializeField] Image _background;
         [SerializeField] TMP_Text _time;
         [SerializeField] TMP_Text _storm;
         [SerializeField] Button _pause;
@@ -36,9 +38,7 @@ namespace F1.UI
         [SerializeField] BattleUnitView _unitTemplate;
         [SerializeField] RectTransform _field;
         [SerializeField] RectTransform[] _partyRows;
-        [SerializeField] RectTransform[] _partyRowLabels;
         [SerializeField] RectTransform[] _enemyRows;
-        [SerializeField] RectTransform[] _enemyRowLabels;
         [SerializeField] PotionSlotView _potionTemplate;
         [SerializeField] Transform _potionParent;
         [SerializeField] TMP_Text _potionHint;
@@ -66,12 +66,33 @@ namespace F1.UI
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
         readonly List<TMP_Text> _logChunks = new List<TMP_Text>();
         BattleSession _battle;
+        ExpeditionArt _art;
+        Sprite _backgroundArt;
         int _armedPotion = -1;
         int _shownTimeTenths = -1;
         bool _resultShown;
 
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
         public BattleClock Clock => _clock;
+
+        /// <summary>The dungeon's background behind the battle, or null when the dungeon has none.</summary>
+        public Sprite Background => _background.enabled ? _background.sprite : null;
+
+        /// <summary>
+        /// The art is loaded before the screen opens, so nothing waits for it afterwards: the
+        /// figures of the units, the icons of the items and the background of the dungeon. A dungeon whose data names no
+        /// background is fought on the plain background color.
+        /// </summary>
+        public override async Task PrepareAsync()
+        {
+            StaticData data = Managers.Data.Data;
+            _art = await ExpeditionArt.LoadAsync(Managers.Resource, data);
+
+            string background = data.Dungeons.Get(Managers.Expedition.Expedition.DungeonId).Background;
+            _backgroundArt = background == null
+                ? null
+                : await Managers.Resource.LoadAsync<Sprite>(background, ResourceScope.Expedition);
+        }
 
         protected override void OnOpen()
         {
@@ -82,6 +103,8 @@ namespace F1.UI
             // A battle continued from a save is already under way: let the player look before it moves on.
             _clock.Paused = engine.TimeMs > 0;
 
+            _background.sprite = _backgroundArt;
+            _background.enabled = _backgroundArt != null;
             LayoutColumns(engine.Setup.Balance.PartySize);
 
             foreach (BattleUnit unit in engine.Party)
@@ -182,32 +205,32 @@ namespace F1.UI
             {
                 bool used = i < partyRows;
                 _partyRows[i].gameObject.SetActive(used);
-                _partyRowLabels[i].gameObject.SetActive(used);
                 if (used)
                 {
-                    PlaceColumn(_partyRows[i], _partyRowLabels[i], FieldLayout.PartyColumnX(width, partyRows, i), width);
+                    PlaceColumn(_partyRows[i], FieldLayout.PartyColumnX(width, partyRows, i), width);
                 }
             }
 
             for (int i = 0; i < _enemyRows.Length; i++)
             {
-                PlaceColumn(_enemyRows[i], _enemyRowLabels[i], FieldLayout.EnemyColumnX(width, partyRows, i), width);
+                PlaceColumn(_enemyRows[i], FieldLayout.EnemyColumnX(width, partyRows, i), width);
             }
         }
 
-        static void PlaceColumn(RectTransform column, RectTransform label, float x, float width)
+        static void PlaceColumn(RectTransform column, float x, float width)
         {
             column.anchoredPosition = new Vector2(x, column.anchoredPosition.y);
             column.sizeDelta = new Vector2(width, column.sizeDelta.y);
-            label.anchoredPosition = new Vector2(x, label.anchoredPosition.y);
-            label.sizeDelta = new Vector2(width, label.sizeDelta.y);
         }
 
         BattleUnitView CreateUnit(BattleUnit unit, Transform parent)
         {
             BattleUnitView view = Instantiate(_unitTemplate, parent);
             view.gameObject.SetActive(true);
-            view.Bind(unit);
+
+            // A party unit is a mercenary and is shown as its job; an enemy has its own figure.
+            string id = unit.Setup.SourceId;
+            view.Bind(unit, unit.Side == BattleSide.Party ? _art.OfMercenary(id) : _art.OfEnemy(id), _art);
             return view;
         }
 
@@ -254,9 +277,9 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Puts each card in the column of the row its unit stands in now and takes the cards of the
-        /// dead off the field. Cards are visited in unit order, so those that advance into a column
-        /// together keep their order.
+        /// Puts each unit in the column of the row it stands in now and takes the dead off the
+        /// field. Units are visited in unit order, so those that advance into a column together
+        /// keep their order.
         /// </summary>
         static void PlaceUnits(List<BattleUnitView> views, RectTransform[] columns)
         {

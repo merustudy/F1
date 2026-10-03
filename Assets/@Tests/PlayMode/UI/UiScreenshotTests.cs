@@ -68,6 +68,15 @@ namespace F1.Tests
             yield return Capture("ko_15_battle_after_advance");
         }
 
+        /// <summary>A battle at the moment a mercenary is at death's door: the plate that says so.</summary>
+        [UnityTest]
+        public IEnumerator DeathsDoor_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachDeathsDoorInTheFirstBattle();
+            yield return Capture("ko_18_battle_deaths_door");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);

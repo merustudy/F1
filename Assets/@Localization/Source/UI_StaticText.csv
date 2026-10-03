@@ -45,7 +45,7 @@ Map.SelectNode,Shown until a node is selected.,갈 곳을 고르세요,Choose wh
 Map.NodeTitle,{0} = floor. {1} = node kind.,{0}층 · {1},Floor {0} · {1}
 Map.Unknown,Shown in place of an enemy list: who waits at a node is not shown before the battle.,누가 기다리는지는 들어가 봐야 압니다.,Who waits inside is found out inside.
 Map.Enter,Starts the battle at the selected node.,전투 시작,Fight
-Board.Hp,{0} = HP. {1} = max HP.,HP {0}/{1},HP {0}/{1}
+Board.Hp,On the HP bar of a plate. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.EmptySlot,An empty item or potion slot.,빈 칸,Empty
 Board.Grade,{0} = item grade.,등급 {0},Grade {0}
 Board.Forward,Moves a mercenary one row forward (towards row 1); the one standing there moves back.,앞으로,Forward
@@ -85,11 +85,11 @@ Battle.StormIn,{0} = seconds until the storm starts.,폭풍까지 {0}초,Storm i
 Battle.StormActive,{0} = damage of the next storm tick.,폭풍! 다음 피해 {0},Storm! Next hit {0}
 Battle.Pause,Pauses the battle.,정지,Pause
 Battle.Speed,{0} = speed multiplier.,x{0},x{0}
-Battle.Hp,{0} = HP. {1} = max HP.,HP {0}/{1},HP {0}/{1}
-Battle.Shield,{0} = shield points.,보호막 {0},Shield {0}
-Battle.Burn,{0} = burn stacks.,화상 {0},Burn {0}
-Battle.DogGrace,At 0 HP during grace. {0} = seconds of grace left. {1} = hits taken. {2} = hits that break the grace.,빈사 · 유예 {0}초 · 피격 {1}/{2},Death's door · {0}s · hits {1}/{2}
-Battle.DogRolling,At 0 HP after grace. {0} = death chance per hit.,빈사 · 피격마다 사망 {0}%,Death's door · {0}% death per hit
+Battle.Hp,On the HP bar of a plate. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
+Battle.Shield,Next to the shield icon. {0} = shield points.,{0},{0}
+Battle.Burn,Next to the burn icon. {0} = burn stacks.,{0},{0}
+Battle.DogGrace,Next to the death's door icon: at 0 HP during grace. {0} = seconds of grace left. {1} = hits taken. {2} = hits that break the grace.,유예 {0}초 · 피격 {1}/{2},{0}s left · hits {1}/{2}
+Battle.DogRolling,Next to the death's door icon: at 0 HP after grace. {0} = death chance per hit.,피격마다 사망 {0}%,{0}% death per hit
 Battle.PartyFallen,Mercenaries who died in this battle. {0} = names.,쓰러진 아군: {0},Fallen: {0}
 Battle.EnemyFallen,Enemies killed in this battle. {0} = names.,쓰러뜨린 적: {0},Defeated: {0}
 Battle.PotionHint,How to use a potion.,포션을 누른 뒤 아군을 누르세요,"Click a potion, then an ally"

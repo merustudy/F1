@@ -181,9 +181,18 @@ namespace F1.Tests
             PotionSlotView[] potions = UiTestUtil.Views<PotionSlotView>(screen);
             BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/PartyRow1"));
             Assert.IsFalse(units[0].Button.interactable, "Allies are not clickable until a potion is armed.");
+
+            // A unit's plate says whose side it is on, and that a potion can be used on it.
+            BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(screen).First(u => u.Unit.Side == BattleSide.Enemy);
+            Assert.AreEqual("plate_party", units[0].Plate.name);
+            Assert.AreEqual("plate_enemy", enemy.Plate.name);
             UiTestUtil.Click(potions[0].Button);
             yield return null;
+            Assert.AreEqual("plate_target", units[0].Plate.name, "The potion can be used on this ally.");
+            Assert.AreEqual("plate_enemy", enemy.Plate.name, "Not on an enemy.");
             UiTestUtil.Click(units[0].Button);
+            yield return null;
+            Assert.AreEqual("plate_party", units[0].Plate.name, "The potion is used: nothing waits for a target.");
 
             Assert.AreEqual(1, engine.Inputs.Count);
             Assert.AreEqual(BattleInputKind.UsePotion, engine.Inputs[0].Kind);
@@ -375,7 +384,7 @@ namespace F1.Tests
             // Row 1 cannot go further forward, the last row not further back.
             PartyColumnView row1 = party.ColumnOfRow(1);
             Assert.AreEqual(front, expedition.Members[row1.Member].MercenaryId);
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1, "Party1Card/Party1Name"));
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1, "Party1Info/Party1Plate/Party1Name"));
             Assert.IsFalse(row1.Forward.interactable);
             Assert.IsTrue(row1.Back.interactable);
             PartyColumnView last = party.ColumnOfRow(partySize);
@@ -387,8 +396,8 @@ namespace F1.Tests
 
             Assert.AreEqual(2, expedition.Members.Single(m => m.MercenaryId == front).Row);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == second).Row);
-            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1, "Party1Card/Party1Name"), "A column shows whoever stands in its row now.");
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2), "Party2Card/Party2Name"));
+            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1, "Party1Info/Party1Plate/Party1Name"), "A column shows whoever stands in its row now.");
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2), "Party2Info/Party2Plate/Party2Name"));
 
             UiTestUtil.Click(party.ColumnOfRow(2).Forward);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
@@ -431,14 +440,16 @@ namespace F1.Tests
                 Assert.AreEqual(row <= partyRows, UiTestUtil.At(screen, "Frame/Field/PartyRow" + row).gameObject.activeSelf, $"Party row {row}");
             }
 
-            // An item that cannot be used in the new row is dimmed and its cooldown does not fill.
+            // An item that cannot be used in the new row is dimmed (its icon, and the name that stands in for a missing icon) and its cooldown does not fill.
             foreach (BattleUnitView view in shown)
             {
                 BattleItemView[] items = UiTestUtil.Views<BattleItemView>(view);
                 for (int i = 0; i < items.Length; i++)
                 {
-                    Color expected = view.Unit.Items[i].Active ? UiPalette.Text : UiPalette.TextDim;
-                    Assert.AreEqual(expected, items[i].GetComponentInChildren<TMPro.TMP_Text>().color, UiText.Name(view.Unit.Items[i].Equipped.Item.Name));
+                    bool active = view.Unit.Items[i].Active;
+                    string name = UiText.Name(view.Unit.Items[i].Equipped.Item.Name);
+                    Assert.AreEqual(active ? UiPalette.Text : UiPalette.TextDim, items[i].GetComponentInChildren<TMPro.TMP_Text>().color, name);
+                    Assert.AreEqual(active ? Color.white : UiPalette.IconDim, items[i].GetComponentsInChildren<Image>().Single(image => image.sprite == items[i].Icon).color, name);
                 }
             }
 
@@ -583,6 +594,167 @@ namespace F1.Tests
             UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
             yield return null;
             Assert.IsFalse(party.InventoryPanel.activeSelf);
+        }
+
+        [UnityTest]
+        public IEnumerator Figures_ShowTheArtTheDataNames_OnThePartySideAndInBattle_AndThePlaceholderWithoutArt()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            // The party side: every member stands as the figure of its job, and its board shows
+            // the icon of each item with the grade on its badge; an empty cell shows words only.
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            Assert.IsNotEmpty(Managers.Expedition.Expedition.Members);
+            foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
+            {
+                PartyColumnView column = party.ColumnOfRow(member.Row);
+                AssertShows(column.Figure, data.Jobs.Get(member.JobId).Figure, member.MercenaryId);
+
+                Assert.IsNotEmpty(member.Items, member.MercenaryId);
+                Assert.Greater(member.ItemSlots, member.Items.Count, member.MercenaryId);
+                for (int i = 0; i < member.Items.Count; i++)
+                {
+                    EquippedItem item = member.Items[i];
+                    ItemSlotView slot = column.Slots[i];
+                    Assert.AreSame(item, slot.Item, item.Item.Id);
+                    Assert.IsNotNull(slot.Icon, item.Item.Id);
+                    Assert.AreEqual(item.Item.Id, slot.Icon.name, item.Item.Id);
+                    Assert.AreEqual(item.Grade.ToString(), slot.Grade, item.Item.Id);
+                    Assert.IsFalse(slot.GetComponentsInChildren<TMPro.TMP_Text>().First(text => text.name.EndsWith("Text")).enabled, $"The words of {item.Item.Id} are hidden behind its icon.");
+                }
+
+                ItemSlotView empty = column.Slots[member.Items.Count];
+                Assert.IsNull(empty.Item, member.MercenaryId);
+                Assert.IsNull(empty.Icon, member.MercenaryId);
+                Assert.IsEmpty(empty.Grade, member.MercenaryId);
+                Assert.AreEqual(UiStrings.Get(UiKeys.Board.EmptySlot), empty.GetComponentsInChildren<TMPro.TMP_Text>().First(text => text.name.EndsWith("Text")).text, member.MercenaryId);
+            }
+
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/NodeInfo/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+
+            // The battle: a mercenary is its job's figure, an enemy its own.
+            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>());
+            Assert.IsTrue(units.Any(u => u.Unit.Side == BattleSide.Party) && units.Any(u => u.Unit.Side == BattleSide.Enemy));
+            foreach (BattleUnitView unit in units)
+            {
+                string id = unit.Unit.Setup.SourceId;
+                string address = unit.Unit.Side == BattleSide.Party
+                    ? data.Jobs.Get(data.Mercenaries.Get(id).JobId).Figure
+                    : data.Enemies.Get(id).Figure;
+                AssertShows(unit.Figure, address, id);
+
+                // The badge on the plate says which row the unit stands in.
+                Assert.AreEqual(unit.Unit.Row.ToString(), UiTestUtil.TextAt(unit, "UnitPlate/UnitBadge/UnitRow"), id);
+
+                // A click on the figure's place counts for its unit.
+                var place = (RectTransform)unit.Figure.transform;
+                Transform hit = UiTestUtil.TopmostUnder(place);
+                Assert.IsTrue(hit != null && hit.IsChildOf(unit.transform), $"A click on the figure of {id} lands on '{(hit == null ? "nothing" : hit.name)}'.");
+
+                // The art keeps its own size on the canvas every figure shares, so it is wider than its column.
+                if (address != null)
+                {
+                    RectTransform art = unit.Figure.GetComponentsInChildren<Image>(true).Single(i => i.sprite == unit.Figure.Art).rectTransform;
+                    Assert.AreEqual(place.rect.height, art.rect.height, 0.01f, id);
+                    Assert.AreEqual(art.rect.height * 3f / 4f, art.rect.width, 0.01f, id);
+                    Assert.Greater(art.rect.width, place.rect.width, id);
+                }
+
+                // Each cell shows the icon its item's data names instead of the name; an enemy's icons are mirrored.
+                BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(unit);
+                Assert.AreEqual(unit.Unit.Items.Count, cells.Length, id);
+                for (int i = 0; i < cells.Length; i++)
+                {
+                    ItemData item = unit.Unit.Items[i].Equipped.Item;
+                    Assert.IsNotNull(item.Icon, item.Id);
+                    Assert.IsNotNull(cells[i].Icon, item.Id);
+                    Assert.AreEqual(item.Id, cells[i].Icon.name, item.Id);
+                    Assert.IsFalse(cells[i].GetComponentInChildren<TMPro.TMP_Text>().enabled, $"The name of {item.Id} is hidden behind its icon.");
+                    Assert.AreEqual(unit.Unit.Side == BattleSide.Enemy, cells[i].Mirrored, item.Id);
+                }
+            }
+
+            // A unit without art: the placeholder stands in.
+            FigureView figure = units[0].Figure;
+            figure.Show(null);
+            Assert.IsNull(figure.Art);
+            Assert.IsTrue(figure.ShowsPlaceholder);
+
+            // An item without art: its name stands in.
+            BattleItemView cell = UiTestUtil.Views<BattleItemView>(units[0])[0];
+            cell.Bind(units[0].Unit.Items[0], units[0].Unit.Items[0].Equipped.Item.Size, null, mirrored: false);
+            Assert.IsNull(cell.Icon);
+            Assert.IsTrue(cell.GetComponentInChildren<TMPro.TMP_Text>().enabled);
+            Assert.AreEqual(UiText.Name(units[0].Unit.Items[0].Equipped.Item.Name), cell.GetComponentInChildren<TMPro.TMP_Text>().text);
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_AUnitAtDeathsDoor_ShowsItOnItsPlate()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachDeathsDoorInTheFirstBattle();
+
+            BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Single(u => u.Unit.InDog);
+            Assert.AreEqual("plate_danger", unit.Plate.name);
+
+            // The state line holds the death's door state with its words, and nothing else.
+            Assert.IsTrue(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);
+            Assert.IsNotEmpty(UiTestUtil.TextAt(unit, "UnitPlate/UnitStates/UnitStatusChip/UnitStatus"));
+            Assert.IsFalse(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitShieldChip").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitBurnChip").gameObject.activeSelf);
+
+            // Everyone else keeps the plate of their side, without the state.
+            foreach (BattleUnitView other in UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Where(u => !u.Unit.InDog))
+            {
+                Assert.AreEqual(other.Unit.Side == BattleSide.Party ? "plate_party" : "plate_enemy", other.Plate.name);
+                Assert.IsFalse(UiTestUtil.At(other, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_IsFoughtInFrontOfTheBackgroundTheDungeonNames()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+
+            string address = Managers.Data.Data.Dungeons.Get(Managers.Expedition.Expedition.DungeonId).Background;
+            Assert.IsNotNull(address, "The dungeon of the game has a background.");
+            BattleScreen screen = UiTestUtil.Screen<BattleScreen>();
+            Assert.IsNotNull(screen.Background);
+            Assert.AreEqual(address.Substring(address.LastIndexOf('/') + 1).Replace('-', '_'), screen.Background.name);
+
+            // It lies behind everything else of the screen and takes no clicks.
+            Transform background = UiTestUtil.At(screen, "Frame/Background");
+            Assert.AreEqual(0, background.GetSiblingIndex());
+            Assert.IsFalse(background.GetComponent<Image>().raycastTarget);
+        }
+
+        /// <summary>
+        /// The figure shows the art of the address, or the placeholder when the data names none.
+        /// A sprite is named after its file, and the file after the data id
+        /// ("unit/enemy/goblin-raider" is "goblin_raider").
+        /// </summary>
+        static void AssertShows(FigureView figure, string address, string who)
+        {
+            if (address == null)
+            {
+                Assert.IsNull(figure.Art, who);
+                Assert.IsTrue(figure.ShowsPlaceholder, who);
+                return;
+            }
+
+            Assert.IsNotNull(figure.Art, who);
+            Assert.IsFalse(figure.ShowsPlaceholder, who);
+            Assert.AreEqual(address.Substring(address.LastIndexOf('/') + 1).Replace('-', '_'), figure.Art.name, who);
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, depart and enter the first node.</summary>

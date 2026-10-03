@@ -12,9 +12,9 @@ namespace F1.UI
 {
     /// <summary>
     /// The party between battles, in the battle screen's shape: one column per row (row 1 on the
-    /// right) with the figure, the info card and the board stacked under it, placed where the battle
-    /// screen places its party columns (<see cref="FieldLayout"/>), the potions in the strip under
-    /// the header, and the inventory as a popup over the other half of the screen.
+    /// right) with the figure, the plate, the move buttons and the board stacked under it, placed
+    /// where the battle screen places its party columns (<see cref="FieldLayout"/>), the potions in
+    /// the strip under the header, and the inventory as a popup over the other half of the screen.
     /// Clicking an item and then a cell moves it or trades places; "to inventory" takes the clicked
     /// item off its board; an inventory item and then a cell puts it on a board (whatever was there
     /// goes to the inventory). The inventory has a fixed number of cells, so what would not fit
@@ -24,7 +24,6 @@ namespace F1.UI
     public sealed class PartySideView : MonoBehaviour
     {
         [SerializeField] RectTransform _field;
-        [SerializeField] RectTransform _floor;
         [SerializeField] PartyColumnView[] _columns;
         [SerializeField] PotionSlotView _potionTemplate;
         [SerializeField] Transform _potionParent;
@@ -43,6 +42,7 @@ namespace F1.UI
         int _selectedMember = -1;
         int _selectedCell = -1;
         int _selectedInventory = -1;
+        ExpeditionArt _art;
 
         /// <summary>
         /// Set by a screen that holds a selection of its own (the reward screen's chosen item): which
@@ -75,8 +75,10 @@ namespace F1.UI
         }
 
         /// <summary>Places and wires the columns and makes the potion slots. Called once by the owning screen.</summary>
-        public void Open()
+        /// <param name="art">The art the owning screen loaded before it opened.</param>
+        public void Open(ExpeditionArt art)
         {
+            _art = art;
             ExpeditionState expedition = Managers.Expedition.Expedition;
             LayoutColumns(Mathf.Min(Managers.Data.Data.Balance.PartySize, _columns.Length));
             for (int i = 0; i < _columns.Length; i++)
@@ -100,8 +102,7 @@ namespace F1.UI
 
         /// <summary>
         /// Puts each column where the battle screen puts the party column of the same row for a
-        /// party of this size, and runs the floor line under them. The rows the party cannot stand
-        /// in are not shown, as in battle.
+        /// party of this size. The rows the party cannot stand in are not shown, as in battle.
         /// </summary>
         void LayoutColumns(int partyRows)
         {
@@ -117,8 +118,6 @@ namespace F1.UI
                     column.sizeDelta = new Vector2(width, column.sizeDelta.y);
                 }
             }
-
-            _floor.sizeDelta = new Vector2(FieldLayout.SideWidth(width, partyRows), _floor.sizeDelta.y);
         }
 
         public void ClearSelection()
@@ -159,6 +158,7 @@ namespace F1.UI
                 column.Show(
                     m,
                     expedition.Members[m],
+                    _art,
                     manager.CanMoveToRow(m, row - 1),
                     manager.CanMoveToRow(m, row + 1),
                     m == _selectedMember ? _selectedCell : -1,

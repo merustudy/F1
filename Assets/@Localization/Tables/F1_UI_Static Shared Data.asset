@@ -928,7 +928,7 @@ MonoBehaviour:
     - rid: 636489279218909217
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = HP. {1} = max HP.'
+        m_CommentText: On the HP bar of a plate. {0} = HP. {1} = max HP.
     - rid: 636489279218909218
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1024,24 +1024,25 @@ MonoBehaviour:
     - rid: 636489279218909248
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = HP. {1} = max HP.'
+        m_CommentText: On the HP bar of a plate. {0} = HP. {1} = max HP.
     - rid: 636489279218909249
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = shield points.'
+        m_CommentText: Next to the shield icon. {0} = shield points.
     - rid: 636489279218909250
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = burn stacks.'
+        m_CommentText: Next to the burn icon. {0} = burn stacks.
     - rid: 636489279218909251
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: At 0 HP during grace. {0} = seconds of grace left. {1} = hits
-          taken. {2} = hits that break the grace.
+        m_CommentText: 'Next to the death''s door icon: at 0 HP during grace. {0}
+          = seconds of grace left. {1} = hits taken. {2} = hits that break the grace.'
     - rid: 636489279218909252
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: At 0 HP after grace. {0} = death chance per hit.
+        m_CommentText: 'Next to the death''s door icon: at 0 HP after grace. {0}
+          = death chance per hit.'
     - rid: 636489279218909254
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:

@@ -106,11 +106,19 @@ namespace F1.Tests
             return top != null && (top == button.transform || top.IsChildOf(button.transform));
         }
 
-        /// <summary>Casts a pointer ray at the middle of the button, the way the event system does for a mouse click.</summary>
         static Transform TopmostUnderPointer(Button button)
         {
+            return TopmostUnder((RectTransform)button.transform);
+        }
+
+        /// <summary>
+        /// Casts a pointer ray at the middle of the rect, the way the event system does for a mouse
+        /// click, and returns what it lands on first, or null when it hits nothing.
+        /// </summary>
+        public static Transform TopmostUnder(RectTransform rect)
+        {
             var corners = new Vector3[4];
-            ((RectTransform)button.transform).GetWorldCorners(corners);
+            rect.GetWorldCorners(corners);
             var pointer = new PointerEventData(EventSystem.current) { position = (corners[0] + corners[2]) * 0.5f };
             var hits = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointer, hits);
@@ -225,6 +233,42 @@ namespace F1.Tests
             champion.Items[0] = new EquippedItem(champion.Items[0].Item, 999);
             champion.MaxHp = 100000;
             champion.Hp = champion.MaxHp;
+        }
+
+        /// <summary>
+        /// From the title: a new run, a full party, the first node, and its battle advanced (and
+        /// left paused) to the moment a mercenary is at death's door. The party is staged so that
+        /// this does not hang on the luck of the encounter: everyone has one HP, and weapons too
+        /// weak to end the battle first.
+        /// </summary>
+        public static IEnumerator ReachDeathsDoorInTheFirstBattle()
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            FillParty(Screen<LobbyScreen>());
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+
+            foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
+            {
+                member.Hp = 1;
+                member.Items[0] = new EquippedItem(member.Items[0].Item, 1);
+            }
+
+            NodeMapScreen map = Screen<NodeMapScreen>();
+            Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            Click(map, "Frame/NodeInfo/Enter");
+            yield return WaitForScreen(ScreenId.Battle);
+
+            Screen<BattleScreen>().Clock.Paused = true;
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            while (!engine.Party.Any(u => u.InDog))
+            {
+                Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The battle ended before anyone was at death's door.");
+                Managers.Expedition.AdvanceBattle(100);
+            }
+
+            yield return WaitForRedraw();
         }
 
         /// <summary>Runs the shown battle to its end without input and returns to the phase after it.</summary>

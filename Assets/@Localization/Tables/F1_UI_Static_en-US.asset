@@ -180,7 +180,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864224
-    m_Localized: HP {0}/{1}
+    m_Localized: '{0}/{1}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -292,27 +292,27 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864255
-    m_Localized: HP {0}/{1}
+    m_Localized: '{0}/{1}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864256
-    m_Localized: Shield {0}
+    m_Localized: '{0}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864257
-    m_Localized: Burn {0}
+    m_Localized: '{0}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864258
-    m_Localized: "Death's door \xB7 {0}s \xB7 hits {1}/{2}"
+    m_Localized: "{0}s left \xB7 hits {1}/{2}"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864259
-    m_Localized: "Death's door \xB7 {0}% death per hit"
+    m_Localized: '{0}% death per hit'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844

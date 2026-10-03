@@ -3,10 +3,12 @@ namespace F1.UI
     /// <summary>
     /// Where the columns of a field stand. A field holds one column per row of each side: the
     /// party's rows on the left with row 1 next to the middle, the enemy's rows on the right, every
-    /// column the same width. The battle screen lays its field out with this when it opens, and the
-    /// party side of the node map and the reward screen puts its columns in the same places, so the
-    /// party keeps the battle's shape on every screen whatever the party size is. Rows are given as
-    /// indices (0 is row 1) and every x is measured from the field's left edge.
+    /// column the same width. A side stands close together and the two sides stand apart: the gap
+    /// between the sides is much wider than the gap inside a side (the field's box leaves room at
+    /// both ends of the screen as well). The battle screen lays its field out with this when it
+    /// opens, and the party side of the node map and the reward screen puts its columns in the same
+    /// places, so the party keeps the battle's shape on every screen whatever the party size is.
+    /// Rows are given as indices (0 is row 1) and every x is measured from the field's left edge.
     /// </summary>
     public static class FieldLayout
     {
@@ -14,7 +16,7 @@ namespace F1.UI
         public const float ColumnGap = 10f;
 
         /// <summary>Space between the two sides: between their row 1 columns.</summary>
-        public const float SideGap = 40f;
+        public const float SideGap = 180f;
 
         /// <summary>The width of one column of a field that holds this many columns on the two sides together.</summary>
         public static float ColumnWidth(float fieldWidth, int partyColumns, int enemyColumns)

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using F1.Core;
 using F1.Data;
 using F1.Flow;
@@ -29,6 +30,14 @@ namespace F1.UI
         readonly List<RewardOptionView> _options = new List<RewardOptionView>();
         int _selectedOption = -1;
 
+        ExpeditionArt _art;
+
+        /// <summary>The art of the units is loaded before the screen opens, so nothing waits for it afterwards.</summary>
+        public override async Task PrepareAsync()
+        {
+            _art = await ExpeditionArt.LoadAsync(Managers.Resource, Managers.Data.Data);
+        }
+
         protected override void OnOpen()
         {
             ExpeditionState expedition = Managers.Expedition.Expedition;
@@ -44,7 +53,7 @@ namespace F1.UI
             _skip.onClick.AddListener(OnSkip);
             _toInventory.onClick.AddListener(OnToInventory);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
-            _party.Open();
+            _party.Open(_art);
             _party.CellClickOverride = PlaceSelectedItem;
         }
 

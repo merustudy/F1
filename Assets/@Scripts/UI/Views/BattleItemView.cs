@@ -1,26 +1,25 @@
-using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace F1.UI
 {
     /// <summary>
-    /// One item of a unit in battle: a cell of the item board. A geometric placeholder icon (one
-    /// per effect kind, until there is art) sits behind the cooldown fill, the name over it. A big
-    /// item can take more than one cell; the cell then grows downward.
+    /// One item of a unit in battle: a cell of the item board. The cell itself is the cooldown
+    /// gauge: it fills from the left and the item fires when it is full. The item's icon lies over
+    /// the gauge, inside the cell's rim; an item without an icon shows its name instead. A big
+    /// item can take more than one cell; the cell then grows downward, and its icon is drawn for
+    /// that shape. An enemy's icon is mirrored so that its weapon points at the party.
     /// </summary>
     public sealed class BattleItemView : MonoBehaviour
     {
-        public const float CellHeight = 48f;
+        public const float CellHeight = 60f;
         public const float CellGap = 4f;
 
         [SerializeField] UiBar _cooldown;
+        [SerializeField] Image _icon;
         [SerializeField] TMP_Text _name;
-        [SerializeField] GameObject _iconDamage;
-        [SerializeField] GameObject _iconHeal;
-        [SerializeField] GameObject _iconShield;
-        [SerializeField] GameObject _iconBurn;
 
         BattleItemState _item;
         bool _shownActive;
@@ -31,21 +30,26 @@ namespace F1.UI
             return cells * CellHeight + (cells - 1) * CellGap;
         }
 
+        /// <summary>The icon on show, or null while the name stands in for it.</summary>
+        public Sprite Icon => _icon.enabled ? _icon.sprite : null;
+
+        /// <summary>True when the icon is drawn mirrored: an enemy's.</summary>
+        public bool Mirrored => _icon.rectTransform.localScale.x < 0f;
+
         /// <param name="cells">How many cells of the board the item takes.</param>
-        public void Bind(BattleItemState item, int cells)
+        /// <param name="icon">The item's icon, or null when it has none.</param>
+        /// <param name="mirrored">Whether the icon points the other way: the enemy's side.</param>
+        public void Bind(BattleItemState item, int cells, Sprite icon, bool mirrored)
         {
             _item = item;
-            ItemData data = item.Equipped.Item;
-            _name.text = UiText.Name(data.Name);
+            _name.text = UiText.Name(item.Equipped.Item.Name);
+            _name.enabled = icon == null;
+            _icon.sprite = icon;
+            _icon.enabled = icon != null;
+            _icon.rectTransform.localScale = new Vector3(mirrored ? -1f : 1f, 1f, 1f);
 
             var rect = (RectTransform)transform;
             rect.sizeDelta = new Vector2(rect.sizeDelta.x, BoardHeight(cells));
-
-            EffectKind kind = data.Effects[0].Kind;
-            _iconDamage.SetActive(kind == EffectKind.Damage);
-            _iconHeal.SetActive(kind == EffectKind.Heal);
-            _iconShield.SetActive(kind == EffectKind.Shield);
-            _iconBurn.SetActive(kind == EffectKind.Burn);
 
             ShowActive(item.Active);
         }
@@ -74,6 +78,7 @@ namespace F1.UI
         {
             _shownActive = active;
             _name.color = active ? UiPalette.Text : UiPalette.TextDim;
+            _icon.color = active ? Color.white : UiPalette.IconDim;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using F1.Core;
 using F1.Data;
 using F1.Flow;
@@ -30,12 +31,20 @@ namespace F1.UI
         readonly Dictionary<int, MapNodeView> _nodes = new Dictionary<int, MapNodeView>();
         int _selectedNodeId = -1;
 
+        ExpeditionArt _art;
+
+        /// <summary>The art of the units is loaded before the screen opens, so nothing waits for it afterwards.</summary>
+        public override async Task PrepareAsync()
+        {
+            _art = await ExpeditionArt.LoadAsync(Managers.Resource, Managers.Data.Data);
+        }
+
         protected override void OnOpen()
         {
             BuildMap(Managers.Expedition.Expedition.Map);
             _enter.onClick.AddListener(OnEnter);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
-            _party.Open();
+            _party.Open(_art);
 
             // With a single way forward there is nothing to choose: select it.
             IReadOnlyList<MapNode> available = Managers.Expedition.AvailableNodes();
