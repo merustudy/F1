@@ -1,0 +1,10 @@
+Key,Source,Fill
+panel,panel,
+plate_party,plate,
+plate_enemy,plate,#74322A
+plate_danger,plate,#B22E26
+plate_target,plate,#406CA4
+plate_label,plate,#1E222C
+slot,slot,
+slot_selected,slot,#7E642C
+button,button,#FFFFFF

@@ -1,0 +1,6 @@
+Key,Dungeon,Subject,Height,Flip
+cave_rat,abandoned_mine,"a giant cave rat with matted grey-brown fur, a long bare tail and big front teeth, crouching on all fours",40,false
+goblin_raider,abandoned_mine,"a goblin raider with grey-green skin, in ragged brown leather, holding a rusty notched short sword",68,false
+goblin_archer,abandoned_mine,"a goblin archer with grey-green skin, in a ragged hood, holding a crude short bow, with a quiver of arrows on its back",68,false
+goblin_shaman,abandoned_mine,"a goblin shaman with grey-green skin, in a tattered robe hung with a few small bones, holding a crooked staff with a tin lantern hanging from its tip",68,false
+mine_overseer,abandoned_mine,"a hulking hobgoblin overseer with grey-green skin, twice as broad as a goblin and standing upright, in a leather apron and one iron shoulder plate, holding a heavy two-handed maul",97,false

@@ -1,0 +1,22 @@
+Key,Subject,Reference
+sword,"the spellblade's sword: a dark crimson blade, a black crossguard and a wrapped grip",Assets/@Art/Unit/Job/spellblade.png
+longsword,"the knight's longsword: a broad steel blade, a brass crossguard and a round pommel",Assets/@Art/Unit/Job/knight.png
+greataxe,"the valkyrie's great axe: a wooden haft with one broad steel axe blade",Assets/@Art/Unit/Job/valkyrie.png
+mace,"the paladin's mace: a dark handle with a round steel head studded with spikes",Assets/@Art/Unit/Job/paladin.png
+healing_staff,"the bishop's staff: a golden-brown staff topped with a golden sun disc",Assets/@Art/Unit/Job/bishop.png
+fire_staff,"the archmage's staff: a gnarled wooden staff with a red crystal at its top",Assets/@Art/Unit/Job/archmage.png
+dagger,"a dagger: a short steel blade, a small crossguard and a leather grip",
+longbow,"a wooden longbow with its string",
+spear,"a spear: a wooden shaft with a leaf-shaped steel head",
+halberd,"a halberd: a wooden shaft topped with an axe blade, a spike and a back hook",
+buckler,"a small round buckler: a wooden shield with a steel rim and a steel boss in its middle",
+ward_charm,"a ward charm: a brass amulet set with a blue stone, on a leather cord",
+herb_pouch,"a small leather pouch tied with a cord, with green herb leaves sticking out of it",
+ember_flask,"a round glass flask with a cork stopper, holding orange embers",
+rat_bite,"a rat's two long yellow front teeth in a bit of pink gum",
+rusty_blade,"the goblin raider's short sword: a rusty, notched blade with a crude wrapped grip",Assets/@Art/Unit/Enemy/goblin_raider.png
+crude_bow,"the goblin archer's crude short bow: a bent branch with a string",Assets/@Art/Unit/Enemy/goblin_archer.png
+hex_spit,"a glob of sickly green spit with a short trail behind it, a pale skull shape showing in it",
+mending_chant,"a charm of small bones and green leaves tied together with a cord",
+overseer_maul,"the overseer's maul: a heavy hammer with a big iron head on a thick wooden shaft",Assets/@Art/Unit/Enemy/mine_overseer.png
+overseer_roar,"a hobgoblin's open roaring mouth with two tusks, seen from the side, and three curved sound lines in front of it",
