@@ -1,6 +1,6 @@
 # 9단계 — 그림
 
-Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했고 체인을 통과했다. 그 뒤의 그림은 배경 -> UI -> 아이템 순서로 하기로 했고, 광산 배경이 확정(잠정)됐다. 그 배경을 전투 화면에 깔고 전투의 캐릭터 간격을 승인된 목업(B안)대로 고쳤다(체인 통과). 이어서 전투 UI의 그림 여덟 장을 생성했고, 목업이 승인돼 전투 화면과 노드 맵·보상의 파티 쪽에 넣었다(체인 통과). 그 뒤 아이템의 아이콘 스물한 개를 아이템 칸의 모양에 맞춰 그렸고, 사용자가 전부 확정해 전투 화면의 칸에 넣었고, 파티 쪽 칸도 목업 A안(아이콘과 등급 배지)으로 넣었다(체인 통과). 2026-10-03 세션 정리에서 전부 커밋하고 푸시했다. 커밋 전. 다음은 아이템의 아이콘)
+Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했고 체인을 통과했다. 그 뒤의 그림은 배경 -> UI -> 아이템 순서로 하기로 했고, 광산 배경이 확정(잠정)됐다. 그 배경을 전투 화면에 깔고 전투의 캐릭터 간격을 승인된 목업(B안)대로 고쳤다(체인 통과). 이어서 전투 UI의 그림 여덟 장을 생성했고, 목업이 승인돼 전투 화면과 노드 맵·보상의 파티 쪽에 넣었다(체인 통과). 그 뒤 아이템의 아이콘 스물한 개를 아이템 칸의 모양에 맞춰 그렸고, 사용자가 전부 확정해 전투 화면의 칸에 넣었고, 파티 쪽 칸도 목업 A안(아이콘과 등급 배지)으로 넣었다(체인 통과). 2026-10-03 세션 정리에서 전부 커밋하고 푸시했다. 그 뒤 새 그림체를 시험했다: 치비(직업 둘)는 폐기, 다크 판타지 1장은 보류. 이어서 전투와 노드 맵·보상의 아이템 칸을 하단 보드 패널로 옮겼다(목업 A안 승인, 구현, 체인 통과). 띠 아이콘 셋은 판정 대기. 같은 날 두 번째 세션 정리에서 커밋하고 푸시했다)
 
 ## Goal
 
@@ -13,6 +13,7 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
 - 직업 광전사를 발키리(`valkyrie`)로, 그 용병을 아스트리드(`astrid`)로 바꿨다(`Docs/Design/05_Mercenary_Growth.md` §1).
 - 유료 호출 15회, 약 $0.44(상한 $10). 장부는 `ArtPipeline/Archive/calls.csv`.
 - **커밋됐다** (2026-10-03 세션 정리. 9단계와 그 뒤의 그림 라운드를 네 커밋으로: 그림 파이프라인 / 그림의 데이터와 연결 / 화면 / Roadmap·Handoff).
+  같은 날 두 번째 세션 정리에서 그림체 시험과 보드 패널을 네 커밋으로 더 올렸다(그림 파이프라인 / 그림체 시험 기록 / 화면과 얼굴 / Roadmap·Handoff).
   기준 그림은 저장소에 넣었다(사용자가 직접 만든 그림이라는 전제. 저장소가 공개다). 승인된 원본(`ArtPipeline/Archive`)도 저장소에 있다(약 80MB).
 - 이 단계와 무관한 변경(사용자의 Unity Editor가 바꾼 설정 파일들. 아래 "알아둘 것")은 되돌렸고 커밋하지 않았다.
 
@@ -69,7 +70,29 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
     `PartyColumnView.Show`가 `ExpeditionArt`를 받아 직업의 그림과 아이템의 아이콘을 스스로 고른다. 배지는 명패의 열 번호 배지와 같은 조각(`KitBadge`. 24px, 왼쪽 아래에서 5px).
 - 남은 것(요청이 있을 때): 포션의 아이콘. 인벤토리 팝업과 보상 목록의 아이콘은 그 UI를 그릴 때. 타이틀과 본부의 배경은 보류.
   노드 맵·보상 화면의 오른쪽과 타이틀·로비·정산은 도형 UI 그대로다.
-- 누계: 호출 47회, 약 $1.12(상한 $10).
+- **그림체 시험 (2026-10-03).** 사용자 지시: "현재 그림체 일단 백업 해놓고 새로운 그림체를 테스트".
+  - 지금의 그림체는 바꾸지 않았다. 스타일 문서, 직업 소재, 기준 그림을 `Archive/06-style-test/before/`에 복사했다(Git `32e47fe`에도 있다).
+  - `gen_image.py`에 `--style`, `--roster`, `--reference`(그대로 붙임)를, `review_sheet.py`에 `--reference`를 더했다. 플래그 없이 돌리면 전과 같다(dry-run으로 확인).
+  - 시험 1 (치비) — **폐기** (사용자): 올린 그림을 기준 그림으로 기사와 대마법사를 그렸다(호출 2회, 약 $0.06). 시험 세트와 그림, 리뷰 시트는 지웠고 README에 기록만 남겼다.
+  - 시험 2 (다크 판타지) — **판정 대기**: 사용자 지시 "백업 원본이미지에서 어두운 느낌 부여(다크 판타지) 테스트 이미지 1개 생성". `Archive/06-style-test/dark/`에
+    `character`만 있는 시험용 `STYLE_RUNTIME.md`(같은 캐릭터를 같은 방식으로 다시 그리되 색·그림자·낡음·분위기만 어둡게)와 소재(`valkyrie` 하나). 기준 그림은 `before/`의 원본을 그대로(왼쪽을 본다, `Flip` false).
+    후보 `valkyrie_dark`(호출 1회, 약 $0.03, 경고 없음). 원본과 맞춘 그림은 `dark/`에, 리뷰 시트는 `review-dark-vs-original.png`. 판정할 때 볼 것은 README.
+    사용자가 **보류**했다. 세트는 그대로 둔다.
+- **전투 UI 개정: 보드 패널 (2026-10-03) — 구현됨, 커밋됨.** 사용자 지시: 아이템 칸을 가로로, 다키스트 던전처럼 하단 패널에 캐릭터마다(열 순서) 가로 칸, 오른쪽은 몬스터, 양 끝에 얼굴.
+  목업 넷(지금, A, B, C)을 보고 **"A안으로 구현 진행. 노드 맵·보상 화면은 별도 목업 제공"**.
+  - 화면: `BattleBoardView`(새 View), `BattleUnitView`에서 칸을 뺌, `BattleItemView`의 가로 칸(`CellWidth`, `CellGapX`, `BoardWidth`. 세로의 `CellGap`·`BoardHeight`는 파티 쪽이 그대로 쓴다),
+    `BattleScreen`이 무대의 View와 패널의 줄을 함께 만들고 옮긴다(`Place<T>`), Builder의 패널·줄 여덟·`BoardTemplate`·`PotionTargetButton`.
+  - 그림: `ArtAddress.FaceOf`, `JobData.Face`·`EnemyData.Face`(`[JsonIgnore]`. Generated JSON은 그대로), `ExpeditionArt`의 얼굴, `ArtSetup`의 얼굴 Entry와 정책, `Assets/@Art/Face/<Job|Enemy>/<Id>.png` 열하나.
+  - 파이프라인: `tools/cutface.py`, Roster의 `FaceDx`·`FaceDy`, `gen_image.py`의 `ITEM_CELLS`, `STYLE_RUNTIME.md` §20·§21(띠), `review_sheet.py`의 가로 칸.
+    띠 아이콘 셋(`longbow`, `spear`, `halberd`)을 생성했다(호출 3회). 미늘창은 폭의 39%만 채운다. **판정 대기, `Assets`에 넣지 않았다**(세로 모양의 맞춘 그림은 `output/item/old-vertical/`).
+  - Test: `DefinitionTests.Face_...`, `ArtSetupTests`(얼굴의 경로와 Entry), PlayMode 전투 Test 넷이 패널의 줄을 본다.
+  - 문서: Architecture/12("전투 화면", "아이템의 아이콘", "유닛의 그림", Test), 13("후처리 (`cell`)", "얼굴", "Unity 배선", Test), 04, 01, Design/10 §5·§6, Roadmap, `Archive/07-battle-panel/README.md`.
+  - 파티 쪽(노드 맵, 보상): 별도 목업(`Archive/07-battle-panel/mock-party-compare.png`: 지금 / A안 / B안)에서 사용자가 **A안**을 택해 구현했다.
+    `PartyColumnView`가 무대의 Column과 패널의 줄(`_line`, `_face`, `_slotParent`)을 함께 보여 준다, `ItemSlotView.SetWidth`, `PartySideView.LayoutColumns`가 줄도 감춘다.
+    Builder `PartySide.cs`(무대 262, 패널·줄·설명 줄·"인벤토리로", 팝업 높이 640), `NodeMap.cs`(맵 630, 노드 정보와 버튼을 패널로), `Reward.cs`(안내와 버튼을 패널로).
+    Test의 버튼 경로가 `Frame/BoardPanel/...`로 바뀌었다(Enter, InventoryToggle, Skip, RewardToInventory). 그림 Test에 파티 줄의 얼굴.
+  - 스크린샷 34장(`Tools/screenshots.sh`): 전투(`_05`, `_15`, `_18`)의 패널이 목업과 같다. 둘은 `Archive/07-battle-panel/game/`에 두었다.
+- 누계: 호출 53회, 약 $1.27(상한 $10).
 
 ## Done
 
@@ -182,6 +205,8 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
 
 ## Verification
 
+- `Tools/chain.sh` (노드 맵·보상의 패널까지 넣은 뒤, 2026-10-03): setup OK, sim OK, EditMode 616/616, PlayMode 43/43(`[Explicit]` 스크린샷 4개 제외).
+  (전투의 패널만 넣었을 때도 같은 수로 통과했고, 그때 두 번째 setup은 바뀐 파일이 없었다. 스크린샷 34장, 4/4 통과. 실행이 ProjectSettings나 Render 설정을 바꾸지 않았다.)
 - `Tools/chain.sh` (전투 UI를 넣은 뒤): setup OK, sim OK, EditMode 611/611, PlayMode 43/43(`[Explicit]` 스크린샷 4개 제외). 체인의 setup이 두 번째 setup이었고 바뀐 파일이 없었다.
   (배경과 간격을 넣었을 때는 PlayMode 42/42, 9단계를 끝냈을 때는 EditMode 596/596, PlayMode 41/41.)
 - `Tools/screenshots.sh` 34장 (전투 UI를 넣은 뒤): 전투(`_05`)가 승인된 목업과 같다. 빈사(`ko_18`)에서 붉은 명패와 해골과 남은 유예, 전진 뒤(`ko_15`)에서 보호막과 화상의 아이콘과 숫자,
@@ -206,6 +231,9 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
 - 그림을 더 그릴 때: `.venv/bin/python ArtPipeline/tools/gen_image.py --type <character|enemy|background> --key <Key>`. 호출 전 `--dry-run`. 같은 이름의 산출물이 있으면 호출하지 않는다.
   확정된 그림을 `Assets/@Art/Unit/<Job|Enemy>/<Id>.png`에 복사하고 CSV의 `Figure`를 채운 뒤 체인을 돌린다. Entry와 Import 설정은 setup이 만든다.
   던전의 배경은 `Assets/@Art/Background/Dungeon/<Id>.png`와 `DungeonData.csv`의 `Background`다. 그린 뒤 발 높이를 재서 Roster의 `FloorLine`에 적고 `--refit`한다.
+- 그림체를 시험할 때: 지금의 문서·Roster·기준 그림은 두고, `Archive/<round>/<style-name>/`에 같은 형식의 시험 세트를 둔 뒤
+  `gen_image.py --type character --key <Key> --name <Key>_<style-name> --style <문서> --roster <소재> --reference <기준 그림>`. `--reference`는 뒤집지 않는다.
+  시트는 `review_sheet.py --names <시험>,<지금> --reference <시험의 기준 그림>`. 보기: `Archive/06-style-test/README.md`.
 - 배경의 바닥선(57%)과 캔버스 비율(3:2)은 두 곳에 있다: `gen_image.py`의 `SCENE_FLOOR`·`SCENE_CANVAS`와 `UiPrefabSetup.Battle.cs`의 `BattleBackgroundFloor`·`BattleBackgroundHeight`. 함께 고친다.
 - 전투 UI를 고칠 때: 그림 자리의 아래 끝(전장 위에서 300, 화면에서 562)이 배경의 바닥선과 맞물려 있다. 그림 자리를 옮기면 배경도 따라간다(`BattleFloorY`).
 - UI 그림을 더하거나 바꿀 때: `gen_image.py --type ui_frame|ui_icon` -> (틀이면) `Rosters/ui_variant.csv`에 줄을 넣고 `ui_variants.py` -> `Assets/@Art/UI/<Frame|Icon>`에 복사
@@ -224,6 +252,10 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
 
 ## Next Action (제안)
 
-1. 사용자가 Unity에서 직접 플레이해 배경, 간격, 새 UI, 아이콘이 들어간 전투와 노드 맵을 본다(`Assets/@Scenes/Boot.unity`. 옛 저장은 이어지지 않으니 새 런).
-2. 사후 검토(Roadmap "사후 검토 대기")와 개정 2~4의 사후 검토(`active/a-rows-items.md`).
-3. 그림을 더 그릴 때는 이 문서의 "알아둘 것"과 `Docs/Architecture/13_ART_PIPELINE.md`를 따른다. 포션의 아이콘이 다음 후보다. 10단계(소리)와 11단계(플레이테스트와 Slice B)는 대기.
+1. 띠 아이콘 셋의 판정(`Archive/07-battle-panel/README.md`): 확정이면 `output/item/{longbow,spear,halberd}.png`를 `Assets/@Art/Item/`에 복사하고 체인을 돌린다.
+   미늘창은 `--extra`로 1회 재생성을 권한다. 사용자가 "나머지는 대기"라고 했으므로 지시가 있을 때 한다.
+2. 다크 판타지 시험(보류 중)의 판정(`Archive/06-style-test/README.md` "판정할 때 볼 것"). 버리면 바꿀 것이 없다. 채택하면 Design/10의 G9를 먼저 고치고, 확정된 그림을 새 기준 그림으로
+   삼아(`References/Character/`) 지금 문서의 색·그림자·분위기 문구를 고친 뒤, 종류마다 승인 라운드로 다시 그려 배선한다(선·비율은 같으니 범위는 판정 때 정한다). 그 전까지 게임은 지금 그림체다.
+3. 사용자가 Unity에서 직접 플레이해 배경, 간격, 보드 패널, 아이콘이 들어간 전투와 노드 맵을 본다(`Assets/@Scenes/Boot.unity`. 옛 저장은 이어지지 않으니 새 런).
+4. 사후 검토(Roadmap "사후 검토 대기")와 개정 2~4의 사후 검토(`active/a-rows-items.md`).
+5. 그림을 더 그릴 때는 이 문서의 "알아둘 것"과 `Docs/Architecture/13_ART_PIPELINE.md`를 따른다. 포션의 아이콘이 다음 후보다. 10단계(소리)와 11단계(플레이테스트와 Slice B)는 대기.
