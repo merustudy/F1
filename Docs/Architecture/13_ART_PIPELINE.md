@@ -19,14 +19,15 @@ CSV 열은 `05_STATIC_DATA.md`, 화면이 그림을 보여 주는 방식은 `12_
 ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 ├─ STYLE_RUNTIME.md            # 스타일 규칙. 스크립트가 읽어 프롬프트를 조립한다
 ├─ References/<Type>/          # 타입별 기준 그림. 그리는 방식만 빌린다
-├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도), 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
+├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
 ├─ Archive
 │  ├─ calls.csv                # 유료 호출의 장부: 시각, 대상, 모델, 사용량, 추정 비용
 │  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본
 ├─ tools
-│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다
+│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference 는 그림체 시험용
 │  ├─ run_roster.py            # Roster의 빠진 항목을 하나씩 돌린다. --max-calls 가 필수다
 │  ├─ cutout.py                # 단색 배경의 그림에서 캐릭터를 오려 낸다. 호출하지 않는다
+│  ├─ cutface.py               # 확정된 전신 그림에서 얼굴을 잘라 낸다 (전투의 보드 패널). 호출하지 않는다
 │  ├─ ui_variants.py           # 맞춘 틀에서 게임에 넣을 Sprite를 만든다: 바탕색을 바꾼 변형. 호출하지 않는다
 │  └─ review_sheet.py          # 리뷰 시트. 호출하지 않는다
 └─ output/                     # 생성 직후 산출물 (gitignore)
@@ -48,6 +49,10 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 - 프롬프트는 공통 규칙 -> Subject -> 타입 섹션 -> (적이면) 던전 컨셉 -> 금지 블록 -> 타입의 기준 그림 문구 순으로 조립한다.
 - 작가, 스튜디오, 작품의 이름과 "in the style of"를 프롬프트에 넣지 않는다.
 - 그림체를 바꿀 때는 이전 문서를 `Archive/<style-name>/`으로 옮기고 새로 쓴다.
+- 그림체를 **시험**할 때는 지금의 문서, Roster, 기준 그림을 건드리지 않는다. 같은 형식의 시험 세트(스타일 문서, 소재, 기준 그림)를 `Archive/<round>/<style-name>/`에 두고
+  `gen_image.py --style <문서> --roster <소재> --reference <기준 그림>`으로 돌린다. `--reference`는 뒤집지 않고 그대로 붙이므로 피사체가 볼 방향을 보는 그림을 준다.
+  산출물의 이름은 `--name <Key>_<style-name>`으로 달리한다. 리뷰 시트는 `review_sheet.py --reference`로 시험의 기준 그림을 보인다.
+  채택되면 그 세트를 제자리(`STYLE_RUNTIME.md`, `Rosters`, `References`)로 옮기고 이전 문서는 위 규칙대로 Archive로 옮긴다.
 
 ## 타입
 
@@ -94,19 +99,33 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 
 ## 후처리 (`cell`)
 
-아이템의 아이콘은 그 아이템이 차지하는 칸의 모양으로 그린다. 칸의 수는 Game Data(`ItemData.Size`)에서 읽는다. Roster에 다시 적지 않는다.
+아이템의 아이콘은 그 아이템이 차지하는 칸의 모양으로 그린다. 전투의 보드 패널에서 한 아이템의 칸은 **옆으로 이어지므로**(`12_UI.md` "전투 화면") 칸이 많을수록 더 긴 띠다.
+칸의 수는 Game Data(`ItemData.Size`)에서 읽는다. Roster에 다시 적지 않는다.
 
 | 칸의 수 | 화면의 칸 | 생성 캔버스 | 맞춘 캔버스 | 구도 (스타일 문서의 그 칸 수의 절) |
 |---|---|---|---|---|
 | 1 | 180x60 | `1536x512` | 320x88 | 가로로 긴 띠. 긴 것은 눕힌다 |
-| 2 | 180x124 | `1536x1024` | 320x216 | 가로가 긴 사각형. 긴 것은 비스듬히 놓는다 |
-| 3 | 180x188 | `1024x1024` | 320x344 | 정사각에 가까운 사각형. 긴 것은 대각선으로 놓는다 |
+| 2 | 366x60 | `1536x512` | 692x88 | 더 긴 띠(약 8:1). 긴 것은 가늘고 길게 눕힌다 |
+| 3 | 552x60 | `1536x512` | 1064x88 | 아주 긴 띠(약 12:1). 긴 것은 가늘고 길게 눕힌다 |
 
-- 맞춘 캔버스는 칸에서 테(좌우 10, 위아래 8)를 뺀 자리의 2배다. 화면은 아이콘을 칸의 가운데에 그 크기로 놓는다.
+- 맞춘 캔버스는 칸(크기 2와 3은 칸 사이의 간격 6을 더한 폭)에서 테(좌우 10, 위아래 8)를 뺀 자리의 2배다. 화면은 아이콘을 칸의 가운데에 그 크기로 놓는다.
 - 조각을 Alpha로 오려 내 비율을 지킨 채 캔버스에 가장 크게 맞추고 가운데에 놓는다. 둘레에 고른 띠(4px, `UI_LINE`)를 두른다(`glyph`와 같은 맞추기다).
+  생성 캔버스(3:1)보다 긴 띠에서는 높이에 맞춰 줄어드므로, 그림이 가늘지 않으면 띠의 일부만 채운다. 폭의 비율은 실행이 출력한다.
 - 프롬프트의 구도는 아이템의 공통 규칙에 그 칸 수의 절을 더한 것이다. 긴 것은 손잡이가 왼쪽, 끝이 오른쪽이다.
 - 칸의 크기(`12_UI.md` "전투 화면")가 바뀌면 이 표와 `ITEM_CELLS`를 같이 고치고, 비율이 달라진 칸 수의 아이콘은 다시 그린다.
+  (2026-10-03 보드 패널로 바뀌면서 2칸과 3칸의 모양이 사각형에서 띠로 바뀌었다. 장궁, 창, 미늘창이 다시 그려졌다.)
 - 리뷰 시트(`review_sheet.py --type item`)는 아이콘을 실제 칸에 넣어 만든다: 화면 크기(쿨다운이 절반 찬 것과 다 찬 것)와 그 2배.
+
+## 얼굴 (`cutface.py`)
+
+전투의 보드 패널은 유닛의 줄을 얼굴로 시작한다(`12_UI.md` "전투 화면"). 얼굴은 따로 그리지 않고 **확정된 전신 그림에서 잘라 낸다**. 호출이 없다.
+
+- 원본은 게임이 보여 주는 확정된 그림(`Assets/@Art/Unit`)이다. 후보에서 자르지 않는다. 그래서 전신 그림이 있는 유닛은 얼굴도 있고, 데이터는 전신 그림(`Figure`)만 가리킨다.
+  얼굴의 Address는 전신 그림의 첫 조각을 바꾼 것이다(`unit/job/knight` -> `face/job/knight`. `ArtAddress.FaceOf`).
+- 자르기는 산술이다: 정사각의 한 변은 그림 높이(Alpha 경계)의 27%, 그림의 맨 위 조각(머리)의 가운데에 맞추고, 모자나 무기가 머리 위로 솟은 그림은 Roster의 `FaceDx`, `FaceDy`(그림의 px)로 옮긴다.
+  화면 크기(60)의 2배인 120x120으로 저장한다. 리뷰 시트(`output/review/faces.png`)가 모든 얼굴을 편의 색 위에 화면 크기와 2배로 보인다.
+- 돌리는 법: `cutface.py --type character --type enemy [--only key]` -> `output/face/<Key>.png` -> `Assets/@Art/Face/<Job|Enemy>/<Id>.png`로 복사한다.
+  전신 그림이 바뀌면 얼굴도 다시 자른다. 따로 그린 초상이 생기면 같은 자리에 두면 된다.
 
 ## 후처리 (`scene`)
 
@@ -159,6 +178,11 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
 2. CSV   -> JobData.csv / EnemyData.csv 의 Figure = "unit/<job|enemy>/<kebab-id>"
 3. Entry -> CSV의 Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
+유닛의 얼굴 (전신 그림에서 잘라 낸 것)
+1. PNG   -> Assets/@Art/Face/<Job|Enemy>/<Id>.png (cutface.py의 산출물 그대로, 120x120)
+2. CSV   -> 없다. Figure가 있는 유닛마다 Face = "face/<job|enemy>/<kebab-id>"가 따라 나온다 (ArtAddress.FaceOf)
+3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
+
 던전의 배경
 1. PNG   -> Assets/@Art/Background/Dungeon/<Id>.png
 2. CSV   -> DungeonData.csv 의 Background = "background/dungeon/<kebab-id>"
@@ -175,23 +199,24 @@ UI의 틀과 아이콘
 3. Entry -> 없다. 화면 Prefab이 Sprite를 직접 가리키고 Prefab과 함께 읽힌다
 ```
 
-- 그림은 **직업**과 **적**에 붙는다. 용병은 자기 직업의 그림으로 보인다.
-- `Figure`가 빈 값이면 그 유닛은 도형 Placeholder로 남는다. 그림이 없다는 것은 데이터가 말한다. Load 실패를 Placeholder로 바꾸지 않는다.
+- 그림은 **직업**과 **적**에 붙는다. 용병은 자기 직업의 그림으로 보인다. 얼굴도 그 그림에서 나온다.
+- `Figure`가 빈 값이면 그 유닛은 도형 Placeholder로 남는다(얼굴 자리도). 그림이 없다는 것은 데이터가 말한다. Load 실패를 Placeholder로 바꾸지 않는다.
+  `Figure`가 있는데 얼굴 파일이 없으면 `ArtSetup.FindProblems`가 잡는다.
 - 배경은 **던전**에 붙고, 전투 화면이 깐다. `Background`가 빈 값이면 그 던전의 전투는 배경색 그대로다.
 - 아이콘은 **아이템**에 붙고, 아이템 칸이 보여 준다(`12_UI.md` "전투 화면", "파티 쪽"). `Icon`이 빈 값이면 그 아이템의 칸에는 이름이 적힌다.
 - 맞춘 그림(`output/<type>/<Key>.png`)을 그 자리에 복사하는 것이 배선의 시작이다. 승인된 것만 복사한다.
 - Import 정책은 Setup 코드 한 곳(`ArtSetup`)이 강제한다. 전신 그림: Sprite(Single), `alphaIsTransparency`, Mipmap, Full Rect, MaxSize 1024, 높은 품질의 압축.
   배경: 같되 불투명(`alphaIsTransparency` 없음), Mipmap 없음(화면에 거의 제 크기로 깔린다), MaxSize 4096(캔버스 2304x1536을 줄이지 않는다).
   UI: 전신 그림과 같되 Pixels Per Unit 200(화면 크기의 2배로 그려져 있다), MaxSize 512, 틀에는 `UiArt`의 Border.
-  아이템의 아이콘: UI의 아이콘과 같다(화면 크기의 2배, Border 없음).
+  아이템의 아이콘과 유닛의 얼굴: UI의 아이콘과 같다(화면 크기의 2배, Border 없음).
   정책과 다르면 다시 Import한다. Inspector에서 고치지 않는다. 체인의 setup 단계가 부른다.
 - 화면은 열리기 전에 쓸 그림을 `ResourceManager`로 읽어 둔다. Addressables를 직접 부르지 않는다(`12_UI.md` "유닛의 그림", "전투 화면").
 
 ## Test와 검사
 
-- EditMode: `ArtSetup.FindProblems`가 비어 있다(`Figure`, `Background`, `Icon`이 가리키는 파일, `UiArt`의 파일이 있고 Import 정책이 맞다. `Assets/@Art`에 아무도 가리키지 않는 PNG가 없다).
+- EditMode: `ArtSetup.FindProblems`가 비어 있다(`Figure`와 그 얼굴, `Background`, `Icon`이 가리키는 파일, `UiArt`의 파일이 있고 Import 정책이 맞다. `Assets/@Art`에 아무도 가리키지 않는 PNG가 없다).
   `AddressablesSetup.FindProblems`가 비어 있다.
-- PlayMode: `Figure`가 있는 유닛은 그림을, 없는 유닛은 Placeholder를 보여 준다. 전투 화면이 던전의 배경을 깐다. 아이템 칸이 `Icon`의 그림을 보여 준다.
+- PlayMode: `Figure`가 있는 유닛은 그림과 얼굴을, 없는 유닛은 Placeholder를 보여 준다. 전투 화면이 던전의 배경을 깐다. 아이템 칸이 `Icon`의 그림을 보여 준다.
 - 눈으로: `Tools/screenshots.sh`.
 - 스크립트는 `--dry-run`으로 호출 없이 파일 검사와 프롬프트 조립까지 확인한다.
 

@@ -44,11 +44,12 @@ GAP = 16
 LABEL_HEIGHT = 30
 
 # An item cell of a unit's board, in the 1920x1080 design space (BattleItemView, UiPrefabSetup):
-# a cell is this wide and high, cells are stacked with a gap, and the icon sits inside the rim
-# of the slot. The slot is the frame of the interface kit, stretched as the game stretches it;
-# its border is the one UiArt gives it, in the pixels of the sprite (twice the size on screen).
+# a cell is this wide and high, the cells of a board lie side by side with a gap, and the icon
+# sits inside the rim of the slot. The slot is the frame of the interface kit, stretched as the
+# game stretches it; its border is the one UiArt gives it, in the pixels of the sprite (twice the
+# size on screen).
 ITEM_CELL = (180, 60)
-ITEM_CELL_GAP = 4
+ITEM_CELL_GAP = 6
 ITEM_RIM = 7
 ITEM_SLOT = OUTPUT_DIR / "ui_variant" / "slot.png"
 ITEM_SLOT_BORDER = 30
@@ -121,13 +122,13 @@ def nine_slice(image: Image.Image, border: int, size) -> Image.Image:
 
 
 def item_cell(icon: Image.Image, cells: int, charge: float, scale: int) -> Image.Image:
-    """An item in the cells it takes, as the board draws it: the slot, the icon inside its rim.
+    """An item in the cells it takes, as the board draws it: the slot (as wide as its cells side by side), the icon inside its rim.
 
     charge: how far the item has charged, 0..1. The charged part of the icon is lit from the
     left and the rest is dimmed; 1 shows the whole icon lit. scale 2 is the sprite's own size.
     """
-    width = ITEM_CELL[0] * 2
-    height = (ITEM_CELL[1] * cells + ITEM_CELL_GAP * (cells - 1)) * 2
+    width = (ITEM_CELL[0] * cells + ITEM_CELL_GAP * (cells - 1)) * 2
+    height = ITEM_CELL[1] * 2
     cell = nine_slice(Image.open(ITEM_SLOT).convert("RGBA"), ITEM_SLOT_BORDER, (width, height))
 
     x, y = (width - icon.width) // 2, (height - icon.height) // 2
@@ -160,30 +161,27 @@ def item_sheet(names: list, folder: Path, out: Path) -> int:
         korean, cells = rows.get(name, (name, 1))
         items.append((name, korean, cells, Image.open(path).convert("RGBA")))
 
+    # One item per line: at its size on screen (half charged over full) and at twice that to the right.
+    # A line is as wide as the widest item, so the sheet of a few long items stays narrow.
     label_font = font(18)
-    per_row = 5
-    column = ITEM_CELL[0] + GAP + ITEM_CELL[0] * 2
-    tallest = lambda group: max(ITEM_CELL[1] * cells + ITEM_CELL_GAP * (cells - 1) for _, _, cells, _ in group)
-    groups = [items[i:i + per_row] for i in range(0, len(items), per_row)]
-    heights = [LABEL_HEIGHT + tallest(group) * 2 + GAP * 3 for group in groups]
-    width = PADDING * 2 + column * per_row + GAP * 2 * (per_row - 1)
-    sheet = Image.new("RGBA", (width, PADDING * 2 + sum(heights)), colours["Background"] + (255,))
+    widest = max(ITEM_CELL[0] * cells + ITEM_CELL_GAP * (cells - 1) for _, _, cells, _ in items)
+    line_height = LABEL_HEIGHT + ITEM_CELL[1] * 2 + GAP * 3
+    width = PADDING * 2 + widest + GAP + widest * 2
+    sheet = Image.new("RGBA", (width, PADDING * 2 + line_height * len(items)), colours["Background"] + (255,))
     draw = ImageDraw.Draw(sheet)
 
     y = PADDING
-    for group, height in zip(groups, heights):
+    for name, korean, cells, icon in items:
         x = PADDING
-        for name, korean, cells, icon in group:
-            draw.text((x, y), f"{korean}  {name}  ({cells}칸)", font=label_font, fill=colours["TextDim"])
-            top = y + LABEL_HEIGHT
-            half = item_cell(icon, cells, 0.55, 1)
-            full = item_cell(icon, cells, 1.0, 1)
-            large = item_cell(icon, cells, 1.0, 2)
-            sheet.alpha_composite(half, (x, top))
-            sheet.alpha_composite(full, (x, top + half.height + GAP))
-            sheet.alpha_composite(large, (x + ITEM_CELL[0] + GAP, top))
-            x += column + GAP * 2
-        y += height
+        draw.text((x, y), f"{korean}  {name}  ({cells}칸)", font=label_font, fill=colours["TextDim"])
+        top = y + LABEL_HEIGHT
+        half = item_cell(icon, cells, 0.55, 1)
+        full = item_cell(icon, cells, 1.0, 1)
+        large = item_cell(icon, cells, 1.0, 2)
+        sheet.alpha_composite(half, (x, top))
+        sheet.alpha_composite(full, (x, top + half.height + GAP))
+        sheet.alpha_composite(large, (x + widest + GAP, top))
+        y += line_height
 
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.convert("RGB").save(out)
@@ -211,6 +209,8 @@ def parse_args():
                         help="Height of the figure's place on the screen, in the 1920x1080 design space "
                              "(BattleFigureHeight in UiPrefabSetup.Battle.cs).")
     parser.add_argument("--out", default="", help="Sheet path. Default: output/review/<type>.png")
+    parser.add_argument("--reference", default="",
+                        help="Style reference shown on the sheet instead of the type's (a style test).")
     return parser.parse_args()
 
 
@@ -251,7 +251,7 @@ def main() -> int:
         frames[name] = blend(background, colours[SIDE_COLOURS.get(side, "Party")], FIGURE_FRAME_ALPHA)
     label_font, title_font = font(18), font(22)
 
-    reference_path = REFERENCES.get(args.kind)
+    reference_path = Path(args.reference) if args.reference else REFERENCES.get(args.kind)
     reference = None
     if reference_path is not None and reference_path.is_file():
         reference = scaled_to_height(Image.open(reference_path).convert("RGB"), LARGE_HEIGHT)

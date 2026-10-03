@@ -192,16 +192,16 @@ FIGURE_FLOOR_MARGIN = 20
 FIGURE_SIDE_MARGIN = 12
 HEIGHT_RANGE = (10, 97)
 
-# The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, one
-# above the other (ItemData.csv, Size). A cell is 180x60 on screen with 4 between cells
-# (BattleItemView); the icon sits inside the slot's rim, at twice the size on screen. For each
-# count of cells: the section of STYLE_RUNTIME.md that says how the item lies in that shape,
-# the size it is generated at (the allowed one closest in proportion) and the canvas it is
-# fitted to.
+# The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, side by
+# side in the battle screen's board panel (ItemData.csv, Size). A cell is 180x60 on screen with 6
+# between cells (BattleItemView), so a bigger item is a longer strip; the icon sits inside the
+# slot's rim (10 at the sides, 8 above and below), at twice the size on screen. For each count of
+# cells: the section of STYLE_RUNTIME.md that says how the item lies in that shape, the size it
+# is generated at (the widest allowed) and the canvas it is fitted to.
 ITEM_CELLS = {
     1: {"section": 19, "generate": "1536x512", "canvas": (320, 88)},
-    2: {"section": 20, "generate": "1536x1024", "canvas": (320, 216)},
-    3: {"section": 21, "generate": "1024x1024", "canvas": (320, 344)},
+    2: {"section": 20, "generate": "1536x512", "canvas": (692, 88)},
+    3: {"section": 21, "generate": "1536x512", "canvas": (1064, 88)},
 }
 # The ring an icon is given, in the pixels of its canvas, and how much of the canvas it may fill.
 ITEM_OUTLINE = 4
@@ -297,9 +297,12 @@ def require_data_id(file_name: str, value: str, what: str) -> None:
         )
 
 
-def read_roster_row(kind: str, key: str) -> dict:
-    """The roster row of a key: what to draw, and how the type frames it or what it is drawn after."""
-    path = ROSTERS / f"{kind}.csv"
+def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
+    """The roster row of a key: what to draw, and how the type frames it or what it is drawn after.
+
+    roster: another roster file than the type's own, for a style test (--roster).
+    """
+    path = roster or ROSTERS / f"{kind}.csv"
     require_file(path, f"Roster {path.name}")
 
     with path.open(encoding="utf-8", newline="") as handle:
@@ -494,14 +497,17 @@ def bullet_rules(body: str) -> str:
     return " ".join(rules)
 
 
-def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", held: bool = False, cells: int = 0) -> str:
+def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", held: bool = False, cells: int = 0,
+                 style: Path = None) -> str:
     """Assembles the prompt in the order the style document prescribes.
 
     held: the attached reference is the figure of the unit that holds the subject, so the prompt
     ends with the type's rule for that instead of its rule for a plain style reference.
     cells: for an item, how many cells it takes; the rules of that shape follow the item's own.
+    style: another style document than STYLE_RUNTIME.md, for a style test (--style). Same format.
     """
-    text = STYLE_RUNTIME.read_text(encoding="utf-8")
+    style = style or STYLE_RUNTIME
+    text = style.read_text(encoding="utf-8")
     sections = style_sections(text)
     spec = dict(TYPES[kind])
     if held:
@@ -531,9 +537,9 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     missing = [name for name, value in required if not value]
     if missing:
         raise PipelineError(
-            "STYLE_RUNTIME.md 에서 필요한 섹션을 읽지 못했다.\n"
+            f"{style.name} 에서 필요한 섹션을 읽지 못했다.\n"
             + "".join(f"  누락: {name}\n" for name in missing)
-            + f"  파일: {STYLE_RUNTIME}"
+            + f"  파일: {style}"
         )
 
     parts = [
@@ -1039,6 +1045,15 @@ def parse_args():
                         help="Constraint appended to the subject sentence for this run, e.g. a direction from a verdict.")
     parser.add_argument("--quality", default="", choices=["", "low", "medium", "high"],
                         help="Overrides the type's quality.")
+    # A style test: its document, roster and reference live together under Archive/<round>/<style>/
+    # and are named here. The files of the current style are not touched.
+    parser.add_argument("--style", default="",
+                        help="Style document for this run instead of STYLE_RUNTIME.md (same format).")
+    parser.add_argument("--roster", default="",
+                        help="Roster file for this run instead of Rosters/<type>.csv.")
+    parser.add_argument("--reference", default="",
+                        help="Style reference for this run instead of the type's. Attached as it is, never mirrored: "
+                             "give one that already faces the way the subject should.")
     parser.add_argument("--dry-run", action="store_true",
                         help="Check the files and print the prompt. Reads no key and makes no call.")
     parser.add_argument("--refit", action="store_true",
@@ -1054,10 +1069,13 @@ def main() -> int:
     background = spec.get("background", "transparent")
     output_path = OUTPUT_DIR / args.kind / f"{name}.png"
     raw_path = OUTPUT_DIR / args.kind / f"{name}.raw.png"
+    style = Path(args.style).resolve() if args.style else STYLE_RUNTIME
+    roster = Path(args.roster).resolve() if args.roster else None
+    custom_reference = Path(args.reference).resolve() if args.reference else None
 
     try:
         if args.refit:
-            row = read_roster_row(args.kind, args.key)
+            row = read_roster_row(args.kind, args.key, roster)
             require_file(raw_path, f"원본 {raw_path.name}")
             png, report = fit(args.kind, raw_path.read_bytes(), row)
             output_path.write_bytes(png)
@@ -1068,8 +1086,8 @@ def main() -> int:
 
         # Everything that can fail for free fails before the key is touched or the
         # single API call is spent.
-        require_file(STYLE_RUNTIME, "STYLE_RUNTIME.md")
-        row = read_roster_row(args.kind, args.key)
+        require_file(style, f"스타일 문서 {style.name}")
+        row = read_roster_row(args.kind, args.key, roster)
 
         # A frame and an item are generated in the proportions they will have; everything else at the type's size.
         if spec["fit"] == "frame":
@@ -1080,9 +1098,15 @@ def main() -> int:
             size = spec.get("size", SIZE)
 
         # The row's own reference (the figure that holds the item) replaces the type's and is sent as it is.
+        # So is a reference given for the run (--reference): whoever gives one chooses its facing.
         held = row["reference"] is not None
-        references = [row["reference"]] if held else spec["references"]
-        mirror = spec.get("mirror_references", False) and not held
+        if held and custom_reference is not None:
+            raise PipelineError("Roster 의 Reference 와 --reference 를 함께 쓸 수 없다. 하나만 남겨라.")
+        if custom_reference is not None:
+            references, mirror = [custom_reference], False
+        else:
+            references = [row["reference"]] if held else spec["references"]
+            mirror = spec.get("mirror_references", False) and not held
 
         uploads = []
         for reference in references:
@@ -1090,10 +1114,12 @@ def main() -> int:
             upload, extension, reference_size = reference_upload(reference, mirror)
             uploads.append(upload)
             print(f"[1/6] 레퍼런스 확인: {reference.name} ({reference_size:,} bytes, 보내는 포맷 {extension.upper()}"
-                  f"{', 좌우를 뒤집어 붙인다' if mirror else ''}{', 이 아이템을 든 유닛' if held else ''})")
+                  f"{', 좌우를 뒤집어 붙인다' if mirror else ''}{', 이 아이템을 든 유닛' if held else ''}"
+                  f"{', --reference 로 받은 것' if custom_reference is not None else ''})")
 
-        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"])
-        print(f"[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 ({len(prompt):,} chars).")
+        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style)
+        print(f"[2/6] {style if args.style else style.name} 로 프롬프트 조립 ({len(prompt):,} chars"
+              f"{f', 소재는 {roster}' if roster else ''}).")
 
         if not args.dry_run and (output_path.exists() or raw_path.exists()):
             raise PipelineError(

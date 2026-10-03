@@ -46,3 +46,9 @@ Time,Type,Key,Name,Model,Quality,Size,TextInTokens,ImageInTokens,OutputTokens,Es
 2026-10-03T00:18:31+09:00,item,mending_chant,mending_chant,gpt-image-2.5-sunburst,medium,1536x512,798,1521,134,0.0202
 2026-10-03T00:18:48+09:00,item,overseer_maul,overseer_maul,gpt-image-2.5-sunburst,medium,1536x512,816,768,134,0.0142
 2026-10-03T00:19:03+09:00,item,overseer_roar,overseer_roar,gpt-image-2.5-sunburst,medium,1536x512,813,1521,134,0.0203
+2026-10-03T11:39:42+09:00,character,knight,knight_chibi,gpt-image-2.5-sunburst,medium,1024x1024,979,1496,439,0.0300
+2026-10-03T11:40:03+09:00,character,archmage,archmage_chibi,gpt-image-2.5-sunburst,medium,1024x1024,999,1496,439,0.0301
+2026-10-03T11:53:31+09:00,character,valkyrie,valkyrie_dark,gpt-image-2.5-sunburst,medium,1024x1024,1080,1521,439,0.0307
+2026-10-03T12:50:00+09:00,item,longbow,longbow,gpt-image-2.5-sunburst,medium,1536x512,751,1521,134,0.0199
+2026-10-03T12:50:12+09:00,item,spear,spear,gpt-image-2.5-sunburst,medium,1536x512,756,1521,134,0.0200
+2026-10-03T12:50:26+09:00,item,halberd,halberd,gpt-image-2.5-sunburst,medium,1536x512,767,1521,134,0.0200

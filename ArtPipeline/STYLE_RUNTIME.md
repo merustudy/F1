@@ -258,17 +258,17 @@ Added to §7 for an item that takes one cell of a board: a wide strip.
 
 ## 20. Item Shape: Two Cells
 
-Added to §7 for an item that takes two cells of a board: a landscape.
+Added to §7 for an item that takes two cells of a board: a long strip, two cells side by side.
 
-- The picture is a landscape, one and a half times as wide as it is tall. The item fills it, its width and its height.
-- Lay a long item on a slant from the lower left corner to the upper right corner, with its point or head at the upper right.
+- The picture is a very long, thin strip, about eight times as wide as it is tall. The item fills the strip from its left end to its right end and is only as thick as the strip is tall.
+- Lay a long item (a bow, a spear) flat and level along the strip: its grip or lower end at the left, its point or head at the right. It is not tilted. Draw it as long and as slender as it really is.
 
 ## 21. Item Shape: Three Cells
 
-Added to §7 for an item that takes three cells of a board: a square.
+Added to §7 for an item that takes three cells of a board: a very long strip, three cells side by side.
 
-- The picture is a square. The item fills it, its width and its height.
-- Lay a long item on the diagonal from the lower left corner to the upper right corner, with its point or head at the upper right.
+- The picture is a very long, thin strip, about twelve times as wide as it is tall. The item fills the strip from its left end to its right end and is only as thick as the strip is tall.
+- Lay a long item (a halberd, a pike) flat and level along the strip: its grip or lower end at the left, its point or head at the right. It is not tilted. Draw it as long and as slender as it really is.
 
 ## Dungeon: abandoned_mine
 
