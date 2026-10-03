@@ -1,6 +1,6 @@
-# Slice A 개정 2~4 — 상대 범위, 아이템 크기, 인벤토리, 화면 통일, 인벤토리 용량
+# Slice A 개정 2~5 — 상대 범위, 아이템 크기, 인벤토리, 화면 통일, 인벤토리 용량, 아이템 칸 수와 칸 크기
 
-Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 개정 1~4 코드 리뷰 5건을 반영하고 체인을 통과해 커밋·푸시했다. 사후 검토 대기)
+Snapshot: 2026-10-03 (개정 2~4는 구현, 검증, 커밋, 푸시 완료(2026-10-01). 개정 5(아이템 칸 5칸·최대 8칸, 보드 패널의 정사각 칸 72와 가방, 패널 358)를 구현해 체인을 통과했고 같은 날 세션 정리에서 커밋·푸시했다. 사후 검토 대기)
 
 ## Goal
 
@@ -10,6 +10,8 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 �
 개정 3: 노드 맵과 보상 화면의 파티가 전투와 같은 열로 보인다("C안"). 노드를 고를 때 적은 보이지 않는다. 포션은 세 화면에서 같은 자리, 인벤토리는 팝업.
 
 개정 4: 인벤토리는 10칸(`InventoryCells`). 아이템은 크기만큼 차지하고, 들어갈 자리가 없으면 인벤토리로 갈 수 없다.
+
+개정 5: 용병의 보드는 5칸으로 시작하고 최대 8칸이다. 보드 패널의 칸은 정사각 72x72이고 한 줄에 여덟 칸이 들어가며, 유닛의 칸 수만큼만 보이고 뒤에 가방이 깔린다. 패널은 358.
 
 ## State
 
@@ -64,6 +66,24 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 �
 - 문서: Design/03 §5, 00("개정 4", 현황, 개정 2의 표), 01(용어), Architecture/07(검증, Schema Version), 08(인벤토리), 11(질의), 12(팝업, Test). Roadmap.
 - Test: `ExpeditionRulesTests` 둘(칸으로 세는 것과 집기 / 밀려나는 아이템의 자리), `DefinitionTests`(하한), `RunSaveMapperTests`(넘침 거부, 꽉 찬 것 허용),
   `ExpeditionManagerTests`(질의), PlayMode 팝업 Test에 제목과 가득 찬 상태.
+
+## 개정 5 (아이템 칸 수와 보드 패널의 칸 크기, 2026-10-03)
+
+사용자가 정한 것(목업 네 번. Roadmap "Slice A 개정 5"): E안(칸 100x72, 얼굴 72, 패널 372), 초기 5칸·최대 8칸, 칸은 유닛의 지금 칸 수만큼만, 칸 뒤에 가방(백팩 배틀즈식), "이 모양으로 구현".
+E안을 구현한 뒤 "1칸을 정사각으로, 패널을 약간 낮게" → **G안**(정사각 72x72, 얼굴 72, 줄 사이 10, 패널 358·위에서 722) "G안으로 반영". 2칸 148x72, 3칸 224x72.
+아이템의 크기와 아이콘은 사용자가 따로 재조절한다(미정).
+
+권장안으로 정한 세부(검토 대상, Design/00 "개정 5"): 칸이 느는 방식은 비워 둠(지금은 모두 5칸) / 줄 사이 10(가방이 닿지 않게), 여백 24, 칸 사이 4, 아이콘 여백 6, 가방은 칸의 좌우 8·위아래 3 /
+가방은 도형 Placeholder 틀(`ArtPipeline/Archive/08-panel-cells/draw_bag.py` → `Assets/@Art/UI/Frame/bag.png`, Border 40), 적의 줄에도 같음 / 패널이 34 높아진 만큼 맵 596, 보상 카드 188(사이 8), 팝업 606, 버튼 줄 258.
+
+바꾼 것:
+- Data: `JobData.csv`의 `ItemSlots` 4 → 5(여섯 직업), `JobData.json`, `JobData.MaxItemSlots` 6 → 8. `StaticDataValidationTests`의 넘치는 적은 9칸으로.
+- Views: `BattleItemView`(칸 72x72, 간격 4. 세로 칸의 `CellGap`·`BoardHeight`는 지웠다), `BattleBoardView.BoardWidth`, `PartyColumnView`(`_slotParent`를 RectTransform으로 두고 칸 수만큼의 폭으로, `BoardWidth`).
+- Builders: `UiPrefabSetup.Battle`(패널 722/358, 여백 24, 얼굴 72·안쪽 6·배지 24, 줄 사이 10, `BuildBoardBag`), `PartySide`(가방, 버튼 줄 258), `Kit`(아이콘 여백 6, `BoardBagPadX/Y` 8/3, `BuildBoardBag`), `Reward`(카드 188, 사이 8), `UiArt.Bag`(Border 40).
+  Prefab 셋과 Stamp가 다시 만들어졌다. `bag.png`와 `.meta`가 새로 생겼다(setup의 Import).
+- Test: PlayMode `UiFlowTests`의 보드 검사 둘에 보드(와 가방)의 폭이 칸 수와 같은 것.
+- 문서: Design/02 §4, 10 §5, 00(현황, 개정 2 표, "개정 5"), 08 §8; Architecture/12("아이템의 아이콘", "파티 쪽", "보상 화면의 오른쪽", "전투 화면", Test), 13("후처리 (`cell`)" 표, "얼굴", "Unity 배선", Deferred); Roadmap.
+- 기록: `ArtPipeline/Archive/08-panel-cells/`(README, `mock_panel_cells.py`, 시트 아홉 장, `draw_bag.py`).
 
 ## 리뷰 반영 (2026-10-01)
 
@@ -142,6 +162,11 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 �
 
 ## Verification
 
+- 개정 5 (2026-10-03, E안 뒤 G안) `Tools/chain.sh`: setup OK, sim OK, EditMode 616/616, PlayMode 43/43(`[Explicit]` 스크린샷 4개 제외). `git diff --check` 깨끗.
+  두 번째 setup에서 Prefab 셋과 Stamp의 해시가 같다. 시뮬(같은 명령): 81.2% / 0.26 → 81.7% / 0.25, 보드 6.86개, 인벤토리 0.00개.
+  바뀐 생성물: Prefab 셋, Stamp, `JobData.json`, 새 `bag.png`(.meta). ProjectSettings, Packages, Scene은 그대로.
+  `Tools/screenshots.sh` 34장(4/4, G안): 전투(`_05`)에 정사각 다섯 칸의 보드가 가방 위에, 적의 줄은 거울상에 가방, 전진 뒤(`_15`) 죽은 적의 줄이 없고 두 칸의 적은 두 칸 가방,
+  노드 맵(`_04`, `en_17`)과 보상(`_07`)의 파티 쪽도 같고 "빈 칸"/"Empty"와 등급 배지가 72의 정사각 칸에 들어가며, 보상 카드 셋이 패널 위에 들어간다. 넷은 `ArtPipeline/Archive/08-panel-cells/game/`.
 - 리뷰 반영 뒤 `Tools/chain.sh`: setup OK, sim OK, EditMode 587/587, PlayMode 40/40(`[Explicit]` 스크린샷 3개 제외). `git diff --check` 깨끗.
   바뀐 생성물: `NodeMapScreen.prefab`, `RewardScreen.prefab`, `UiPrefabStamp.txt`. ProjectSettings, Packages, Scene, Generated JSON은 그대로.
   `Tools/screenshots.sh` 33장: 노드 맵(`_04`)·보상(`_07`)·인벤토리 팝업(`_17`)의 파티 열 넷이 전투(`_05`)의 아군 열과 같은 x와 폭에 서고, 카드 안 요소가 열 폭을 따른다.
@@ -167,6 +192,7 @@ Snapshot: 2026-10-01 (개정 2~4 모두 구현, 검증, 커밋 완료. 그 뒤 �
 
 ## Next Action (제안)
 
+0. 아이템의 크기(`Size`)와 아이콘의 재조절은 사용자의 지시를 기다린다(개정 5의 미정 항목. 그 전까지 띠 아이콘이 정사각 칸에서 작다).
 1. 사용자가 Unity에서 직접 플레이하고 세 화면의 파티 열, 인벤토리 팝업(10칸), 적이 보이지 않는 노드 선택을 본다(`Assets/@Scenes/Boot.unity`).
 2. 사후 검토: Roadmap "사후 검토 대기"의 개정 2~4 항목을 보고 바꿀 것을 정한다. 바꿀 때는 문서(Design/00의 해당 개정 절이 가리키는 곳)를 먼저 고친다.
 3. 사후 검토가 끝나면 이 문서를 `completed/`로 옮기고, 9단계(그림)는 시작 지시를 받은 뒤 시작한다. 그림 자리가 세 화면에서 같은 크기이니 그림 요청에 그대로 쓸 수 있다.
