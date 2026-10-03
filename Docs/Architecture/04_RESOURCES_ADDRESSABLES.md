@@ -21,6 +21,7 @@ Game Code -> Managers.Resource -> ResourceManager -> Addressables
 data/app/<name>
 ui/app/<name>        ui/lobby/<name>        ui/expedition/<name>
 unit/job/<key>       unit/enemy/<key>          # 유닛의 전신 그림. key는 Data Id의 `_`를 `-`로 바꾼 것
+face/job/<key>       face/enemy/<key>          # 유닛의 얼굴. 전신 그림에서 잘라 낸 것이라 전신 그림이 있는 유닛마다 있다 (ArtAddress.FaceOf)
 background/dungeon/<key>                       # 던전의 배경
 <domain>/<category>/<key>                      # 그 밖의 그림과 소리가 들어올 때
 ```

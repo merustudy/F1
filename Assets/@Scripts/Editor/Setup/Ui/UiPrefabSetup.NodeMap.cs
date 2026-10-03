@@ -8,9 +8,10 @@ namespace F1.Editor.Setup
     public static partial class UiPrefabSetup
     {
         /// <summary>
-        /// The node map: the party on the left as in battle, the map on the right with the chosen
-        /// node's panel under it. The panel names no enemies: who waits at a node is not shown
-        /// (Docs/Design/03_Dungeon_Structure.md §1).
+        /// The node map: the party as in battle (the stage on the left, the boards in the panel
+        /// under it), the map on the right above the panel, and the chosen node's words and the
+        /// buttons in the panel's right half. The panel names no enemies: who waits at a node is
+        /// not shown (Docs/Design/03_Dungeon_Structure.md §1).
         /// </summary>
         static UIScreen BuildNodeMap(Transform holder)
         {
@@ -22,10 +23,10 @@ namespace F1.Editor.Setup
             TextMeshProUGUI progress = UiBuild.Label("Progress", header.transform, 30f, UiPalette.TextDim, TextAlignmentOptions.Right);
             UiBuild.Box(progress, 1280f, 18f, 600f, 44f);
 
-            // Map: nodes and paths are created at runtime inside the area, measured from its bottom-left corner.
+            // Map: nodes and paths are created at runtime inside the area, measured from its bottom-left corner. It ends above the panel.
             Image map = UiBuild.Panel("Map", frame, UiPalette.Panel);
-            UiBuild.Box(map, 980f, 110f, 920f, 690f);
-            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 860f, 630f);
+            UiBuild.Box(map, 980f, 110f, 920f, BoardPanelTop - 16f - 110f);
+            RectTransform mapArea = UiBuild.Box(UiBuild.Rect("MapArea", map.transform), 30f, 30f, 860f, BoardPanelTop - 16f - 110f - 60f);
 
             Image edgeTemplate = UiBuild.Image("EdgeTemplate", mapArea, UiPalette.Line);
             UiBuild.Place(edgeTemplate.rectTransform, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 6f));
@@ -48,17 +49,15 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(nodeTemplate, "_label", nodeLabel);
             nodeFrame.gameObject.SetActive(false);
 
-            // The chosen node: its floor and kind, the note that the enemies stay unknown, the inventory and the fight.
-            Image info = UiBuild.Panel("NodeInfo", frame, UiPalette.Panel);
-            UiBuild.Box(info, 980f, 812f, 920f, 228f);
-            TextMeshProUGUI nodeTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("NodeTitle", info.transform, 34f, UiPalette.Text), 24f, 18f, 700f, 48f));
-            UiBuild.Box(UiBuild.LocalizedLabel("NodeHint", info.transform, UiKeys.Map.Unknown, 20f, UiPalette.TextDim), 24f, 72f, 880f, 30f);
-            ButtonParts inventoryToggle = UiBuild.Button("InventoryToggle", info.transform, UiPalette.ButtonQuiet, 28f);
-            UiBuild.Box(inventoryToggle.Rect, 24f, 116f, 236f, 76f);
-            ButtonParts enter = UiBuild.LocalizedButton("Enter", info.transform, UiKeys.Map.Enter, UiPalette.Button, 34f);
-            UiBuild.Box(enter.Rect, 660f, 116f, 236f, 76f);
+            PartySideView party = BuildPartySide(frame, PanelRightX, 200f, out Image panel);
 
-            PartySideView party = BuildPartySide(frame);
+            // The chosen node in the panel's right half: its floor and kind, the note that the enemies stay unknown, then the inventory and the fight.
+            TextMeshProUGUI nodeTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("NodeTitle", panel.transform, 34f, UiPalette.Text), PanelRightX, PanelTitleTop, PanelRightWidth, 48f));
+            UiBuild.Box(UiBuild.LocalizedLabel("NodeHint", panel.transform, UiKeys.Map.Unknown, 20f, UiPalette.TextDim), PanelRightX, PanelHintTop, PanelRightWidth, 30f);
+            ButtonParts inventoryToggle = KitButton("InventoryToggle", panel.transform, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(inventoryToggle.Rect, 1220f, PanelButtonsTop, 236f, PanelButtonHeight);
+            ButtonParts enter = KitLocalizedButton("Enter", panel.transform, UiKeys.Map.Enter, UiPalette.Button, 30f);
+            UiBuild.Box(enter.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
 
             UiBuild.SetReference(screen, "_dungeon", dungeon);
             UiBuild.SetReference(screen, "_progress", progress);

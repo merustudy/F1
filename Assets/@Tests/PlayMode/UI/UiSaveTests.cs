@@ -71,7 +71,7 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-            UiTestUtil.Click(map, "Frame/NodeInfo/Enter");
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
 
             // A potion at 1.2 s is the last thing confirmed; 0.3 s more pass before the app closes.

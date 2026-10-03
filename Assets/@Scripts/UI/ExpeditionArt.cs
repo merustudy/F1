@@ -7,11 +7,11 @@ using UnityEngine;
 namespace F1.UI
 {
     /// <summary>
-    /// The art the screens of an expedition show: the full-body figures of the units and the icons
-    /// of the items. A screen loads it before it opens, so its views ask for a picture without
-    /// waiting. A unit or an item whose data names no art has none, and its view shows the
-    /// placeholder (the silhouette, the item's name); art that is named but does not load fails
-    /// the screen.
+    /// The art the screens of an expedition show: the full-body figures of the units, the faces
+    /// cut out of them and the icons of the items. A screen loads it before it opens, so its views
+    /// ask for a picture without waiting. A unit or an item whose data names no art has none, and
+    /// its view shows the placeholder (the silhouette, the item's name); art that is named but
+    /// does not load fails the screen.
     /// </summary>
     public sealed class ExpeditionArt
     {
@@ -42,7 +42,7 @@ namespace F1.UI
             return new ExpeditionArt(data, sprites);
         }
 
-        /// <summary>The address of every picture the data names: the jobs, the enemies, then the items, each in id order.</summary>
+        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its face), then the items, each in id order.</summary>
         public static IEnumerable<string> Addresses(StaticData data)
         {
             foreach (JobData job in data.Jobs.Ordered)
@@ -50,6 +50,7 @@ namespace F1.UI
                 if (job.Figure != null)
                 {
                     yield return job.Figure;
+                    yield return job.Face;
                 }
             }
 
@@ -58,6 +59,7 @@ namespace F1.UI
                 if (enemy.Figure != null)
                 {
                     yield return enemy.Figure;
+                    yield return enemy.Face;
                 }
             }
 
@@ -86,6 +88,24 @@ namespace F1.UI
         public Sprite OfEnemy(string enemyId)
         {
             return Of(_data.Enemies.Get(enemyId).Figure);
+        }
+
+        /// <summary>The face cut out of a job's figure, or null when the job has no figure.</summary>
+        public Sprite FaceOfJob(string jobId)
+        {
+            return Of(_data.Jobs.Get(jobId).Face);
+        }
+
+        /// <summary>A mercenary's face is its job's.</summary>
+        public Sprite FaceOfMercenary(string mercenaryId)
+        {
+            return FaceOfJob(_data.Mercenaries.Get(mercenaryId).JobId);
+        }
+
+        /// <summary>The face cut out of an enemy's figure, or null when the enemy has no figure.</summary>
+        public Sprite FaceOfEnemy(string enemyId)
+        {
+            return Of(_data.Enemies.Get(enemyId).Face);
         }
 
         /// <summary>The icon of an item, or null when the item has none.</summary>

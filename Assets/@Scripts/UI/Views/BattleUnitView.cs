@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
@@ -9,13 +8,14 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One living unit in battle: the figure (its art, or a placeholder when it has none), the
-    /// plate under its feet and its item cells under the plate, each cell showing its item's icon. The plate holds the row the unit
-    /// stands in, its name, its HP, and a line of states: shield and burn as an icon with a
-    /// number, or the death's door state. The plate's color says whose side the unit is on, that
-    /// it is at death's door or that a potion can be used on it. It shows what the engine says;
-    /// texts are rebuilt only when their numbers change. The battle screen takes a dead unit off
-    /// the field.
+    /// One living unit on the stage of the battle: the figure (its art, or a placeholder when it
+    /// has none) and the plate under its feet. The plate holds the row the unit stands in, its
+    /// name, its HP, and a line of states: shield and burn as an icon with a number, or the
+    /// death's door state. The plate's color says whose side the unit is on, that it is at death's
+    /// door or that a potion can be used on it. The unit's items are not here: they are its line
+    /// of the board panel under the stage (<see cref="BattleBoardView"/>). It shows what the
+    /// engine says; texts are rebuilt only when their numbers change. The battle screen takes a
+    /// dead unit off the stage.
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
@@ -36,13 +36,8 @@ namespace F1.UI
         [SerializeField] TMP_Text _burn;
         [SerializeField] GameObject _statusChip;
         [SerializeField] TMP_Text _status;
-        [SerializeField] BattleItemView _itemTemplate;
-        [SerializeField] GameObject _emptyCellTemplate;
-        [SerializeField] Transform _itemParent;
 
-        readonly List<BattleItemView> _items = new List<BattleItemView>();
         BattleUnit _unit;
-        ExpeditionArt _art;
         int _shownRow = -1;
         int _shownHp = -1;
         int _shownShield = -1;
@@ -59,30 +54,11 @@ namespace F1.UI
         public Sprite Plate => _plate.sprite;
 
         /// <param name="figure">The unit's art, or null when it has none.</param>
-        /// <param name="art">Where the icons of the items come from.</param>
-        public void Bind(BattleUnit unit, Sprite figure, ExpeditionArt art)
+        public void Bind(BattleUnit unit, Sprite figure)
         {
             _unit = unit;
-            _art = art;
             _name.text = UiText.Name(unit.Setup.Name);
             _figureView.Show(figure);
-
-            // The board in order: an item takes as many cells as its size and shows its cooldown;
-            // the cells after the last item stay faint. An enemy's icons point at the party.
-            int cells = 0;
-            foreach (BattleItemState item in unit.Items)
-            {
-                BattleItemView view = Instantiate(_itemTemplate, _itemParent);
-                view.gameObject.SetActive(true);
-                BindItem(view, item);
-                _items.Add(view);
-                cells += item.Equipped.Item.Size;
-            }
-
-            for (; cells < unit.Setup.ItemSlots; cells++)
-            {
-                Instantiate(_emptyCellTemplate, _itemParent).SetActive(true);
-            }
         }
 
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>
@@ -93,16 +69,22 @@ namespace F1.UI
             _shownBurn = -1;
             _shownStatus = -1;
             _name.text = UiText.Name(_unit.Setup.Name);
-            for (int i = 0; i < _items.Count; i++)
-            {
-                BindItem(_items[i], _unit.Items[i]);
-            }
         }
 
-        void BindItem(BattleItemView view, BattleItemState item)
+        /// <summary>The plate a unit shows in a state: at death's door, as the target of a potion, or just its side's.</summary>
+        public static Sprite PlateFor(BattleUnit unit, bool targetable, Sprite party, Sprite enemy, Sprite danger, Sprite target)
         {
-            ItemData data = item.Equipped.Item;
-            view.Bind(item, data.Size, _art.OfItem(data.Id), mirrored: _unit.Side == BattleSide.Enemy);
+            if (unit.InDog)
+            {
+                return danger;
+            }
+
+            if (targetable)
+            {
+                return target;
+            }
+
+            return unit.Side == BattleSide.Party ? party : enemy;
         }
 
         /// <param name="targetable">True while a potion is waiting for this unit to be clicked.</param>
@@ -145,28 +127,10 @@ namespace F1.UI
             SetShown(_burnChip, !_unit.InDog && _unit.Burn > 0);
 
             _button.interactable = targetable && _unit.Alive;
-            Sprite plate;
-            if (_unit.InDog)
-            {
-                plate = _plateDanger;
-            }
-            else if (targetable)
-            {
-                plate = _plateTarget;
-            }
-            else
-            {
-                plate = _unit.Side == BattleSide.Party ? _plateParty : _plateEnemy;
-            }
-
+            Sprite plate = PlateFor(_unit, targetable, _plateParty, _plateEnemy, _plateDanger, _plateTarget);
             if (_plate.sprite != plate)
             {
                 _plate.sprite = plate;
-            }
-
-            foreach (BattleItemView item in _items)
-            {
-                item.Render(timeMs, _unit.Alive);
             }
         }
 

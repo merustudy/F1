@@ -73,6 +73,10 @@ namespace F1.Data
         /// <summary>The logical address of the enemy's full-body art. Null when it has no art yet.</summary>
         [JsonProperty(Order = 6, Required = Required.AllowNull)]
         public string Figure { get; }
+
+        /// <summary>The address of the face cut out of the figure (<see cref="ArtAddress.FaceOf"/>). Null when the enemy has no figure.</summary>
+        [JsonIgnore]
+        public string Face => ArtAddress.FaceOf(Figure);
     }
 
     /// <summary>A set of enemies that fights together, and where in a dungeon it appears.</summary>

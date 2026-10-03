@@ -187,5 +187,9 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 10, Required = Required.AllowNull)]
         public string Figure { get; }
+
+        /// <summary>The address of the face cut out of the figure (<see cref="ArtAddress.FaceOf"/>). Null when the job has no figure.</summary>
+        [JsonIgnore]
+        public string Face => ArtAddress.FaceOf(Figure);
     }
 }

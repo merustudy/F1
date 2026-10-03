@@ -7,11 +7,11 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One item on a member's board (as tall as the cells it takes) or one empty cell. An item
-    /// shows its icon, as in battle, with its grade on the badge at the bottom-left corner; an
-    /// item without an icon shows its name with the grade under it, smaller and dimmer (a column
-    /// is too narrow for both on one line); an empty cell says so. The chosen item's cell is the
-    /// brass one. A cell that takes no click now is dimmed by its button.
+    /// One item on a member's board (as wide as the cells it takes, side by side as in battle) or
+    /// one empty cell. An item shows its icon, as in battle, with its grade on the badge at the
+    /// bottom-left corner; an item without an icon shows its name with the grade under it, smaller
+    /// and dimmer; an empty cell says so. The chosen item's cell is the brass one. A cell that
+    /// takes no click now is dimmed by its button.
     /// <see cref="Index"/> is the first cell the view covers.
     /// </summary>
     public sealed class ItemSlotView : MonoBehaviour
@@ -63,11 +63,11 @@ namespace F1.UI
             _button.interactable = interactable;
         }
 
-        /// <summary>The height of the view inside its column: the cells the item takes.</summary>
-        public void SetHeight(float height)
+        /// <summary>The width of the view in its line: the cells the item takes, side by side.</summary>
+        public void SetWidth(float width)
         {
             var rect = (RectTransform)transform;
-            rect.sizeDelta = new Vector2(rect.sizeDelta.x, height);
+            rect.sizeDelta = new Vector2(width, rect.sizeDelta.y);
         }
     }
 }

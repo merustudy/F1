@@ -105,7 +105,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             yield return Capture(prefix + "_04_map");
 
-            UiTestUtil.Click(map, "Frame/NodeInfo/Enter");
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             battle.Clock.Paused = true;
@@ -133,16 +133,16 @@ namespace F1.Tests
                             UiTestUtil.Click(weapon.Button);
                             yield return Capture(prefix + "_08_map_item_selected");
                             UiTestUtil.Click(weapon.Button);
-                            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+                            UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.Click(party.InventoryEntries[0].Button);
                             yield return Capture(prefix + "_17_map_inventory_selected");
-                            UiTestUtil.Click(map, "Frame/NodeInfo/InventoryToggle");
+                            UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
                         }
 
                         UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-                        UiTestUtil.Click(map, "Frame/NodeInfo/Enter");
+                        UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
                         yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
                         break;
 
@@ -191,7 +191,7 @@ namespace F1.Tests
                             // The first reward goes to the inventory; the later ones behind the row-1 member's weapon.
                             capturedReward = true;
                             yield return Capture(prefix + "_07_reward");
-                            UiTestUtil.Click(reward, "Frame/RewardToInventory");
+                            UiTestUtil.Click(reward, "Frame/BoardPanel/RewardToInventory");
                         }
                         else
                         {

@@ -235,6 +235,20 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Face_IsTheFigureAddressUnderFace_OrNullWithoutAFigure()
+        {
+            LocalizedText name = TestData.Text("x");
+            var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
+
+            Assert.AreEqual("face/job/x", new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x").Face);
+            Assert.AreEqual("face/enemy/x", new EnemyData("x", name, 1, 10, items, "unit/enemy/x").Face);
+            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).Face, "No face without a figure.");
+            Assert.IsNull(new EnemyData("x", name, 1, 10, items).Face);
+            Assert.AreEqual("face/job/knight", ArtAddress.FaceOf("unit/job/knight"));
+            Assert.IsNull(ArtAddress.FaceOf(null));
+        }
+
+        [Test]
         public void EnemyGroupData_BossGroupsHaveFloorZero_OthersHaveARange()
         {
             string[] one = { "rat" };

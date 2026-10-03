@@ -180,7 +180,7 @@ namespace F1.Tests
                     case GamePhase.NodeMap:
                         NodeMapScreen map = Screen<NodeMapScreen>();
                         Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-                        Click(map, "Frame/NodeInfo/Enter");
+                        Click(map, "Frame/BoardPanel/Enter");
                         yield return WaitForScreen(ScreenId.Battle);
                         break;
 
@@ -212,7 +212,7 @@ namespace F1.Tests
                         break;
 
                     case GamePhase.Reward:
-                        Click(Screen<RewardScreen>(), "Frame/Skip");
+                        Click(Screen<RewardScreen>(), "Frame/BoardPanel/Skip");
                         yield return WaitForScreen(ScreenId.NodeMap);
                         break;
 
@@ -257,7 +257,7 @@ namespace F1.Tests
 
             NodeMapScreen map = Screen<NodeMapScreen>();
             Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-            Click(map, "Frame/NodeInfo/Enter");
+            Click(map, "Frame/BoardPanel/Enter");
             yield return WaitForScreen(ScreenId.Battle);
 
             Screen<BattleScreen>().Clock.Paused = true;

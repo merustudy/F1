@@ -10,35 +10,43 @@ namespace F1.Editor.Setup
     public static partial class UiPrefabSetup
     {
         /// <summary>
-        /// The party side of the node map and the reward screen: the battle screen's party columns,
-        /// each with the figure, the plate under its feet, the two buttons that move the member a
-        /// row and the board stacked under them; the potions in the strip under the header; the
-        /// inventory as a popup over the right half. The columns stand in a field shaped like the
-        /// battle's, and the view puts them in the battle screen's places when it opens
-        /// (FieldLayout), so everything inside a column is laid out as lines that stretch across
-        /// it. The hint line and its button under the columns span the left half.
-        /// Built after the right half so the popup draws over it.
+        /// The party side of the node map and the reward screen, in the battle screen's shape
+        /// (2026-10-03 mockup A): on the stage, the battle's party columns, each with the figure,
+        /// the plate under its feet and the two buttons that move the member a row; under the stage,
+        /// the battle's board panel, whose left half holds one line per row (the face, then the
+        /// board side by side) and whose right half holds the screen's own words and buttons; the
+        /// potions in the strip under the header; the inventory as a popup over the right half of
+        /// the screen above the panel. The columns stand in a field shaped like the battle's, and
+        /// the view puts them in the battle screen's places when it opens (FieldLayout), so
+        /// everything inside a column is laid out as lines that stretch across it.
+        /// Built after the right half of the screen so the popup draws over it.
         /// </summary>
-        const float PartyTop = 186f;
         const float PartyMoveHeight = 40f;
-        const float PartyLeft = 20f;
-        const float PartyWidth = 930f;
-        const float PartyDetailWidth = 760f;
-        const float PartyToInventoryWidth = 150f;
 
-        /// <summary>The popup over the right half: it must not cover the buttons under the panels there.</summary>
+        /// <summary>The popup over the right half: it stays above the board panel.</summary>
         const float InventoryPopupTop = 100f;
-        const float InventoryPopupHeight = 820f;
+        const float InventoryPopupHeight = BoardPanelTop - InventoryPopupTop - 16f;
 
-        /// <summary>From the top of a column: the plate, the move buttons and the board, each a gap under the one above.</summary>
+        /// <summary>From the top of a column: the plate, then the move buttons, each a gap under the one above.</summary>
         const float PartyPlateTop = BattleFigureHeight + PlateGap;
         const float PartyMoveTop = PartyPlateTop + PlateHeight + PlateGap;
-        const float PartyCellsTop = PartyMoveTop + PartyMoveHeight + PlateGap;
+        const float PartyColumnHeight = PartyMoveTop + PartyMoveHeight;
 
-        static float PartyColumnHeight => PartyCellsTop + BattleItemView.BoardHeight(JobData.MaxItemSlots);
-        static float PartyBottom => PartyTop + PartyColumnHeight;
+        /// <summary>
+        /// The right half of the board panel, measured from the panel's top-left corner: a title
+        /// line, a hint line, the selected item's facts, then the buttons.
+        /// </summary>
+        const float PanelRightX = 1000f;
+        const float PanelRightWidth = 880f;
+        const float PanelTitleTop = 24f;
+        const float PanelHintTop = 72f;
+        const float PanelDetailTop = 122f;
+        const float PanelButtonsTop = 224f;
+        const float PanelButtonHeight = 76f;
 
-        static PartySideView BuildPartySide(RectTransform frame)
+        /// <param name="toInventoryX">Where the "to inventory" button stands in the panel's button line; the screen puts its own buttons next to it.</param>
+        /// <param name="panel">The board panel, for the screen's own words and buttons in its right half.</param>
+        static PartySideView BuildPartySide(RectTransform frame, float toInventoryX, float toInventoryWidth, out Image panel)
         {
             // Potions where the battle screen has them.
             PotionSlotView potionTemplate = BuildPotionStrip(frame, out RectTransform potions);
@@ -46,18 +54,31 @@ namespace F1.Editor.Setup
             // The field is the battle field's box, so that the view can place the columns with the
             // battle's formula. As in battle, the rearmost row is built first so that the figure in
             // front is drawn over the one behind.
-            RectTransform field = UiBuild.Box(UiBuild.Rect("PartyField", frame), BattleFieldLeft, PartyTop, BattleFieldWidth, PartyColumnHeight);
+            RectTransform field = UiBuild.Box(UiBuild.Rect("PartyField", frame), BattleFieldLeft, BattleFieldTop, BattleFieldWidth, PartyColumnHeight);
             var columns = new PartyColumnView[BattleRows.Count];
             for (int row = BattleRows.Count; row >= BattleRows.Front; row--)
             {
                 columns[row - 1] = BuildPartyColumn(field, row);
             }
 
-            // Under the columns: the selected item's facts (or how to use the boards), and the button that takes it off its board.
-            TextMeshProUGUI detail = UiBuild.Label("PartyDetail", frame, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(detail, PartyLeft, PartyBottom + 8f, PartyDetailWidth, 54f);
-            ButtonParts toInventory = KitLocalizedButton("ToInventory", frame, UiKeys.Board.ToInventory, UiPalette.ButtonQuiet, 22f);
-            UiBuild.Box(toInventory.Rect, PartyLeft + PartyWidth - PartyToInventoryWidth, PartyBottom + 8f, PartyToInventoryWidth, 50f);
+            // The board panel of the battle screen: the party's lines in its left half.
+            panel = KitFrame("BoardPanel", frame, UiArt.Panel);
+            UiBuild.Box(panel, 0f, BoardPanelTop, 1920f, BoardPanelHeight);
+            Image seam = UiBuild.Image("BoardSeam", panel.transform, new Color(UiPalette.Line.r, UiPalette.Line.g, UiPalette.Line.b, 0.47f));
+            UiBuild.Box(seam, 959f, BoardSeamInset, 2f, BoardPanelHeight - 2f * BoardSeamInset);
+            float linesTop = (BoardPanelHeight - (BattleRows.Count * BattleItemView.CellHeight + (BattleRows.Count - 1) * BoardLineGap)) / 2f;
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                float y = linesTop + (row - 1) * (BattleItemView.CellHeight + BoardLineGap);
+                RectTransform line = UiBuild.Box(UiBuild.Rect("PartyLine" + row, panel.transform), BoardLineMargin, y, 1920f / 2f - BoardLineMargin, BattleItemView.CellHeight);
+                BuildPartyLine(line, row, columns[row - 1]);
+            }
+
+            // The right half: the selected item's facts (or how to use the boards), and the button that takes it off its board.
+            TextMeshProUGUI detail = UiBuild.Label("PartyDetail", panel.transform, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
+            UiBuild.Box(detail, PanelRightX, PanelDetailTop, PanelRightWidth, 54f);
+            ButtonParts toInventory = KitLocalizedButton("ToInventory", panel.transform, UiKeys.Board.ToInventory, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(toInventory.Rect, toInventoryX, PanelButtonsTop, toInventoryWidth, PanelButtonHeight);
 
             GameObject popup = BuildInventoryPopup(frame, out TMP_Text inventoryTitle, out GameObject inventoryEmpty, out InventoryEntryView entryTemplate, out RectTransform entryParent);
 
@@ -77,11 +98,12 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One row's column: the figure, then what is known of whoever stands there: the plate
-        /// (the row, the name, HP and the job), the two buttons that move the member a row, and the
-        /// board. The view sets the column's place and width when the screen opens, so every part
-        /// is a line that stretches across the column. Every object is named after the row,
-        /// because a prefab must not repeat a name.
+        /// One row's column on the stage: the figure, then what is known of whoever stands there:
+        /// the plate (the row, the name, HP and the job) and the two buttons that move the member a
+        /// row. The view sets the column's place and width when the screen opens, so every part is
+        /// a line that stretches across the column. Every object is named after the row, because a
+        /// prefab must not repeat a name. The row's board is in its line of the panel
+        /// (<see cref="BuildPartyLine"/>).
         /// </summary>
         static PartyColumnView BuildPartyColumn(RectTransform field, int row)
         {
@@ -116,14 +138,6 @@ namespace F1.Editor.Setup
             back.Rect.offsetMin = new Vector2(2f, back.Rect.offsetMin.y);
             FitMoveLabel(back.Label);
 
-            // The board: the battle's cells stacked top to bottom, as many as a board can have at most. The view sizes them at runtime.
-            float cellsTop = PartyCellsTop - PartyPlateTop;
-            RectTransform cells = UiBuild.Line(UiBuild.Rect(p + "Cells", info), cellsTop, BattleItemView.BoardHeight(JobData.MaxItemSlots));
-            VerticalLayoutGroup stack = UiBuild.Vertical(cells, BattleItemView.CellGap);
-            stack.childControlWidth = true;
-            stack.childForceExpandWidth = true;
-            ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
-
             var view = column.gameObject.AddComponent<PartyColumnView>();
             UiBuild.SetReference(view, "_figure", figure.gameObject);
             UiBuild.SetReference(view, "_figureView", figureView);
@@ -134,9 +148,44 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_hpBar", plate.HpBar);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
+            return view;
+        }
+
+        /// <summary>
+        /// One row's line of the board panel, as in battle: the face in a plate frame with the row
+        /// badge at its corner, then the board's cells side by side. The row's column view shows
+        /// and fills it. Every object is named after the row.
+        /// </summary>
+        static void BuildPartyLine(RectTransform line, int row, PartyColumnView view)
+        {
+            string p = "Party" + row;
+            UiBuild.Horizontal(line, BoardFaceGap, 0, TextAnchor.MiddleLeft);
+
+            Image frame = KitFrame(p + "Face", line, UiArt.PlateParty, 0.5f);
+            UiBuild.Size(frame, BoardFaceSize, BoardFaceSize);
+            Image placeholder = UiBuild.Image(p + "FacePlaceholder", frame.transform, UiPalette.ButtonQuiet);
+            placeholder.sprite = UiBuild.BuiltinSprite("UI/Skin/Knob.psd");
+            UiBuild.Stretch(placeholder.rectTransform, 12f, 12f, 12f, 12f);
+            Image face = UiBuild.Image(p + "FaceArt", frame.transform, Color.white);
+            face.preserveAspect = true;
+            UiBuild.Stretch(face.rectTransform, BoardFaceInset, BoardFaceInset, BoardFaceInset, BoardFaceInset);
+            face.enabled = false;
+            // Named apart from the plate's badge in the column of the same row.
+            TextMeshProUGUI number = KitBadge(frame.transform, p + "FaceBadge", p + "FaceRow", 14f, out Image badge);
+            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(2f, 2f), new Vector2(22f, 22f));
+            number.text = row.ToString(CultureInfo.InvariantCulture);
+
+            // The board: the battle's cells side by side, as many as a board can have at most. The view sizes them at runtime.
+            RectTransform cells = UiBuild.Rect(p + "Cells", line);
+            UiBuild.Size(cells, BattleItemView.BoardWidth(JobData.MaxItemSlots), BattleItemView.CellHeight);
+            UiBuild.Horizontal(cells, BattleItemView.CellGapX, 0, TextAnchor.MiddleLeft);
+            ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
+
+            UiBuild.SetReference(view, "_line", line.gameObject);
+            UiBuild.SetReference(view, "_face", face);
+            UiBuild.SetReference(view, "_facePlaceholder", placeholder.gameObject);
             UiBuild.SetReference(view, "_slotTemplate", slotTemplate);
             UiBuild.SetReference(view, "_slotParent", cells);
-            return view;
         }
 
         /// <summary>The label of a move button: closer to the button's edges than usual, and smaller when the word is long.</summary>
@@ -149,12 +198,12 @@ namespace F1.Editor.Setup
         /// <summary>
         /// One cell of a board, in a slot of the kit: the name with the grade under it, in one text
         /// (the view writes the two lines). The lines never wrap; a name too long for the cell
-        /// shrinks. Its width follows the stack; its height is set at runtime.
+        /// shrinks. It is as high as a cell; its width is set at runtime, the cells its item takes.
         /// </summary>
         static ItemSlotView BuildItemSlot(Transform parent, string name)
         {
             Image frame = KitFrame(name, parent, UiArt.Slot);
-            UiBuild.Size(frame, 100f, BattleItemView.CellHeight);
+            UiBuild.Size(frame, BattleItemView.CellWidth, BattleItemView.CellHeight);
             Button button = UiBuild.MakeButton(frame);
 
             // Words: the empty cell, or the name and grade of an item without an icon.
@@ -185,8 +234,9 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// The inventory popup: a dimmed cover over the right half with a box that lists the items
-        /// top to bottom. The screen's toggle button opens and closes it; the view fills it.
+        /// The inventory popup: a dimmed cover over the right half of the screen above the board
+        /// panel, with a box that lists the items top to bottom. The screen's toggle button opens
+        /// and closes it; the view fills it.
         /// </summary>
         static GameObject BuildInventoryPopup(Transform frame, out TMP_Text title, out GameObject empty, out InventoryEntryView entryTemplate, out RectTransform entryParent)
         {

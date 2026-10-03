@@ -8,13 +8,19 @@ namespace F1.UI
     /// <summary>
     /// One item of a unit in battle: a cell of the item board. The cell itself is the cooldown
     /// gauge: it fills from the left and the item fires when it is full. The item's icon lies over
-    /// the gauge, inside the cell's rim; an item without an icon shows its name instead. A big
-    /// item can take more than one cell; the cell then grows downward, and its icon is drawn for
-    /// that shape. An enemy's icon is mirrored so that its weapon points at the party.
+    /// the gauge, inside the cell's rim; an item without an icon shows its name instead. In battle
+    /// the cells of a board lie side by side in the unit's line of the board panel, so a big item
+    /// takes more than one cell and the cell grows to the right; its icon is drawn for that shape.
+    /// An enemy's icon is mirrored so that its weapon points at the party.
     /// </summary>
     public sealed class BattleItemView : MonoBehaviour
     {
+        /// <summary>A cell of the board panel in battle, and the gap between two cells side by side.</summary>
+        public const float CellWidth = 180f;
         public const float CellHeight = 60f;
+        public const float CellGapX = 6f;
+
+        /// <summary>The gap between two cells stacked top to bottom, on the party side of the node map and the reward screen.</summary>
         public const float CellGap = 4f;
 
         [SerializeField] UiBar _cooldown;
@@ -24,7 +30,13 @@ namespace F1.UI
         BattleItemState _item;
         bool _shownActive;
 
-        /// <summary>The height of a board of this many cells.</summary>
+        /// <summary>The width of a board of this many cells side by side.</summary>
+        public static float BoardWidth(int cells)
+        {
+            return cells * CellWidth + (cells - 1) * CellGapX;
+        }
+
+        /// <summary>The height of a board of this many cells stacked top to bottom.</summary>
         public static float BoardHeight(int cells)
         {
             return cells * CellHeight + (cells - 1) * CellGap;
@@ -49,7 +61,7 @@ namespace F1.UI
             _icon.rectTransform.localScale = new Vector3(mirrored ? -1f : 1f, 1f, 1f);
 
             var rect = (RectTransform)transform;
-            rect.sizeDelta = new Vector2(rect.sizeDelta.x, BoardHeight(cells));
+            rect.sizeDelta = new Vector2(BoardWidth(cells), CellHeight);
 
             ShowActive(item.Active);
         }

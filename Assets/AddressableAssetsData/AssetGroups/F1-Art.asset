@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06f7b51dfc73f4bb4a728a05d56a373f
+    m_Address: face/enemy/goblin-shaman
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 09fb679c0bb374c9682fdfb2b6faacc3
     m_Address: unit/job/paladin
     m_ReadOnly: 0
@@ -33,6 +39,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 106d436b17bf54b178de84a3cc37b8f8
+    m_Address: face/job/knight
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11102349196d34ef9924c294f1138643
     m_Address: item/rat-bite
     m_ReadOnly: 0
@@ -41,6 +53,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1bfeb92e34e4d41db860ff13decf1d50
     m_Address: item/fire-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 284c634048f1348519f0a5d4192379c8
+    m_Address: face/job/valkyrie
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -111,6 +129,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 76b1f0985dcd44d2f85799814743d7ff
+    m_Address: face/enemy/goblin-archer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 796bbb5365b1943ad8644fe53ffb6a76
+    m_Address: face/enemy/mine-overseer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -125,6 +155,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ef6459b91f264e388f97a10281d294d
     m_Address: item/longbow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 93c269ccf40e64f73ab5c76640c9baa7
+    m_Address: face/job/archmage
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -153,6 +189,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a9671a5d910e045f68920bd8f5a74618
+    m_Address: face/job/paladin
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aed91b06bab47424ba9de9c294801f3b
     m_Address: item/halberd
     m_ReadOnly: 0
@@ -171,6 +213,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b98b898260e884492b8619842b00e710
+    m_Address: face/job/bishop
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cad3fa1212df04eee81411be7b721fa7
     m_Address: item/buckler
     m_ReadOnly: 0
@@ -185,6 +233,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb5a58417a3274f4a8b2817065b2cb28
     m_Address: unit/enemy/goblin-shaman
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dcdfda16ad8ad44a3b9f67fe06603ddc
+    m_Address: face/job/spellblade
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -209,6 +263,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed1342e1860b14c1db5e83e6b0db4ee6
     m_Address: item/mending-chant
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f38f5ed7d49bd4f51a9e2396e8103d50
+    m_Address: face/enemy/cave-rat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fdb2cdf14f96b4c64afdfbc8c2fa5554
+    m_Address: face/enemy/goblin-raider
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using F1.Core;
@@ -15,10 +16,11 @@ namespace F1.UI
     /// passes potion and retreat clicks on. Speed and pause change only how fast the battle is
     /// shown; the engine decides every outcome.
     ///
-    /// Each side has one column per row, and a row holds one unit. A unit (its figure, its plate
-    /// and its item cells) stands in the column of the row the engine says it is in, so it moves
-    /// when the unit advances. The dead leave the field. The event log is not shown while the
-    /// battle runs; the result panel opens a viewer with the whole log.
+    /// Each side has one column of the stage and one line of the board panel per row, and a row
+    /// holds one unit. A unit's figure and plate stand in the column of the row the engine says it
+    /// is in, and its face and item cells lie in the panel's line of that row, so both move when
+    /// the unit advances. The dead leave the stage and the panel. The event log is not shown
+    /// while the battle runs; the result panel opens a viewer with the whole log.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
@@ -39,6 +41,9 @@ namespace F1.UI
         [SerializeField] RectTransform _field;
         [SerializeField] RectTransform[] _partyRows;
         [SerializeField] RectTransform[] _enemyRows;
+        [SerializeField] BattleBoardView _boardTemplate;
+        [SerializeField] RectTransform[] _partyLines;
+        [SerializeField] RectTransform[] _enemyLines;
         [SerializeField] PotionSlotView _potionTemplate;
         [SerializeField] Transform _potionParent;
         [SerializeField] TMP_Text _potionHint;
@@ -63,6 +68,8 @@ namespace F1.UI
         readonly BattleClock _clock = new BattleClock();
         readonly List<BattleUnitView> _partyViews = new List<BattleUnitView>();
         readonly List<BattleUnitView> _enemyViews = new List<BattleUnitView>();
+        readonly List<BattleBoardView> _partyBoards = new List<BattleBoardView>();
+        readonly List<BattleBoardView> _enemyBoards = new List<BattleBoardView>();
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
         readonly List<TMP_Text> _logChunks = new List<TMP_Text>();
         BattleSession _battle;
@@ -107,17 +114,22 @@ namespace F1.UI
             _background.enabled = _backgroundArt != null;
             LayoutColumns(engine.Setup.Balance.PartySize);
 
+            // A unit has a view on the stage and a line in the panel; for an ally, both take the click a potion is aimed with.
             foreach (BattleUnit unit in engine.Party)
             {
                 BattleUnitView view = CreateUnit(unit, _partyRows[unit.Row - 1]);
+                BattleBoardView board = CreateBoard(unit, _partyLines[unit.Row - 1]);
                 _partyViews.Add(view);
+                _partyBoards.Add(board);
                 int index = unit.Index;
                 view.Button.onClick.AddListener(() => OnPartyUnitClicked(index));
+                board.Button.onClick.AddListener(() => OnPartyUnitClicked(index));
             }
 
             foreach (BattleUnit unit in engine.Enemies)
             {
                 _enemyViews.Add(CreateUnit(unit, _enemyRows[unit.Row - 1]));
+                _enemyBoards.Add(CreateBoard(unit, _enemyLines[unit.Row - 1]));
             }
 
             for (int i = 0; i < engine.Potions.Count; i++)
@@ -160,6 +172,16 @@ namespace F1.UI
             foreach (BattleUnitView view in _enemyViews)
             {
                 view.Invalidate();
+            }
+
+            foreach (BattleBoardView board in _partyBoards)
+            {
+                board.Invalidate();
+            }
+
+            foreach (BattleBoardView board in _enemyBoards)
+            {
+                board.Invalidate();
             }
 
             _shownTimeTenths = -1;
@@ -230,8 +252,18 @@ namespace F1.UI
 
             // A party unit is a mercenary and is shown as its job; an enemy has its own figure.
             string id = unit.Setup.SourceId;
-            view.Bind(unit, unit.Side == BattleSide.Party ? _art.OfMercenary(id) : _art.OfEnemy(id), _art);
+            view.Bind(unit, unit.Side == BattleSide.Party ? _art.OfMercenary(id) : _art.OfEnemy(id));
             return view;
+        }
+
+        /// <summary>The unit's line of the board panel: the face cut out of the figure the unit is shown as, and its cells.</summary>
+        BattleBoardView CreateBoard(BattleUnit unit, Transform line)
+        {
+            BattleBoardView board = Instantiate(_boardTemplate, line);
+            board.gameObject.SetActive(true);
+            string id = unit.Setup.SourceId;
+            board.Bind(unit, unit.Side == BattleSide.Party ? _art.FaceOfMercenary(id) : _art.FaceOfEnemy(id), _art);
+            return board;
         }
 
         void Render()
@@ -252,16 +284,29 @@ namespace F1.UI
                 RenderControls(engine, balance, ongoing);
             }
 
-            PlaceUnits(_partyViews, _partyRows);
-            PlaceUnits(_enemyViews, _enemyRows);
-            for (int i = 0; i < _partyViews.Count; i++)
+            Place(_partyViews, _partyRows, view => view.Unit);
+            Place(_enemyViews, _enemyRows, view => view.Unit);
+            Place(_partyBoards, _partyLines, board => board.Unit);
+            Place(_enemyBoards, _enemyLines, board => board.Unit);
+            bool targeting = ongoing && _armedPotion >= 0;
+            foreach (BattleUnitView view in _partyViews)
             {
-                _partyViews[i].Render(engine, ongoing && _armedPotion >= 0);
+                view.Render(engine, targeting);
             }
 
             foreach (BattleUnitView view in _enemyViews)
             {
                 view.Render(engine, false);
+            }
+
+            foreach (BattleBoardView board in _partyBoards)
+            {
+                board.Render(engine, targeting);
+            }
+
+            foreach (BattleBoardView board in _enemyBoards)
+            {
+                board.Render(engine, false);
             }
 
             _pauseFrame.color = _clock.Paused ? UiPalette.Selected : UiPalette.ButtonQuiet;
@@ -277,24 +322,25 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Puts each unit in the column of the row it stands in now and takes the dead off the
-        /// field. Units are visited in unit order, so those that advance into a column together
-        /// keep their order.
+        /// Puts each unit's view (on the stage, or in the panel) in the place of the row the unit
+        /// stands in now and takes the dead away. Views are visited in unit order, so those that
+        /// advance into a place together keep their order.
         /// </summary>
-        static void PlaceUnits(List<BattleUnitView> views, RectTransform[] columns)
+        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf)
+            where T : Component
         {
-            foreach (BattleUnitView view in views)
+            foreach (T view in views)
             {
-                BattleUnit unit = view.Unit;
+                BattleUnit unit = unitOf(view);
                 if (view.gameObject.activeSelf != unit.Alive)
                 {
                     view.gameObject.SetActive(unit.Alive);
                 }
 
-                Transform column = columns[unit.Row - 1];
-                if (unit.Alive && view.transform.parent != column)
+                Transform place = places[unit.Row - 1];
+                if (unit.Alive && view.transform.parent != place)
                 {
-                    view.transform.SetParent(column, false);
+                    view.transform.SetParent(place, false);
                 }
             }
         }

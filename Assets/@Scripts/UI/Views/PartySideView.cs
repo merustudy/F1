@@ -11,15 +11,16 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// The party between battles, in the battle screen's shape: one column per row (row 1 on the
-    /// right) with the figure, the plate, the move buttons and the board stacked under it, placed
-    /// where the battle screen places its party columns (<see cref="FieldLayout"/>), the potions in
-    /// the strip under the header, and the inventory as a popup over the other half of the screen.
-    /// Clicking an item and then a cell moves it or trades places; "to inventory" takes the clicked
-    /// item off its board; an inventory item and then a cell puts it on a board (whatever was there
-    /// goes to the inventory). The inventory has a fixed number of cells, so what would not fit
-    /// there is not offered. Which cells and buttons take a click is asked of the manager, cell by
-    /// cell. The node map and the reward screen both show it.
+    /// The party between battles, in the battle screen's shape: on the stage, one column per row
+    /// (row 1 on the right) with the figure, the plate and the move buttons under it, placed where
+    /// the battle screen places its party columns (<see cref="FieldLayout"/>); in the board panel
+    /// under the stage, one line per row with the face and the board side by side, as in battle;
+    /// the potions in the strip under the header; and the inventory as a popup over the other half
+    /// of the screen above the panel. Clicking an item and then a cell moves it or trades places;
+    /// "to inventory" takes the clicked item off its board; an inventory item and then a cell puts
+    /// it on a board (whatever was there goes to the inventory). The inventory has a fixed number
+    /// of cells, so what would not fit there is not offered. Which cells and buttons take a click
+    /// is asked of the manager, cell by cell. The node map and the reward screen both show it.
     /// </summary>
     public sealed class PartySideView : MonoBehaviour
     {
@@ -102,7 +103,8 @@ namespace F1.UI
 
         /// <summary>
         /// Puts each column where the battle screen puts the party column of the same row for a
-        /// party of this size. The rows the party cannot stand in are not shown, as in battle.
+        /// party of this size. The rows the party cannot stand in are not shown, as in battle:
+        /// neither their column on the stage nor their line in the panel.
         /// </summary>
         void LayoutColumns(int partyRows)
         {
@@ -111,6 +113,7 @@ namespace F1.UI
             {
                 bool used = i < partyRows;
                 _columns[i].gameObject.SetActive(used);
+                _columns[i].Line.SetActive(used);
                 if (used)
                 {
                     var column = (RectTransform)_columns[i].transform;

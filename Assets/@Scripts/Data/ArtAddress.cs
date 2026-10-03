@@ -24,5 +24,22 @@ namespace F1.Data
 
             return value;
         }
+
+        /// <summary>
+        /// The address of the face of a unit: the figure's address with its first segment replaced
+        /// ("unit/job/knight" is "face/job/knight"). A unit that has a figure has a face, because the
+        /// face is cut out of the figure (ArtPipeline, cutface.py), so the data names only the figure.
+        /// Null for a unit without a figure.
+        /// </summary>
+        public static string FaceOf(string figure)
+        {
+            if (figure == null)
+            {
+                return null;
+            }
+
+            int slash = figure.IndexOf('/');
+            return "face" + (slash < 0 ? "/" + figure : figure.Substring(slash));
+        }
     }
 }

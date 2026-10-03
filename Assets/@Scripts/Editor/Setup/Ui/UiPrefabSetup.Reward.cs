@@ -7,7 +7,11 @@ namespace F1.Editor.Setup
 {
     public static partial class UiPrefabSetup
     {
-        /// <summary>The reward screen: the party on the left as in battle, the rewards stacked on the right with the buttons under them.</summary>
+        /// <summary>
+        /// The reward screen: the party as in battle (the stage on the left, the boards in the panel
+        /// under it), the rewards stacked on the right above the panel, and the hint and the buttons
+        /// in the panel's right half.
+        /// </summary>
         static UIScreen BuildReward(Transform holder)
         {
             RewardScreen screen = Screen<RewardScreen>("RewardScreen", holder, out RectTransform frame);
@@ -16,23 +20,23 @@ namespace F1.Editor.Setup
             UiBuild.Box(header, 0f, 0f, 1920f, 80f);
             UiBuild.Box(UiBuild.LocalizedLabel("RewardTitle", header.transform, UiKeys.Reward.Title, 36f, UiPalette.Text), 40f, 14f, 900f, 52f);
 
-            // The rewards, one under the other, as wide as the right half.
-            RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, 110f, 920f, 636f);
+            // The rewards, one under the other, as wide as the right half, above the panel.
+            RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, 110f, 920f, BoardPanelTop - 16f - 110f);
             VerticalLayoutGroup stack = UiBuild.Vertical(options, 12f);
             stack.childControlWidth = true;
             stack.childForceExpandWidth = true;
             RewardOptionView optionTemplate = BuildRewardOption(options);
 
-            UiBuild.Box(UiBuild.LocalizedLabel("RewardHint", frame, UiKeys.Reward.Hint, 22f, UiPalette.TextDim), 980f, 770f, 920f, 60f);
+            PartySideView party = BuildPartySide(frame, 1230f, 170f, out Image panel);
 
-            ButtonParts toInventory = UiBuild.LocalizedButton("RewardToInventory", frame, UiKeys.Reward.ToInventory, UiPalette.ButtonQuiet, 30f);
-            UiBuild.Box(toInventory.Rect, 980f, 940f, 290f, 84f);
-            ButtonParts inventoryToggle = UiBuild.Button("InventoryToggle", frame, UiPalette.ButtonQuiet, 30f);
-            UiBuild.Box(inventoryToggle.Rect, 1290f, 940f, 290f, 84f);
-            ButtonParts skip = UiBuild.LocalizedButton("Skip", frame, UiKeys.Reward.Skip, UiPalette.ButtonQuiet, 30f);
-            UiBuild.Box(skip.Rect, 1600f, 940f, 300f, 84f);
-
-            PartySideView party = BuildPartySide(frame);
+            // The panel's right half: how to choose, the chosen item's facts (the party side writes them), then the buttons.
+            UiBuild.Box(UiBuild.LocalizedLabel("RewardHint", panel.transform, UiKeys.Reward.Hint, 22f, UiPalette.TextDim), PanelRightX, PanelTitleTop, PanelRightWidth, 48f);
+            ButtonParts toInventory = KitLocalizedButton("RewardToInventory", panel.transform, UiKeys.Reward.ToInventory, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(toInventory.Rect, PanelRightX, PanelButtonsTop, 210f, PanelButtonHeight);
+            ButtonParts inventoryToggle = KitButton("InventoryToggle", panel.transform, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(inventoryToggle.Rect, 1420f, PanelButtonsTop, 210f, PanelButtonHeight);
+            ButtonParts skip = KitLocalizedButton("Skip", panel.transform, UiKeys.Reward.Skip, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(skip.Rect, 1650f, PanelButtonsTop, 230f, PanelButtonHeight);
 
             UiBuild.SetReference(screen, "_optionTemplate", optionTemplate);
             UiBuild.SetReference(screen, "_optionParent", options);
