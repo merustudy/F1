@@ -90,6 +90,21 @@ namespace F1.UI
                     throw new InvalidOperationException($"The prefab of screen {id} has no UIScreen component.");
                 }
 
+                // The screen loads what it shows before it is seen: it stays hidden meanwhile, and the
+                // previous screen stays on display.
+                instance.SetActive(false);
+                try
+                {
+                    await screen.PrepareAsync();
+                }
+                catch
+                {
+                    _resource.ReleaseInstance(instance);
+                    throw;
+                }
+
+                instance.SetActive(true);
+
                 Current = screen;
                 CurrentId = id;
                 screen.Open();

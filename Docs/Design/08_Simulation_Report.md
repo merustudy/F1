@@ -1,6 +1,8 @@
 # 100일 시뮬 보고서 (재구성 요약 v0-recon)
 
 > 원본 보고서의 표·런별 수치는 없음. 기록된 결론만 정리.
+> (2026-10-02) 직업 id `berserker`를 `valkyrie`로 바꿨다(05_Mercenary_Growth §1). 이 문서의 `valkyrie`는 그 전의 `berserker`이고,
+> 규칙과 수치는 그대로다: 같은 시드로 다시 돌려 이름만 다르고 결과가 같은 것을 확인했다.
 > 아래 도구는 없다 (2026-09-30). 규칙을 다시 정하므로, 이 문서의 결론은 새 시뮬로 재검증하기 전까지 출발값과 가설이다 (→ 00_INDEX "수치와 시뮬 결론의 지위").
 
 ## 1. 도구
@@ -47,13 +49,13 @@
 |---|---|---|---|
 | knight, bishop, spellblade | 81.7% / 0.22 | 62.3% / 0.22 | 77.5% / 1.24 |
 | paladin, bishop, spellblade | 80.1% / 0.24 | 52.2% / 0.23 | 79.4% / 0.99 |
-| berserker, bishop, spellblade | 77.2% / 0.29 | 48.2% / 0.29 | 73.5% / 1.28 |
+| valkyrie, bishop, spellblade | 77.2% / 0.29 | 48.2% / 0.29 | 73.5% / 1.28 |
 | knight, bishop, archmage | 62.8% / 0.43 | 44.7% / 0.36 | 64.1% / 1.48 |
-| knight, berserker, bishop | 63.7% / 0.39 | 38.3% / 0.35 | 77.7% / 1.42 |
-| paladin, berserker, bishop | 60.7% / 0.41 | 28.4% / 0.34 | 75.3% / 1.28 |
+| knight, valkyrie, bishop | 63.7% / 0.39 | 38.3% / 0.35 | 77.7% / 1.42 |
+| paladin, valkyrie, bishop | 60.7% / 0.41 | 28.4% / 0.34 | 75.3% / 1.28 |
 | paladin, bishop, archmage | 52.9% / 0.45 | 33.9% / 0.37 | 58.1% / 1.56 |
 | knight, archmage, spellblade | 46.7% / 0.73 | 26.2% / 0.40 | 48.1% / 2.14 |
-| knight, berserker, spellblade | 35.2% / 0.79 | 19.1% / 0.42 | 58.3% / 1.96 |
+| knight, valkyrie, spellblade | 35.2% / 0.79 | 19.1% / 0.42 | 58.3% / 1.96 |
 | bishop, archmage, spellblade | 35.1% / 0.83 | 18.1% / 0.57 | 51.5% / 1.83 |
 | knight, paladin, spellblade | 12.3% / 0.92 | 5.3% / 0.45 | 34.7% / 2.39 |
 
@@ -111,15 +113,15 @@
 | 파티 (1열, 2열, 3열) | balanced | safe | none | 변경 전 balanced (§5) |
 |---|---|---|---|---|
 | knight, spellblade, bishop | 80.2% / 0.20 | 69.6% / 0.18 | 81.9% / 0.86 | 81.7% / 0.22 |
-| berserker, spellblade, bishop | 80.7% / 0.22 | 58.7% / 0.23 | 73.6% / 1.15 | 77.2% / 0.29 |
+| valkyrie, spellblade, bishop | 80.7% / 0.22 | 58.7% / 0.23 | 73.6% / 1.15 | 77.2% / 0.29 |
 | paladin, spellblade, bishop | 75.3% / 0.25 | 56.4% / 0.22 | 77.5% / 0.93 | 80.1% / 0.24 |
 | knight, bishop, archmage | 58.9% / 0.35 | 49.8% / 0.33 | 43.0% / 1.81 | 62.8% / 0.43 |
 | spellblade, bishop, archmage | 55.3% / 0.48 | 42.0% / 0.34 | 40.0% / 1.95 | 35.1% / 0.83 |
 | knight, spellblade, archmage | 53.7% / 0.54 | 38.5% / 0.33 | 52.1% / 1.87 | 46.7% / 0.73 |
 | paladin, bishop, archmage | 45.3% / 0.35 | 42.6% / 0.34 | 43.0% / 1.81 | 52.9% / 0.45 |
-| berserker, knight, bishop | 27.4% / 0.69 | 12.5% / 0.52 | 32.3% / 2.18 | 63.7% / 0.39 |
-| berserker, paladin, bishop | 16.5% / 0.72 | 7.2% / 0.52 | 27.3% / 2.33 | 60.7% / 0.41 |
-| berserker, spellblade, knight | 6.9% / 1.06 | 2.0% / 0.46 | 20.5% / 2.64 | 35.2% / 0.79 |
+| valkyrie, knight, bishop | 27.4% / 0.69 | 12.5% / 0.52 | 32.3% / 2.18 | 63.7% / 0.39 |
+| valkyrie, paladin, bishop | 16.5% / 0.72 | 7.2% / 0.52 | 27.3% / 2.33 | 60.7% / 0.41 |
+| valkyrie, spellblade, knight | 6.9% / 1.06 | 2.0% / 0.46 | 20.5% / 2.64 | 35.2% / 0.79 |
 | knight, spellblade, paladin | 5.9% / 1.03 | 2.4% / 0.50 | 15.5% / 2.75 | 12.3% / 0.92 |
 
 같은 파티(knight, bishop, spellblade)를 자리만 바꿔 세운 결과 (balanced, 1,000회):
@@ -134,8 +136,8 @@
 ### 관찰
 - 【확정 — 시뮬】 **자리가 결과를 가른다.** 같은 세 명이 자리에 따라 80%에서 1% 미만까지 달라진다. 무기를 쓸 수 없는 열에 선 용병은 없는 것과 같다.
 - 【확정 — 시뮬】 **절벽: 조합.** "1열에 버틸 직업 하나, 2열에 1~2열 무기, 3열에 2~4열 아이템" 꼴이면 변경 전과 비슷하다(75~81%).
-  그 꼴에서 벗어나면 급히 나빠진다. 1열을 원하는 직업이 둘인 파티(berserker와 knight, berserker와 paladin)는 60%대에서 17~27%로,
-  근접 셋인 파티는 6~7%로 떨어졌다. berserker의 무기는 1열에서만 쓸 수 있고 knight와 paladin의 패시브는 1열에서만 켜지므로,
+  그 꼴에서 벗어나면 급히 나빠진다. 1열을 원하는 직업이 둘인 파티(valkyrie와 knight, valkyrie와 paladin)는 60%대에서 17~27%로,
+  근접 셋인 파티는 6~7%로 떨어졌다. valkyrie의 무기는 1열에서만 쓸 수 있고 knight와 paladin의 패시브는 1열에서만 켜지므로,
   둘 중 하나는 제 몫을 하지 못한다.
 - 【확정 — 시뮬】 **1열로 끌려 나온 뒤 열 유닛은 무력하다.** 적에게는 약점이고(앞 열을 먼저 잡으면 뒤의 궁수와 주술사가 멈춘다),
   아군에게는 연쇄 붕괴다. 기본 파티 3,000회의 사망은 1열 554명, 2열 30명, 3열 4명이다(변경 전 648, 2, 9).
@@ -151,8 +153,8 @@
 
 | 선택지 | 내용 | 시뮬 (balanced, 1,000회, 가장 좋은 자리) |
 |---|---|---|
-| 가 | 그대로 둔다. 조합과 자리를 맞추는 것이 게임의 일부다 | knight·berserker·bishop 28.9% / 0.68. paladin·berserker·bishop 18.6% / 0.71 |
-| 나 | `greataxe`를 1~2열에서 쓸 수 있게 한다. berserker가 knight나 paladin 뒤에 설 수 있다 | knight, berserker, bishop 58.4% / 0.41. paladin, berserker, bishop 54.2% / 0.42. 기본 파티는 그대로 |
+| 가 | 그대로 둔다. 조합과 자리를 맞추는 것이 게임의 일부다 | knight·valkyrie·bishop 28.9% / 0.68. paladin·valkyrie·bishop 18.6% / 0.71 |
+| 나 | `greataxe`를 1~2열에서 쓸 수 있게 한다. valkyrie가 knight나 paladin 뒤에 설 수 있다 | knight, valkyrie, bishop 58.4% / 0.41. paladin, valkyrie, bishop 54.2% / 0.42. 기본 파티는 그대로 |
 | 다 | 쓸 수 있는 열도 "앞에서 몇 번째까지", "뒤에서 몇 번째까지"처럼 서 있는 순서로 센다. 끌려 나온 뒤 열 유닛이 덜 무력해진다 | 재지 않았다(규칙과 데이터 형식이 바뀐다) |
 | 라 | 플레이테스트에서 실제로 막히는지 본 뒤에 정한다 | |
 
@@ -211,19 +213,19 @@
 |---|---|
 | knight, spellblade, archmage, bishop | 82.7% / 0.25 |
 | paladin, spellblade, archmage, bishop | 72.3% / 0.35 |
-| berserker, spellblade, bishop, archmage | 70.7% / 0.41 |
-| berserker, knight, archmage, bishop | 40.4% / 0.72 |
+| valkyrie, spellblade, bishop, archmage | 70.7% / 0.41 |
+| valkyrie, knight, archmage, bishop | 40.4% / 0.72 |
 | paladin, knight, archmage, bishop | 36.9% / 0.70 |
-| berserker, paladin, archmage, bishop | 27.2% / 0.82 |
-| berserker, spellblade, bishop, knight | 16.6% / 1.00 |
+| valkyrie, paladin, archmage, bishop | 27.2% / 0.82 |
+| valkyrie, spellblade, bishop, knight | 16.6% / 1.00 |
 | knight, spellblade, bishop, paladin | 16.1% / 1.01 |
-| berserker, spellblade, bishop, paladin | 15.9% / 1.01 |
+| valkyrie, spellblade, bishop, paladin | 15.9% / 1.01 |
 | knight, spellblade, archmage, paladin | 11.6% / 1.13 |
-| knight, spellblade, archmage, berserker | 10.7% / 1.14 |
-| berserker, spellblade, archmage, paladin | 6.9% / 1.17 |
-| berserker, knight, bishop, paladin | 2.7% / 1.08 |
-| berserker, knight, archmage, paladin | 1.4% / 1.24 |
-| berserker, spellblade, paladin, knight | 0.2% / 1.13 |
+| knight, spellblade, archmage, valkyrie | 10.7% / 1.14 |
+| valkyrie, spellblade, archmage, paladin | 6.9% / 1.17 |
+| valkyrie, knight, bishop, paladin | 2.7% / 1.08 |
+| valkyrie, knight, archmage, paladin | 1.4% / 1.24 |
+| valkyrie, spellblade, paladin, knight | 0.2% / 1.13 |
 
 기본 파티 네 명을 자리만 바꿔 세운 결과(balanced, 1,000회): knight가 1열, spellblade가 2열이면 81~83%. 둘을 맞바꾸면 41~43%.
 spellblade가 3열이나 4열이면 16~21%, bishop이나 archmage가 1열이면 1% 미만이다.
@@ -232,7 +234,7 @@ spellblade가 3열이나 4열이면 16~21%, bishop이나 archmage가 1열이면 
 - 【확정 — 시뮬】 **뒤 열 둘은 지팡이 직업이어야 한다.** 근접 무기는 1~2열에서만 쓰므로 3열과 4열에 선 근접 직업은 없는 것과 같다.
   시작 로스터에서 2열 뒤에 설 수 있는 직업은 bishop과 archmage뿐이라, 쓸 만한 4인 파티는 둘을 모두 넣은 것뿐이다(70~83%).
   둘 중 하나가 죽으면 다음으로 좋은 파티가 40%, 둘 다 없으면 17% 아래다. 3인 파티였을 때보다 절벽이 가파르다.
-- 【확정 — 시뮬】 **spellblade가 2열의 기둥이다.** knight와 paladin, knight와 berserker를 1~2열에 세운 파티(둘 다 1~2열 무기를 쓴다)는 37~40%인데,
+- 【확정 — 시뮬】 **spellblade가 2열의 기둥이다.** knight와 paladin, knight와 valkyrie를 1~2열에 세운 파티(둘 다 1~2열 무기를 쓴다)는 37~40%인데,
   spellblade를 2열에 세운 파티는 70~83%다. 무기 적중마다 화상 3을 얹는 패시브의 값이다.
 - 【확정 — 시뮬】 **3인 파티는 이제 어렵다.** 적을 4인에 맞췄으므로 knight, spellblade, bishop 셋만 데려가면 11.8% / 1.02다.
   용병이 셋 남은 런은 사실상 끝난 런이다.
@@ -284,10 +286,10 @@ spellblade가 3열이나 4열이면 16~21%, bishop이나 archmage가 1열이면 
 |---|---|---|
 | knight, spellblade, archmage, bishop | 82.7% | 79.2% |
 | paladin, spellblade, archmage, bishop | 72.3% | 70.6% |
-| berserker, spellblade, bishop, archmage | 70.7% | 65.9% |
-| berserker, knight, archmage, bishop | 40.4% | 37.6% |
+| valkyrie, spellblade, bishop, archmage | 70.7% | 65.9% |
+| valkyrie, knight, archmage, bishop | 40.4% | 37.6% |
 | knight, spellblade, bishop, paladin | 16.1% | 14.2% |
-| knight, spellblade, archmage, berserker | 10.7% | 13.6% |
+| knight, spellblade, archmage, valkyrie | 10.7% | 13.6% |
 
 - 【확정 — 시뮬】 예측대로 "다"는 절벽을 바꾸지 않는다. 넷이 다 살아 있을 때 `back:3`은 2~4열 그대로이므로, 4열에 선 근접 직업은 여전히 무기를 못 쓴다.
   "다"가 바꾸는 것은 죽은 뒤의 붕괴와 짧은 줄이다. 3인 파티(knight, spellblade, bishop)는 9.4% / 1.02(전 11.8%)로 여전히 어렵다.

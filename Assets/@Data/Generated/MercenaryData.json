@@ -2,12 +2,12 @@
   "SchemaVersion": 1,
   "Items": [
     {
-      "Id": "bran",
+      "Id": "astrid",
       "Name": {
-        "en-US": "Bran",
-        "ko-KR": "브란"
+        "en-US": "Astrid",
+        "ko-KR": "아스트리드"
       },
-      "JobId": "berserker"
+      "JobId": "valkyrie"
     },
     {
       "Id": "cedric",

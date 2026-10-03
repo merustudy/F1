@@ -4,11 +4,16 @@
 
 ## 1. 원형과 전직
 - 【확정】 기본 원형 3종: 전사 / 성직자 / 마법사
-- 【확정】 전직 6종: `knight`, `berserker`, `bishop`, `paladin`, `archmage`, `spellblade`
-- 【해석】 계보: 전사 → knight / berserker, 성직자 → bishop / paladin, 마법사 → archmage / spellblade
+- 【확정】 전직 6종: `knight`, `valkyrie`, `bishop`, `paladin`, `archmage`, `spellblade`
+- 【해석】 계보: 전사 → knight / valkyrie, 성직자 → bishop / paladin, 마법사 → archmage / spellblade
 - 레퍼런스: 우리들의 모험가 길드 (성장·전직)
 - 【확정】 (일괄) Slice A에는 성장과 전직이 없다. 용병은 처음부터 전직 직업 하나를 가지고, 바뀌지 않는다.
 - 【확정】 (일괄) Slice A의 시작 로스터는 전직 6종이 하나씩이다 (`MercenaryData.csv`).
+- 【확정】 (2026-10-02) 전직 **발키리**(`valkyrie`)는 그 전의 광전사(`berserker`)다. 이름과 그림, id만 바뀌었고 규칙과 수치(기본 무기 대도끼,
+  빈사 상태의 패시브)는 그대로다. 시작 로스터의 그 직업 용병도 브란(`bran`)에서 **아스트리드**(`astrid`)로 바뀌었다.
+  - 사용자는 "광전사를 바이킹 또는 발키리로, 용병 이름도 변경. 직업명은 권고하는 안으로"라고 했고, id까지 바꾸는 권장안을 수락했다.
+  - 【확정】 (2026-10-02 권장안) 발키리를 고른 까닭: 직업의 그림이 여성 한 명이므로 이름이 그림과 어긋나지 않는다(그림은 `10_Art_Direction.md` §1).
+    용병의 이름 아스트리드도 권장안이다.
 
 ## 2. 레벨과 스탯
 - 【확정】 레벨과 STR 스탯 존재
@@ -24,7 +29,7 @@
 |---|---|---|
 | spellblade | STR 9 | 마법사 Lv8 기대 STR에 맞춤 【확정】 |
 | paladin | STR 11 | 하향 조정 【확정】 |
-| knight / berserker / bishop / archmage | 【원본확인】 | |
+| knight / valkyrie / bishop / archmage | 【원본확인】 | |
 
 - 【해석】 전직 시점은 Lv8 전후
 

@@ -30,7 +30,7 @@ namespace F1.Data
         public const string DefinitionName = "Enemy";
 
         [JsonConstructor]
-        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items)
+        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -52,6 +52,7 @@ namespace F1.Data
             Level = level;
             MaxHp = maxHp;
             Items = items;
+            Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -68,6 +69,10 @@ namespace F1.Data
 
         [JsonProperty(Order = 5, Required = Required.Always)]
         public IReadOnlyList<ItemGrant> Items { get; }
+
+        /// <summary>The logical address of the enemy's full-body art. Null when it has no art yet.</summary>
+        [JsonProperty(Order = 6, Required = Required.AllowNull)]
+        public string Figure { get; }
     }
 
     /// <summary>A set of enemies that fights together, and where in a dungeon it appears.</summary>

@@ -14,7 +14,8 @@
           "ItemId": "rat_bite",
           "Grade": 10
         }
-      ]
+      ],
+      "Figure": "unit/enemy/cave-rat"
     },
     {
       "Id": "goblin_archer",
@@ -29,7 +30,8 @@
           "ItemId": "crude_bow",
           "Grade": 14
         }
-      ]
+      ],
+      "Figure": "unit/enemy/goblin-archer"
     },
     {
       "Id": "goblin_raider",
@@ -44,7 +46,8 @@
           "ItemId": "rusty_blade",
           "Grade": 15
         }
-      ]
+      ],
+      "Figure": "unit/enemy/goblin-raider"
     },
     {
       "Id": "goblin_shaman",
@@ -63,7 +66,8 @@
           "ItemId": "mending_chant",
           "Grade": 12
         }
-      ]
+      ],
+      "Figure": "unit/enemy/goblin-shaman"
     },
     {
       "Id": "mine_overseer",
@@ -82,7 +86,8 @@
           "ItemId": "overseer_roar",
           "Grade": 22
         }
-      ]
+      ],
+      "Figure": "unit/enemy/mine-overseer"
     }
   ]
 }

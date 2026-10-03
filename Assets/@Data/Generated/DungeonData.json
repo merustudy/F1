@@ -18,7 +18,8 @@
       "StartingPotions": [
         "healing_potion",
         "healing_potion"
-      ]
+      ],
+      "Background": "background/dungeon/abandoned-mine"
     }
   ]
 }

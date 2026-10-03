@@ -933,17 +933,17 @@ namespace F1.Tests
         [Test]
         public void Passive_WeaponPowerWhileInDog_AppliesOnlyAtDeathsDoor()
         {
-            BattleUnitSetup Berserker(int hp)
+            BattleUnitSetup Valkyrie(int hp)
             {
-                return TestData.Mercenary("berserker", 1, hp, TestData.Attack(1000, 10)).WithMaxHp(100)
+                return TestData.Mercenary("valkyrie", 1, hp, TestData.Attack(1000, 10)).WithMaxHp(100)
                     .WithPassive(PassiveTrigger.Always, PassiveCondition.SelfInDog, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 100);
             }
 
-            BattleEngine healthy = Battle(TestData.Balance(), TestData.Units(Berserker(100)), TestData.Units(IdleEnemy(100)));
+            BattleEngine healthy = Battle(TestData.Balance(), TestData.Units(Valkyrie(100)), TestData.Units(IdleEnemy(100)));
             healthy.AdvanceTo(1000);
             Assert.AreEqual(90, healthy.Enemies[0].Hp);
 
-            BattleEngine atDeathsDoor = Battle(TestData.Balance(), TestData.Units(Berserker(0)), TestData.Units(IdleEnemy(100)));
+            BattleEngine atDeathsDoor = Battle(TestData.Balance(), TestData.Units(Valkyrie(0)), TestData.Units(IdleEnemy(100)));
             atDeathsDoor.AdvanceTo(1000);
             Assert.AreEqual(80, atDeathsDoor.Enemies[0].Hp);
         }

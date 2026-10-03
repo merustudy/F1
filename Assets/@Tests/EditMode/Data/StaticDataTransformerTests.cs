@@ -55,11 +55,17 @@ namespace F1.Tests
             Assert.AreEqual("Shield {0}", knight.PassiveText.Resolve("en-US"));
             Assert.IsNull(data.Jobs.Get("bishop").Passive, "Empty Passive* cells mean no passive.");
             Assert.IsNull(data.Jobs.Get("bishop").PassiveText);
+            Assert.AreEqual("unit/job/knight", knight.Figure);
+            Assert.IsNull(data.Jobs.Get("bishop").Figure, "An empty Figure cell means the job has no art.");
+            Assert.AreEqual("unit/enemy/rat", data.Enemies.Get("rat").Figure);
+            Assert.IsNull(data.Enemies.Get("ogre").Figure);
 
             ItemData mace = data.Items.Get("mace");
             Assert.AreEqual(ItemCategory.Weapon, mace.Category);
             Assert.AreEqual(2, mace.Size);
             Assert.AreEqual(1, data.Items.Get("sword").Size);
+            Assert.AreEqual("item/sword", data.Items.Get("sword").Icon);
+            Assert.IsNull(data.Items.Get("staff").Icon, "An empty Icon cell means the item has no art.");
             Assert.AreEqual(3200, mace.CooldownMs);
             Assert.AreEqual("front:1", mace.Rows.ToString());
             Assert.AreEqual("front:2", data.Items.Get("sword").Rows.ToString());
@@ -100,6 +106,7 @@ namespace F1.Tests
             Assert.AreEqual(30, mine.FatigueCost);
             Assert.AreEqual(10, mine.RewardGradeAt(2));
             CollectionAssert.AreEqual(new[] { "tonic" }, mine.StartingPotions);
+            Assert.AreEqual("background/dungeon/mine", mine.Background);
 
             Assert.AreEqual("knight", data.Mercenaries.Get("rowan").JobId);
         }
@@ -200,6 +207,17 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_WhenTheBackgroundCellIsEmpty_TheDungeonHasNoArt()
+        {
+            string dungeons = TestCsv.Dungeons.Replace(",tonic,background/dungeon/mine", ",tonic,");
+            StringAssert.Contains(",tonic,\n", dungeons);
+
+            StaticData data = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Dungeon, dungeons)).Data;
+
+            Assert.IsNull(data.Dungeons.Get("mine").Background);
+        }
+
+        [Test]
         public void Transform_WhenCsvMalformed_ReportsLine()
         {
             DataTransformException exception = TransformFails(StaticDataFiles.Potion, "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight\ntonic,강장제\n");
@@ -214,7 +232,7 @@ namespace F1.Tests
             {
                 DataTransformException exception = TransformFails(
                     StaticDataFiles.Enemy,
-                    "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items\nrat,쥐,Rat,2,30," + items + "\nogre,오우거,Ogre,9,200,claw:12\n");
+                    "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure\nrat,쥐,Rat,2,30," + items + ",\nogre,오우거,Ogre,9,200,claw:12,\n");
 
                 StringAssert.Contains("EnemyData.csv(2) [Items]", exception.Errors[0], items);
             }

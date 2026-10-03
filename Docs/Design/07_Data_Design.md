@@ -10,7 +10,7 @@
 
 | 분류 | id |
 |---|---|
-| 전직 | knight, berserker, bishop, paladin, archmage, spellblade |
+| 전직 | knight, valkyrie, bishop, paladin, archmage, spellblade |
 | 지역 속성 | swift, hardened, regen, warded, armored |
 | 최종 보스 | Abyss Lord (id 표기 【원본확인】) |
 

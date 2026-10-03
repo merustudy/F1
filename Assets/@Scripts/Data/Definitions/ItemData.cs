@@ -96,7 +96,8 @@ namespace F1.Data
             int cooldownMs,
             RowSpan rows,
             IReadOnlyList<ItemEffect> effects,
-            int rewardWeight)
+            int rewardWeight,
+            string icon = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -134,6 +135,7 @@ namespace F1.Data
             CooldownMs = cooldownMs;
             Effects = effects;
             RewardWeight = rewardWeight;
+            Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -162,6 +164,10 @@ namespace F1.Data
         /// <summary>Relative chance to be offered as a battle reward. 0 means it is never offered.</summary>
         [JsonProperty(Order = 8, Required = Required.Always)]
         public int RewardWeight { get; }
+
+        /// <summary>The logical address of the icon its cell shows. Null when it has no art yet: the cell shows the name.</summary>
+        [JsonProperty(Order = 9, Required = Required.AllowNull)]
+        public string Icon { get; }
 
         /// <param name="row">The row the owner stands in.</param>
         /// <param name="lineLength">How many units of the owner's side are alive.</param>

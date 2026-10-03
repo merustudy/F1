@@ -20,7 +20,9 @@ Game Code -> Managers.Resource -> ResourceManager -> Addressables
 ```text
 data/app/<name>
 ui/app/<name>        ui/lobby/<name>        ui/expedition/<name>
-<domain>/<category>/<key>        # 그림과 소리가 들어올 때
+unit/job/<key>       unit/enemy/<key>          # 유닛의 전신 그림. key는 Data Id의 `_`를 `-`로 바꾼 것
+background/dungeon/<key>                       # 던전의 배경
+<domain>/<category>/<key>                      # 그 밖의 그림과 소리가 들어올 때
 ```
 
 형식: 소문자, 숫자, `-`로 된 조각을 `/`로 둘 이상 잇는다. `ResourceManager`가 형식을 검사한다.
@@ -33,7 +35,7 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 |---|---|---|---|
 | `App` | `scope-app` | 앱이 떠 있는 동안 | Static Data, 어느 화면에서나 쓰는 UI |
 | `Lobby` | `scope-lobby` | 로비 화면이 떠 있는 동안 | 로비 UI |
-| `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 보상, 결과 UI |
+| `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 보상, 결과 UI, 유닛의 그림, 던전의 배경 |
 
 - 기획의 "런"(100일 전체)은 Scope가 아니다. 런의 Static Data는 작아서 `App`에 둔다.
 - 여러 Scope가 쓰는 Asset은 더 긴 수명의 Scope로 올린다.
@@ -57,13 +59,16 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 ## Group과 Entry
 
-- Group은 책임별 소수다: `F1-Data`, `F1-UI`. Scope마다 Group을 만들지 않는다. Group은 첫 Entry가 생길 때 만든다.
+- Group은 책임별 소수다: `F1-Data`, `F1-UI`, `F1-Art`. Scope마다 Group을 만들지 않는다. Group은 첫 Entry가 생길 때 만든다.
 - Entry는 Inspector에서 등록하지 않는다. `F1.Editor.Setup.AddressablesSetup`의 Entry 목록에 `(assetPath, address, scope)` 한 줄을 넣고
   Sync한다. Sync는 멱등하고 체인의 setup 단계가 부른다.
 - Sync는 목록에 없는 Entry를 `F1-*` Group에서 지운다.
-- Data Entry는 `StaticDataFiles`에서, 화면 Prefab Entry는 `ScreenCatalog`에서 자동으로 나온다. 손으로 적는 목록이 아니다.
+- Data Entry는 `StaticDataFiles`에서, 화면 Prefab Entry는 `ScreenCatalog`에서, 그림 Entry는 Static Data의 `Figure`, `Background`, `Icon` 값에서 자동으로 나온다
+  (`ArtSetup`. 파일의 자리는 Address에서 정해진다: `unit/enemy/goblin-raider` -> `Assets/@Art/Unit/Enemy/goblin_raider.png`,
+  `item/herb-pouch` -> `Assets/@Art/Item/herb_pouch.png`). 손으로 적는 목록이 아니다.
 - `AddressablesSetup.FindProblems`가 검사한다: Asset 파일 존재, Address 형식과 중복, Scope Label이 정확히 하나, 목록에 없는 Entry.
   EditMode Test가 이 검사를 부른다.
+- UI의 그림(`Assets/@Art/UI`)은 Entry가 아니다. 화면 Prefab이 Sprite를 직접 가리키고 Prefab과 함께 읽힌다(`12_UI.md` "UI의 그림").
 - Editor의 Play Mode Script는 "Use Asset Database"다.
 
 ## Validation
@@ -74,5 +79,5 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 ## Deferred and Forbidden
 
-- Deferred: Remote Addressables, Content Update, Pool, 그림·소리 Group.
+- Deferred: Remote Addressables, Content Update, Pool, 소리 Group.
 - Forbidden: Handle을 일반 코드에 노출, `Resources.Load`로 Runtime Asset 읽기, 시작 시 전체 Preload, Inspector로만 등록한 Entry.

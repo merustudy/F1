@@ -106,7 +106,8 @@ namespace F1.Data
             int weaponGrade,
             int recommendedRow,
             PassiveSpec passive,
-            LocalizedText passiveText = null)
+            LocalizedText passiveText = null,
+            string figure = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -142,6 +143,7 @@ namespace F1.Data
             RecommendedRow = recommendedRow;
             Passive = passive;
             PassiveText = passiveText;
+            Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -178,5 +180,12 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 9, Required = Required.AllowNull)]
         public LocalizedText PassiveText { get; }
+
+        /// <summary>
+        /// The logical address of the full-body art of the job's mercenaries. Null when the job
+        /// has no art yet: the screen then shows a placeholder.
+        /// </summary>
+        [JsonProperty(Order = 10, Required = Required.AllowNull)]
+        public string Figure { get; }
     }
 }

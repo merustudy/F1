@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using F1.Core;
 using UnityEngine;
 
@@ -5,14 +6,24 @@ namespace F1.UI
 {
     /// <summary>
     /// A full screen. It shows state and sends commands to the managers; it computes no rule.
-    /// UIManager creates it, calls <see cref="Open"/> once and destroys it when another screen is shown.
+    /// UIManager creates it, lets it load what it shows (<see cref="PrepareAsync"/>), calls <see cref="Open"/>
+    /// once and destroys it when another screen is shown.
     /// </summary>
     [RequireComponent(typeof(CanvasGroup))]
     public abstract class UIScreen : MonoBehaviour
     {
         bool _opened;
 
-        /// <summary>Called once, right after the screen was created.</summary>
+        /// <summary>
+        /// Loads what the screen shows and cannot wait for once it is open, such as the art of the
+        /// units. UIManager awaits it once, before <see cref="Open"/>. Most screens need nothing.
+        /// </summary>
+        public virtual Task PrepareAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        /// <summary>Called once, after <see cref="PrepareAsync"/>.</summary>
         public void Open()
         {
             _opened = true;

@@ -73,6 +73,8 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:1
 - 줄에서 세는 자리(아이템의 `Rows`, 직업의 `PassiveRows`)는 `front:N`, `back:N`, `all`로 적는다(`RowSpan`. 구문은 그 Type이 가진다).
 - 다른 열의 값에 따라 비워 두는 칸은 Mapper가 Optional로 읽고, 채워야 하는지는 Definition 생성자가 검증한다
   (효과의 `Reach`는 앞이나 뒤에서 세는 타깃에만 있다).
+- 그림을 가리키는 열(`JobData`와 `EnemyData`의 `Figure`, `DungeonData`의 `Background`, `ItemData`의 `Icon`)에는 그 그림의 Logical Address를 적는다(`04_RESOURCES_ADDRESSABLES.md`).
+  비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 

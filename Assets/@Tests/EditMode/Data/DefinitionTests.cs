@@ -219,6 +219,22 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Figure_IsAnAddressWithoutSpaces_OrLeftOut()
+        {
+            LocalizedText name = TestData.Text("x");
+            var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
+
+            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).Figure, "No figure by default.");
+            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x").Figure);
+            Assert.AreEqual("unit/enemy/x", new EnemyData("x", name, 1, 10, items, "unit/enemy/x").Figure);
+            Assert.IsNull(new EnemyData("x", name, 1, 10, items).Figure);
+
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, null, null, ""));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x "));
+            Assert.Throws<DataException>(() => new EnemyData("x", name, 1, 10, items, "unit/ enemy/x"));
+        }
+
+        [Test]
         public void EnemyGroupData_BossGroupsHaveFloorZero_OthersHaveARange()
         {
             string[] one = { "rat" };
@@ -260,6 +276,35 @@ namespace F1.Tests
             Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, -1, 2, 8, 2, potions));
             Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 0, 8, 2, potions));
             Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 0, 2, potions));
+        }
+
+        [Test]
+        public void Background_IsAnAddressWithoutSpaces_OrLeftOut()
+        {
+            LocalizedText name = TestData.Text("x");
+            var potions = new List<string>();
+
+            Assert.IsNull(new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions).Background, "No background by default.");
+            Assert.AreEqual("background/dungeon/d", new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, "background/dungeon/d").Background);
+
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, ""));
+            DataException error = Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, "background/ dungeon/d"));
+            StringAssert.Contains("Background", error.Message, "The error names the column.");
+        }
+
+        [Test]
+        public void Icon_IsAnAddressWithoutSpaces_OrLeftOut()
+        {
+            ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
+            LocalizedText name = TestData.Text("x");
+            RowSpan rows = RowSpan.All;
+
+            Assert.IsNull(new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0).Icon, "No icon by default.");
+            Assert.AreEqual("item/x", new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, "item/x").Icon);
+
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, ""));
+            DataException error = Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, "item/ x"));
+            StringAssert.Contains("Icon", error.Message, "The error names the column.");
         }
 
         [Test]

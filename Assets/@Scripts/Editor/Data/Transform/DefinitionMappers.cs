@@ -10,6 +10,15 @@ namespace F1.Editor.Data
     {
         public const string Id = "Id";
         public const string Name = "Name";
+        public const string Figure = "Figure";
+        public const string Background = "Background";
+        public const string Icon = "Icon";
+
+        /// <summary>The address of a piece of art (a unit's Figure, a dungeon's Background, an item's Icon). An empty cell means there is no art.</summary>
+        public static string ReadArt(CsvRow row, string header)
+        {
+            return row.IsEmpty(header) ? null : row.Text(header);
+        }
 
         public static List<T> MapRows<T>(CsvTable table, List<string> errors, Func<CsvRow, T> map)
         {
@@ -51,7 +60,8 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "MaxHp", "ItemSlots", "WeaponItemId", "WeaponGrade", "RecommendedRow",
-                "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude")
+                "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
+                RowMapping.Figure)
                 .Concat(CsvRow.LocalizedHeaders(PassiveText)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
@@ -63,7 +73,8 @@ namespace F1.Editor.Data
                 row.Int("WeaponGrade"),
                 row.Int("RecommendedRow"),
                 ReadPassive(row),
-                ReadPassiveText(row)));
+                ReadPassiveText(row),
+                RowMapping.ReadArt(row, RowMapping.Figure)));
         }
 
         const string PassiveText = "PassiveText";
@@ -102,7 +113,7 @@ namespace F1.Editor.Data
                 "Category", "Size", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
-                "RewardWeight"));
+                "RewardWeight", RowMapping.Icon));
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -121,7 +132,8 @@ namespace F1.Editor.Data
                     row.Int("CooldownMs"),
                     row.Rows("Rows"),
                     effects,
-                    row.Int("RewardWeight"));
+                    row.Int("RewardWeight"),
+                    RowMapping.ReadArt(row, RowMapping.Icon));
             });
         }
 
@@ -154,13 +166,14 @@ namespace F1.Editor.Data
     {
         public static List<EnemyData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items"));
+            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure));
             return RowMapping.MapRows(table, errors, row => new EnemyData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Int("Level"),
                 row.Int("MaxHp"),
-                row.GrantList("Items")));
+                row.GrantList("Items"),
+                RowMapping.ReadArt(row, RowMapping.Figure)));
         }
     }
 
@@ -197,7 +210,7 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "FatigueCost", "DurationDays",
-                "ItemGradeBase", "ItemGradePerFloor", "StartingPotions"));
+                "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background));
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -210,7 +223,8 @@ namespace F1.Editor.Data
                 row.Int("DurationDays"),
                 row.Int("ItemGradeBase"),
                 row.Int("ItemGradePerFloor"),
-                row.IdList("StartingPotions")));
+                row.IdList("StartingPotions"),
+                RowMapping.ReadArt(row, RowMapping.Background)));
         }
     }
 

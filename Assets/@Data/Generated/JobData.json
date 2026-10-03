@@ -26,31 +26,8 @@
       "PassiveText": {
         "en-US": "Rear 2 rows: weapon damage +{0}%",
         "ko-KR": "뒤에서 2번째 자리까지: 무기 피해 +{0}%"
-      }
-    },
-    {
-      "Id": "berserker",
-      "Name": {
-        "en-US": "Berserker",
-        "ko-KR": "광전사"
       },
-      "MaxHp": 120,
-      "ItemSlots": 4,
-      "WeaponItemId": "greataxe",
-      "WeaponGrade": 12,
-      "RecommendedRow": 1,
-      "Passive": {
-        "Trigger": "Always",
-        "Condition": "SelfInDog",
-        "Rows": null,
-        "Effect": "WeaponPowerPercent",
-        "Target": "Self",
-        "Magnitude": 100
-      },
-      "PassiveText": {
-        "en-US": "At death's door: weapon damage +{0}%",
-        "ko-KR": "빈사 상태: 무기 피해 +{0}%"
-      }
+      "Figure": "unit/job/archmage"
     },
     {
       "Id": "bishop",
@@ -74,7 +51,8 @@
       "PassiveText": {
         "en-US": "Healed targets also gain {0} Shield",
         "ko-KR": "회복시킨 대상에게 보호막 {0}"
-      }
+      },
+      "Figure": "unit/job/bishop"
     },
     {
       "Id": "knight",
@@ -101,7 +79,8 @@
       "PassiveText": {
         "en-US": "Front row: gains {0} Shield at the start of battle",
         "ko-KR": "맨 앞: 전투 시작 때 자신에게 보호막 {0}"
-      }
+      },
+      "Figure": "unit/job/knight"
     },
     {
       "Id": "paladin",
@@ -128,7 +107,8 @@
       "PassiveText": {
         "en-US": "Front row: every ally gains {0} Shield at the start of battle",
         "ko-KR": "맨 앞: 전투 시작 때 아군 전체에 보호막 {0}"
-      }
+      },
+      "Figure": "unit/job/paladin"
     },
     {
       "Id": "spellblade",
@@ -152,7 +132,33 @@
       "PassiveText": {
         "en-US": "Weapon hits apply {0} Burn",
         "ko-KR": "무기 적중 시 화상 {0}"
-      }
+      },
+      "Figure": "unit/job/spellblade"
+    },
+    {
+      "Id": "valkyrie",
+      "Name": {
+        "en-US": "Valkyrie",
+        "ko-KR": "발키리"
+      },
+      "MaxHp": 120,
+      "ItemSlots": 4,
+      "WeaponItemId": "greataxe",
+      "WeaponGrade": 12,
+      "RecommendedRow": 1,
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "SelfInDog",
+        "Rows": null,
+        "Effect": "WeaponPowerPercent",
+        "Target": "Self",
+        "Magnitude": 100
+      },
+      "PassiveText": {
+        "en-US": "At death's door: weapon damage +{0}%",
+        "ko-KR": "빈사 상태: 무기 피해 +{0}%"
+      },
+      "Figure": "unit/job/valkyrie"
     }
   ]
 }

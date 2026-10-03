@@ -49,7 +49,8 @@ namespace F1.Data
             int durationDays,
             int itemGradeBase,
             int itemGradePerFloor,
-            IReadOnlyList<string> startingPotions)
+            IReadOnlyList<string> startingPotions,
+            string background = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -98,6 +99,7 @@ namespace F1.Data
             ItemGradeBase = itemGradeBase;
             ItemGradePerFloor = itemGradePerFloor;
             StartingPotions = startingPotions;
+            Background = ArtAddress.Optional(background, $"{DefinitionName} '{id}'", nameof(Background));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -133,6 +135,10 @@ namespace F1.Data
 
         [JsonProperty(Order = 11, Required = Required.Always)]
         public IReadOnlyList<string> StartingPotions { get; }
+
+        /// <summary>The logical address of the background its battles are fought in front of. Null when it has no art yet.</summary>
+        [JsonProperty(Order = 12, Required = Required.AllowNull)]
+        public string Background { get; }
 
         /// <summary>Grade of reward items offered after winning on a battle floor (1-based).</summary>
         public int RewardGradeAt(int floor)

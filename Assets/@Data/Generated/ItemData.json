@@ -22,7 +22,8 @@
           "PowerPercent": 80
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/buckler"
     },
     {
       "Id": "crude_bow",
@@ -45,7 +46,8 @@
           "PowerPercent": 90
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/crude-bow"
     },
     {
       "Id": "dagger",
@@ -68,7 +70,8 @@
           "PowerPercent": 45
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/dagger"
     },
     {
       "Id": "ember_flask",
@@ -91,7 +94,8 @@
           "PowerPercent": 25
         }
       ],
-      "RewardWeight": 8
+      "RewardWeight": 8,
+      "Icon": "item/ember-flask"
     },
     {
       "Id": "fire_staff",
@@ -114,7 +118,8 @@
           "PowerPercent": 110
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/fire-staff"
     },
     {
       "Id": "greataxe",
@@ -137,7 +142,8 @@
           "PowerPercent": 190
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/greataxe"
     },
     {
       "Id": "halberd",
@@ -160,7 +166,8 @@
           "PowerPercent": 80
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/halberd"
     },
     {
       "Id": "healing_staff",
@@ -183,7 +190,8 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/healing-staff"
     },
     {
       "Id": "herb_pouch",
@@ -206,7 +214,8 @@
           "PowerPercent": 60
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/herb-pouch"
     },
     {
       "Id": "hex_spit",
@@ -229,7 +238,8 @@
           "PowerPercent": 30
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/hex-spit"
     },
     {
       "Id": "longbow",
@@ -252,7 +262,8 @@
           "PowerPercent": 85
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/longbow"
     },
     {
       "Id": "longsword",
@@ -275,7 +286,8 @@
           "PowerPercent": 110
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/longsword"
     },
     {
       "Id": "mace",
@@ -304,7 +316,8 @@
           "PowerPercent": 40
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/mace"
     },
     {
       "Id": "mending_chant",
@@ -327,7 +340,8 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/mending-chant"
     },
     {
       "Id": "overseer_maul",
@@ -350,7 +364,8 @@
           "PowerPercent": 150
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/overseer-maul"
     },
     {
       "Id": "overseer_roar",
@@ -373,7 +388,8 @@
           "PowerPercent": 60
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/overseer-roar"
     },
     {
       "Id": "rat_bite",
@@ -396,7 +412,8 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/rat-bite"
     },
     {
       "Id": "rusty_blade",
@@ -419,7 +436,8 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/rusty-blade"
     },
     {
       "Id": "spear",
@@ -442,7 +460,8 @@
           "PowerPercent": 85
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/spear"
     },
     {
       "Id": "sword",
@@ -465,7 +484,8 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0
+      "RewardWeight": 0,
+      "Icon": "item/sword"
     },
     {
       "Id": "ward_charm",
@@ -488,7 +508,8 @@
           "PowerPercent": 70
         }
       ],
-      "RewardWeight": 10
+      "RewardWeight": 10,
+      "Icon": "item/ward-charm"
     }
   ]
 }

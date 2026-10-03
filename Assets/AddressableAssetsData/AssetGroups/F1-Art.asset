@@ -1,0 +1,221 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: F1-Art
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: F1-Art
+  m_GUID: ffee4d694673a498abe503b5ec6b7e61
+  m_SerializeEntries:
+  - m_GUID: 04ef4f6f4dba440d4b0e7399f95a565d
+    m_Address: unit/enemy/goblin-raider
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 09fb679c0bb374c9682fdfb2b6faacc3
+    m_Address: unit/job/paladin
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0f7c7f87b8ca442df8004987503377d4
+    m_Address: item/spear
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11102349196d34ef9924c294f1138643
+    m_Address: item/rat-bite
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1bfeb92e34e4d41db860ff13decf1d50
+    m_Address: item/fire-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2ae71990f7aa7425baf28b9a976fd823
+    m_Address: item/herb-pouch
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 31d9f56cbb2454f63967eb520430338f
+    m_Address: unit/enemy/mine-overseer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37b027612946d42efac48357516e83f1
+    m_Address: unit/job/valkyrie
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 37ece49934cc54329b691e0cf2aa7936
+    m_Address: item/hex-spit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 56c069291186e44889592ec7a4866f92
+    m_Address: unit/enemy/goblin-archer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b1de3acad00c454ebd910ff8802dcc1
+    m_Address: item/mace
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5bcf6180d93de495998508c2b6df9c09
+    m_Address: item/greataxe
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5c0ef07881417464d976f02aecad051d
+    m_Address: background/dungeon/abandoned-mine
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65360ba647f20488f8a94b0778afae14
+    m_Address: unit/job/archmage
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 70632e28bad6c46469c934fd033bd9e1
+    m_Address: item/ember-flask
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72ea9c297924a4805a218a3fb095cfbd
+    m_Address: item/overseer-maul
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 85d07dc708b9d4f7799392eafc18962d
+    m_Address: item/ward-charm
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 88054558662394804b778ba0228043e5
+    m_Address: unit/job/spellblade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ef6459b91f264e388f97a10281d294d
+    m_Address: item/longbow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a3023d20283bb42a2b4c0e75497dd2bc
+    m_Address: unit/enemy/cave-rat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a4ad8ae318fda454c8283c0255eeb848
+    m_Address: item/longsword
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a6c8f0c68966046b79723c7183444c72
+    m_Address: item/sword
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a7d64dc1de6b64a4fa1fb7c53d34413e
+    m_Address: item/crude-bow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aed91b06bab47424ba9de9c294801f3b
+    m_Address: item/halberd
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b30a8c9416c214f77afdacd039f788eb
+    m_Address: item/dagger
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b407988f231d14721b1e8b6efd67e7c2
+    m_Address: item/rusty-blade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cad3fa1212df04eee81411be7b721fa7
+    m_Address: item/buckler
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cb07a0e55d08946f6add4eb817bcba6d
+    m_Address: unit/job/bishop
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cb5a58417a3274f4a8b2817065b2cb28
+    m_Address: unit/enemy/goblin-shaman
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e92e1c7de97174586bcb155d2bb4e10d
+    m_Address: unit/job/knight
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eaf46b0b3de9d4192a44b9085e7f5404
+    m_Address: item/healing-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eb9166aa2dea54fd994471e5589a3d54
+    m_Address: item/overseer-roar
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ed1342e1860b14c1db5e83e6b0db4ee6
+    m_Address: item/mending-chant
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: a299c20a8ef58429d832de7bde7daad2, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: ed90998d506ae4d1ca10151c997ebb05, type: 2}
+    - {fileID: 11400000, guid: f1805e851b9ce407787603729bd51397, type: 2}

@@ -47,12 +47,15 @@ namespace F1.Editor.Setup
             var entries = new List<AddressEntry>();
             AddDataEntries(entries);
             AddUiEntries(entries);
+            AddArtEntries(entries);
             return entries;
         }
 
         static partial void AddDataEntries(List<AddressEntry> entries);
 
         static partial void AddUiEntries(List<AddressEntry> entries);
+
+        static partial void AddArtEntries(List<AddressEntry> entries);
 
         [MenuItem("F1/Setup/Sync Addressables")]
         public static void SyncMenu()

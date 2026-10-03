@@ -31,6 +31,10 @@ namespace F1.Editor.Setup
             DataTransformMenu.Transform();
             LocalizationSetup.Sync();
 
+            // After the data: it names the art. Before the screen prefabs, which hold the sprites of the
+            // interface, and before Addressables: the art's entries need its files imported.
+            ArtSetup.Sync();
+
             // After the data and the UI strings: the atlas holds the characters of both.
             FontSetup.Sync();
             UiPrefabSetup.Sync();
