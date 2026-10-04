@@ -105,6 +105,13 @@ namespace F1.Editor.Setup
         public const string CandleDark = "Icon/candle_dark";
         public const string CandleWarm = "Icon/candle_warm";
 
+        /// <summary>
+        /// The soft ramp of an item's cooldown light (2026-10-04 round 18): white, clear on the left and opaque on the
+        /// right. The item's cell tints and stretches it as the glow behind the front of the charge and as the soft left
+        /// end of the dark. Drawn (Archive/18-cooldown-light/draw_pieces.py).
+        /// </summary>
+        public const string ChargeRamp = "Icon/charge_ramp";
+
         public const string Shield = "Icon/shield";
         public const string Burn = "Icon/burn";
         public const string DeathsDoor = "Icon/deaths_door";
@@ -142,6 +149,7 @@ namespace F1.Editor.Setup
             new Piece(Vignette),
             new Piece(CandleDark),
             new Piece(CandleWarm),
+            new Piece(ChargeRamp),
             new Piece(Shield),
             new Piece(Burn),
             new Piece(DeathsDoor),

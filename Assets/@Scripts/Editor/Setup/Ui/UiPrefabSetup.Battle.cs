@@ -632,39 +632,67 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One item in battle: a cell of the kit that is its own cooldown gauge, with the item's
-        /// icon over the charge in the icon's place (the cell less the margin the icons are drawn
-        /// for), and the name for an item without an icon. A big item is made taller at runtime:
-        /// its cells are stacked.
+        /// One item in battle: a cell of the kit that shows its own cooldown as light (2026-10-04
+        /// round 18). Inside the cell's rim lie, in the order they are drawn: the candle's gold on the
+        /// charged part, the name (for an item without an icon) and the icon in the icon's place (the
+        /// cell less the margin the icons are drawn for), the dark over the part not charged yet with
+        /// its soft left end, the glow and the line at the front of the charge, and the flash when the
+        /// item fires. Before any charge the dark covers the whole cell. A big item is made taller at
+        /// runtime: its cells are stacked.
         /// </summary>
         static BattleItemView BuildBattleItem(Transform parent)
         {
-            // The charge covers the cell from the left, inside its rim.
-            var charge = new Color(UiPalette.Gauge.r, UiPalette.Gauge.g, UiPalette.Gauge.b, CooldownAlpha);
-            UiBar cooldown = KitBar("ItemTemplate", parent, UiArt.Slot, 1f, 7f, charge);
-            cooldown.GetComponent<Image>().raycastTarget = true;
-            UiBuild.Size(cooldown, BattleItemView.CellWidth, BattleItemView.CellHeight);
+            Image cell = KitFrame("ItemTemplate", parent, UiArt.Slot, raycastTarget: true);
+            UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
+            const float rim = BattleItemView.Rim;
+
+            // Under the icon: the gold of the charged part, from the left. Nothing has charged yet.
+            RectTransform under = UiBuild.Rect("ItemUnder", cell.transform);
+            UiBuild.Stretch(under, rim, rim, rim, rim);
+            Image light = UiBuild.Image("ItemLight", under, Tinted(UiPalette.ChargeLight, ChargeTint));
+            UiBuild.Stretch(light.rectTransform);
+            light.rectTransform.anchorMax = new Vector2(0f, 1f);
 
             TextMeshProUGUI name = UiBuild.ShrinkToFit(
-                UiBuild.SingleLine(UiBuild.Label("ItemName", cooldown.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
+                UiBuild.SingleLine(UiBuild.Label("ItemName", cell.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
             UiBuild.Stretch(name.rectTransform, 10f, 0f, 10f, 0f);
 
-            Image icon = UiBuild.Image("ItemIcon", cooldown.transform, Color.white);
+            Image icon = UiBuild.Image("ItemIcon", cell.transform, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
 
-            // The flash over the cell when the item fires, inside the rim. Off until then.
-            Image flash = UiBuild.Image("ItemFlash", cooldown.transform, new Color(1f, 1f, 1f, 0f));
-            UiBuild.Stretch(flash.rectTransform, 6f, 6f, 6f, 6f);
+            // Over the icon: the dark of the part not charged yet (the whole cell at first), its soft left end
+            // (the ramp, clear on its left), and the front of the charge: a glow (the ramp again) and a line.
+            RectTransform over = UiBuild.Rect("ItemOver", cell.transform);
+            UiBuild.Stretch(over, rim, rim, rim, rim);
+            Color dark = Tinted(UiPalette.ChargeDark, BattleItemView.ChargeShade);
+            Image darkFill = UiBuild.Image("ItemDark", over, dark);
+            UiBuild.Stretch(darkFill.rectTransform);
+            Image darkEdge = UiBuild.Image("ItemDarkEdge", over, dark);
+            darkEdge.sprite = UiArt.Load(UiArt.ChargeRamp);
+            darkEdge.enabled = false;
+            Image glow = UiBuild.Image("ItemGlow", over, Tinted(UiPalette.ChargeEdge, FrontGlowAlpha));
+            glow.sprite = UiArt.Load(UiArt.ChargeRamp);
+            glow.enabled = false;
+            Image front = UiBuild.Image("ItemFront", over, Tinted(UiPalette.ChargeEdge, FrontLineAlpha));
+            front.enabled = false;
+
+            // The flash over the whole cell inside its rim when the item fires. Off until then.
+            Image flash = UiBuild.Image("ItemFlash", cell.transform, new Color(1f, 1f, 1f, 0f));
+            UiBuild.Stretch(flash.rectTransform, rim, rim, rim, rim);
             flash.enabled = false;
 
-            var view = cooldown.gameObject.AddComponent<BattleItemView>();
-            UiBuild.SetReference(view, "_cooldown", cooldown);
+            var view = cell.gameObject.AddComponent<BattleItemView>();
+            UiBuild.SetReference(view, "_light", light.rectTransform);
+            UiBuild.SetReference(view, "_dark", darkFill);
+            UiBuild.SetReference(view, "_darkEdge", darkEdge);
+            UiBuild.SetReference(view, "_glow", glow);
+            UiBuild.SetReference(view, "_front", front);
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_flash", flash);
 
-            cooldown.gameObject.SetActive(false);
+            cell.gameObject.SetActive(false);
             return view;
         }
 
@@ -690,12 +718,18 @@ namespace F1.Editor.Setup
             return view;
         }
 
-        /// <summary>An empty item slot: a faint cell, so that the player sees how many slots the unit has.</summary>
+        /// <summary>
+        /// An empty item slot of a battle board: a faint cell as dark inside its rim as an item's before
+        /// it charges (2026-10-04 round 18), so that the player sees how many slots the unit has and only
+        /// what charges lights up.
+        /// </summary>
         static GameObject BuildEmptyCell(Transform parent)
         {
             Image cell = KitFrame("EmptyCellTemplate", parent, UiArt.Slot, raycastTarget: true);
             cell.color = new Color(1f, 1f, 1f, EmptyCellAlpha);
             UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
+            Image dark = UiBuild.Image("EmptyCellDark", cell.transform, Tinted(UiPalette.ChargeDark, BattleItemView.ChargeShade));
+            UiBuild.Stretch(dark.rectTransform, BattleItemView.Rim, BattleItemView.Rim, BattleItemView.Rim, BattleItemView.Rim);
             cell.gameObject.SetActive(false);
             return cell.gameObject;
         }

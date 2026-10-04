@@ -28,8 +28,14 @@ namespace F1.UI
         public static readonly Color Enemy = Rgb(0x70, 0x35, 0x2C);
         public static readonly Color Shield = Rgb(0x8F, 0xD3, 0xF4);
         public static readonly Color Burn = Rgb(0xF3, 0x9C, 0x12);
-        /// <summary>The charge of an item's cell: dried blood on the bone cell (2026-10-04 Diablo kit).</summary>
-        public static readonly Color Gauge = Rgb(0x8C, 0x3A, 0x2C);
+        /// <summary>
+        /// The cooldown of an item's cell as light (2026-10-04 round 18, the candle's gold): the smoky dark over the part
+        /// not charged yet (and over an empty cell of a battle board), the gold on the charged part of the cell, and the
+        /// gold of the line and the glow at the front of the charge.
+        /// </summary>
+        public static readonly Color ChargeDark = Rgb(0x1E, 0x10, 0x06);
+        public static readonly Color ChargeLight = Rgb(0xFF, 0xB8, 0x48);
+        public static readonly Color ChargeEdge = Rgb(0xFF, 0xCE, 0x68);
         public static readonly Color Dead = Rgb(0x33, 0x33, 0x38);
         public static readonly Color Line = Rgb(0x55, 0x5C, 0x6B);
         /// <summary>The brass of the art: the row badge of a unit's plate, and the gold of the Diablo kit's titles and map paths.</summary>

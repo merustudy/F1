@@ -845,6 +845,87 @@ namespace F1.Tests
             Assert.AreEqual(candle.Darkness, candle.DarknessAtFlame, 0.01f, "Once the light has faded the stage is dark everywhere.");
         }
 
+        /// <summary>
+        /// An item's cooldown is light (2026-10-04 round 18): a cell is dark until its item charges, the dark withdraws from
+        /// the left as far as the item has charged (the candle's gold of the charged part reaches as far, and the front of the
+        /// charge shows between them), and the flash of a firing lights the cell while the dark comes back. A cell whose
+        /// item does not charge stays dark, and so do the empty cells of a battle board.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_ItemCells_StartDark_AndLightUpFromTheLeftAsTheyCharge()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+
+            // 0.7 s in, before any item's first firing (every cooldown is longer): each working item is lit as far as it has charged.
+            Managers.Expedition.AdvanceBattle(700 - engine.TimeMs);
+            yield return null;
+            BattleBoardView[] boards = UiTestUtil.Views<BattleBoardView>(battle);
+            int charging = 0;
+            foreach (BattleBoardView board in boards)
+            {
+                for (int i = 0; i < board.Items.Count; i++)
+                {
+                    BattleItemState item = board.Unit.Items[i];
+                    BattleItemView cell = board.Items[i];
+                    string name = item.Equipped.Item.Id;
+                    float charge = item.Active ? 1f - (float)(item.NextFireMs - engine.TimeMs) / item.CooldownMs : 0f;
+                    Assert.AreEqual(charge, cell.Charge, 0.001f, name);
+                    Assert.AreEqual(charge, cell.LitTo, 0.001f, $"The gold of {name} reaches as far as it has charged.");
+                    Assert.AreEqual(charge, cell.DarkFrom, 0.001f, $"The dark of {name} begins where the gold ends.");
+                    Assert.AreEqual(charge > 0f, cell.ShowsFront, name);
+                    Assert.AreEqual(BattleItemView.ChargeShade, cell.Darkness, 0.001f, name);
+                    if (charge > 0f)
+                    {
+                        charging++;
+                    }
+                }
+            }
+
+            Assert.Greater(charging, 0, "Items charge in the first seconds.");
+
+            // Right after a firing the cell is dark all over; at the moment of the next it is fully lit; while its owner is down it stays dark.
+            BattleBoardView partyBoard = boards.First(b => b.Unit.Side == BattleSide.Party && b.Items.Count > 0);
+            BattleItemState first = partyBoard.Unit.Items[0];
+            BattleItemView firstCell = partyBoard.Items[0];
+            firstCell.Render(first.NextFireMs - first.CooldownMs, ownerAlive: true);
+            Assert.AreEqual(0f, firstCell.DarkFrom, 0.001f, "Nothing charged: the dark covers the whole cell.");
+            Assert.AreEqual(0f, firstCell.LitTo, 0.001f);
+            firstCell.Render(first.NextFireMs, ownerAlive: true);
+            Assert.AreEqual(1f, firstCell.DarkFrom, 0.001f, "Fully charged: the dark is gone.");
+            Assert.IsFalse(firstCell.ShowsFront);
+            firstCell.Render(engine.TimeMs, ownerAlive: false);
+            Assert.AreEqual(0f, firstCell.DarkFrom, 0.001f, "An item that does not charge leaves its cell dark.");
+            Assert.IsFalse(firstCell.ShowsFront);
+
+            // A firing: the cell is lit under the flash, and the dark comes back as the flash fades.
+            firstCell.Pulse();
+            Assert.AreEqual(0f, firstCell.Darkness, 0.001f);
+            yield return new WaitForSeconds(0.4f);
+            Assert.AreEqual(BattleItemView.ChargeShade, firstCell.Darkness, 0.001f);
+
+            // The empty cells of a battle board are as dark as a cell that has not charged.
+            int empty = 0;
+            foreach (BattleBoardView board in boards)
+            {
+                foreach (Transform child in UiTestUtil.At(board, "BoardCells"))
+                {
+                    if (child.gameObject.activeSelf && child.name.StartsWith("EmptyCellTemplate"))
+                    {
+                        Image dark = child.Find("EmptyCellDark").GetComponent<Image>();
+                        Assert.AreEqual(BattleItemView.ChargeShade, dark.color.a, 0.001f);
+                        Assert.AreEqual(UiPalette.ChargeDark.r, dark.color.r, 0.001f);
+                        empty++;
+                    }
+                }
+            }
+
+            Assert.Greater(empty, 0, "A mercenary has more cells than items.");
+        }
+
         [UnityTest]
         public IEnumerator Battle_IsFoughtInFrontOfTheBackgroundTheDungeonNames()
         {

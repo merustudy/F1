@@ -49,8 +49,14 @@ namespace F1.Editor.Setup
         /// </summary>
         const float QuietCellTint = 0.8f;
 
-        /// <summary>How strongly the charge of an item covers its cell.</summary>
-        const float CooldownAlpha = 0.84f;
+        /// <summary>
+        /// The cooldown's light (2026-10-04 round 18): how strongly the candle's gold lies on the charged
+        /// part of a cell (under the icon), and the glow and the line at the front of the charge. How dark
+        /// the part not charged yet is belongs to the view, which brings it back after a flash (BattleItemView).
+        /// </summary>
+        const float ChargeTint = 0.22f;
+        const float FrontGlowAlpha = 0.45f;
+        const float FrontLineAlpha = 0.9f;
 
         /// <summary>The parts of a plate that a view fills in. The state line is left to the caller.</summary>
         struct PlateParts
@@ -60,6 +66,12 @@ namespace F1.Editor.Setup
             public TextMeshProUGUI Name;
             public TextMeshProUGUI Hp;
             public UiBar HpBar;
+        }
+
+        /// <summary>A colour of the palette at this alpha.</summary>
+        static Color Tinted(Color color, float alpha)
+        {
+            return new Color(color.r, color.g, color.b, alpha);
         }
 
         /// <summary>A frame of the kit, stretched to wherever the caller puts it.</summary>
