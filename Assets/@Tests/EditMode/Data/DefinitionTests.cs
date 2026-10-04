@@ -249,6 +249,20 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Poses_AreTheFigureAddressUnderPose_WithThePose_OrNullWithoutAFigure()
+        {
+            LocalizedText name = TestData.Text("x");
+            var job = new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x");
+
+            Assert.AreEqual("pose/job/x-attack", job.AttackPose);
+            Assert.AreEqual("pose/job/x-hit", job.HitPose);
+            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).AttackPose, "No pose without a figure.");
+            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).HitPose);
+            Assert.AreEqual("pose/job/goblin-raider-hit", ArtAddress.PoseOf("unit/job/goblin-raider", ArtAddress.Hit));
+            Assert.IsNull(ArtAddress.PoseOf(null, ArtAddress.Attack));
+        }
+
+        [Test]
         public void EnemyGroupData_BossGroupsHaveFloorZero_OthersHaveARange()
         {
             string[] one = { "rat" };

@@ -117,6 +117,31 @@ namespace F1.Tests
             }
         }
 
+        /// <summary>
+        /// The items are classed as the design says (Docs/Design/02_Combat_System.md §4, 2026-10-04): every job's own weapon is a
+        /// weapon (the bishop's healing staff too), the buckler is defensive gear, the flask and the spit are attacks that are not
+        /// weapons, and the charm, the pouch and the chant are support items.
+        /// </summary>
+        [Test]
+        public void ShippedItems_AreClassedAsDecided()
+        {
+            StaticData data = LoadShipped();
+
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                Assert.AreEqual(ItemCategory.Weapon, data.Items.Get(job.WeaponItemId).Category, job.Id);
+            }
+
+            Assert.AreEqual(ItemCategory.Weapon, data.Items.Get("healing_staff").Category);
+            Assert.AreEqual(ItemCategory.Armor, data.Items.Get("buckler").Category);
+            Assert.AreEqual(ItemCategory.Attack, data.Items.Get("ember_flask").Category);
+            Assert.AreEqual(ItemCategory.Attack, data.Items.Get("hex_spit").Category);
+            foreach (string support in new[] { "ward_charm", "herb_pouch", "mending_chant" })
+            {
+                Assert.AreEqual(ItemCategory.Support, data.Items.Get(support).Category, support);
+            }
+        }
+
         static StaticData LoadShipped()
         {
             StaticDataFileStore store = DataTransformMenu.CreateStore();

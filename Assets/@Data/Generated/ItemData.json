@@ -7,7 +7,7 @@
         "en-US": "Buckler",
         "ko-KR": "버클러"
       },
-      "Category": "Support",
+      "Category": "Armor",
       "Size": 1,
       "CooldownMs": 5000,
       "Rows": {
@@ -79,7 +79,7 @@
         "en-US": "Ember Flask",
         "ko-KR": "불씨 플라스크"
       },
-      "Category": "Support",
+      "Category": "Attack",
       "Size": 1,
       "CooldownMs": 4500,
       "Rows": {
@@ -175,7 +175,7 @@
         "en-US": "Healing Staff",
         "ko-KR": "치유의 지팡이"
       },
-      "Category": "Support",
+      "Category": "Weapon",
       "Size": 1,
       "CooldownMs": 4000,
       "Rows": {
@@ -223,7 +223,7 @@
         "en-US": "Hex Spit",
         "ko-KR": "저주의 침"
       },
-      "Category": "Support",
+      "Category": "Attack",
       "Size": 1,
       "CooldownMs": 3800,
       "Rows": {

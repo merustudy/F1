@@ -18,11 +18,26 @@ namespace F1.Data
         }
     }
 
+    /// <summary>
+    /// What an item is (Docs/Design/02_Combat_System.md §4). The rules ask only whether it is a weapon; the battle screen
+    /// moves the owner by it (Docs/Design/10_Art_Direction.md §5).
+    /// </summary>
     public enum ItemCategory
     {
-        /// <summary>"Weapon hit" and "weapon power" passives apply to these.</summary>
+        /// <summary>A weapon held in the hand: a sword, a bow, a staff. "Weapon hit" and "weapon power" passives apply to its damage.</summary>
         Weapon,
+
+        /// <summary>A healing or helping item: it heals or strengthens (a charm, a pouch of herbs).</summary>
         Support,
+
+        /// <summary>Defensive gear: a shield, and later armour.</summary>
+        Armor,
+
+        /// <summary>An attack that is not a weapon: something thrown or spat.</summary>
+        Attack,
+
+        /// <summary>Anything else.</summary>
+        Other,
     }
 
     public enum EffectKind

@@ -22,6 +22,7 @@ data/app/<name>
 ui/app/<name>        ui/lobby/<name>        ui/expedition/<name>
 unit/job/<key>       unit/enemy/<key>          # 유닛의 전신 그림. key는 Data Id의 `_`를 `-`로 바꾼 것
 face/job/<key>       face/enemy/<key>          # 유닛의 얼굴. 전신 그림에서 잘라 낸 것이라 전신 그림이 있는 유닛마다 있다 (ArtAddress.FaceOf)
+pose/job/<key>-attack  pose/job/<key>-hit      # 용병의 공격·피격 자세. 전신 그림이 확정되면 그려 더하므로 전신 그림이 있는 직업마다 있다 (ArtAddress.PoseOf)
 background/dungeon/<key>                       # 던전의 배경
 item/<key>                                     # 아이템의 아이콘
 potion/<key>                                   # 포션의 병 아이콘

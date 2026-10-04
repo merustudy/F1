@@ -3,20 +3,20 @@ sword,소드,Sword,Weapon,1,2900,front:2,Damage,EnemyFront,1,100,,,,,0,item/swor
 longsword,롱소드,Longsword,Weapon,1,3000,front:2,Damage,EnemyFront,1,110,,,,,0,item/longsword
 greataxe,대도끼,Greataxe,Weapon,1,3600,front:1,Damage,EnemyFront,1,190,,,,,0,item/greataxe
 mace,메이스,Mace,Weapon,1,3200,front:2,Damage,EnemyFront,1,100,Shield,Self,,40,0,item/mace
-healing_staff,치유의 지팡이,Healing Staff,Support,1,4000,back:3,Heal,AllyLowestHp,,100,,,,,0,item/healing-staff
+healing_staff,치유의 지팡이,Healing Staff,Weapon,1,4000,back:3,Heal,AllyLowestHp,,100,,,,,0,item/healing-staff
 fire_staff,화염 지팡이,Fire Staff,Weapon,1,3500,back:3,Damage,EnemyAll,,110,,,,,0,item/fire-staff
 dagger,단검,Dagger,Weapon,1,1500,front:2,Damage,EnemyFront,1,45,,,,,10,item/dagger
 longbow,장궁,Longbow,Weapon,2,3000,back:3,Damage,EnemyBack,2,85,,,,,10,item/longbow
 spear,창,Spear,Weapon,2,3200,front:2,Damage,EnemyFront,2,85,,,,,10,item/spear
 halberd,미늘창,Halberd,Weapon,3,3600,front:1,Damage,EnemyFront,3,80,,,,,10,item/halberd
-buckler,버클러,Buckler,Support,1,5000,front:1,Shield,Self,,80,,,,,10,item/buckler
+buckler,버클러,Buckler,Armor,1,5000,front:1,Shield,Self,,80,,,,,10,item/buckler
 ward_charm,수호 부적,Ward Charm,Support,1,6000,all,Shield,AllyLowestHp,,70,,,,,10,item/ward-charm
 herb_pouch,약초 주머니,Herb Pouch,Support,1,5000,all,Heal,Self,,60,,,,,10,item/herb-pouch
-ember_flask,불씨 플라스크,Ember Flask,Support,1,4500,all,Burn,EnemyFront,1,25,,,,,8,item/ember-flask
+ember_flask,불씨 플라스크,Ember Flask,Attack,1,4500,all,Burn,EnemyFront,1,25,,,,,8,item/ember-flask
 rat_bite,물어뜯기,Bite,Weapon,1,2000,front:2,Damage,EnemyFront,1,100,,,,,0,item/rat-bite
 rusty_blade,녹슨 칼,Rusty Blade,Weapon,1,2800,front:2,Damage,EnemyFront,1,100,,,,,0,item/rusty-blade
 crude_bow,조잡한 활,Crude Bow,Weapon,1,3400,back:3,Damage,EnemyBack,1,90,,,,,0,item/crude-bow
-hex_spit,저주의 침,Hex Spit,Support,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0,item/hex-spit
+hex_spit,저주의 침,Hex Spit,Attack,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0,item/hex-spit
 mending_chant,치유 주문,Mending Chant,Support,1,5500,back:3,Heal,AllyLowestHp,,100,,,,,0,item/mending-chant
 overseer_maul,감독관의 망치,Overseer's Maul,Weapon,1,4500,front:2,Damage,EnemyFront,1,150,,,,,0,item/overseer-maul
 overseer_roar,감독관의 포효,Overseer's Roar,Weapon,1,6000,front:2,Damage,EnemyAll,,60,,,,,0,item/overseer-roar

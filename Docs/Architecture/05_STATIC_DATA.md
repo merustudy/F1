@@ -74,6 +74,9 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:1
 - 다른 열의 값에 따라 비워 두는 칸은 Mapper가 Optional로 읽고, 채워야 하는지는 Definition 생성자가 검증한다
   (효과의 `Reach`는 앞이나 뒤에서 세는 타깃에만 있다).
 - 그림을 가리키는 열(`JobData`와 `EnemyData`의 `Figure`, `DungeonData`의 `Background`, `ItemData`와 `PotionData`의 `Icon`)에는 그 그림의 Logical Address를 적는다(`04_RESOURCES_ADDRESSABLES.md`).
+  얼굴과 용병의 공격·피격 자세는 열이 없다: `Figure`에서 주소가 따라 나온다(`JobData.Face`, `AttackPose`, `HitPose`. `ArtAddress`).
+- `ItemData.Category`는 아이템의 분류 다섯이다: `Weapon`(무기 장비), `Armor`(방어 장비), `Attack`(공격 아이템), `Support`(지원 아이템: 회복·버프), `Other`(기타 아이템) (Design/02 §4).
+  규칙은 `Weapon`인지만 본다(무기 패시브는 무기 장비의 피해에만). 전투 화면은 분류로 주인을 움직인다(`12_UI.md` "연출").
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
