@@ -22,15 +22,16 @@ namespace F1.UI
     /// move when the unit advances. The dead leave the stage and the panel. The event log is not
     /// shown while the battle runs; the result panel opens a viewer with the whole log. What
     /// happens is played as it happens (<see cref="BattlePresenter"/>): numbers rise, units lunge
-    /// and recoil, cells flash, the storm's clock between the two sides of the panel fills and
-    /// darkens the stage, and the last few events read as captions in the header.
+    /// and recoil, cells flash, the storm candle between the two sides of the panel burns down
+    /// while its light on the stage goes down with it and pulls in, and goes out with the storm,
+    /// and the last few events read as captions in the header.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
         /// <summary>Lines per text of the log viewer: a long log is split over several texts.</summary>
         const int LogLinesPerChunk = 40;
 
-        /// <summary>The stage darkens over this long before the storm, until it is here.</summary>
+        /// <summary>The candle's flame gutters and its light pulls in over this long before the storm, until it is here.</summary>
         const int StormDuskMs = 10000;
 
         static readonly int[] Speeds = { 100, 200, 400 };
@@ -100,7 +101,6 @@ namespace F1.UI
         /// <summary>How many events of the log the presenter has passed.</summary>
         public int PlayedEvents => _presenter == null ? 0 : _presenter.Played;
 
-        /// <summary>How far the storm's ring has filled: 0 at the start, 1 when the storm is here.</summary>
         /// <summary>How far the storm has come, 0..1: the share of the storm candle that has burnt.</summary>
         public float StormProgress => _candle.Progress;
 
@@ -427,8 +427,8 @@ namespace F1.UI
 
         /// <summary>
         /// The battle time under the candle, and the storm: the candle burns down until the storm is
-        /// here, when it goes out and the label says what the next tick takes. The flame gutters and the
-        /// stage darkens over the last seconds before the storm.
+        /// here, when it goes out and the label says what the next tick takes. The flame gutters and
+        /// its light on the stage pulls in over the last seconds before the storm.
         /// </summary>
         void RenderClock(BattleEngine engine, BalanceData balance)
         {
@@ -440,7 +440,6 @@ namespace F1.UI
                 ? UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage)
                 : UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs));
             _clockLabel.color = storm ? UiPalette.Burn : UiPalette.TextDim;
-            _fx.SetStorm(closeness);
         }
 
         /// <summary>

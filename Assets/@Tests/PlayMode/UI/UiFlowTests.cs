@@ -795,15 +795,54 @@ namespace F1.Tests
             Assert.AreEqual(engine.Events.Count(e => e.Kind == BattleEventKind.StormTicked), 0, "No storm yet.");
             Assert.IsFalse(battle.Fx.DangerShown);
 
-            // The storm: the candle has burnt down and gone out, the stage is dark, and a tick flashes and names its damage.
+            // The storm: the candle has burnt down and gone out (how the stage darkens: Battle_StageIsLitByTheCandle...).
             Managers.Expedition.AdvanceBattle(engine.Setup.Balance.StormStartMs - engine.TimeMs + engine.Setup.Balance.StormTickMs);
             yield return null;
             if (!Managers.Expedition.Battle.IsFinished)
             {
                 Assert.AreEqual(1f, battle.StormProgress, 0.001f);
                 Assert.IsFalse(battle.Candle.Lit, "The candle is out once the storm is here.");
-                Assert.AreEqual(1f, battle.Fx.StormDarkness, 0.001f);
             }
+        }
+
+        /// <summary>
+        /// The stage is lit by the storm candle alone (2026-10-04 mockup B): the light stands on the flame and goes down
+        /// with it as the candle burns, pulls in over the storm's last seconds, and once the storm has put the flame out the
+        /// whole stage is as dark as where the light never reached. The battle is staged to last past the storm.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_StageIsLitByTheCandle_UntilTheStormPutsItOut()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterALongFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            BalanceData balance = engine.Setup.Balance;
+            CandleView candle = battle.Candle;
+
+            Managers.Expedition.AdvanceBattle(1000 - engine.TimeMs);
+            yield return null;
+            Assert.IsTrue(candle.Lit);
+            Assert.AreEqual(0f, candle.DarknessAtFlame, 0.001f, "The stage is lit around the flame.");
+            Assert.Greater(candle.Darkness, 0.5f, "Beyond the light the stage is dark.");
+            Assert.AreEqual(1f, candle.LightReach, 0.001f, "The light has its full reach while the storm is far.");
+            float early = candle.LightPosition.y;
+
+            // Five seconds before the storm: the candle has burnt down, so the light stands lower, and it has pulled in.
+            Managers.Expedition.AdvanceBattle(balance.StormStartMs - 5000 - engine.TimeMs);
+            yield return null;
+            Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The staged battle lasts until the storm.");
+            Assert.IsTrue(candle.Lit);
+            Assert.Less(candle.LightPosition.y, early, "The light goes down with the flame.");
+            Assert.Less(candle.LightReach, 1f, "The light pulls in as the storm nears.");
+            Assert.AreEqual(0f, candle.DarknessAtFlame, 0.001f);
+
+            // The storm puts the flame out; the light fades, and the stage is as dark everywhere as it was beyond the light.
+            Managers.Expedition.AdvanceBattle(balance.StormStartMs + balance.StormTickMs - engine.TimeMs);
+            yield return new WaitForSeconds(0.6f);
+            Assert.AreEqual(BattleResult.Ongoing, engine.Result);
+            Assert.IsFalse(candle.Lit, "The storm puts the candle out.");
+            Assert.AreEqual(candle.Darkness, candle.DarknessAtFlame, 0.01f, "Once the light has faded the stage is dark everywhere.");
         }
 
         [UnityTest]

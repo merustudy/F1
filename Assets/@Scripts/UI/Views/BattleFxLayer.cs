@@ -7,8 +7,9 @@ namespace F1.UI
     /// <summary>
     /// What the battle shows on top of the stage and the panel when something happens: numbers
     /// and words that rise from a unit, the ghost of a fallen unit fading away, a flash of
-    /// lightning, the darkness the storm brings to the stage, the red at its edges while an ally
-    /// is at death's door, and the shake of the stage under a heavy hit. It decides nothing: the
+    /// lightning, the red at the stage's edges while an ally is at death's door, and the shake of
+    /// the stage under a heavy hit. (The darkness the storm brings is the storm candle's: its light
+    /// pulls in and goes out, CandleView.) It decides nothing: the
     /// presenter reads the event log and calls it (Docs/Architecture/12_UI.md, "연출"). Nothing
     /// here takes a click.
     /// </summary>
@@ -18,7 +19,6 @@ namespace F1.UI
         const float FlashFall = 11f;
         const float GhostLife = 0.55f;
         const float GhostSink = 26f;
-        const float StormDarknessMax = 0.5f;
         const float DangerPulse = 2.4f;
         const float DangerAlphaMin = 0.16f;
         const float DangerAlphaMax = 0.42f;
@@ -31,7 +31,6 @@ namespace F1.UI
         [SerializeField] FloatingTextView _floatingTemplate;
         [SerializeField] Image _ghostTemplate;
         [SerializeField] Image _flash;
-        [SerializeField] Image _stormVignette;
         [SerializeField] Image _dangerVignette;
         [SerializeField] RectTransform _shaken;
 
@@ -43,7 +42,6 @@ namespace F1.UI
         Vector2 _shakeBase;
         bool _shaking;
         float _flashAlpha;
-        float _storm;
         bool _danger;
         float _dangerPhase;
 
@@ -64,9 +62,6 @@ namespace F1.UI
 
         /// <summary>How many texts have risen since the screen opened.</summary>
         public int FloatingPlayed { get; private set; }
-
-        /// <summary>How dark the storm has made the stage: 0 (none) to 1 (the storm is here).</summary>
-        public float StormDarkness => _storm;
 
         /// <summary>True while the red at the edges says an ally is at death's door.</summary>
         public bool DangerShown => _danger;
@@ -163,14 +158,6 @@ namespace F1.UI
             }
 
             _shake = Mathf.Max(_shake, amplitude);
-        }
-
-        /// <summary>How close the storm is: 0 is far, 1 is here. The stage darkens with it.</summary>
-        public void SetStorm(float closeness)
-        {
-            _storm = Mathf.Clamp01(closeness);
-            _stormVignette.color = new Color(0f, 0f, 0f, StormDarknessMax * _storm);
-            _stormVignette.enabled = _storm > 0.001f;
         }
 
         public void SetDanger(bool danger)

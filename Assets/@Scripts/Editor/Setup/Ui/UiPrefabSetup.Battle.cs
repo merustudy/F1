@@ -17,7 +17,8 @@ namespace F1.Editor.Setup
         /// frame; the screen sets the columns' places and widths when it opens (FieldLayout). The
         /// board panel has one column per row on each side, right under the stage's column of that
         /// row: the unit's item cells stacked on a bag (2026-10-03 mockup V, after the lines of
-        /// mockups A, E and G). The storm clock stands between the two sides.
+        /// mockups A, E and G). The storm clock stands between the two sides. The stage is lit by the
+        /// storm candle alone: right over the background lies its light, a half disc around the flame.
         /// </summary>
         const float BattleFieldLeft = 120f;
         /// <summary>The stage stands high enough for the panel of eight stacked cells under it (mockup V: 56 higher than before).</summary>
@@ -74,6 +75,27 @@ namespace F1.Editor.Setup
         const float CandleFlameWidth = 26f;
         const float CandleFlameHeight = 48f;
         const float CandleGlowSize = 280f;
+
+        /// <summary>The colour of the candle's light: the glow behind the flame and its warm light on the stage.</summary>
+        static readonly Color CandleLight = new Color(1f, 0.78f, 0.42f);
+        const float CandleGlowAlpha = 0.45f;
+
+        /// <summary>
+        /// The candle's light on the stage (2026-10-04 mockup B, ArtPipeline/Archive/16-candle-light): the stage is lit in a
+        /// half disc around the flame and darkens with the distance from it, as the torch lights the corridor in Darkest
+        /// Dungeon. Two drawn layers lie right over the background and under everything else, clipped to the stage's box:
+        /// the darkness (clear near the flame, full from LightReach on; its sprite spans twice the reach on every side so
+        /// that it still covers the stage when the light pulls in) and the candle's warm light on the background (gone by
+        /// LightWarmReach). The half disc is LightWide times as wide as it is high, for the stage is wide and low. Their
+        /// strengths are the layers' alphas (blended in linear light like the rest of the UI). A third layer covers the
+        /// whole stage once the candle is out. CandleView keeps the light on the flame and pulls it in and puts it out.
+        /// </summary>
+        const float LightReach = 800f;
+        const float LightWide = 1.35f;
+        const float LightWarmReach = 620f;
+        const float LightDarkness = 0.88f;
+        const float LightWarmth = 0.16f;
+
         const float ClockTimeTop = CandleTop + CandleHeight + 2f;
         const float StormLineTop = ClockTimeTop + 42f;
         const float StormLineWidth = FieldLayout.SideGap;
@@ -88,7 +110,7 @@ namespace F1.Editor.Setup
         const float TitlePlateWidth = 330f;
         const float TitlePlateHeight = 76f;
 
-        /// <summary>The stage's box the storm's dusk, the red of death's door and the lightning cover: from under the header to the panel.</summary>
+        /// <summary>The stage's box the candle's light, the red of death's door and the lightning cover: from under the header to the panel.</summary>
         const float StageFxTop = 84f;
         const float StageFxHeight = BoardPanelTop - StageFxTop;
 
@@ -105,6 +127,9 @@ namespace F1.Editor.Setup
             Image background = UiBuild.Image("Background", frame, Color.white);
             UiBuild.Box(background, 0f, BattleFieldTop + BattleFloorY - BattleBackgroundFloor * BattleBackgroundHeight, BattleBackgroundWidth, BattleBackgroundHeight);
             background.enabled = false;
+
+            // The candle's light, right over the background and under everything else; the candle keeps it on its flame.
+            StageLightParts stageLight = BuildStageLight(frame);
 
             // Header: retreat and the dungeon with its floor on the left, the captions in the middle, pause and
             // speed on the right. The battle time and the storm are on the clock in the middle of the board panel.
@@ -184,7 +209,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(KitIcon("ChainLeft", panel.transform, UiArt.Chain), 48f, 20f, 24f, 140f);
             UiBuild.Box(KitIcon("ChainRight", panel.transform, UiArt.Chain), 1848f, 20f, 24f, 140f);
             UiBuild.Box(KitIcon("Skulls", panel.transform, UiArt.Skulls), 1500f, 340f, 120f, 70f);
-            CandleView candle = BuildCandle(panel.transform);
+            CandleView candle = BuildCandle(panel.transform, stageLight);
             var partyBoards = new RectTransform[BattleRows.Count];
             var enemyBoards = new RectTransform[BattleRows.Count];
             for (int i = 0; i < BattleRows.Count; i++)
@@ -214,15 +239,11 @@ namespace F1.Editor.Setup
             // The gloom over the whole screen, under the fx and the result.
             BuildScreenVignette(frame);
 
-            // The fx layer over the stage and the panel: the storm's dusk, the red of death's door and the
-            // lightning over the stage's box, and the numbers and ghosts anywhere. Built before the result so
-            // that the result is drawn over it. Nothing in it takes a click.
+            // The fx layer over the stage and the panel: the red of death's door and the lightning over the
+            // stage's box, and the numbers and ghosts anywhere. Built before the result so that the result is
+            // drawn over it. Nothing in it takes a click. (The storm darkens the stage through the candle's light.)
             RectTransform fx = UiBuild.Rect("Fx", frame);
             UiBuild.Stretch(fx);
-            Image stormVignette = UiBuild.Image("StormVignette", fx, new Color(0f, 0f, 0f, 0f));
-            stormVignette.sprite = UiArt.Load(UiArt.Vignette);
-            UiBuild.Box(stormVignette, 0f, StageFxTop, 1920f, StageFxHeight);
-            stormVignette.enabled = false;
             Image dangerVignette = UiBuild.Image("DangerVignette", fx, new Color(UiPalette.Danger.r, UiPalette.Danger.g, UiPalette.Danger.b, 0f));
             dangerVignette.sprite = UiArt.Load(UiArt.Vignette);
             UiBuild.Box(dangerVignette, 0f, StageFxTop, 1920f, StageFxHeight);
@@ -238,7 +259,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(fxLayer, "_floatingTemplate", floatingTemplate);
             UiBuild.SetReference(fxLayer, "_ghostTemplate", ghostTemplate);
             UiBuild.SetReference(fxLayer, "_flash", flash);
-            UiBuild.SetReference(fxLayer, "_stormVignette", stormVignette);
             UiBuild.SetReference(fxLayer, "_dangerVignette", dangerVignette);
             UiBuild.SetReference(fxLayer, "_shaken", field);
 
@@ -320,7 +340,7 @@ namespace F1.Editor.Setup
         /// top, the flame over it with its light behind it, and the smoke that rises once the candle is out. CandleView
         /// moves and animates them.
         /// </summary>
-        static CandleView BuildCandle(Transform panel)
+        static CandleView BuildCandle(Transform panel, StageLightParts light)
         {
             RectTransform root = UiBuild.Box(UiBuild.Rect("Candle", panel), 960f - CandleWidth / 2f, CandleTop, CandleWidth, CandleHeight);
 
@@ -341,7 +361,7 @@ namespace F1.Editor.Setup
             RectTransform flame = UiBuild.Rect("CandleFlame", root);
             UiBuild.Place(flame, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, CandleBodyBottom + CandleBodyHeight), new Vector2(CandleFlameWidth, CandleFlameHeight));
             Image glow = KitIcon("CandleGlow", flame, UiArt.Glow);
-            glow.color = new Color(1f, 0.78f, 0.42f, 0.45f);
+            glow.color = new Color(CandleLight.r, CandleLight.g, CandleLight.b, CandleGlowAlpha);
             UiBuild.Place(glow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(CandleGlowSize, CandleGlowSize));
             Image flameArt = KitIcon("CandleFlameArt", flame, UiArt.CandleFlame);
             UiBuild.Stretch(flameArt.rectTransform);
@@ -356,7 +376,58 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_flame", flame);
             UiBuild.SetReference(view, "_glow", glow);
             UiBuild.SetReference(view, "_smoke", smoke);
+            UiBuild.SetReference(view, "_light", light.Light);
+            UiBuild.SetReference(view, "_lightDark", light.Dark);
+            UiBuild.SetReference(view, "_lightWarm", light.Warm);
+            UiBuild.SetReference(view, "_lightOut", light.Out);
             return view;
+        }
+
+        /// <summary>The parts of the candle's light on the stage, which the candle drives.</summary>
+        readonly struct StageLightParts
+        {
+            public StageLightParts(RectTransform light, Image dark, Image warm, Image @out)
+            {
+                Light = light;
+                Dark = dark;
+                Warm = warm;
+                Out = @out;
+            }
+
+            /// <summary>A point the candle keeps on its flame; the darkness and the warm light stand on it.</summary>
+            public RectTransform Light { get; }
+            public Image Dark { get; }
+            public Image Warm { get; }
+
+            /// <summary>The dark over the whole stage once the candle is out.</summary>
+            public Image Out { get; }
+        }
+
+        /// <summary>
+        /// The candle's light: a box as large as the stage that clips what is in it, holding the light (the darkness and the
+        /// warm light, each the upper half of a disc whose middle is the light's point) and the dark that covers the whole
+        /// stage once the candle is out. The candle puts the point on its flame when the screen draws it.
+        /// </summary>
+        static StageLightParts BuildStageLight(Transform frame)
+        {
+            RectTransform stage = UiBuild.Box(UiBuild.Rect("StageLight", frame), 0f, StageFxTop, 1920f, StageFxHeight);
+            stage.gameObject.AddComponent<RectMask2D>();
+
+            RectTransform light = UiBuild.Rect("CandleLight", stage);
+            UiBuild.Place(light, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, Vector2.zero);
+
+            Image dark = UiBuild.Image("LightDark", light, new Color(0f, 0f, 0f, LightDarkness));
+            dark.sprite = UiArt.Load(UiArt.CandleDark);
+            UiBuild.Place(dark.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(4f * LightReach * LightWide, 2f * LightReach));
+
+            Image warm = UiBuild.Image("LightWarm", light, new Color(CandleLight.r, CandleLight.g, CandleLight.b, LightWarmth));
+            warm.sprite = UiArt.Load(UiArt.CandleWarm);
+            UiBuild.Place(warm.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(2f * LightWarmReach * LightWide, LightWarmReach));
+
+            Image lightOut = UiBuild.Image("LightOut", stage, new Color(0f, 0f, 0f, 0f));
+            UiBuild.Stretch(lightOut.rectTransform);
+            lightOut.enabled = false;
+            return new StageLightParts(light, dark, warm, lightOut);
         }
 
         /// <summary>One row of a side: a column that holds the row's unit. The unit takes the width of the column.</summary>

@@ -271,6 +271,33 @@ namespace F1.Tests
             yield return WaitForRedraw();
         }
 
+        /// <summary>
+        /// From the title: a new run, a full party, and the first node's battle entered (and left paused), staged to last
+        /// past the storm: the party carries no item, so it cannot end the battle, and has so much HP that the enemy cannot
+        /// end it either before the storm has come.
+        /// </summary>
+        public static IEnumerator EnterALongFirstBattle()
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            FillParty(Screen<LobbyScreen>());
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+
+            foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
+            {
+                member.Items.Clear();
+                member.MaxHp = 100000;
+                member.Hp = member.MaxHp;
+            }
+
+            NodeMapScreen map = Screen<NodeMapScreen>();
+            Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            Click(map, "Frame/BoardPanel/Enter");
+            yield return WaitForScreen(ScreenId.Battle);
+            Screen<BattleScreen>().Clock.Paused = true;
+        }
+
         /// <summary>Runs the shown battle to its end without input and returns to the phase after it.</summary>
         public static IEnumerator FinishBattle()
         {

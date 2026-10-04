@@ -94,8 +94,16 @@ namespace F1.Editor.Setup
         public const string NodeBattle = "Icon/node_battle";
         public const string NodeBoss = "Icon/node_boss";
 
-        /// <summary>A soft darkening towards the edges, stretched over the stage (the storm's dusk, the red of death's door) and over the whole screen (the Diablo kit's gloom). Drawn (Archive/09-battle-ui-feel/draw_pieces.py).</summary>
+        /// <summary>A soft darkening towards the edges, clear in the middle, stretched over the stage (the red of death's door) and over the whole screen (the Diablo kit's gloom). Drawn (Archive/16-candle-light/draw_pieces.py, which turned round 09's inside-out ramp the right way).</summary>
         public const string Vignette = "Icon/vignette";
+
+        /// <summary>
+        /// The candle's light on the stage (2026-10-04 mockup B): the darkness around it and its warm light on the background,
+        /// each the upper half of a disc around the flame. Drawn (Archive/16-candle-light/draw_pieces.py); the battle
+        /// screen stretches and tints them (UiPrefabSetup.Battle, CandleView).
+        /// </summary>
+        public const string CandleDark = "Icon/candle_dark";
+        public const string CandleWarm = "Icon/candle_warm";
 
         public const string Shield = "Icon/shield";
         public const string Burn = "Icon/burn";
@@ -132,6 +140,8 @@ namespace F1.Editor.Setup
             new Piece(NodeBattle),
             new Piece(NodeBoss),
             new Piece(Vignette),
+            new Piece(CandleDark),
+            new Piece(CandleWarm),
             new Piece(Shield),
             new Piece(Burn),
             new Piece(DeathsDoor),

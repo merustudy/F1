@@ -77,6 +77,22 @@ namespace F1.Tests
             yield return Capture("ko_18_battle_deaths_door");
         }
 
+        /// <summary>The candle's light: a battle five seconds before the storm (the candle low, its light pulled in) and once the storm has put it out.</summary>
+        [UnityTest]
+        public IEnumerator TheStorm_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterALongFirstBattle();
+            BalanceData balance = Managers.Expedition.Battle.Engine.Setup.Balance;
+            Managers.Expedition.AdvanceBattle(balance.StormStartMs - 5000 - Managers.Expedition.Battle.Engine.TimeMs);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_19_battle_storm_near");
+
+            Managers.Expedition.AdvanceBattle(balance.StormStartMs + balance.StormTickMs - Managers.Expedition.Battle.Engine.TimeMs);
+            yield return new WaitForSeconds(0.6f);
+            yield return Capture("ko_20_battle_storm");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);
