@@ -48,7 +48,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
   기준 그림 문구도 타입마다 따로 있다(사람의 기준 그림에서 몬스터가 빌릴 것은 다르다).
 - 프롬프트는 공통 규칙 -> Subject -> 타입 섹션 -> (적이면) 던전 컨셉 -> 금지 블록 -> 타입의 기준 그림 문구 순으로 조립한다.
 - 작가, 스튜디오, 작품의 이름과 "in the style of"를 프롬프트에 넣지 않는다.
-- 그림체를 바꿀 때는 이전 문서를 `Archive/<style-name>/`으로 옮기고 새로 쓴다.
+- 그림체를 바꿀 때는 이전 문서를 `Archive/<style-name>/`으로 옮기고 새로 쓴다. (2026-10-04: 이전 그림체는 `Archive/flat-v1/`. 그림체 전환의 경위는 `Archive/12-roar-style/README.md`.)
 - 그림체를 **시험**할 때는 지금의 문서, Roster, 기준 그림을 건드리지 않는다. 같은 형식의 시험 세트(스타일 문서, 소재, 기준 그림)를 `Archive/<round>/<style-name>/`에 두고
   `gen_image.py --style <문서> --roster <소재> --reference <기준 그림>`으로 돌린다. `--reference`는 뒤집지 않고 그대로 붙이므로 피사체가 볼 방향을 보는 그림을 준다.
   산출물의 이름은 `--name <Key>_<style-name>`으로 달리한다. 리뷰 시트는 `review_sheet.py --reference`로 시험의 기준 그림을 보인다.
@@ -71,9 +71,11 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 - 호출: `images.edit`에 기준 그림을 붙인다. 모델 `gpt-image-2.5-sunburst`, `1024x1024`, `medium`, 투명 배경, PNG.
   모양이 정사각이 아닌 것(배경, UI의 틀, 아이템)은 그 모양에 가까운 캔버스로 생성한다.
   모델은 투명 배경을 지원하는 것이어야 한다(`gpt-image-2`는 투명 배경 요청을 거절한다).
-- 기준 그림은 타입마다 정해 둔 것만 붙인다. 승인된 우리 그림이 생기면 그것을 기준 그림으로 바꾼다.
-- 파티 쪽 그림(직업)은 화면의 오른쪽, 곧 적 쪽을 본다. 적은 왼쪽을 본다. 모델은 방향을 문구보다 기준 그림에서 따르므로,
-  왼쪽을 보는 기준 그림을 직업에는 좌우를 뒤집어, 적에는 그대로 붙인다.
+- 기준 그림은 타입마다 정해 둔 것만 붙인다. 승인된 우리 그림이 생기면 그것을 기준 그림으로 바꾼다. (2026-10-04: 모든 타입이 확정한 직업 셋의 시트 `References/Character/style_ref_roster.png`를 붙인다. 적만 뒤집는다. 이전 기준 그림은 `Archive/flat-v1/`.)
+- 파티 쪽 그림(직업)은 화면의 오른쪽, 곧 적 쪽을 보고 눈도 그쪽을 본다. 적은 왼쪽을 본다. 모델은 방향을 문구보다 기준 그림에서 따르므로,
+  오른쪽을 보는 기준 그림(확정한 직업 셋의 시트 `References/Character/style_ref_roster.png`, 2026-10-04)을 직업에는 그대로, 적에는 좌우를 뒤집어 붙인다.
+  이전 기준 그림(`style_ref_mercenary.jpg`, 왼쪽을 본다)은 아이템·배경·UI 타입이 계속 쓴다.
+- 체형(등신 포함), 얼굴, 자세는 Roster의 `Subject`가 캐릭터마다 적는다(2026-10-04 그림체: 캐릭터마다 다른 체형과 표정이 핵심이다). 스타일 문서는 손맛과 공통 규칙만 갖는다.
 - **몬스터는 던전마다 컨셉이 있다.** 던전의 컨셉(눈의 색, 몸의 표시, 장비, 강조색)은 스타일 문서에 던전마다 한 절로 적고,
   그 던전의 적을 그릴 때마다 같은 문구가 붙는다. 그래서 한 던전의 몬스터는 서로 닮고 다른 던전과 구별된다.
 - 아이템이 어느 유닛이 든 것이면 Roster의 `Reference`에 그 유닛의 확정된 그림을 적는다. 그 그림을 기준 그림으로 붙여 그 유닛이 든 것과 같은 모습으로 그린다.
@@ -93,6 +95,8 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
   캔버스는 생성한 그림(1024)보다 작다. 그래서 맞추기는 늘 줄이기이고, `Height`가 같은 그림은 같은 키로 선다.
 - 키는 Roster의 `Height`(캔버스 높이에 대한 %)로 맞춘다. 폭이 캔버스를 넘으면 폭에 맞춰 더 줄인다.
 - 줄이기만 한다. 키우지 않는다. 모자라면 경고를 내고 판정에 맡긴다. 생성 캔버스의 가장자리에 닿은 그림(잘렸을 수 있다)도 경고한다.
+- 맞춘 뒤 실루엣 둘레에 고른 어두운 띠(`FIGURE_OUTLINE` 8px, 색은 UI의 선 `UI_LINE`)를 두른다(2026-10-04 플레이 피드백 "용병·몬스터의 외곽선을 더 굵게, 배경과 구별되게"). 그림은 바뀌지 않고 `--refit`으로 다시 두를 수 있다. 옆 여백 12는 띠보다 넓어 캔버스 밖으로 나가지 않는다.
+- 폭이 캔버스(3:4)를 넘는 그림(넓은 자세, 옆으로 뻗은 무기)은 폭에 맞춰 더 줄어 키가 목표보다 작게 선다. 직업마다 `Height`를 따로 두거나 캔버스를 넓히는 것은 그림체 전환의 【미결】이다(Design/10 §2).
 - `Flip`이 참이면 좌우를 뒤집는다. 반대쪽을 보고 나온 그림은 다시 생성하지 않고 뒤집는다.
 - 생성한 원본(`<name>.raw.png`)을 먼저 저장하고 맞춘 그림(`<name>.png`)을 따로 둔다. `Height`나 `Flip`을 고친 뒤에는
   `--refit`으로 원본에서 다시 맞춘다(호출 없음).
@@ -114,9 +118,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
   캔버스보다 길쭉한 그림은 한쪽에 맞춰 줄어드므로 캔버스의 일부만 채운다. 폭의 비율은 실행이 출력한다.
 - 프롬프트의 구도는 아이템의 공통 규칙에 그 칸 수의 절을 더한 것이다. 긴 것은 손잡이가 왼쪽(아래), 끝이 오른쪽(위)이다.
 - 칸의 크기(`12_UI.md` "전투 화면")가 바뀌면 이 표와 `ITEM_CELLS`, `review_sheet.py`의 `ITEM_CELL`을 같이 고치고, 비율이 달라진 칸 수의 아이콘은 다시 그린다.
-- **지금의 아이콘 스물한 개는 그 전의 칸(180x60을 쌓은 것: 자리 160x44, 160x108, 160x172, 캔버스 320x88, 320x216, 320x344)에 그린 것이다.** 비율이 거의 같아 새 자리에
-  약 90%로 맞아 들어가므로 다시 그리지 않는다. (경위: 2026-10-03 보드 패널의 가로 줄과 개정 5의 정사각 칸을 거치며 띠와 정사각 모양을 계획했으나, 같은 날 V안이 세로 쌓임으로
-  되돌렸다. 07 라운드의 띠 아이콘 셋(`output/item`)은 쓰지 않는다.)
+- 아이콘 스물한 개는 2026-10-04 그림체 전환 때 이 표의 캔버스로 다시 그렸다(그 전의 것은 180x60을 쌓은 칸의 캔버스 320x88, 320x216, 320x344에 그린 것이었다. `Archive/03-items/approved`).
 - 리뷰 시트(`review_sheet.py --type item`)는 아이콘을 실제 칸에 넣어 만든다: 화면 크기(쿨다운이 절반 찬 것과 다 찬 것)와 그 2배.
 
 ## 얼굴 (`cutface.py`)
@@ -157,6 +159,8 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   결(두 톤의 평면 무늬)을 남길 틀은 Roster의 `Flat`을 no로 두면 `frame` 후처리가 바탕색을 펴지 않는다(`panel`, `bag`). 색 변형은 `Rosters/ui_variant.csv`의 `Mode`로 정한다:
   `flatten`(바탕을 한 색으로 펴며 바꾼다. 명패·칸·버튼)과 `tint`(결을 남긴 채 바탕의 색을 바꾼다. `tint_fill`). 전의 틀은 `Archive/09-battle-ui-feel/frames-before/`에 있다.
 - `ui_piece`(§22)는 늘이지 않는 장식 조각이다. `glyph`처럼 비율을 지켜 캔버스의 84%에 맞추므로, 화면 크기의 2배를 0.84로 나눈 `Size`를 적는다(다이얼 200 → 476).
+- (2026-10-04) 틀의 변형(`ui_variant.csv`)은 Sprite의 이름과 생성한 틀을 떼어 놓는다. 그래서 그림체나 재질을 바꿀 때 Unity 쪽 이름은 그대로다. 디아블로 컨셉(`Archive/14-ui-diablo/`)에서는 `panel`·`table`·`tablet`이 `stone_panel`에서, `plate_*`가 `gothic_plate`에 편의 색을 `tint`로, `bag`이 `iron_inventory`, `belt`가 `belt_iron`, `trough`가 `iron_slot`, `potion_slot`(과 금색 `_selected`)이 `iron_pocket`, `button`이 `button_iron`을 흰색으로 편 것이다.
+  **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트(09). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
 
 ## 승인 라운드
 
@@ -201,9 +205,14 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
 3. Entry -> CSV의 Icon에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
 UI의 틀과 아이콘
-1. PNG   -> Assets/@Art/UI/Frame/<Key>.png (ui_variant의 Key), Assets/@Art/UI/Icon/<Key>.png
+1. PNG   -> Assets/@Art/UI/Frame/<Key>.png (ui_variant의 Key, 늘이지 않는 ui_piece도), Assets/@Art/UI/Icon/<Key>.png
 2. 목록  -> UiArt 에 이름(틀은 Border도)을 적는다. 데이터가 가리키지 않는다
 3. Entry -> 없다. 화면 Prefab이 Sprite를 직접 가리키고 Prefab과 함께 읽힌다
+
+포션의 병 아이콘
+1. PNG   -> Assets/@Art/Potion/<Id>.png (ui_icon으로 생성한 96x96)
+2. CSV   -> PotionData.csv 의 Icon = "potion/<kebab-id>"
+3. Entry -> CSV의 Icon에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 UI 아이콘과 같다)
 ```
 
 - 그림은 **직업**과 **적**에 붙는다. 용병은 자기 직업의 그림으로 보인다. 얼굴도 그 그림에서 나온다.

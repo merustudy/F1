@@ -96,10 +96,10 @@ TYPES = {
     "character": {
         "section": 4,
         "reference_section": 3,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
-        # The reference faces left and a party figure faces right. The model takes the facing
-        # from the reference rather than from the prompt, so the reference is attached mirrored.
-        "mirror_references": True,
+        # The style reference is a sheet of our own confirmed figures (2026-10-04), which face
+        # right as a party figure does, so it is attached as it is.
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
+        "mirror_references": False,
         "data": "JobData.csv",
         "dungeon_theme": None,
         "quality": "medium",
@@ -109,9 +109,10 @@ TYPES = {
     "enemy": {
         "section": 5,
         "reference_section": 6,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
-        # An enemy faces left, as the reference does, so the reference is attached as it is.
-        "mirror_references": False,
+        # An enemy faces left, so the roster sheet (facing right) is attached mirrored. The model
+        # takes the facing from the reference rather than from the prompt.
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
+        "mirror_references": True,
         "data": "EnemyData.csv",
         # An enemy belongs to a dungeon, and what the dungeon says of its creatures is added to its prompt.
         "dungeon_theme": "Creatures",
@@ -126,7 +127,7 @@ TYPES = {
         # A roster row may name a unit's figure as its reference: the item is the one that unit
         # holds, and the icon is drawn after it. That prompt ends with this section instead.
         "held_reference_section": 9,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
         "mirror_references": False,
         "data": "ItemData.csv",
         "dungeon_theme": None,
@@ -141,7 +142,7 @@ TYPES = {
         "section": 11,
         "forbidden_section": 12,
         "reference_section": 13,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
         "mirror_references": False,
         # A background is not named by one data file: a dungeon's is, the title's is not.
         "data": None,
@@ -159,7 +160,7 @@ TYPES = {
         "section": 15,
         "forbidden_section": 17,
         "reference_section": 18,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
         "mirror_references": False,
         # A frame is named by its use on the screens, not by a data id.
         "data": None,
@@ -173,7 +174,7 @@ TYPES = {
         "section": 16,
         "forbidden_section": 17,
         "reference_section": 18,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
         "mirror_references": False,
         "data": None,
         "dungeon_theme": None,
@@ -186,7 +187,7 @@ TYPES = {
         "section": 22,
         "forbidden_section": 17,
         "reference_section": 18,
-        "references": [ROOT / "References" / "Character" / "style_ref_mercenary.jpg"],
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
         "mirror_references": False,
         # A decorative piece shown whole (the storm clock's dial), named by its use on the screens.
         "data": None,
@@ -205,6 +206,11 @@ FIGURE_CANVAS = (672, 896)
 FIGURE_FLOOR_MARGIN = 20
 FIGURE_SIDE_MARGIN = 12
 HEIGHT_RANGE = (10, 97)
+# The dark ring drawn around the whole silhouette of a figure after fitting, in canvas pixels
+# (2026-10-04 play feedback: the outline has to be thicker so a unit stands off the background).
+# It is the UI line color, so figures and interface share one tone of outline. The side margin
+# above is wider than the ring, so the ring never leaves the canvas.
+FIGURE_OUTLINE = 8
 
 # The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, stacked
 # top to bottom in the panel column under the unit (ItemData.csv, Size; 2026-10-03 mockup V). A
@@ -668,6 +674,15 @@ def fit_figure(png_bytes: bytes, height_percent: int, flip: bool):
     x = (canvas_width - subject.width) // 2
     y = canvas_height - FIGURE_FLOOR_MARGIN - subject.height
     canvas.paste(subject, (x, y))
+
+    if FIGURE_OUTLINE > 0:
+        # One even dark ring around the silhouette, under the figure: its outer edge is softened
+        # by a pixel so that it does not alias at the size the screen shows it.
+        body = canvas.getchannel("A").point(lambda value: 255 if value > ALPHA_FLOOR else 0)
+        ring = Image.new("RGBA", FIGURE_CANVAS, UI_LINE + (0,))
+        ring.putalpha(grow(body, FIGURE_OUTLINE).filter(ImageFilter.GaussianBlur(0.8)))
+        ring.alpha_composite(canvas)
+        canvas = ring
 
     buffer = BytesIO()
     canvas.save(buffer, format="PNG")

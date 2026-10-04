@@ -28,8 +28,8 @@ LABEL_FONT = REPO / "Assets" / "@Fonts" / "Source" / "Pretendard" / "Pretendard-
 
 # The style reference shown next to the candidates, per type.
 REFERENCES = {
-    "character": ROOT / "References" / "Character" / "style_ref_mercenary.jpg",
-    "enemy": ROOT / "References" / "Character" / "style_ref_mercenary.jpg",
+    "character": ROOT / "References" / "Character" / "style_ref_roster.png",
+    "enemy": ROOT / "References" / "Character" / "style_ref_roster.png",
 }
 
 # The colour of the frame behind a figure, by the type of the figure: the party's or the enemy's.
