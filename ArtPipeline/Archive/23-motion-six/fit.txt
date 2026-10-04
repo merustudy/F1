@@ -1,0 +1,18 @@
+knight: idle ratio 0.6653, boots (90, 66, 54), back foot x 154, soles y 963, discs [50, 49], 7 main colours
+  knight_attack: discs [47, 47, 42] -> scale 0.964, back foot x 226, soles y 863, colours worst dE 2.1 -> 0.6 moved, subject 701..1586 x 302..964 (+88 below the floor) on 2016x1008
+  knight_hit: discs [50, 46, 39, 21] -> scale 0.975, back foot x 565, soles y 961, colours worst dE 2.4 -> 0.4 moved, subject 582..1222 x 239..882 (+6 below the floor) on 2016x1008
+valkyrie: idle ratio 0.6667, boots (114, 66, 54), back foot x 205, soles y 953, discs [53, 49, 46, 45], 9 main colours
+  valkyrie_attack: discs [51, 48, 43, 41] -> scale 0.954, back foot x 246, soles y 848, colours worst dE 5.1 -> 5.7 as drawn, subject 715..1548 x 313..976 (+100 below the floor) on 2016x1008
+  valkyrie_hit: discs [55, 50, 47, 45] -> scale 1.018, back foot x 478, soles y 966, colours worst dE 7.3 -> 4.0 moved, subject 655..1276 x 271..881 (+5 below the floor) on 2016x1008
+bishop: idle ratio 0.8036, boots (90, 54, 42), back foot x 324, soles y 1010, discs [76, 72, 64, 62], 11 main colours
+  bishop_attack: discs [83, 73, 58, 56] -> scale 0.962, back foot x 324, soles y 929, colours worst dE 2.9 -> 1.6 moved, subject 734..1614 x 108..881 (+5 below the floor) on 2016x1008
+  bishop_hit: discs [167, 74, 60, 56] -> scale 0.978, back foot x 592, soles y 942, colours worst dE 3.1 -> 1.8 moved, subject 723..1328 x 126..881 (+5 below the floor) on 2016x1008
+paladin: idle ratio 0.6633, boots (114, 66, 54), back foot x 304, soles y 996, discs [75, 59, 59, 39], 9 main colours
+  paladin_attack2: discs [70, 59, 56, 49] -> scale 0.977, back foot x 331, soles y 865, colours worst dE 6.2 -> 3.6 moved, subject 739..1462 x 344..919 (+43 below the floor) on 2016x1008
+  paladin_hit: discs [69, 52, 51, 49] -> scale 0.877 (SCALE 0.92), back foot x 645, soles y 964, colours worst dE 3.5 -> 0.7 moved, subject 576..1335 x 200..881 (+5 below the floor) on 2016x1008
+archmage: idle ratio 0.8174, boots (114, 78, 54), back foot x 384, soles y 995, discs [79], 7 main colours
+  archmage_attack: discs [87] -> scale 1.093, back foot x 249, soles y 932, colours worst dE 3.2 -> 1.9 moved, subject 751..1793 x 212..886 (+10 below the floor) on 2016x1008
+  archmage_hit: discs [72] -> scale 0.906, back foot x 672, soles y 975, colours worst dE 7.9 -> 13.6 as drawn, subject 605..1299 x 42..883 (+7 below the floor) on 2016x1008
+spellblade: idle ratio 0.7474, boots (90, 66, 54), back foot x 333, soles y 981, discs [], 5 main colours
+  spellblade_attack: discs [20] -> scale None (SCALE 0.93), back foot x 194, soles y 846, colours worst dE 2.3 -> 0.5 moved, subject 739..1919 x 301..881 (+5 below the floor) on 2016x1008
+  spellblade_hit: discs [70, 36, 21, 20] -> scale None (SCALE 1.0), back foot x 611, soles y 957, colours worst dE 4.3 -> 1.7 moved, subject 686..1299 x 200..881 (+5 below the floor) on 2016x1008
