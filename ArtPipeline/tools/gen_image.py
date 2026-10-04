@@ -182,6 +182,50 @@ TYPES = {
         "tail": "Draw this one symbol as an icon.",
         "fit": "glyph",
     },
+    "prop": {
+        # A thing that stands on the stage's floor like a figure, drawn in the figures' hand: a fallen
+        # mercenary's grave (2026-10-04, round 21). It is named by its use, not by a data id, and it is
+        # framed like a figure (its foot on the floor line of the figure canvas, Height and Flip from the row).
+        "section": 23,
+        "reference_section": 24,
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
+        "mirror_references": False,
+        "data": None,
+        "dungeon_theme": None,
+        "quality": "medium",
+        "tail": "Draw this one prop.",
+        "fit": "figure",
+    },
+    "attack": {
+        # A mercenary's attack pose, drawn after its approved figure (2026-10-04, round 23; Docs/Design/10 §2, §5): the
+        # reference is that figure laid on the pose's canvas with open floor under the feet and room for the lunge on the
+        # right (pose_reference), and tools/fit_pose.py stands the pose at the figure's size afterwards.
+        "section": 25,
+        "reference_section": 26,
+        "references": [],
+        "pose_place": "left",
+        "mirror_references": False,
+        "data": "JobData.csv",
+        "dungeon_theme": None,
+        "quality": "medium",
+        "size": "1536x1024",
+        "tail": "Draw this one character, full body.",
+        "fit": "pose",
+    },
+    "hit": {
+        # A mercenary's hit pose: the same, with the figure in the middle of the canvas (it is knocked back to the left).
+        "section": 25,
+        "reference_section": 26,
+        "references": [],
+        "pose_place": "middle",
+        "mirror_references": False,
+        "data": "JobData.csv",
+        "dungeon_theme": None,
+        "quality": "medium",
+        "size": "1536x1024",
+        "tail": "Draw this one character, full body.",
+        "fit": "pose",
+    },
     "ui_piece": {
         "shared_section": 14,
         "section": 22,
@@ -208,10 +252,13 @@ FIGURE_SIDE_MARGIN = 12
 HEIGHT_RANGE = (10, 97)
 # The dark ring drawn around the whole silhouette of a figure after fitting, in canvas pixels
 # (2026-10-04 play feedback: the outline has to be thicker so a unit stands off the background;
-# 8 then, halved the same day after a review, "외곽선 1/2 적용": about 1.3 px on screen, where the
-# canvas is drawn at about a third). It is the UI line color, so figures and interface share one
-# tone of outline. The side margin above is wider than the ring, so the ring never leaves the canvas.
-FIGURE_OUTLINE = 4
+# 8 then, halved the same day after a review, "외곽선 1/2 적용"; 1.35 the same night after round 25's
+# mockups, "권장안으로 변경 구현": the outline, the drawn ink line and the ring together, about 2/3 of
+# what it was with 4, about 2.2 px on screen where the canvas is drawn at about a third). A width
+# between two whole pixels is drawn as the blend of the two whole rings (ring_alpha). It is the UI
+# line color, so figures and interface share one tone of outline. The side margin above is wider than
+# the ring, so the ring never leaves the canvas.
+FIGURE_OUTLINE = 1.35
 
 # The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, stacked
 # top to bottom in the panel column under the unit (ItemData.csv, Size; 2026-10-03 mockup V). A
@@ -623,6 +670,34 @@ def reference_upload(path: Path, mirror: bool = False):
 # ---------------------------------------------------------------- post-processing
 
 
+# The reference of a pose (round 19's second attack, round 23): the approved figure on the canvas the pose is drawn on,
+# smaller, its soles three quarters down with open floor under them so that a weapon can come down below the feet; an
+# attack's figure in the left third (the lunge reaches right), a hit's in the middle (it is knocked back left).
+POSE_CANVAS = (1536, 1024)
+POSE_FIGURE_HEIGHT = 700
+POSE_SOLES = 768
+POSE_LEFT = 152
+POSE_MAX_WIDTH = 1100
+
+
+def pose_reference(kind: str, key: str) -> Path:
+    """Lays the mercenary's approved figure (its raw, output/character/<key>.raw.png) on a pose's canvas and saves it next
+    to the pose's output as <key>.reference.png."""
+    approved = OUTPUT_DIR / "character" / f"{key}.raw.png"
+    require_file(approved, f"확정 원본 {approved.name}(자세는 확정한 전신 그림을 보고 그린다)")
+    image = Image.open(approved).convert("RGBA")
+    subject = image.crop(subject_box(image))
+    scale = min(POSE_FIGURE_HEIGHT / subject.height, POSE_MAX_WIDTH / subject.width)
+    subject = subject.resize((round(subject.width * scale), round(subject.height * scale)), Image.LANCZOS)
+    left = POSE_LEFT if TYPES[kind]["pose_place"] == "left" else (POSE_CANVAS[0] - subject.width) // 2
+    canvas = Image.new("RGBA", POSE_CANVAS, (0, 0, 0, 0))
+    canvas.paste(subject, (left, POSE_SOLES - subject.height))
+    path = OUTPUT_DIR / kind / f"{key}.reference.png"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(path)
+    return path
+
+
 def subject_box(image: Image.Image):
     """Bounding box of the drawn subject, measured on alpha alone.
 
@@ -682,7 +757,7 @@ def fit_figure(png_bytes: bytes, height_percent: int, flip: bool):
         # by a pixel so that it does not alias at the size the screen shows it.
         body = canvas.getchannel("A").point(lambda value: 255 if value > ALPHA_FLOOR else 0)
         ring = Image.new("RGBA", FIGURE_CANVAS, UI_LINE + (0,))
-        ring.putalpha(grow(body, FIGURE_OUTLINE).filter(ImageFilter.GaussianBlur(0.8)))
+        ring.putalpha(ring_alpha(body, FIGURE_OUTLINE))
         ring.alpha_composite(canvas)
         canvas = ring
 
@@ -740,6 +815,24 @@ def fit_scene(png_bytes: bytes, floor_line: int):
         "window": (round(window_width), round(window_height)),
     }
     return buffer.getvalue(), report
+
+
+def ring_alpha(body: Image.Image, width: float) -> Image.Image:
+    """The alpha of the dark ring around a figure (body: its silhouette's mask), its outer edge softened by a blur of 0.8.
+
+    A whole width is the body grown by it. A width between two whole pixels is the blend of the two
+    rings: the screen draws the canvas at about a third, so how much ink there is makes the width.
+    """
+    def whole(radius: int) -> Image.Image:
+        if radius <= 0:
+            return Image.new("L", body.size, 0)
+        return grow(body, radius).filter(ImageFilter.GaussianBlur(0.8))
+
+    low = int(width)
+    share = width - low
+    if share < 1e-6:
+        return whole(low)
+    return Image.blend(whole(low), whole(low + 1), share)
 
 
 def grow(mask: Image.Image, radius: int) -> Image.Image:
@@ -1108,6 +1201,8 @@ def parse_args():
                         help="Constraint appended to the subject sentence for this run, e.g. a direction from a verdict.")
     parser.add_argument("--quality", default="", choices=["", "low", "medium", "high"],
                         help="Overrides the type's quality.")
+    parser.add_argument("--size", default="", choices=["", "1024x1024", "1536x1024", "1024x1536"],
+                        help="Generation size of a full-body figure instead of 1024x1024: a wide pose needs room to be drawn at its usual size.")
     # A style test: its document, roster and reference live together under Archive/<round>/<style>/
     # and are named here. The files of the current style are not touched.
     parser.add_argument("--style", default="",
@@ -1138,6 +1233,8 @@ def main() -> int:
 
     try:
         if args.refit:
+            if spec["fit"] == "pose":
+                raise PipelineError("자세는 tools/fit_pose.py 로 맞춘다(확정한 전신 그림과 같은 크기·자리).")
             row = read_roster_row(args.kind, args.key, roster)
             require_file(raw_path, f"원본 {raw_path.name}")
             png, report = fit(args.kind, raw_path.read_bytes(), row)
@@ -1153,12 +1250,14 @@ def main() -> int:
         row = read_roster_row(args.kind, args.key, roster)
 
         # A frame and an item are generated in the proportions they will have; everything else at the type's size.
+        if args.size and spec["fit"] != "figure":
+            raise PipelineError(f"--size 는 전신 그림(character, enemy, prop)에만 쓴다. {args.kind} 의 크기는 타입, Roster, 데이터가 정한다.")
         if spec["fit"] == "frame":
             size = generation_size(*row["ui"]["size"])
         elif spec["fit"] == "cell":
             size = ITEM_CELLS[row["cells"]]["generate"]
         else:
-            size = spec.get("size", SIZE)
+            size = args.size or spec.get("size", SIZE)
 
         # The row's own reference (the figure that holds the item) replaces the type's and is sent as it is.
         # So is a reference given for the run (--reference): whoever gives one chooses its facing.
@@ -1167,6 +1266,8 @@ def main() -> int:
             raise PipelineError("Roster 의 Reference 와 --reference 를 함께 쓸 수 없다. 하나만 남겨라.")
         if custom_reference is not None:
             references, mirror = [custom_reference], False
+        elif spec["fit"] == "pose":
+            references, mirror = [pose_reference(args.kind, args.key)], False
         else:
             references = [row["reference"]] if held else spec["references"]
             mirror = spec.get("mirror_references", False) and not held
@@ -1203,6 +1304,8 @@ def main() -> int:
             elif spec["fit"] in ("frame", "glyph"):
                 ui = row["ui"]
                 placement = f"fit={spec['fit']} Size={ui['size'][0]}x{ui['size'][1]} Outline={ui['outline']}"
+            elif spec["fit"] == "pose":
+                placement = f"fit=pose reference={references[0].name} (맞추기는 tools/fit_pose.py)"
             else:
                 placement = f"fit={spec['fit']}"
             print(f"\n[dry-run] type={args.kind} key={args.key} name={name} quality={quality} "
@@ -1212,7 +1315,7 @@ def main() -> int:
         api_key = read_api_key()
         print(f"[3/6] Keychain에서 키를 읽었다 (서비스 {KEYCHAIN_SERVICE}, 계정 {getpass.getuser()}).")
 
-        print(f"[4/6] 생성 요청 1회: type={args.kind}, key={args.key}, quality={quality}.")
+        print(f"[4/6] 생성 요청 1회: type={args.kind}, key={args.key}, quality={quality}, size={size}.")
         raw, usage = generate_png(api_key, prompt, uploads, quality, size, background)
 
         # The raw image is saved before anything else can fail: it is what the call paid for.
@@ -1226,6 +1329,12 @@ def main() -> int:
                   f"출력 {numbers['output']:,} tokens -> 약 ${numbers['usd']:.3f} (누계 약 ${total:.2f})")
         else:
             print(f"      사용량: 응답에 없다 (누계 약 ${total:.2f}, 이 호출은 0으로 적었다).")
+
+        if spec["fit"] == "pose":
+            # A pose is stood at the approved figure's size, which takes the figure: a step of its own.
+            print(f"[5/6] 원본은 {raw_path.name}. 맞추기: tools/fit_pose.py --type {args.kind} --key {args.key}")
+            print("[6/6] 저장 완료.")
+            return 0
 
         png, report = fit(args.kind, raw, row)
         output_path.write_bytes(png)

@@ -37,7 +37,7 @@ Assets
 ├─ @Localization    # Source/UI_StaticText.csv, Settings/, Locales/, Tables/
 ├─ @Fonts           # Source/<Family>/ (ttf + LICENSE + README), TMP/
 ├─ @Prefabs         # UI/ (화면 Prefab. Setup 코드가 만든 생성물)
-├─ @Art             # Unit/Job, Unit/Enemy, Face/Job, Face/Enemy, Background/Dungeon, Item, UI/Frame, UI/Icon (승인된 그림. ArtPipeline에서 온다 -> 13_ART_PIPELINE.md)
+├─ @Art             # Unit/Job, Unit/Enemy, Face/Job, Face/Enemy, Pose/Job, Background/Dungeon, Item, UI/Frame, UI/Icon (승인된 그림. ArtPipeline에서 온다 -> 13_ART_PIPELINE.md)
 │
 ├─ AddressableAssetsData   # Package가 만든 경로 그대로
 ├─ Settings                # URP Template 설정

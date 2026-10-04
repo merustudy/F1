@@ -51,8 +51,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 13ffaeca5587e4fa48dac891936c3530
+    m_Address: pose/job/paladin-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1bfeb92e34e4d41db860ff13decf1d50
     m_Address: item/fire-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e7d3e6c0ae9041f8a0144fe6ce203ae
+    m_Address: pose/job/knight-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -75,6 +87,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35ad7d7c5060c47c0af39791bd0cabe3
+    m_Address: pose/job/knight-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 37b027612946d42efac48357516e83f1
     m_Address: unit/job/valkyrie
     m_ReadOnly: 0
@@ -89,6 +107,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
     m_Address: potion/healing-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43311083f1a004e15b97c2a3b48afe21
+    m_Address: pose/job/bishop-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 50449636f0b7645628953b7c33cf6b78
+    m_Address: pose/job/valkyrie-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -153,6 +183,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8694b92fa8fd04ff8b244fafed781ce2
+    m_Address: pose/job/bishop-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 88054558662394804b778ba0228043e5
     m_Address: unit/job/spellblade
     m_ReadOnly: 0
@@ -207,6 +243,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ad990f5f1691f4415adcf89bd7c7e849
+    m_Address: pose/job/archmage-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aed91b06bab47424ba9de9c294801f3b
     m_Address: item/halberd
     m_ReadOnly: 0
@@ -231,6 +273,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0113b0fa9bee45128af6863872fb88e
+    m_Address: pose/job/archmage-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cad3fa1212df04eee81411be7b721fa7
     m_Address: item/buckler
     m_ReadOnly: 0
@@ -245,6 +293,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cb5a58417a3274f4a8b2817065b2cb28
     m_Address: unit/enemy/goblin-shaman
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd80f3c6d818c4389ace97ee094a75f9
+    m_Address: pose/job/valkyrie-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdb68c3bc13004d6e965a9ea2c6070f1
+    m_Address: pose/job/spellblade-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -279,8 +339,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f33d647ce9e4043b489645316d890fe1
+    m_Address: pose/job/spellblade-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f38f5ed7d49bd4f51a9e2396e8103d50
     m_Address: face/enemy/cave-rat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f7b43789322d44d0fb9f2e4c3680d57f
+    m_Address: pose/job/paladin-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

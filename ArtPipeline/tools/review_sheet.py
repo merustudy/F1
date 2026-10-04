@@ -7,6 +7,12 @@ background colour, standing on a floor line as it will in battle. The bottom ban
 style reference and each candidate large, on a checkerboard so the alpha edge can be seen.
 An item icon has no floor to stand on: it is shown in the cells of the board it takes.
 
+A mercenary (type character) is judged among the others: the top band stands the candidates
+next to every mercenary the game shows now, and a band of heads shows them all at one scale,
+lined up on the eyes, with the band the chin has to fall in (FACE_BAND, a man's or a woman's as
+the roster's Gender says). A head drawn small for a big body was approved once without being seen
+next to the others (2026-10-04, the paladin).
+
 Makes no API call.
 """
 
@@ -37,6 +43,19 @@ SIDE_COLOURS = {"character": "Party", "enemy": "Enemy"}
 
 # How much of the side's colour the figure's place shows in battle (BattleUnitView.FigureAlpha).
 FIGURE_FRAME_ALPHA = 0.35
+
+# The face of a mercenary, from the eye line to the chin (the tip of a beard), on the fitted canvas
+# (672x896): every mercenary's falls in the band of its sex, so that no head looks small next to the
+# others; a woman's is a little smaller (Docs/Design/10_Art_Direction.md §2,
+# Docs/Architecture/13_ART_PIPELINE.md "승인 라운드"). The men measured 68 to 81 (the paladin drawn
+# again; his small head was 41), the women 51 to 56 (2026-10-04). The roster's Gender says which.
+FACE_BAND = {"male": (65, 85), "female": (48, 62)}
+CHARACTER_ROSTER = ROOT / "Rosters" / "character.csv"
+# The figures the game shows now, the mercenaries a candidate is judged among.
+APPROVED_FIGURES = REPO / "Assets" / "@Art" / "Unit" / "Job"
+# The head's window around the eye on the fitted canvas, and how much it is enlarged.
+HEAD_WINDOW = (220, 150, 110)   # width, above the eye, below the eye
+HEAD_ZOOM = 2
 
 LARGE_HEIGHT = 896
 PADDING = 24
@@ -189,6 +208,89 @@ def item_sheet(names: list, folder: Path, out: Path) -> int:
     return 0
 
 
+def near_eye(image: Image.Image):
+    """The middle of the largest eye white in the upper part of a figure (the near eye of a head
+    turned to the right), or None when no eye white is found."""
+    px = image.load()
+    alpha = image.getchannel("A").getbbox()
+    if alpha is None:
+        return None
+    x0, y0, x1, y1 = alpha[0], alpha[1], alpha[2], alpha[1] + int((alpha[3] - alpha[1]) * 0.45)
+    seen, best = set(), None
+    for y in range(y0, y1):
+        for x in range(x0, x1):
+            if (x, y) in seen:
+                continue
+            r, g, b, a = px[x, y]
+            if a < 200 or min(r, g, b) <= 225:
+                continue
+            stack, count, sx, sy = [(x, y)], 0, 0, 0
+            seen.add((x, y))
+            while stack:
+                cx, cy = stack.pop()
+                count, sx, sy = count + 1, sx + cx, sy + cy
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if x0 <= nx < x1 and y0 <= ny < y1 and (nx, ny) not in seen:
+                        q = px[nx, ny]
+                        if q[3] >= 200 and min(q[:3]) > 225:
+                            seen.add((nx, ny))
+                            stack.append((nx, ny))
+            if 30 <= count <= 2000 and (best is None or count > best[0]):
+                best = (count, sx / count, sy / count)
+    return None if best is None else (round(best[1]), round(best[2]))
+
+
+def genders() -> dict:
+    """Mercenary key -> "male" or "female", from the character roster."""
+    with CHARACTER_ROSTER.open(encoding="utf-8", newline="") as handle:
+        return {row["Key"]: (row.get("Gender") or "").strip() for row in csv.DictReader(handle)}
+
+
+def face_band(name: str, known: dict):
+    """The band of a figure named by its key, "game/<key>" or "<key>_<pose>": (low, high, sex), or None when the
+    roster does not say whose figure it is."""
+    stem = name.split("/")[-1]
+    key = stem if stem in known else stem.split("_")[0]
+    sex = known.get(key)
+    return FACE_BAND[sex] + (sex,) if sex in FACE_BAND else None
+
+
+def head_band(figures: list, colours: dict) -> Image.Image:
+    """Every figure's head at one scale, lined up on the near eye, with the band its chin has to fall in."""
+    width, above, below = HEAD_WINDOW
+    cell_w, cell_h = width * HEAD_ZOOM, (above + below) * HEAD_ZOOM
+    title, label = font(22), font(18)
+    band = Image.new("RGB", (PADDING * 2 + len(figures) * (cell_w + GAP) - GAP, PADDING + LABEL_HEIGHT * 2 + cell_h + LABEL_HEIGHT + PADDING),
+                     colours["Background"])
+    draw = ImageDraw.Draw(band, "RGBA")
+    bands = ", ".join(f"{sex} {low}-{high}px" for sex, (low, high) in FACE_BAND.items())
+    draw.text((PADDING, PADDING), f"heads at one scale (canvas x{HEAD_ZOOM}), lined up on the eyes: the chin falls in the green band "
+              f"below the eye on the canvas (FACE_BAND: {bands})", font=title, fill=colours["TextDim"])
+    top = PADDING + LABEL_HEIGHT * 2
+    known = genders()
+    for i, (name, image) in enumerate(figures):
+        x = PADDING + i * (cell_w + GAP)
+        eye = near_eye(image)
+        found = eye is not None
+        if not found:
+            box = image.getchannel("A").getbbox()
+            eye = ((box[0] + box[2]) // 2, box[1] + (box[3] - box[1]) * 22 // 100)
+        crop = image.crop((eye[0] - width // 2, eye[1] - above, eye[0] + width // 2, eye[1] + below))
+        cell = Image.new("RGBA", crop.size, colours["Background"] + (255,))
+        cell.alpha_composite(crop)
+        band.paste(cell.convert("RGB").resize((cell_w, cell_h), Image.LANCZOS), (x, top))
+        band_of = face_band(name, known)
+        low, high, sex = band_of if band_of else (min(b[0] for b in FACE_BAND.values()), max(b[1] for b in FACE_BAND.values()), "?")
+        chin = (top + (above + low) * HEAD_ZOOM, top + (above + high) * HEAD_ZOOM)
+        draw.rectangle([x, chin[0], x + cell_w - 1, chin[1]], fill=(90, 200, 110, 70), outline=(90, 200, 110, 200))
+        draw.line([x, top + above * HEAD_ZOOM, x + cell_w - 1, top + above * HEAD_ZOOM], fill=(110, 170, 230, 200), width=1)
+        note = f"{sex} {low}-{high}" + ("" if found else ", no eye found: lined up on the head")
+        draw.text((x + 4, top + cell_h + 6), f"{name} ({note})", font=label, fill=colours["Text"])
+        print(f"  머리: {name}: 눈 {eye}{'' if found else ' (눈을 찾지 못해 머리 위에서 맞춤)'}. "
+              f"턱이 초록 띠({'성별을 모름, ' if sex == '?' else ''}눈에서 {low}~{high}px) 안에 있는지 본다")
+    return band
+
+
 def roster_order(kind: str):
     """A sort key that puts names in the order of the type's roster; names it does not list come last."""
     roster = ROOT / "Rosters" / f"{kind}.csv"
@@ -251,13 +353,21 @@ def main() -> int:
         frames[name] = blend(background, colours[SIDE_COLOURS.get(side, "Party")], FIGURE_FRAME_ALPHA)
     label_font, title_font = font(18), font(22)
 
+    # A mercenary is judged among the mercenaries the game shows now.
+    lineup = figures
+    if args.kind == "character":
+        approved = sorted((path.stem for path in APPROVED_FIGURES.glob("*.png")), key=roster_order(args.kind))
+        lineup = [(f"game/{key}", Image.open(APPROVED_FIGURES / f"{key}.png").convert("RGBA")) for key in approved] + figures
+        for name, _ in lineup:
+            frames.setdefault(name, blend(background, colours["Party"], FIGURE_FRAME_ALPHA))
+
     reference_path = Path(args.reference) if args.reference else REFERENCES.get(args.kind)
     reference = None
     if reference_path is not None and reference_path.is_file():
         reference = scaled_to_height(Image.open(reference_path).convert("RGB"), LARGE_HEIGHT)
 
     # Top band: display size, on the game's background.
-    small = [(name, scaled_to_height(image, args.display_height)) for name, image in figures]
+    small = [(name, scaled_to_height(image, args.display_height)) for name, image in lineup]
     column = max(image.width for _, image in small)
     top_height = PADDING + LABEL_HEIGHT + args.display_height + 2 + LABEL_HEIGHT + PADDING
 
@@ -296,6 +406,13 @@ def main() -> int:
         board.paste(image, (0, 0), image)
         sheet.paste(board, (x, y + LABEL_HEIGHT))
         x += image.width + GAP
+
+    if args.kind == "character":
+        heads = head_band(lineup, colours)
+        whole = Image.new("RGB", (max(sheet.width, heads.width), sheet.height + heads.height), (248, 248, 248))
+        whole.paste(sheet, (0, 0))
+        whole.paste(heads, (0, sheet.height))
+        sheet = whole
 
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out)

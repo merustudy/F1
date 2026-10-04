@@ -69,6 +69,12 @@ namespace F1.Editor.Setup
         /// <summary>A unit's face, cut out of its figure at twice the size of its place in the board panel, like an icon.</summary>
         static readonly ImportPolicy Face = Interface(border: 0);
 
+        /// <summary>
+        /// A mercenary's attack or hit pose: the figure canvas in the middle of a canvas three times as wide and an eighth
+        /// deeper (2016x1008). Kept at its size, so that it is as sharp as the figure it stands in for (2026-10-04).
+        /// </summary>
+        static readonly ImportPolicy Pose = new ImportPolicy(cutOut: true, mipMaps: true, maxTextureSize: 2048, pixelsPerUnit: 100f);
+
         readonly struct ArtFile
         {
             public ArtFile(string name, string assetPath, ImportPolicy policy, AddressEntry? entry)
@@ -139,10 +145,13 @@ namespace F1.Editor.Setup
             StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
 
             // A unit that has a figure has a face too: it is cut out of the figure, and its address follows the figure's.
+            // A job that has a figure has its attack and hit poses as well, drawn after the figure.
             IEnumerable<(string Address, ImportPolicy Policy)> named = data.Jobs.Ordered.Select(j => (j.Figure, Figure))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Figure, Figure)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.Face, Face)))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Face, Face)))
+                .Concat(data.Jobs.Ordered.Select(j => (j.AttackPose, Pose)))
+                .Concat(data.Jobs.Ordered.Select(j => (j.HitPose, Pose)))
                 .Concat(data.Dungeons.Ordered.Select(d => (d.Background, Scene)))
                 .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)))
                 .Concat(data.Potions.Ordered.Select(p => (p.Icon, Icon)));
@@ -226,7 +235,7 @@ namespace F1.Editor.Setup
                     string path = file.Replace('\\', '/');
                     if (!listed.Contains(path))
                     {
-                        problems.Add($"{path}: nothing names this image: no Figure (or its face), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
+                        problems.Add($"{path}: nothing names this image: no Figure (or its face or poses), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
                     }
                 }
             }

@@ -23,6 +23,9 @@
 | `item` | 아이템의 아이콘. 그 아이템이 차지하는 칸의 모양으로 그린다 | 그 아이템을 든 유닛의 확정된 그림(Roster의 `Reference`). 없으면 `References/Character/style_ref_roster.png` | 칸 수에 따라 `1536x512`(1칸), `1536x1024`(2칸), `1024x1024`(3칸) | `medium` | `transparent` | §7과 칸 수의 섹션(§19, §20, §21) | 든 유닛의 그림이면 §9, 아니면 §8 | `cell` |
 | `ui_frame` | UI의 틀(패널, 명패, 칸, 버튼). 늘여 쓰는 빈 사각형 | `References/Character/style_ref_roster.png` (그대로 붙인다) | Roster의 `Size` 비율에 가까운 것 (`1024x1024`, `1536x1024`, `1536x768`, `1536x512`) | `medium` | `transparent` | §15 | §18 | `frame` |
 | `ui_icon` | UI의 작은 기호(상태 아이콘) | `References/Character/style_ref_roster.png` (그대로 붙인다) | `1024x1024` | `medium` | `transparent` | §16 | §18 | `glyph` |
+| `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21). 전신 그림처럼 바닥선에 세운다. §23은 지금 하나뿐인 무덤에 맞춰 적었다 | `References/Character/style_ref_roster.png` (그대로 붙인다) | `1024x1024` | `medium` | `transparent` | §23 | §24 | `figure` |
+| `attack` | 확정한 용병 그림의 공격 자세: 무기를 휘둘러 돌진하는 순간(Round 23의 규칙). 손에 든 것은 그대로, 무기는 바닥선 아래로 내려가도 된다 | 그 직업의 확정 원본(`output/character/<key>.raw.png`)을 1536x1024에 앉힌 것: 발바닥이 높이의 3/4, 왼쪽 3분의 1에(gen_image.py가 만든다) | `1536x1024` | `medium` | `transparent` | §25 | §26 | `pose` (`tools/fit_pose.py`) |
+| `hit` | 확정한 용병 그림의 피격 자세: 맞아서 뒤로 밀리는 순간 | 같은 원본을 가운데에 | `1536x1024` | `medium` | `transparent` | §25 | §26 | `pose` (`tools/fit_pose.py`) |
 
 ## 1. Shared Style Rule
 
@@ -79,8 +82,8 @@ transparent background.
 ## 4. Character
 
 - Draw one mercenary alone, the whole body from the top of the head to the boots, standing on both feet in an energetic, characterful stance as the subject says, in a three-quarter view turned toward the viewer's right.
-- Proportions and build: exaggerated and rubbery, between three and five heads tall as the subject says. Every character has a strongly different body type (brawny and top-heavy, squat and barrel-shaped, tall and lanky, round and soft, lean and wiry): follow the subject. A woman keeps a curvy figure (a full bust, a narrow waist, full hips) whatever her build. Rubbery limbs with no muscles drawn inside, big hands and big boots.
-- Face: caricatured but attractive, as the subject says: large expressive eyes with dark pupils (one may be a touch larger than the other), well-shaped thick eyebrows, a distinctive but elegant nose (long and straight, small and upturned, or strong and straight), a strong handsome jaw for a man and soft pretty features for a woman, and a wide charming mouth (a big confident grin, a cocky half-smile, a sly smirk, a gentle smile). A few freckle or stubble dots are fine. Each character gets its own face shape and expression, never grotesque.
+- Proportions and build: exaggerated and rubbery, between three and five heads tall as the subject says, always with a big head: the head is as big as the heads of the characters on the reference sheet. A tall, broad or heroic build is shown by the body, never by a smaller head. Every character has a strongly different body type (brawny and top-heavy, squat and barrel-shaped, tall and lanky, round and soft, lean and wiry): follow the subject. A woman keeps a curvy figure (a full bust, a narrow waist, full hips) whatever her build. Rubbery limbs with no muscles drawn inside, big hands and big boots.
+- Face: caricatured but attractive, as the subject says: large expressive eyes with dark pupils (one may be a touch larger than the other), well-shaped thick eyebrows, a distinctive but elegant nose (long and straight, small and upturned, or strong and straight), a strong handsome jaw for a man and soft pretty features for a woman, and a serious mouth that does not smile (closed in a firm line, set, or pressed thin): a mercenary about to fight in a dark dungeon looks determined, stern, wary or grim, never cheerful, never grinning. A few freckle or stubble dots are fine. Each character gets its own face shape and its own kind of seriousness, never grotesque.
 - Gaze: the eyes look toward the viewer's right, where the enemy stands: the pupils sit toward the right side of the eyes and the head is turned a little that way. Never looking at the viewer, never looking left.
 - The eyes always have their dark pupils: never dot eyes, never blank eyes without pupils.
 - Hair: big rubbery clumps with a few scribbly strand strokes.
@@ -304,6 +307,66 @@ For a decorative piece of the interface that is shown whole, never stretched: th
 - It is made of the same materials as the frames (brass, iron, leather, dark navy) in a few flat shapes and two or three colors, with the same bold dark outline, and its fittings (rivets, ticks, a rim) are even and symmetrical.
 - Its face is empty where the subject says so: numbers are written on it by the game.
 - Never add text, letters, numbers, a shadow under it or a glow around it. Output a transparent PNG with all four corner pixels at alpha 0.
+
+## 23. Prop
+
+- Draw one prop alone, standing on the floor of the battle stage: the whole prop from its top down to the ground it stands in, seen from the side in a slight three-quarter view like the figures of our game.
+- It is the grave marker of a fallen mercenary of the party: a plain, solemn thing in a dark dungeon. Never cute, never comic, no skull, no bones, no gore, no blood.
+- Keep it simple and readable when small: one strong silhouette, a few big shapes and two to four flat muted colors. A small low mound of earth or stones at its foot is part of it.
+- Keep the whole prop inside the canvas with a clear empty margin on all four sides. Never crop it.
+- Draw no character, no creature, no hand, no scenery beyond the mound at its foot, no shadow under it, no glow, no candles and no flowers.
+- Never add text, letters, numbers, names, R.I.P. or logos. Output a transparent PNG with all four corner pixels at alpha 0.
+
+## 24. Prop Reference Rule
+
+The last part of a `prop` prompt.
+
+```text
+The attached image is a sheet of three characters of our game, drawn in our style.
+Use it only as a style reference for the hand-drawn wobbly ink line, the scribbly
+marks, the shape simplification, the flat muted color range and the shading
+amount. Do not draw any character or any part of one. Draw only the described
+prop, as a new standalone picture in the same drawing style on a transparent
+background, and do not reproduce the sheet's white background.
+```
+
+## 25. Pose
+
+For an attack or a hit pose of an approved mercenary, drawn after its battle-ready figure (Docs/Design/10 §2, §5).
+
+- Draw the one character alone, the whole body from the top of the head to the boots, in the action pose the subject describes, in a three-quarter view turned toward the viewer's right, where the enemy stands.
+- Keep the proportions and the build of the attached image exactly: only the limbs, the torso, the head and the weapon move. The hands grip the weapon as the subject says.
+- Hands: when the attached figure holds a different thing in each hand (a weapon and a shield), each stays where it is whatever the pose; the subject names them. The arm that holds the weapon makes the move, the other arm keeps its own thing.
+- Face: the same face as in the attached image, with the expression the subject asks for. The eyes keep their dark pupils unless the subject closes an eye: never dot eyes, never blank eyes without pupils.
+- Gaze: the head and the eyes stay turned toward the viewer's right, toward the enemy. Never looking at the viewer, never looking left.
+- The hair, the cloak and loose cloth may swing with the motion as the subject says, but keep their shapes, lengths and colors.
+- The boots stand on the floor line where the boots are in the attached image; below that line is open space in front of the character. The weapon may come down below the floor line, in front of the feet, as far as the pose asks: no ground is drawn and nothing hides it, the whole weapon stays visible. The whole figure and the whole weapon stay inside the canvas with an empty margin on all four sides. Never crop the head, the feet or the weapon.
+- Draw one character only: no second figure, no enemy, no impact effect, no blood, no scenery, no ground line and no shadow under the feet. Never add text, letters, numbers or logos. Output a transparent PNG with all four corner pixels at alpha 0.
+- Never a smile, a grin or a cheerful face: the attack is a fierce war cry and the hit a pained grimace. Never a smaller head than in the attached image, never a redesigned character, another outfit or another weapon.
+
+## 26. Pose Reference Rule
+
+The last part of an `attack` or `hit` prompt. The attached image is the mercenary's approved figure, laid on the canvas with open floor under the feet (gen_image.py).
+
+```text
+The attached image is this exact character of our game, already drawn in our
+style and approved. Redraw the very same character in the new pose the subject
+asks for. Keep everything else exactly as in the attached image: the face and
+its features, the hair, the body type and proportions, every piece of the outfit
+and its ornaments, the weapon, every color, and the size the character is drawn
+at (the same head size and the same body size) and the place it stands in: the
+soles of the boots on the floor line where they are in the attached image. Keep
+the same hand: the wobbly
+hand-drawn ink line, the scribbly marks and the flat coloring with its one hard
+darker tone. Change only the pose and the expression the subject asks for: the
+same person in the same clothes with the same weapon, not a new design. Each
+hand that holds a different thing in the attached image keeps it: a weapon in
+one hand and a shield on the other arm stay in the same hand and on the same
+arm; they never change hands. The
+character faces toward the viewer's right, where the enemy stands. Draw one
+figure only, alone, on a transparent background, and do not reproduce the
+background of the attached image.
+```
 
 ## Dungeon: abandoned_mine
 
