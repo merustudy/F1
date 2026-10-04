@@ -57,24 +57,36 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The middle of the board panel, between the two sides' row 1 columns (FieldLayout.SideGap
-        /// wide): the storm clock (a dial with the ring that fills as the storm comes and the
-        /// battle time on its face) and the storm's words under it. The clock is as wide as the
-        /// gap allows.
+        /// wide): the storm candle (2026-10-04 Diablo kit), which burns down as the storm comes, with
+        /// the battle time written under its holder and the storm's words under that. Its box, and
+        /// inside it the holder at the bottom, the body standing on the holder's dish and the flame
+        /// over the body's top (CandleView moves the top and the flame as the body burns).
         /// </summary>
-        const float ClockSize = 160f;
-        const float ClockTop = 16f;
-        const float ClockX = 960f - ClockSize / 2f;
-
-        /// <summary>The dial's sprite holds the disc at 84% of its canvas (ui_piece fit), so its box is larger than the disc.</summary>
-        const float DialBox = ClockSize / 0.84f;
-        const float StormLineTop = ClockTop + ClockSize + 10f;
+        const float CandleTop = 12f;
+        const float CandleWidth = 160f;
+        const float CandleHeight = 300f;
+        const float CandleHolderWidth = 120f;
+        const float CandleHolderHeight = 62f;
+        const float CandleBodyWidth = 56f;
+        const float CandleBodyHeight = 160f;
+        /// <summary>Where the body's foot stands, from the box's bottom: on the holder's dish.</summary>
+        const float CandleBodyBottom = 48f;
+        const float CandleFlameWidth = 26f;
+        const float CandleFlameHeight = 48f;
+        const float CandleGlowSize = 280f;
+        const float ClockTimeTop = CandleTop + CandleHeight + 2f;
+        const float StormLineTop = ClockTimeTop + 42f;
         const float StormLineWidth = FieldLayout.SideGap;
 
         /// <summary>The last few events as captions in the middle of the header, the newest at the bottom.</summary>
         const float CaptionTop = 12f;
         const float CaptionHeight = 20f;
         const int CaptionLines = 3;
-        const float CaptionWidth = 560f;
+        const float CaptionWidth = 440f;
+
+        /// <summary>The title plate in the middle of the header (2026-10-04 Diablo kit): blackened iron with the dungeon and the floor (or the screen's title) in gold on it.</summary>
+        const float TitlePlateWidth = 330f;
+        const float TitlePlateHeight = 76f;
 
         /// <summary>The stage's box the storm's dusk, the red of death's door and the lightning cover: from under the header to the panel.</summary>
         const float StageFxTop = 84f;
@@ -100,16 +112,19 @@ namespace F1.Editor.Setup
             UiBuild.Box(header, 0f, 0f, 1920f, 84f);
             ButtonParts retreat = KitButton("Retreat", header.transform, UiPalette.Danger, 28f);
             UiBuild.Box(retreat.Rect, 40f, 16f, 300f, 52f);
-            TextMeshProUGUI title = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label("Title", header.transform, 26f, UiPalette.Text, TextAlignmentOptions.Left)), 18f);
-            UiBuild.Box(title, 372f, 16f, 300f, 52f);
-
-            // The captions: the last few events, the newest at the bottom and brightest (BattleScreen.RenderCaptions).
+            // The captions: the last few events, the newest at the bottom and brightest (BattleScreen.RenderCaptions), next to the retreat button.
             var captions = new TextMeshProUGUI[CaptionLines];
             for (int i = 0; i < CaptionLines; i++)
             {
-                captions[i] = UiBuild.SingleLine(UiBuild.Label("Caption" + i, header.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Center));
-                UiBuild.Box(captions[i], 960f - CaptionWidth / 2f, CaptionTop + i * CaptionHeight, CaptionWidth, CaptionHeight);
+                captions[i] = UiBuild.SingleLine(UiBuild.Label("Caption" + i, header.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Left));
+                UiBuild.Box(captions[i], 372f, CaptionTop + i * CaptionHeight, CaptionWidth, CaptionHeight);
             }
+
+            // The title plate in the middle of the header: the dungeon and the floor in gold on blackened iron.
+            Image titlePlate = KitFrame("TitlePlate", header.transform, UiArt.PlateLabel);
+            UiBuild.Box(titlePlate, 960f - TitlePlateWidth / 2f, 4f, TitlePlateWidth, TitlePlateHeight);
+            TextMeshProUGUI title = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label("Title", titlePlate.transform, 26f, UiPalette.Brass, TextAlignmentOptions.Center)), 18f);
+            UiBuild.Stretch(title.rectTransform, 20f, 8f, 20f, 8f);
 
             ButtonParts pause = KitLocalizedButton("Pause", header.transform, UiKeys.Battle.Pause, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(pause.Rect, 1530f, 16f, 110f, 52f);
@@ -125,12 +140,12 @@ namespace F1.Editor.Setup
                 speedLabels[i] = speed.Label;
             }
 
-            // Potions under the retreat button. Their hint is written on a small plate so that it
-            // reads over the background; the plate is as wide as the text. The rest of the space
-            // above the field stays empty: the background shows there.
+            // Potions under the retreat button. While one is chosen, its name and effect and what to do
+            // next are written on a small plate next to the strip, as wide as the text; the plate is hidden
+            // otherwise. The rest of the space above the field stays empty: the background shows there.
             PotionSlotView potionTemplate = BuildPotionStrip(frame, 30f, out RectTransform potions);
             Image hintPlate = KitFrame("PotionHintPlate", frame, UiArt.PlateLabel, 0.6f);
-            UiBuild.Box(hintPlate, 656f, 110f, 300f, 48f);
+            UiBuild.Box(hintPlate, 30f + PotionStripWidth + 16f, 110f, 300f, 48f);
             HorizontalLayoutGroup hintLayout = UiBuild.Horizontal(hintPlate.rectTransform, 0f, 0, TextAnchor.MiddleLeft);
             hintLayout.padding = new RectOffset(22, 22, 0, 0);
             hintLayout.childControlWidth = true;
@@ -161,8 +176,15 @@ namespace F1.Editor.Setup
             // A unit's board (its cells stacked) is put in the column of the row it stands in, as its
             // figure is put in that row's stage column; the screen places both when it opens. The
             // storm clock stands in the middle, where the two sides stand apart as on the stage.
-            Image panel = KitFrame("BoardPanel", frame, UiArt.Panel);
+            Image panel = KitFrame("BoardPanel", frame, UiArt.Table);
             UiBuild.Box(panel, 0f, BoardPanelTop, 1920f, BoardPanelHeight);
+
+            // On the stone: a chain hanging at each end and a heap of skulls at the right. The candle is built before the
+            // board columns so that its light lies under the boards next to it.
+            UiBuild.Box(KitIcon("ChainLeft", panel.transform, UiArt.Chain), 48f, 20f, 24f, 140f);
+            UiBuild.Box(KitIcon("ChainRight", panel.transform, UiArt.Chain), 1848f, 20f, 24f, 140f);
+            UiBuild.Box(KitIcon("Skulls", panel.transform, UiArt.Skulls), 1500f, 340f, 120f, 70f);
+            CandleView candle = BuildCandle(panel.transform);
             var partyBoards = new RectTransform[BattleRows.Count];
             var enemyBoards = new RectTransform[BattleRows.Count];
             for (int i = 0; i < BattleRows.Count; i++)
@@ -174,20 +196,9 @@ namespace F1.Editor.Setup
 
             BattleBoardView boardTemplate = BuildBattleBoard(panel.transform);
 
-            // The storm clock in the middle of the panel: the dial, the ring that fills on it, the time on its face,
-            // and the storm's words under it with the storm icon.
-            Image dial = KitIcon("Dial", panel.transform, UiArt.Dial);
-            UiBuild.Box(dial, 960f - DialBox / 2f, ClockTop - (DialBox - ClockSize) / 2f, DialBox, DialBox);
-            Image ring = KitIcon("StormRing", panel.transform, UiArt.Ring);
-            UiBuild.Box(ring, ClockX, ClockTop, ClockSize, ClockSize);
-            ring.type = Image.Type.Filled;
-            ring.fillMethod = Image.FillMethod.Radial360;
-            ring.fillOrigin = (int)Image.Origin360.Top;
-            ring.fillClockwise = true;
-            ring.fillAmount = 0f;
-            ring.color = UiPalette.Text;
-            TextMeshProUGUI clockTime = UiBuild.SingleLine(UiBuild.Label("ClockTime", panel.transform, 32f, UiPalette.Text, TextAlignmentOptions.Center));
-            UiBuild.Box(clockTime, ClockX, ClockTop + ClockSize / 2f - 30f, ClockSize, 60f);
+            // Under the candle: the battle time, then the storm's words with the storm icon.
+            TextMeshProUGUI clockTime = UiBuild.SingleLine(UiBuild.Label("ClockTime", panel.transform, 28f, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Box(clockTime, 960f - 100f, ClockTimeTop, 200f, 40f);
 
             RectTransform stormLine = UiBuild.Box(UiBuild.Rect("StormLine", panel.transform), 960f - StormLineWidth / 2f, StormLineTop, StormLineWidth, 30f);
             HorizontalLayoutGroup stormLayout = UiBuild.Horizontal(stormLine, 8f, 0, TextAnchor.MiddleCenter);
@@ -199,6 +210,9 @@ namespace F1.Editor.Setup
             stormIconSize.preferredHeight = 26f;
             TextMeshProUGUI clockLabel = UiBuild.Label("ClockLabel", stormLine, 18f, UiPalette.TextDim);
             clockLabel.textWrappingMode = TextWrappingModes.NoWrap;
+
+            // The gloom over the whole screen, under the fx and the result.
+            BuildScreenVignette(frame);
 
             // The fx layer over the stage and the panel: the storm's dusk, the red of death's door and the
             // lightning over the stage's box, and the numbers and ghosts anywhere. Built before the result so
@@ -265,7 +279,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_title", title);
             UiBuild.SetReference(screen, "_clockTime", clockTime);
             UiBuild.SetReference(screen, "_clockLabel", clockLabel);
-            UiBuild.SetReference(screen, "_clockRing", ring);
+            UiBuild.SetReference(screen, "_candle", candle);
             UiBuild.SetReferences(screen, "_captions", captions);
             UiBuild.SetReference(screen, "_fx", fxLayer);
             UiBuild.SetReference(screen, "_pause", pause.Button);
@@ -298,6 +312,51 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_logEnemyFallen", logEnemyFallen);
             UiBuild.SetReference(screen, "_logClose", logClose.Button);
             return screen;
+        }
+
+        /// <summary>
+        /// The storm candle: a box in the middle of the panel. The holder stands at its bottom, the body on the holder's dish
+        /// (filled from the bottom, so that it is as tall as the time left before the storm), the molten top at the body's
+        /// top, the flame over it with its light behind it, and the smoke that rises once the candle is out. CandleView
+        /// moves and animates them.
+        /// </summary>
+        static CandleView BuildCandle(Transform panel)
+        {
+            RectTransform root = UiBuild.Box(UiBuild.Rect("Candle", panel), 960f - CandleWidth / 2f, CandleTop, CandleWidth, CandleHeight);
+
+            Image holder = KitIcon("CandleHolder", root, UiArt.CandleHolder);
+            UiBuild.Place(holder.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(CandleHolderWidth, CandleHolderHeight));
+
+            Image body = KitIcon("CandleBody", root, UiArt.CandleBody);
+            UiBuild.Place(body.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, CandleBodyBottom), new Vector2(CandleBodyWidth, CandleBodyHeight));
+            body.preserveAspect = false;
+            body.type = Image.Type.Filled;
+            body.fillMethod = Image.FillMethod.Vertical;
+            body.fillOrigin = (int)Image.OriginVertical.Bottom;
+            body.fillAmount = 1f;
+
+            Image top = KitIcon("CandleTop", root, UiArt.CandleTop);
+            UiBuild.Place(top.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, CandleBodyBottom + CandleBodyHeight), new Vector2(CandleBodyWidth + 8f, 20f));
+
+            RectTransform flame = UiBuild.Rect("CandleFlame", root);
+            UiBuild.Place(flame, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, CandleBodyBottom + CandleBodyHeight), new Vector2(CandleFlameWidth, CandleFlameHeight));
+            Image glow = KitIcon("CandleGlow", flame, UiArt.Glow);
+            glow.color = new Color(1f, 0.78f, 0.42f, 0.45f);
+            UiBuild.Place(glow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(CandleGlowSize, CandleGlowSize));
+            Image flameArt = KitIcon("CandleFlameArt", flame, UiArt.CandleFlame);
+            UiBuild.Stretch(flameArt.rectTransform);
+
+            Image smoke = KitIcon("CandleSmoke", root, UiArt.Smoke);
+            UiBuild.Place(smoke.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, CandleBodyBottom), new Vector2(40f, 90f));
+            smoke.enabled = false;
+
+            var view = root.gameObject.AddComponent<CandleView>();
+            UiBuild.SetReference(view, "_body", body);
+            UiBuild.SetReference(view, "_top", top.rectTransform);
+            UiBuild.SetReference(view, "_flame", flame);
+            UiBuild.SetReference(view, "_glow", glow);
+            UiBuild.SetReference(view, "_smoke", smoke);
+            return view;
         }
 
         /// <summary>One row of a side: a column that holds the row's unit. The unit takes the width of the column.</summary>

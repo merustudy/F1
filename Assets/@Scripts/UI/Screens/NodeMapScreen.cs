@@ -86,7 +86,7 @@ namespace F1.UI
                     state = node.Floor <= currentFloor ? MapNodeState.Passed : MapNodeState.Ahead;
                 }
 
-                _nodes[node.Id].Show(KindText(node), state, node.Id == _selectedNodeId);
+                _nodes[node.Id].Show(KindText(node), node.Kind == MapNodeKind.Boss, state, node.Id == _selectedNodeId);
             }
 
             bool hasSelection = _selectedNodeId >= 0;

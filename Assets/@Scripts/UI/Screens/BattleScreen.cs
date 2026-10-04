@@ -39,7 +39,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _title;
         [SerializeField] TMP_Text _clockTime;
         [SerializeField] TMP_Text _clockLabel;
-        [SerializeField] Image _clockRing;
+        [SerializeField] CandleView _candle;
         [SerializeField] TMP_Text[] _captions;
         [SerializeField] BattleFxLayer _fx;
         [SerializeField] Button _pause;
@@ -101,7 +101,11 @@ namespace F1.UI
         public int PlayedEvents => _presenter == null ? 0 : _presenter.Played;
 
         /// <summary>How far the storm's ring has filled: 0 at the start, 1 when the storm is here.</summary>
-        public float StormRingFill => _clockRing.fillAmount;
+        /// <summary>How far the storm has come, 0..1: the share of the storm candle that has burnt.</summary>
+        public float StormProgress => _candle.Progress;
+
+        /// <summary>The storm candle. For tests.</summary>
+        public CandleView Candle => _candle;
 
         /// <summary>The captions in the header, oldest first.</summary>
         public IReadOnlyList<string> Captions => _captionLines;
@@ -180,7 +184,7 @@ namespace F1.UI
             _resultPanel.SetActive(false);
             _logPanel.SetActive(false);
 
-            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _clockRing.rectTransform, PushCaption);
+            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption);
             RenderCaptions();
         }
 
@@ -335,9 +339,17 @@ namespace F1.UI
             BattleUnitView view = Instantiate(_unitTemplate, parent);
             view.gameObject.SetActive(true);
 
-            // A party unit is a mercenary and is shown as its job; an enemy has its own figure.
+            // A party unit is a mercenary and is shown as its job; an enemy has its own figure, drawn at its own
+            // scale (a boss stands larger than its place).
             string id = unit.Setup.SourceId;
-            view.Bind(unit, unit.Side == BattleSide.Party ? _art.OfMercenary(id) : _art.OfEnemy(id));
+            if (unit.Side == BattleSide.Party)
+            {
+                view.Bind(unit, _art.OfMercenary(id));
+            }
+            else
+            {
+                view.Bind(unit, _art.OfEnemy(id), _art.ScaleOfEnemy(id));
+            }
             return view;
         }
 
@@ -414,21 +426,21 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The clock in the middle of the panel: the battle time, and the storm as a ring that
-        /// fills until the storm is here, when it turns the storm's color and the label says what
-        /// the next tick takes. The stage darkens over the last seconds before the storm.
+        /// The battle time under the candle, and the storm: the candle burns down until the storm is
+        /// here, when it goes out and the label says what the next tick takes. The flame gutters and the
+        /// stage darkens over the last seconds before the storm.
         /// </summary>
         void RenderClock(BattleEngine engine, BalanceData balance)
         {
             _clockTime.text = UiStrings.Get(UiKeys.Battle.Time, UiText.Seconds(engine.TimeMs));
             bool storm = engine.TimeMs >= balance.StormStartMs;
-            _clockRing.fillAmount = storm ? 1f : Mathf.Clamp01((float)engine.TimeMs / balance.StormStartMs);
-            _clockRing.color = storm ? UiPalette.Burn : UiPalette.Text;
+            float closeness = storm ? 1f : Mathf.Clamp01((float)(engine.TimeMs - (balance.StormStartMs - StormDuskMs)) / StormDuskMs);
+            _candle.Show(storm ? 1f : Mathf.Clamp01((float)engine.TimeMs / balance.StormStartMs), closeness, storm);
             _clockLabel.text = storm
                 ? UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage)
                 : UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs));
             _clockLabel.color = storm ? UiPalette.Burn : UiPalette.TextDim;
-            _fx.SetStorm(storm ? 1f : Mathf.Clamp01((float)(engine.TimeMs - (balance.StormStartMs - StormDuskMs)) / StormDuskMs));
+            _fx.SetStorm(closeness);
         }
 
         /// <summary>
@@ -465,21 +477,19 @@ namespace F1.UI
             for (int i = 0; i < _potionViews.Count; i++)
             {
                 PotionData potion = engine.Potions[i];
-                _potionViews[i].Show(potion, i == _armedPotion, ongoing && potion != null && potionReady);
+                _potionViews[i].Show(potion, potion == null ? null : _art.OfPotion(potion.Id), i == _armedPotion, ongoing && potion != null && potionReady);
             }
 
-            if (_armedPotion >= 0 && engine.Potions[_armedPotion] != null)
+            // The words of the chosen potion (its name, its effect, what to do next) show only while one is chosen:
+            // they go away when it is used or put down (2026-10-04).
+            bool armed = _armedPotion >= 0 && engine.Potions[_armedPotion] != null;
+            if (armed)
             {
-                _potionHint.text = UiStrings.Get(UiKeys.Battle.PotionArmed, UiText.Name(engine.Potions[_armedPotion].Name));
+                PotionData chosen = engine.Potions[_armedPotion];
+                _potionHint.text = UiStrings.Get(UiKeys.Battle.PotionArmed, UiText.Name(chosen.Name), UiText.PotionDetails(chosen));
             }
-            else if (!potionReady)
-            {
-                _potionHint.text = UiStrings.Get(UiKeys.Battle.PotionWait, UiText.Seconds(engine.PotionReadyMs - engine.TimeMs));
-            }
-            else
-            {
-                _potionHint.text = UiStrings.Get(UiKeys.Battle.PotionHint);
-            }
+
+            _potionHint.transform.parent.gameObject.SetActive(armed);
 
             _retreat.interactable = engine.CanRetreat;
             _retreatLabel.text = ongoing && !engine.CanRetreat

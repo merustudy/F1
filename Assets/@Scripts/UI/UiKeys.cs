@@ -138,9 +138,7 @@ namespace F1.UI
             public const string DogRolling = "Battle.DogRolling";
             public const string PartyFallen = "Battle.PartyFallen";
             public const string EnemyFallen = "Battle.EnemyFallen";
-            public const string PotionHint = "Battle.PotionHint";
             public const string PotionArmed = "Battle.PotionArmed";
-            public const string PotionWait = "Battle.PotionWait";
             public const string Retreat = "Battle.Retreat";
             public const string RetreatWait = "Battle.RetreatWait";
             public const string Victory = "Battle.Victory";

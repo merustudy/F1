@@ -38,8 +38,13 @@ namespace F1.Editor.Setup
             public string AssetPath => ArtDirectory + "/" + Name + ".png";
         }
 
-        /// <summary>The dark leather panel behind a header, a strip of slots or a box. Tiled: rivets run along its edges.</summary>
+        /// <summary>The carved stone panel behind a header, a box, the board panel's table top and the node map's tablet (2026-10-04 Diablo kit). Tiled: a band of gothic arches runs along its edges.</summary>
         public const string Panel = "Frame/panel";
+        public const string Table = "Frame/table";
+        public const string Tablet = "Frame/tablet";
+
+        /// <summary>The iron belt the potion slots sit on. Tiled: rivets run along its edges.</summary>
+        public const string Belt = "Frame/belt";
 
         /// <summary>The plate under a unit, in the color of its side or state.</summary>
         public const string PlateParty = "Frame/plate_party";
@@ -50,23 +55,46 @@ namespace F1.Editor.Setup
         /// <summary>The plate a line of text is written on so that it reads over the background.</summary>
         public const string PlateLabel = "Frame/plate_label";
 
-        /// <summary>An item cell, a potion slot and the trough of a bar; and the same when it is the chosen one.</summary>
+        /// <summary>An item cell of a unit's inventory panel: a plain bone cell with a thin dark line (drawn: Archive/14-ui-diablo/draw_pieces.py); and the same in gold when it is the chosen one.</summary>
         public const string Slot = "Frame/slot";
         public const string SlotSelected = "Frame/slot_selected";
+
+        /// <summary>The trough of a bar: a dark iron recess (the HP bar of a plate).</summary>
+        public const string Trough = "Frame/trough";
+
+        /// <summary>A potion slot: a square pocket of blackened iron on the belt; and the same in gold when the potion is the chosen one.</summary>
+        public const string PotionSlot = "Frame/potion_slot";
+        public const string PotionSlotSelected = "Frame/potion_slot_selected";
 
         /// <summary>A white button: the screen tints it.</summary>
         public const string Button = "Frame/button";
 
-        /// <summary>The leather bag behind a unit's item cells, as long as its board. Tiled: a stitch runs along its edges.</summary>
+        /// <summary>The inventory panel of blackened iron behind a unit's item cells, as long as its board.</summary>
         public const string Bag = "Frame/bag";
 
-        /// <summary>The dial of the storm clock in the middle of the board panel: a whole piece, never stretched (ui_piece).</summary>
-        public const string Dial = "Frame/dial";
+        /// <summary>
+        /// The storm candle in the middle of the board panel: the skull holder, the body that burns down (filled from the
+        /// bottom), its flame, its molten top and the smoke when it is out. Whole pieces; the top and the smoke are drawn
+        /// (Archive/14-ui-diablo/draw_pieces.py).
+        /// </summary>
+        public const string CandleHolder = "Frame/candle_holder";
+        public const string CandleBody = "Frame/candle_body";
+        public const string CandleFlame = "Frame/candle_flame";
+        public const string CandleTop = "Icon/candle_top";
+        public const string Smoke = "Icon/smoke";
 
-        /// <summary>The ring of the storm clock, filled radially as the storm comes. Drawn (same script).</summary>
-        public const string Ring = "Icon/ring";
+        /// <summary>A heap of skulls on the stone of the board panel. A whole piece.</summary>
+        public const string Skulls = "Frame/skulls";
 
-        /// <summary>A soft darkening towards the edges, stretched over the stage: the storm's dusk and the red of death's door. Drawn (same script).</summary>
+        /// <summary>The iron chains hanging at the ends of the board panel (drawn), and the warm light behind the candle's flame (drawn, Archive/13-ui-decor).</summary>
+        public const string Chain = "Icon/chain";
+        public const string Glow = "Icon/glow";
+
+        /// <summary>The markers of the node map: a battle (crossed swords) and the boss (a crowned skull).</summary>
+        public const string NodeBattle = "Icon/node_battle";
+        public const string NodeBoss = "Icon/node_boss";
+
+        /// <summary>A soft darkening towards the edges, stretched over the stage (the storm's dusk, the red of death's door) and over the whole screen (the Diablo kit's gloom). Drawn (Archive/09-battle-ui-feel/draw_pieces.py).</summary>
         public const string Vignette = "Icon/vignette";
 
         public const string Shield = "Icon/shield";
@@ -78,17 +106,31 @@ namespace F1.Editor.Setup
         public static readonly IReadOnlyList<Piece> All = new[]
         {
             new Piece(Panel, 40, tiled: true),
+            new Piece(Table, 40, tiled: true),
+            new Piece(Tablet, 40, tiled: true),
+            new Piece(Belt, 40, tiled: true),
             new Piece(PlateParty, 44),
             new Piece(PlateEnemy, 44),
             new Piece(PlateDanger, 44),
             new Piece(PlateTarget, 44),
             new Piece(PlateLabel, 44),
-            new Piece(Slot, 30),
-            new Piece(SlotSelected, 30),
+            new Piece(Slot, 16),
+            new Piece(SlotSelected, 16),
+            new Piece(Trough, 30),
+            new Piece(PotionSlot, 30),
+            new Piece(PotionSlotSelected, 30),
             new Piece(Button, 32),
-            new Piece(Bag, 40, tiled: true),
-            new Piece(Dial),
-            new Piece(Ring),
+            new Piece(Bag, 40),
+            new Piece(CandleHolder),
+            new Piece(CandleBody),
+            new Piece(CandleFlame),
+            new Piece(CandleTop),
+            new Piece(Smoke),
+            new Piece(Skulls),
+            new Piece(Chain),
+            new Piece(Glow),
+            new Piece(NodeBattle),
+            new Piece(NodeBoss),
             new Piece(Vignette),
             new Piece(Shield),
             new Piece(Burn),

@@ -73,8 +73,15 @@ namespace F1.Editor.Setup
             }
 
             // The board panel of the battle screen: the party's boards in its columns, under the stage's columns.
-            panel = KitFrame("BoardPanel", frame, UiArt.Panel);
+            panel = KitFrame("BoardPanel", frame, UiArt.Table);
             UiBuild.Box(panel, 0f, BoardPanelTop, 1920f, BoardPanelHeight);
+
+            // The right half's words and buttons read on a dark plate laid on the stone; a chain hangs at the left end and
+            // a heap of skulls lies between the boards and the plate.
+            Image rightPlate = KitFrame("PanelRightPlate", panel.transform, UiArt.PlateLabel);
+            UiBuild.Box(rightPlate, PanelRightX - 20f, 12f, PanelRightWidth + 40f, BoardPanelHeight - 24f);
+            UiBuild.Box(KitIcon("ChainLeft", panel.transform, UiArt.Chain), 48f, 20f, 24f, 140f);
+            UiBuild.Box(KitIcon("Skulls", panel.transform, UiArt.Skulls), 872f, 386f, 104f, 60f);
             float w = BattleFieldWidth / (BattleRows.Count * 2);
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
@@ -87,6 +94,9 @@ namespace F1.Editor.Setup
             UiBuild.Box(detail, PanelRightX, PanelDetailTop, PanelRightWidth, 54f);
             ButtonParts toInventory = KitLocalizedButton("ToInventory", panel.transform, UiKeys.Board.ToInventory, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(toInventory.Rect, toInventoryX, PanelButtonsTop, toInventoryWidth, PanelButtonHeight);
+
+            // The gloom over the whole screen, under the popup.
+            BuildScreenVignette(frame);
 
             GameObject popup = BuildInventoryPopup(frame, out TMP_Text inventoryTitle, out GameObject inventoryEmpty, out InventoryEntryView entryTemplate, out RectTransform entryParent);
 
@@ -198,9 +208,12 @@ namespace F1.Editor.Setup
             Image frame = KitFrame(name, parent, UiArt.Slot);
             UiBuild.Size(frame, BattleItemView.CellWidth, BattleItemView.CellHeight);
             Button button = UiBuild.MakeButton(frame);
+            ColorBlock colors = button.colors;
+            colors.disabledColor = new Color(QuietCellTint, QuietCellTint, QuietCellTint, 1f);
+            button.colors = colors;
 
             // Words: the empty cell, or the name and grade of an item without an icon.
-            TextMeshProUGUI text = UiBuild.Label(name + "Text", frame.transform, 19f, UiPalette.Text);
+            TextMeshProUGUI text = UiBuild.Label(name + "Text", frame.transform, 19f, UiPalette.InkText);
             UiBuild.Stretch(text.rectTransform, 14f, 4f, 12f, 4f);
             text.textWrappingMode = TextWrappingModes.NoWrap;
             UiBuild.ShrinkToFit(text, 13f);

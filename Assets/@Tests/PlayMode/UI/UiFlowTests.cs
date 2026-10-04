@@ -768,7 +768,7 @@ namespace F1.Tests
         /// ring has filled as far as the time has gone.
         /// </summary>
         [UnityTest]
-        public IEnumerator Battle_PlaysWhatHappens_AsRisingNumbersCaptionsAndTheStormRing()
+        public IEnumerator Battle_PlaysWhatHappens_AsRisingNumbersCaptionsAndTheStormCandle()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle();
@@ -790,16 +790,18 @@ namespace F1.Tests
             Assert.AreEqual(engine.Events.Count, battle.PlayedEvents, "Every event so far was passed.");
             Assert.Greater(battle.Fx.FloatingPlayed, 0, "A hit rose as a number.");
             Assert.IsNotEmpty(battle.Captions, "The hit reads as a caption.");
-            Assert.AreEqual(Mathf.Clamp01((float)engine.TimeMs / engine.Setup.Balance.StormStartMs), battle.StormRingFill, 0.001f);
+            Assert.AreEqual(Mathf.Clamp01((float)engine.TimeMs / engine.Setup.Balance.StormStartMs), battle.StormProgress, 0.001f);
+            Assert.IsTrue(battle.Candle.Lit, "The candle burns while the storm is still to come.");
             Assert.AreEqual(engine.Events.Count(e => e.Kind == BattleEventKind.StormTicked), 0, "No storm yet.");
             Assert.IsFalse(battle.Fx.DangerShown);
 
-            // The storm: the ring is full, the stage is dark, and a tick flashes and names its damage.
+            // The storm: the candle has burnt down and gone out, the stage is dark, and a tick flashes and names its damage.
             Managers.Expedition.AdvanceBattle(engine.Setup.Balance.StormStartMs - engine.TimeMs + engine.Setup.Balance.StormTickMs);
             yield return null;
             if (!Managers.Expedition.Battle.IsFinished)
             {
-                Assert.AreEqual(1f, battle.StormRingFill, 0.001f);
+                Assert.AreEqual(1f, battle.StormProgress, 0.001f);
+                Assert.IsFalse(battle.Candle.Lit, "The candle is out once the storm is here.");
                 Assert.AreEqual(1f, battle.Fx.StormDarkness, 0.001f);
             }
         }

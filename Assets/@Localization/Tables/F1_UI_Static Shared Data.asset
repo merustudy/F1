@@ -345,21 +345,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909252
-  - m_Id: 9766393864261
-    m_Key: Battle.PotionHint
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909254
   - m_Id: 9766393864262
     m_Key: Battle.PotionArmed
     m_Metadata:
       m_Items:
       - rid: 636489279218909255
-  - m_Id: 9766393864263
-    m_Key: Battle.PotionWait
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909256
   - m_Id: 9766393864264
     m_Key: Battle.Retreat
     m_Metadata:
@@ -1103,18 +1093,11 @@ MonoBehaviour:
       data:
         m_CommentText: 'Next to the death''s door icon: at 0 HP after grace. {0}
           = death chance per hit.'
-    - rid: 636489279218909254
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: How to use a potion.
     - rid: 636489279218909255
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = potion name.'
-    - rid: 636489279218909256
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = seconds until a potion can be used.'
+        m_CommentText: '{0} = potion name; {1} = its effect. Shown only while the
+          potion is chosen.'
     - rid: 636489279218909257
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:

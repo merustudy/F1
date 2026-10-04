@@ -316,17 +316,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864261
-    m_Localized: Click a potion, then an ally
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864262
-    m_Localized: '{0}: click an ally'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 9766393864263
-    m_Localized: Potion ready in {0}s
+    m_Localized: "{0} \xB7 {1}: click an ally"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -790,7 +781,6 @@ MonoBehaviour:
         - id: 9766393864258
         - id: 9766393864259
         - id: 9766393864262
-        - id: 9766393864263
         - id: 9766393864264
         - id: 9766393864265
         - id: 9766393864270

@@ -16,9 +16,12 @@ namespace F1.Editor.Setup
         {
             RewardScreen screen = Screen<RewardScreen>("RewardScreen", holder, out RectTransform frame);
 
-            Image header = UiBuild.Panel("Header", frame, UiPalette.Panel);
-            UiBuild.Box(header, 0f, 0f, 1920f, 80f);
-            UiBuild.Box(UiBuild.LocalizedLabel("RewardTitle", header.transform, UiKeys.Reward.Title, 36f, UiPalette.Text), 40f, 14f, 900f, 52f);
+            Image header = KitFrame("Header", frame, UiArt.Panel);
+            UiBuild.Box(header, 0f, 0f, 1920f, 84f);
+            Image titlePlate = KitFrame("TitlePlate", header.transform, UiArt.PlateLabel);
+            UiBuild.Box(titlePlate, 960f - TitlePlateWidth / 2f, 4f, TitlePlateWidth, TitlePlateHeight);
+            TextMeshProUGUI rewardTitle = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.LocalizedLabel("RewardTitle", titlePlate.transform, UiKeys.Reward.Title, 26f, UiPalette.Brass, TextAlignmentOptions.Center)), 18f);
+            UiBuild.Stretch(rewardTitle.rectTransform, 20f, 8f, 20f, 8f);
 
             // The rewards, one under the other, as wide as the right half, under the potions and above the panel. Three cards fit the room.
             RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, PartyRightTop, 920f, BoardPanelTop - 16f - PartyRightTop);

@@ -23,6 +23,8 @@ namespace F1.UI
         RectTransform _rect;
         Vector2 _base;
         bool _baseKnown;
+        Vector2 _artBase;
+        bool _artBaseKnown;
         float _phase;
         float _flash;
         Color _flashTint = Color.white;
@@ -42,6 +44,22 @@ namespace F1.UI
             _art.enabled = art != null;
             _art.color = Color.white;
             _placeholder.SetActive(art == null);
+        }
+
+        /// <summary>
+        /// Draws the art this many times the common size of a figure place, keeping its feet on the floor line
+        /// (the art is anchored at the bottom centre). A boss is drawn larger than its place and may overlap its
+        /// neighbours; the place itself, and so the layout, does not change.
+        /// </summary>
+        public void SetScale(float scale)
+        {
+            if (!_artBaseKnown)
+            {
+                _artBase = _art.rectTransform.sizeDelta;
+                _artBaseKnown = true;
+            }
+
+            _art.rectTransform.sizeDelta = _artBase * Mathf.Max(0.1f, scale);
         }
 
         /// <summary>Moves the whole place by this much from where it is laid out.</summary>

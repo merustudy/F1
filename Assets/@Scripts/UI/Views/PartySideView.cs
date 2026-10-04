@@ -39,10 +39,12 @@ namespace F1.UI
         readonly List<PotionSlotView> _potions = new List<PotionSlotView>();
         readonly List<InventoryEntryView> _entries = new List<InventoryEntryView>();
 
-        // At most one of the two is selected: an item on a board (member and its first cell) or an item of the inventory.
+        // At most one of these is selected: an item on a board (member and its first cell), an item of the inventory,
+        // or a potion (whose words then show on the detail line; the potions cannot be used here).
         int _selectedMember = -1;
         int _selectedCell = -1;
         int _selectedInventory = -1;
+        int _selectedPotion = -1;
         ExpeditionArt _art;
 
         /// <summary>
@@ -94,6 +96,8 @@ namespace F1.UI
             {
                 PotionSlotView view = Instantiate(_potionTemplate, _potionParent);
                 view.gameObject.SetActive(true);
+                int slot = i;
+                view.Button.onClick.AddListener(() => OnPotionClicked(slot));
                 _potions.Add(view);
             }
 
@@ -134,6 +138,7 @@ namespace F1.UI
             _selectedMember = -1;
             _selectedCell = -1;
             _selectedInventory = -1;
+            _selectedPotion = -1;
         }
 
         /// <summary>
@@ -177,7 +182,7 @@ namespace F1.UI
             for (int i = 0; i < _potions.Count; i++)
             {
                 string potionId = expedition.Potions[i];
-                _potions[i].Show(potionId == null ? null : data.Potions.Get(potionId), false, false);
+                _potions[i].Show(potionId == null ? null : data.Potions.Get(potionId), potionId == null ? null : _art.OfPotion(potionId), i == _selectedPotion, potionId != null);
             }
 
             _inventoryPanel.SetActive(InventoryOpen);
@@ -189,9 +194,18 @@ namespace F1.UI
             _toInventory.interactable = !external && _selectedMember >= 0 && manager.CanMoveToInventory(_selectedMember, _selectedCell);
 
             EquippedItem selected = SelectedItem(expedition);
-            _detail.text = selected == null
-                ? UiStrings.Get(UiKeys.Board.Hint)
-                : UiText.ItemTitle(selected) + " — " + UiText.ItemSummary(selected);
+            string chosenPotion = _selectedPotion >= 0 ? expedition.Potions[_selectedPotion] : null;
+            if (chosenPotion != null)
+            {
+                PotionData potion = data.Potions.Get(chosenPotion);
+                _detail.text = UiText.Name(potion.Name) + " — " + UiText.PotionDetails(potion);
+            }
+            else
+            {
+                _detail.text = selected == null
+                    ? UiStrings.Get(UiKeys.Board.Hint)
+                    : UiText.ItemTitle(selected) + " — " + UiText.ItemSummary(selected);
+            }
         }
 
         void RefreshInventory(ExpeditionState expedition, int cells, bool interactable)
@@ -287,6 +301,16 @@ namespace F1.UI
             }
         }
 
+        /// <summary>A potion's slot shows its words on the detail line while it is chosen; clicking it again puts it down. Nothing else changes: potions are used in battle.</summary>
+        void OnPotionClicked(int slot)
+        {
+            _selectedPotion = _selectedPotion == slot ? -1 : slot;
+            _selectedMember = -1;
+            _selectedCell = -1;
+            _selectedInventory = -1;
+            Refresh();
+        }
+
         void OnCellClicked(int member, int cell)
         {
             if (member < 0)
@@ -299,6 +323,7 @@ namespace F1.UI
                 return;
             }
 
+            _selectedPotion = -1;
             ExpeditionManager manager = Managers.Expedition;
             if (_selectedInventory >= 0)
             {

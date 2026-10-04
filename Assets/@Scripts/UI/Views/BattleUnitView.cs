@@ -84,11 +84,13 @@ namespace F1.UI
         public bool Moving => _lungeAge >= 0f || _recoilAge >= 0f || _walkAge >= 0f;
 
         /// <param name="figure">The unit's art, or null when it has none.</param>
-        public void Bind(BattleUnit unit, Sprite figure)
+        /// <param name="figureScale">How many times the common size the art is drawn (a boss is larger).</param>
+        public void Bind(BattleUnit unit, Sprite figure, float figureScale = 1f)
         {
             _unit = unit;
             _name.text = UiText.Name(unit.Setup.Name);
             _figureView.Show(figure);
+            _figureView.SetScale(figureScale);
         }
 
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>

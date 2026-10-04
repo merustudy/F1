@@ -93,9 +93,7 @@ Battle.DogGrace,Next to the death's door icon: at 0 HP during grace. {0} = secon
 Battle.DogRolling,Next to the death's door icon: at 0 HP after grace. {0} = death chance per hit.,피격마다 사망 {0}%,{0}% death per hit
 Battle.PartyFallen,Mercenaries who died in this battle. {0} = names.,쓰러진 아군: {0},Fallen: {0}
 Battle.EnemyFallen,Enemies killed in this battle. {0} = names.,쓰러뜨린 적: {0},Defeated: {0}
-Battle.PotionHint,How to use a potion.,포션을 누른 뒤 아군을 누르세요,"Click a potion, then an ally"
-Battle.PotionArmed,{0} = potion name.,{0}: 쓸 아군을 누르세요,{0}: click an ally
-Battle.PotionWait,{0} = seconds until a potion can be used.,포션 대기 {0}초,Potion ready in {0}s
+Battle.PotionArmed,{0} = potion name; {1} = its effect. Shown only while the potion is chosen.,{0} · {1}: 쓸 아군을 누르세요,{0} · {1}: click an ally
 Battle.Retreat,{0} = success chance.,후퇴 ({0}%),Retreat ({0}%)
 Battle.RetreatWait,{0} = seconds until retreat can be tried again.,후퇴 대기 {0}초,Retreat in {0}s
 Battle.Victory,Battle result.,승리,Victory

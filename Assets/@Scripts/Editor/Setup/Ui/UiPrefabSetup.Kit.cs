@@ -23,9 +23,12 @@ namespace F1.Editor.Setup
         const float ItemIconMarginX = 8f;
         const float ItemIconMarginY = 5f;
 
-        /// <summary>How far the bag behind a board reaches out past its cells, sideways (the bags of two columns, FieldLayout.ColumnGap apart, must not touch) and up and down.</summary>
+        /// <summary>How far the inventory panel behind a board reaches out past its cells, sideways (the panels of two columns, FieldLayout.ColumnGap apart, must not touch) and up and down.</summary>
         const float BoardBagPadX = 4f;
-        const float BoardBagPadY = 3f;
+        const float BoardBagPadY = 10f;
+
+        /// <summary>The gloom of the Diablo kit: a soft darkening towards the edges of the whole screen.</summary>
+        const float ScreenVignetteAlpha = 0.35f;
 
         /// <summary>The grade badge of an item on the party side: its size, and its distance from the cell's bottom-left corner.</summary>
         const float GradeBadgeSize = 24f;
@@ -38,7 +41,13 @@ namespace F1.Editor.Setup
         const float UnitNameMinSize = 14f;
 
         /// <summary>How much of an empty item cell shows: it is there, but nothing is in it.</summary>
-        const float EmptyCellAlpha = 0.45f;
+        const float EmptyCellAlpha = 0.8f;
+
+        /// <summary>
+        /// How much of its color a board cell keeps while it takes no click: dimmer than a live cell,
+        /// but opaque, so that bone stays bone over the iron panel instead of sinking into it.
+        /// </summary>
+        const float QuietCellTint = 0.8f;
 
         /// <summary>How strongly the charge of an item covers its cell.</summary>
         const float CooldownAlpha = 0.84f;
@@ -125,7 +134,7 @@ namespace F1.Editor.Setup
             Image ghostFill = null;
             if (ghost)
             {
-                ghostFill = UiBuild.Image(name + "Ghost", area, UiPalette.Danger);
+                ghostFill = UiBuild.Image(name + "Ghost", area, UiPalette.BloodLight);
                 UiBuild.Stretch(ghostFill.rectTransform);
             }
 
@@ -180,7 +189,7 @@ namespace F1.Editor.Setup
                 UiBuild.SingleLine(UiBuild.Line(UiBuild.Label(prefix + "Name", t, 20f, UiPalette.Text), 10f, 26f, 45f, 11f)),
                 UnitNameMinSize);
 
-            UiBar hpBar = KitBar(prefix + "HpBar", t, UiArt.Slot, 0.4f, 4f, UiPalette.Good, ghost: true);
+            UiBar hpBar = KitBar(prefix + "HpBar", t, UiArt.Trough, 0.4f, 4f, UiPalette.Blood, ghost: true);
             UiBuild.Line(hpBar, 39f, 23f, 11f, 11f);
             TextMeshProUGUI hp = UiBuild.SingleLine(UiBuild.Label(prefix + "Hp", t, 15f, UiPalette.Text, TextAlignmentOptions.Center));
             UiBuild.Line(hp, 39f, 23f, 11f, 11f);
@@ -202,35 +211,47 @@ namespace F1.Editor.Setup
         /// </summary>
         static PotionSlotView BuildPotionStrip(Transform frame, float x, out RectTransform potions)
         {
-            Image panel = KitFrame("PotionsPanel", frame, UiArt.Panel, 0.75f);
-            UiBuild.Box(panel, x, 92f, 610f, 84f);
-            potions = UiBuild.Box(UiBuild.Rect("Potions", frame), x + 12f, 102f, 586f, 64f);
-            UiBuild.Horizontal(potions, 8f);
-            return BuildPotionSlot(potions, 190f);
+            Image panel = KitFrame("PotionsPanel", frame, UiArt.Belt, 0.75f);
+            UiBuild.Box(panel, x, 92f, PotionStripWidth, 84f);
+            potions = UiBuild.Box(UiBuild.Rect("Potions", frame), x + 12f, 102f, PotionStripWidth - 24f, PotionSlotSize);
+            UiBuild.Horizontal(potions, PotionSlotGap);
+            return BuildPotionSlot(potions);
         }
 
-        /// <summary>One potion slot: the name over the effect, in a slot of the kit.</summary>
-        static PotionSlotView BuildPotionSlot(Transform parent, float width)
+        /// <summary>A potion slot is a square iron pocket that shows only the bottle (2026-10-04); the belt holds three with a gap between them.</summary>
+        const float PotionSlotSize = 64f;
+        const float PotionSlotGap = 8f;
+        const float PotionStripWidth = 24f + 3f * PotionSlotSize + 2f * PotionSlotGap;
+
+        /// <summary>One potion slot: the bottle alone, in a square pocket of the kit. Its words are shown elsewhere while it is chosen (the battle's hint plate, the party side's detail line).</summary>
+        static PotionSlotView BuildPotionSlot(Transform parent)
         {
-            Image frame = KitFrame("PotionTemplate", parent, UiArt.Slot);
-            UiBuild.Size(frame, width, 64f);
+            Image frame = KitFrame("PotionTemplate", parent, UiArt.PotionSlot);
+            UiBuild.Size(frame, PotionSlotSize, PotionSlotSize);
             Button button = UiBuild.MakeButton(frame);
 
-            TextMeshProUGUI name = UiBuild.SingleLine(UiBuild.Label("PotionName", frame.transform, 21f, UiPalette.Text));
-            UiBuild.Stretch(name.rectTransform, 14f, 6f, 12f, 30f);
-            TextMeshProUGUI effect = UiBuild.SingleLine(UiBuild.Label("PotionEffect", frame.transform, 17f, UiPalette.TextDim));
-            UiBuild.Stretch(effect.rectTransform, 14f, 34f, 12f, 6f);
+            Image icon = UiBuild.Image("PotionIcon", frame.transform, Color.white);
+            icon.preserveAspect = true;
+            UiBuild.Stretch(icon.rectTransform, 7f, 7f, 7f, 7f);
+            icon.enabled = false;
 
             var view = frame.gameObject.AddComponent<PotionSlotView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_frame", frame);
-            UiBuild.SetReference(view, "_plain", UiArt.Load(UiArt.Slot));
-            UiBuild.SetReference(view, "_selected", UiArt.Load(UiArt.SlotSelected));
-            UiBuild.SetReference(view, "_name", name);
-            UiBuild.SetReference(view, "_effect", effect);
+            UiBuild.SetReference(view, "_icon", icon);
+            UiBuild.SetReference(view, "_plain", UiArt.Load(UiArt.PotionSlot));
+            UiBuild.SetReference(view, "_selected", UiArt.Load(UiArt.PotionSlotSelected));
 
             frame.gameObject.SetActive(false);
             return view;
+        }
+
+        /// <summary>The gloom of the Diablo kit over a whole screen: a soft darkening towards the edges. Takes no click; the caller builds it under what must stay bright (the result, a popup).</summary>
+        static void BuildScreenVignette(Transform frame)
+        {
+            Image vignette = UiBuild.Image("ScreenVignette", frame, new Color(0f, 0f, 0f, ScreenVignetteAlpha));
+            vignette.sprite = UiArt.Load(UiArt.Vignette);
+            UiBuild.Stretch(vignette.rectTransform);
         }
     }
 }

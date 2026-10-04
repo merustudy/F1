@@ -17,7 +17,7 @@ namespace F1.UI
     public sealed class ItemSlotView : MonoBehaviour
     {
         /// <summary>The grade's line inside the text: its size against the name's, and its color.</summary>
-        static readonly string GradeLine = "\n<size=75%><color=#" + ColorUtility.ToHtmlStringRGB(UiPalette.TextDim) + ">{0}</color></size>";
+        static readonly string GradeLine = "\n<size=75%><color=#" + ColorUtility.ToHtmlStringRGB(UiPalette.InkTextDim) + ">{0}</color></size>";
 
         [SerializeField] Button _button;
         [SerializeField] Image _frame;
@@ -57,7 +57,7 @@ namespace F1.UI
             _text.text = item == null
                 ? UiStrings.Get(UiKeys.Board.EmptySlot)
                 : pictured ? string.Empty : UiText.Name(item.Item.Name) + string.Format(GradeLine, UiStrings.Get(UiKeys.Board.Grade, item.Grade));
-            _text.color = item == null ? UiPalette.TextDim : UiPalette.Text;
+            _text.color = item == null ? UiPalette.InkTextDim : UiPalette.InkText;
 
             _frame.sprite = selected ? _selected : _plain;
             _button.interactable = interactable;

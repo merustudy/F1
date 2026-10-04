@@ -3,3 +3,7 @@ shield,"a heater shield in steel blue-grey with a cream band down its middle",96
 burn,"a single flame in orange with a smaller yellow flame inside it",96x96,6
 deaths_door,"a skull seen from the front, cream colored, with two dark eye sockets",96x96,6
 storm,"a dark grey storm cloud with one yellow lightning bolt under it",96x96,6
+node_battle,"two crossed swords, steel blades with brass hilts",96x96,6
+node_boss,"a skull seen from the front with a small iron crown on it, cream colored with dark eye sockets",96x96,6
+potion_heal,"a round glass potion bottle with a short neck and a cork, holding deep red liquid, with a small paper tag on a string",96x96,6
+potion_shield,"a round glass potion bottle with a short neck and a cork, holding pale blue liquid, with a small brass shield-shaped tag on a string",96x96,6
