@@ -57,8 +57,8 @@ saturated colors, pastel, anime face, cute mascot, chibi, grotesque, ugly, bulgi
 eyes, huge nose, huge jaw, missing teeth, clean vector line, uniform line weight,
 eyelashes drawn one by one, sparkles, drop shadow, ground shadow, scenery,
 background, light rays, motion lines, frame, text, letters, numbers, logo, title,
-watermark, cropped figure, extra characters, two figures, a crowd, dot eyes, blank
-eyes without pupils, elegant fashion figure
+watermark, cropped figure, extra characters, two figures, a crowd, elegant fashion
+figure
 ```
 
 ## 3. Reference Rule
@@ -82,6 +82,7 @@ transparent background.
 - Proportions and build: exaggerated and rubbery, between three and five heads tall as the subject says. Every character has a strongly different body type (brawny and top-heavy, squat and barrel-shaped, tall and lanky, round and soft, lean and wiry): follow the subject. A woman keeps a curvy figure (a full bust, a narrow waist, full hips) whatever her build. Rubbery limbs with no muscles drawn inside, big hands and big boots.
 - Face: caricatured but attractive, as the subject says: large expressive eyes with dark pupils (one may be a touch larger than the other), well-shaped thick eyebrows, a distinctive but elegant nose (long and straight, small and upturned, or strong and straight), a strong handsome jaw for a man and soft pretty features for a woman, and a wide charming mouth (a big confident grin, a cocky half-smile, a sly smirk, a gentle smile). A few freckle or stubble dots are fine. Each character gets its own face shape and expression, never grotesque.
 - Gaze: the eyes look toward the viewer's right, where the enemy stands: the pupils sit toward the right side of the eyes and the head is turned a little that way. Never looking at the viewer, never looking left.
+- The eyes always have their dark pupils: never dot eyes, never blank eyes without pupils.
 - Hair: big rubbery clumps with a few scribbly strand strokes.
 - Clothes and gear as a few big flat shapes that fit the figure, fur drawn with short scribbly strokes, three or four simple ornaments at most. Weapons oversized and chunky, simplified to a few shapes.
 - Let the figure hold the weapon as the subject says, with the whole weapon inside the canvas and its top no higher than the top of the head. Keep the whole figure inside the canvas with a clear empty margin on all four sides. Never crop the head, the feet or the weapon.
@@ -90,9 +91,9 @@ transparent background.
 ## 5. Enemy
 
 - Draw one enemy creature alone, the whole body, standing or crouching, with every limb, the tail and the weapon inside the canvas.
-- Turn the creature toward the left side of the image: a three-quarter view with the head and the chest facing the viewer's left, and its eyes looking left, where the party stands.
+- Turn the creature toward the left side of the image: a three-quarter view with the head and the chest facing the viewer's left, where the party stands. Its eyes have no pupils, so the head and the body show where it looks.
 - Proportions and build: exaggerated and rubbery, as the subject says. A goblin is a short, hunched humanoid about three heads tall with a big head, long pointed ears, long arms, big hands and big bare feet. A beast keeps its animal build, drawn chunky and simple. Every creature has its own body type.
-- Face: caricatured and expressive, full of personality: large eyes with small dark pupils (one may be bigger than the other), a big nose or snout, and a wide mouth with a few plain crooked teeth or fangs, in a sneer, a grin or a scowl. Menacing in a goofy way, never cute and never gory: no blood, no wounds.
+- Face: caricatured and expressive, full of personality: large blank eyes with no pupils, each filled with one flat colour and nothing dark inside it (one may be bigger than the other), a big nose or snout, and a wide mouth with a few plain crooked teeth or fangs, in a sneer, a grin or a scowl. Menacing in a goofy way, never cute and never gory: no blood, no wounds.
 - Draw it in the same hand as the mercenaries: the wobbly ink line, scribbly marks for fur, dirt and stubble, big plain shapes, crude gear drawn as plain shapes, nothing small inside the body beyond the marks.
 - Keep the whole figure inside the canvas with a clear empty margin on all four sides. Never crop the head, the feet, the tail or the weapon.
 - Draw one creature only: no second figure, no scenery, no ground line and no shadow under the feet.
@@ -108,9 +109,10 @@ our style and mirrored so that they face left. Use it only as a style reference:
 the hand-drawn wobbly ink line, the scribbly small marks, the rubbery exaggerated
 shapes, the flat muted coloring and the expressive faces. Do not copy any of the
 three: do not give the creature their faces, hair, outfits or weapons, and do not
-reproduce the white background. Draw the described creature as a new, original
-figure alone, facing and looking toward the viewer's left, on a transparent
-background.
+reproduce the white background. Their eyes have dark pupils; the creature's eyes
+have none: they are blank, filled with one flat colour. Draw the described
+creature as a new, original figure alone, facing the viewer's left, on a
+transparent background.
 ```
 
 ## 7. Item
@@ -308,7 +310,7 @@ For a decorative piece of the interface that is shown whole, never stretched: th
 ### Creatures
 
 - This creature lives in an abandoned mine that goblins have taken over.
-- The whites of its eyes are a dull lantern yellow, with small dark pupils.
+- Its eyes are filled with one flat dull lantern yellow, with no pupils.
 - It is dusted with soot and grey rock dust.
 - A goblin wears one piece of scavenged mining gear, such as a dented miner's cap with a candle stub, a small tin lantern on the belt, a coil of rope or a leather apron. A beast carries no gear.
 - Gear and accents use the colors of the mine: rust orange, soot grey and dull lantern yellow.

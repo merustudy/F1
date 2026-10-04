@@ -207,10 +207,11 @@ FIGURE_FLOOR_MARGIN = 20
 FIGURE_SIDE_MARGIN = 12
 HEIGHT_RANGE = (10, 97)
 # The dark ring drawn around the whole silhouette of a figure after fitting, in canvas pixels
-# (2026-10-04 play feedback: the outline has to be thicker so a unit stands off the background).
-# It is the UI line color, so figures and interface share one tone of outline. The side margin
-# above is wider than the ring, so the ring never leaves the canvas.
-FIGURE_OUTLINE = 8
+# (2026-10-04 play feedback: the outline has to be thicker so a unit stands off the background;
+# 8 then, halved the same day after a review, "외곽선 1/2 적용": about 1.3 px on screen, where the
+# canvas is drawn at about a third). It is the UI line color, so figures and interface share one
+# tone of outline. The side margin above is wider than the ring, so the ring never leaves the canvas.
+FIGURE_OUTLINE = 4
 
 # The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, stacked
 # top to bottom in the panel column under the unit (ItemData.csv, Size; 2026-10-03 mockup V). A
