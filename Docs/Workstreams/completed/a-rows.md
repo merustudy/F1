@@ -1,6 +1,6 @@
 # Slice A 개정 — 열 (1열~4열, 한 열에 한 유닛, 4인 파티)
 
-Snapshot: 2026-10-01 (완료. 사후 검토에서 조합 절벽은 "다"를 채택해 개정 2로 이어졌다: `active/a-rows-items.md`)
+Snapshot: 2026-10-01 (완료. 사후 검토에서 조합 절벽은 "다"를 채택해 개정 2로 이어졌다: `completed/a-rows-items.md`)
 
 ## Goal
 

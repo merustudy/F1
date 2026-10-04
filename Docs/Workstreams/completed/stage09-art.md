@@ -78,6 +78,9 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
     `character`만 있는 시험용 `STYLE_RUNTIME.md`(같은 캐릭터를 같은 방식으로 다시 그리되 색·그림자·낡음·분위기만 어둡게)와 소재(`valkyrie` 하나). 기준 그림은 `before/`의 원본을 그대로(왼쪽을 본다, `Flip` false).
     후보 `valkyrie_dark`(호출 1회, 약 $0.03, 경고 없음). 원본과 맞춘 그림은 `dark/`에, 리뷰 시트는 `review-dark-vs-original.png`. 판정할 때 볼 것은 README.
     사용자가 **보류**했다. 세트는 그대로 둔다.
+  - 시험 3 (Round 11, 같은 날 저녁) — **실패, 처음부터 다시** (사용자): 지시 "컨셉 이미지 변경을 시도. 캐릭터부터. 현재 스타일 백업 후 새 컨셉 테스트". 백업 `Archive/11-concept-test/before/`(06 뒤에 바뀐 것까지).
+    C1 전달서("Cute Clean Cartoon", 사용자 작성)로 3장 → 그림체 변형 5장 → 큐트/지금 섞기 4장(60/40 선택) → 60/40의 얼굴 5장 → 미국 TV 카툰 1장, 그리고 지시를 잘못 읽은 화풍 5장. 호출 23회, 약 $0.57.
+    세트·그림·리뷰 시트를 지우고 README(기록, 방법의 교훈)와 `before/`, 전달서 `C1_STYLE_TRANSFER.md`만 남겼다. 지금의 그림체·Assets·코드는 그대로.
 - **전투 UI 개정: 보드 패널 (2026-10-03) — 구현됨, 커밋됨.** 사용자 지시: 아이템 칸을 가로로, 다키스트 던전처럼 하단 패널에 캐릭터마다(열 순서) 가로 칸, 오른쪽은 몬스터, 양 끝에 얼굴.
   목업 넷(지금, A, B, C)을 보고 **"A안으로 구현 진행. 노드 맵·보상 화면은 별도 목업 제공"**.
   - 화면: `BattleBoardView`(새 View), `BattleUnitView`에서 칸을 뺌, `BattleItemView`의 가로 칸(`CellWidth`, `CellGapX`, `BoardWidth`. 세로의 `CellGap`·`BoardHeight`는 파티 쪽이 그대로 쓴다),
@@ -92,7 +95,7 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
     Builder `PartySide.cs`(무대 262, 패널·줄·설명 줄·"인벤토리로", 팝업 높이 640), `NodeMap.cs`(맵 630, 노드 정보와 버튼을 패널로), `Reward.cs`(안내와 버튼을 패널로).
     Test의 버튼 경로가 `Frame/BoardPanel/...`로 바뀌었다(Enter, InventoryToggle, Skip, RewardToInventory). 그림 Test에 파티 줄의 얼굴.
   - 스크린샷 34장(`Tools/screenshots.sh`): 전투(`_05`, `_15`, `_18`)의 패널이 목업과 같다. 둘은 `Archive/07-battle-panel/game/`에 두었다.
-- 누계: 호출 53회, 약 $1.27(상한 $10).
+- 누계: 호출 137회, 약 $3.37(상한 $10). (연출 3차까지 59회 $1.41, Round 11 컨셉 시험 23회 $0.57, Round 12 그림체 전환 55회 $1.39. 전환의 기록은 `active/a-art-restyle.md`)
 
 ## Done
 
@@ -256,5 +259,5 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
 2. 다크 판타지 시험(보류 중)의 판정(`Archive/06-style-test/README.md` "판정할 때 볼 것"). 버리면 바꿀 것이 없다. 채택하면 Design/10의 G9를 먼저 고치고, 확정된 그림을 새 기준 그림으로
    삼아(`References/Character/`) 지금 문서의 색·그림자·분위기 문구를 고친 뒤, 종류마다 승인 라운드로 다시 그려 배선한다(선·비율은 같으니 범위는 판정 때 정한다). 그 전까지 게임은 지금 그림체다.
 3. 사용자가 Unity에서 직접 플레이해 배경, 간격, 보드 패널, 아이콘이 들어간 전투와 노드 맵을 본다(`Assets/@Scenes/Boot.unity`. 옛 저장은 이어지지 않으니 새 런).
-4. 사후 검토(Roadmap "사후 검토 대기")와 개정 2~4의 사후 검토(`active/a-rows-items.md`).
+4. 사후 검토(Roadmap "사후 검토 대기")와 개정 2~4의 사후 검토(`completed/a-rows-items.md`).
 5. 그림을 더 그릴 때는 이 문서의 "알아둘 것"과 `Docs/Architecture/13_ART_PIPELINE.md`를 따른다. 포션의 아이콘이 다음 후보다. 10단계(소리)와 11단계(플레이테스트와 Slice B)는 대기.
