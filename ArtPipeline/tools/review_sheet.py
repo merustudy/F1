@@ -48,8 +48,8 @@ LABEL_HEIGHT = 30
 # sits inside the rim of the slot. The slot is the frame of the interface kit, stretched as the
 # game stretches it; its border is the one UiArt gives it, in the pixels of the sprite (twice the
 # size on screen).
-ITEM_CELL = (180, 50)
-ITEM_CELL_GAP = 4
+ITEM_CELL = (180, 60)
+ITEM_CELL_GAP = 2
 ITEM_RIM = 7
 ITEM_SLOT = OUTPUT_DIR / "ui_variant" / "slot.png"
 ITEM_SLOT_BORDER = 30

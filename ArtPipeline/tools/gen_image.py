@@ -214,16 +214,17 @@ FIGURE_OUTLINE = 8
 
 # The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, stacked
 # top to bottom in the panel column under the unit (ItemData.csv, Size; 2026-10-03 mockup V). A
-# cell is 180x50 on screen with 4 between cells (BattleItemView), so a bigger item is a taller
-# shape; the icon sits inside the slot's rim (8 at the sides, 5 above and below), at twice the
-# size on screen. For each count of cells: the section of STYLE_RUNTIME.md that says how the
-# item lies in that shape, the size it is generated at and the canvas it is fitted to. (The
-# icons on hand were drawn for the earlier cells of 180x60 stacked, on canvases of 320x88,
-# 320x216 and 320x344; they fit the new places a little smaller and are not redrawn.)
+# cell is 180x60 on screen with 2 between cells (BattleItemView; 2026-10-04 mockup B, before it
+# 180x50 with 4), so a bigger item is a taller shape; the icon sits inside the slot's rim (8 at
+# the sides, 5 above and below), at twice the size on screen. For each count of cells: the
+# section of STYLE_RUNTIME.md that says how the item lies in that shape, the size it is
+# generated at and the canvas it is fitted to. (The icons on hand were drawn for the 180x50
+# cells, on canvases of 328x80, 328x188 and 328x296; the screen fits them by width, so they
+# stand the same size with more room above and below, and they are not redrawn.)
 ITEM_CELLS = {
-    1: {"section": 19, "generate": "1536x512", "canvas": (328, 80)},
-    2: {"section": 20, "generate": "1536x1024", "canvas": (328, 188)},
-    3: {"section": 21, "generate": "1024x1024", "canvas": (328, 296)},
+    1: {"section": 19, "generate": "1536x512", "canvas": (328, 100)},
+    2: {"section": 20, "generate": "1536x1024", "canvas": (328, 224)},
+    3: {"section": 21, "generate": "1024x1024", "canvas": (328, 348)},
 }
 # The ring an icon is given, in the pixels of its canvas, and how much of the canvas it may fill.
 ITEM_OUTLINE = 4
