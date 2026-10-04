@@ -8,7 +8,7 @@ namespace F1.UI
 {
     /// <summary>
     /// The art the screens of an expedition show: the full-body figures of the units, the faces
-    /// cut out of them, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
+    /// cut out of them, the mercenaries' attack and hit poses, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
     /// ask for a picture without waiting. A unit or an item whose data names no art has none, and
     /// its view shows the placeholder (the silhouette, the item's name); art that is named but
     /// does not load fails the screen.
@@ -42,7 +42,7 @@ namespace F1.UI
             return new ExpeditionArt(data, sprites);
         }
 
-        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its face), then the items, then the potions, each in id order.</summary>
+        /// <summary>The address of every picture the data names: the jobs (each figure with its face and its two poses) and the enemies (each figure with its face), then the items, then the potions, each in id order.</summary>
         public static IEnumerable<string> Addresses(StaticData data)
         {
             foreach (JobData job in data.Jobs.Ordered)
@@ -51,6 +51,8 @@ namespace F1.UI
                 {
                     yield return job.Figure;
                     yield return job.Face;
+                    yield return job.AttackPose;
+                    yield return job.HitPose;
                 }
             }
 
@@ -102,6 +104,18 @@ namespace F1.UI
         public float ScaleOfEnemy(string enemyId)
         {
             return _data.Enemies.Get(enemyId).FigureScale / 100f;
+        }
+
+        /// <summary>A mercenary's attack pose: its job's (Docs/Design/10 §5). Null when the job has no figure.</summary>
+        public Sprite AttackPoseOfMercenary(string mercenaryId)
+        {
+            return Of(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).AttackPose);
+        }
+
+        /// <summary>A mercenary's hit pose: its job's. Null when the job has no figure.</summary>
+        public Sprite HitPoseOfMercenary(string mercenaryId)
+        {
+            return Of(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).HitPose);
         }
 
         /// <summary>The face cut out of a job's figure, or null when the job has no figure.</summary>

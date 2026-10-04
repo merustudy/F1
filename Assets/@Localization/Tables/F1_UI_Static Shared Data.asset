@@ -815,6 +815,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673182117429259
+  - m_Id: 1503007001796608
+    m_Key: Item.Armor
+    m_Metadata:
+      m_Items:
+      - rid: 8623673209745833984
+  - m_Id: 1503007010185216
+    m_Key: Item.Attack
+    m_Metadata:
+      m_Items:
+      - rid: 8623673209745833985
+  - m_Id: 1503007010185217
+    m_Key: Item.Other
+    m_Metadata:
+      m_Items:
+      - rid: 8623673209745833986
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -998,11 +1013,11 @@ MonoBehaviour:
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Item category.
+        m_CommentText: 'Item category: a weapon held in the hand.'
     - rid: 636489279218909225
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Item category.
+        m_CommentText: 'Item category: heals or strengthens.'
     - rid: 636489279218909226
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1485,3 +1500,15 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = damage of this storm tick. Rises from the clock.'
+    - rid: 8623673209745833984
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Item category: defensive gear.'
+    - rid: 8623673209745833985
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Item category: an attack that is not a weapon.'
+    - rid: 8623673209745833986
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Item category: anything else.'

@@ -9,7 +9,8 @@ namespace F1.UI
     /// <summary>
     /// Plays the battle's events as what the screen shows: a hit rises as a number and the one
     /// hit flashes and recoils, the one who struck lunges, the item that fired flashes in its
-    /// cell, a fallen unit fades, a heavy blow shakes the stage, the storm's lightning flashes,
+    /// cell, a fallen enemy fades and a fallen mercenary turns into a grave (the screen shows it and
+    /// keeps the party's places meanwhile), a heavy blow shakes the stage, the storm's lightning flashes,
     /// and each event that reads as a sentence goes to the panel's captions. It reads the event
     /// log the engine has already settled and never changes anything in it. Only what just
     /// happened is played: when a long stretch of battle arrives at once (a continued battle,
@@ -33,12 +34,15 @@ namespace F1.UI
         readonly Func<UnitRef, BattleBoardView> _boardView;
         readonly RectTransform _clock;
         readonly Action<string> _caption;
+        readonly Action<UnitRef> _partyFell;
         int _played;
 
         /// <param name="unitView">The stage view of a unit, or null when it has none.</param>
         /// <param name="boardView">The panel line of a unit, or null when it has none.</param>
         /// <param name="clock">Where the storm's numbers rise from.</param>
         /// <param name="caption">Takes one line for the panel's captions.</param>
+        /// <param name="partyFell">Turns a fallen mercenary into its grave: the screen's to do, as it keeps the party's places
+        /// while the grave stands. Without it a fallen mercenary fades like an enemy.</param>
         public BattlePresenter(
             BattleEngine engine,
             StaticData data,
@@ -46,7 +50,8 @@ namespace F1.UI
             Func<UnitRef, BattleUnitView> unitView,
             Func<UnitRef, BattleBoardView> boardView,
             RectTransform clock,
-            Action<string> caption)
+            Action<string> caption,
+            Action<UnitRef> partyFell = null)
         {
             _engine = engine;
             _data = data;
@@ -55,6 +60,7 @@ namespace F1.UI
             _boardView = boardView;
             _clock = clock;
             _caption = caption;
+            _partyFell = partyFell;
 
             // What happened before the screen opened (a battle continued from a save) is not replayed.
             _played = engine.Events.Count;
@@ -115,7 +121,16 @@ namespace F1.UI
 
                     break;
                 case BattleEventKind.Died:
-                    _fx.Ghost(_unitView(e.Target)?.FigureArt);
+                    // A mercenary turns into a grave at once (2026-10-04, round 21); an enemy fades as before.
+                    if (e.Target.Side == BattleSide.Party && _partyFell != null)
+                    {
+                        _partyFell(e.Target);
+                    }
+                    else
+                    {
+                        _fx.Ghost(_unitView(e.Target)?.FigureArt);
+                    }
+
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Died), UiPalette.Danger, true);
                     _fx.Shake(10f);
                     break;
@@ -130,13 +145,54 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The item's cell flashes; a weapon's owner lunges at the other side.</summary>
+        /// <summary>How an item's owner moves when the item fires, by what the item is (Docs/Design/10 §5).</summary>
+        public enum Motion
+        {
+            /// <summary>A weapon: a lunge at the other side, with the attack pose.</summary>
+            Strike,
+
+            /// <summary>Defensive gear, an attack that is not a weapon, anything else: the lunge alone.</summary>
+            Lunge,
+
+            /// <summary>A support item: a swell with a warm light behind.</summary>
+            Pulse,
+        }
+
+        public static Motion MotionOf(ItemCategory category)
+        {
+            switch (category)
+            {
+                case ItemCategory.Weapon: return Motion.Strike;
+                case ItemCategory.Support: return Motion.Pulse;
+                case ItemCategory.Armor:
+                case ItemCategory.Attack:
+                case ItemCategory.Other:
+                    return Motion.Lunge;
+                default: throw new ArgumentOutOfRangeException(nameof(category), category, null);
+            }
+        }
+
+        /// <summary>The item's cell flashes; its owner moves as the item's category says.</summary>
         void PlayActivation(BattleEvent e)
         {
             _boardView(e.Source)?.ItemOfSlot(e.A)?.Pulse();
-            if (_data.Items.Get(e.Id).Category == ItemCategory.Weapon)
+            BattleUnitView owner = _unitView(e.Source);
+            if (owner == null)
             {
-                _unitView(e.Source)?.Lunge(Towards(e.Source.Side));
+                return;
+            }
+
+            switch (MotionOf(_data.Items.Get(e.Id).Category))
+            {
+                case Motion.Strike:
+                    owner.Lunge(Towards(e.Source.Side), withPose: true);
+                    break;
+                case Motion.Lunge:
+                    owner.Lunge(Towards(e.Source.Side));
+                    break;
+                case Motion.Pulse:
+                    owner.Pulse();
+                    break;
             }
         }
 
@@ -169,7 +225,8 @@ namespace F1.UI
 
             if (!storm && !burn)
             {
-                target.Flash(HitTint);
+                // A unit that shows its hit pose flashes at half strength: the pose already says it was hit.
+                target.Flash(target.HasHitPose ? Color.Lerp(Color.white, HitTint, 0.5f) : HitTint);
                 target.Recoil(-Towards(e.Target.Side));
                 if (heavy)
                 {

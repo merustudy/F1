@@ -58,8 +58,11 @@ Board.InventoryHint,How to use the inventory popup.,아이템을 누른 뒤 왼�
 Board.InventoryEmpty,Shown in the inventory popup when it holds nothing.,비어 있음,Empty
 Board.ToInventory,Sends the selected board item to the inventory.,인벤토리로,To inventory
 Item.Title,{0} = item name. {1} = grade.,{0} · 등급 {1},{0} · Grade {1}
-Item.Weapon,Item category.,무기,Weapon
-Item.Support,Item category.,보조,Support
+Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
+Item.Armor,Item category: defensive gear.,방어 장비,Armor
+Item.Attack,Item category: an attack that is not a weapon.,공격 아이템,Attack item
+Item.Support,Item category: heals or strengthens.,지원 아이템,Support item
+Item.Other,Item category: anything else.,기타 아이템,Other item
 Item.Size,{0} = cells the item takes on a board.,크기 {0}칸,Size {0}
 Item.Cooldown,{0} = seconds.,쿨다운 {0}초,Cooldown {0}s
 Item.RowsFront,The item only works while its owner stands within the front N rows. {0} = N (2 or more).,앞에서 {0}번째 자리까지만 발동,Only within the front {0} rows

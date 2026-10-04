@@ -86,6 +86,13 @@ namespace F1.Editor.Setup
         /// <summary>A heap of skulls on the stone of the board panel. A whole piece.</summary>
         public const string Skulls = "Frame/skulls";
 
+        /// <summary>
+        /// The grave a fallen mercenary turns into for a moment in battle, the same for everyone: a wooden cross in a cairn of
+        /// grey stones (2026-10-04 round 21, C). A whole piece, drawn on the canvas every figure shares (type prop), so it
+        /// stands on the floor line of the figure it replaces.
+        /// </summary>
+        public const string Grave = "Frame/grave";
+
         /// <summary>The iron chains hanging at the ends of the board panel (drawn), and the warm light behind the candle's flame (drawn, Archive/13-ui-decor).</summary>
         public const string Chain = "Icon/chain";
         public const string Glow = "Icon/glow";
@@ -142,6 +149,7 @@ namespace F1.Editor.Setup
             new Piece(CandleTop),
             new Piece(Smoke),
             new Piece(Skulls),
+            new Piece(Grave),
             new Piece(Chain),
             new Piece(Glow),
             new Piece(NodeBattle),

@@ -19,7 +19,10 @@ namespace F1.UI
     /// Each side has one column of the stage and, right under it, one column of the board panel
     /// per row, and a row holds one unit. A unit's figure and plate stand in the stage column of
     /// the row the engine says it is in, and its item cells in the panel column under it, so both
-    /// move when the unit advances. The dead leave the stage and the panel. The event log is not
+    /// move when the unit advances. The dead leave the stage and the panel. A fallen mercenary turns
+    /// into a grave for a moment, and the party keeps the places it is drawn in until the grave has
+    /// gone, then walks into the ones the engine has already given it: only the picture waits
+    /// (2026-10-04, round 21). The event log is not
     /// shown while the battle runs; the result panel opens a viewer with the whole log. What
     /// happens is played as it happens (<see cref="BattlePresenter"/>): numbers rise, units lunge
     /// and recoil, cells flash, the storm candle between the two sides of the panel burns down
@@ -34,6 +37,13 @@ namespace F1.UI
         /// <summary>The candle's flame gutters and its light pulls in over this long before the storm, until it is here.</summary>
         const int StormDuskMs = 10000;
 
+        /// <summary>
+        /// Seconds a fallen mercenary's grave stands at x1 and then takes to fade out (2026-10-04, round 21 mockup 2B). At a
+        /// higher speed both are shorter by as much, so that the battle does not run far ahead of what is shown.
+        /// </summary>
+        internal const float GraveHold = 0.7f;
+        internal const float GraveVanish = 0.15f;
+
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] Image _background;
@@ -43,6 +53,7 @@ namespace F1.UI
         [SerializeField] CandleView _candle;
         [SerializeField] TMP_Text[] _captions;
         [SerializeField] BattleFxLayer _fx;
+        [SerializeField] Sprite _grave;
         [SerializeField] Button _pause;
         [SerializeField] Image _pauseFrame;
         [SerializeField] Button[] _speedButtons;
@@ -184,7 +195,7 @@ namespace F1.UI
             _resultPanel.SetActive(false);
             _logPanel.SetActive(false);
 
-            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption);
+            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell);
             RenderCaptions();
         }
 
@@ -207,6 +218,13 @@ namespace F1.UI
         {
             List<BattleBoardView> boards = unit.Side == BattleSide.Party ? _partyBoards : _enemyBoards;
             return unit.Index >= 0 && unit.Index < boards.Count ? boards[unit.Index] : null;
+        }
+
+        /// <summary>A mercenary fell: it turns into a grave where it stood. The party keeps its places while the grave stands (Render).</summary>
+        void OnPartyFell(UnitRef unit)
+        {
+            float speed = _clock.SpeedPercent / 100f;
+            _fx.Grave(UnitViewOf(unit)?.FigureArt, _grave, GraveHold / speed, GraveVanish / speed);
         }
 
         /// <summary>A new caption in the header; the oldest goes when there are more than fit.</summary>
@@ -344,7 +362,7 @@ namespace F1.UI
             string id = unit.Setup.SourceId;
             if (unit.Side == BattleSide.Party)
             {
-                view.Bind(unit, _art.OfMercenary(id));
+                view.Bind(unit, _art.OfMercenary(id), 1f, _art.AttackPoseOfMercenary(id), _art.HitPoseOfMercenary(id));
             }
             else
             {
@@ -369,7 +387,7 @@ namespace F1.UI
             bool ongoing = !_battle.IsFinished;
 
             // What happened since the last frame is played before the dead leave the stage, so that a
-            // fallen unit's ghost starts where it stood.
+            // fallen enemy's ghost and a fallen mercenary's grave start where it stood.
             _presenter.Play();
 
             int tenths = engine.TimeMs / 100;
@@ -388,10 +406,13 @@ namespace F1.UI
 
             _fx.SetDanger(ongoing && danger);
 
-            Place(_partyViews, _partyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
-            Place(_enemyViews, _enemyRows, view => view.Unit, (view, fromX) => view.Walk(fromX));
-            Place(_partyBoards, _partyBoardColumns, board => board.Unit, null);
-            Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, null);
+            // While a fallen mercenary's grave stands, the living of the party keep their places on the stage and in the
+            // panel (with the badges); they walk on when the last grave has gone.
+            bool graves = _fx.GravesLeft > 0f;
+            Place(_partyViews, _partyRows, view => view.Unit, graves, WalkIn);
+            Place(_enemyViews, _enemyRows, view => view.Unit, false, WalkIn);
+            Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, null);
+            Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, false, null);
             bool targeting = ongoing && _armedPotion >= 0;
             foreach (BattleUnitView view in _partyViews)
             {
@@ -446,9 +467,10 @@ namespace F1.UI
         /// Puts each unit's view (on the stage, or in the panel) in the place of the row the unit
         /// stands in now and takes the dead away. Views are visited in unit order, so those that
         /// advance into a place together keep their order. A view that changes place is told how
-        /// far it came from, so that it can walk in instead of appearing.
+        /// far it came from, so that it can walk in instead of appearing. While `hold` is true the
+        /// living keep the places they are in; the dead go all the same.
         /// </summary>
-        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf, Action<T, float> moved)
+        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf, bool hold, Action<T, float> moved)
             where T : Component
         {
             foreach (T view in views)
@@ -460,13 +482,20 @@ namespace F1.UI
                 }
 
                 RectTransform place = places[unit.Row - 1];
-                if (unit.Alive && view.transform.parent != place)
+                if (unit.Alive && !hold && view.transform.parent != place)
                 {
                     var from = (RectTransform)view.transform.parent;
                     view.transform.SetParent(place, false);
                     moved?.Invoke(view, from.anchoredPosition.x - place.anchoredPosition.x);
                 }
             }
+        }
+
+        /// <summary>A unit's view was put in the column of the unit's row: its badge says so, and it walks in from where it stood.</summary>
+        static void WalkIn(BattleUnitView view, float fromX)
+        {
+            view.StandIn(view.Unit.Row);
+            view.Walk(fromX);
         }
 
         /// <summary>Potions, their hint and the retreat button. They change with battle time (cooldowns) and with clicks.</summary>

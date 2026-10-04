@@ -93,6 +93,51 @@ namespace F1.Tests
             yield return Capture("ko_20_battle_storm");
         }
 
+        /// <summary>
+        /// A battle a moment after the mercenary in row 1 fell: its grave where it stood, and those behind still in their
+        /// places, waiting for it to go (2026-10-04, round 21); then the same battle once it has gone and they have walked on.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator AGrave_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterAFirstBattleWhereRow1Falls();
+            UiTestUtil.Screen<BattleScreen>().Clock.SpeedPercent = 100;
+            yield return null;
+            UiTestUtil.AdvanceUntilFallen(Managers.Expedition.Battle.Engine.Party.Single(unit => unit.Row == BattleRows.Front));
+            yield return new WaitForSeconds(0.3f);
+            yield return Capture("ko_21_battle_grave");
+
+            yield return new WaitForSeconds(1.2f);
+            yield return Capture("ko_22_battle_after_grave");
+        }
+
+        /// <summary>
+        /// The poses and the pulse in battle (Docs/Design/10 §5): the mercenary in row 1 lunging in its attack pose, the one in
+        /// row 2 knocked back in its hit pose, and the one in row 3 swelling with a support item's light.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PosesAndPulse_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterALongFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.WaitForRedraw();
+            BattleUnitView[] party = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Party)
+                .OrderBy(view => view.Unit.Row).ToArray();
+
+            party[0].Lunge(1f, withPose: true);
+            yield return Capture("ko_23_battle_attack_pose");
+            yield return new WaitForSeconds(0.5f);
+
+            party[1].Recoil(-1f);
+            yield return Capture("ko_24_battle_hit_pose");
+            yield return new WaitForSeconds(0.5f);
+
+            party[2].Pulse();
+            yield return Capture("ko_25_battle_support_pulse");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);

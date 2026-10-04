@@ -209,7 +209,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864232
-    m_Localized: Support
+    m_Localized: Support item
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864233
@@ -741,6 +741,18 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 1503007001796608
+    m_Localized: Armor
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1503007010185216
+    m_Localized: Attack item
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1503007010185217
+    m_Localized: Other item
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

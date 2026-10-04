@@ -102,12 +102,26 @@ namespace F1.UI
             return string.Join(FactSeparator, parts);
         }
 
+        /// <summary>The words of an item's category (Docs/Design/02_Combat_System.md §4).</summary>
+        public static string CategoryKey(ItemCategory category)
+        {
+            switch (category)
+            {
+                case ItemCategory.Weapon: return UiKeys.Item.Weapon;
+                case ItemCategory.Armor: return UiKeys.Item.Armor;
+                case ItemCategory.Attack: return UiKeys.Item.Attack;
+                case ItemCategory.Support: return UiKeys.Item.Support;
+                case ItemCategory.Other: return UiKeys.Item.Other;
+                default: throw new ArgumentOutOfRangeException(nameof(category), category, null);
+            }
+        }
+
         static List<string> ItemFacts(EquippedItem item)
         {
             ItemData data = item.Item;
             var facts = new List<string>
             {
-                UiStrings.Get(data.Category == ItemCategory.Weapon ? UiKeys.Item.Weapon : UiKeys.Item.Support),
+                UiStrings.Get(CategoryKey(data.Category)),
                 UiStrings.Get(UiKeys.Item.Size, data.Size),
                 UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)),
             };

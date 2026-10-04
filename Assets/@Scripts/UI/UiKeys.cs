@@ -88,7 +88,10 @@ namespace F1.UI
         {
             public const string Title = "Item.Title";
             public const string Weapon = "Item.Weapon";
+            public const string Armor = "Item.Armor";
+            public const string Attack = "Item.Attack";
             public const string Support = "Item.Support";
+            public const string Other = "Item.Other";
             public const string Size = "Item.Size";
             public const string Cooldown = "Item.Cooldown";
             public const string RowsFront = "Item.RowsFront";

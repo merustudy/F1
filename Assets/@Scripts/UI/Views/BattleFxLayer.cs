@@ -6,7 +6,8 @@ namespace F1.UI
 {
     /// <summary>
     /// What the battle shows on top of the stage and the panel when something happens: numbers
-    /// and words that rise from a unit, the ghost of a fallen unit fading away, a flash of
+    /// and words that rise from a unit, the ghost of a fallen enemy fading away, the grave a fallen
+    /// mercenary turns into for a moment, a flash of
     /// lightning, the red at the stage's edges while an ally is at death's door, and the shake of
     /// the stage under a heavy hit. (The darkness the storm brings is the storm candle's: its light
     /// pulls in and goes out, CandleView.) It decides nothing: the
@@ -36,6 +37,7 @@ namespace F1.UI
 
         readonly List<FloatingTextView> _floats = new List<FloatingTextView>();
         readonly List<Fading> _ghosts = new List<Fading>();
+        readonly List<Standing> _graves = new List<Standing>();
         readonly List<Launch> _launches = new List<Launch>();
         RectTransform _rect;
         float _shake;
@@ -60,8 +62,37 @@ namespace F1.UI
             public float Age;
         }
 
+        /// <summary>A grave that stands for a while and then goes.</summary>
+        sealed class Standing
+        {
+            public Image Image;
+            public float Born;
+            public float Hold;
+            public float Vanish;
+
+            public float Left => Born + Hold + Vanish - Time.time;
+        }
+
         /// <summary>How many texts have risen since the screen opened.</summary>
         public int FloatingPlayed { get; private set; }
+
+        /// <summary>How many ghosts have started to fade since the screen opened.</summary>
+        public int GhostsShown { get; private set; }
+
+        /// <summary>Seconds until the last grave that stands has gone; 0 while none stands. The battle screen keeps the party's places until then.</summary>
+        public float GravesLeft
+        {
+            get
+            {
+                float left = 0f;
+                foreach (Standing grave in _graves)
+                {
+                    left = Mathf.Max(left, grave.Left);
+                }
+
+                return left;
+            }
+        }
 
         /// <summary>True while the red at the edges says an ally is at death's door.</summary>
         public bool DangerShown => _danger;
@@ -140,6 +171,34 @@ namespace F1.UI
             ghost.color = Color.white;
             ghost.gameObject.SetActive(true);
             _ghosts.Add(new Fading { Image = ghost, Start = rect.anchoredPosition, Age = 0f });
+            GhostsShown++;
+        }
+
+        /// <summary>
+        /// A grave where a unit's art stood: it is there at once in place of the figure, stands `hold` seconds and fades
+        /// out over `vanish` (2026-10-04, round 21). The grave is drawn on the canvas every figure shares, so it fills the
+        /// figure's place and stands on its floor line. The unit itself leaves the stage at once. Its time is counted from
+        /// the frame it appears in, so a long frame before it does not cut it short.
+        /// </summary>
+        public void Grave(Image art, Sprite grave, float hold, float vanish)
+        {
+            if (art == null || grave == null)
+            {
+                return;
+            }
+
+            Image image = Instantiate(_ghostTemplate, _rect);
+            RectTransform from = art.rectTransform;
+            RectTransform rect = image.rectTransform;
+            image.sprite = grave;
+            image.preserveAspect = true;
+            rect.sizeDelta = from.rect.size;
+
+            // From the feet: the art breathes by stretching up from them, so its centre is not where it stands.
+            rect.anchoredPosition = LocalPoint(from, new Vector2(from.rect.center.x, from.rect.yMin)) + new Vector2(0f, from.rect.height * 0.5f);
+            image.color = Color.white;
+            image.gameObject.SetActive(true);
+            _graves.Add(new Standing { Image = image, Born = Time.time, Hold = hold, Vanish = Mathf.Max(0.01f, vanish) });
         }
 
         /// <summary>A flash of light over the stage that dies down at once: lightning.</summary>
@@ -200,6 +259,19 @@ namespace F1.UI
                 float alpha = Mathf.Lerp(DangerAlphaMin, DangerAlphaMax, 0.5f + 0.5f * Mathf.Sin(_dangerPhase));
                 _dangerVignette.color = new Color(UiPalette.Danger.r, UiPalette.Danger.g, UiPalette.Danger.b, alpha);
                 _dangerVignette.enabled = true;
+            }
+
+            for (int i = _graves.Count - 1; i >= 0; i--)
+            {
+                Standing grave = _graves[i];
+                if (grave.Left <= 0f)
+                {
+                    Destroy(grave.Image.gameObject);
+                    _graves.RemoveAt(i);
+                    continue;
+                }
+
+                grave.Image.color = new Color(1f, 1f, 1f, Mathf.Clamp01(grave.Left / grave.Vanish));
             }
 
             for (int i = _ghosts.Count - 1; i >= 0; i--)

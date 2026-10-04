@@ -926,6 +926,238 @@ namespace F1.Tests
             Assert.Greater(empty, 0, "A mercenary has more cells than items.");
         }
 
+        /// <summary>
+        /// A unit's plate stays in its column while the figure lunges or recoils, so its row, name and HP can be read
+        /// while it acts (2026-10-04, round 19: "정보칸은 그대로"); a walk into a new column carries the plate too.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_APlateStaysInItsColumn_WhileItsFigureLungesOrRecoils()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
+            yield return UntilStill(unit);
+            Vector2 figure = unit.FigureRect.anchoredPosition;
+            Vector2 plate = unit.PlateRect.anchoredPosition;
+
+            unit.Lunge(1f);
+            yield return UntilMoved(unit, figure);
+            Assert.Greater(unit.FigureRect.anchoredPosition.x, figure.x, "The figure lunges at the enemy.");
+            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition, "The plate stays where it is during a lunge.");
+            yield return UntilStill(unit);
+
+            unit.Recoil(-1f);
+            yield return UntilMoved(unit, figure);
+            Assert.Less(unit.FigureRect.anchoredPosition.x, figure.x, "The figure is knocked back.");
+            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition, "The plate stays where it is during a recoil.");
+            yield return UntilStill(unit);
+
+            unit.Walk(-120f);
+            yield return null;
+            Assert.Less(unit.PlateRect.anchoredPosition.x, plate.x, "A walk into a new column carries the plate.");
+            Assert.AreEqual(unit.PlateRect.anchoredPosition.x - plate.x, unit.FigureRect.anchoredPosition.x - figure.x, 0.01f,
+                "The figure and the plate walk together.");
+            yield return UntilStill(unit);
+            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition);
+        }
+
+        /// <summary>
+        /// A mercenary shows its attack pose while its weapon's lunge plays and its hit pose while a blow's recoil plays, then
+        /// its figure again (Docs/Design/10 §5). A pose stands on the figure's floor line: its place is the figure's, three times
+        /// as wide and an eighth deeper, with the floor line 112 of 1008 up. A lunge that is not a weapon's shows no pose, and an
+        /// enemy has none.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AMercenaryShowsItsAttackPoseWhileItsWeaponLunges_AndItsHitPoseWhileItRecoils()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
+            string job = Managers.Data.Data.Mercenaries.Get(unit.Unit.Setup.SourceId).JobId;
+            Sprite figure = unit.Figure.Art;
+            RectTransform art = unit.FigureArt.rectTransform;
+            Vector2 size = art.sizeDelta;
+            yield return UntilStill(unit);
+
+            unit.Lunge(1f, withPose: true);
+            yield return null;
+            Assert.AreEqual(job + "_attack", unit.Figure.Art.name, "The weapon's lunge shows the attack pose.");
+            Assert.AreEqual(size.x * 3f, art.sizeDelta.x, 0.01f, "The pose's place is three figure places wide.");
+            Assert.AreEqual(size.y * 1008f / 896f, art.sizeDelta.y, 0.01f, "and an eighth deeper.");
+            Assert.AreEqual(112f / 1008f, art.pivot.y, 0.0001f, "It stands on its floor line, where the figure's feet are.");
+            yield return UntilStill(unit);
+            yield return UntilFigure(unit);
+            Assert.AreSame(figure, unit.Figure.Art, "The figure comes back when the lunge is over.");
+            Assert.AreEqual(size, art.sizeDelta);
+            Assert.AreEqual(0f, art.pivot.y);
+
+            unit.Recoil(-1f);
+            yield return null;
+            Assert.AreEqual(job + "_hit", unit.Figure.Art.name, "A blow shows the hit pose.");
+            Assert.IsTrue(unit.HasHitPose, "Its red flash is at half strength.");
+            yield return UntilStill(unit);
+            yield return UntilFigure(unit);
+            Assert.AreSame(figure, unit.Figure.Art);
+
+            unit.Lunge(1f);
+            yield return null;
+            Assert.AreSame(figure, unit.Figure.Art, "Defensive gear, an attack item or anything else lunges without the pose.");
+            yield return UntilStill(unit);
+
+            BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Enemy);
+            Sprite enemyFigure = enemy.Figure.Art;
+            enemy.Lunge(-1f, withPose: true);
+            enemy.Recoil(1f);
+            yield return null;
+            Assert.AreSame(enemyFigure, enemy.Figure.Art, "An enemy has no pose.");
+            Assert.IsFalse(enemy.HasHitPose);
+        }
+
+        /// <summary>A support item makes its owner swell and lights a warm light behind it for a moment (Docs/Design/10 §5).</summary>
+        [UnityTest]
+        public IEnumerator Battle_ASupportItemPulsesItsOwner_WithALightBehind()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
+            Image glow = UiTestUtil.At(unit.Figure, unit.Figure.name + "Glow").GetComponent<Image>();
+            Assert.IsFalse(glow.enabled, "No light before.");
+
+            unit.Pulse();
+            yield return null;
+            yield return null;
+            Assert.IsTrue(unit.Figure.Pulsing);
+            Assert.IsTrue(glow.enabled, "The light shows.");
+            Assert.Greater(unit.FigureArt.rectTransform.localScale.x, 1f, "The figure swells.");
+            Assert.IsFalse(unit.Figure.ShowsPose, "A support item shows no pose.");
+
+            float until = Time.time + 2f;
+            while (unit.Figure.Pulsing && Time.time < until)
+            {
+                yield return null;
+            }
+
+            yield return null;
+            Assert.IsFalse(glow.enabled, "The light is gone.");
+            Assert.AreEqual(1f, unit.FigureArt.rectTransform.localScale.x, 0.0001f);
+        }
+
+        /// <summary>Waits by the clock until the pose has gone back to the figure.</summary>
+        static IEnumerator UntilFigure(BattleUnitView unit)
+        {
+            float until = Time.time + 2f;
+            while (unit.Figure.ShowsPose && Time.time < until)
+            {
+                yield return null;
+            }
+        }
+
+        static IEnumerator UntilMoved(BattleUnitView unit, Vector2 figure)
+        {
+            for (int frame = 0; frame < 60 && unit.FigureRect.anchoredPosition == figure; frame++)
+            {
+                yield return null;
+            }
+        }
+
+        /// <summary>Waits out the unit's motion by the clock: a batch run's frames are far shorter than a game's.</summary>
+        static IEnumerator UntilStill(BattleUnitView unit)
+        {
+            float until = Time.time + 2f;
+            while (unit.Moving && Time.time < until)
+            {
+                yield return null;
+            }
+
+            yield return null;
+        }
+
+        /// <summary>
+        /// A fallen mercenary turns into a grave at once, without a ghost, and those behind keep the places they are drawn
+        /// in (with their badges, and their boards in the panel) until the grave has gone; then they walk into the rows the
+        /// engine gave them at once (2026-10-04, round 21: 2안-B). Only the picture waits.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AFallenMercenary_TurnsIntoAGrave_AndThoseBehindWaitUntilItHasGone()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterAFirstBattleWhereRow1Falls();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            battle.Clock.SpeedPercent = 100;
+            yield return null;
+            BattleUnitView[] views = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Party).ToArray();
+            BattleBoardView[] boards = UiTestUtil.Views<BattleBoardView>(battle).Where(board => board.Unit.Side == BattleSide.Party).ToArray();
+            BattleUnit front = engine.Party.Single(unit => unit.Row == BattleRows.Front);
+            var drawnIn = engine.Party.ToDictionary(unit => unit, unit => unit.Row);
+            int ghosts = battle.Fx.GhostsShown;
+
+            UiTestUtil.AdvanceUntilFallen(front);
+            BattleUnit[] behind = engine.Party.Where(unit => unit.Alive).ToArray();
+            Assert.IsNotEmpty(behind);
+            foreach (BattleUnit unit in behind)
+            {
+                Assert.AreEqual(drawnIn[unit] - 1, unit.Row, "The engine moves those behind forward at once.");
+            }
+
+            yield return null;
+            float fell = Time.time;
+            Assert.AreEqual(BattleScreen.GraveHold + BattleScreen.GraveVanish, battle.Fx.GravesLeft, 0.001f, "The grave stands at once, for its time at x1.");
+            Assert.AreEqual(ghosts, battle.Fx.GhostsShown, "A mercenary leaves no ghost.");
+            Assert.IsFalse(views.Single(view => view.Unit == front).gameObject.activeSelf, "The fallen leaves the stage at once.");
+            Assert.IsFalse(boards.Single(board => board.Unit == front).gameObject.activeSelf, "The fallen leaves the panel at once.");
+
+            while (battle.Fx.GravesLeft > 0f)
+            {
+                Assert.Less(Time.time - fell, 2f, "The grave did not go.");
+                foreach (BattleUnit unit in behind)
+                {
+                    string name = UiText.Name(unit.Setup.Name);
+                    BattleUnitView view = views.Single(v => v.Unit == unit);
+                    Assert.AreEqual("PartyRow" + drawnIn[unit], view.transform.parent.name, $"{name} keeps its place while the grave stands.");
+                    Assert.AreEqual(drawnIn[unit].ToString(), UiTestUtil.TextAt(view, "UnitPlate/UnitBadge/UnitRow"), name);
+                    Assert.AreEqual("PartyBoard" + drawnIn[unit], boards.Single(b => b.Unit == unit).transform.parent.name, name);
+                }
+
+                yield return null;
+            }
+
+            Assert.GreaterOrEqual(Time.time - fell, BattleScreen.GraveHold + BattleScreen.GraveVanish - 0.001f, "Nobody walks before the grave has gone.");
+            yield return null;
+            foreach (BattleUnit unit in behind)
+            {
+                string name = UiText.Name(unit.Setup.Name);
+                BattleUnitView view = views.Single(v => v.Unit == unit);
+                Assert.AreEqual("PartyRow" + unit.Row, view.transform.parent.name, $"{name} walks into its new row when the grave has gone.");
+                Assert.AreEqual(unit.Row.ToString(), UiTestUtil.TextAt(view, "UnitPlate/UnitBadge/UnitRow"), name);
+                Assert.AreEqual("PartyBoard" + unit.Row, boards.Single(b => b.Unit == unit).transform.parent.name, name);
+            }
+        }
+
+        /// <summary>At a higher speed the grave goes sooner by as much, so that the battle does not run far ahead of what is shown.</summary>
+        [UnityTest]
+        public IEnumerator Battle_AGraveGoesSooner_AtAHigherSpeed()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterAFirstBattleWhereRow1Falls();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.SpeedPercent = 400;
+            yield return null;
+
+            UiTestUtil.AdvanceUntilFallen(Managers.Expedition.Battle.Engine.Party.Single(unit => unit.Row == BattleRows.Front));
+            yield return null;
+            Assert.AreEqual((BattleScreen.GraveHold + BattleScreen.GraveVanish) / 4f, battle.Fx.GravesLeft, 0.001f);
+        }
+
         [UnityTest]
         public IEnumerator Battle_IsFoughtInFrontOfTheBackgroundTheDungeonNames()
         {

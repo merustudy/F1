@@ -298,6 +298,47 @@ namespace F1.Tests
             Screen<BattleScreen>().Clock.Paused = true;
         }
 
+        /// <summary>
+        /// From the title: a new run, a full party, and the first node's battle entered (and left paused), staged so that the
+        /// mercenary in row 1 is the one who falls: the party carries no item, so it cannot end the battle, and row 1 has one
+        /// HP while everyone else has so much that the enemy cannot bring them down first.
+        /// </summary>
+        public static IEnumerator EnterAFirstBattleWhereRow1Falls()
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            FillParty(Screen<LobbyScreen>());
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+
+            foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
+            {
+                member.Items.Clear();
+                if (member.Row != BattleRows.Front)
+                {
+                    member.MaxHp = 100000;
+                }
+
+                member.Hp = member.Row == BattleRows.Front ? 1 : member.MaxHp;
+            }
+
+            NodeMapScreen map = Screen<NodeMapScreen>();
+            Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            Click(map, "Frame/BoardPanel/Enter");
+            yield return WaitForScreen(ScreenId.Battle);
+            Screen<BattleScreen>().Clock.Paused = true;
+        }
+
+        /// <summary>Moves the battle on by 100 ms at a time until the unit has fallen, with no frame between: the screen has not drawn it yet.</summary>
+        public static void AdvanceUntilFallen(BattleUnit unit)
+        {
+            while (unit.Alive)
+            {
+                Assert.AreEqual(BattleResult.Ongoing, Managers.Expedition.Battle.Engine.Result, "The battle ended before the unit fell.");
+                Managers.Expedition.AdvanceBattle(100);
+            }
+        }
+
         /// <summary>Runs the shown battle to its end without input and returns to the phase after it.</summary>
         public static IEnumerator FinishBattle()
         {

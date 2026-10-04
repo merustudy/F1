@@ -19,7 +19,15 @@ namespace F1.UI
     ///
     /// The presenter moves it for a moment when something happens: it lunges when its weapon
     /// fires, recoils and flashes when it is hit, and walks into its new column when it advances.
-    /// The motion moves the figure and the plate together and never the column they are in.
+    /// A mercenary has an attack pose and a hit pose drawn after its figure (Docs/Design/10 §5):
+    /// the attack pose shows while a weapon's lunge plays, the hit pose while a blow's recoil plays,
+    /// each 0.05 s more, then the figure again; the later of the two wins.
+    /// A lunge and a recoil move the figure (and the shadow under it) only: the plate, with the
+    /// unit's row, name and HP, stays in its column so that it can be read while the figure acts
+    /// (2026-10-04, round 19). A walk moves both: the unit has moved to another column. No motion
+    /// moves the column itself. The badge shows the row of the column the screen has put the view in,
+    /// which can be behind the engine for a moment: while a fallen mercenary's grave stands, the party
+    /// keeps its places (2026-10-04, round 21).
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
@@ -30,6 +38,9 @@ namespace F1.UI
         const float RecoilDistance = 12f;
         const float WalkDuration = 0.35f;
         const float DangerPulse = 5f;
+
+        /// <summary>How long a pose stays after its lunge or recoil has ended.</summary>
+        const float PoseExtra = 0.05f;
 
         [SerializeField] Button _button;
         [SerializeField] FigureView _figureView;
@@ -50,6 +61,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _status;
 
         BattleUnit _unit;
+        int _standRow;
         int _shownRow = -1;
         int _shownHp = -1;
         int _shownShield = -1;
@@ -64,6 +76,9 @@ namespace F1.UI
         float _recoilDirection;
         float _walkAge = -1f;
         float _walkFrom;
+        Sprite _attackPose;
+        Sprite _hitPose;
+        float _poseLeft = -1f;
 
         public Button Button => _button;
         public BattleUnit Unit => _unit;
@@ -74,7 +89,10 @@ namespace F1.UI
         /// <summary>The place of the figure: where numbers rise from.</summary>
         public RectTransform FigureRect => (RectTransform)_figureView.transform;
 
-        /// <summary>The image of the art, for a ghost of a fallen unit.</summary>
+        /// <summary>The plate under the figure: the unit's row, name, HP and states.</summary>
+        public RectTransform PlateRect => _plate.rectTransform;
+
+        /// <summary>The image of the art, for the ghost of a fallen enemy or the grave of a fallen mercenary.</summary>
         public Image FigureArt => _figureView.ArtImage;
 
         /// <summary>The plate on show: the one of the unit's side or state.</summary>
@@ -83,14 +101,22 @@ namespace F1.UI
         /// <summary>True while a lunge, a recoil or a walk moves the unit.</summary>
         public bool Moving => _lungeAge >= 0f || _recoilAge >= 0f || _walkAge >= 0f;
 
+        /// <summary>True when the unit has a hit pose: its red flash is at half strength (Docs/Design/10 §5).</summary>
+        public bool HasHitPose => _hitPose != null;
+
         /// <param name="figure">The unit's art, or null when it has none.</param>
         /// <param name="figureScale">How many times the common size the art is drawn (a boss is larger).</param>
-        public void Bind(BattleUnit unit, Sprite figure, float figureScale = 1f)
+        /// <param name="attackPose">The mercenary's attack pose, or null (an enemy has none).</param>
+        /// <param name="hitPose">The mercenary's hit pose, or null.</param>
+        public void Bind(BattleUnit unit, Sprite figure, float figureScale = 1f, Sprite attackPose = null, Sprite hitPose = null)
         {
             _unit = unit;
+            _standRow = unit.Row;
             _name.text = UiText.Name(unit.Setup.Name);
             _figureView.Show(figure);
             _figureView.SetScale(figureScale);
+            _attackPose = attackPose;
+            _hitPose = hitPose;
         }
 
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>
@@ -103,19 +129,48 @@ namespace F1.UI
             _name.text = UiText.Name(_unit.Setup.Name);
         }
 
-        /// <summary>A step towards the other side and back: the unit's weapon fired.</summary>
+        /// <summary>A step towards the other side and back: an item that strikes or guards fired.</summary>
         /// <param name="direction">1 to the right, -1 to the left.</param>
-        public void Lunge(float direction)
+        /// <param name="withPose">True for a weapon: the attack pose shows while the lunge plays.</param>
+        public void Lunge(float direction, bool withPose = false)
         {
             _lungeAge = 0f;
             _lungeDirection = direction;
+            if (withPose)
+            {
+                ShowPose(_attackPose, LungeOut + LungeBack);
+            }
         }
 
-        /// <summary>A knock away from the blow that dies down.</summary>
+        /// <summary>A knock away from the blow that dies down; the hit pose shows meanwhile.</summary>
         public void Recoil(float direction)
         {
             _recoilAge = 0f;
             _recoilDirection = direction;
+            ShowPose(_hitPose, RecoilDuration);
+        }
+
+        /// <summary>A support item fired: the figure swells and a warm light behind it fades.</summary>
+        public void Pulse()
+        {
+            _figureView.Pulse();
+        }
+
+        void ShowPose(Sprite pose, float motion)
+        {
+            if (pose == null)
+            {
+                return;
+            }
+
+            _figureView.ShowPose(pose);
+            _poseLeft = motion + PoseExtra;
+        }
+
+        /// <summary>The screen has put the view in the column of this row: its badge shows the row.</summary>
+        public void StandIn(int row)
+        {
+            _standRow = row;
         }
 
         /// <summary>The unit was put in a new column: it starts this far from it (where it was) and walks in.</summary>
@@ -152,11 +207,11 @@ namespace F1.UI
             BalanceData balance = engine.Setup.Balance;
             int timeMs = engine.TimeMs;
 
-            // The unit moves to another column when it advances; its badge follows.
-            if (_unit.Row != _shownRow)
+            // The unit moves to another column when it advances; its badge follows the column it is put in.
+            if (_standRow != _shownRow)
             {
-                _shownRow = _unit.Row;
-                _row.text = _unit.Row.ToString(CultureInfo.InvariantCulture);
+                _shownRow = _standRow;
+                _row.text = _standRow.ToString(CultureInfo.InvariantCulture);
             }
 
             if (_unit.Hp != _shownHp)
@@ -197,6 +252,16 @@ namespace F1.UI
         {
             float dt = Time.deltaTime;
             float x = 0f;
+            float walk = 0f;
+
+            if (_poseLeft >= 0f)
+            {
+                _poseLeft -= dt;
+                if (_poseLeft < 0f)
+                {
+                    _figureView.ShowFigure();
+                }
+            }
 
             if (_lungeAge >= 0f)
             {
@@ -235,7 +300,7 @@ namespace F1.UI
                 float t = _walkAge / WalkDuration;
                 if (t < 1f)
                 {
-                    x += _walkFrom * (1f - t) * (1f - t);
+                    walk = _walkFrom * (1f - t) * (1f - t);
                 }
                 else
                 {
@@ -243,15 +308,15 @@ namespace F1.UI
                 }
             }
 
-            var offset = new Vector2(x, 0f);
-            _figureView.SetMotion(offset);
+            // The figure takes every motion; the plate only the walk into a new column.
+            _figureView.SetMotion(new Vector2(x + walk, 0f));
             if (!_plateBaseKnown)
             {
                 _plateBase = _plate.rectTransform.anchoredPosition;
                 _plateBaseKnown = true;
             }
 
-            _plate.rectTransform.anchoredPosition = _plateBase + offset;
+            _plate.rectTransform.anchoredPosition = _plateBase + new Vector2(walk, 0f);
 
             // At death's door the plate pulses.
             if (_unit != null && _unit.InDog)

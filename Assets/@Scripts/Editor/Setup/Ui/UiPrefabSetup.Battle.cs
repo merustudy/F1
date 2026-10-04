@@ -27,6 +27,10 @@ namespace F1.Editor.Setup
 
         /// <summary>A figure's place is as tall as this and the art in it as wide as its 3:4 canvas, whatever the column's width is.</summary>
         const float BattleFigureHeight = 300f;
+
+        /// <summary>The light a support item lights behind a figure: its size and how high its middle is, as a share of the figure place (2026-10-04 mockup C).</summary>
+        const float PulseGlowSize = 300f;
+        const float PulseGlowHeight = 0.55f;
         const float BattleFigureWidth = BattleFigureHeight * 3f / 4f;
 
         /// <summary>Where the figures' feet stand, from the field's top: the bottom of the figures' places.</summary>
@@ -240,7 +244,7 @@ namespace F1.Editor.Setup
             BuildScreenVignette(frame);
 
             // The fx layer over the stage and the panel: the red of death's door and the lightning over the
-            // stage's box, and the numbers and ghosts anywhere. Built before the result so that the result is
+            // stage's box, and the numbers, ghosts and graves anywhere. Built before the result so that the result is
             // drawn over it. Nothing in it takes a click. (The storm darkens the stage through the candle's light.)
             RectTransform fx = UiBuild.Rect("Fx", frame);
             UiBuild.Stretch(fx);
@@ -302,6 +306,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_candle", candle);
             UiBuild.SetReferences(screen, "_captions", captions);
             UiBuild.SetReference(screen, "_fx", fxLayer);
+            UiBuild.SetReference(screen, "_grave", UiArt.Load(UiArt.Grave));
             UiBuild.SetReference(screen, "_pause", pause.Button);
             UiBuild.SetReference(screen, "_pauseFrame", pause.Frame);
             UiBuild.SetReferences(screen, "_speedButtons", speedButtons);
@@ -605,6 +610,13 @@ namespace F1.Editor.Setup
                 UiBuild.LocalizedLabel(name + "Label", placeholder, UiKeys.Battle.FigurePlaceholder, 16f, UiPalette.TextDim, TextAlignmentOptions.Center),
                 BattleFigureHeight - 32f, 26f);
 
+            // The warm light a support item lights behind the figure for a moment (FigureView.Pulse, Docs/Design/10 §5):
+            // the glow piece in the candle gold, around the chest.
+            Image glow = UiBuild.Image(name + "Glow", figure, new Color(UiPalette.ChargeEdge.r, UiPalette.ChargeEdge.g, UiPalette.ChargeEdge.b, 0f));
+            glow.sprite = UiArt.Load(UiArt.Glow);
+            UiBuild.Place(glow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, BattleFigureHeight * PulseGlowHeight), new Vector2(PulseGlowSize, PulseGlowSize));
+            glow.enabled = false;
+
             // The art. Every figure shares one canvas and one floor line, so each stands in the same place at the same size.
             Image art = UiBuild.Image(name + "Art", figure, Color.white);
             UiBuild.Place(art.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(BattleFigureWidth, BattleFigureHeight));
@@ -614,6 +626,7 @@ namespace F1.Editor.Setup
             view = figure.gameObject.AddComponent<FigureView>();
             UiBuild.SetReference(view, "_art", art);
             UiBuild.SetReference(view, "_placeholder", placeholder.gameObject);
+            UiBuild.SetReference(view, "_glow", glow);
             return figure;
         }
 
