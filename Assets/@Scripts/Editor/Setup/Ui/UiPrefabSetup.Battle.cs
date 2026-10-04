@@ -52,7 +52,7 @@ namespace F1.Editor.Setup
         /// </summary>
         const float BoardPanelTop = 620f;
         const float BoardPanelHeight = 460f;
-        const float BoardColumnsTop = 16f;
+        const float BoardColumnsTop = 14f;
         const float BoardColumnsHeight = BoardPanelHeight - 2f * BoardColumnsTop;
 
         /// <summary>

@@ -26,11 +26,13 @@ namespace F1.UI
         /// <summary>
         /// A cell of the board panel: a strip as wide as a column of the stage (2026-10-03 mockup V),
         /// and the gap between two cells stacked. A big item's cells make a taller strip. The party
-        /// side of the node map and the reward screen uses the same cells.
+        /// side of the node map and the reward screen uses the same cells. The 2026-10-04 mockup B
+        /// made the cell 60 high with 2 between (from 50 and 4) and the most cells 7 (from 8), so
+        /// that the panel keeps its height.
         /// </summary>
         public const float CellWidth = 180f;
-        public const float CellHeight = 50f;
-        public const float CellGapY = 4f;
+        public const float CellHeight = 60f;
+        public const float CellGapY = 2f;
 
         [SerializeField] UiBar _cooldown;
         [SerializeField] Image _icon;

@@ -93,8 +93,8 @@ namespace F1.Data
     {
         public const string DefinitionName = "Job";
 
-        /// <summary>The most cells any board has. A unit's line of the board panel is built to hold this many cells side by side.</summary>
-        public const int MaxItemSlots = 8;
+        /// <summary>The most cells any board has. A unit's column of the board panel is built to hold this many cells stacked (8 until the 2026-10-04 mockup B made it 7).</summary>
+        public const int MaxItemSlots = 7;
 
         [JsonConstructor]
         public JobData(
