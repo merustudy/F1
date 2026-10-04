@@ -125,7 +125,7 @@ namespace F1.Editor.Setup
         /// <summary>
         /// One entry per piece of art the generated static data names: the figures of the jobs,
         /// those of the enemies, the faces cut out of those figures, the backgrounds of the
-        /// dungeons, then the icons of the items.
+        /// dungeons, the icons of the items, then the bottles of the potions.
         /// </summary>
         public static List<AddressEntry> Entries()
         {
@@ -144,7 +144,8 @@ namespace F1.Editor.Setup
                 .Concat(data.Jobs.Ordered.Select(j => (j.Face, Face)))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Face, Face)))
                 .Concat(data.Dungeons.Ordered.Select(d => (d.Background, Scene)))
-                .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)));
+                .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)))
+                .Concat(data.Potions.Ordered.Select(p => (p.Icon, Icon)));
 
             var files = new List<ArtFile>();
             var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -225,7 +226,7 @@ namespace F1.Editor.Setup
                     string path = file.Replace('\\', '/');
                     if (!listed.Contains(path))
                     {
-                        problems.Add($"{path}: nothing names this image: no Figure (or its face), Background or Icon in the static data and no piece of UiArt.");
+                        problems.Add($"{path}: nothing names this image: no Figure (or its face), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
                     }
                 }
             }

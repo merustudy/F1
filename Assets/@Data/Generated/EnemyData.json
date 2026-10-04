@@ -15,7 +15,8 @@
           "Grade": 10
         }
       ],
-      "Figure": "unit/enemy/cave-rat"
+      "Figure": "unit/enemy/cave-rat",
+      "FigureScale": 100
     },
     {
       "Id": "goblin_archer",
@@ -31,7 +32,8 @@
           "Grade": 14
         }
       ],
-      "Figure": "unit/enemy/goblin-archer"
+      "Figure": "unit/enemy/goblin-archer",
+      "FigureScale": 100
     },
     {
       "Id": "goblin_raider",
@@ -47,7 +49,8 @@
           "Grade": 15
         }
       ],
-      "Figure": "unit/enemy/goblin-raider"
+      "Figure": "unit/enemy/goblin-raider",
+      "FigureScale": 100
     },
     {
       "Id": "goblin_shaman",
@@ -67,7 +70,8 @@
           "Grade": 12
         }
       ],
-      "Figure": "unit/enemy/goblin-shaman"
+      "Figure": "unit/enemy/goblin-shaman",
+      "FigureScale": 100
     },
     {
       "Id": "mine_overseer",
@@ -87,7 +91,8 @@
           "Grade": 22
         }
       ],
-      "Figure": "unit/enemy/mine-overseer"
+      "Figure": "unit/enemy/mine-overseer",
+      "FigureScale": 150
     }
   ]
 }

@@ -152,13 +152,14 @@ namespace F1.Editor.Data
     {
         public static List<PotionData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "RewardWeight"));
+            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "RewardWeight", RowMapping.Icon));
             return RowMapping.MapRows(table, errors, row => new PotionData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Enum<PotionEffect>("Effect"),
                 row.Int("Magnitude"),
-                row.Int("RewardWeight")));
+                row.Int("RewardWeight"),
+                RowMapping.ReadArt(row, RowMapping.Icon)));
         }
     }
 
@@ -166,14 +167,15 @@ namespace F1.Editor.Data
     {
         public static List<EnemyData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure));
+            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"));
             return RowMapping.MapRows(table, errors, row => new EnemyData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Int("Level"),
                 row.Int("MaxHp"),
                 row.GrantList("Items"),
-                RowMapping.ReadArt(row, RowMapping.Figure)));
+                RowMapping.ReadArt(row, RowMapping.Figure),
+                row.Int("FigureScale")));
         }
     }
 

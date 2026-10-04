@@ -87,6 +87,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
+    m_Address: potion/healing-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 56c069291186e44889592ec7a4866f92
     m_Address: unit/enemy/goblin-archer
     m_ReadOnly: 0
@@ -179,6 +185,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a6c8f0c68966046b79723c7183444c72
     m_Address: item/sword
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a79f44c774fcf4c97a89202a3e027ade
+    m_Address: potion/barrier-potion
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

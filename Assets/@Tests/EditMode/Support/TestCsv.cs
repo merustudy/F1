@@ -28,13 +28,13 @@ namespace F1.Tests
             "claw,발톱,Claw,Weapon,1,2000,all,Damage,EnemyBack,1,100,,,,,0,\n";
 
         public const string Potions =
-            "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight\n" +
-            "tonic,강장제,Tonic,Heal,50,5\n";
+            "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon\n" +
+            "tonic,강장제,Tonic,Heal,50,5,potion/tonic\n";
 
         public const string Enemies =
-            "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure\n" +
-            "rat,쥐,Rat,2,30,claw:4,unit/enemy/rat\n" +
-            "ogre,오우거,Ogre,9,200,claw:12+mace:8,\n";
+            "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale\n" +
+            "rat,쥐,Rat,2,30,claw:4,unit/enemy/rat,100\n" +
+            "ogre,오우거,Ogre,9,200,claw:12+mace:8,,150\n";
 
         public const string EnemyGroups =
             "Id,DungeonId,MinFloor,MaxFloor,IsBoss,Enemies\n" +

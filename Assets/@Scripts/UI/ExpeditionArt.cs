@@ -8,7 +8,7 @@ namespace F1.UI
 {
     /// <summary>
     /// The art the screens of an expedition show: the full-body figures of the units, the faces
-    /// cut out of them and the icons of the items. A screen loads it before it opens, so its views
+    /// cut out of them, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
     /// ask for a picture without waiting. A unit or an item whose data names no art has none, and
     /// its view shows the placeholder (the silhouette, the item's name); art that is named but
     /// does not load fails the screen.
@@ -42,7 +42,7 @@ namespace F1.UI
             return new ExpeditionArt(data, sprites);
         }
 
-        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its face), then the items, each in id order.</summary>
+        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its face), then the items, then the potions, each in id order.</summary>
         public static IEnumerable<string> Addresses(StaticData data)
         {
             foreach (JobData job in data.Jobs.Ordered)
@@ -70,6 +70,14 @@ namespace F1.UI
                     yield return item.Icon;
                 }
             }
+
+            foreach (PotionData potion in data.Potions.Ordered)
+            {
+                if (potion.Icon != null)
+                {
+                    yield return potion.Icon;
+                }
+            }
         }
 
         /// <summary>The figure of a job, or null when the job has none.</summary>
@@ -88,6 +96,12 @@ namespace F1.UI
         public Sprite OfEnemy(string enemyId)
         {
             return Of(_data.Enemies.Get(enemyId).Figure);
+        }
+
+        /// <summary>How much larger than the common figure place an enemy's figure is drawn (1 for most; a boss is larger). Data: <see cref="EnemyData.FigureScale"/>.</summary>
+        public float ScaleOfEnemy(string enemyId)
+        {
+            return _data.Enemies.Get(enemyId).FigureScale / 100f;
         }
 
         /// <summary>The face cut out of a job's figure, or null when the job has no figure.</summary>
@@ -112,6 +126,12 @@ namespace F1.UI
         public Sprite OfItem(string itemId)
         {
             return Of(_data.Items.Get(itemId).Icon);
+        }
+
+        /// <summary>The bottle of a potion, or null when the potion has none.</summary>
+        public Sprite OfPotion(string potionId)
+        {
+            return Of(_data.Potions.Get(potionId).Icon);
         }
 
         Sprite Of(string address)

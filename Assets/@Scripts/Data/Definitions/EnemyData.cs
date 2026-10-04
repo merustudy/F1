@@ -29,8 +29,13 @@ namespace F1.Data
     {
         public const string DefinitionName = "Enemy";
 
+        /// <summary>FigureScale of an enemy drawn at the common size of a figure place, in percent.</summary>
+        public const int DefaultFigureScale = 100;
+        public const int MinFigureScale = 50;
+        public const int MaxFigureScale = 300;
+
         [JsonConstructor]
-        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null)
+        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -49,10 +54,16 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': an enemy carries 1..{JobData.MaxItemSlots} items.");
             }
 
+            if (figureScale < MinFigureScale || figureScale > MaxFigureScale)
+            {
+                throw new DataException($"{DefinitionName} '{id}': FigureScale must be {MinFigureScale}..{MaxFigureScale} (percent).");
+            }
+
             Level = level;
             MaxHp = maxHp;
             Items = items;
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
+            FigureScale = figureScale;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -73,6 +84,13 @@ namespace F1.Data
         /// <summary>The logical address of the enemy's full-body art. Null when it has no art yet.</summary>
         [JsonProperty(Order = 6, Required = Required.AllowNull)]
         public string Figure { get; }
+
+        /// <summary>
+        /// How large the enemy's figure is drawn, in percent of the common figure place (100 for most enemies; a boss
+        /// is drawn larger and may overlap its neighbours). Presentation only: it changes no rule and no position.
+        /// </summary>
+        [JsonProperty(Order = 7, Required = Required.Always)]
+        public int FigureScale { get; }
 
         /// <summary>The address of the face cut out of the figure (<see cref="ArtAddress.FaceOf"/>). Null when the enemy has no figure.</summary>
         [JsonIgnore]

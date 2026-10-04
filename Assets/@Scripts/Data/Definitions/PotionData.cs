@@ -8,7 +8,7 @@ namespace F1.Data
         public const string DefinitionName = "Potion";
 
         [JsonConstructor]
-        public PotionData(string id, LocalizedText name, PotionEffect effect, int magnitude, int rewardWeight)
+        public PotionData(string id, LocalizedText name, PotionEffect effect, int magnitude, int rewardWeight, string icon = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -25,6 +25,7 @@ namespace F1.Data
             Effect = effect;
             Magnitude = magnitude;
             RewardWeight = rewardWeight;
+            Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -41,5 +42,9 @@ namespace F1.Data
 
         [JsonProperty(Order = 5, Required = Required.Always)]
         public int RewardWeight { get; }
+
+        /// <summary>The logical address of the potion's bottle icon. Null when it has no art yet.</summary>
+        [JsonProperty(Order = 6, Required = Required.AllowNull)]
+        public string Icon { get; }
     }
 }
