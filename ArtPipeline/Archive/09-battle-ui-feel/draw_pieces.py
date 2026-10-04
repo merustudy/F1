@@ -61,7 +61,11 @@ def ring(size=400, outer_radius=186, inner_radius=162):
 
 
 def vignette(size=512):
-    """White, transparent in the middle and opaque at the edges; the screen tints and stretches it."""
+    """White, transparent in the middle and opaque at the edges; the screen tints and stretches it.
+
+    Round 16 found this ramp drawn inside out (opaque in the middle): the vignette in Assets is now drawn by
+    Archive/16-candle-light/draw_pieces.py. Kept as it was, for the record; do not copy its output into Assets.
+    """
     im = Image.new("L", (size, size), 0)
     d = ImageDraw.Draw(im)
     c = size / 2
