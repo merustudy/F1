@@ -165,7 +165,7 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   `flatten`(바탕을 한 색으로 펴며 바꾼다. 명패·칸·버튼)과 `tint`(결을 남긴 채 바탕의 색을 바꾼다. `tint_fill`). 전의 틀은 `Archive/09-battle-ui-feel/frames-before/`에 있다.
 - `ui_piece`(§22)는 늘이지 않는 장식 조각이다. `glyph`처럼 비율을 지켜 캔버스의 84%에 맞추므로, 화면 크기의 2배를 0.84로 나눈 `Size`를 적는다(다이얼 200 → 476).
 - (2026-10-04) 틀의 변형(`ui_variant.csv`)은 Sprite의 이름과 생성한 틀을 떼어 놓는다. 그래서 그림체나 재질을 바꿀 때 Unity 쪽 이름은 그대로다. 디아블로 컨셉(`Archive/14-ui-diablo/`)에서는 `panel`·`table`·`tablet`이 `stone_panel`에서, `plate_*`가 `gothic_plate`에 편의 색을 `tint`로, `bag`이 `iron_inventory`, `belt`가 `belt_iron`, `trough`가 `iron_slot`, `potion_slot`(과 금색 `_selected`)이 `iron_pocket`, `button`이 `button_iron`을 흰색으로 편 것이다.
-  **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
+  **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
   양초의 빛처럼 화면에서 크게 늘이는 부드러운 경사는 2배로 그리지 않는다(UI의 MaxSize 512 안에서 512x256. 늘여도 경사는 매끄럽다).
 
 ## 승인 라운드

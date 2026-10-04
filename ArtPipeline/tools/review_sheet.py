@@ -66,7 +66,7 @@ def palette() -> dict:
     pattern = re.compile(r"Color (\w+) = Rgb\(0x([0-9A-Fa-f]{2}), 0x([0-9A-Fa-f]{2}), 0x([0-9A-Fa-f]{2})\)")
     colours = {name: (int(r, 16), int(g, 16), int(b, 16))
                for name, r, g, b in pattern.findall(UI_PALETTE.read_text(encoding="utf-8"))}
-    for needed in ("Background", "Party", "Enemy", "Line", "Text", "TextDim", "Slot", "Gauge"):
+    for needed in ("Background", "Party", "Enemy", "Line", "Text", "TextDim", "Slot"):
         if needed not in colours:
             raise SystemExit(f"실패: UiPalette.cs 에서 {needed} 색을 읽지 못했다.")
     return colours
