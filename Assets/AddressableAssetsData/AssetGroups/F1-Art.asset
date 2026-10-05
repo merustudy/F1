@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: F1-Art
   m_GUID: ffee4d694673a498abe503b5ec6b7e61
   m_SerializeEntries:
+  - m_GUID: 03a45ed981f33416ba26140f1ff2ce35
+    m_Address: item/lantern-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 04ef4f6f4dba440d4b0e7399f95a565d
     m_Address: unit/enemy/goblin-raider
     m_ReadOnly: 0
@@ -35,6 +41,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0f7c7f87b8ca442df8004987503377d4
     m_Address: item/spear
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1034f3fdb392f4cc3a9c3d7df73d701d
+    m_Address: pose/enemy/goblin-shaman-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -69,6 +81,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 23504f9eb39a942c09f1f2d36f854622
+    m_Address: pose/enemy/cave-rat-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 284c634048f1348519f0a5d4192379c8
     m_Address: face/job/valkyrie
     m_ReadOnly: 0
@@ -99,12 +117,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 37ece49934cc54329b691e0cf2aa7936
-    m_Address: item/hex-spit
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
     m_Address: potion/healing-potion
     m_ReadOnly: 0
@@ -113,6 +125,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 43311083f1a004e15b97c2a3b48afe21
     m_Address: pose/job/bishop-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46dc0b2cb244c48a3b1033508c9c24b0
+    m_Address: pose/enemy/mine-overseer-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -147,8 +165,26 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6291045098c4b410f8e5cdc17f8cf643
+    m_Address: pose/enemy/goblin-shaman-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65360ba647f20488f8a94b0778afae14
     m_Address: unit/job/archmage
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 66eca0ab6a3634e129c0e08845f047a2
+    m_Address: pose/enemy/mine-overseer-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 701a0e55ee9a4464fa5c9c9fdd470c07
+    m_Address: pose/enemy/cave-rat-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -197,6 +233,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ef6459b91f264e388f97a10281d294d
     m_Address: item/longbow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8febd31da6ef849bea3de47deba92f09
+    m_Address: pose/enemy/goblin-raider-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -273,6 +315,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bd819f93ad5824e9cb91d8e2230a3325
+    m_Address: pose/enemy/goblin-raider-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c0113b0fa9bee45128af6863872fb88e
     m_Address: pose/job/archmage-hit
     m_ReadOnly: 0
@@ -315,6 +363,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e426af557a41d47d0990399ee48adefd
+    m_Address: pose/enemy/goblin-archer-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e92e1c7de97174586bcb155d2bb4e10d
     m_Address: unit/job/knight
     m_ReadOnly: 0
@@ -347,6 +401,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f38f5ed7d49bd4f51a9e2396e8103d50
     m_Address: face/enemy/cave-rat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f764de12c07144c35bf7b3fba6df7cda
+    m_Address: pose/enemy/goblin-archer-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

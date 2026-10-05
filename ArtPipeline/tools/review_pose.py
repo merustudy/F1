@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""The review sheet of mercenaries' attack and hit poses. No API call.
+"""The review sheet of units' attack and hit poses. No API call.
 
   review_pose.py                       every job that has both poses fitted (output/attack/<key>.png, output/hit/<key>.png)
   review_pose.py --key paladin --out ArtPipeline/Archive/<round>/review-pose.png
+  review_pose.py --enemies             every monster that has both (output/enemy_attack/<key>.png, output/enemy_hit/<key>.png)
 
 A row per mercenary: the approved figure, the attack pose and the hit pose, on the pose canvas at one scale (half the
 canvas: about one and a half times the battle's), standing on the floor line (the blue line) with the back foot where the
 figure's is, on the stage's colour. A mercenary that holds a different thing in each hand has its hands written over its
 row (Rosters/character.csv, Hands): the three pictures keep them (Docs/Design/10 §5). What to look at before a verdict is
-listed in Docs/Architecture/13_ART_PIPELINE.md ("자세 그림의 점검").
+listed in Docs/Architecture/13_ART_PIPELINE.md ("자세 그림의 점검"). A monster's row shows its game figure, its
+attack and its hit the same way (it faces left: its back foot is its rightmost).
 """
 import argparse
 import csv
@@ -20,7 +22,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 REPO = ROOT.parent
 sys.path.insert(0, str(TOOLS))
-from fit_pose import FLOOR, OUTPUT, idle_wide  # noqa: E402
+from fit_pose import FLOOR, OUTPUT, enemy_idle_wide, idle_wide  # noqa: E402
 
 FONT = REPO / "Assets/@Fonts/Source/Pretendard/Pretendard-Medium.ttf"
 Z = 0.5
@@ -37,8 +39,9 @@ def characters():
         return {row["Key"]: (row.get("Hands") or "").strip() for row in csv.DictReader(handle)}
 
 
-def row(key, hands):
-    images = [idle_wide(key)] + [Image.open(OUTPUT / pose / f"{key}.png").convert("RGBA") for pose in ("attack", "hit")]
+def row(key, hands, enemy=False):
+    poses = ("enemy_attack", "enemy_hit") if enemy else ("attack", "hit")
+    images = [enemy_idle_wide(key) if enemy else idle_wide(key)] + [Image.open(OUTPUT / pose / f"{key}.png").convert("RGBA") for pose in poses]
     boxes = [image.getchannel("A").getbbox() for image in images]
     top = min(b[1] for b in boxes) - 12
     bottom = max(b[3] for b in boxes) + 12
@@ -65,25 +68,32 @@ def row(key, hands):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Build the review sheet of mercenaries' poses. No API call.")
-    parser.add_argument("--key", dest="keys", action="append", help="A job id; may be given more than once. Default: every job with both poses.")
-    parser.add_argument("--out", default="", help="Sheet path. Default: output/review/pose.png")
+    parser = argparse.ArgumentParser(description="Build the review sheet of units' poses. No API call.")
+    parser.add_argument("--key", dest="keys", action="append", help="A job (or with --enemies an enemy) id; may be given more than once. Default: every one with both poses.")
+    parser.add_argument("--enemies", action="store_true", help="The monsters' poses instead of the mercenaries'.")
+    parser.add_argument("--out", default="", help="Sheet path. Default: output/review/pose.png (output/review/enemy_pose.png with --enemies)")
     args = parser.parse_args()
-    known = characters()
-    keys = args.keys or [key for key in known if (OUTPUT / "attack" / f"{key}.png").is_file() and (OUTPUT / "hit" / f"{key}.png").is_file()]
+    if args.enemies:
+        with (ROOT / "Rosters" / "enemy.csv").open(encoding="utf-8", newline="") as handle:
+            known = {row["Key"]: "" for row in csv.DictReader(handle)}
+        poses = ("enemy_attack", "enemy_hit")
+    else:
+        known = characters()
+        poses = ("attack", "hit")
+    keys = args.keys or [key for key in known if all((OUTPUT / pose / f"{key}.png").is_file() for pose in poses)]
     if not keys:
         raise SystemExit("실패: 맞춘 자세가 없다. 먼저 fit_pose.py")
-    rows = [row(key, known.get(key, "")) for key in keys]
+    rows = [row(key, known.get(key, ""), args.enemies) for key in keys]
     width = max(r.width for r in rows)
     sheet = Image.new("RGB", (width, sum(r.height for r in rows)), BACK)
     y = 0
     for r in rows:
         sheet.paste(r, (0, y))
         y += r.height
-    out = Path(args.out) if args.out else OUTPUT / "review" / "pose.png"
+    out = Path(args.out) if args.out else OUTPUT / "review" / ("enemy_pose.png" if args.enemies else "pose.png")
     out.parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out)
-    print(f"리뷰 시트: {out} ({sheet.width}x{sheet.height}, 용병 {len(keys)})")
+    print(f"리뷰 시트: {out} ({sheet.width}x{sheet.height}, {'몬스터' if args.enemies else '용병'} {len(keys)})")
     return 0
 
 

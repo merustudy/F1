@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Stands a mercenary's attack and hit poses at the size of its approved figure, on the pose canvas. No API call.
+"""Stands a unit's attack and hit poses at the size of its approved figure, on the pose canvas. No API call.
 
-  fit_pose.py                      every pose that has a raw (output/attack/<key>.raw.png, output/hit/<key>.raw.png)
+  fit_pose.py                      every pose that has a raw (output/<type>/<key>.raw.png of attack, hit, enemy_attack, enemy_hit)
   fit_pose.py --type attack --key paladin
+  fit_pose.py --type enemy_attack --key goblin_raider
 
 A pose (gen_image.py --type attack|hit) is drawn after the mercenary's approved figure; here it is stood in place of
 that figure (Docs/Architecture/13_ART_PIPELINE.md "후처리 (pose)", the rules of rounds 19 and 23):
@@ -19,6 +20,20 @@ that figure (Docs/Architecture/13_ART_PIPELINE.md "후처리 (pose)", the rules 
   nearer (CIE76 delta E).
 - The ring around the silhouette is the figures' (FIGURE_OUTLINE, UI_LINE).
 Writes output/<type>/<key>.png: the file that goes to Assets/@Art/Pose/Job/<key>_<type>.png.
+
+A monster's pose (enemy_attack, enemy_hit; rounds 26 to 28) is stood the same way, turned for a creature that faces left
+and stands on bare feet, paws or boots:
+- Feet: its back foot is its rightmost. The feet's colour is the commonest light colour of the lowest twelfth of the
+  approved raw (a taller strip where that one holds only dark claws), or Rosters/enemy.csv's Feet where that rule finds
+  something else (the overseer's dark boots). The back foot is the rightmost area of that colour in the lowest sixth above
+  the floor of the figure's right half (a weapon that comes down below the feet does so in front, on the left), the ink
+  lines drawn inside a foot bridged by growing the colour's mask a little.
+- Size: the roster's Scale, which every monster's pose has: a monster has no gold disc, and the parts it was measured on
+  differ from one monster to the next (the face, the back foot and pieces of gear, filled from points found by looking:
+  ArtPipeline/Archive/26-monster-motion, 27-monster-poses, 28-shaman-weapon).
+- Place: the back foot on the back foot of the game's figure, placed as gen_image.fit_figure places it (Rosters/enemy.csv's
+  Height, bound by the canvas width), in the middle of the pose canvas. Colours and the ring as a mercenary's.
+Writes output/<type>/<key>.png: the file that goes to Assets/@Art/Pose/Enemy/<key>_<attack|hit>.png.
 """
 import argparse
 import colorsys
@@ -26,7 +41,7 @@ import csv
 import math
 import sys
 from pathlib import Path
-from PIL import Image
+from PIL import Image, ImageFilter
 
 TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
@@ -36,6 +51,10 @@ from gen_image import ALPHA_FLOOR, FIGURE_CANVAS, FIGURE_FLOOR_MARGIN, FIGURE_SI
 OUTPUT = ROOT / "output"
 ROSTERS = ROOT / "Rosters"
 POSES = ("attack", "hit")
+ENEMY_POSES = ("enemy_attack", "enemy_hit")
+FOOT_LUMA = 90                        # a monster's feet are a light colour: not its dark claws, soles or shading
+FOOT_NEAR = 32                        # a pixel is of the feet's colour within this distance (RGB)
+FOOT_BRIDGE = 9                       # the feet's mask grows by this filter to close the ink lines drawn inside a foot
 BELOW = 112
 SIDE = FIGURE_CANVAS[0]               # room beside the figure canvas, on each side
 WIDE = (FIGURE_CANVAS[0] + 2 * SIDE, FIGURE_CANVAS[1] + BELOW)
@@ -285,20 +304,135 @@ def fit_pose(kind, key, scales):
         print(f"  경고: {kind}/{key} 가 자세 캔버스({WIDE[0]}x{WIDE[1]}) 밖으로 나간다")
 
 
+def enemy_rows():
+    """Key -> (Height, the colour of the feet or None) of Rosters/enemy.csv."""
+    with (ROSTERS / "enemy.csv").open(encoding="utf-8", newline="") as handle:
+        out = {}
+        for row in csv.DictReader(handle):
+            feet = (row.get("Feet") or "").split()
+            out[row["Key"]] = (int(row["Height"]), tuple(int(c) for c in feet) if feet else None)
+        return out
+
+
+def luma(r, g, b):
+    return 0.299 * r + 0.587 * g + 0.114 * b
+
+
+def foot_colour(image):
+    """The commonest light colour of the lowest twelfth of a monster's figure, or of a taller strip where that one holds
+    only dark claws (the rat)."""
+    box = subject_box(image)
+    for share in (12, 8, 6):
+        band = image.crop((box[0], box[3] - (box[3] - box[1]) // share, box[2], box[3]))
+        counts = {}
+        for r, g, b, a in band.getdata():
+            if a > 200 and luma(r, g, b) > FOOT_LUMA:
+                key = (r // 8 * 8 + 4, g // 8 * 8 + 4, b // 8 * 8 + 4)
+                counts[key] = counts.get(key, 0) + 1
+        if sum(counts.values()) >= 200:
+            return max(counts, key=counts.get)
+    raise SystemExit("실패: 발의 색을 찾지 못했다. Rosters/enemy.csv 의 Feet 에 적는다")
+
+
+def enemy_back_foot(image, colour):
+    """A monster's back foot: (its x, the bottom of its sole). The rightmost area of the feet's colour in the lowest sixth
+    above the floor of the figure's right half, the ink lines inside a foot bridged; x is the mean of its pixels of the
+    colour."""
+    px = image.load()
+    w, h = image.size
+    box = subject_box(image)
+    right = image.crop(((box[0] + box[2]) // 2, box[1], box[2], box[3])).getchannel("A").point(lambda v: 255 if v > 200 else 0)
+    floor = box[1] + right.getbbox()[3]
+    low = floor - (floor - box[1]) // 6
+    mask = Image.new("L", image.size, 0)
+    mp = mask.load()
+    for y in range(low, floor):
+        for x in range(box[0], box[2]):
+            r, g, b, a = px[x, y]
+            if a > 200 and (r - colour[0]) ** 2 + (g - colour[1]) ** 2 + (b - colour[2]) ** 2 < FOOT_NEAR * FOOT_NEAR:
+                mp[x, y] = 255
+    grown = mask.filter(ImageFilter.MaxFilter(FOOT_BRIDGE)).load()
+    seen, feet = bytearray(w * h), []
+    for y0 in range(low, floor):
+        for x0 in range(box[0], box[2]):
+            if seen[y0 * w + x0] or not grown[x0, y0]:
+                continue
+            stack, pts = [(x0, y0)], []
+            seen[y0 * w + x0] = 1
+            while stack:
+                x, y = stack.pop()
+                if mp[x, y]:
+                    pts.append((x, y))
+                for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                    if 0 <= nx < w and 0 <= ny < h and not seen[ny * w + nx] and grown[nx, ny]:
+                        seen[ny * w + nx] = 1
+                        stack.append((nx, ny))
+            if len(pts) >= 1200:
+                feet.append((sum(p[0] for p in pts) / len(pts), max(p[1] for p in pts) + 1))
+    if not feet:
+        raise SystemExit("실패: 발을 찾지 못했다")
+    return max(feet)
+
+
+def enemy_place(key):
+    """A monster's game figure on the pose canvas: (raw, ratio, back foot x, sole y on the canvas, the feet's colour), placed
+    as gen_image.fit_figure places it (the roster's Height, bound by the canvas width) in the middle of the canvas."""
+    height_percent, feet = enemy_rows()[key]
+    approved = Image.open(OUTPUT / "enemy" / f"{key}.raw.png").convert("RGBA")
+    box = subject_box(approved)
+    width, height = box[2] - box[0], box[3] - box[1]
+    ratio = min(round(FIGURE_CANVAS[1] * height_percent / 100) / height, (FIGURE_CANVAS[0] - 2 * FIGURE_SIDE_MARGIN) / width, 1.0)
+    x = (FIGURE_CANVAS[0] - round(width * ratio)) // 2 + SIDE
+    y = FIGURE_CANVAS[1] - FIGURE_FLOOR_MARGIN - round(height * ratio)
+    colour = feet or foot_colour(approved)
+    back, sole = enemy_back_foot(approved, colour)
+    return approved, ratio, x + (back - box[0]) * ratio, y + (sole - box[1]) * ratio, colour
+
+
+def enemy_idle_wide(key):
+    """A monster's game figure (Assets/@Art/Unit/Enemy/<key>.png) on the pose canvas, for a review."""
+    canvas = Image.new("RGBA", WIDE, (0, 0, 0, 0))
+    canvas.paste(Image.open(ROOT.parent / "Assets" / "@Art" / "Unit" / "Enemy" / f"{key}.png").convert("RGBA"), (SIDE, 0))
+    return canvas
+
+
+def fit_enemy_pose(kind, key, scales):
+    if key not in scales:
+        raise SystemExit(f"실패: {kind}/{key} 의 배율이 없다. 몬스터는 Rosters/{kind}.csv 의 Scale 에 잰 배율을 적는다")
+    approved, ratio, foot_x, sole_y, colour = enemy_place(key)
+    raw = Image.open(OUTPUT / kind / f"{key}.raw.png").convert("RGBA")
+    b = subject_box(raw)
+    back, sole = enemy_back_foot(raw, colour)
+    r = ratio / scales[key]
+    origin = (round(foot_x - (back - b[0]) * r), round(sole_y - (sole - b[1]) * r))
+    main = main_colours(approved)
+    approved_means = means(approved, main)
+    matched = match_colours(raw, main, approved_means)
+    before, after = worst(means(raw, main), approved_means), worst(means(matched, main), approved_means)
+    out = OUTPUT / kind / f"{key}.png"
+    place(matched if after < before else raw, r, origin, b).save(out)
+    right, bottom = origin[0] + round((b[2] - b[0]) * r), origin[1] + round((b[3] - b[1]) * r)
+    print(f"{kind}/{key}: feet {colour}, Scale {scales[key]}, colours worst dE {before:.1f} -> {after:.1f} {'moved' if after < before else 'as drawn'}, "
+          f"x {origin[0]}..{right}, {bottom - FLOOR:+d} below the floor -> {out.relative_to(ROOT.parent)}")
+    if origin[0] < 0 or origin[1] < 0 or right > WIDE[0] or bottom > WIDE[1]:
+        print(f"  경고: {kind}/{key} 가 자세 캔버스({WIDE[0]}x{WIDE[1]}) 밖으로 나간다")
+
+
 def parse_args():
-    parser = argparse.ArgumentParser(description="Stand mercenaries' poses at their approved figures' size. No API call.")
-    parser.add_argument("--type", dest="kinds", action="append", choices=POSES, help="attack or hit; may be given twice. Default: both.")
-    parser.add_argument("--key", dest="keys", action="append", help="A job id; may be given more than once. Default: every pose that has a raw.")
+    parser = argparse.ArgumentParser(description="Stand units' poses at their approved figures' size. No API call.")
+    parser.add_argument("--type", dest="kinds", action="append", choices=POSES + ENEMY_POSES,
+                        help="attack, hit, enemy_attack or enemy_hit; may be given more than once. Default: all four.")
+    parser.add_argument("--key", dest="keys", action="append", help="A job or enemy id; may be given more than once. Default: every pose that has a raw.")
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-    for kind in args.kinds or POSES:
+    for kind in args.kinds or POSES + ENEMY_POSES:
         scales = roster_scales(kind)
         keys = args.keys or sorted(path.name[:-len(".raw.png")] for path in (OUTPUT / kind).glob("*.raw.png"))
         for key in keys:
-            fit_pose(kind, key, scales)
+            (fit_enemy_pose if kind in ENEMY_POSES else fit_pose)(kind, key, scales)
     return 0
 
 

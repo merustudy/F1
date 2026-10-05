@@ -26,6 +26,8 @@
 | `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21). 전신 그림처럼 바닥선에 세운다. §23은 지금 하나뿐인 무덤에 맞춰 적었다 | `References/Character/style_ref_roster.png` (그대로 붙인다) | `1024x1024` | `medium` | `transparent` | §23 | §24 | `figure` |
 | `attack` | 확정한 용병 그림의 공격 자세: 무기를 휘둘러 돌진하는 순간(Round 23의 규칙). 손에 든 것은 그대로, 무기는 바닥선 아래로 내려가도 된다 | 그 직업의 확정 원본(`output/character/<key>.raw.png`)을 1536x1024에 앉힌 것: 발바닥이 높이의 3/4, 왼쪽 3분의 1에(gen_image.py가 만든다) | `1536x1024` | `medium` | `transparent` | §25 | §26 | `pose` (`tools/fit_pose.py`) |
 | `hit` | 확정한 용병 그림의 피격 자세: 맞아서 뒤로 밀리는 순간 | 같은 원본을 가운데에 | `1536x1024` | `medium` | `transparent` | §25 | §26 | `pose` (`tools/fit_pose.py`) |
+| `enemy_attack` | 확정한 몬스터 그림의 공격 자세: 무기를 휘둘러 왼쪽(파티)으로 돌진하는 순간(2026-10-05 Round 26~28의 규칙). 눈동자 없는 눈과 장비는 그대로, 무기는 바닥선 아래로 내려가도 된다 | 그 몬스터의 확정 원본(`output/enemy/<key>.raw.png`, 눈동자를 지운 것)을 1536x1024에 앉힌 것: 발바닥이 높이의 3/4, 오른쪽 3분의 1에(gen_image.py가 만든다) | `1536x1024` | `medium` | `transparent` | §27 | §28 | `pose` (`tools/fit_pose.py`) |
+| `enemy_hit` | 확정한 몬스터 그림의 피격 자세: 맞아서 오른쪽으로 밀리는 순간 | 같은 원본을 가운데에 | `1536x1024` | `medium` | `transparent` | §27 | §28 | `pose` (`tools/fit_pose.py`) |
 
 ## 1. Shared Style Rule
 
@@ -366,6 +368,40 @@ arm; they never change hands. The
 character faces toward the viewer's right, where the enemy stands. Draw one
 figure only, alone, on a transparent background, and do not reproduce the
 background of the attached image.
+```
+
+## 27. Enemy Pose
+
+For an attack or a hit pose of an approved monster, drawn after its figure (Docs/Design/10 §5; rounds 26 to 28). The dungeon's concept is not added to these prompts: the approved figure carries it, and the pose keeps that figure's gear.
+
+- Draw the one creature alone, the whole body from the top of the head and its gear to the feet and the tail, in the action pose the subject describes, in a three-quarter view turned toward the viewer's left, where the party stands.
+- Keep the proportions and the build of the attached image exactly: only the limbs, the torso, the head, the tail and the weapon move. If it holds a weapon, its hands grip it as the subject says.
+- Face: the same face as in the attached image, with the expression the subject asks for: menacing in a goofy way, never cute and never gory. The eyes stay blank as in the attached image: each is filled with the same one flat colour, with no pupil and nothing dark inside it, unless the subject squeezes an eye shut.
+- Facing: the head and the chest stay turned toward the viewer's left, toward the party. The eyes have no pupils, so the head and the body show where it looks. Never turned to the viewer, never turned right.
+- The ears, the hair, the tail, loose leather, cloth, rope and hanging gear may swing with the motion as the subject says, but keep their shapes, lengths and colors. The creature keeps the gear of the attached image as the subject lists it, and nothing more.
+- The feet, the paws or the boots stand on the floor line where they are in the attached image; below that line is open space in front of the creature. A weapon may come down below the floor line, in front of the feet, as far as the pose asks: no ground is drawn and nothing hides it, the whole weapon stays visible. The whole figure and the whole weapon stay inside the canvas with an empty margin on all four sides. Never crop the head, the feet, the tail or the weapon.
+- Draw one creature only: no second figure, no mercenary, no impact effect, no arrow in flight, no blood, no wound, no scenery, no ground line and no shadow under the feet. Never add text, letters, numbers or logos. Output a transparent PNG with all four corner pixels at alpha 0.
+- Never a smaller head than in the attached image, never a redesigned creature, other gear or another weapon, never pupils, irises or dark dots in the eyes.
+
+## 28. Enemy Pose Reference Rule
+
+The last part of an `enemy_attack` or `enemy_hit` prompt. The attached image is the monster's approved figure, laid on the canvas with open floor under the feet (gen_image.py).
+
+```text
+The attached image is this exact creature of our game, already drawn in our
+style and approved. Redraw the very same creature in the new pose the subject
+asks for. Keep everything else exactly as in the attached image: the face and
+its features, the ears, the body type and proportions, every piece of its gear
+and clothing, the weapon, every color, and the size the creature is drawn at
+(the same head size and the same body size) and the place it stands in: the
+feet, paws or boots on the floor line where they are in the attached image. Its
+eyes stay blank as in the attached image, filled with one flat colour, with no
+pupils. Keep the same hand: the wobbly hand-drawn ink line, the scribbly marks
+and the flat coloring with its one hard darker tone. Change only the pose and
+the expression the subject asks for: the same creature with the same gear and
+the same weapon, not a new design. The creature faces toward the viewer's left,
+where the party stands. Draw one figure only, alone, on a transparent
+background, and do not reproduce the background of the attached image.
 ```
 
 ## Dungeon: abandoned_mine

@@ -23,6 +23,7 @@ namespace F1.Tests
         [TestCase("face/job/knight", "Assets/@Art/Face/Job/knight.png")]
         [TestCase("face/enemy/goblin-raider", "Assets/@Art/Face/Enemy/goblin_raider.png")]
         [TestCase("pose/job/knight-attack", "Assets/@Art/Pose/Job/knight_attack.png")]
+        [TestCase("pose/enemy/goblin-raider-hit", "Assets/@Art/Pose/Enemy/goblin_raider_hit.png")]
         [TestCase("background/dungeon/abandoned-mine", "Assets/@Art/Background/Dungeon/abandoned_mine.png")]
         [TestCase("item/herb-pouch", "Assets/@Art/Item/herb_pouch.png")]
         [TestCase("item/small-icon/herb-pouch", "Assets/@Art/Item/SmallIcon/herb_pouch.png")]
@@ -53,8 +54,8 @@ namespace F1.Tests
                 Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.FaceOf(figure.Address)), $"{figure.Address} has its face.");
             }
 
-            // A mercenary's figure comes with its attack and hit poses (an enemy's does not yet).
-            foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/job/", StringComparison.Ordinal)))
+            // A figure comes with its attack and hit poses, a mercenary's and a monster's (Docs/Design/10 §5).
+            foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)))
             {
                 Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.PoseOf(figure.Address, F1.Data.ArtAddress.Attack)), $"{figure.Address} has its attack pose.");
                 Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.PoseOf(figure.Address, F1.Data.ArtAddress.Hit)), $"{figure.Address} has its hit pose.");

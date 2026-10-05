@@ -145,13 +145,15 @@ namespace F1.Editor.Setup
             StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
 
             // A unit that has a figure has a face too: it is cut out of the figure, and its address follows the figure's.
-            // A job that has a figure has its attack and hit poses as well, drawn after the figure.
+            // A job or an enemy that has a figure has its attack and hit poses as well, drawn after the figure.
             IEnumerable<(string Address, ImportPolicy Policy)> named = data.Jobs.Ordered.Select(j => (j.Figure, Figure))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Figure, Figure)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.Face, Face)))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Face, Face)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.AttackPose, Pose)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.HitPose, Pose)))
+                .Concat(data.Enemies.Ordered.Select(e => (e.AttackPose, Pose)))
+                .Concat(data.Enemies.Ordered.Select(e => (e.HitPose, Pose)))
                 .Concat(data.Dungeons.Ordered.Select(d => (d.Background, Scene)))
                 .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)))
                 .Concat(data.Potions.Ordered.Select(p => (p.Icon, Icon)));

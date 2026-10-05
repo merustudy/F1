@@ -3,13 +3,10 @@ panel,stone_panel,,tint
 table,stone_panel,,tint
 tablet,stone_panel,,tint
 belt,belt_iron,,flatten
-plate_party,gothic_plate,#2C4A70,tint
-plate_enemy,gothic_plate,#74322A,tint
-plate_danger,gothic_plate,#B22E26,tint
-plate_target,gothic_plate,#406CA4,tint
 plate_label,gothic_plate,#1E222C,tint
 trough,iron_slot,,flatten
 potion_slot,iron_pocket,,flatten
 potion_slot_selected,iron_pocket,#B8944E,flatten
 button,button_iron,#FFFFFF,flatten
 bag,iron_inventory,,flatten
+name_tag,iron_tag,,tint

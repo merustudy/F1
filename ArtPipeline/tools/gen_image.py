@@ -226,6 +226,39 @@ TYPES = {
         "tail": "Draw this one character, full body.",
         "fit": "pose",
     },
+    "enemy_attack": {
+        # A monster's attack pose, drawn after its approved figure (2026-10-05, rounds 26 to 28; Docs/Design/10 §5): a
+        # mercenary's pose turned for a creature that faces left. The reference is its approved raw (the one with the pupils
+        # taken off) laid on the pose's canvas with the room for the lunge on the left. The dungeon's concept is not added:
+        # the approved figure carries it, and the pose keeps that figure's gear (STYLE_RUNTIME.md §27).
+        "section": 27,
+        "reference_section": 28,
+        "references": [],
+        "pose_figure": "enemy",
+        "pose_place": "right",
+        "mirror_references": False,
+        "data": "EnemyData.csv",
+        "dungeon_theme": None,
+        "quality": "medium",
+        "size": "1536x1024",
+        "tail": "Draw this one creature, full body.",
+        "fit": "pose",
+    },
+    "enemy_hit": {
+        # A monster's hit pose: the same, with the figure in the middle of the canvas (it is knocked back to the right).
+        "section": 27,
+        "reference_section": 28,
+        "references": [],
+        "pose_figure": "enemy",
+        "pose_place": "middle",
+        "mirror_references": False,
+        "data": "EnemyData.csv",
+        "dungeon_theme": None,
+        "quality": "medium",
+        "size": "1536x1024",
+        "tail": "Draw this one creature, full body.",
+        "fit": "pose",
+    },
     "ui_piece": {
         "shared_section": 14,
         "section": 22,
@@ -670,9 +703,10 @@ def reference_upload(path: Path, mirror: bool = False):
 # ---------------------------------------------------------------- post-processing
 
 
-# The reference of a pose (round 19's second attack, round 23): the approved figure on the canvas the pose is drawn on,
-# smaller, its soles three quarters down with open floor under them so that a weapon can come down below the feet; an
-# attack's figure in the left third (the lunge reaches right), a hit's in the middle (it is knocked back left).
+# The reference of a pose (round 19's second attack, round 23; a monster's, rounds 26 to 28): the approved figure on the
+# canvas the pose is drawn on, smaller, its soles three quarters down with open floor under them so that a weapon can come
+# down below the feet; a mercenary's attack in the left third (the lunge reaches right), a monster's in the right third
+# (it lunges left), a hit's in the middle (it is knocked back).
 POSE_CANVAS = (1536, 1024)
 POSE_FIGURE_HEIGHT = 700
 POSE_SOLES = 768
@@ -681,15 +715,21 @@ POSE_MAX_WIDTH = 1100
 
 
 def pose_reference(kind: str, key: str) -> Path:
-    """Lays the mercenary's approved figure (its raw, output/character/<key>.raw.png) on a pose's canvas and saves it next
-    to the pose's output as <key>.reference.png."""
-    approved = OUTPUT_DIR / "character" / f"{key}.raw.png"
+    """Lays the unit's approved figure (its raw: output/character/<key>.raw.png for a mercenary, output/enemy/<key>.raw.png
+    for a monster) on a pose's canvas and saves it next to the pose's output as <key>.reference.png."""
+    approved = OUTPUT_DIR / TYPES[kind].get("pose_figure", "character") / f"{key}.raw.png"
     require_file(approved, f"확정 원본 {approved.name}(자세는 확정한 전신 그림을 보고 그린다)")
     image = Image.open(approved).convert("RGBA")
     subject = image.crop(subject_box(image))
     scale = min(POSE_FIGURE_HEIGHT / subject.height, POSE_MAX_WIDTH / subject.width)
     subject = subject.resize((round(subject.width * scale), round(subject.height * scale)), Image.LANCZOS)
-    left = POSE_LEFT if TYPES[kind]["pose_place"] == "left" else (POSE_CANVAS[0] - subject.width) // 2
+    place = TYPES[kind]["pose_place"]
+    if place == "left":
+        left = POSE_LEFT
+    elif place == "right":
+        left = POSE_CANVAS[0] - POSE_LEFT - subject.width
+    else:
+        left = (POSE_CANVAS[0] - subject.width) // 2
     canvas = Image.new("RGBA", POSE_CANVAS, (0, 0, 0, 0))
     canvas.paste(subject, (left, POSE_SOLES - subject.height))
     path = OUTPUT_DIR / kind / f"{key}.reference.png"

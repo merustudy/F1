@@ -19,7 +19,7 @@ CSV 열은 `05_STATIC_DATA.md`, 화면이 그림을 보여 주는 방식은 `12_
 ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 ├─ STYLE_RUNTIME.md            # 스타일 규칙. 스크립트가 읽어 프롬프트를 조립한다
 ├─ References/<Type>/          # 타입별 기준 그림. 그리는 방식만 빌린다
-├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy(용병은 Gender, 양손에 각각 장비를 들면 Hands도), 자세(attack, hit)는 Scale(잰 배율을 덮어쓸 때), 소품은 Height, Flip, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
+├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy(용병은 Gender, 양손에 각각 장비를 들면 Hands도, 적은 자세를 맞출 발의 색 Feet: 밝은 색 규칙이 발을 찾지 못할 때), 자세(attack, hit)는 Scale(잰 배율을 덮어쓸 때. enemy_attack, enemy_hit는 늘), 소품은 Height, Flip, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
 ├─ Archive
 │  ├─ calls.csv                # 유료 호출의 장부: 시각, 대상, 모델, 사용량, 추정 비용
 │  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본
@@ -29,8 +29,8 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 │  ├─ cutout.py                # 단색 배경의 그림에서 캐릭터를 오려 낸다. 호출하지 않는다
 │  ├─ cutface.py               # 확정된 전신 그림에서 얼굴을 잘라 낸다 (전투의 보드 패널). 호출하지 않는다
 │  ├─ ui_variants.py           # 맞춘 틀에서 게임에 넣을 Sprite를 만든다: 바탕색을 바꾼 변형. 호출하지 않는다
-│  ├─ fit_pose.py              # 용병의 공격·피격 자세를 확정 그림과 같은 크기·자리의 자세 캔버스(2016x1008)에 세운다. 호출하지 않는다
-│  ├─ review_pose.py           # 자세의 리뷰 시트: 용병마다 대기/공격/피격, 양손 장비의 손. 호출하지 않는다
+│  ├─ fit_pose.py              # 용병과 몬스터의 공격·피격 자세를 확정 그림과 같은 크기·자리의 자세 캔버스(2016x1008)에 세운다. 호출하지 않는다
+│  ├─ review_pose.py           # 자세의 리뷰 시트: 용병마다 대기/공격/피격, 양손 장비의 손(--enemies 는 몬스터). 호출하지 않는다
 │  └─ review_sheet.py          # 리뷰 시트. 호출하지 않는다. 용병(character)은 지금 게임의 용병 전원과 한 줄에 세우고 머리를 같은 배율로 맞대 본다(FACE_BAND, 성별은 Roster의 Gender)
 └─ output/                     # 생성 직후 산출물 (gitignore)
 .venv/                         # Python 가상환경 (gitignore). openai, pillow
@@ -66,11 +66,12 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 | `enemy` | 적의 전신 그림. 왼쪽을 본다 | `Rosters/enemy.csv` (`EnemyData.Id`, `Dungeon`은 `DungeonData.Id`) | `figure` |
 | `item` | 아이템의 아이콘. 그 아이템이 차지하는 칸의 모양으로 그린다 | `Rosters/item.csv` (`ItemData.Id`. 칸의 수는 `ItemData.Size`) | `cell` |
 | `background` | 화면의 배경. 불투명, 인물 없음 | `Rosters/background.csv` (던전의 배경은 `Dungeon`이 `DungeonData.Id`) | `scene` |
-| `ui_frame` | UI의 틀: 패널, 명패, 칸, 버튼, 가방. 화면에서 늘여 쓰는 빈 사각형 | `Rosters/ui_frame.csv` (쓰임새의 이름. `Flat`이 no면 그린 결을 남긴다) | `frame` |
-| `ui_piece` | UI의 장식 조각: 폭풍 시계의 다이얼. 늘이지 않고 통째로 보인다 | `Rosters/ui_piece.csv` (쓰임새의 이름) | `glyph` |
+| `ui_frame` | UI의 틀: 패널, 제목의 명패, 보드의 머리 띠, 칸, 버튼, 가방. 화면에서 늘여 쓰는 빈 사각형 | `Rosters/ui_frame.csv` (쓰임새의 이름. `Flat`이 no면 그린 결을 남긴다) | `frame` |
+| `ui_piece` | UI의 장식 조각: 양초의 조각, 해골 더미, 보드 머리의 금 징(전에는 폭풍 시계의 다이얼). 늘이지 않고 통째로 보인다 | `Rosters/ui_piece.csv` (쓰임새의 이름) | `glyph` |
 | `ui_icon` | UI의 작은 기호: 상태 아이콘 | `Rosters/ui_icon.csv` (쓰임새의 이름) | `glyph` |
 | `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21, C 채택). 전신 그림처럼 바닥선에 세운다 | `Rosters/prop.csv` (쓰임새의 이름. 데이터가 가리키지 않는다) | `figure` |
 | `attack`, `hit` | 용병의 공격 자세와 피격 자세(Round 19·23). 확정 그림을 보고 같은 인물로, 자세와 표정만 바꾼다 | `Rosters/attack.csv`, `Rosters/hit.csv` (`JobData.Id`) | `pose` (`tools/fit_pose.py`) |
+| `enemy_attack`, `enemy_hit` | 몬스터의 공격 자세와 피격 자세(2026-10-05 Round 26~28). 확정 그림을 보고 같은 몬스터로, 자세와 표정만. 왼쪽을 보고 눈동자 없는 눈 그대로 | `Rosters/enemy_attack.csv`, `Rosters/enemy_hit.csv` (`EnemyData.Id`, 잰 배율 `Scale`) | `pose` (`tools/fit_pose.py`) |
 
 - **공격·피격 자세**는 용병의 기본 그림이 확정될 때마다 더한다(규칙, Design/10 §2. Round 23에서 정식 타입이 됐다): `gen_image.py --type attack|hit --key <job>`.
   기준 그림은 스크립트가 만든다: 그 직업의 확정 원본(`output/character/<key>.raw.png`)을 1536x1024에 키 700으로 앉혀 발바닥을 높이의 4분의 3에 두고(그 아래는 무기가 내려갈 빈 바닥), 공격은 왼쪽 3분의 1에, 피격은 가운데에(`output/<type>/<key>.reference.png`).
@@ -79,6 +80,10 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
   - **양손에 각각 다른 장비를 들면 손을 지킨다**(2026-10-04, Design/10 §5. Round 23의 성기사 공격이 철퇴와 방패를 바꿔 들었다. 한 손에만 무기를 든 용병은 손이 바뀌어도 된다: 사용자 판정, 마검사 공격은 그대로): 그런 용병의 소재는 장비마다 든 손을 적는다(대기 그림에서 본 대로. 오른쪽을 보는 4분의 3 측면에서 앞(보는 사람의 왼쪽)의 팔이 오른팔).
     소재가 그 손과 어긋나는 움직임을 시키지 않는다(먼 팔의 방패를 "왼쪽 뒤로" 보내라는 문장이 손을 바꾸게 했다). 시험 문서는 §3에 "양손에 각각 다른 것을 들면 각 손은 그것을 그대로 든다", §4에 손의 절, 금지에 무기와 방패가 손을 바꾸는 것을 둔다.
   - **자세 그림의 점검**(판정에 내기 전에 모두 본다): 같은 인물인가, 양손에 각각 장비를 든 용병은 각 손이 대기 그림과 같은가, 머리가 대기와 같은 크기인가, 디딘 뒷발과 바닥선, 무기가 잘리지 않았는가, 표정이 소재대로인가. 리뷰 시트는 그런 용병의 든 손을 적어 세 그림(대기·공격·피격)을 맞대 보게 한다.
+- **몬스터의 공격·피격 자세**(2026-10-05, Design/10 §5. Round 26~28의 시험이 확정되어 정식 타입이 됐다): `gen_image.py --type enemy_attack|enemy_hit --key <enemy>`. 용병의 것을 왼쪽을 보는 몬스터로 돌린 것이다:
+  기준 그림은 그 몬스터의 확정 원본(`output/enemy/<key>.raw.png`, 눈동자를 지운 것)을 같은 캔버스에 앉혀 공격은 **오른쪽** 3분의 1에(왼쪽으로 돌진할 자리), 피격은 가운데에. 스타일 문서 §27(구도: 왼쪽, 눈동자 없는 한 가지 색의 눈, 발·짐승의 발·부츠가 바닥선에, 장비 그대로, 날아가는 화살 없음, 우스꽝스럽게 위협적인 얼굴)과 §28(기준 그림 규칙).
+  던전 컨셉은 붙이지 않는다(확정 그림이 이미 지니고, 자세는 그 장비를 그대로 지킨다. 던전 절의 "장비 하나를 걸친다"는 장비를 바꾸게 할 수 있었다). 소재는 정체 목록(확정 그림에서 읽은 체형·장비·무기, 눈의 색) + 자세 + 표정(공격은 사나운 비명·포효, 피격은 한 눈을 감은 찡그림).
+  공격 자세는 무기 장비가 있는 몬스터에 그린다(공격 자세는 무기 장비의 돌진에만 보인다: Design/10 §5).
 - `prop`의 타입 섹션(§23)은 지금 하나뿐인 무덤에 맞춰 적혀 있다(시험 문서의 것을 그대로 옮겨 확정한 무덤을 같은 문구로 다시 그릴 수 있다). 다른 소품을 그릴 때 무덤에 딸린 문장을 소재로 옮긴다.
 - 호출: `images.edit`에 기준 그림을 붙인다. 모델 `gpt-image-2.5-sunburst`, `1024x1024`, `medium`, 투명 배경, PNG.
   모양이 정사각이 아닌 것(배경, UI의 틀, 아이템)은 그 모양에 가까운 캔버스로 생성한다.
@@ -130,6 +135,10 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 - 자리: 디딘 뒷발(부츠 가죽색의 맨 왼쪽 무리)을 확정 그림의 뒷발 자리에 두고, 그 발바닥이 바닥선이다. 돌진에서도 밀림에서도 뒷발은 땅에 있다. 앞발은 들릴 수 있고 무기는 바닥선 아래로 내려갈 수 있다.
 - 색: 확정 원본의 주요 색(14색으로 줄인 팔레트)마다 평균의 차이만큼 옮기되, 가장 큰 차이를 줄일 때만 쓴다(CIE76 ΔE). 잉크와 흰색은 그대로.
 - 둘레의 띠는 전신 그림과 같다(`FIGURE_OUTLINE`, `UI_LINE`, `ring_alpha`). 결과는 `output/<type>/<key>.png`, 캔버스 밖으로 나가면 경고한다.
+- **몬스터**(`enemy_attack`, `enemy_hit`): 뒷발은 **맨 오른쪽 발**이다. 발의 색은 확정 원본의 맨 아래 12분의 1에서 가장 흔한 밝은 색(그 띠에 어두운 발톱뿐이면 띠를 넓힌다), 그 규칙이 다른 것을 잡으면 `Rosters/enemy.csv`의 `Feet`(감독관의 어두운 부츠).
+  뒷발 = 그림 오른쪽 절반의 바닥(앞에서 바닥선 아래로 내려오는 무기를 피한다)에서 위로 6분의 1 안의, 그 색의 맨 오른쪽 덩어리. 발 안의 잉크선(발가락, 부츠의 주름)은 그 색의 마스크를 조금 키워 잇는다.
+  배율은 소재의 `Scale`이다(늘 적는다): 금 장식이 없고, 잰 부위가 몬스터마다 다르다(얼굴, 디딘 뒷발, 칼날·모자·양초·코·귀·플라스크를 손으로 고른 점에서 채워 잰 면적비의 중앙값. `Archive/26-monster-motion/`, `27-monster-poses/`, `28-shaman-weapon/`).
+  자리는 게임 그림의 자리(`fit_figure`: 소재의 `Height`, 폭에 맞춤)에서 뒷발을 뒷발에. 색 맞춤과 띠는 용병과 같다. Round 26~28의 열 장을 이 도구로 다시 맞추면 확정한 후보와 픽셀까지 같다.
 
 ## 후처리 (`cell`)
 
@@ -191,6 +200,8 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   `flatten`(바탕을 한 색으로 펴며 바꾼다. 명패·칸·버튼)과 `tint`(결을 남긴 채 바탕의 색을 바꾼다. `tint_fill`). 전의 틀은 `Archive/09-battle-ui-feel/frames-before/`에 있다.
 - `ui_piece`(§22)는 늘이지 않는 장식 조각이다. `glyph`처럼 비율을 지켜 캔버스의 84%에 맞추므로, 화면 크기의 2배를 0.84로 나눈 `Size`를 적는다(다이얼 200 → 476).
 - (2026-10-04) 틀의 변형(`ui_variant.csv`)은 Sprite의 이름과 생성한 틀을 떼어 놓는다. 그래서 그림체나 재질을 바꿀 때 Unity 쪽 이름은 그대로다. 디아블로 컨셉(`Archive/14-ui-diablo/`)에서는 `panel`·`table`·`tablet`이 `stone_panel`에서, `plate_*`가 `gothic_plate`에 편의 색을 `tint`로, `bag`이 `iron_inventory`, `belt`가 `belt_iron`, `trough`가 `iron_slot`, `potion_slot`(과 금색 `_selected`)이 `iron_pocket`, `button`이 `button_iron`을 흰색으로 편 것이다.
+  유닛의 명패 `plate_party`·`plate_enemy`·`plate_danger`·`plate_target`은 2026-10-05 명패를 없애며 지웠다(`plate_label`은 남는다). 그때 더한 **보드의 머리 띠** `name_tag`는 `iron_tag`를 색 그대로(`tint`) 쓴 것이고,
+  그 왼쪽 끝의 **금 징** `gold_stud`는 늘이지 않는 `ui_piece`다. 둘 다 Round 29의 견본(`tag29_slim`, `badge29_a_stud`)을 사용자가 목업으로 승인해 같은 소재로 `Rosters/ui_frame.csv`·`ui_piece.csv`에 올렸다(`Archive/29-plates/`).
   **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
   양초의 빛처럼 화면에서 크게 늘이는 부드러운 경사는 2배로 그리지 않는다(UI의 MaxSize 512 안에서 512x256. 늘여도 경사는 매끄럽다).
 
@@ -205,7 +216,8 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
 6. 재생성은 요청된 항목만 한 번씩. 뒤집기, 크기 맞추기는 로컬에서 한다 (호출 없음)
 7. 승인분만 배선하고 검증 체인을 한 번 돌린다
 8. Archive/<round>/README.md: 후보, 판정, 받아들인 문구, 거절 사유, 호출 수와 사용량
-9. 용병은 기본 그림(전투 준비 자세)이 확정되면 공격 자세와 피격 자세를 더한다(Design/10 §2): 같은 승인 라운드를 그 둘로 한 번 더 돈다
+9. 용병은 기본 그림(전투 준비 자세)이 확정되면 공격 자세와 피격 자세를 더한다(Design/10 §2): 같은 승인 라운드를 그 둘로 한 번 더 돈다.
+   몬스터도 같다(Design/10 §5, 2026-10-05): 공격 자세는 무기 장비가 있는 몬스터에
 ```
 
 - **용병의 얼굴 크기**(2026-10-04, 성기사의 작은 머리가 세 라운드를 지나도록 걸러지지 않았다: 리뷰 시트가 후보끼리나 그 그림의 전과 후만 맞대 보였다):
@@ -257,6 +269,11 @@ UI의 틀과 아이콘
 2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
+몬스터의 공격·피격 자세 (전신 그림이 확정되면 더한다. 2026-10-05)
+1. PNG   -> Assets/@Art/Pose/Enemy/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2016x1008)
+2. CSV   -> 없다. Figure가 있는 적마다 "pose/enemy/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf, EnemyData.AttackPose/HitPose)
+3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 용병의 자세와 같다)
+
 포션의 병 아이콘
 1. PNG   -> Assets/@Art/Potion/<Id>.png (ui_icon으로 생성한 96x96)
 2. CSV   -> PotionData.csv 의 Icon = "potion/<kebab-id>"
@@ -281,7 +298,7 @@ UI의 틀과 아이콘
 
 ## Test와 검사
 
-- EditMode: `ArtSetup.FindProblems`가 비어 있다(`Figure`와 그 얼굴, 직업의 두 자세, `Background`, `Icon`이 가리키는 파일, `UiArt`의 파일이 있고 Import 정책이 맞다. `Assets/@Art`에 아무도 가리키지 않는 PNG가 없다).
+- EditMode: `ArtSetup.FindProblems`가 비어 있다(`Figure`와 그 얼굴, 직업과 적의 두 자세, `Background`, `Icon`이 가리키는 파일, `UiArt`의 파일이 있고 Import 정책이 맞다. `Assets/@Art`에 아무도 가리키지 않는 PNG가 없다).
   `AddressablesSetup.FindProblems`가 비어 있다.
 - PlayMode: `Figure`가 있는 유닛은 그림과 얼굴을, 없는 유닛은 Placeholder를 보여 준다. 전투 화면이 던전의 배경을 깐다. 아이템 칸이 `Icon`의 그림을 보여 준다.
 - 눈으로: `Tools/screenshots.sh`.
@@ -298,6 +315,6 @@ UI의 틀과 아이콘
 ## Deferred and Forbidden
 
 - Deferred: 원정 화면 말고의 UI 그림, 가방의 그림(지금은 도형), 아이템 아이콘을 새 칸의 캔버스로 다시 그리는 것(지금 것이 맞아 들어가므로 필요할 때), 던전 말고의 배경(타이틀, 본부)과 그 배선, 포션의 아이콘, 노드 아이콘,
-  몬스터의 공격·피격 자세, 여러 장의 애니메이션, 유닛의 색만 다른 변형, 소리.
+  여러 장의 애니메이션, 유닛의 색만 다른 변형, 소리.
 - Forbidden: 요청 없는 생성, 판정 없는 재생성, 승인 전 배선, 키를 환경 변수나 파일에 두기, 스타일 문구를 스크립트에 복사하기,
   작가나 작품의 이름을 프롬프트에 넣기, 기준 그림의 캐릭터를 승인 없이 다시 그리기, Inspector로 Import 설정 고치기.
