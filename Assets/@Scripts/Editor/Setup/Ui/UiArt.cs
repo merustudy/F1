@@ -46,11 +46,12 @@ namespace F1.Editor.Setup
         /// <summary>The iron belt the potion slots sit on. Tiled: rivets run along its edges.</summary>
         public const string Belt = "Frame/belt";
 
-        /// <summary>The plate under a unit, in the color of its side or state.</summary>
-        public const string PlateParty = "Frame/plate_party";
-        public const string PlateEnemy = "Frame/plate_enemy";
-        public const string PlateDanger = "Frame/plate_danger";
-        public const string PlateTarget = "Frame/plate_target";
+        /// <summary>
+        /// The head of a unit's board (2026-10-05 round 29): a slim strip of blackened iron with a thin gold line inside its edge and
+        /// a rivet at each end, and on its left end the gold stud the row is written on. The stud is a whole piece.
+        /// </summary>
+        public const string NameTag = "Frame/name_tag";
+        public const string GoldStud = "Frame/gold_stud";
 
         /// <summary>The plate a line of text is written on so that it reads over the background.</summary>
         public const string PlateLabel = "Frame/plate_label";
@@ -59,7 +60,7 @@ namespace F1.Editor.Setup
         public const string Slot = "Frame/slot";
         public const string SlotSelected = "Frame/slot_selected";
 
-        /// <summary>The trough of a bar: a dark iron recess (the HP bar of a plate).</summary>
+        /// <summary>The trough of a bar: a dark iron recess (the HP bar under a unit's feet).</summary>
         public const string Trough = "Frame/trough";
 
         /// <summary>A potion slot: a square pocket of blackened iron on the belt; and the same in gold when the potion is the chosen one.</summary>
@@ -131,10 +132,8 @@ namespace F1.Editor.Setup
             new Piece(Table, 40, tiled: true),
             new Piece(Tablet, 40, tiled: true),
             new Piece(Belt, 40, tiled: true),
-            new Piece(PlateParty, 44),
-            new Piece(PlateEnemy, 44),
-            new Piece(PlateDanger, 44),
-            new Piece(PlateTarget, 44),
+            new Piece(NameTag, 30),
+            new Piece(GoldStud),
             new Piece(PlateLabel, 44),
             new Piece(Slot, 16),
             new Piece(SlotSelected, 16),

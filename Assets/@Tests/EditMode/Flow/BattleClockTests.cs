@@ -63,5 +63,26 @@ namespace F1.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>(() => clock.SpeedPercent = 0);
         }
+
+        [Test]
+        public void Step_WhileSlowed_PassesThatShareOfTheChosenSpeed()
+        {
+            var clock = new BattleClock { SpeedPercent = 200, SlowPercent = 25 };
+
+            Assert.AreEqual(50, clock.Step(0.1f), "A quarter of x2.");
+            Assert.AreEqual(200, clock.SpeedPercent, "The speed the player chose is kept.");
+
+            clock.SlowPercent = 100;
+            Assert.AreEqual(200, clock.Step(0.1f));
+        }
+
+        [Test]
+        public void SlowPercent_IsAShareOfTheSpeed()
+        {
+            var clock = new BattleClock();
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => clock.SlowPercent = 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => clock.SlowPercent = 101);
+        }
     }
 }

@@ -9,9 +9,10 @@ namespace F1.UI
 {
     /// <summary>
     /// One row of the party side of the node map and the reward screen, in the battle screen's
-    /// shape: on the stage, the row's column with the figure, the plate (the row, the name, HP and
-    /// the job) and forward and back under it; in the board panel under the stage, the row's
-    /// column with the item board stacked on its bag, whose cells are the battle's
+    /// shape: on the stage, the row's column with the figure, the marks (HP, and the job on the
+    /// state line) and forward and back under it; in the board panel under the stage, the row's
+    /// column with the board's head (the row and the name) and the item board stacked on its bag,
+    /// whose cells are the battle's
     /// (<see cref="BattleItemView"/>) and show the same icons, each with its grade on a badge. It
     /// shows whoever stands in its row; an empty row shows nothing.
     /// </summary>

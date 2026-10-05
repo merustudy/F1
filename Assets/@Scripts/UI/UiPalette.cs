@@ -28,6 +28,17 @@ namespace F1.UI
         public static readonly Color Enemy = Rgb(0x70, 0x35, 0x2C);
         public static readonly Color Shield = Rgb(0x8F, 0xD3, 0xF4);
         public static readonly Color Burn = Rgb(0xF3, 0x9C, 0x12);
+
+        /// <summary>
+        /// The marks under a unit's feet (2026-10-05 round 29): the rim around the HP bar that tells a shield, death's door or
+        /// a potion's target, the light on the floor at a target's feet (the target's rim, faint), and a monster's name on the
+        /// head of its board, a pale red so that the sides read apart (the party's names are Text).
+        /// </summary>
+        public static readonly Color RimShield = Rgb(0x6E, 0xA8, 0xE8);
+        public static readonly Color RimDanger = Rgb(0xE2, 0x3C, 0x30);
+        public static readonly Color RimTarget = Rgb(0x6E, 0xAA, 0xFF);
+        public static readonly Color TargetLight = new Color(RimTarget.r, RimTarget.g, RimTarget.b, 0.6f);
+        public static readonly Color EnemyName = Rgb(0xF2, 0x8C, 0x7E);
         /// <summary>
         /// The cooldown of an item's cell as light (2026-10-04 round 18, the candle's gold): the smoky dark over the part
         /// not charged yet (and over an empty cell of a battle board), the gold on the charged part of the cell, and the

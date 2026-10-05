@@ -14,7 +14,8 @@ namespace F1.Editor.Setup
     /// <summary>
     /// Bakes the UI font asset. The atlas is static and holds exactly the characters that can reach
     /// the screen: ASCII, every UI string and every static data source. It is rebuilt only when that
-    /// set changes, so the asset is never edited by hand and never changes while playing.
+    /// set changes, so the asset is never edited by hand and never changes while playing. Next to it
+    /// lies the same font's material with a dark outline, kept in step with it (<see cref="OutlineMaterialPath"/>).
     /// </summary>
     public static class FontSetup
     {
@@ -23,6 +24,21 @@ namespace F1.Editor.Setup
         public const string FontAssetDirectory = "Assets/@Fonts/TMP";
         public const string FontAssetPath = FontAssetDirectory + "/Pretendard-Medium SDF.asset";
         public const string FamilyName = "Pretendard";
+
+        /// <summary>
+        /// The font's material with a dark outline (the ink of the art), for words that stand on the stage with no plate behind
+        /// them: the marks under a unit's feet and the names on the heads of the boards (2026-10-05 round 29). It is the font's own
+        /// material with the outline on, made again from it whenever the font is synced, so it always reads the same atlas.
+        /// </summary>
+        public const string OutlineMaterialPath = FontAssetDirectory + "/Pretendard-Medium SDF Outline.mat";
+
+        /// <summary>
+        /// The outline's thickness, in the shader's units (0..1 of the distance the atlas keeps around a glyph). The outline
+        /// straddles a glyph's edge, so the face grows by as much (dilate): the outline lies outside the letters, which keep
+        /// their weight. (A thick outline alone ate the small letters from inside.)
+        /// </summary>
+        const float OutlineWidth = 0.3f;
+        const float OutlineDilate = 0.3f;
 
         const int SamplingPointSize = 36;
         const int AtlasPadding = 4;
@@ -49,6 +65,18 @@ namespace F1.Editor.Setup
             }
 
             return fontAsset;
+        }
+
+        /// <summary>The outlined material of the UI font. Throws when it has not been made yet.</summary>
+        public static Material LoadOutlineMaterial()
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(OutlineMaterialPath);
+            if (material == null)
+            {
+                throw new InvalidOperationException($"UI font outline material not found at '{OutlineMaterialPath}'. Run F1/Setup/Sync Font Asset.");
+            }
+
+            return material;
         }
 
         /// <summary>Every code point the UI can show, in ascending order.</summary>
@@ -110,17 +138,51 @@ namespace F1.Editor.Setup
         {
             List<uint> corpus = BuildCorpus();
             var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
-            if (fontAsset != null && IsBakedFor(fontAsset, corpus))
+            if (fontAsset == null || !IsBakedFor(fontAsset, corpus))
             {
-                return;
+                if (fontAsset == null)
+                {
+                    fontAsset = Create();
+                }
+
+                Bake(fontAsset, corpus);
             }
 
-            if (fontAsset == null)
+            SyncOutlineMaterial(fontAsset);
+        }
+
+        /// <summary>The outlined material: the font's material copied, with the outline in the art's ink.</summary>
+        static void SyncOutlineMaterial(TMP_FontAsset fontAsset)
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(OutlineMaterialPath);
+            bool created = material == null;
+            if (created)
             {
-                fontAsset = Create();
+                material = new Material(fontAsset.material);
+            }
+            else
+            {
+                material.shader = fontAsset.material.shader;
+                material.CopyPropertiesFromMaterial(fontAsset.material);
             }
 
-            Bake(fontAsset, corpus);
+            material.name = Path.GetFileNameWithoutExtension(OutlineMaterialPath);
+            material.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            material.SetFloat("_OutlineWidth", OutlineWidth);
+            material.SetFloat("_FaceDilate", OutlineDilate);
+            material.SetColor("_OutlineColor", F1.UI.UiPalette.Ink);
+            ShaderUtilities.GetShaderPropertyIDs();
+            ShaderUtilities.UpdateShaderRatios(material);
+            if (created)
+            {
+                AssetDatabase.CreateAsset(material, OutlineMaterialPath);
+            }
+            else
+            {
+                EditorUtility.SetDirty(material);
+            }
+
+            AssetDatabase.SaveAssetIfDirty(material);
         }
 
         static TMP_FontAsset Create()
@@ -273,6 +335,16 @@ namespace F1.Editor.Setup
             if (extra.Count > 0)
             {
                 problems.Add($"Characters in the atlas but not in the corpus: {string.Join(" ", extra.Select(Describe))}. Run F1/Setup/Sync Font Asset.");
+            }
+
+            var outline = AssetDatabase.LoadAssetAtPath<Material>(OutlineMaterialPath);
+            if (outline == null)
+            {
+                problems.Add($"UI font outline material not found at '{OutlineMaterialPath}'. Run F1/Setup/Sync Font Asset.");
+            }
+            else if (outline.mainTexture != fontAsset.atlasTexture || !outline.IsKeywordEnabled(ShaderUtilities.Keyword_Outline))
+            {
+                problems.Add($"The material at '{OutlineMaterialPath}' does not read the font's atlas with its outline on. Run F1/Setup/Sync Font Asset.");
             }
 
             return problems;

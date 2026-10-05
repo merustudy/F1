@@ -59,12 +59,20 @@ namespace F1.Tests
             yield return CaptureLap("en-US", "en");
         }
 
-        /// <summary>The boss battle right after an enemy row emptied: who advanced, who fell and which items stopped.</summary>
+        /// <summary>
+        /// The boss battle as an enemy row empties: first the kill moment of the boss felled by Astrid's greataxe, a quarter of a
+        /// second in (the two lit over the dark, the stage drawn in; Docs/Design/10 §5), then the battle right after it: who
+        /// advanced, who fell and which items stopped.
+        /// </summary>
         [UnityTest]
         public IEnumerator AfterAnAdvance_Korean()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return UiTestUtil.ReachAnEnemyAdvanceInTheBossBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return new WaitForSecondsRealtime(0.25f);
+            yield return Capture("ko_29_battle_kill_moment");
+            yield return UiTestUtil.WaitForTheKillMoment(battle);
             yield return Capture("ko_15_battle_after_advance");
         }
 
@@ -136,6 +144,33 @@ namespace F1.Tests
 
             party[2].Pulse();
             yield return Capture("ko_25_battle_support_pulse");
+        }
+
+        /// <summary>
+        /// The monsters' poses in the boss battle (Docs/Design/10 §5): the overseer in row 1 lunging in its attack pose at 150%,
+        /// its maul over the party; the shaman in the last row lunging with its lantern staff, drawn over the raider in front of
+        /// it while it attacks; and the raider knocked back in its hit pose.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator MonsterPoses_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterTheBossBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.WaitForRedraw();
+            BattleUnitView[] enemies = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Enemy)
+                .OrderBy(view => view.Unit.Row).ToArray();
+
+            enemies[0].Lunge(-1f, withPose: true);
+            yield return Capture("ko_26_battle_boss_attack_pose");
+            yield return new WaitForSeconds(0.5f);
+
+            enemies[enemies.Length - 1].Lunge(-1f, withPose: true);
+            yield return Capture("ko_27_battle_back_row_attack");
+            yield return new WaitForSeconds(0.5f);
+
+            enemies[1].Recoil(1f);
+            yield return Capture("ko_28_battle_enemy_hit_pose");
         }
 
         IEnumerator CaptureLap(string localeCode, string prefix)
@@ -223,7 +258,7 @@ namespace F1.Tests
                             Managers.Expedition.AdvanceBattle(250);
                         }
 
-                        yield return UiTestUtil.WaitForRedraw();
+                        yield return UiTestUtil.WaitForResult(battle);
                         if (boss || !capturedReward)
                         {
                             yield return Capture(prefix + (boss ? "_10_boss_result" : "_06_battle_result"));

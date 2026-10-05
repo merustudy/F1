@@ -12,9 +12,10 @@ namespace F1.Editor.Setup
         /// <summary>
         /// The party side of the node map and the reward screen, in the battle screen's shape
         /// (2026-10-03 mockups A and V): on the stage, the battle's party columns, each with the
-        /// figure, the plate under its feet and the two buttons that move the member a row; under
-        /// the stage, the battle's board panel, with the board of each row stacked in the panel
-        /// column under its figure and the screen's own words and buttons in the right half; the
+        /// figure, the marks under its feet and the two buttons that move the member a row; under
+        /// the stage, the battle's board panel, with the board of each row (its head with the row and
+        /// the name, its cells) stacked in the panel column under its figure and the screen's own words
+        /// and buttons in the right half; the
         /// potions in the strip above the right half (the party stands too high for the strip on
         /// the left); the inventory as a popup over the right half under the potions, above the
         /// panel. The columns stand in a field shaped like the battle's, and the view puts them
@@ -38,9 +39,13 @@ namespace F1.Editor.Setup
         const float PartyPanelGap = 12f;
         const float PartyFieldTop = BoardPanelTop - PartyPanelGap - PartyColumnHeight;
 
-        /// <summary>From the top of a column: the plate, then the move buttons, each a gap under the one above.</summary>
-        const float PartyPlateTop = BattleFigureHeight + PlateGap;
-        const float PartyMoveTop = PartyPlateTop + PlateHeight + PlateGap;
+        /// <summary>
+        /// From the top of a column: the figure, the marks under its feet (as in battle, the state line naming the job), then the
+        /// move buttons, each a gap under the one above. The marks are lower than the plates they replaced (2026-10-05 round 29),
+        /// and the column stands on the panel, so its figures came 46 down with them.
+        /// </summary>
+        const float PartyMarksTop = BattleFigureHeight + PlateGap;
+        const float PartyMoveTop = PartyMarksTop + MarksHeight + PlateGap;
         const float PartyColumnHeight = PartyMoveTop + PartyMoveHeight;
 
         /// <summary>
@@ -117,8 +122,8 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's column on the stage: the figure, then what is known of whoever stands there:
-        /// the plate (the row, the name, HP and the job) and the two buttons that move the member a
-        /// row. The view sets the column's place and width when the screen opens, so every part is
+        /// the marks (HP, and the job on the state line) and the two buttons that move the member a
+        /// row. The row and the name are on the head of the row's board. The view sets the column's place and width when the screen opens, so every part is
         /// a line that stretches across the column. Every object is named after the row, because a
         /// prefab must not repeat a name. The row's board is in its column of the panel
         /// (<see cref="BuildPartyBoard"/>).
@@ -134,17 +139,16 @@ namespace F1.Editor.Setup
 
             // Everything under the figure is shown and hidden together: nobody stands in an empty row.
             RectTransform info = UiBuild.Rect(p + "Info", column);
-            UiBuild.Stretch(info, 0f, PartyPlateTop, 0f, 0f);
+            UiBuild.Stretch(info, 0f, PartyMarksTop, 0f, 0f);
 
-            // The plate of the battle screen. The column is its row, so the badge never changes; the state line names the job.
-            PlateParts plate = BuildPlate(info, p, UiArt.PlateParty, raycastTarget: false);
-            UiBuild.Line(plate.Plate, 0f, PlateHeight);
-            plate.Row.text = row.ToString(CultureInfo.InvariantCulture);
-            TextMeshProUGUI job = PlateStateLine(UiBuild.SingleLine(UiBuild.Label(p + "Job", plate.Plate.transform, 15f, UiPalette.TextDim)));
+            // The marks of the battle screen; the state line names the job.
+            MarksParts marks = BuildMarks(info, p, raycastTarget: false);
+            UiBuild.Line(marks.Marks, 0f, MarksHeight);
+            TextMeshProUGUI job = MarksStateLine(UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label(p + "Job", marks.Marks, 15f, UiPalette.TextDim))));
 
             // Forward goes towards row 1 (to the right), back the other way: the left and the right half of one line.
             // Half a column is narrow, so the labels may shrink.
-            float moveTop = PartyMoveTop - PartyPlateTop;
+            float moveTop = PartyMoveTop - PartyMarksTop;
             ButtonParts forward = KitLocalizedButton(p + "Forward", info, UiKeys.Board.Forward, UiPalette.ButtonQuiet, 20f);
             UiBuild.Line(forward.Rect, moveTop, PartyMoveHeight);
             forward.Rect.anchorMax = new Vector2(0.5f, 1f);
@@ -160,19 +164,18 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_figure", figure.gameObject);
             UiBuild.SetReference(view, "_figureView", figureView);
             UiBuild.SetReference(view, "_card", info.gameObject);
-            UiBuild.SetReference(view, "_name", plate.Name);
             UiBuild.SetReference(view, "_job", job);
-            UiBuild.SetReference(view, "_hp", plate.Hp);
-            UiBuild.SetReference(view, "_hpBar", plate.HpBar);
+            UiBuild.SetReference(view, "_hp", marks.Hp);
+            UiBuild.SetReference(view, "_hpBar", marks.HpBar);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
             return view;
         }
 
         /// <summary>
-        /// One row's board in its column of the board panel, as in battle: the cells stacked on
-        /// their bag in the middle of the column. The row's column view shows and fills it. Every
-        /// object is named after the row.
+        /// One row's board in its column of the board panel, as in battle: the head with the row and
+        /// the name, and under it the cells stacked on their bag in the middle of the column. The row's
+        /// column view shows and fills it. Every object is named after the row.
         /// </summary>
         static void BuildPartyBoard(RectTransform board, int row, PartyColumnView view)
         {
@@ -181,11 +184,16 @@ namespace F1.Editor.Setup
             // The board: the battle's cells stacked on their bag, as many as a board can have at most.
             // The view sizes the board to the member's cells at runtime (the bag follows) and makes the cells.
             RectTransform cells = UiBuild.Rect(p + "Cells", board);
-            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
+            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BoardCellsTop), new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
             UiBuild.Vertical(cells, BattleItemView.CellGapY, 0, TextAnchor.UpperCenter);
             BuildBoardBag(cells, p + "Bag");
             ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
 
+            // The head: the column is its row, so the stud never changes; the view writes whoever stands in it.
+            BuildBoardHead(board, p + "Board", out TextMeshProUGUI rowText, out TextMeshProUGUI name);
+            rowText.text = row.ToString(CultureInfo.InvariantCulture);
+
+            UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_board", board.gameObject);
             UiBuild.SetReference(view, "_slotTemplate", slotTemplate);
             UiBuild.SetReference(view, "_slotParent", cells);

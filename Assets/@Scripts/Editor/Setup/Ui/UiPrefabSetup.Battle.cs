@@ -13,16 +13,19 @@ namespace F1.Editor.Setup
         /// captions, pause and speed), the potions under it on the left, headroom, the stage, then
         /// the board panel. Everything above the panel is in front of the dungeon's background.
         /// Each column of the stage holds one unit: a full-body figure standing on the background's
-        /// floor with its plate under its feet. The stage's box leaves room at both ends of the
+        /// floor with its marks under its feet. The stage's box leaves room at both ends of the
         /// frame; the screen sets the columns' places and widths when it opens (FieldLayout). The
         /// board panel has one column per row on each side, right under the stage's column of that
-        /// row: the unit's item cells stacked on a bag (2026-10-03 mockup V, after the lines of
-        /// mockups A, E and G). The storm clock stands between the two sides. The stage is lit by the
+        /// row: the unit's item cells stacked on a bag under the head with its row and name (2026-10-03
+        /// mockup V, after the lines of mockups A, E and G; the head 2026-10-05). The storm clock stands between the two sides. The stage is lit by the
         /// storm candle alone: right over the background lies its light, a half disc around the flame.
         /// </summary>
         const float BattleFieldLeft = 120f;
-        /// <summary>The stage stands high enough for the panel of eight stacked cells under it (mockup V: 56 higher than before).</summary>
-        const float BattleFieldTop = 206f;
+        /// <summary>
+        /// The stage stands right over the panel: its marks end just above it. (Mockup V raised it 56 for the panel of eight
+        /// stacked cells; the marks that replaced the plates in round 29 are lower, and the stage came 48 down after them.)
+        /// </summary>
+        const float BattleFieldTop = 254f;
         const float BattleFieldWidth = 1680f;
 
         /// <summary>A figure's place is as tall as this and the art in it as wide as its 3:4 canvas, whatever the column's width is.</summary>
@@ -45,19 +48,24 @@ namespace F1.Editor.Setup
         const float BattleBackgroundHeight = BattleBackgroundWidth * 1536f / 2304f;
         const float BattleBackgroundFloor = 0.57f;
 
-        const float BattlePlateTop = BattleFigureHeight + PlateGap;
+        const float BattleMarksTop = BattleFigureHeight + PlateGap;
 
-        /// <summary>A unit on the stage: the figure and the plate under its feet.</summary>
-        const float BattleUnitHeight = BattlePlateTop + PlateHeight;
+        /// <summary>A unit on the stage: the figure and the marks under its feet.</summary>
+        const float BattleUnitHeight = BattleMarksTop + MarksHeight;
+
+        /// <summary>The light on the floor at the feet of a potion's target: a soft ellipse in the target's blue, behind the figure.</summary>
+        const float TargetLightWidth = 200f;
+        const float TargetLightHeight = 44f;
 
         /// <summary>
         /// The board panel under the stage: its box, and the room above and below its columns. A
-        /// column holds the most cells a board can have, stacked (JobData.MaxItemSlots), so the
-        /// panel is as high as they are plus the room.
+        /// column holds a board's head and the cells under it, stacked. (Before the head, the room of 14
+        /// above and below fitted the most cells a board can have, JobData.MaxItemSlots; now the bag of
+        /// seven cells would reach 8 past the panel's bottom. Every job has five.)
         /// </summary>
         const float BoardPanelTop = 620f;
         const float BoardPanelHeight = 460f;
-        const float BoardColumnsTop = 14f;
+        const float BoardColumnsTop = 2f;
         const float BoardColumnsHeight = BoardPanelHeight - 2f * BoardColumnsTop;
 
         /// <summary>
@@ -127,13 +135,16 @@ namespace F1.Editor.Setup
         {
             BattleScreen screen = Screen<BattleScreen>("BattleScreen", holder, out RectTransform frame);
 
-            // The dungeon's background, behind everything else. The screen shows it when the dungeon has one.
-            Image background = UiBuild.Image("Background", frame, Color.white);
+            // The stage's back, behind everything else: the dungeon's background (the screen shows it when the dungeon has
+            // one) and the candle's light right over it (the candle keeps it on its flame). It and the stage's front (the
+            // field) stretch over the frame, so that a kill moment draws both in about one point (BattleScreen); the header
+            // and the panel are drawn over them.
+            RectTransform stageBack = UiBuild.Rect("StageBack", frame);
+            UiBuild.Stretch(stageBack);
+            Image background = UiBuild.Image("Background", stageBack, Color.white);
             UiBuild.Box(background, 0f, BattleFieldTop + BattleFloorY - BattleBackgroundFloor * BattleBackgroundHeight, BattleBackgroundWidth, BattleBackgroundHeight);
             background.enabled = false;
-
-            // The candle's light, right over the background and under everything else; the candle keeps it on its flame.
-            StageLightParts stageLight = BuildStageLight(frame);
+            StageLightParts stageLight = BuildStageLight(stageBack);
 
             // Header: retreat and the dungeon with its floor on the left, the captions in the middle, pause and
             // speed on the right. The battle time and the storm are on the clock in the middle of the board panel.
@@ -188,7 +199,9 @@ namespace F1.Editor.Setup
             // because how many the party uses depends on the party size. The rearmost row is built
             // first and row 1 last: a figure is wider than its column, and where two figures of a
             // side touch, the one in front is drawn over the one behind.
-            RectTransform field = UiBuild.Box(UiBuild.Rect("Field", frame), BattleFieldLeft, BattleFieldTop, BattleFieldWidth, BattleUnitHeight);
+            RectTransform stageFront = UiBuild.Rect("StageFront", frame);
+            UiBuild.Stretch(stageFront);
+            RectTransform field = UiBuild.Box(UiBuild.Rect("Field", stageFront), BattleFieldLeft, BattleFieldTop, BattleFieldWidth, BattleUnitHeight);
             float columnWidth = BattleFieldWidth / (BattleRows.Count * 2);
             var partyRows = new RectTransform[BattleRows.Count];
             var enemyRows = new RectTransform[BattleRows.Count];
@@ -200,6 +213,12 @@ namespace F1.Editor.Setup
             }
 
             BattleUnitView unitTemplate = BuildBattleUnit(field);
+
+            // A kill moment's dark over the stage's box, among the field's columns: the screen puts it under the columns the
+            // moment lights (BattleScreen.ArrangeColumns). Takes no click.
+            Image killDark = UiBuild.Image("KillDark", field, new Color(0f, 0f, 0f, 0f));
+            UiBuild.Box(killDark, -BattleFieldLeft, StageFxTop - BattleFieldTop, 1920f, StageFxHeight);
+            killDark.enabled = false;
 
             // The board panel: one column per row on each side, under the stage's column of that row.
             // A unit's board (its cells stacked) is put in the column of the row it stands in, as its
@@ -313,6 +332,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReferences(screen, "_speedFrames", speedFrames);
             UiBuild.SetReferences(screen, "_speedLabels", speedLabels);
             UiBuild.SetReference(screen, "_unitTemplate", unitTemplate);
+            UiBuild.SetReference(screen, "_stageBack", stageBack);
+            UiBuild.SetReference(screen, "_stageFront", stageFront);
+            UiBuild.SetReference(screen, "_killDark", killDark);
             UiBuild.SetReference(screen, "_field", field);
             UiBuild.SetReferences(screen, "_partyRows", partyRows);
             UiBuild.SetReferences(screen, "_enemyRows", enemyRows);
@@ -456,50 +478,54 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One unit on the stage: the full-body figure (its art, or a placeholder) and its plate
-        /// under its feet. The whole unit is the button a potion is aimed at. Its width follows the
-        /// column it is put in, so everything inside is laid out as lines that stretch across it.
+        /// One unit on the stage: the full-body figure (its art, or a placeholder) and its marks under
+        /// its feet, with the light a potion's target gets on the floor behind the figure. The whole unit
+        /// is the button a potion is aimed at. Its width follows the column it is put in, so everything
+        /// inside is laid out as lines that stretch across it.
         /// </summary>
         static BattleUnitView BuildBattleUnit(Transform parent)
         {
             RectTransform root = UiBuild.Rect("UnitTemplate", parent);
             UiBuild.Size(root, BattleFieldWidth / (BattleRows.Count * 2), BattleUnitHeight);
 
+            // The light at the feet, built first so that the figure stands on it.
+            Image targetLight = UiBuild.Image("UnitTargetLight", root, UiPalette.TargetLight);
+            targetLight.sprite = UiArt.Load(UiArt.Glow);
+            UiBuild.Place(targetLight.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -BattleFloorY), new Vector2(TargetLightWidth, TargetLightHeight));
+            targetLight.enabled = false;
+
             // The figure's place, as wide as the column. A click on it counts for the unit.
             RectTransform figure = BuildFigure(root, "UnitFigure", takesClicks: true, out FigureView figureView);
             UiBuild.Line(figure, 0f, BattleFigureHeight);
 
-            // The plate: the row, the name, HP, then the line of states.
-            PlateParts plate = BuildPlate(root, "Unit", UiArt.PlateParty, raycastTarget: true);
-            UiBuild.Line(plate.Plate, BattlePlateTop, PlateHeight);
+            // The marks: HP with its badge and rim, then the line of states. The row and the name are on the unit's board.
+            MarksParts marks = BuildMarks(root, "Unit", raycastTarget: true);
+            UiBuild.Line(marks.Marks, BattleMarksTop, MarksHeight);
 
-            // The button lives on the root so that a click on the figure or the plate counts.
-            Button button = PotionTargetButton(root, plate.Plate);
+            // The button lives on the root so that a click on the figure or the bar counts.
+            Button button = PotionTargetButton(root, marks.HpTrack);
 
-            // The line of states: the death's door state, or the shield and the burn the unit
-            // carries, each an icon with its number. Only what applies is shown, from the left.
-            RectTransform states = PlateStateLine(UiBuild.Rect("UnitStates", plate.Plate.transform));
+            // The line of states: the death's door state, or the burn the unit carries, an icon with its
+            // number (the shield is the badge at the bar's end). Only what applies is shown, from the left.
+            RectTransform states = MarksStateLine(UiBuild.Rect("UnitStates", marks.Marks));
             HorizontalLayoutGroup line = UiBuild.Horizontal(states, 10f, 0, TextAnchor.MiddleLeft);
             line.childControlWidth = true;
             line.childControlHeight = true;
             GameObject statusChip = BuildStateChip(states, "UnitStatus", UiArt.DeathsDoor, UiPalette.Text, out TextMeshProUGUI status);
-            GameObject shieldChip = BuildStateChip(states, "UnitShield", UiArt.Shield, UiPalette.Shield, out TextMeshProUGUI shield);
             GameObject burnChip = BuildStateChip(states, "UnitBurn", UiArt.Burn, UiPalette.Burn, out TextMeshProUGUI burn);
 
             var view = root.gameObject.AddComponent<BattleUnitView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_figureView", figureView);
-            UiBuild.SetReference(view, "_plate", plate.Plate);
-            UiBuild.SetReference(view, "_plateParty", UiArt.Load(UiArt.PlateParty));
-            UiBuild.SetReference(view, "_plateEnemy", UiArt.Load(UiArt.PlateEnemy));
-            UiBuild.SetReference(view, "_plateDanger", UiArt.Load(UiArt.PlateDanger));
-            UiBuild.SetReference(view, "_plateTarget", UiArt.Load(UiArt.PlateTarget));
-            UiBuild.SetReference(view, "_row", plate.Row);
-            UiBuild.SetReference(view, "_name", plate.Name);
-            UiBuild.SetReference(view, "_hp", plate.Hp);
-            UiBuild.SetReference(view, "_hpBar", plate.HpBar);
-            UiBuild.SetReference(view, "_shieldChip", shieldChip);
-            UiBuild.SetReference(view, "_shield", shield);
+            UiBuild.SetReference(view, "_marks", marks.Marks);
+            UiBuild.SetReference(view, "_rim", marks.Rim);
+            UiBuild.SetReference(view, "_targetLight", targetLight);
+            UiBuild.SetReference(view, "_badge", marks.Badge);
+            UiBuild.SetReference(view, "_badgeNumber", marks.BadgeNumber);
+            UiBuild.SetReference(view, "_shieldBadge", UiArt.Load(UiArt.Shield));
+            UiBuild.SetReference(view, "_dangerBadge", UiArt.Load(UiArt.DeathsDoor));
+            UiBuild.SetReference(view, "_hp", marks.Hp);
+            UiBuild.SetReference(view, "_hpBar", marks.HpBar);
             UiBuild.SetReference(view, "_burnChip", burnChip);
             UiBuild.SetReference(view, "_burn", burn);
             UiBuild.SetReference(view, "_statusChip", statusChip);
@@ -510,10 +536,11 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One unit's board of the board panel: its cells stacked top to bottom on their bag, in the
-        /// middle of whichever column of the panel the board is put in. The view sizes the board to
-        /// the unit's cells (the bag follows) and makes the cells in it. The whole board is the
-        /// button a potion is aimed at; the bag is the graphic the button tints.
+        /// One unit's board of the board panel: the head with its row and name, and under it its cells
+        /// stacked top to bottom on their bag, in the middle of whichever column of the panel the board
+        /// is put in. The view sizes the board to the unit's cells (the bag follows), makes the cells in
+        /// it and writes the head. The whole board is the button a potion is aimed at; the bag is the
+        /// graphic the button tints.
         /// </summary>
         static BattleBoardView BuildBattleBoard(Transform parent)
         {
@@ -521,17 +548,20 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(root);
 
             RectTransform cells = UiBuild.Rect("BoardCells", root);
-            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
+            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BoardCellsTop), new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
             UiBuild.Vertical(cells, BattleItemView.CellGapY, 0, TextAnchor.UpperCenter);
             Image bag = BuildBoardBag(cells, "BoardBag");
             bag.raycastTarget = true;
             BattleItemView itemTemplate = BuildBattleItem(cells);
             GameObject emptyCell = BuildEmptyCell(cells);
+            BuildBoardHead(root, "Board", out TextMeshProUGUI row, out TextMeshProUGUI name);
 
             Button button = PotionTargetButton(root, bag);
 
             var view = root.gameObject.AddComponent<BattleBoardView>();
             UiBuild.SetReference(view, "_button", button);
+            UiBuild.SetReference(view, "_row", row);
+            UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_cells", cells);
             UiBuild.SetReference(view, "_itemTemplate", itemTemplate);
             UiBuild.SetReference(view, "_emptyCellTemplate", emptyCell);
@@ -561,7 +591,7 @@ namespace F1.Editor.Setup
             return button;
         }
 
-        /// <summary>One state on a plate's state line: an icon with its number or words next to it. An icon never stands alone.</summary>
+        /// <summary>One state on the state line under a unit's feet: an icon with its number or words next to it, outlined over the stage. An icon never stands alone.</summary>
         static GameObject BuildStateChip(Transform line, string name, string art, Color textColor, out TextMeshProUGUI text)
         {
             RectTransform chip = UiBuild.Rect(name + "Chip", line);
@@ -574,7 +604,7 @@ namespace F1.Editor.Setup
             size.preferredWidth = 18f;
             size.preferredHeight = 18f;
 
-            text = UiBuild.Label(name, chip, 15f, textColor);
+            text = UiBuild.Outlined(UiBuild.Label(name, chip, 15f, textColor));
             text.textWrappingMode = TextWrappingModes.NoWrap;
             return chip.gameObject;
         }

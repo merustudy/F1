@@ -94,7 +94,7 @@ Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 
 ```text
 Assets/@Fonts/Source/Pretendard/   # ttf, LICENSE.txt, README.md(출처와 SHA-256)
-Assets/@Fonts/TMP/                 # TMP Font Asset (생성물)
+Assets/@Fonts/TMP/                 # TMP Font Asset과 그 외곽선 재질 (생성물)
 ```
 
 - UI는 TextMeshPro와 Pretendard를 쓴다. Latin과 한글을 한 Family가 가져서 Fallback 사슬이 필요 없다.
@@ -104,6 +104,9 @@ Assets/@Fonts/TMP/                 # TMP Font Asset (생성물)
 - Corpus가 바뀌면 setup이 Atlas를 다시 굽는다. 같으면 건드리지 않는다. Font Asset을 손으로 고치지 않는다.
 - Corpus의 글자가 Font Asset에 전부 있는지 EditMode Test가 확인한다. 화면에 나오는 문구는 전부 CSV에서 오므로 빠지는 글자가 없다.
 - Locale별 Font 교체는 하지 않는다.
+- **외곽선 재질** (2026-10-05): 판 없이 무대 위에 놓이는 글(유닛의 발밑 표시, 보드 머리의 이름. `12_UI.md`)은 같은 Font의 외곽선 재질
+  `Pretendard-Medium SDF Outline.mat`(그림의 잉크색 `UiPalette.Ink`, 두께 0.3. 글자를 같은 만큼 부풀려 외곽선이 글자 바깥에 온다)로 그린다(`UiBuild.Outlined`). `FontSetup.Sync`가 Font Asset의 재질을 복사해 외곽선을 켜고 맞추므로
+  Atlas를 다시 구워도 같은 Atlas를 읽는다. 손으로 고치지 않는다. 재질이 Atlas를 읽고 외곽선이 켜져 있는지는 `FontSetup.FindProblems`가 본다.
 - Font Asset은 LFS가 아니라 일반 Git에 둔다. Atlas가 텍스트로 저장되고 대부분 빈칸이라 잘 압축된다. LFS 용량은 그림과 소리에 쓴다.
 - CSV에 넣지 않은 글자(코드에 직접 쓴 기호 등)는 화면에 나오지 않는다. 기호가 필요하면 CSV 문구에 넣는다.
 

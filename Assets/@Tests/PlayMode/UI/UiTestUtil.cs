@@ -57,6 +57,43 @@ namespace F1.Tests
             yield return null;
         }
 
+        /// <summary>
+        /// Waits until the battle's result is shown. The last enemy's kill moment is seen first (Docs/Design/10 §5), so the
+        /// result comes a moment after the battle has ended.
+        /// </summary>
+        public static IEnumerator WaitForResult(BattleScreen battle, float timeoutSeconds = DefaultTimeoutSeconds)
+        {
+            float deadline = Time.realtimeSinceStartup + timeoutSeconds;
+            while (!At(battle, "Frame/ResultPanel").gameObject.activeSelf)
+            {
+                if (Time.realtimeSinceStartup > deadline)
+                {
+                    Assert.Fail("The battle's result was not shown.");
+                }
+
+                yield return null;
+            }
+
+            yield return WaitForRedraw();
+        }
+
+        /// <summary>Waits until no kill moment is shown: its fallen have gone and the dark and the zoom are back.</summary>
+        public static IEnumerator WaitForTheKillMoment(BattleScreen battle, float timeoutSeconds = DefaultTimeoutSeconds)
+        {
+            float deadline = Time.realtimeSinceStartup + timeoutSeconds;
+            while (battle.KillMomentShown)
+            {
+                if (Time.realtimeSinceStartup > deadline)
+                {
+                    Assert.Fail("The kill moment did not end.");
+                }
+
+                yield return null;
+            }
+
+            yield return WaitForRedraw();
+        }
+
         public static T Screen<T>()
             where T : UIScreen
         {
@@ -163,6 +200,23 @@ namespace F1.Tests
             string dungeonId = data.Dungeons.Ordered[0].Id;
             Assert.Greater(data.BossGroupOf(dungeonId).Enemies.Count, 1, "This needs a boss group with someone behind row 1.");
 
+            yield return EnterTheBossBattle();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.RowsAdvanced && e.A == (int)BattleSide.Enemy))
+            {
+                Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The boss battle ended before an enemy row emptied.");
+                Managers.Expedition.AdvanceBattle(100);
+            }
+
+            yield return WaitForRedraw();
+        }
+
+        /// <summary>
+        /// From the title: a new run, a full party with a champion in row 1 (<see cref="StageChampion"/>), every battle on the
+        /// way won and every reward skipped, and the boss's battle entered and left paused at its start.
+        /// </summary>
+        public static IEnumerator EnterTheBossBattle()
+        {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
@@ -190,12 +244,6 @@ namespace F1.Tests
                         battle.Clock.Paused = true;
                         if (Managers.Expedition.Battle.Node.Kind == MapNodeKind.Boss)
                         {
-                            while (!engine.Events.Any(e => e.Kind == BattleEventKind.RowsAdvanced && e.A == (int)BattleSide.Enemy))
-                            {
-                                Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The boss battle ended before an enemy row emptied.");
-                                Managers.Expedition.AdvanceBattle(100);
-                            }
-
                             yield return WaitForRedraw();
                             yield break;
                         }
@@ -206,7 +254,7 @@ namespace F1.Tests
                         }
 
                         Assert.AreEqual(BattleResult.Victory, engine.Result);
-                        yield return WaitForRedraw();
+                        yield return WaitForResult(battle);
                         Click(battle, "Frame/ResultPanel/ResultBox/Continue");
                         yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
@@ -349,7 +397,7 @@ namespace F1.Tests
                 Managers.Expedition.AdvanceBattle(250);
             }
 
-            yield return WaitForRedraw();
+            yield return WaitForResult(battle);
             Click(battle, "Frame/ResultPanel/ResultBox/Continue");
             yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
         }

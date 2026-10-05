@@ -11,7 +11,7 @@ Assets/@Scripts/Flow            Namespace F1.Flow
 ├─ ExpeditionManager   원정, 전투 세션, 정산 보고의 주인
 ├─ RunSaveMapper       Save DTO와 상태 사이의 변환과 검증. RunSaveMigrator는 Schema Version
 ├─ BattleSession       진행 중이거나 막 끝난 전투 하나 (BattleEngine과 그 노드)
-├─ BattleClock         화면의 Frame 시간을 전투 밀리초로 바꾼다 (배속, 일시정지)
+├─ BattleClock         화면의 Frame 시간을 전투 밀리초로 바꾼다 (배속, 일시정지, 결정타 동안의 느림)
 └─ GamePhase           지금 어느 단계인가
 ```
 
@@ -63,7 +63,7 @@ Application 계층이 하는 일은 넷이다.
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo
 ```
 
-- 전투 시간을 얼마나 나아가게 할지는 화면이 정한다(배속, 일시정지). 결과는 Setup과 입력 기록만의 함수이므로
+- 전투 시간을 얼마나 나아가게 할지는 화면이 정한다(배속, 일시정지, 결정타 동안 잠깐 느리게: `BattleClock.SlowPercent`. `12_UI.md` "연출"). 결과는 Setup과 입력 기록만의 함수이므로
   Frame 간격과 배속은 결과를 바꾸지 않는다.
 - 입력(`TryUsePotion`, `TryRetreat`)은 현재 전투 시각에 적용된다. 일시정지 중에도 입력할 수 있다.
 - 전투가 끝나면 **그 호출 안에서** `ExpeditionRules.CompleteBattle`을 적용한다. 연출이나 화면의 확인을 기다리지 않는다.

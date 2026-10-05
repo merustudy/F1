@@ -13,6 +13,7 @@ namespace F1.Flow
 
         double _carryMs;
         int _speedPercent = 100;
+        int _slowPercent = 100;
 
         public bool Paused { get; set; }
 
@@ -31,6 +32,24 @@ namespace F1.Flow
             }
         }
 
+        /// <summary>
+        /// How much of the chosen speed the battle keeps for a moment: 100 is all of it. The screen slows the battle while it
+        /// shows a kill moment (Docs/Design/10 §5) without changing the speed the player chose.
+        /// </summary>
+        public int SlowPercent
+        {
+            get => _slowPercent;
+            set
+            {
+                if (value < 1 || value > 100)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), value, "A slowing keeps between 1% and all of the speed.");
+                }
+
+                _slowPercent = value;
+            }
+        }
+
         /// <summary>Whole battle milliseconds that passed during a frame. The fraction is carried to the next frame.</summary>
         public int Step(float deltaSeconds)
         {
@@ -40,7 +59,7 @@ namespace F1.Flow
             }
 
             double frameMs = Math.Min(deltaSeconds * 1000.0, MaxStepMs);
-            _carryMs += frameMs * _speedPercent / 100.0;
+            _carryMs += frameMs * _speedPercent / 100.0 * _slowPercent / 100.0;
             int whole = (int)_carryMs;
             _carryMs -= whole;
             return whole;

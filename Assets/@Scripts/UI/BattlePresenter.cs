@@ -10,7 +10,9 @@ namespace F1.UI
     /// Plays the battle's events as what the screen shows: a hit rises as a number and the one
     /// hit flashes and recoils, the one who struck lunges, the item that fired flashes in its
     /// cell, a fallen enemy fades and a fallen mercenary turns into a grave (the screen shows it and
-    /// keeps the party's places meanwhile), a heavy blow shakes the stage, the storm's lightning flashes,
+    /// keeps the party's places meanwhile), an enemy felled by a unit's item is a kill moment (the
+    /// screen slows, darkens and draws in on the two, then lets the enemy fade; Docs/Design/10 §5),
+    /// a heavy blow shakes the stage, the storm's lightning flashes,
     /// and each event that reads as a sentence goes to the panel's captions. It reads the event
     /// log the engine has already settled and never changes anything in it. Only what just
     /// happened is played: when a long stretch of battle arrives at once (a continued battle,
@@ -35,6 +37,8 @@ namespace F1.UI
         readonly RectTransform _clock;
         readonly Action<string> _caption;
         readonly Action<UnitRef> _partyFell;
+        readonly Func<bool> _killMoments;
+        readonly Action<UnitRef, UnitRef> _killMoment;
         int _played;
 
         /// <param name="unitView">The stage view of a unit, or null when it has none.</param>
@@ -43,6 +47,9 @@ namespace F1.UI
         /// <param name="caption">Takes one line for the panel's captions.</param>
         /// <param name="partyFell">Turns a fallen mercenary into its grave: the screen's to do, as it keeps the party's places
         /// while the grave stands. Without it a fallen mercenary fades like an enemy.</param>
+        /// <param name="killMoments">True while the screen plays kill moments (not at every speed).</param>
+        /// <param name="killMoment">Plays an enemy's fall to a unit's item as a kill moment, the striker first: the screen's to
+        /// do, as it slows the battle and holds the fallen until the moment is over, then lets it fade with its words.</param>
         public BattlePresenter(
             BattleEngine engine,
             StaticData data,
@@ -51,7 +58,9 @@ namespace F1.UI
             Func<UnitRef, BattleBoardView> boardView,
             RectTransform clock,
             Action<string> caption,
-            Action<UnitRef> partyFell = null)
+            Action<UnitRef> partyFell = null,
+            Func<bool> killMoments = null,
+            Action<UnitRef, UnitRef> killMoment = null)
         {
             _engine = engine;
             _data = data;
@@ -61,6 +70,8 @@ namespace F1.UI
             _clock = clock;
             _caption = caption;
             _partyFell = partyFell;
+            _killMoments = killMoments;
+            _killMoment = killMoment;
 
             // What happened before the screen opened (a battle continued from a save) is not replayed.
             _played = engine.Events.Count;
@@ -78,12 +89,36 @@ namespace F1.UI
                 BattleEvent e = events[_played];
                 if (e.TimeMs >= _engine.TimeMs - RecentMs)
                 {
-                    PlayOne(e);
+                    PlayOne(e, _played);
                 }
             }
         }
 
-        void PlayOne(BattleEvent e)
+        /// <summary>
+        /// The blow at this index of the log, when it killed an enemy: a unit's item that hurt it, its death logged right after
+        /// (an enemy has no death's door, so its death follows the damage that killed it). Burn's, the storm's and a passive's
+        /// damage are not blows. Null otherwise.
+        /// </summary>
+        BattleEvent KillingBlowAt(int index)
+        {
+            IReadOnlyList<BattleEvent> events = _engine.Events;
+            if (index < 0 || index + 1 >= events.Count)
+            {
+                return null;
+            }
+
+            BattleEvent blow = events[index];
+            BattleEvent death = events[index + 1];
+            bool fromAnItem = !blow.Source.IsNone && blow.Id != BattleEvent.CauseBurn && blow.Id != BattleEvent.CauseStorm && blow.Id != BattleEvent.CausePassive;
+            return blow.Kind == BattleEventKind.Damaged && fromAnItem && blow.Target.Side == BattleSide.Enemy
+                && death.Kind == BattleEventKind.Died && death.Target.Equals(blow.Target) && death.TimeMs == blow.TimeMs
+                ? blow
+                : null;
+        }
+
+        bool KillMoments => _killMoment != null && _killMoments != null && _killMoments();
+
+        void PlayOne(BattleEvent e, int index)
         {
             string caption = BattleLogText.Caption(e, _engine);
             if (caption != null)
@@ -97,7 +132,7 @@ namespace F1.UI
                     PlayActivation(e);
                     break;
                 case BattleEventKind.Damaged:
-                    PlayDamage(e);
+                    PlayDamage(e, KillMoments && KillingBlowAt(index) != null);
                     break;
                 case BattleEventKind.Healed:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Heal, e.B), UiPalette.Good, false);
@@ -121,7 +156,16 @@ namespace F1.UI
 
                     break;
                 case BattleEventKind.Died:
-                    // A mercenary turns into a grave at once (2026-10-04, round 21); an enemy fades as before.
+                    // A mercenary turns into a grave at once (2026-10-04, round 21). An enemy felled by a unit's item is a kill
+                    // moment: the screen holds it and lets it fade, with its words, when the moment is over, and nothing shakes
+                    // (2026-10-05, round 30). Any other enemy fades as before.
+                    BattleEvent blow = KillingBlowAt(index - 1);
+                    if (blow != null && KillMoments)
+                    {
+                        _killMoment(blow.Source, e.Target);
+                        break;
+                    }
+
                     if (e.Target.Side == BattleSide.Party && _partyFell != null)
                     {
                         _partyFell(e.Target);
@@ -199,9 +243,9 @@ namespace F1.UI
         /// <summary>
         /// The HP lost rises as a number (orange for burn, red otherwise) and what the shield took
         /// as a second one. A blow from a unit makes the target flash and recoil; the storm's and
-        /// burn's damage have no blow. A heavy blow shakes the stage.
+        /// burn's damage have no blow. A heavy blow shakes the stage, unless it is a kill moment's.
         /// </summary>
-        void PlayDamage(BattleEvent e)
+        void PlayDamage(BattleEvent e, bool killMoment)
         {
             BattleUnitView target = _unitView(e.Target);
             if (target == null)
@@ -228,7 +272,7 @@ namespace F1.UI
                 // A unit that shows its hit pose flashes at half strength: the pose already says it was hit.
                 target.Flash(target.HasHitPose ? Color.Lerp(Color.white, HitTint, 0.5f) : HitTint);
                 target.Recoil(-Towards(e.Target.Side));
-                if (heavy)
+                if (heavy && !killMoment)
                 {
                     _fx.Shake(6f);
                 }

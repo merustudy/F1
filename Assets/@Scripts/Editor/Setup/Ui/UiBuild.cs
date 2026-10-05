@@ -282,6 +282,13 @@ namespace F1.Editor.Setup
             return text;
         }
 
+        /// <summary>Draws a text with the font's outlined material: a dark outline lets it read over the stage with no plate behind it.</summary>
+        public static TextMeshProUGUI Outlined(TextMeshProUGUI text)
+        {
+            text.fontSharedMaterial = FontSetup.LoadOutlineMaterial();
+            return text;
+        }
+
         /// <summary>
         /// Lets a text shrink, down to a smallest size, when it does not fit its rect at its own
         /// size. For a name on a card whose width is set at runtime.

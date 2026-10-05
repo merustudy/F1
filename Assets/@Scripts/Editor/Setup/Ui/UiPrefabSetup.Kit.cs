@@ -9,11 +9,47 @@ namespace F1.Editor.Setup
     {
         /// <summary>
         /// The pieces the expedition screens are built from, drawn with the art of the interface
-        /// (UiArt): frames stretched as nine-slices, tinted buttons, bars in a frame, and the plate
-        /// under a unit. A sprite is drawn at twice its size on screen; a thin piece shrinks the
-        /// frame's border further (borderScale below 1).
+        /// (UiArt): frames stretched as nine-slices, tinted buttons, bars in a frame, the marks under
+        /// a unit and the head of its board. A sprite is drawn at twice its size on screen; a thin
+        /// piece shrinks the frame's border further (borderScale below 1).
+        ///
+        /// The marks under a unit's feet (2026-10-05 round 29, Slay the Spire's way): no plate behind
+        /// them, the stage shows through. From the top of their box, PlateGap under the feet: the HP bar
+        /// with its numbers on it (MarksBarInset in from each side of the column: 160 in a column of
+        /// 180), then the state line. The badge at the bar's left end reaches out of the box.
         /// </summary>
-        const float PlateHeight = 92f;
+        const float MarksHeight = 46f;
+        const float MarksBarTop = 2f;
+        const float MarksBarHeight = 22f;
+        const float MarksBarInset = 10f;
+
+        /// <summary>How far the rim of a state shows around the bar.</summary>
+        const float MarksRim = 2f;
+
+        /// <summary>The badge at the bar's left end (a shield and its number, the skull at death's door): its size, and how far it reaches out of the bar's end and above its top.</summary>
+        const float MarksBadgeSize = 36f;
+        const float MarksBadgeOut = 20f;
+        const float MarksBadgeRise = 7f;
+
+        /// <summary>The state line under the bar, starting a little in from the bar's left end.</summary>
+        const float MarksStateTop = 28f;
+        const float MarksStateHeight = 18f;
+        const float MarksStateIndent = 6f;
+
+        /// <summary>
+        /// The head of a unit's board (2026-10-05 round 29): the strip with the row on a gold stud and the
+        /// name, at the top of the board's column, as wide as an item cell's ink rim (which shows 3 past
+        /// the cell on either side). The cells start under it.
+        /// </summary>
+        const float BoardHeadHeight = 22f;
+        const float BoardHeadOut = 3f;
+        const float BoardHeadStud = 18f;
+        const float BoardHeadStudLeft = 4f;
+        const float BoardHeadNameGap = 6f;
+        const float BoardCellsTop = 24f;
+
+        /// <summary>The name tag is drawn for a strip 30 high: a thinner one shrinks its border in step (UiArt.NameTag).</summary>
+        const float NameTagArtHeight = 30f;
 
         /// <summary>
         /// The margin between an item cell and its icon. The icon is scaled into the place inside
@@ -34,11 +70,11 @@ namespace F1.Editor.Setup
         const float GradeBadgeSize = 24f;
         const float GradeBadgeInset = 5f;
 
-        /// <summary>The space between a figure and its plate, and between the plate and what stands under it.</summary>
+        /// <summary>The space between a figure and its marks, and between the marks and what stands under them.</summary>
         const float PlateGap = 6f;
 
-        /// <summary>A unit's name shrinks down to this size when it does not fit its plate.</summary>
-        const float UnitNameMinSize = 14f;
+        /// <summary>A unit's name shrinks down to this size when it does not fit the head of its board.</summary>
+        const float UnitNameMinSize = 10f;
 
         /// <summary>How much of an empty item cell shows: it is there, but nothing is in it.</summary>
         const float EmptyCellAlpha = 0.8f;
@@ -58,14 +94,16 @@ namespace F1.Editor.Setup
         const float FrontGlowAlpha = 0.45f;
         const float FrontLineAlpha = 0.9f;
 
-        /// <summary>The parts of a plate that a view fills in. The state line is left to the caller.</summary>
-        struct PlateParts
+        /// <summary>The parts of a unit's marks that a view fills in. The state line is left to the caller.</summary>
+        struct MarksParts
         {
-            public Image Plate;
-            public TextMeshProUGUI Row;
-            public TextMeshProUGUI Name;
-            public TextMeshProUGUI Hp;
+            public RectTransform Marks;
+            public Image Rim;
             public UiBar HpBar;
+            public Image HpTrack;
+            public TextMeshProUGUI Hp;
+            public Image Badge;
+            public TextMeshProUGUI BadgeNumber;
         }
 
         /// <summary>A colour of the palette at this alpha.</summary>
@@ -167,8 +205,8 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// A badge with a number on it: a brass disc with a dark rim. The row of a unit on its plate,
-        /// the grade of an item on its cell. The caller places the rim. Takes no clicks.
+        /// A badge with a number on it: a brass disc with a dark rim. The grade of an item on its cell
+        /// on the party side. The caller places the rim. Takes no clicks.
         /// </summary>
         static TextMeshProUGUI KitBadge(Transform parent, string name, string textName, float fontSize, out Image rim)
         {
@@ -183,37 +221,67 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// The plate under a unit: the badge with its row, its name, and its HP as a bar with the
-        /// numbers on it. The plate stretches across its column; the caller places it and adds the
-        /// state line under the bar. Every object is named after the prefix, because a prefab
-        /// must not repeat a name.
+        /// The marks under a unit's feet: its HP as a bar with the numbers on it, the badge at the bar's
+        /// left end (the view shows it with a shield or at death's door), and behind the bar the rim the
+        /// view colours with the unit's state. They stretch across the column; the caller places them and
+        /// adds the state line under the bar. The words are outlined: they stand on the stage. Every
+        /// object is named after the prefix, because a prefab must not repeat a name.
         /// </summary>
-        static PlateParts BuildPlate(Transform parent, string prefix, string art, bool raycastTarget)
+        static MarksParts BuildMarks(Transform parent, string prefix, bool raycastTarget)
         {
-            Image plate = KitFrame(prefix + "Plate", parent, art, raycastTarget: raycastTarget);
-            Transform t = plate.transform;
+            RectTransform marks = UiBuild.Rect(prefix + "Marks", parent);
 
-            // The row badge, at the top-left corner.
-            TextMeshProUGUI row = KitBadge(t, prefix + "Badge", prefix + "Row", 17f, out Image badge);
-            UiBuild.Box(badge, 11f, 10f, 26f, 26f);
+            // The rim: a rounded shape a little larger than the bar, behind it, so that its colour shows around the bar.
+            Image rim = UiBuild.Image(prefix + "Rim", marks, Color.white);
+            rim.sprite = UiBuild.BuiltinSprite("UI/Skin/UISprite.psd");
+            rim.type = Image.Type.Sliced;
+            rim.pixelsPerUnitMultiplier = 2f;
+            UiBuild.Line(rim, MarksBarTop - MarksRim, MarksBarHeight + 2f * MarksRim, MarksBarInset - MarksRim, MarksBarInset - MarksRim);
+            rim.enabled = false;
 
-            TextMeshProUGUI name = UiBuild.ShrinkToFit(
-                UiBuild.SingleLine(UiBuild.Line(UiBuild.Label(prefix + "Name", t, 20f, UiPalette.Text), 10f, 26f, 45f, 11f)),
-                UnitNameMinSize);
+            UiBar hpBar = KitBar(prefix + "HpBar", marks, UiArt.Trough, 0.4f, 4f, UiPalette.Blood, ghost: true);
+            UiBuild.Line(hpBar, MarksBarTop, MarksBarHeight, MarksBarInset, MarksBarInset);
+            var track = hpBar.GetComponent<Image>();
+            track.raycastTarget = raycastTarget;
+            TextMeshProUGUI hp = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label(prefix + "Hp", marks, 15f, UiPalette.Text, TextAlignmentOptions.Center)));
+            UiBuild.Line(hp, MarksBarTop, MarksBarHeight, MarksBarInset, MarksBarInset);
 
-            UiBar hpBar = KitBar(prefix + "HpBar", t, UiArt.Trough, 0.4f, 4f, UiPalette.Blood, ghost: true);
-            UiBuild.Line(hpBar, 39f, 23f, 11f, 11f);
-            TextMeshProUGUI hp = UiBuild.SingleLine(UiBuild.Label(prefix + "Hp", t, 15f, UiPalette.Text, TextAlignmentOptions.Center));
-            UiBuild.Line(hp, 39f, 23f, 11f, 11f);
+            // The badge over the bar's left end, reaching out of it; its number in the middle.
+            Image badge = KitIcon(prefix + "Badge", marks, UiArt.Shield);
+            UiBuild.Box(badge, MarksBarInset - MarksBadgeOut, MarksBarTop - MarksBadgeRise, MarksBadgeSize, MarksBadgeSize);
+            TextMeshProUGUI number = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label(prefix + "BadgeNumber", badge.transform, 15f, UiPalette.Text, TextAlignmentOptions.Center)));
+            UiBuild.Stretch(number.rectTransform);
+            badge.gameObject.SetActive(false);
 
-            return new PlateParts { Plate = plate, Row = row, Name = name, Hp = hp, HpBar = hpBar };
+            return new MarksParts { Marks = marks, Rim = rim, HpBar = hpBar, HpTrack = track, Hp = hp, Badge = badge, BadgeNumber = number };
         }
 
-        /// <summary>Where the state line of a plate is: under the HP bar.</summary>
-        static T PlateStateLine<T>(T component)
+        /// <summary>Where the state line of a unit's marks is: under the HP bar, from a little in from its left end.</summary>
+        static T MarksStateLine<T>(T component)
             where T : Component
         {
-            return UiBuild.Line(component, 65f, 18f, 13f, 11f);
+            return UiBuild.Line(component, MarksStateTop, MarksStateHeight, MarksBarInset + MarksStateIndent, MarksBarInset);
+        }
+
+        /// <summary>
+        /// The head of a unit's board, at the top of the board's column: the iron strip, the row written
+        /// on the gold stud at its left end, and the name next to it (outlined; the view colours it with
+        /// the unit's side). Built after the cells, so that it lies over the top of their bag. The battle
+        /// screen and the party side both use it.
+        /// </summary>
+        static Image BuildBoardHead(Transform board, string prefix, out TextMeshProUGUI row, out TextMeshProUGUI name)
+        {
+            Image head = KitFrame(prefix + "Head", board, UiArt.NameTag, BoardHeadHeight / NameTagArtHeight);
+            UiBuild.Line(head, 0f, BoardHeadHeight, -BoardHeadOut, -BoardHeadOut);
+
+            Image stud = KitIcon(prefix + "Stud", head.transform, UiArt.GoldStud);
+            UiBuild.Box(stud, BoardHeadStudLeft, (BoardHeadHeight - BoardHeadStud) / 2f, BoardHeadStud, BoardHeadStud);
+            row = UiBuild.SingleLine(UiBuild.Label(prefix + "Row", stud.transform, 11f, UiPalette.Ink, TextAlignmentOptions.Center));
+            UiBuild.Stretch(row.rectTransform);
+
+            name = UiBuild.Outlined(UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(prefix + "Name", head.transform, 14f, UiPalette.Text)), UnitNameMinSize));
+            UiBuild.Line(name, 0f, BoardHeadHeight, BoardHeadStudLeft + BoardHeadStud + BoardHeadNameGap, BoardHeadNameGap);
+            return head;
         }
 
         /// <summary>

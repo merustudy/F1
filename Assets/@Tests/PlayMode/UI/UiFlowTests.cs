@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using F1.Core;
 using F1.Data;
@@ -179,27 +180,44 @@ namespace F1.Tests
 
             // A potion is armed by clicking it and used by clicking an ally.
             PotionSlotView[] potions = UiTestUtil.Views<PotionSlotView>(screen);
-            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/PartyRow1"));
+            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/StageFront/Field/PartyRow1"));
             Assert.IsFalse(units[0].Button.interactable, "Allies are not clickable until a potion is armed.");
 
-            // A unit's plate says whose side it is on, and that a potion can be used on it. Its board
+            // The marks under the feet show what the engine says: the badge at the bar's end is the skull at death's
+            // door, the shield with its number while the unit has one, and nothing else.
+            foreach (BattleUnitView view in UiTestUtil.Views<BattleUnitView>(screen))
+            {
+                BattleUnit unit = view.Unit;
+                string badge = unit.InDog ? "deaths_door" : unit.Shield > 0 ? "shield" : null;
+                Assert.AreEqual(badge, view.BadgeShown == null ? null : view.BadgeShown.name, unit.Setup.SourceId);
+                if (badge == "shield")
+                {
+                    Assert.AreEqual(unit.Shield.ToString(), UiTestUtil.TextAt(view, "UnitMarks/UnitBadge/UnitBadgeNumber"), unit.Setup.SourceId);
+                }
+            }
+
+            // The rim around a unit's bar says that a potion can be used on it, and a light lies at its feet. Its board
             // in the panel takes the click too, but only while a potion is armed.
             BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(screen).First(u => u.Unit.Side == BattleSide.Enemy);
             BattleBoardView[] boards = UiTestUtil.Views<BattleBoardView>(screen);
             BattleBoardView board = boards.Single(b => b.Unit == units[0].Unit);
             BattleBoardView enemyBoard = boards.Single(b => b.Unit == enemy.Unit);
-            Assert.AreEqual("plate_party", units[0].Plate.name);
-            Assert.AreEqual("plate_enemy", enemy.Plate.name);
+            Assert.AreNotEqual(BattleUnitView.Rim.Target, units[0].RimShown);
+            Assert.IsFalse(units[0].TargetLit);
+            Assert.AreNotEqual(BattleUnitView.Rim.Target, enemy.RimShown);
             Assert.IsFalse(board.Button.interactable, "The board in the panel is not clickable either until a potion is armed.");
             UiTestUtil.Click(potions[0].Button);
             yield return null;
-            Assert.AreEqual("plate_target", units[0].Plate.name, "The potion can be used on this ally.");
-            Assert.AreEqual("plate_enemy", enemy.Plate.name, "Not on an enemy.");
+            Assert.AreEqual(BattleUnitView.Rim.Target, units[0].RimShown, "The potion can be used on this ally.");
+            Assert.IsTrue(units[0].TargetLit, "A light lies at its feet.");
+            Assert.AreNotEqual(BattleUnitView.Rim.Target, enemy.RimShown, "Not on an enemy.");
+            Assert.IsFalse(enemy.TargetLit, "Not on an enemy.");
             Assert.IsTrue(board.Button.interactable, "The board in the panel takes the click too.");
             Assert.IsFalse(enemyBoard.Button.interactable, "An enemy's board never does.");
             UiTestUtil.Click(units[0].Button);
             yield return null;
-            Assert.AreEqual("plate_party", units[0].Plate.name, "The potion is used: nothing waits for a target.");
+            Assert.AreNotEqual(BattleUnitView.Rim.Target, units[0].RimShown, "The potion is used: nothing waits for a target.");
+            Assert.IsFalse(units[0].TargetLit, "The potion is used: nothing waits for a target.");
 
             Assert.AreEqual(1, engine.Inputs.Count);
             Assert.AreEqual(BattleInputKind.UsePotion, engine.Inputs[0].Kind);
@@ -391,7 +409,8 @@ namespace F1.Tests
             // Row 1 cannot go further forward, the last row not further back.
             PartyColumnView row1 = party.ColumnOfRow(1);
             Assert.AreEqual(front, expedition.Members[row1.Member].MercenaryId);
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1, "Party1Info/Party1Plate/Party1Name"));
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardName"));
+            Assert.AreEqual("1", UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardStud/Party1BoardRow"), "The head of a row's board says its row.");
             Assert.IsFalse(row1.Forward.interactable);
             Assert.IsTrue(row1.Back.interactable);
             PartyColumnView last = party.ColumnOfRow(partySize);
@@ -403,8 +422,8 @@ namespace F1.Tests
 
             Assert.AreEqual(2, expedition.Members.Single(m => m.MercenaryId == front).Row);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == second).Row);
-            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1, "Party1Info/Party1Plate/Party1Name"), "A column shows whoever stands in its row now.");
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2), "Party2Info/Party2Plate/Party2Name"));
+            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardName"), "A column shows whoever stands in its row now.");
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2).Board.transform, "Party2BoardHead/Party2BoardName"));
 
             UiTestUtil.Click(party.ColumnOfRow(2).Forward);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
@@ -416,6 +435,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return UiTestUtil.ReachAnEnemyAdvanceInTheBossBattle();
             BattleScreen screen = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.WaitForTheKillMoment(screen);
             BattleEngine engine = Managers.Expedition.Battle.Engine;
             BattleEvent advanced = engine.Events.First(e => e.Kind == BattleEventKind.RowsAdvanced);
             BattleUnit[] dead = engine.Enemies.Where(u => !u.Alive).ToArray();
@@ -427,7 +447,7 @@ namespace F1.Tests
             var shown = new System.Collections.Generic.List<BattleUnitView>();
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
-                BattleUnitView[] inColumn = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/EnemyRow" + row));
+                BattleUnitView[] inColumn = UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/StageFront/Field/EnemyRow" + row));
                 Assert.LessOrEqual(inColumn.Length, 1, $"Row {row} holds one unit.");
                 foreach (BattleUnitView view in inColumn)
                 {
@@ -438,13 +458,13 @@ namespace F1.Tests
             }
 
             CollectionAssert.AreEquivalent(living, shown.Select(view => view.Unit));
-            Assert.AreEqual(1, UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/Field/EnemyRow1")).Length, "Someone advanced into row 1.");
+            Assert.AreEqual(1, UiTestUtil.Views<BattleUnitView>(UiTestUtil.At(screen, "Frame/StageFront/Field/EnemyRow1")).Length, "Someone advanced into row 1.");
 
             // The party's columns: one per row the party can stand in; the rest of the side's rows are not shown.
             int partyRows = engine.Setup.Balance.PartySize;
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
-                Assert.AreEqual(row <= partyRows, UiTestUtil.At(screen, "Frame/Field/PartyRow" + row).gameObject.activeSelf, $"Party row {row}");
+                Assert.AreEqual(row <= partyRows, UiTestUtil.At(screen, "Frame/StageFront/Field/PartyRow" + row).gameObject.activeSelf, $"Party row {row}");
             }
 
             // The board panel follows the stage: a living enemy's board is in the panel's column of its row, and the dead have none.
@@ -472,7 +492,10 @@ namespace F1.Tests
                     bool active = board.Unit.Items[i].Active;
                     string name = UiText.Name(board.Unit.Items[i].Equipped.Item.Name);
                     Assert.AreEqual(active ? UiPalette.Text : UiPalette.TextDim, items[i].GetComponentInChildren<TMPro.TMP_Text>().color, name);
-                    Assert.AreEqual(active ? Color.white : UiPalette.IconDim, items[i].GetComponentsInChildren<Image>().Single(image => image.sprite == items[i].Icon).color, name);
+                    if (items[i].Icon != null)
+                    {
+                        Assert.AreEqual(active ? Color.white : UiPalette.IconDim, items[i].GetComponentsInChildren<Image>().Single(image => image.sprite == items[i].Icon).color, name);
+                    }
                 }
             }
 
@@ -485,7 +508,7 @@ namespace F1.Tests
                 Managers.Expedition.AdvanceBattle(250);
             }
 
-            yield return UiTestUtil.WaitForRedraw();
+            yield return UiTestUtil.WaitForResult(screen);
             Assert.AreEqual(BattleResult.Victory, engine.Result);
             UiTestUtil.Click(screen, "Frame/ResultPanel/ResultBox/ShowLog");
             yield return UiTestUtil.WaitForRedraw();
@@ -686,9 +709,6 @@ namespace F1.Tests
                     : data.Enemies.Get(id).Figure;
                 AssertShows(unit.Figure, address, id);
 
-                // The badge on the plate says which row the unit stands in.
-                Assert.AreEqual(unit.Unit.Row.ToString(), UiTestUtil.TextAt(unit, "UnitPlate/UnitBadge/UnitRow"), id);
-
                 // A click on the figure's place counts for its unit.
                 var place = (RectTransform)unit.Figure.transform;
                 Transform hit = UiTestUtil.TopmostUnder(place);
@@ -707,6 +727,12 @@ namespace F1.Tests
                 BattleBoardView board = boards.Single(b => b.Unit == unit.Unit);
                 string side = unit.Unit.Side == BattleSide.Party ? "Party" : "Enemy";
                 Assert.AreEqual(side + "Board" + unit.Unit.Row, board.transform.parent.name, id);
+
+                // The head of the board says which row the unit stands in and its name; a monster's name is in its own red.
+                Assert.AreEqual(unit.Unit.Row.ToString(), UiTestUtil.TextAt(board, "BoardHead/BoardStud/BoardRow"), id);
+                Assert.AreEqual(UiText.Name(unit.Unit.Setup.Name), UiTestUtil.TextAt(board, "BoardHead/BoardName"), id);
+                Assert.AreEqual(unit.Unit.Side == BattleSide.Enemy ? UiPalette.EnemyName : UiPalette.Text,
+                    UiTestUtil.At(board, "BoardHead/BoardName").GetComponent<TMPro.TMP_Text>().color, id);
 
                 // The board is as high as the unit's cells stacked, with the bag behind them; each cell shows the icon
                 // its item's data names instead of the name; an enemy's icons are mirrored.
@@ -740,25 +766,27 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Battle_AUnitAtDeathsDoor_ShowsItOnItsPlate()
+        public IEnumerator Battle_AUnitAtDeathsDoor_ShowsItUnderItsFeet()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return UiTestUtil.ReachDeathsDoorInTheFirstBattle();
 
+            // The red rim around the bar and the skull at its end, without a number.
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Single(u => u.Unit.InDog);
-            Assert.AreEqual("plate_danger", unit.Plate.name);
+            Assert.AreEqual(BattleUnitView.Rim.Danger, unit.RimShown);
+            Assert.AreEqual("deaths_door", unit.BadgeShown.name);
+            Assert.IsFalse(UiTestUtil.At(unit, "UnitMarks/UnitBadge/UnitBadgeNumber").gameObject.activeSelf);
 
             // The state line holds the death's door state with its words, and nothing else.
-            Assert.IsTrue(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);
-            Assert.IsNotEmpty(UiTestUtil.TextAt(unit, "UnitPlate/UnitStates/UnitStatusChip/UnitStatus"));
-            Assert.IsFalse(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitShieldChip").gameObject.activeSelf);
-            Assert.IsFalse(UiTestUtil.At(unit, "UnitPlate/UnitStates/UnitBurnChip").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(unit, "UnitMarks/UnitStates/UnitStatusChip").gameObject.activeSelf);
+            Assert.IsNotEmpty(UiTestUtil.TextAt(unit, "UnitMarks/UnitStates/UnitStatusChip/UnitStatus"));
+            Assert.IsFalse(UiTestUtil.At(unit, "UnitMarks/UnitStates/UnitBurnChip").gameObject.activeSelf);
 
-            // Everyone else keeps the plate of their side, without the state.
+            // Everyone else has neither the rim nor the state.
             foreach (BattleUnitView other in UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Where(u => !u.Unit.InDog))
             {
-                Assert.AreEqual(other.Unit.Side == BattleSide.Party ? "plate_party" : "plate_enemy", other.Plate.name);
-                Assert.IsFalse(UiTestUtil.At(other, "UnitPlate/UnitStates/UnitStatusChip").gameObject.activeSelf);
+                Assert.AreNotEqual(BattleUnitView.Rim.Danger, other.RimShown);
+                Assert.IsFalse(UiTestUtil.At(other, "UnitMarks/UnitStates/UnitStatusChip").gameObject.activeSelf);
             }
         }
 
@@ -927,11 +955,11 @@ namespace F1.Tests
         }
 
         /// <summary>
-        /// A unit's plate stays in its column while the figure lunges or recoils, so its row, name and HP can be read
-        /// while it acts (2026-10-04, round 19: "정보칸은 그대로"); a walk into a new column carries the plate too.
+        /// A unit's marks stay in its column while the figure lunges or recoils, so its HP and states can be read
+        /// while it acts (2026-10-04, round 19: "정보칸은 그대로"); a walk into a new column carries the marks too.
         /// </summary>
         [UnityTest]
-        public IEnumerator Battle_APlateStaysInItsColumn_WhileItsFigureLungesOrRecoils()
+        public IEnumerator Battle_TheMarksStayInTheColumn_WhileTheFigureLungesOrRecoils()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle();
@@ -941,34 +969,33 @@ namespace F1.Tests
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
             yield return UntilStill(unit);
             Vector2 figure = unit.FigureRect.anchoredPosition;
-            Vector2 plate = unit.PlateRect.anchoredPosition;
+            Vector2 marks = unit.MarksRect.anchoredPosition;
 
             unit.Lunge(1f);
             yield return UntilMoved(unit, figure);
             Assert.Greater(unit.FigureRect.anchoredPosition.x, figure.x, "The figure lunges at the enemy.");
-            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition, "The plate stays where it is during a lunge.");
+            Assert.AreEqual(marks, unit.MarksRect.anchoredPosition, "The marks stay where they are during a lunge.");
             yield return UntilStill(unit);
 
             unit.Recoil(-1f);
             yield return UntilMoved(unit, figure);
             Assert.Less(unit.FigureRect.anchoredPosition.x, figure.x, "The figure is knocked back.");
-            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition, "The plate stays where it is during a recoil.");
+            Assert.AreEqual(marks, unit.MarksRect.anchoredPosition, "The marks stay where they are during a recoil.");
             yield return UntilStill(unit);
 
             unit.Walk(-120f);
             yield return null;
-            Assert.Less(unit.PlateRect.anchoredPosition.x, plate.x, "A walk into a new column carries the plate.");
-            Assert.AreEqual(unit.PlateRect.anchoredPosition.x - plate.x, unit.FigureRect.anchoredPosition.x - figure.x, 0.01f,
-                "The figure and the plate walk together.");
+            Assert.Less(unit.MarksRect.anchoredPosition.x, marks.x, "A walk into a new column carries the marks.");
+            Assert.AreEqual(unit.MarksRect.anchoredPosition.x - marks.x, unit.FigureRect.anchoredPosition.x - figure.x, 0.01f,
+                "The figure and the marks walk together.");
             yield return UntilStill(unit);
-            Assert.AreEqual(plate, unit.PlateRect.anchoredPosition);
+            Assert.AreEqual(marks, unit.MarksRect.anchoredPosition);
         }
 
         /// <summary>
         /// A mercenary shows its attack pose while its weapon's lunge plays and its hit pose while a blow's recoil plays, then
         /// its figure again (Docs/Design/10 §5). A pose stands on the figure's floor line: its place is the figure's, three times
-        /// as wide and an eighth deeper, with the floor line 112 of 1008 up. A lunge that is not a weapon's shows no pose, and an
-        /// enemy has none.
+        /// as wide and an eighth deeper, with the floor line 112 of 1008 up. A lunge that is not a weapon's shows no pose.
         /// </summary>
         [UnityTest]
         public IEnumerator Battle_AMercenaryShowsItsAttackPoseWhileItsWeaponLunges_AndItsHitPoseWhileItRecoils()
@@ -1009,14 +1036,89 @@ namespace F1.Tests
             yield return null;
             Assert.AreSame(figure, unit.Figure.Art, "Defensive gear, an attack item or anything else lunges without the pose.");
             yield return UntilStill(unit);
+        }
 
+        /// <summary>
+        /// A monster shows its attack pose while its weapon's lunge plays and its hit pose while a blow's recoil plays, then its
+        /// figure again, as a mercenary does (Docs/Design/10 §5): the same pose place on the figure's floor line, the red flash
+        /// at half strength.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AnEnemyShowsItsAttackPoseWhileItsWeaponLunges_AndItsHitPoseWhileItRecoils()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
             BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Enemy);
-            Sprite enemyFigure = enemy.Figure.Art;
+            string id = enemy.Unit.Setup.SourceId;
+            Sprite figure = enemy.Figure.Art;
+            RectTransform art = enemy.FigureArt.rectTransform;
+            Vector2 size = art.sizeDelta;
+            yield return UntilStill(enemy);
+
             enemy.Lunge(-1f, withPose: true);
+            yield return null;
+            Assert.AreEqual(id + "_attack", enemy.Figure.Art.name, "The weapon's lunge shows the attack pose.");
+            Assert.AreEqual(size.x * 3f, art.sizeDelta.x, 0.01f, "The pose's place is three figure places wide.");
+            Assert.AreEqual(size.y * 1008f / 896f, art.sizeDelta.y, 0.01f, "and an eighth deeper.");
+            Assert.AreEqual(112f / 1008f, art.pivot.y, 0.0001f, "It stands on its floor line, where the figure's feet are.");
+            yield return UntilStill(enemy);
+            yield return UntilFigure(enemy);
+            Assert.AreSame(figure, enemy.Figure.Art, "The figure comes back when the lunge is over.");
+            Assert.AreEqual(size, art.sizeDelta);
+
             enemy.Recoil(1f);
             yield return null;
-            Assert.AreSame(enemyFigure, enemy.Figure.Art, "An enemy has no pose.");
-            Assert.IsFalse(enemy.HasHitPose);
+            Assert.AreEqual(id + "_hit", enemy.Figure.Art.name, "A blow shows the hit pose.");
+            Assert.IsTrue(enemy.HasHitPose, "Its red flash is at half strength.");
+            yield return UntilStill(enemy);
+            yield return UntilFigure(enemy);
+            Assert.AreSame(figure, enemy.Figure.Art);
+        }
+
+        /// <summary>
+        /// While a unit attacks, its column is drawn over every other, so that its weapon is not hidden behind the unit in front
+        /// of it; when the attack is over the field's order comes back: a row over the rows behind it, the enemy's row 1 over the
+        /// party's (Docs/Design/10 §5).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AnAttackerIsDrawnInFrontOfEveryone_WhileItAttacks()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            RectTransform[] columns = Enumerable.Range(BattleRows.Front, BattleRows.Count)
+                .SelectMany(row => new[] { UiTestUtil.At(battle, "Frame/StageFront/Field/PartyRow" + row), UiTestUtil.At(battle, "Frame/StageFront/Field/EnemyRow" + row) })
+                .Select(column => (RectTransform)column).ToArray();
+            int[] order = columns.Select(column => column.GetSiblingIndex()).ToArray();
+            int last = order.Max();
+            Assert.AreEqual(last, UiTestUtil.At(battle, "Frame/StageFront/Field/EnemyRow1").GetSiblingIndex(), "The enemy's row 1 is drawn over everyone.");
+            Assert.Greater(UiTestUtil.At(battle, "Frame/StageFront/Field/PartyRow1").GetSiblingIndex(), UiTestUtil.At(battle, "Frame/StageFront/Field/PartyRow2").GetSiblingIndex(),
+                "A row is drawn over the rows behind it.");
+
+            BattleUnitView[] party = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Party)
+                .OrderBy(view => view.Unit.Row).ToArray();
+            Assert.Greater(party.Length, 1, "This needs a mercenary behind row 1.");
+            BattleUnitView behind = party[1];
+            yield return UntilStill(behind);
+            behind.Lunge(1f, withPose: true);
+            yield return null;
+            Assert.IsTrue(behind.Attacking);
+            Assert.AreEqual(last, behind.transform.parent.GetSiblingIndex(), "The attacker's column is drawn over everyone.");
+
+            yield return UntilStill(behind);
+            float until = Time.time + 1f;
+            while (behind.Attacking && Time.time < until)
+            {
+                yield return null;
+            }
+
+            yield return null;
+            CollectionAssert.AreEqual(order, columns.Select(column => column.GetSiblingIndex()).ToArray(), "The field's order comes back.");
         }
 
         /// <summary>A support item makes its owner swell and lights a warm light behind it for a moment (Docs/Design/10 §5).</summary>
@@ -1124,8 +1226,9 @@ namespace F1.Tests
                     string name = UiText.Name(unit.Setup.Name);
                     BattleUnitView view = views.Single(v => v.Unit == unit);
                     Assert.AreEqual("PartyRow" + drawnIn[unit], view.transform.parent.name, $"{name} keeps its place while the grave stands.");
-                    Assert.AreEqual(drawnIn[unit].ToString(), UiTestUtil.TextAt(view, "UnitPlate/UnitBadge/UnitRow"), name);
-                    Assert.AreEqual("PartyBoard" + drawnIn[unit], boards.Single(b => b.Unit == unit).transform.parent.name, name);
+                    BattleBoardView waiting = boards.Single(b => b.Unit == unit);
+                    Assert.AreEqual(drawnIn[unit].ToString(), UiTestUtil.TextAt(waiting, "BoardHead/BoardStud/BoardRow"), name);
+                    Assert.AreEqual("PartyBoard" + drawnIn[unit], waiting.transform.parent.name, name);
                 }
 
                 yield return null;
@@ -1138,9 +1241,165 @@ namespace F1.Tests
                 string name = UiText.Name(unit.Setup.Name);
                 BattleUnitView view = views.Single(v => v.Unit == unit);
                 Assert.AreEqual("PartyRow" + unit.Row, view.transform.parent.name, $"{name} walks into its new row when the grave has gone.");
-                Assert.AreEqual(unit.Row.ToString(), UiTestUtil.TextAt(view, "UnitPlate/UnitBadge/UnitRow"), name);
-                Assert.AreEqual("PartyBoard" + unit.Row, boards.Single(b => b.Unit == unit).transform.parent.name, name);
+                BattleBoardView moved = boards.Single(b => b.Unit == unit);
+                Assert.AreEqual(unit.Row.ToString(), UiTestUtil.TextAt(moved, "BoardHead/BoardStud/BoardRow"), name);
+                Assert.AreEqual("PartyBoard" + unit.Row, moved.transform.parent.name, name);
             }
+        }
+
+        /// <summary>
+        /// The index in the log of the first enemy's death that a unit's item caused (the damage logged right before it came
+        /// from a unit, not from burn, the storm or a passive), advancing the battle until there is one; -1 if the battle ends first.
+        /// </summary>
+        static int AdvanceUntilAnEnemyIsFelled(BattleEngine engine)
+        {
+            int guard = 0;
+            while (true)
+            {
+                IReadOnlyList<BattleEvent> events = engine.Events;
+                for (int i = 1; i < events.Count; i++)
+                {
+                    BattleEvent e = events[i];
+                    BattleEvent before = events[i - 1];
+                    if (e.Kind == BattleEventKind.Died && e.Target.Side == BattleSide.Enemy && before.Kind == BattleEventKind.Damaged
+                        && before.Target.Equals(e.Target) && !before.Source.IsNone && before.Id != BattleEvent.CauseBurn
+                        && before.Id != BattleEvent.CauseStorm && before.Id != BattleEvent.CausePassive)
+                    {
+                        return i;
+                    }
+                }
+
+                if (engine.Result != BattleResult.Ongoing || ++guard > 2000)
+                {
+                    return -1;
+                }
+
+                Managers.Expedition.AdvanceBattle(100);
+            }
+        }
+
+        /// <summary>
+        /// An enemy felled by a unit's item is a kill moment (Docs/Design/10 §5): for half a second the battle and every motion
+        /// run at a quarter of the speed, the fallen stays on the stage and the enemy keeps its places, the rest of the stage is
+        /// in the dark under the columns of the two (the one who struck over everyone), the stage draws in and nothing shakes;
+        /// then the fallen goes as a ghost, everything runs at its speed again and the enemy walks on, and the dark and the
+        /// zoom go back. The moment runs on real time: here the battle is paused.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AnEnemyFelledByAUnitsItem_IsAKillMoment()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterTheBossBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            var field = (RectTransform)UiTestUtil.At(battle, "Frame/StageFront/Field");
+            Vector2 still = field.anchoredPosition;
+            int ghosts = battle.Fx.GhostsShown;
+
+            int at = AdvanceUntilAnEnemyIsFelled(engine);
+            Assert.GreaterOrEqual(at, 1, "The champion fells an enemy (UiTestUtil.StageChampion).");
+            UnitRef fallenRef = engine.Events[at].Target;
+            UnitRef strikerRef = engine.Events[at - 1].Source;
+            yield return null;
+
+            Assert.IsTrue(battle.KillMomentSlows, "A unit's item felled it: a kill moment.");
+            yield return null;
+            Assert.AreEqual(BattleScreen.KillSlowPercent, battle.Clock.SlowPercent, "The battle runs slow.");
+            Assert.AreEqual(BattleScreen.KillSlowPercent / 100f, Time.timeScale, 1e-4f, "The motions run slow too.");
+            Assert.AreEqual(ghosts, battle.Fx.GhostsShown, "The fallen stays on the stage meanwhile.");
+            BattleUnitView[] views = UiTestUtil.Views<BattleUnitView>(battle);
+            BattleUnitView fallen = views.Single(view => view.Unit.Ref.Equals(fallenRef));
+            BattleUnitView striker = views.Single(view => view.Unit.Ref.Equals(strikerRef));
+            Assert.IsFalse(fallen.Unit.Alive);
+            foreach (BattleUnitView view in views.Where(view => view.Unit.Side == BattleSide.Enemy && view.Unit.Alive))
+            {
+                Assert.AreNotEqual("EnemyRow" + view.Unit.Row, view.transform.parent.name, "The enemy keeps its places while the fallen stays.");
+            }
+
+            int dark = battle.KillDarkLayer.GetSiblingIndex();
+            Assert.Greater(fallen.transform.parent.GetSiblingIndex(), dark, "The fallen is lit over the dark.");
+            Assert.Greater(striker.transform.parent.GetSiblingIndex(), fallen.transform.parent.GetSiblingIndex(), "The one who struck is over everyone.");
+            foreach (BattleUnitView other in views.Where(view => view != fallen && view != striker))
+            {
+                Assert.Less(other.transform.parent.GetSiblingIndex(), dark, $"{UiText.Name(other.Unit.Setup.Name)} is in the dark.");
+            }
+
+            yield return new WaitForSecondsRealtime(0.25f);
+            Assert.Greater(battle.KillDarkness, 0.5f, "The rest of the stage is dark.");
+            Assert.Greater(battle.StageZoom, 1.05f, "The stage is drawn in.");
+            Assert.AreEqual(still, field.anchoredPosition, "Nothing shakes.");
+            var darkRect = (RectTransform)battle.KillDarkLayer;
+            foreach (BattleUnitView view in views)
+            {
+                RectTransform figure = view.FigureRect;
+                Vector3 middle = figure.TransformPoint(figure.rect.center);
+                Assert.IsTrue(darkRect.rect.Contains(darkRect.InverseTransformPoint(middle)), $"The dark lies where {UiText.Name(view.Unit.Setup.Name)} stands.");
+            }
+
+            float until = Time.realtimeSinceStartup + 2f;
+            while (battle.KillMomentSlows && Time.realtimeSinceStartup < until)
+            {
+                yield return null;
+            }
+
+            yield return null;
+            Assert.IsFalse(battle.KillMomentSlows, "The slow time is over.");
+            Assert.AreEqual(1f, Time.timeScale, "The motions run at their speed again.");
+            Assert.AreEqual(100, battle.Clock.SlowPercent);
+            Assert.AreEqual(ghosts + 1, battle.Fx.GhostsShown, "The fallen goes as a ghost.");
+            Assert.IsFalse(fallen.gameObject.activeSelf);
+            Assert.AreEqual(still, field.anchoredPosition, "Nothing shakes when it goes either.");
+
+            yield return UiTestUtil.WaitForTheKillMoment(battle);
+            Assert.AreEqual(1f, battle.StageZoom, 1e-4f, "The zoom is back.");
+            Assert.AreEqual(0f, battle.KillDarkness, "The dark is gone.");
+            foreach (BattleUnitView view in UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Enemy))
+            {
+                Assert.AreEqual("EnemyRow" + view.Unit.Row, view.transform.parent.name, "The enemy has walked on.");
+            }
+        }
+
+        /// <summary>At x4 an enemy falls as before, without a kill moment holding the battle up (Docs/Design/10 §5).</summary>
+        [UnityTest]
+        public IEnumerator Battle_AtX4_AnEnemyFallsWithoutAKillMoment()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterTheBossBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.SpeedPercent = 400;
+            int ghosts = battle.Fx.GhostsShown;
+
+            Assert.GreaterOrEqual(AdvanceUntilAnEnemyIsFelled(Managers.Expedition.Battle.Engine), 1);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsFalse(battle.KillMomentShown);
+            Assert.AreEqual(1f, Time.timeScale);
+            Assert.Greater(battle.Fx.GhostsShown, ghosts, "It fades at once.");
+        }
+
+        /// <summary>An enemy the storm kills is no kill moment: nobody struck it (Docs/Design/10 §5).</summary>
+        [UnityTest]
+        public IEnumerator Battle_AnEnemyTheStormKills_IsNoKillMoment()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterALongFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            int ghosts = battle.Fx.GhostsShown;
+
+            int guard = 0;
+            while (engine.Enemies.All(unit => unit.Alive))
+            {
+                Assert.Less(++guard, 3000, "No enemy fell to the storm.");
+                Assert.AreEqual(BattleResult.Ongoing, engine.Result);
+                Managers.Expedition.AdvanceBattle(100);
+            }
+
+            Assert.IsTrue(engine.Events.Any(e => e.Kind == BattleEventKind.Damaged && e.Id == BattleEvent.CauseStorm && e.Target.Side == BattleSide.Enemy),
+                "The storm is what killed it: the party carries nothing.");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsFalse(battle.KillMomentShown);
+            Assert.AreEqual(1f, Time.timeScale);
+            Assert.Greater(battle.Fx.GhostsShown, ghosts, "It fades at once.");
         }
 
         /// <summary>At a higher speed the grave goes sooner by as much, so that the battle does not run far ahead of what is shown.</summary>
@@ -1171,7 +1430,7 @@ namespace F1.Tests
             Assert.AreEqual(address.Substring(address.LastIndexOf('/') + 1).Replace('-', '_'), screen.Background.name);
 
             // It lies behind everything else of the screen and takes no clicks.
-            Transform background = UiTestUtil.At(screen, "Frame/Background");
+            Transform background = UiTestUtil.At(screen, "Frame/StageBack/Background");
             Assert.AreEqual(0, background.GetSiblingIndex());
             Assert.IsFalse(background.GetComponent<Image>().raycastTarget);
         }

@@ -17,9 +17,9 @@ namespace F1.UI
     /// shown; the engine decides every outcome.
     ///
     /// Each side has one column of the stage and, right under it, one column of the board panel
-    /// per row, and a row holds one unit. A unit's figure and plate stand in the stage column of
-    /// the row the engine says it is in, and its item cells in the panel column under it, so both
-    /// move when the unit advances. The dead leave the stage and the panel. A fallen mercenary turns
+    /// per row, and a row holds one unit. A unit's figure and marks stand in the stage column of
+    /// the row the engine says it is in, and its board (the head with its row and name, its item
+    /// cells) in the panel column under it, so both move when the unit advances. The dead leave the stage and the panel. A fallen mercenary turns
     /// into a grave for a moment, and the party keeps the places it is drawn in until the grave has
     /// gone, then walks into the ones the engine has already given it: only the picture waits
     /// (2026-10-04, round 21). The event log is not
@@ -44,6 +44,34 @@ namespace F1.UI
         internal const float GraveHold = 0.7f;
         internal const float GraveVanish = 0.15f;
 
+        /// <summary>
+        /// The kill moment (2026-10-05 round 30, Docs/Design/10 §5): when an enemy falls to a unit's item, for KillSlowFor
+        /// seconds the battle and every motion run at KillSlowPercent (the clock is slowed, and the engine's time scale for the
+        /// motions), the rest of the stage darkens under the one who struck and the one who fell, and the stage draws in
+        /// towards them; then the fallen goes as any fallen enemy does, and the dark and the zoom go back. The times are real
+        /// seconds at x1, shorter by as much at x2; at a speed above KillMomentTopSpeed there is none. The curves are the
+        /// mockup's (ArtPipeline/Archive/30-kill-moment): the dark comes in over KillDarkIn and goes from KillDarkOutFrom over
+        /// KillDarkOut, the zoom comes in over KillZoomIn and goes back from KillZoomOutFrom over KillZoomOut.
+        /// </summary>
+        internal const float KillSlowFor = 0.5f;
+        internal const int KillSlowPercent = 25;
+        internal const int KillMomentTopSpeed = 200;
+        internal const float KillZoom = 1.1f;
+
+        /// <summary>
+        /// The dark's alpha. The approved 60% is the mockup's: the rest of the stage at 40% of its brightness on the screen. The
+        /// UI blends in linear light, where black at 60% leaves a bright colour at about two thirds, so the same look takes
+        /// 1 - 0.4^2.2 = 0.87.
+        /// </summary>
+        internal const float KillDark = 0.87f;
+        internal const float KillLength = KillZoomOutFrom + KillZoomOut;
+        const float KillDarkIn = 0.08f;
+        const float KillDarkOutFrom = 0.452f;
+        const float KillDarkOut = 0.12f;
+        const float KillZoomIn = 0.12f;
+        const float KillZoomOutFrom = 0.45f;
+        const float KillZoomOut = 0.2f;
+
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] Image _background;
@@ -60,6 +88,9 @@ namespace F1.UI
         [SerializeField] Image[] _speedFrames;
         [SerializeField] TMP_Text[] _speedLabels;
         [SerializeField] BattleUnitView _unitTemplate;
+        [SerializeField] RectTransform _stageBack;
+        [SerializeField] RectTransform _stageFront;
+        [SerializeField] Image _killDark;
         [SerializeField] RectTransform _field;
         [SerializeField] RectTransform[] _partyRows;
         [SerializeField] RectTransform[] _enemyRows;
@@ -90,6 +121,8 @@ namespace F1.UI
         readonly BattleClock _clock = new BattleClock();
         readonly List<BattleUnitView> _partyViews = new List<BattleUnitView>();
         readonly List<BattleUnitView> _enemyViews = new List<BattleUnitView>();
+        readonly List<RectTransform> _columnOrder = new List<RectTransform>();
+        int _firstColumn;
         readonly List<BattleBoardView> _partyBoards = new List<BattleBoardView>();
         readonly List<BattleBoardView> _enemyBoards = new List<BattleBoardView>();
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
@@ -102,6 +135,29 @@ namespace F1.UI
         int _armedPotion = -1;
         int _shownTimeTenths = -1;
         bool _resultShown;
+        KillMoment _kill;
+
+        /// <summary>Where the kill moment's dark lies when nothing is drawn in: its place in the field, and its corner in the frame (the stage's box).</summary>
+        Vector2 _killDarkPlace;
+        Vector3 _killDarkHome;
+
+        /// <summary>In the frame: the point the stage draws in about, and the stage's layers' own pivot at rest (both stretch over the frame).</summary>
+        Vector2 _killCentre;
+        Vector2 _stageRest;
+
+        /// <summary>A kill moment on show: whom it lights, how long it has run (real seconds), how fast, and whether its fallen have gone.</summary>
+        sealed class KillMoment
+        {
+            public readonly List<BattleUnitView> Fallen = new List<BattleUnitView>();
+            public readonly List<BattleUnitView> Strikers = new List<BattleUnitView>();
+            public float Age;
+
+            /// <summary>The speed it was struck at, as a factor: its times are divided by it.</summary>
+            public float Pace = 1f;
+
+            /// <summary>True once the slow time is over and the fallen have gone: the dark and the zoom are going back.</summary>
+            public bool Released;
+        }
 
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
         public BattleClock Clock => _clock;
@@ -117,6 +173,21 @@ namespace F1.UI
 
         /// <summary>The storm candle. For tests.</summary>
         public CandleView Candle => _candle;
+
+        /// <summary>True while a kill moment is shown, until its dark and zoom are back. For tests.</summary>
+        public bool KillMomentShown => _kill != null;
+
+        /// <summary>True while a kill moment holds the fallen and slows the battle. For tests.</summary>
+        public bool KillMomentSlows => _kill != null && !_kill.Released;
+
+        /// <summary>How far the stage is drawn in: 1 when it is not.</summary>
+        public float StageZoom => _stageFront.localScale.x;
+
+        /// <summary>How dark a kill moment has made the rest of the stage, 0..1.</summary>
+        public float KillDarkness => _killDark.enabled ? _killDark.color.a : 0f;
+
+        /// <summary>The kill moment's dark, among the stage's columns. For tests.</summary>
+        public Transform KillDarkLayer => _killDark.transform;
 
         /// <summary>The captions in the header, oldest first.</summary>
         public IReadOnlyList<string> Captions => _captionLines;
@@ -195,7 +266,15 @@ namespace F1.UI
             _resultPanel.SetActive(false);
             _logPanel.SetActive(false);
 
-            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell);
+            // From the layout, not from positions (a fresh screen's are not laid out yet): the stage's front stretches over the
+            // frame, the field hangs from its top-left corner and the dark from the field's.
+            var frame = (RectTransform)_stageFront.parent;
+            Rect frameRect = frame.rect;
+            _killDarkPlace = _killDark.rectTransform.anchoredPosition;
+            _killDarkHome = new Vector3(frameRect.xMin + _field.anchoredPosition.x + _killDarkPlace.x, frameRect.yMax + _field.anchoredPosition.y + _killDarkPlace.y, 0f);
+            _stageRest = frameRect.center;
+            _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell,
+                KillMomentsOn, OnKillingBlow);
             RenderCaptions();
         }
 
@@ -225,6 +304,149 @@ namespace F1.UI
         {
             float speed = _clock.SpeedPercent / 100f;
             _fx.Grave(UnitViewOf(unit)?.FigureArt, _grave, GraveHold / speed, GraveVanish / speed);
+        }
+
+        /// <summary>A kill moment is played at the speeds where it does not hold the battle up for long: x1 and x2.</summary>
+        bool KillMomentsOn()
+        {
+            return _clock.SpeedPercent <= KillMomentTopSpeed;
+        }
+
+        /// <summary>
+        /// An enemy fell to a unit's item: a kill moment begins, or one already slowing takes this one in too (it lasts no
+        /// longer). The stage draws in about the middle of the two; a moment begun while the last one draws back keeps its point.
+        /// </summary>
+        void OnKillingBlow(UnitRef striker, UnitRef fallen)
+        {
+            BattleUnitView fallenView = UnitViewOf(fallen);
+            if (fallenView == null)
+            {
+                return;
+            }
+
+            BattleUnitView strikerView = UnitViewOf(striker);
+            if (_kill == null || _kill.Released)
+            {
+                if (_kill == null)
+                {
+                    Vector3 centre = FigureCentre(fallenView);
+                    if (strikerView != null)
+                    {
+                        centre = (centre + FigureCentre(strikerView)) * 0.5f;
+                    }
+
+                    _killCentre = _stageFront.parent.InverseTransformPoint(centre);
+                }
+
+                _kill = new KillMoment { Pace = _clock.SpeedPercent / 100f };
+            }
+
+            if (!_kill.Fallen.Contains(fallenView))
+            {
+                _kill.Fallen.Add(fallenView);
+            }
+
+            if (strikerView != null && !_kill.Strikers.Contains(strikerView))
+            {
+                _kill.Strikers.Add(strikerView);
+            }
+
+            SlowFor(_kill);
+        }
+
+        static Vector3 FigureCentre(BattleUnitView view)
+        {
+            RectTransform figure = view.FigureRect;
+            return figure.TransformPoint(figure.rect.center);
+        }
+
+        /// <summary>The battle and the motions run slow while the moment holds its fallen, at the speed chosen otherwise.</summary>
+        void SlowFor(KillMoment kill)
+        {
+            bool slow = kill != null && !kill.Released;
+            _clock.SlowPercent = slow ? KillSlowPercent : 100;
+            float scale = slow ? KillSlowPercent / 100f : 1f;
+            if (!Mathf.Approximately(Time.timeScale, scale))
+            {
+                Time.timeScale = scale;
+            }
+        }
+
+        /// <summary>The moment runs on real time, paused or not: when its slow time is over its fallen go, as any fallen enemy goes.</summary>
+        void AdvanceKillMoment(float realSeconds)
+        {
+            if (_kill == null)
+            {
+                return;
+            }
+
+            _kill.Age += realSeconds;
+            if (!_kill.Released && _kill.Age >= KillSlowFor / _kill.Pace)
+            {
+                _kill.Released = true;
+                foreach (BattleUnitView fallen in _kill.Fallen)
+                {
+                    _fx.Ghost(fallen.FigureArt);
+                    _fx.Float(fallen.FigureRect, UiStrings.Get(UiKeys.Fx.Died), UiPalette.Danger, true);
+                }
+            }
+
+            if (_kill.Age >= KillLength / _kill.Pace)
+            {
+                _kill = null;
+            }
+
+            SlowFor(_kill);
+        }
+
+        /// <summary>The dark over the stage and how far the stage is drawn in, by the moment's curves; the dark stays on the stage's box.</summary>
+        void RenderKillMoment()
+        {
+            float dark = 0f;
+            float zoom = 1f;
+            if (_kill != null)
+            {
+                float t = _kill.Age * _kill.Pace;
+                dark = KillDark * Mathf.Min(Smooth(t / KillDarkIn), 1f - Smooth((t - KillDarkOutFrom) / KillDarkOut));
+                zoom = 1f + (KillZoom - 1f) * Mathf.Min(Smooth(t / KillZoomIn), 1f - Smooth((t - KillZoomOutFrom) / KillZoomOut));
+            }
+
+            // Scaled about their own pivot and moved by as much as keeps the moment's point where it is: drawn in about that point.
+            var scale = new Vector3(zoom, zoom, 1f);
+            Vector2 offset = (1f - zoom) * (_killCentre - _stageRest);
+            _stageBack.localScale = scale;
+            _stageFront.localScale = scale;
+            _stageBack.anchoredPosition = offset;
+            _stageFront.anchoredPosition = offset;
+            _killDark.enabled = dark > 0.001f;
+            _killDark.color = new Color(0f, 0f, 0f, dark);
+            RectTransform rect = _killDark.rectTransform;
+            rect.localScale = new Vector3(1f / zoom, 1f / zoom, 1f);
+            if (_kill != null)
+            {
+                rect.position = _stageFront.parent.TransformPoint(_killDarkHome);
+            }
+            else
+            {
+                rect.anchoredPosition = _killDarkPlace;
+            }
+        }
+
+        static float Smooth(float x)
+        {
+            x = Mathf.Clamp01(x);
+            return x * x * (3f - 2f * x);
+        }
+
+        /// <summary>The time scale is the engine's, not the screen's: whatever closes the screen, the motions run at their speed again.</summary>
+        void OnDisable()
+        {
+            _kill = null;
+            _clock.SlowPercent = 100;
+            if (!Mathf.Approximately(Time.timeScale, 1f))
+            {
+                Time.timeScale = 1f;
+            }
         }
 
         /// <summary>A new caption in the header; the oldest goes when there are more than fit.</summary>
@@ -300,6 +522,7 @@ namespace F1.UI
                 return;
             }
 
+            AdvanceKillMoment(Time.unscaledDeltaTime);
             if (!_battle.IsFinished)
             {
                 int stepMs = _clock.Step(Time.unscaledDeltaTime);
@@ -352,13 +575,112 @@ namespace F1.UI
             column.sizeDelta = new Vector2(width, column.sizeDelta.y);
         }
 
+        /// <summary>
+        /// Draws the stage's columns in the field's order (built from the rearmost row to row 1, the party's before the
+        /// enemy's: a row is drawn over the rows behind it, and the enemy's row 1 over the party's), except that the column of
+        /// a unit that is attacking is drawn over every other while it attacks, so that its weapon is not hidden behind the
+        /// unit in front of it (Docs/Design/10 §5). The order comes back when the attack is over. During a kill moment its
+        /// dark comes next, and over it the columns of its fallen and then of those who struck them.
+        /// </summary>
+        void ArrangeColumns()
+        {
+            if (_columnOrder.Count == 0)
+            {
+                _columnOrder.AddRange(_partyRows);
+                _columnOrder.AddRange(_enemyRows);
+                _columnOrder.Sort((a, b) => a.GetSiblingIndex().CompareTo(b.GetSiblingIndex()));
+                _firstColumn = _columnOrder[0].GetSiblingIndex();
+            }
+
+            int index = _firstColumn;
+            for (int pass = 0; pass < 4; pass++)
+            {
+                foreach (RectTransform column in _columnOrder)
+                {
+                    int lit = KillLight(column);
+                    bool inPass = pass == 0 ? lit == 0 && !AttackingIn(column)
+                        : pass == 1 ? lit == 0 && AttackingIn(column)
+                        : pass == 2 ? lit == 1
+                        : lit == 2;
+                    if (inPass)
+                    {
+                        PutAt(column, ref index);
+                    }
+                }
+
+                if (pass == 1)
+                {
+                    PutAt(_killDark.transform, ref index);
+                }
+            }
+        }
+
+        static void PutAt(Transform child, ref int index)
+        {
+            if (child.GetSiblingIndex() != index)
+            {
+                child.SetSiblingIndex(index);
+            }
+
+            index++;
+        }
+
+        /// <summary>How a kill moment lights a column: 2 for one who struck, 1 for one who fell, 0 for the rest.</summary>
+        int KillLight(Transform column)
+        {
+            if (_kill == null)
+            {
+                return 0;
+            }
+
+            foreach (BattleUnitView view in _kill.Strikers)
+            {
+                if (view.gameObject.activeSelf && view.transform.parent == column)
+                {
+                    return 2;
+                }
+            }
+
+            foreach (BattleUnitView view in _kill.Fallen)
+            {
+                if (view.gameObject.activeSelf && view.transform.parent == column)
+                {
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        /// <summary>True when a living unit in the column is attacking (a fallen one's view is hidden and stops its clock).</summary>
+        bool AttackingIn(Transform column)
+        {
+            foreach (BattleUnitView view in _partyViews)
+            {
+                if (view.Attacking && view.gameObject.activeSelf && view.transform.parent == column)
+                {
+                    return true;
+                }
+            }
+
+            foreach (BattleUnitView view in _enemyViews)
+            {
+                if (view.Attacking && view.gameObject.activeSelf && view.transform.parent == column)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         BattleUnitView CreateUnit(BattleUnit unit, Transform parent)
         {
             BattleUnitView view = Instantiate(_unitTemplate, parent);
             view.gameObject.SetActive(true);
 
             // A party unit is a mercenary and is shown as its job; an enemy has its own figure, drawn at its own
-            // scale (a boss stands larger than its place).
+            // scale (a boss stands larger than its place, its poses too). Both show their attack and hit poses.
             string id = unit.Setup.SourceId;
             if (unit.Side == BattleSide.Party)
             {
@@ -366,7 +688,7 @@ namespace F1.UI
             }
             else
             {
-                view.Bind(unit, _art.OfEnemy(id), _art.ScaleOfEnemy(id));
+                view.Bind(unit, _art.OfEnemy(id), _art.ScaleOfEnemy(id), _art.AttackPoseOfEnemy(id), _art.HitPoseOfEnemy(id));
             }
             return view;
         }
@@ -407,12 +729,16 @@ namespace F1.UI
             _fx.SetDanger(ongoing && danger);
 
             // While a fallen mercenary's grave stands, the living of the party keep their places on the stage and in the
-            // panel (with the badges); they walk on when the last grave has gone.
+            // panel (with the rows on their boards' heads); they walk on when the last grave has gone. While a kill moment holds
+            // its fallen, they stay on the stage and the enemy keeps its places the same way.
             bool graves = _fx.GravesLeft > 0f;
+            bool killHold = KillMomentSlows;
             Place(_partyViews, _partyRows, view => view.Unit, graves, WalkIn);
-            Place(_enemyViews, _enemyRows, view => view.Unit, false, WalkIn);
-            Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, null);
-            Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, false, null);
+            Place(_enemyViews, _enemyRows, view => view.Unit, killHold, WalkIn, view => killHold && _kill.Fallen.Contains(view));
+            ArrangeColumns();
+            Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, StandIn);
+            Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, killHold, StandIn);
+            RenderKillMoment();
             bool targeting = ongoing && _armedPotion >= 0;
             foreach (BattleUnitView view in _partyViews)
             {
@@ -440,7 +766,8 @@ namespace F1.UI
                 _speedFrames[i].color = !_clock.Paused && _clock.SpeedPercent == Speeds[i] ? UiPalette.Selected : UiPalette.ButtonQuiet;
             }
 
-            if (!ongoing && !_resultShown)
+            // The last enemy's kill moment is seen before the result covers the stage.
+            if (!ongoing && !_resultShown && _kill == null)
             {
                 ShowResult(engine);
             }
@@ -468,17 +795,18 @@ namespace F1.UI
         /// stands in now and takes the dead away. Views are visited in unit order, so those that
         /// advance into a place together keep their order. A view that changes place is told how
         /// far it came from, so that it can walk in instead of appearing. While `hold` is true the
-        /// living keep the places they are in; the dead go all the same.
+        /// living keep the places they are in; the dead go all the same, except those `kept` (a kill moment's fallen).
         /// </summary>
-        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf, bool hold, Action<T, float> moved)
+        static void Place<T>(List<T> views, RectTransform[] places, Func<T, BattleUnit> unitOf, bool hold, Action<T, float> moved, Func<T, bool> kept = null)
             where T : Component
         {
             foreach (T view in views)
             {
                 BattleUnit unit = unitOf(view);
-                if (view.gameObject.activeSelf != unit.Alive)
+                bool shown = unit.Alive || (kept != null && kept(view));
+                if (view.gameObject.activeSelf != shown)
                 {
-                    view.gameObject.SetActive(unit.Alive);
+                    view.gameObject.SetActive(shown);
                 }
 
                 RectTransform place = places[unit.Row - 1];
@@ -491,11 +819,16 @@ namespace F1.UI
             }
         }
 
-        /// <summary>A unit's view was put in the column of the unit's row: its badge says so, and it walks in from where it stood.</summary>
+        /// <summary>A unit's view was put in the column of the unit's row: it walks in from where it stood.</summary>
         static void WalkIn(BattleUnitView view, float fromX)
         {
-            view.StandIn(view.Unit.Row);
             view.Walk(fromX);
+        }
+
+        /// <summary>A unit's board was put in the column of the unit's row: its head says so.</summary>
+        static void StandIn(BattleBoardView board, float fromX)
+        {
+            board.StandIn(board.Unit.Row);
         }
 
         /// <summary>Potions, their hint and the retreat button. They change with battle time (cooldowns) and with clicks.</summary>

@@ -1,23 +1,30 @@
 using System.Collections.Generic;
+using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace F1.UI
 {
     /// <summary>
-    /// One unit's board of the board panel under the stage: its item cells stacked top to bottom,
-    /// each the cooldown gauge of its item (<see cref="BattleItemView"/>), on a bag as long as the
-    /// cells the unit has. The board sits in the panel's column of the row the unit stands in,
-    /// right under its figure and plate (2026-10-03 mockup V), so it moves when the unit advances
-    /// and leaves the panel with the dead, as the figure leaves the stage. The plate above says
-    /// whose side the unit is on and what state it is in; the whole board is the button a potion
-    /// is aimed at.
+    /// One unit's board of the board panel under the stage: its head, with the row the unit stands
+    /// in on a gold stud and its name (a monster's in a pale red, 2026-10-05 round 29), and under it
+    /// its item cells stacked top to bottom, each the cooldown gauge of its item
+    /// (<see cref="BattleItemView"/>), on a bag as long as the cells the unit has. The board sits in
+    /// the panel's column of the row the unit stands in, right under its figure and marks (2026-10-03
+    /// mockup V), so it moves when the unit advances and leaves the panel with the dead, as the
+    /// figure leaves the stage. The row on the head is the row of the column the screen has put the
+    /// board in, which can be behind the engine for a moment: while a fallen mercenary's grave stands,
+    /// the party keeps its places (2026-10-04, round 21). The whole board is the button a potion is
+    /// aimed at.
     /// </summary>
     public sealed class BattleBoardView : MonoBehaviour
     {
         [SerializeField] Button _button;
+        [SerializeField] TMP_Text _row;
+        [SerializeField] TMP_Text _name;
         [SerializeField] RectTransform _cells;
         [SerializeField] BattleItemView _itemTemplate;
         [SerializeField] GameObject _emptyCellTemplate;
@@ -25,6 +32,8 @@ namespace F1.UI
         readonly List<BattleItemView> _items = new List<BattleItemView>();
         BattleUnit _unit;
         ExpeditionArt _art;
+        int _standRow;
+        int _shownRow = -1;
 
         public Button Button => _button;
         public BattleUnit Unit => _unit;
@@ -40,6 +49,9 @@ namespace F1.UI
         {
             _unit = unit;
             _art = art;
+            _standRow = unit.Row;
+            _name.text = UiText.Name(unit.Setup.Name);
+            _name.color = unit.Side == BattleSide.Enemy ? UiPalette.EnemyName : UiPalette.Text;
             _cells.sizeDelta = new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(unit.Setup.ItemSlots));
 
             // The board in order from the top: an item takes as many cells as its size and shows
@@ -74,9 +86,16 @@ namespace F1.UI
             return null;
         }
 
+        /// <summary>The screen has put the board in the column of this row: its head shows the row.</summary>
+        public void StandIn(int row)
+        {
+            _standRow = row;
+        }
+
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>
         public void Invalidate()
         {
+            _name.text = UiText.Name(_unit.Setup.Name);
             for (int i = 0; i < _items.Count; i++)
             {
                 BindItem(_items[i], _unit.Items[i]);
@@ -92,6 +111,12 @@ namespace F1.UI
         /// <param name="targetable">True while a potion is waiting for this unit to be clicked.</param>
         public void Render(BattleEngine engine, bool targetable)
         {
+            if (_standRow != _shownRow)
+            {
+                _shownRow = _standRow;
+                _row.text = _standRow.ToString(CultureInfo.InvariantCulture);
+            }
+
             _button.interactable = targetable && _unit.Alive;
             foreach (BattleItemView item in _items)
             {

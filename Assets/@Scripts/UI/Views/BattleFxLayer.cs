@@ -167,6 +167,7 @@ namespace F1.UI
             ghost.sprite = art.sprite;
             ghost.preserveAspect = art.preserveAspect;
             rect.sizeDelta = from.rect.size;
+            rect.localScale = ScaleOf(from);
             rect.anchoredPosition = LocalPoint(from, from.rect.center);
             ghost.color = Color.white;
             ghost.gameObject.SetActive(true);
@@ -193,6 +194,7 @@ namespace F1.UI
             image.sprite = grave;
             image.preserveAspect = true;
             rect.sizeDelta = from.rect.size;
+            rect.localScale = ScaleOf(from);
 
             // From the feet: the art breathes by stretching up from them, so its centre is not where it stands.
             rect.anchoredPosition = LocalPoint(from, new Vector2(from.rect.center.x, from.rect.yMin)) + new Vector2(0f, from.rect.height * 0.5f);
@@ -289,6 +291,17 @@ namespace F1.UI
                 ghost.Image.color = new Color(1f, 1f, 1f, 1f - t);
                 ghost.Image.rectTransform.anchoredPosition = ghost.Start - new Vector2(0f, GhostSink * t);
             }
+        }
+
+        /// <summary>
+        /// How large another rect is drawn against this layer: a copy made here of art on the stage keeps the size the art had
+        /// on the screen, while the stage draws in for a kill moment as well.
+        /// </summary>
+        Vector3 ScaleOf(RectTransform from)
+        {
+            Vector3 art = from.lossyScale;
+            Vector3 layer = _rect.lossyScale;
+            return new Vector3(art.x / layer.x, art.y / layer.y, 1f);
         }
 
         /// <summary>A point of another rect, in this layer's coordinates (every rect is under the same canvas).</summary>
