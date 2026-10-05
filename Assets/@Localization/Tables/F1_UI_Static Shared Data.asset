@@ -830,6 +830,36 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673209745833986
+  - m_Id: 1854534669295616
+    m_Key: Title.Music
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122624
+  - m_Id: 1854534681878528
+    m_Key: Title.Effects
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122625
+  - m_Id: 1854534681878529
+    m_Key: Title.VolumeOn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122626
+  - m_Id: 1854534681878530
+    m_Key: Title.VolumeLow
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122627
+  - m_Id: 1854534681878531
+    m_Key: Title.VolumeOff
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122628
+  - m_Id: 1854534681878532
+    m_Key: Title.VolumeNotSaved
+    m_Metadata:
+      m_Items:
+      - rid: 8623673231716122629
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1512,3 +1542,30 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'Item category: anything else.'
+    - rid: 8623673231716122624
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button that steps the music volume. {0} = the current step
+          (Title.VolumeOn/Low/Off).
+    - rid: 8623673231716122625
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button that steps the sound effects volume. {0} = the current
+          step (Title.VolumeOn/Low/Off).
+    - rid: 8623673231716122626
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Volume step: full.'
+    - rid: 8623673231716122627
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Volume step: low (about half as loud).'
+    - rid: 8623673231716122628
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Volume step: silent.'
+    - rid: 8623673231716122629
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when changing a volume failed because settings could
+          not be written.

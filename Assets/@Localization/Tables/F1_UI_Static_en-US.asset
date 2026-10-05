@@ -753,6 +753,32 @@ MonoBehaviour:
     m_Localized: Other item
     m_Metadata:
       m_Items: []
+  - m_Id: 1854534669295616
+    m_Localized: 'Music: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1854534681878528
+    m_Localized: 'Effects: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1854534681878529
+    m_Localized: On
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1854534681878530
+    m_Localized: Low
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1854534681878531
+    m_Localized: Off
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1854534681878532
+    m_Localized: The setting could not be saved, so the volume was not changed.
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -836,3 +862,5 @@ MonoBehaviour:
         - id: 1060957215252483
         - id: 1060957215252484
         - id: 1060957215252490
+        - id: 1854534669295616
+        - id: 1854534681878528

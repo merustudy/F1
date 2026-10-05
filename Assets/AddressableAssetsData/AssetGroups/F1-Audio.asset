@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: F1-Audio
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: F1-Audio
+  m_GUID: 37fbeb02594b542cd9c7b82241c7acec
+  m_SerializeEntries:
+  - m_GUID: 19a05b7de574b44f3b33fc37b298ce32
+    m_Address: sound/sfx/hit-heavy
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2b73c49a02b1847dc9ee48ea8be17aee
+    m_Address: sound/sfx/item-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 341d7a43a4ab048cb82d3490bc335fb1
+    m_Address: sound/sfx/retreat-failed
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 342bb8e219d294a14ae829ca64693a51
+    m_Address: sound/sfx/item-support
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 35d7a4316027d4678ab2d2d21c958501
+    m_Address: sound/sfx/item-weapon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4caf85733f3e04e86b096d343ca531c4
+    m_Address: sound/sfx/potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5037601938bbb4dfd84cf1bb568a21ec
+    m_Address: sound/sfx/burn
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5fc55447643674b87a231dcb8342df4b
+    m_Address: sound/sfx/enemy-down
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a27d2c9687314c67903362f1a7dee42
+    m_Address: sound/bgm/boss
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 78998dd8a56a44853852bd58b2733ec9
+    m_Address: sound/sfx/survived
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8121677cdc7fe49fc8fed334c4b74176
+    m_Address: sound/sfx/defeat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8362a66dd8ec64d2b8c6837ac0f67b58
+    m_Address: sound/sfx/deaths-door
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8da35c68dea164c1a852463dc631f9f4
+    m_Address: sound/sfx/item-armor
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 90e2f5ac1c25f458d9d98678bdd56e14
+    m_Address: sound/sfx/shield
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 94d3293d3727e4d76a72c30d0dffe3f3
+    m_Address: sound/bgm/lobby
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 992456db251194fda83fdb59e2c10481
+    m_Address: sound/sfx/retreat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ab37be8c1bfaf4bb69a539d4b97e209e
+    m_Address: sound/sfx/thunder
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae33dd7307386488c9333c7df191dc93
+    m_Address: sound/sfx/button
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b1d5f1ddd905e47ceb85d940ad90ef0a
+    m_Address: sound/bgm/dungeon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bf67c90fd3a6745cd9b9399ec719273c
+    m_Address: sound/sfx/node-move
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c0663550d1ffd46b5a940ecd268a928c
+    m_Address: sound/sfx/kill-moment
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c421acd7885d44bebb0fc8dfcb64bd2f
+    m_Address: sound/sfx/mercenary-death
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c45e2e0fc306344a793d22df51ea06d7
+    m_Address: sound/sfx/blocked
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc9c55023662346ecbdfc7441537f186
+    m_Address: sound/sfx/item-place
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cdd8173be0a5644eea8e915d9fa52c58
+    m_Address: sound/sfx/depart
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d118df8bb71d641c485d97c6a1298e95
+    m_Address: sound/sfx/victory
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d37abfffc44ee435e86e34592c9720f0
+    m_Address: sound/sfx/hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd9b37326df204a96bec866239e07ab9
+    m_Address: sound/sfx/candle-out
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df8a42f6a2e6d43fe8b3a488a12b6f0f
+    m_Address: sound/sfx/heal
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: a299c20a8ef58429d832de7bde7daad2, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: c3412a4e21f1e430ea9600b0051ed486, type: 2}
+    - {fileID: 11400000, guid: 628103e47e273440aad599e975394401, type: 2}
