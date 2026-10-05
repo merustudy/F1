@@ -35,6 +35,7 @@ namespace F1.Editor.Setup
             // The panel's right half: how to choose, the chosen item's facts (the party side writes them), then the buttons.
             UiBuild.Box(UiBuild.LocalizedLabel("RewardHint", panel.transform, UiKeys.Reward.Hint, 22f, UiPalette.TextDim), PanelRightX, PanelTitleTop, PanelRightWidth, 48f);
             ButtonParts toInventory = KitLocalizedButton("RewardToInventory", panel.transform, UiKeys.Reward.ToInventory, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Silence(toInventory.Button);
             UiBuild.Box(toInventory.Rect, PanelRightX, PanelButtonsTop, 210f, PanelButtonHeight);
             ButtonParts inventoryToggle = KitButton("InventoryToggle", panel.transform, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(inventoryToggle.Rect, 1420f, PanelButtonsTop, 210f, PanelButtonHeight);
@@ -61,6 +62,9 @@ namespace F1.Editor.Setup
             Image frame = UiBuild.Image("OptionTemplate", parent, UiPalette.PanelLight);
             UiBuild.Size(frame, 920f, RewardCardHeight);
             Button button = UiBuild.MakeButton(frame);
+
+            // Silent: a potion taken sounds as put in, a card picked as a click (RewardScreen).
+            UiBuild.Silence(button);
             Transform option = frame.transform;
 
             TextMeshProUGUI kind = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionKind", option, 19f, UiPalette.TextDim), 20f, 12f, 110f, 28f));

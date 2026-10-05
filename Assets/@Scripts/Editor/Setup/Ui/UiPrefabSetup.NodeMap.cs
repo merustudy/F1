@@ -68,6 +68,7 @@ namespace F1.Editor.Setup
             ButtonParts inventoryToggle = KitButton("InventoryToggle", panel.transform, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(inventoryToggle.Rect, 1220f, PanelButtonsTop, 236f, PanelButtonHeight);
             ButtonParts enter = KitLocalizedButton("Enter", panel.transform, UiKeys.Map.Enter, UiPalette.Button, 30f);
+            UiBuild.Silence(enter.Button);
             UiBuild.Box(enter.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
 
             UiBuild.SetReference(screen, "_dungeon", dungeon);

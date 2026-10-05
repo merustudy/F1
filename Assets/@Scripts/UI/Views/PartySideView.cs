@@ -308,6 +308,10 @@ namespace F1.UI
             Refresh();
         }
 
+        /// <summary>
+        /// A click on a cell picks an item up, puts it down or moves it. The cells are built silent: the click sounds here,
+        /// once, as what it did: an item that went into a cell sounds as put in, anything else as a click.
+        /// </summary>
         void OnCellClicked(int member, int cell)
         {
             if (member < 0)
@@ -315,6 +319,7 @@ namespace F1.UI
                 return;
             }
 
+            // The screen that overrides the click (a reward put in a cell) makes its own sound.
             if (CellClickOverride != null && CellClickOverride(member, cell))
             {
                 return;
@@ -322,11 +327,13 @@ namespace F1.UI
 
             _selectedPotion = -1;
             ExpeditionManager manager = Managers.Expedition;
+            SoundEffect sound = SoundEffect.Button;
             if (_selectedInventory >= 0)
             {
                 if (manager.CanPlaceFromInventory(_selectedInventory, member, cell))
                 {
                     manager.PlaceFromInventory(_selectedInventory, member, cell);
+                    sound = SoundEffect.ItemPlace;
                 }
 
                 ClearSelection();
@@ -348,11 +355,13 @@ namespace F1.UI
                 if (manager.CanMoveItem(_selectedMember, _selectedCell, member, cell))
                 {
                     manager.MoveItem(_selectedMember, _selectedCell, member, cell);
+                    sound = SoundEffect.ItemPlace;
                 }
 
                 ClearSelection();
             }
 
+            Managers.Sound.PlayEffect(sound);
             Refresh();
         }
 
@@ -375,6 +384,7 @@ namespace F1.UI
             if (_selectedMember >= 0 && manager.CanMoveToInventory(_selectedMember, _selectedCell))
             {
                 manager.MoveToInventory(_selectedMember, _selectedCell);
+                Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
             }
 
             ClearSelection();

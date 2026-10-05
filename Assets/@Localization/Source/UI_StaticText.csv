@@ -18,6 +18,12 @@ Title.OverwriteWarning,Asked before a new run replaces the run in progress.,진�
 Title.SaveUnreadable,Shown when the save file and its backup cannot be read.,저장된 런을 읽을 수 없습니다. 새 런만 시작할 수 있습니다.,The saved run cannot be read. Only a new run can be started.
 Title.SaveRestored,Shown when the save file was damaged and the backup was used.,저장 파일이 손상되어 직전 저장으로 되돌렸습니다.,The save file was damaged. The previous save was restored.
 Title.SettingsNotSaved,Shown when changing the language failed because settings could not be written.,설정을 저장하지 못해 언어를 바꾸지 않았습니다.,"The setting could not be saved, so the language was not changed."
+Title.Music,Button that steps the music volume. {0} = the current step (Title.VolumeOn/Low/Off).,음악: {0},Music: {0}
+Title.Effects,Button that steps the sound effects volume. {0} = the current step (Title.VolumeOn/Low/Off).,효과음: {0},Effects: {0}
+Title.VolumeOn,Volume step: full.,켬,On
+Title.VolumeLow,Volume step: low (about half as loud).,작게,Low
+Title.VolumeOff,Volume step: silent.,끔,Off
+Title.VolumeNotSaved,Shown when changing a volume failed because settings could not be written.,설정을 저장하지 못해 소리 크기를 바꾸지 않았습니다.,"The setting could not be saved, so the volume was not changed."
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
 Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 Lobby.Roster,Header of the mercenary list.,로스터,Roster

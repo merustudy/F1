@@ -325,12 +325,13 @@ namespace F1.Editor.Setup
             return new ButtonParts(button, frame, label);
         }
 
-        /// <summary>Makes an image clickable. Hover and press tint it; a disabled button is dimmed.</summary>
+        /// <summary>Makes an image clickable. Hover and press tint it; a disabled button is dimmed. A click clicks (<see cref="ButtonSound"/>).</summary>
         public static Button MakeButton(Image frame)
         {
             frame.raycastTarget = true;
             var button = frame.gameObject.AddComponent<Button>();
             button.targetGraphic = frame;
+            frame.gameObject.AddComponent<ButtonSound>();
 
             ColorBlock colors = button.colors;
             colors.normalColor = Color.white;
@@ -443,6 +444,20 @@ namespace F1.Editor.Setup
         }
 
         // ---- Serialized references -----------------------------------------------------------
+
+        /// <summary>Builds a button without its click: its command plays a sound of its own (Docs/Architecture/14_SOUND.md).</summary>
+        public static void Silence(Button button)
+        {
+            var sound = button.GetComponent<ButtonSound>();
+            if (sound == null)
+            {
+                throw new InvalidOperationException($"Button '{button.name}' has no ButtonSound to silence.");
+            }
+
+            var serialized = new SerializedObject(sound);
+            Find(serialized, sound, "_silent").boolValue = true;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
 
         public static void SetReference(UnityEngine.Object target, string propertyName, UnityEngine.Object value)
         {

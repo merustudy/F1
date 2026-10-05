@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using F1.Core;
 using F1.Data;
 using F1.Gameplay;
 using UnityEngine;
@@ -13,7 +14,8 @@ namespace F1.UI
     /// keeps the party's places meanwhile), an enemy felled by a unit's item is a kill moment (the
     /// screen slows, darkens and draws in on the two, then lets the enemy fade; Docs/Design/10 §5),
     /// a heavy blow shakes the stage, the storm's lightning flashes,
-    /// and each event that reads as a sentence goes to the panel's captions. It reads the event
+    /// and each event that reads as a sentence goes to the panel's captions. Each event asks for its sound
+    /// (Docs/Architecture/14_SOUND.md "소리를 내는 자리"), so a skipped event makes none either. It reads the event
     /// log the engine has already settled and never changes anything in it. Only what just
     /// happened is played: when a long stretch of battle arrives at once (a continued battle,
     /// a test stepping ahead) the older events are skipped, so nothing replays the past.
@@ -39,6 +41,7 @@ namespace F1.UI
         readonly Action<UnitRef> _partyFell;
         readonly Func<bool> _killMoments;
         readonly Action<UnitRef, UnitRef> _killMoment;
+        readonly Action<SoundEffect> _sound;
         int _played;
 
         /// <param name="unitView">The stage view of a unit, or null when it has none.</param>
@@ -50,6 +53,7 @@ namespace F1.UI
         /// <param name="killMoments">True while the screen plays kill moments (not at every speed).</param>
         /// <param name="killMoment">Plays an enemy's fall to a unit's item as a kill moment, the striker first: the screen's to
         /// do, as it slows the battle and holds the fallen until the moment is over, then lets it fade with its words.</param>
+        /// <param name="sound">Plays a sound effect. Without it the battle is silent.</param>
         public BattlePresenter(
             BattleEngine engine,
             StaticData data,
@@ -60,7 +64,8 @@ namespace F1.UI
             Action<string> caption,
             Action<UnitRef> partyFell = null,
             Func<bool> killMoments = null,
-            Action<UnitRef, UnitRef> killMoment = null)
+            Action<UnitRef, UnitRef> killMoment = null,
+            Action<SoundEffect> sound = null)
         {
             _engine = engine;
             _data = data;
@@ -72,6 +77,7 @@ namespace F1.UI
             _partyFell = partyFell;
             _killMoments = killMoments;
             _killMoment = killMoment;
+            _sound = sound;
 
             // What happened before the screen opened (a battle continued from a save) is not replayed.
             _played = engine.Events.Count;
@@ -137,21 +143,26 @@ namespace F1.UI
                 case BattleEventKind.Healed:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Heal, e.B), UiPalette.Good, false);
                     _unitView(e.Target)?.Flash(HealTint);
+                    Sound(SoundEffect.Heal);
                     break;
                 case BattleEventKind.ShieldGained:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Shield, e.A), UiPalette.Shield, false);
+                    Sound(SoundEffect.Shield);
                     break;
                 case BattleEventKind.BurnApplied:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Burn, e.A), UiPalette.Burn, false);
+                    Sound(SoundEffect.Burn);
                     break;
                 case BattleEventKind.DogEntered:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.DogEntered), UiPalette.Danger, true);
                     _fx.Shake(8f);
+                    Sound(SoundEffect.DeathsDoor);
                     break;
                 case BattleEventKind.DeathRolled:
                     if (e.C == 0)
                     {
                         FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Survived), UiPalette.TextDim, false);
+                        Sound(SoundEffect.Survived);
                     }
 
                     break;
@@ -163,6 +174,7 @@ namespace F1.UI
                     if (blow != null && KillMoments)
                     {
                         _killMoment(blow.Source, e.Target);
+                        Sound(SoundEffect.KillMoment);
                         break;
                     }
 
@@ -175,16 +187,24 @@ namespace F1.UI
                         _fx.Ghost(_unitView(e.Target)?.FigureArt);
                     }
 
+                    // A mercenary's death is the game's heaviest sound (Docs/Design/12 §2).
+                    Sound(e.Target.Side == BattleSide.Party ? SoundEffect.MercenaryDeath : SoundEffect.EnemyDown);
+
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Died), UiPalette.Danger, true);
                     _fx.Shake(10f);
                     break;
+                case BattleEventKind.PotionUsed:
+                    Sound(SoundEffect.Potion);
+                    break;
                 case BattleEventKind.RetreatAttempted:
                     FloatOverParty(UiStrings.Get(e.C == 1 ? UiKeys.Fx.RetreatSucceeded : UiKeys.Fx.RetreatFailed), e.C == 1 ? UiPalette.Good : UiPalette.TextDim);
+                    Sound(e.C == 1 ? SoundEffect.Retreat : SoundEffect.RetreatFailed);
                     break;
                 case BattleEventKind.StormTicked:
                     _fx.Flash(0.22f);
                     _fx.Shake(4f);
                     _fx.Float(_clock, UiStrings.Get(UiKeys.Fx.Storm, e.A), UiPalette.Burn, true);
+                    Sound(SoundEffect.Thunder);
                     break;
             }
         }
@@ -216,10 +236,33 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The item's cell flashes; its owner moves as the item's category says.</summary>
+        /// <summary>
+        /// The sound of an item that fires, by what the item is: one for each category the shipped items have
+        /// (Docs/Design/12 §2). An item of the other category has none.
+        /// </summary>
+        public static SoundEffect? EffectOf(ItemCategory category)
+        {
+            switch (category)
+            {
+                case ItemCategory.Weapon: return SoundEffect.ItemWeapon;
+                case ItemCategory.Armor: return SoundEffect.ItemArmor;
+                case ItemCategory.Attack: return SoundEffect.ItemAttack;
+                case ItemCategory.Support: return SoundEffect.ItemSupport;
+                case ItemCategory.Other: return null;
+                default: throw new ArgumentOutOfRangeException(nameof(category), category, null);
+            }
+        }
+
+        /// <summary>The item's cell flashes; its owner moves as the item's category says, and the item sounds.</summary>
         void PlayActivation(BattleEvent e)
         {
             _boardView(e.Source)?.ItemOfSlot(e.A)?.Pulse();
+            SoundEffect? effect = EffectOf(_data.Items.Get(e.Id).Category);
+            if (effect.HasValue)
+            {
+                Sound(effect.Value);
+            }
+
             BattleUnitView owner = _unitView(e.Source);
             if (owner == null)
             {
@@ -267,6 +310,12 @@ namespace F1.UI
                 _fx.Float(target.FigureRect, UiStrings.Get(UiKeys.Fx.Absorbed, e.B), UiPalette.Shield, false);
             }
 
+            if (!storm && !burn && !killMoment)
+            {
+                // The kill moment's own sound carries its blow; the storm's and burn's damage are numbers only.
+                Sound(lost <= 0 && e.B > 0 ? SoundEffect.Blocked : heavy ? SoundEffect.HitHeavy : SoundEffect.Hit);
+            }
+
             if (!storm && !burn)
             {
                 // A unit that shows its hit pose flashes at half strength: the pose already says it was hit.
@@ -277,6 +326,11 @@ namespace F1.UI
                     _fx.Shake(6f);
                 }
             }
+        }
+
+        void Sound(SoundEffect effect)
+        {
+            _sound?.Invoke(effect);
         }
 
         void FloatOver(UnitRef unit, string text, Color color, bool big)

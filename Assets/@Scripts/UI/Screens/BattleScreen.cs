@@ -135,6 +135,9 @@ namespace F1.UI
         int _armedPotion = -1;
         int _shownTimeTenths = -1;
         bool _resultShown;
+
+        /// <summary>True once the clock has been drawn: a candle already out when the screen opens (a battle continued in the storm) makes no sound.</summary>
+        bool _clockShown;
         KillMoment _kill;
 
         /// <summary>Where the kill moment's dark lies when nothing is drawn in: its place in the field, and its corner in the frame (the stage's box).</summary>
@@ -274,8 +277,16 @@ namespace F1.UI
             _killDarkHome = new Vector3(frameRect.xMin + _field.anchoredPosition.x + _killDarkPlace.x, frameRect.yMax + _field.anchoredPosition.y + _killDarkPlace.y, 0f);
             _stageRest = frameRect.center;
             _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell,
-                KillMomentsOn, OnKillingBlow);
+                KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect);
             RenderCaptions();
+            Managers.Sound.PlayMusic(IsBossBattle() ? MusicTrack.Boss : MusicTrack.Dungeon);
+        }
+
+        /// <summary>True when the battle is the dungeon's boss node: the boss's music plays (Docs/Design/12 §2).</summary>
+        static bool IsBossBattle()
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            return expedition.CurrentNodeId >= 0 && expedition.Map.Get(expedition.CurrentNodeId).Kind == MapNodeKind.Boss;
         }
 
         /// <summary>The dungeon and the floor the battle is fought on, in the header.</summary>
@@ -783,7 +794,14 @@ namespace F1.UI
             _clockTime.text = UiStrings.Get(UiKeys.Battle.Time, UiText.Seconds(engine.TimeMs));
             bool storm = engine.TimeMs >= balance.StormStartMs;
             float closeness = storm ? 1f : Mathf.Clamp01((float)(engine.TimeMs - (balance.StormStartMs - StormDuskMs)) / StormDuskMs);
+            bool wasLit = _candle.Lit;
             _candle.Show(storm ? 1f : Mathf.Clamp01((float)engine.TimeMs / balance.StormStartMs), closeness, storm);
+            if (wasLit && !_candle.Lit && _clockShown)
+            {
+                Managers.Sound.PlayEffect(SoundEffect.CandleOut);
+            }
+
+            _clockShown = true;
             _clockLabel.text = storm
                 ? UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage)
                 : UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs));
@@ -922,6 +940,7 @@ namespace F1.UI
                 case BattleResult.Victory:
                     _resultTitle.text = UiStrings.Get(UiKeys.Battle.Victory);
                     _resultTitle.color = UiPalette.Good;
+                    Managers.Sound.PlayEffect(SoundEffect.Victory);
                     break;
                 case BattleResult.Retreated:
                     _resultTitle.text = UiStrings.Get(UiKeys.Battle.Retreated);
@@ -930,6 +949,7 @@ namespace F1.UI
                 default:
                     _resultTitle.text = UiStrings.Get(UiKeys.Battle.Defeat);
                     _resultTitle.color = UiPalette.Danger;
+                    Managers.Sound.PlayEffect(SoundEffect.Defeat);
                     break;
             }
 

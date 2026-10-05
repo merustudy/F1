@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace F1.Core
 {
-    /// <summary>Owns setting values. settings.json is the only settings store.</summary>
+    /// <summary>Owns setting values: the locale and the music and effect volumes. settings.json is the only settings store.</summary>
     public sealed class SettingManager
     {
         public const string FileName = "settings.json";
@@ -28,13 +28,24 @@ namespace F1.Core
         /// <summary>Raised after a locale change is saved. The argument is the new locale code.</summary>
         public event Action<string> LocaleChanged;
 
+        /// <summary>Raised after a volume change is saved.</summary>
+        public event Action VolumeChanged;
+
         public bool IsLoaded => _data != null;
 
         public string LocaleCode => Require().LocaleCode;
 
+        /// <summary>The music's volume, 0..100.</summary>
+        public int MusicVolume => Require().MusicVolume;
+
+        /// <summary>The effects' volume, 0..100.</summary>
+        public int EffectVolume => Require().EffectVolume;
+
         /// <summary>
         /// Loads settings. On first run (or when the file is unreadable) the system locale is used if it is
-        /// supported, otherwise the default. A stored locale that is no longer valid is normalized and saved.
+        /// supported, otherwise the default, and both volumes are full. A stored locale that is no longer valid
+        /// is normalized, a volume out of 0..100 is brought to the nearer end, and an older file is brought to the
+        /// current version (version 1 had no volumes: they read as full); any of these is saved.
         /// </summary>
         public void Load(string systemLocaleCode)
         {
@@ -55,6 +66,13 @@ namespace F1.Core
                     data.LocaleCode = LocalePolicy.DefaultCode;
                     mustSave = true;
                 }
+
+                int music = VolumeLevels.Clamp(data.MusicVolume);
+                int effects = VolumeLevels.Clamp(data.EffectVolume);
+                mustSave |= music != data.MusicVolume || effects != data.EffectVolume || data.SchemaVersion != SettingsData.CurrentSchemaVersion;
+                data.MusicVolume = music;
+                data.EffectVolume = effects;
+                data.SchemaVersion = SettingsData.CurrentSchemaVersion;
             }
             else
             {
@@ -93,11 +111,8 @@ namespace F1.Core
                 return;
             }
 
-            var next = new SettingsData
-            {
-                SchemaVersion = current.SchemaVersion,
-                LocaleCode = canonical,
-            };
+            SettingsData next = Copy(current);
+            next.LocaleCode = canonical;
             try
             {
                 await ApplyRuntimeLocale(canonical);
@@ -112,6 +127,56 @@ namespace F1.Core
 
             _data = next;
             LocaleChanged?.Invoke(canonical);
+        }
+
+        /// <summary>Changes the music's volume: it is saved, then VolumeChanged is raised. If saving fails nothing changes.</summary>
+        public void ChangeMusicVolume(int volume)
+        {
+            SettingsData next = Copy(Require());
+            next.MusicVolume = CheckVolume(volume);
+            Commit(next);
+        }
+
+        /// <summary>Changes the effects' volume: it is saved, then VolumeChanged is raised. If saving fails nothing changes.</summary>
+        public void ChangeEffectVolume(int volume)
+        {
+            SettingsData next = Copy(Require());
+            next.EffectVolume = CheckVolume(volume);
+            Commit(next);
+        }
+
+        void Commit(SettingsData next)
+        {
+            SettingsData current = Require();
+            if (next.MusicVolume == current.MusicVolume && next.EffectVolume == current.EffectVolume)
+            {
+                return;
+            }
+
+            _save.Save(FileName, next);
+            _data = next;
+            VolumeChanged?.Invoke();
+        }
+
+        static int CheckVolume(int volume)
+        {
+            if (volume < VolumeLevels.Off || volume > VolumeLevels.Full)
+            {
+                throw new ArgumentOutOfRangeException(nameof(volume), volume, $"A volume is {VolumeLevels.Off}..{VolumeLevels.Full}.");
+            }
+
+            return volume;
+        }
+
+        static SettingsData Copy(SettingsData data)
+        {
+            return new SettingsData
+            {
+                SchemaVersion = data.SchemaVersion,
+                LocaleCode = data.LocaleCode,
+                MusicVolume = data.MusicVolume,
+                EffectVolume = data.EffectVolume,
+            };
         }
 
         Task ApplyRuntimeLocale(string localeCode)

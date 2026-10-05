@@ -60,6 +60,7 @@ namespace F1.Editor.Setup
             ButtonParts rest = UiBuild.Button("Rest", panel, UiPalette.ButtonQuiet, 30f);
             UiBuild.Box(rest.Rect, 24f, 690f, 612f, 80f);
             ButtonParts depart = UiBuild.LocalizedButton("Depart", panel, UiKeys.Lobby.Depart, UiPalette.Button, 40f);
+            UiBuild.Silence(depart.Button);
             UiBuild.Box(depart.Rect, 24f, 790f, 612f, 100f);
 
             // Shown when no mercenary is left.

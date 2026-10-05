@@ -91,6 +91,7 @@ namespace F1.Core
                 var run = new RunManager(data, save, NewRunSeed);
                 var expedition = new ExpeditionManager(data, run);
                 var ui = new UIManager(resource);
+                var sound = new SoundManager(resource, setting, SoundOutput.Create(transform));
                 _resource = resource;
 
                 step = BootStep.ConfigureManagers;
@@ -104,6 +105,7 @@ namespace F1.Core
                     Run = run,
                     Expedition = expedition,
                     UI = ui,
+                    Sound = sound,
                 });
 
                 step = BootStep.InitializeSaveStorage;
@@ -124,6 +126,9 @@ namespace F1.Core
 
                 step = BootStep.LoadStaticData;
                 await data.LoadAsync();
+
+                step = BootStep.LoadSounds;
+                await sound.LoadAsync();
 
                 // An unreadable run file is not a boot failure: the game starts without a run.
                 step = BootStep.LoadRun;

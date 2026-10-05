@@ -45,6 +45,7 @@ namespace F1.UI
             _enter.onClick.AddListener(OnEnter);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
+            Managers.Sound.PlayMusic(MusicTrack.Dungeon);
 
             // With a single way forward there is nothing to choose: select it.
             IReadOnlyList<MapNode> available = Managers.Expedition.AvailableNodes();
@@ -175,6 +176,7 @@ namespace F1.UI
             }
 
             Managers.Expedition.EnterNode(_selectedNodeId);
+            Managers.Sound.PlayEffect(SoundEffect.NodeMove);
             GoToCurrentPhase();
         }
     }

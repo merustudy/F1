@@ -17,7 +17,7 @@ namespace F1.Editor.Setup
             // A column: when Continue is hidden the buttons below move up.
             const float width = 400f;
             const float height = 84f;
-            RectTransform buttons = UiBuild.Box(UiBuild.Rect("Buttons", frame), 760f, 460f, width, 400f);
+            RectTransform buttons = UiBuild.Box(UiBuild.Rect("Buttons", frame), 760f, 460f, width, 3f * height + 2f * 20f);
             UiBuild.Vertical(buttons, 20f);
 
             ButtonParts newRun = UiBuild.LocalizedButton("NewRun", buttons, UiKeys.Title.NewRun, UiPalette.Button, 36f);
@@ -26,11 +26,25 @@ namespace F1.Editor.Setup
             ButtonParts resume = UiBuild.LocalizedButton("Continue", buttons, UiKeys.Title.Continue, UiPalette.Button, 36f);
             UiBuild.Size(resume.Rect, width, height);
 
-            ButtonParts language = UiBuild.Button("Language", buttons, UiPalette.ButtonQuiet, 32f);
-            UiBuild.Size(language.Rect, width, height);
-
             ButtonParts quit = UiBuild.LocalizedButton("Quit", buttons, UiKeys.Title.Quit, UiPalette.ButtonQuiet, 32f);
             UiBuild.Size(quit.Rect, width, height);
+
+            // The settings in one row under the column (2026-10-05, mockup plan 2): the language, the music, the effects.
+            const float settingWidth = 260f;
+            const float settingHeight = 64f;
+            const float settingGap = 20f;
+            RectTransform settings = UiBuild.Box(UiBuild.Rect("Settings", frame), (1920f - 3f * settingWidth - 2f * settingGap) / 2f, 800f,
+                3f * settingWidth + 2f * settingGap, settingHeight);
+            UiBuild.Horizontal(settings, settingGap);
+
+            ButtonParts language = UiBuild.Button("Language", settings, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Size(language.Rect, settingWidth, settingHeight);
+
+            ButtonParts music = UiBuild.Button("Music", settings, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Size(music.Rect, settingWidth, settingHeight);
+
+            ButtonParts effects = UiBuild.Button("Effects", settings, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Size(effects.Rect, settingWidth, settingHeight);
 
             TextMeshProUGUI notice = UiBuild.Label("Notice", frame, 26f, UiPalette.Burn, TextAlignmentOptions.Center);
             UiBuild.Box(notice, 260f, 900f, 1400f, 80f);
@@ -51,6 +65,10 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_continue", resume.Button);
             UiBuild.SetReference(screen, "_language", language.Button);
             UiBuild.SetReference(screen, "_languageLabel", language.Label);
+            UiBuild.SetReference(screen, "_music", music.Button);
+            UiBuild.SetReference(screen, "_musicLabel", music.Label);
+            UiBuild.SetReference(screen, "_effects", effects.Button);
+            UiBuild.SetReference(screen, "_effectsLabel", effects.Label);
             UiBuild.SetReference(screen, "_quit", quit.Button);
             UiBuild.SetReference(screen, "_notice", notice);
             UiBuild.SetReference(screen, "_confirmPanel", overlay.gameObject);

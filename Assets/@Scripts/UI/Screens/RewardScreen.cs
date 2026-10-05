@@ -55,6 +55,7 @@ namespace F1.UI
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
             _party.CellClickOverride = PlaceSelectedItem;
+            Managers.Sound.PlayMusic(MusicTrack.Dungeon);
         }
 
         public override void Refresh()
@@ -100,6 +101,7 @@ namespace F1.UI
             _party.Refresh();
         }
 
+        /// <summary>The cards are built silent: a potion taken sounds as put in, a card picked or put down as a click.</summary>
         void OnOptionClicked(int option)
         {
             ExpeditionManager manager = Managers.Expedition;
@@ -109,18 +111,24 @@ namespace F1.UI
                 if (manager.CanTakePotionReward)
                 {
                     manager.TakePotionReward(option);
+                    Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
                     GoToCurrentPhase();
+                }
+                else
+                {
+                    Managers.Sound.PlayEffect(SoundEffect.Button);
                 }
 
                 return;
             }
 
+            Managers.Sound.PlayEffect(SoundEffect.Button);
             _selectedOption = _selectedOption == option ? -1 : option;
             _party.ClearSelection();
             Refresh();
         }
 
-        /// <summary>With an item reward picked, a click on a cell that can take it puts the item there.</summary>
+        /// <summary>With an item reward picked, a click on a cell that can take it puts the item there (and sounds so; a cell that cannot, as a click).</summary>
         bool PlaceSelectedItem(int member, int cell)
         {
             if (_selectedOption < 0)
@@ -132,7 +140,12 @@ namespace F1.UI
             if (manager.CanPlaceReward(_selectedOption, member, cell))
             {
                 manager.TakeItemReward(_selectedOption, member, cell);
+                Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
                 GoToCurrentPhase();
+            }
+            else
+            {
+                Managers.Sound.PlayEffect(SoundEffect.Button);
             }
 
             return true;
@@ -147,6 +160,7 @@ namespace F1.UI
             }
 
             manager.TakeItemRewardToInventory(_selectedOption);
+            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
             GoToCurrentPhase();
         }
 

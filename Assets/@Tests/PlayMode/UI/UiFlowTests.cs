@@ -40,7 +40,7 @@ namespace F1.Tests
             TitleScreen title = UiTestUtil.Screen<TitleScreen>();
 
             Assert.AreEqual("새 런", UiTestUtil.TextAt(title, "Frame/Buttons/NewRun/NewRunLabel"), "Fixed labels come from the string table.");
-            Assert.AreEqual("언어: 한국어", UiTestUtil.TextAt(title, "Frame/Buttons/Language/LanguageLabel"));
+            Assert.AreEqual("언어: 한국어", UiTestUtil.TextAt(title, "Frame/Settings/Language/LanguageLabel"));
             Assert.IsFalse(UiTestUtil.At(title, "Frame/Buttons/Continue").gameObject.activeSelf);
             Assert.IsFalse(UiTestUtil.At(title, "Frame/ConfirmPanel").gameObject.activeSelf);
         }
@@ -51,7 +51,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             TitleScreen title = UiTestUtil.Screen<TitleScreen>();
 
-            UiTestUtil.Click(title, "Frame/Buttons/Language");
+            UiTestUtil.Click(title, "Frame/Settings/Language");
             float deadline = Time.realtimeSinceStartup + UiTestUtil.DefaultTimeoutSeconds;
             while (Managers.Setting.LocaleCode != "en-US" && Time.realtimeSinceStartup < deadline)
             {
@@ -62,7 +62,89 @@ namespace F1.Tests
 
             Assert.AreEqual("en-US", Managers.Setting.LocaleCode);
             Assert.AreEqual("New Run", UiTestUtil.TextAt(title, "Frame/Buttons/NewRun/NewRunLabel"));
-            Assert.AreEqual("Language: English", UiTestUtil.TextAt(title, "Frame/Buttons/Language/LanguageLabel"));
+            Assert.AreEqual("Language: English", UiTestUtil.TextAt(title, "Frame/Settings/Language/LanguageLabel"));
+        }
+
+        /// <summary>
+        /// The title's music and effect buttons step on, low, off (Docs/Design/12 §3): the setting is saved, the sound follows
+        /// it at once, and the next start of the app keeps it.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Title_MusicAndEffectButtons_StepOnLowOff_AndTheNextStartKeepsThem()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            TitleScreen title = UiTestUtil.Screen<TitleScreen>();
+            Assert.AreEqual("음악: 켬", UiTestUtil.TextAt(title, "Frame/Settings/Music/MusicLabel"));
+            Assert.AreEqual("효과음: 켬", UiTestUtil.TextAt(title, "Frame/Settings/Effects/EffectsLabel"));
+
+            UiTestUtil.Click(title, "Frame/Settings/Music");
+            Assert.AreEqual(VolumeLevels.Low, Managers.Setting.MusicVolume);
+            Assert.AreEqual("음악: 작게", UiTestUtil.TextAt(title, "Frame/Settings/Music/MusicLabel"));
+            Assert.AreEqual(SoundManager.MusicLevel * 0.3f, Managers.Sound.Output.MusicVolume, 1e-4f, "The music follows the setting at once.");
+
+            UiTestUtil.Click(title, "Frame/Settings/Music");
+            UiTestUtil.Click(title, "Frame/Settings/Effects");
+            Assert.AreEqual("음악: 끔", UiTestUtil.TextAt(title, "Frame/Settings/Music/MusicLabel"));
+            Assert.AreEqual("효과음: 작게", UiTestUtil.TextAt(title, "Frame/Settings/Effects/EffectsLabel"));
+            Assert.AreEqual(0f, Managers.Sound.Output.MusicVolume);
+            Assert.AreEqual(0.3f, Managers.Sound.Output.EffectVolume, 1e-4f);
+
+            yield return BootTestUtil.RestartApp();
+
+            title = UiTestUtil.Screen<TitleScreen>();
+            Assert.AreEqual(VolumeLevels.Off, Managers.Setting.MusicVolume);
+            Assert.AreEqual(VolumeLevels.Low, Managers.Setting.EffectVolume);
+            Assert.AreEqual("음악: 끔", UiTestUtil.TextAt(title, "Frame/Settings/Music/MusicLabel"));
+            Assert.AreEqual(0.3f, Managers.Sound.Output.EffectVolume, 1e-4f, "The sound starts at the saved volume.");
+        }
+
+        /// <summary>
+        /// The music follows the screens (Docs/Design/12 §2): the lobby's on the title and in the lobby, the dungeon's from the
+        /// node map on, each streaming its own clip.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Music_FollowsTheScreens()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            Assert.IsTrue(Managers.Sound.IsLoaded);
+            Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track);
+            Assert.IsNotNull(Managers.Sound.Output.MusicClip, "The lobby's music plays on the title.");
+            AudioClip lobbyMusic = Managers.Sound.Output.MusicClip;
+
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            CollectionAssert.AreEqual(new[] { SoundEffect.Depart }, Managers.Sound.Asked, "Setting out makes its own sound, not a click.");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            Assert.AreEqual(MusicTrack.Dungeon, Managers.Sound.Track);
+            Assert.IsNotNull(Managers.Sound.Output.MusicClip, "The dungeon's music plays.");
+            Assert.AreNotSame(lobbyMusic, Managers.Sound.Output.MusicClip, "The music changed with the screen.");
+            Assert.AreEqual(AudioClipLoadType.Streaming, Managers.Sound.Output.MusicClip.loadType, "The music streams.");
+        }
+
+        /// <summary>
+        /// An effect asked for again within a moment plays once; another effect at the same moment plays as well
+        /// (Docs/Architecture/14_SOUND.md "재생").
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Sound_TheSameEffectTwiceInAMoment_PlaysOnce()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            Managers.Sound.ForgetEffects();
+
+            Managers.Sound.PlayEffect(SoundEffect.Hit);
+            Managers.Sound.PlayEffect(SoundEffect.Hit);
+            Managers.Sound.PlayEffect(SoundEffect.Heal);
+            CollectionAssert.AreEqual(new[] { SoundEffect.Hit, SoundEffect.Hit, SoundEffect.Heal }, Managers.Sound.Asked);
+            CollectionAssert.AreEqual(new[] { SoundEffect.Hit, SoundEffect.Heal }, Managers.Sound.Played);
+
+            yield return new WaitForSecondsRealtime(SoundManager.SameEffectGapSeconds * 2f);
+            Managers.Sound.PlayEffect(SoundEffect.Hit);
+            CollectionAssert.AreEqual(new[] { SoundEffect.Hit, SoundEffect.Heal, SoundEffect.Hit }, Managers.Sound.Played);
         }
 
         [UnityTest]
@@ -564,9 +646,12 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.ButtonAt(reward, "Frame/BoardPanel/RewardToInventory").interactable, "Nothing is picked yet.");
             int item = expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
             string rewardId = expedition.PendingRewards[item].Id;
+            Managers.Sound.ForgetEffects();
             UiTestUtil.Click(UiTestUtil.Views<RewardOptionView>(reward)[item].Button);
             yield return UiTestUtil.WaitForRedraw();
             UiTestUtil.Click(reward, "Frame/BoardPanel/RewardToInventory");
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button, SoundEffect.ItemPlace }, Managers.Sound.Asked,
+                "Picking the card clicks; putting the item away sounds as put in, without a click as well.");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
 
             map = UiTestUtil.Screen<NodeMapScreen>();
@@ -591,21 +676,25 @@ namespace F1.Tests
             row1 = party.ColumnOfRow(1);
             int frontIndex = row1.Member;
             string weapon = expedition.Members[frontIndex].Items[0].Item.Id;
+            Managers.Sound.ForgetEffects();
             UiTestUtil.Click(entry.Button);
             yield return null;
             UiTestUtil.Click(row1.Slots[0].Button);
             yield return null;
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button, SoundEffect.ItemPlace }, Managers.Sound.Asked, "A cell that takes the item sounds once, as put in.");
             Assert.AreEqual(rewardId, expedition.Members[frontIndex].Items[0].Item.Id);
             Assert.AreEqual(weapon, expedition.Inventory.Single().Item.Id);
             Assert.IsTrue(party.InventoryPanel.activeSelf, "The popup stays open.");
             Assert.AreEqual(weapon, party.InventoryEntries[0].Item.Item.Id);
 
             // The board item, then "to inventory": the board is empty and the inventory holds both.
+            Managers.Sound.ForgetEffects();
             UiTestUtil.Click(row1.Slots[0].Button);
             yield return null;
             Assert.IsTrue(party.ToInventory.interactable);
             UiTestUtil.Click(party.ToInventory);
             yield return null;
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button, SoundEffect.ItemPlace }, Managers.Sound.Asked, "Picking the item up clicks; putting it away sounds as put in.");
             Assert.IsEmpty(expedition.Members[frontIndex].Items);
             CollectionAssert.AreEqual(new[] { weapon, rewardId }, expedition.Inventory.Select(i => i.Item.Id));
             Assert.IsFalse(party.ToInventory.interactable);
@@ -817,6 +906,9 @@ namespace F1.Tests
 
             Assert.AreEqual(engine.Events.Count, battle.PlayedEvents, "Every event so far was passed.");
             Assert.Greater(battle.Fx.FloatingPlayed, 0, "A hit rose as a number.");
+            Assert.IsTrue(Managers.Sound.Asked.Any(e => e == SoundEffect.Hit || e == SoundEffect.HitHeavy || e == SoundEffect.Blocked), "A hit sounds.");
+            Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.ItemWeapon), "A weapon that fires sounds.");
+            Assert.AreEqual(MusicTrack.Dungeon, Managers.Sound.Track, "A battle that is not the boss's has the dungeon's music.");
             Assert.IsNotEmpty(battle.Captions, "The hit reads as a caption.");
             Assert.AreEqual(Mathf.Clamp01((float)engine.TimeMs / engine.Setup.Balance.StormStartMs), battle.StormProgress, 0.001f);
             Assert.IsTrue(battle.Candle.Lit, "The candle burns while the storm is still to come.");
@@ -871,6 +963,8 @@ namespace F1.Tests
             Assert.AreEqual(BattleResult.Ongoing, engine.Result);
             Assert.IsFalse(candle.Lit, "The storm puts the candle out.");
             Assert.AreEqual(candle.Darkness, candle.DarknessAtFlame, 0.01f, "Once the light has faded the stage is dark everywhere.");
+            Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.CandleOut), "The candle goes out with a sound.");
+            Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.Thunder), "The storm's tick thunders.");
         }
 
         /// <summary>
@@ -1213,6 +1307,7 @@ namespace F1.Tests
 
             yield return null;
             float fell = Time.time;
+            Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.MercenaryDeath), "A mercenary's death sounds (Docs/Design/12 §2).");
             Assert.AreEqual(BattleScreen.GraveHold + BattleScreen.GraveVanish, battle.Fx.GravesLeft, 0.001f, "The grave stands at once, for its time at x1.");
             Assert.AreEqual(ghosts, battle.Fx.GhostsShown, "A mercenary leaves no ghost.");
             Assert.IsFalse(views.Single(view => view.Unit == front).gameObject.activeSelf, "The fallen leaves the stage at once.");
@@ -1303,6 +1398,8 @@ namespace F1.Tests
             yield return null;
 
             Assert.IsTrue(battle.KillMomentSlows, "A unit's item felled it: a kill moment.");
+            Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.KillMoment), "The kill moment has its sound.");
+            Assert.AreEqual(MusicTrack.Boss, Managers.Sound.Track, "The boss battle has the boss's music.");
             yield return null;
             Assert.AreEqual(BattleScreen.KillSlowPercent, battle.Clock.SlowPercent, "The battle runs slow.");
             Assert.AreEqual(BattleScreen.KillSlowPercent / 100f, Time.timeScale, 1e-4f, "The motions run slow too.");

@@ -98,6 +98,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI detail = UiBuild.Label("PartyDetail", panel.transform, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
             UiBuild.Box(detail, PanelRightX, PanelDetailTop, PanelRightWidth, 54f);
             ButtonParts toInventory = KitLocalizedButton("ToInventory", panel.transform, UiKeys.Board.ToInventory, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Silence(toInventory.Button);
             UiBuild.Box(toInventory.Rect, toInventoryX, PanelButtonsTop, toInventoryWidth, PanelButtonHeight);
 
             // The gloom over the whole screen, under the popup.
@@ -216,6 +217,9 @@ namespace F1.Editor.Setup
             Image frame = KitFrame(name, parent, UiArt.Slot);
             UiBuild.Size(frame, BattleItemView.CellWidth, BattleItemView.CellHeight);
             Button button = UiBuild.MakeButton(frame);
+
+            // Silent: the side sounds a click as what it did, an item put in or a click (PartySideView).
+            UiBuild.Silence(button);
             ColorBlock colors = button.colors;
             colors.disabledColor = new Color(QuietCellTint, QuietCellTint, QuietCellTint, 1f);
             button.colors = colors;

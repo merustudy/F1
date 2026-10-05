@@ -10,6 +10,8 @@ namespace F1.Tests
 {
     public sealed class ManagersTests
     {
+        readonly System.Collections.Generic.List<SoundOutput> _outputs = new System.Collections.Generic.List<SoundOutput>();
+
         [SetUp]
         public void SetUp()
         {
@@ -20,6 +22,12 @@ namespace F1.Tests
         public void TearDown()
         {
             Managers.Reset();
+            foreach (SoundOutput output in _outputs)
+            {
+                UnityEngine.Object.DestroyImmediate(output.gameObject);
+            }
+
+            _outputs.Clear();
         }
 
         [Test]
@@ -45,6 +53,7 @@ namespace F1.Tests
         [TestCase("Run")]
         [TestCase("Expedition")]
         [TestCase("UI")]
+        [TestCase("Sound")]
         public void Configure_WhenManagerIsMissing_ThrowsAndStaysUnconfigured(string missing)
         {
             ManagerSet set = CreateFullSet();
@@ -70,25 +79,30 @@ namespace F1.Tests
             Assert.AreSame(set.Run, Managers.Run);
             Assert.AreSame(set.Expedition, Managers.Expedition);
             Assert.AreSame(set.UI, Managers.UI);
+            Assert.AreSame(set.Sound, Managers.Sound);
         }
 
-        static ManagerSet CreateFullSet()
+        ManagerSet CreateFullSet()
         {
             // Constructors do not touch the disk or Addressables.
             var save = new SaveManager(Path.Combine(Path.GetTempPath(), "F1Tests", "unused"));
             var resource = new ResourceManager();
             var data = new DataManager(resource);
             var run = new RunManager(data, save, () => 1UL);
+            var setting = new SettingManager(save);
+            SoundOutput output = SoundOutput.Create(null);
+            _outputs.Add(output);
             return new ManagerSet
             {
                 Resource = resource,
                 Save = save,
-                Setting = new SettingManager(save),
+                Setting = setting,
                 Data = data,
                 Scene = new SceneManagerEx(),
                 Run = run,
                 Expedition = new ExpeditionManager(data, run),
                 UI = new UIManager(resource),
+                Sound = new SoundManager(resource, setting, output),
             };
         }
     }

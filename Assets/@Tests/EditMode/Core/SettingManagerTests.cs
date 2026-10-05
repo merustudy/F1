@@ -271,6 +271,118 @@ namespace F1.Tests
             Assert.IsFalse(raised);
         }
 
+        [Test]
+        public void Load_WhenFirstRun_BothVolumesAreFull()
+        {
+            var setting = new SettingManager(_save);
+
+            setting.Load("ko-KR");
+
+            Assert.AreEqual(VolumeLevels.Full, setting.MusicVolume);
+            Assert.AreEqual(VolumeLevels.Full, setting.EffectVolume);
+            Assert.AreEqual(VolumeLevels.Full, ReadSaved().MusicVolume);
+        }
+
+        [Test]
+        public void Load_AVersion1File_ReadsBothVolumesAsFull_AndSavesVersion2()
+        {
+            // Version 1 (before 2026-10-05) had the locale only.
+            File.WriteAllText(Path.Combine(_root, SettingManager.FileName), "{\"SchemaVersion\":1,\"LocaleCode\":\"en-US\"}");
+            var setting = new SettingManager(_save);
+
+            setting.Load("ko-KR");
+
+            Assert.AreEqual("en-US", setting.LocaleCode);
+            Assert.AreEqual(VolumeLevels.Full, setting.MusicVolume);
+            Assert.AreEqual(VolumeLevels.Full, setting.EffectVolume);
+            Assert.AreEqual(2, ReadSaved().SchemaVersion);
+            Assert.AreEqual(VolumeLevels.Full, ReadSaved().EffectVolume);
+        }
+
+        [Test]
+        public void Load_WhenAVolumeIsOutOfRange_BringsItToTheNearerEndAndSaves()
+        {
+            _save.Save(SettingManager.FileName, new SettingsData { LocaleCode = "ko-KR", MusicVolume = 150, EffectVolume = -5 });
+            var setting = new SettingManager(_save);
+
+            setting.Load("ko-KR");
+
+            Assert.AreEqual(100, setting.MusicVolume);
+            Assert.AreEqual(0, setting.EffectVolume);
+            Assert.AreEqual(100, ReadSaved().MusicVolume);
+            Assert.AreEqual(0, ReadSaved().EffectVolume);
+        }
+
+        [Test]
+        public void ChangeVolume_SavesThenRaisesTheEvent_AndKeepsTheOtherSettings()
+        {
+            var setting = new SettingManager(_save);
+            setting.Load("en-US");
+            int raised = 0;
+            int savedAtEvent = -1;
+            setting.VolumeChanged += () =>
+            {
+                raised++;
+                savedAtEvent = ReadSaved().MusicVolume;
+            };
+
+            setting.ChangeMusicVolume(VolumeLevels.Low);
+            setting.ChangeEffectVolume(VolumeLevels.Off);
+
+            Assert.AreEqual(2, raised);
+            Assert.AreEqual(VolumeLevels.Low, savedAtEvent, "The event is raised only after the save succeeded.");
+            Assert.AreEqual(VolumeLevels.Low, setting.MusicVolume);
+            Assert.AreEqual(VolumeLevels.Off, setting.EffectVolume);
+            Assert.AreEqual("en-US", ReadSaved().LocaleCode);
+            Assert.AreEqual(VolumeLevels.Off, ReadSaved().EffectVolume);
+        }
+
+        [Test]
+        public void ChangeLocale_KeepsTheVolumes()
+        {
+            var setting = new SettingManager(_save);
+            setting.Load("ko-KR");
+            setting.ChangeMusicVolume(VolumeLevels.Off);
+
+            Change(setting, "en-US");
+
+            Assert.AreEqual(VolumeLevels.Off, setting.MusicVolume);
+            Assert.AreEqual(VolumeLevels.Off, ReadSaved().MusicVolume);
+        }
+
+        [TestCase(-1)]
+        [TestCase(101)]
+        public void ChangeVolume_OutOf0To100_Throws(int volume)
+        {
+            var setting = new SettingManager(_save);
+            setting.Load("ko-KR");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => setting.ChangeMusicVolume(volume));
+            Assert.AreEqual(VolumeLevels.Full, setting.MusicVolume);
+        }
+
+        [Test]
+        public void ChangeVolume_WhenSaveFails_KeepsTheVolumeAndDoesNotRaiseTheEvent()
+        {
+            var setting = new SettingManager(_save);
+            setting.Load("ko-KR");
+            bool raised = false;
+            setting.VolumeChanged += () => raised = true;
+
+            Directory.Delete(_root, true);
+            File.WriteAllText(_root, "blocked");
+            try
+            {
+                Assert.Throws<SaveWriteException>(() => setting.ChangeEffectVolume(VolumeLevels.Low));
+                Assert.AreEqual(VolumeLevels.Full, setting.EffectVolume);
+                Assert.IsFalse(raised);
+            }
+            finally
+            {
+                File.Delete(_root);
+            }
+        }
+
         [TestCase(SystemLanguage.Korean, "ko-KR")]
         [TestCase(SystemLanguage.English, "en-US")]
         [TestCase(SystemLanguage.Japanese, null)]

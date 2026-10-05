@@ -48,6 +48,7 @@ namespace F1.Editor.Setup
             AddDataEntries(entries);
             AddUiEntries(entries);
             AddArtEntries(entries);
+            AddAudioEntries(entries);
             return entries;
         }
 
@@ -56,6 +57,8 @@ namespace F1.Editor.Setup
         static partial void AddUiEntries(List<AddressEntry> entries);
 
         static partial void AddArtEntries(List<AddressEntry> entries);
+
+        static partial void AddAudioEntries(List<AddressEntry> entries);
 
         [MenuItem("F1/Setup/Sync Addressables")]
         public static void SyncMenu()

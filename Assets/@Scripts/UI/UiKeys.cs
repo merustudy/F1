@@ -31,6 +31,12 @@ namespace F1.UI
             public const string SaveUnreadable = "Title.SaveUnreadable";
             public const string SaveRestored = "Title.SaveRestored";
             public const string SettingsNotSaved = "Title.SettingsNotSaved";
+            public const string Music = "Title.Music";
+            public const string Effects = "Title.Effects";
+            public const string VolumeOn = "Title.VolumeOn";
+            public const string VolumeLow = "Title.VolumeLow";
+            public const string VolumeOff = "Title.VolumeOff";
+            public const string VolumeNotSaved = "Title.VolumeNotSaved";
         }
 
         public static class Lobby

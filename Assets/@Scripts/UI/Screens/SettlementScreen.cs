@@ -21,6 +21,7 @@ namespace F1.UI
         protected override void OnOpen()
         {
             _confirm.onClick.AddListener(OnConfirm);
+            Managers.Sound.PlayMusic(MusicTrack.Lobby);
         }
 
         public override void Refresh()

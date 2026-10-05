@@ -35,6 +35,9 @@ namespace F1.Editor.Setup
             // interface, and before Addressables: the art's entries need its files imported.
             ArtSetup.Sync();
 
+            // Before Addressables: the sounds' entries need their files imported.
+            AudioSetup.Sync();
+
             // After the data and the UI strings: the atlas holds the characters of both.
             FontSetup.Sync();
             UiPrefabSetup.Sync();

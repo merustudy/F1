@@ -155,7 +155,7 @@ namespace F1.Tests
             File.WriteAllText(_saveRoot, "blocked");
 
             // The language is applied first and put back when the save fails; the notice comes after that.
-            UiTestUtil.Click(title, "Frame/Buttons/Language");
+            UiTestUtil.Click(title, "Frame/Settings/Language");
             float deadline = Time.realtimeSinceStartup + UiTestUtil.DefaultTimeoutSeconds;
             while (UiTestUtil.TextAt(title, "Frame/Notice").Length == 0 && Time.realtimeSinceStartup < deadline)
             {
@@ -166,6 +166,21 @@ namespace F1.Tests
             Assert.AreEqual(UiStrings.Get(UiKeys.Title.SettingsNotSaved), UiTestUtil.TextAt(title, "Frame/Notice"));
             Assert.AreEqual("ko-KR", Managers.Setting.LocaleCode);
             Assert.AreEqual("새 런", UiTestUtil.TextAt(title, "Frame/Buttons/NewRun/NewRunLabel"), "The screen is still in the old language.");
+        }
+
+        [UnityTest]
+        public IEnumerator Title_WhenAVolumeCannotBeSaved_KeepsIt_AndSaysSo()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            TitleScreen title = UiTestUtil.Screen<TitleScreen>();
+            Directory.Delete(_saveRoot, true);
+            File.WriteAllText(_saveRoot, "blocked");
+
+            UiTestUtil.Click(title, "Frame/Settings/Music");
+
+            Assert.AreEqual(UiStrings.Get(UiKeys.Title.VolumeNotSaved), UiTestUtil.TextAt(title, "Frame/Notice"));
+            Assert.AreEqual(VolumeLevels.Full, Managers.Setting.MusicVolume);
+            Assert.AreEqual("음악: 켬", UiTestUtil.TextAt(title, "Frame/Settings/Music/MusicLabel"));
         }
 
         [UnityTest]

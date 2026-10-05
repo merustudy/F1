@@ -45,6 +45,7 @@ namespace F1.UI
             _rest.onClick.AddListener(OnRest);
             _depart.onClick.AddListener(OnDepart);
             _runOverNewRun.onClick.AddListener(OnNewRun);
+            Managers.Sound.PlayMusic(MusicTrack.Lobby);
         }
 
         public override void Refresh()
@@ -209,6 +210,7 @@ namespace F1.UI
             }
 
             Managers.Expedition.Depart(Dungeon.Id);
+            Managers.Sound.PlayEffect(SoundEffect.Depart);
             GoToCurrentPhase();
         }
 

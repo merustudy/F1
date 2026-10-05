@@ -24,6 +24,7 @@ namespace F1.Core
         public static RunManager Run => Require().Run;
         public static ExpeditionManager Expedition => Require().Expedition;
         public static UIManager UI => Require().UI;
+        public static SoundManager Sound => Require().Sound;
 
         public static void Configure(ManagerSet set)
         {
@@ -70,6 +71,7 @@ namespace F1.Core
         public RunManager Run;
         public ExpeditionManager Expedition;
         public UIManager UI;
+        public SoundManager Sound;
 
         internal void Validate()
         {
@@ -81,6 +83,7 @@ namespace F1.Core
             RequireManager(Run, nameof(Run));
             RequireManager(Expedition, nameof(Expedition));
             RequireManager(UI, nameof(UI));
+            RequireManager(Sound, nameof(Sound));
         }
 
         static void RequireManager(object manager, string name)
