@@ -26,7 +26,9 @@ pose/enemy/<key>-attack  pose/enemy/<key>-hit  # 몬스터의 공격·피격 자
 background/dungeon/<key>                       # 던전의 배경
 item/<key>                                     # 아이템의 아이콘
 potion/<key>                                   # 포션의 병 아이콘
-<domain>/<category>/<key>                      # 그 밖의 그림과 소리가 들어올 때
+sound/sfx/<key>                                # 효과음 (14_SOUND.md. SoundCatalog가 가리킨다)
+sound/bgm/<key>                                # 배경음
+<domain>/<category>/<key>                      # 그 밖의 것이 들어올 때
 ```
 
 형식: 소문자, 숫자, `-`로 된 조각을 `/`로 둘 이상 잇는다. `ResourceManager`가 형식을 검사한다.
@@ -37,7 +39,7 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 
 | Scope | Label | 수명 | 담는 것 |
 |---|---|---|---|
-| `App` | `scope-app` | 앱이 떠 있는 동안 | Static Data, 어느 화면에서나 쓰는 UI |
+| `App` | `scope-app` | 앱이 떠 있는 동안 | Static Data, 어느 화면에서나 쓰는 UI, 소리(효과음과 배경음. `14_SOUND.md`) |
 | `Lobby` | `scope-lobby` | 로비 화면이 떠 있는 동안 | 로비 UI |
 | `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 보상, 결과 UI, 유닛의 그림, 던전의 배경 |
 
@@ -63,11 +65,11 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 ## Group과 Entry
 
-- Group은 책임별 소수다: `F1-Data`, `F1-UI`, `F1-Art`. Scope마다 Group을 만들지 않는다. Group은 첫 Entry가 생길 때 만든다.
+- Group은 책임별 소수다: `F1-Data`, `F1-UI`, `F1-Art`, `F1-Audio`. Scope마다 Group을 만들지 않는다. Group은 첫 Entry가 생길 때 만든다.
 - Entry는 Inspector에서 등록하지 않는다. `F1.Editor.Setup.AddressablesSetup`의 Entry 목록에 `(assetPath, address, scope)` 한 줄을 넣고
   Sync한다. Sync는 멱등하고 체인의 setup 단계가 부른다.
 - Sync는 목록에 없는 Entry를 `F1-*` Group에서 지운다.
-- Data Entry는 `StaticDataFiles`에서, 화면 Prefab Entry는 `ScreenCatalog`에서, 그림 Entry는 Static Data의 `Figure`, `Background`, `Icon` 값에서 자동으로 나온다
+- Data Entry는 `StaticDataFiles`에서, 화면 Prefab Entry는 `ScreenCatalog`에서, 소리 Entry는 `SoundCatalog`에서, 그림 Entry는 Static Data의 `Figure`, `Background`, `Icon` 값에서 자동으로 나온다
   (`ArtSetup`. 파일의 자리는 Address에서 정해진다: `unit/enemy/goblin-raider` -> `Assets/@Art/Unit/Enemy/goblin_raider.png`,
   `item/herb-pouch` -> `Assets/@Art/Item/herb_pouch.png`). 손으로 적는 목록이 아니다.
 - `AddressablesSetup.FindProblems`가 검사한다: Asset 파일 존재, Address 형식과 중복, Scope Label이 정확히 하나, 목록에 없는 Entry.
@@ -83,5 +85,5 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 ## Deferred and Forbidden
 
-- Deferred: Remote Addressables, Content Update, Pool, 소리 Group.
+- Deferred: Remote Addressables, Content Update, Pool.
 - Forbidden: Handle을 일반 코드에 노출, `Resources.Load`로 Runtime Asset 읽기, 시작 시 전체 Preload, Inspector로만 등록한 Entry.

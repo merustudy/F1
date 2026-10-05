@@ -28,13 +28,13 @@ Manager 목록과 의존 방향은 `CLAUDE.md` §4가 소유한다.
 |---|---|---|---|
 | `ResourceManager` | Addressables 초기화, Logical Address로 Load/Instantiate, Scope별 Handle 소유와 Release | Content 선택, Fallback 대체 | 4 |
 | `SaveManager` | Save 파일의 형식과 I/O (Atomic Write, Backup, 손상 복구) | 상태 적용, Gameplay 판단 | 4 |
-| `SettingManager` | 설정 값 소유(Locale), 검증, 저장, `LocaleChanged` 알림 | Unity Localization API 직접 호출(`UnityLocaleAdapter`가 한다, `06_LOCALIZATION.md`) | 4, 6 |
+| `SettingManager` | 설정 값 소유(Locale, 음악·효과음의 음량), 검증, 저장, `LocaleChanged`·`VolumeChanged` 알림 | Unity Localization API 직접 호출(`UnityLocaleAdapter`가 한다, `06_LOCALIZATION.md`) | 4, 6, 10 |
 | `DataManager` | Generated JSON Load, 검증, Definition 조회 | CSV Parse, Handle 소유, Runtime/Save 상태 소유 | 5 |
 | `UIManager` | 화면 Prefab을 Load해 UI Root에 띄우고 닫기, 저장 실패 Overlay 유지 | Gameplay Rule 계산, 어느 화면을 띄울지 결정 | 7 |
 | `SceneManagerEx` | Scene 이름 상수, Main Scene Load | 초기화 순서 결정 | 3 |
 | `RunManager` | 런(100일) 상태와 `run.json`의 주인. 새 런, Load, 로비 명령, 귀환 정산 적용, 저장과 저장 실패 처리 | 전투 계산(Domain이 한다), 화면 표시 | 7, 8 |
 | `ExpeditionManager` | 원정과 전투 진행의 주인. 노드 선택, 전투 세션 진행과 입력 기록, 보상, 원정 종료, 저장된 원정과 전투의 복원 | 런 상태 직접 변경, 파일 쓰기(`RunManager`를 부른다) | 7, 8 |
-| `SoundManager` | 효과음·배경음 재생 | 음량 값 소유(`SettingManager`가 한다) | 10 |
+| `SoundManager` | 효과음·배경음을 읽고 재생, 음량 적용. 재생 규칙은 `14_SOUND.md` | 음량 값 소유(`SettingManager`가 한다), 언제 무슨 소리를 낼지 결정(화면이 부른다) | 10 |
 
 `RunManager`와 `ExpeditionManager`가 Application 계층이다. 규칙은 Domain의 순수 C# 코드가 계산하고, 이 둘은 명령을 검증하고
 Domain을 호출하고 상태를 확정·저장한 뒤 알린다. 명령과 단계의 상세는 `11_APPLICATION_FLOW.md`가 소유한다.
@@ -45,7 +45,7 @@ Domain을 호출하고 상태를 확정·저장한 뒤 알린다. 명령과 단�
 Boot -> AppRoot 중복 검사 -> Manager 생성 -> Managers.Configure
 -> Save 저장소 초기화 -> Settings Load
 -> ResourceManager 초기화, App Scope 열기 -> Localization 초기화 -> 저장 Locale 적용
--> Static Data Load/검증 -> 런 Save Load와 원정 복원
+-> Static Data Load/검증 -> 소리 Load -> 런 Save Load와 원정 복원
 -> Main Scene Load -> Main Binding -> Main UI 표시(타이틀) -> Initialized
 ```
 
@@ -71,6 +71,6 @@ Boot -> AppRoot 중복 검사 -> Manager 생성 -> Managers.Configure
 
 ## Deferred and Forbidden
 
-- Deferred: `SoundManager`(10단계), 별도 Gameplay Scene, Pool.
+- Deferred: 별도 Gameplay Scene, Pool.
 - Forbidden: `GameManager`, `EventManager`, `LocalizationManager`, Getter Lazy Init, Domain에 `Managers` 전달,
   부분 초기화 상태로 Main 진입, Scene 수작업 편집.

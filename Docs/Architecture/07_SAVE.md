@@ -11,7 +11,7 @@ Save 파일의 형식과 I/O, Backup과 복구, Migration, 저장 시점을 소�
 
 | 파일 | 내용 | 주인 |
 |---|---|---|
-| `settings.json` | 전역 설정 (Locale) | `SettingManager` |
+| `settings.json` | 전역 설정 (Locale, 음악·효과음의 음량) | `SettingManager` |
 | `run.json` | 진행 중인 런 하나: 런 상태, 원정 진행 상태, 진행 중인 전투의 재현 기록 | `RunManager` |
 
 저장 슬롯은 하나다. 새 런은 기존 `run.json`을 덮어쓴다.
@@ -129,6 +129,8 @@ Primary가 무효면 `.bak`을 같은 방식으로 검증해 쓴다. 둘 다 무
   진행 중이던 전투는 지금 규칙으로 재현된다("이어하기"의 `Diverged`, `Restarted`).
 - 옛 버전을 읽지 않기로 하는 것은 사용자가 정한다. 그런 결정이 없으면 버전을 올릴 때 변환 단계를 같이 넣는다.
 - Static Data의 내용이 바뀌어 id가 없어진 것은 버전으로 다루지 않는다. 검증에서 무효가 된다.
+- `SettingsData.SchemaVersion`은 2다(2026-10-05, 10단계): 음악·효과음의 음량 `MusicVolume`, `EffectVolume`(0~100의 정수)을 더했다.
+  1은 둘을 100으로 채워 올린다(그대로 읽으면 0이라 소리가 꺼진다). 범위 밖의 음량은 가까운 끝(0이나 100)으로 고쳐 저장한다(알 수 없는 언어를 기본값으로 고치는 것과 같다).
 
 ## Validation
 

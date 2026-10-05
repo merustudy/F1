@@ -46,6 +46,7 @@ root CLAUDE.md -> Docs/Roadmap.md(현재 단계, 결정 관문) -> 작업 영역
 | Application 계층 (런, 원정, 전투 진행) | `Docs/Architecture/11_APPLICATION_FLOW.md` |
 | UI (화면, Prefab, UI Test) | `Docs/Architecture/12_UI.md` |
 | 그림 (스타일, 생성, 승인 라운드, 배선) | `Docs/Architecture/13_ART_PIPELINE.md` |
+| 소리 (방향, 생성, 승인 라운드, 배선, 재생) | `Docs/Architecture/14_SOUND.md`, `Docs/Design/12_Sound_Direction.md` |
 | Testing / Validation | `Docs/Architecture/10_TESTING_VALIDATION.md` |
 | 기획을 근거로 쓰는 모든 작업 | `Docs/Design/00_INDEX.md`(태그 규칙), `Docs/Design/09_Implementation_Constraints.md` |
 | 전투 | `Docs/Design/02_Combat_System.md` |
@@ -204,6 +205,7 @@ ExpeditionManager -> DataManager, RunManager
 | `11_APPLICATION_FLOW.md` | `RunManager`와 `ExpeditionManager`의 명령, 게임 단계, 상태를 확정하는 시점 |
 | `12_UI.md` | `UIManager`, 화면과 View, 화면 Prefab을 만드는 Setup, UI Test |
 | `13_ART_PIPELINE.md` | `ArtPipeline`, 스타일 문서, 그림 생성 스크립트, 승인 라운드, 승인된 그림의 배선과 검사 |
+| `14_SOUND.md` | `SoundPipeline`, 소리 스타일 문서, 소리 생성 스크립트, 소리의 승인 라운드, 승인된 소리의 배선과 검사, `SoundManager`의 재생 규칙, 화면이 소리를 내는 자리 |
 
 - Owner 문서를 만들면 같은 변경에서 이 표와 §2 표에 등록한다. 등록되지 않은 문서는 규칙이 아니다.
 - 한 정책의 상세를 여러 문서에 복사하지 않는다. root는 불변조건, Owner는 상세. 교차 영역은 Link로 연결한다.
@@ -211,8 +213,8 @@ ExpeditionManager -> DataManager, RunManager
 
 ## 9. Current Vertical Slice
 
-현재 Slice는 **Slice A: 핵심 루프 한 바퀴 + 저장/이어하기**다.
-범위, 구현 순서, Acceptance, Deferred는 [Docs/Architecture/09_VERTICAL_SLICE.md](Docs/Architecture/09_VERTICAL_SLICE.md)가 소유한다.
+**Slice A: 핵심 루프 한 바퀴 + 저장/이어하기**는 2026-10-06에 완료했다. 다음 **Slice B는 전투 시스템 완성**이고 범위는 Roadmap 11단계의 범위 문서가 정한다.
+그 문서가 승인되기 전에는 Slice A의 범위가 현재 범위다. 범위, 구현 순서, Acceptance, Deferred는 [Docs/Architecture/09_VERTICAL_SLICE.md](Docs/Architecture/09_VERTICAL_SLICE.md)가 소유한다.
 
 - 그 문서의 Deferred 항목은 현재 범위가 아니다. 코드, 데이터, Folder를 미리 만들지 않는다.
 - Gameplay 규칙은 `Docs/Design`에서 【확정】된 것만 구현한다.
