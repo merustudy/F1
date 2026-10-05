@@ -7,8 +7,8 @@ using UnityEngine;
 namespace F1.UI
 {
     /// <summary>
-    /// The art the screens of an expedition show: the full-body figures of the units, the faces
-    /// cut out of them, the units' attack and hit poses, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
+    /// The art the screens of an expedition show: the full-body figures of the units, the units'
+    /// attack and hit poses, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
     /// ask for a picture without waiting. A unit or an item whose data names no art has none, and
     /// its view shows the placeholder (the silhouette, the item's name); art that is named but
     /// does not load fails the screen.
@@ -42,7 +42,7 @@ namespace F1.UI
             return new ExpeditionArt(data, sprites);
         }
 
-        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its face and its two poses), then the items, then the potions, each in id order.</summary>
+        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its two poses), then the items, then the potions, each in id order.</summary>
         public static IEnumerable<string> Addresses(StaticData data)
         {
             foreach (JobData job in data.Jobs.Ordered)
@@ -50,7 +50,6 @@ namespace F1.UI
                 if (job.Figure != null)
                 {
                     yield return job.Figure;
-                    yield return job.Face;
                     yield return job.AttackPose;
                     yield return job.HitPose;
                 }
@@ -61,7 +60,6 @@ namespace F1.UI
                 if (enemy.Figure != null)
                 {
                     yield return enemy.Figure;
-                    yield return enemy.Face;
                     yield return enemy.AttackPose;
                     yield return enemy.HitPose;
                 }
@@ -130,24 +128,6 @@ namespace F1.UI
         public Sprite HitPoseOfEnemy(string enemyId)
         {
             return Of(_data.Enemies.Get(enemyId).HitPose);
-        }
-
-        /// <summary>The face cut out of a job's figure, or null when the job has no figure.</summary>
-        public Sprite FaceOfJob(string jobId)
-        {
-            return Of(_data.Jobs.Get(jobId).Face);
-        }
-
-        /// <summary>A mercenary's face is its job's.</summary>
-        public Sprite FaceOfMercenary(string mercenaryId)
-        {
-            return FaceOfJob(_data.Mercenaries.Get(mercenaryId).JobId);
-        }
-
-        /// <summary>The face cut out of an enemy's figure, or null when the enemy has no figure.</summary>
-        public Sprite FaceOfEnemy(string enemyId)
-        {
-            return Of(_data.Enemies.Get(enemyId).Face);
         }
 
         /// <summary>The icon of an item, or null when the item has none.</summary>

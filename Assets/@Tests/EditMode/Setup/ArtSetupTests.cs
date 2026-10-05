@@ -20,8 +20,6 @@ namespace F1.Tests
 
         [TestCase("unit/job/knight", "Assets/@Art/Unit/Job/knight.png")]
         [TestCase("unit/enemy/goblin-raider", "Assets/@Art/Unit/Enemy/goblin_raider.png")]
-        [TestCase("face/job/knight", "Assets/@Art/Face/Job/knight.png")]
-        [TestCase("face/enemy/goblin-raider", "Assets/@Art/Face/Enemy/goblin_raider.png")]
         [TestCase("pose/job/knight-attack", "Assets/@Art/Pose/Job/knight_attack.png")]
         [TestCase("pose/enemy/goblin-raider-hit", "Assets/@Art/Pose/Enemy/goblin_raider_hit.png")]
         [TestCase("background/dungeon/abandoned-mine", "Assets/@Art/Background/Dungeon/abandoned_mine.png")]
@@ -48,11 +46,6 @@ namespace F1.Tests
             Assert.IsNotEmpty(entries);
             Assert.AreEqual(entries.Count, entries.Select(e => e.Address).Distinct().Count(), "A picture is listed once.");
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)), "The figures of the units.");
-            Assert.IsTrue(entries.Any(e => e.Address.StartsWith("face/", StringComparison.Ordinal)), "The faces cut out of the figures.");
-            foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)))
-            {
-                Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.FaceOf(figure.Address)), $"{figure.Address} has its face.");
-            }
 
             // A figure comes with its attack and hit poses, a mercenary's and a monster's (Docs/Design/10 §5).
             foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)))

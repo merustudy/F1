@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Cuts the face of every approved figure out, for the board panel of the battle screen.
+"""Cuts the face of every approved figure out.
 
-A unit's line of the panel starts with its face: a square cut from the top of its full-body
-figure, where the head is. The source is the approved figure the game shows (Assets/@Art/Unit),
-never a candidate, so a face is as approved as its figure. The cut is arithmetic: the square's
-side is a share of the figure's height, it is centred on the topmost part of the figure (the head,
-as a rule), and the roster nudges it (FaceDx, FaceDy, in the figure's pixels) where a hat or a
-weapon stands above the head. The face is written at twice its size on screen, like an icon, and
-a review sheet shows every face at its size on the game's plate colours. No API call.
+The game shows no faces now: the battle's board panel lost them with the V plan (2026-10-03), and the
+faces and their wiring were taken out of the game on 2026-10-05 (Docs/Architecture/13_ART_PIPELINE.md
+"얼굴"). This stays for a screen that wants faces again.
+
+A face is a square cut from the top of a full-body figure, where the head is. The source is the
+approved figure the game shows (Assets/@Art/Unit), never a candidate, so a face is as approved as
+its figure. The cut is arithmetic: the square's side is a share of the figure's height, it is
+centred on the topmost part of the figure (the head, as a rule), and the roster nudges it (FaceDx,
+FaceDy, in the figure's pixels) where a hat or a weapon stands above the head. The face is written
+at twice its size on screen, like an icon, and a review sheet shows every face at its size on the
+colours of the two sides. No API call.
 
   cutface.py --type character          every row of the roster
   cutface.py --type enemy --only goblin_shaman
@@ -34,7 +38,7 @@ FIGURES = {
 }
 SIDES = {"character": "Party", "enemy": "Enemy"}
 
-# The face on screen is 60x60 (UiPrefabSetup.Battle: BoardFaceSize) and drawn at twice that.
+# The face was 60x60 on the old board panel (before the V plan) and is drawn at twice that.
 FACE_SIZE = 120
 # The square's side as a share of the figure's height (the head of a six-heads-tall figure, with
 # some hair and shoulder), and how far above the topmost pixel it starts.

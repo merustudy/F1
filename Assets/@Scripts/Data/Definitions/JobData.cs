@@ -188,10 +188,6 @@ namespace F1.Data
         [JsonProperty(Order = 10, Required = Required.AllowNull)]
         public string Figure { get; }
 
-        /// <summary>The address of the face cut out of the figure (<see cref="ArtAddress.FaceOf"/>). Null when the job has no figure.</summary>
-        [JsonIgnore]
-        public string Face => ArtAddress.FaceOf(Figure);
-
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the job has no figure.</summary>
         [JsonIgnore]
         public string AttackPose => ArtAddress.PoseOf(Figure, ArtAddress.Attack);

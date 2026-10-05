@@ -32,23 +32,6 @@ namespace F1.Data
         }
 
         /// <summary>
-        /// The address of the face of a unit: the figure's address with its first segment replaced
-        /// ("unit/job/knight" is "face/job/knight"). A unit that has a figure has a face, because the
-        /// face is cut out of the figure (ArtPipeline, cutface.py), so the data names only the figure.
-        /// Null for a unit without a figure.
-        /// </summary>
-        public static string FaceOf(string figure)
-        {
-            if (figure == null)
-            {
-                return null;
-            }
-
-            int slash = figure.IndexOf('/');
-            return "face" + (slash < 0 ? "/" + figure : figure.Substring(slash));
-        }
-
-        /// <summary>
         /// The address of a pose of a unit: the figure's address under "pose", with the pose after its last segment
         /// ("unit/job/knight" is "pose/job/knight-attack"). A unit's attack and hit poses are drawn after its figure is
         /// approved (Docs/Design/10 §2, §5: the mercenaries' and the monsters'), so a job or an enemy that has a figure has

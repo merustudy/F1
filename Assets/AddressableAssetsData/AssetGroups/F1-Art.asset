@@ -27,12 +27,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 06f7b51dfc73f4bb4a728a05d56a373f
-    m_Address: face/enemy/goblin-shaman
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 09fb679c0bb374c9682fdfb2b6faacc3
     m_Address: unit/job/paladin
     m_ReadOnly: 0
@@ -47,12 +41,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1034f3fdb392f4cc3a9c3d7df73d701d
     m_Address: pose/enemy/goblin-shaman-attack
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 106d436b17bf54b178de84a3cc37b8f8
-    m_Address: face/job/knight
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -83,12 +71,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23504f9eb39a942c09f1f2d36f854622
     m_Address: pose/enemy/cave-rat-hit
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 284c634048f1348519f0a5d4192379c8
-    m_Address: face/job/valkyrie
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -201,18 +183,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 76b1f0985dcd44d2f85799814743d7ff
-    m_Address: face/enemy/goblin-archer
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 796bbb5365b1943ad8644fe53ffb6a76
-    m_Address: face/enemy/mine-overseer
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -239,12 +209,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8febd31da6ef849bea3de47deba92f09
     m_Address: pose/enemy/goblin-raider-attack
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 93c269ccf40e64f73ab5c76640c9baa7
-    m_Address: face/job/archmage
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -279,12 +243,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a9671a5d910e045f68920bd8f5a74618
-    m_Address: face/job/paladin
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad990f5f1691f4415adcf89bd7c7e849
     m_Address: pose/job/archmage-attack
     m_ReadOnly: 0
@@ -305,12 +263,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b407988f231d14721b1e8b6efd67e7c2
     m_Address: item/rusty-blade
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b98b898260e884492b8619842b00e710
-    m_Address: face/job/bishop
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -357,12 +309,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dcdfda16ad8ad44a3b9f67fe06603ddc
-    m_Address: face/job/spellblade
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e426af557a41d47d0990399ee48adefd
     m_Address: pose/enemy/goblin-archer-attack
     m_ReadOnly: 0
@@ -399,12 +345,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f38f5ed7d49bd4f51a9e2396e8103d50
-    m_Address: face/enemy/cave-rat
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f764de12c07144c35bf7b3fba6df7cda
     m_Address: pose/enemy/goblin-archer-hit
     m_ReadOnly: 0
@@ -413,12 +353,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f7b43789322d44d0fb9f2e4c3680d57f
     m_Address: pose/job/paladin-hit
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fdb2cdf14f96b4c64afdfbc8c2fa5554
-    m_Address: face/enemy/goblin-raider
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

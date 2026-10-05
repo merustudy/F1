@@ -78,9 +78,6 @@ namespace F1.Editor.Setup
         /// <summary>An item's icon is drawn at twice the size of its cell, like an icon of the interface.</summary>
         static readonly ImportPolicy Icon = Interface(border: 0);
 
-        /// <summary>A unit's face, cut out of its figure at twice the size of its place in the board panel, like an icon.</summary>
-        static readonly ImportPolicy Face = Interface(border: 0);
-
         /// <summary>
         /// A unit's attack or hit pose: the figure canvas in the middle of a canvas three times as wide and an eighth deeper
         /// (2016x1008), in a file of 2048x1024 (scaled by 64/63, powers of two) so that it is compressed (2026-10-05).
@@ -143,8 +140,8 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One entry per piece of art the generated static data names: the figures of the jobs,
-        /// those of the enemies, the faces cut out of those figures, the backgrounds of the
-        /// dungeons, the icons of the items, then the bottles of the potions.
+        /// those of the enemies, their attack and hit poses, the backgrounds of the dungeons, the
+        /// icons of the items, then the bottles of the potions.
         /// </summary>
         public static List<AddressEntry> Entries()
         {
@@ -157,12 +154,9 @@ namespace F1.Editor.Setup
             StaticDataFileStore store = DataTransformMenu.CreateStore();
             StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
 
-            // A unit that has a figure has a face too: it is cut out of the figure, and its address follows the figure's.
             // A job or an enemy that has a figure has its attack and hit poses as well, drawn after the figure.
             IEnumerable<(string Address, ImportPolicy Policy)> named = data.Jobs.Ordered.Select(j => (j.Figure, Figure))
                 .Concat(data.Enemies.Ordered.Select(e => (e.Figure, Figure)))
-                .Concat(data.Jobs.Ordered.Select(j => (j.Face, Face)))
-                .Concat(data.Enemies.Ordered.Select(e => (e.Face, Face)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.AttackPose, Pose)))
                 .Concat(data.Jobs.Ordered.Select(j => (j.HitPose, Pose)))
                 .Concat(data.Enemies.Ordered.Select(e => (e.AttackPose, Pose)))
@@ -261,7 +255,7 @@ namespace F1.Editor.Setup
                     string path = file.Replace('\\', '/');
                     if (!listed.Contains(path))
                     {
-                        problems.Add($"{path}: nothing names this image: no Figure (or its face or poses), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
+                        problems.Add($"{path}: nothing names this image: no Figure (or its poses), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
                     }
                 }
             }
