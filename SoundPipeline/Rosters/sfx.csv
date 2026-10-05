@@ -1,0 +1,27 @@
+Key,Name,Subject,Seconds,Tail
+item-weapon,무기 발동,"a heavy iron weapon swung hard through the air, a short leather-gloved whoosh with a faint metal ring",0.6,effect
+item-armor,방어 발동,"a small round iron-rimmed buckler raised and braced, a solid knock of wood and a short metal rattle",0.6,effect
+item-attack,공격 발동,"a small clay flask flung hard through the air, a quick spinning whoosh",0.5,effect
+item-support,지원 발동,"a soft warm swell of candle-lit magic, a faint rustle of cloth and a small bone charm rattling",0.8,effect
+hit,피격,"a blunt weapon striking a leather-armored body, a heavy dull thud with a small crunch",0.5,effect
+hit-heavy,큰 피격,"a crushing blow on armor and bone, a deep heavy impact with a sharp crack and a short rumble",0.8,effect
+blocked,막힘,"a blade glancing off a thick iron shield, a hard clang cut short",0.5,effect
+heal,회복,"a warm soft swell like a breath of candle warmth with a gentle low chime of a small bronze bell",0.9,effect
+shield,보호막,"iron plates locking into place, a firm metallic clunk with a short low hum",0.6,effect
+burn,불붙음,"oil catching fire with a sudden whoosh and a crackle of flames",0.8,effect
+deaths-door,빈사,"a single slow heavy heartbeat thump with a low hollow rumble",1.0,effect
+survived,버텼다,"a sharp desperate gasp of breath and a small rattle of armor",0.7,effect
+enemy-down,적의 쓰러짐,"a creature collapsing onto a dirt floor, a heavy body thud with a clatter of dropped gear",1.0,effect
+kill-moment,결정타,"a decisive finishing blow, a deep weighty impact with a low slowed whoosh and a short ringing tail",1.0,effect
+mercenary-death,용병의 죽음,"a fallen hero, a heavy body falling on cold stone, then one low distant iron bell toll fading out",2.0,effect
+potion,포션,"a cork pulled from a small glass bottle and a quick gulp",0.8,effect
+retreat,후퇴 성공,"hurried boots running away on a stone floor with gear rattling",1.0,effect
+retreat-failed,후퇴 실패,"boots scrambling and slipping on stone, a stumble and a dull thud",0.8,effect
+candle-out,양초가 꺼짐,"a gust of cold wind snuffing out a candle flame, a short hiss and a puff of smoke",1.2,effect
+thunder,번개,"a sharp close lightning crack followed by a short heavy thunder rumble",1.5,effect
+victory,승리,"a short grim victory sting, a low horn note over a single heavy drum hit",2.0,sting
+defeat,패배,"a short grim defeat sting, a low descending cello note and a hollow drum",2.0,sting
+button,버튼,"a small iron latch clicking shut, a crisp short click with a faint wooden knock",0.5,effect
+item-place,아이템 넣기,"an iron item dropped into a leather bag, a soft thump with a light clink",0.6,effect
+node-move,노드 이동,"heavy boots taking two steps on a gravel mine floor with a faint lantern creak",0.8,effect
+depart,원정 출발,"a heavy wooden door creaking open, gear being shouldered and boots on stone",1.5,effect

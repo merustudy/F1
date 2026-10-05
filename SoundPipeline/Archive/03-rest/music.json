@@ -1,0 +1,32 @@
+[
+ {
+  "key": "lobby",
+  "name": "로비",
+  "bpm": 72,
+  "pick": "B",
+  "loop_seconds": 26.665,
+  "bars": 8,
+  "likeness": 0.72,
+  "by_user": false
+ },
+ {
+  "key": "dungeon",
+  "name": "던전",
+  "bpm": 92,
+  "pick": "A",
+  "loop_seconds": 20.869,
+  "bars": 8,
+  "likeness": 0.93,
+  "by_user": true
+ },
+ {
+  "key": "boss",
+  "name": "보스",
+  "bpm": 112,
+  "pick": "B",
+  "loop_seconds": 17.13,
+  "bars": 8,
+  "likeness": 0.85,
+  "by_user": false
+ }
+]

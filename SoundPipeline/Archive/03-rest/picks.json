@@ -1,0 +1,1172 @@
+[
+ {
+  "key": "item-weapon",
+  "name": "무기 발동",
+  "asked": 0.6,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "item-weapon_A.wav",
+    "seconds": 0.6,
+    "rms_db": -18.0,
+    "peak_db": -6.0,
+    "brightness_hz": 368,
+    "attack_s": 0.03,
+    "decay_s": 0.15,
+    "variant": "A",
+    "crest_db": 12.0,
+    "valid": true
+   },
+   {
+    "file": "item-weapon_B.wav",
+    "seconds": 0.583,
+    "rms_db": -17.7,
+    "peak_db": -6.0,
+    "brightness_hz": 356,
+    "attack_s": 0.1,
+    "decay_s": 0.13,
+    "variant": "B",
+    "crest_db": 11.7,
+    "valid": true
+   },
+   {
+    "file": "item-weapon_C.wav",
+    "seconds": 0.528,
+    "rms_db": -17.1,
+    "peak_db": -6.0,
+    "brightness_hz": 255,
+    "attack_s": 0.19,
+    "decay_s": 0.09,
+    "variant": "C",
+    "crest_db": 11.1,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "item-armor",
+  "name": "방어 발동",
+  "asked": 0.6,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "item-armor_A.wav",
+    "seconds": 0.6,
+    "rms_db": -28.3,
+    "peak_db": -6.0,
+    "brightness_hz": 1024,
+    "attack_s": 0.09,
+    "decay_s": 0.13,
+    "variant": "A",
+    "crest_db": 22.3,
+    "valid": true
+   },
+   {
+    "file": "item-armor_B.wav",
+    "seconds": 0.511,
+    "rms_db": -26.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1041,
+    "attack_s": 0.19,
+    "decay_s": 0.06,
+    "variant": "B",
+    "crest_db": 20.8,
+    "valid": true
+   },
+   {
+    "file": "item-armor_C.wav",
+    "seconds": 0.396,
+    "rms_db": -27.1,
+    "peak_db": -6.0,
+    "brightness_hz": 2719,
+    "attack_s": 0.02,
+    "decay_s": 0.04,
+    "variant": "C",
+    "crest_db": 21.1,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "item-attack",
+  "name": "공격 발동",
+  "asked": 0.5,
+  "rule": "crispest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "item-attack_A.wav",
+    "seconds": 0.38,
+    "rms_db": -19.5,
+    "peak_db": -6.0,
+    "brightness_hz": 526,
+    "attack_s": 0.15,
+    "decay_s": 0.06,
+    "variant": "A",
+    "crest_db": 13.5,
+    "valid": true
+   },
+   {
+    "file": "item-attack_B.wav",
+    "seconds": 0.48,
+    "rms_db": -25.0,
+    "peak_db": -6.0,
+    "brightness_hz": 277,
+    "attack_s": 0.0,
+    "decay_s": 0.15,
+    "variant": "B",
+    "crest_db": 19.0,
+    "valid": true
+   },
+   {
+    "file": "item-attack_C.wav",
+    "seconds": 0.48,
+    "rms_db": -24.3,
+    "peak_db": -6.0,
+    "brightness_hz": 1006,
+    "attack_s": 0.03,
+    "decay_s": 0.07,
+    "variant": "C",
+    "crest_db": 18.3,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "item-support",
+  "name": "지원 발동",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "item-support_A.wav",
+    "seconds": 0.8,
+    "rms_db": -25.2,
+    "peak_db": -6.0,
+    "brightness_hz": 906,
+    "attack_s": 0.1,
+    "decay_s": 0.36,
+    "variant": "A",
+    "crest_db": 19.2,
+    "valid": true
+   },
+   {
+    "file": "item-support_B.wav",
+    "seconds": 0.77,
+    "rms_db": -28.6,
+    "peak_db": -6.0,
+    "brightness_hz": 5404,
+    "attack_s": 0.1,
+    "decay_s": 0.28,
+    "variant": "B",
+    "crest_db": 22.6,
+    "valid": true
+   },
+   {
+    "file": "item-support_C.wav",
+    "seconds": 0.641,
+    "rms_db": -20.2,
+    "peak_db": -6.0,
+    "brightness_hz": 828,
+    "attack_s": 0.18,
+    "decay_s": 0.12,
+    "variant": "C",
+    "crest_db": 14.2,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "hit",
+  "name": "피격",
+  "asked": 0.5,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "hit_A.wav",
+    "seconds": 0.48,
+    "rms_db": -24.9,
+    "peak_db": -6.0,
+    "brightness_hz": 1133,
+    "attack_s": 0.0,
+    "decay_s": 0.12,
+    "variant": "A",
+    "crest_db": 18.9,
+    "valid": true
+   },
+   {
+    "file": "hit_B.wav",
+    "seconds": 0.48,
+    "rms_db": -19.5,
+    "peak_db": -6.0,
+    "brightness_hz": 284,
+    "attack_s": 0.04,
+    "decay_s": 0.16,
+    "variant": "B",
+    "crest_db": 13.5,
+    "valid": true
+   },
+   {
+    "file": "hit_C.wav",
+    "seconds": 0.48,
+    "rms_db": -17.9,
+    "peak_db": -6.0,
+    "brightness_hz": 313,
+    "attack_s": 0.06,
+    "decay_s": 0.22,
+    "variant": "C",
+    "crest_db": 11.9,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "hit-heavy",
+  "name": "큰 피격",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "hit-heavy_A.wav",
+    "seconds": 0.8,
+    "rms_db": -22.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1600,
+    "attack_s": 0.01,
+    "decay_s": 0.27,
+    "variant": "A",
+    "crest_db": 16.8,
+    "valid": true
+   },
+   {
+    "file": "hit-heavy_B.wav",
+    "seconds": 0.8,
+    "rms_db": -21.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1295,
+    "attack_s": 0.03,
+    "decay_s": 0.2,
+    "variant": "B",
+    "crest_db": 15.8,
+    "valid": true
+   },
+   {
+    "file": "hit-heavy_C.wav",
+    "seconds": 0.8,
+    "rms_db": -22.3,
+    "peak_db": -6.0,
+    "brightness_hz": 1571,
+    "attack_s": 0.02,
+    "decay_s": 0.27,
+    "variant": "C",
+    "crest_db": 16.3,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "blocked",
+  "name": "막힘",
+  "asked": 0.5,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "blocked_A.wav",
+    "seconds": 0.48,
+    "rms_db": -22.9,
+    "peak_db": -6.0,
+    "brightness_hz": 2500,
+    "attack_s": 0.0,
+    "decay_s": 0.14,
+    "variant": "A",
+    "crest_db": 16.9,
+    "valid": true
+   },
+   {
+    "file": "blocked_B.wav",
+    "seconds": 0.48,
+    "rms_db": -23.5,
+    "peak_db": -6.0,
+    "brightness_hz": 2752,
+    "attack_s": 0.0,
+    "decay_s": 0.15,
+    "variant": "B",
+    "crest_db": 17.5,
+    "valid": true
+   },
+   {
+    "file": "blocked_C.wav",
+    "seconds": 0.48,
+    "rms_db": -24.8,
+    "peak_db": -6.0,
+    "brightness_hz": 2473,
+    "attack_s": 0.0,
+    "decay_s": 0.12,
+    "variant": "C",
+    "crest_db": 18.8,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "heal",
+  "name": "회복",
+  "asked": 0.9,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "heal_A.wav",
+    "seconds": 0.88,
+    "rms_db": -17.9,
+    "peak_db": -6.0,
+    "brightness_hz": 9918,
+    "attack_s": 0.09,
+    "decay_s": 0.48,
+    "variant": "A",
+    "crest_db": 11.9,
+    "valid": true
+   },
+   {
+    "file": "heal_B.wav",
+    "seconds": 0.88,
+    "rms_db": -19.1,
+    "peak_db": -6.0,
+    "brightness_hz": 249,
+    "attack_s": 0.07,
+    "decay_s": 0.46,
+    "variant": "B",
+    "crest_db": 13.1,
+    "valid": true
+   },
+   {
+    "file": "heal_C.wav",
+    "seconds": 0.88,
+    "rms_db": -24.0,
+    "peak_db": -6.0,
+    "brightness_hz": 5468,
+    "attack_s": 0.13,
+    "decay_s": 0.35,
+    "variant": "C",
+    "crest_db": 18.0,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "shield",
+  "name": "보호막",
+  "asked": 0.6,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "shield_A.wav",
+    "seconds": 0.539,
+    "rms_db": -26.2,
+    "peak_db": -6.0,
+    "brightness_hz": 1582,
+    "attack_s": 0.07,
+    "decay_s": 0.21,
+    "variant": "A",
+    "crest_db": 20.2,
+    "valid": true
+   },
+   {
+    "file": "shield_B.wav",
+    "seconds": 0.6,
+    "rms_db": -25.5,
+    "peak_db": -6.0,
+    "brightness_hz": 1334,
+    "attack_s": 0.0,
+    "decay_s": 0.3,
+    "variant": "B",
+    "crest_db": 19.5,
+    "valid": true
+   },
+   {
+    "file": "shield_C.wav",
+    "seconds": 0.518,
+    "rms_db": -22.4,
+    "peak_db": -6.0,
+    "brightness_hz": 909,
+    "attack_s": 0.01,
+    "decay_s": 0.37,
+    "variant": "C",
+    "crest_db": 16.4,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "burn",
+  "name": "불붙음",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "burn_A.wav",
+    "seconds": 0.8,
+    "rms_db": -20.7,
+    "peak_db": -6.0,
+    "brightness_hz": 414,
+    "attack_s": 0.11,
+    "decay_s": 0.35,
+    "variant": "A",
+    "crest_db": 14.7,
+    "valid": true
+   },
+   {
+    "file": "burn_B.wav",
+    "seconds": 0.8,
+    "rms_db": -17.9,
+    "peak_db": -6.0,
+    "brightness_hz": 251,
+    "attack_s": 0.04,
+    "decay_s": 0.22,
+    "variant": "B",
+    "crest_db": 11.9,
+    "valid": true
+   },
+   {
+    "file": "burn_C.wav",
+    "seconds": 0.8,
+    "rms_db": -22.7,
+    "peak_db": -6.0,
+    "brightness_hz": 328,
+    "attack_s": 0.0,
+    "decay_s": 0.35,
+    "variant": "C",
+    "crest_db": 16.7,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "deaths-door",
+  "name": "빈사",
+  "asked": 1.0,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "deaths-door_A.wav",
+    "seconds": 0.725,
+    "rms_db": -23.5,
+    "peak_db": -6.0,
+    "brightness_hz": 55,
+    "attack_s": 0.03,
+    "decay_s": 0.09,
+    "variant": "A",
+    "crest_db": 17.5,
+    "valid": true
+   },
+   {
+    "file": "deaths-door_B.wav",
+    "seconds": 1.0,
+    "rms_db": -23.3,
+    "peak_db": -6.0,
+    "brightness_hz": 73,
+    "attack_s": 0.01,
+    "decay_s": 0.14,
+    "variant": "B",
+    "crest_db": 17.3,
+    "valid": true
+   },
+   {
+    "file": "deaths-door_C.wav",
+    "seconds": 1.0,
+    "rms_db": -22.5,
+    "peak_db": -6.0,
+    "brightness_hz": 54,
+    "attack_s": 0.01,
+    "decay_s": 0.27,
+    "variant": "C",
+    "crest_db": 16.5,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "survived",
+  "name": "버텼다",
+  "asked": 0.7,
+  "rule": "crispest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "survived_A.wav",
+    "seconds": 0.68,
+    "rms_db": -20.8,
+    "peak_db": -6.0,
+    "brightness_hz": 2123,
+    "attack_s": 0.2,
+    "decay_s": 0.19,
+    "variant": "A",
+    "crest_db": 14.8,
+    "valid": true
+   },
+   {
+    "file": "survived_B.wav",
+    "seconds": 0.68,
+    "rms_db": -24.4,
+    "peak_db": -6.0,
+    "brightness_hz": 2272,
+    "attack_s": 0.04,
+    "decay_s": 0.17,
+    "variant": "B",
+    "crest_db": 18.4,
+    "valid": true
+   },
+   {
+    "file": "survived_C.wav",
+    "seconds": 0.68,
+    "rms_db": -21.4,
+    "peak_db": -6.0,
+    "brightness_hz": 2344,
+    "attack_s": 0.0,
+    "decay_s": 0.25,
+    "variant": "C",
+    "crest_db": 15.4,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "enemy-down",
+  "name": "적의 쓰러짐",
+  "asked": 1.0,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "enemy-down_A.wav",
+    "seconds": 1.0,
+    "rms_db": -26.2,
+    "peak_db": -6.0,
+    "brightness_hz": 1478,
+    "attack_s": 0.02,
+    "decay_s": 0.2,
+    "variant": "A",
+    "crest_db": 20.2,
+    "valid": true
+   },
+   {
+    "file": "enemy-down_B.wav",
+    "seconds": 1.0,
+    "rms_db": -27.9,
+    "peak_db": -6.0,
+    "brightness_hz": 1247,
+    "attack_s": 0.14,
+    "decay_s": 0.26,
+    "variant": "B",
+    "crest_db": 21.9,
+    "valid": true
+   },
+   {
+    "file": "enemy-down_C.wav",
+    "seconds": 1.0,
+    "rms_db": -30.9,
+    "peak_db": -6.0,
+    "brightness_hz": 2190,
+    "attack_s": 0.06,
+    "decay_s": 0.41,
+    "variant": "C",
+    "crest_db": 24.9,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "kill-moment",
+  "name": "결정타",
+  "asked": 1.0,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "kill-moment_A.wav",
+    "seconds": 1.0,
+    "rms_db": -22.5,
+    "peak_db": -6.0,
+    "brightness_hz": 78,
+    "attack_s": 0.07,
+    "decay_s": 0.32,
+    "variant": "A",
+    "crest_db": 16.5,
+    "valid": true
+   },
+   {
+    "file": "kill-moment_B.wav",
+    "seconds": 1.0,
+    "rms_db": -21.7,
+    "peak_db": -6.0,
+    "brightness_hz": 99,
+    "attack_s": 0.06,
+    "decay_s": 0.22,
+    "variant": "B",
+    "crest_db": 15.7,
+    "valid": true
+   },
+   {
+    "file": "kill-moment_C.wav",
+    "seconds": 1.0,
+    "rms_db": -20.6,
+    "peak_db": -6.0,
+    "brightness_hz": 40,
+    "attack_s": 0.01,
+    "decay_s": 0.34,
+    "variant": "C",
+    "crest_db": 14.6,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "mercenary-death",
+  "name": "용병의 죽음",
+  "asked": 2.0,
+  "rule": "darkest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "mercenary-death_A.wav",
+    "seconds": 1.545,
+    "rms_db": -21.5,
+    "peak_db": -6.0,
+    "brightness_hz": 629,
+    "attack_s": 0.09,
+    "decay_s": 0.41,
+    "variant": "A",
+    "crest_db": 15.5,
+    "valid": true
+   },
+   {
+    "file": "mercenary-death_B.wav",
+    "seconds": 1.529,
+    "rms_db": -21.5,
+    "peak_db": -6.0,
+    "brightness_hz": 1121,
+    "attack_s": 0.15,
+    "decay_s": 0.47,
+    "variant": "B",
+    "crest_db": 15.5,
+    "valid": true
+   },
+   {
+    "file": "mercenary-death_C.wav",
+    "seconds": 1.779,
+    "rms_db": -22.8,
+    "peak_db": -6.0,
+    "brightness_hz": 864,
+    "attack_s": 0.05,
+    "decay_s": 0.23,
+    "variant": "C",
+    "crest_db": 16.8,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "potion",
+  "name": "포션",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "potion_A.wav",
+    "seconds": 0.429,
+    "rms_db": -30.2,
+    "peak_db": -6.0,
+    "brightness_hz": 831,
+    "attack_s": 0.1,
+    "decay_s": 0.04,
+    "variant": "A",
+    "crest_db": 24.2,
+    "valid": true
+   },
+   {
+    "file": "potion_B.wav",
+    "seconds": 0.8,
+    "rms_db": -27.6,
+    "peak_db": -6.0,
+    "brightness_hz": 459,
+    "attack_s": 0.0,
+    "decay_s": 0.1,
+    "variant": "B",
+    "crest_db": 21.6,
+    "valid": true
+   },
+   {
+    "file": "potion_C.wav",
+    "seconds": 0.442,
+    "rms_db": -30.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1125,
+    "attack_s": 0.29,
+    "decay_s": 0.03,
+    "variant": "C",
+    "crest_db": 24.8,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "retreat",
+  "name": "후퇴 성공",
+  "asked": 1.0,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "retreat_A.wav",
+    "seconds": 0.849,
+    "rms_db": -28.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1034,
+    "attack_s": 0.13,
+    "decay_s": 0.16,
+    "variant": "A",
+    "crest_db": 22.8,
+    "valid": true
+   },
+   {
+    "file": "retreat_B.wav",
+    "seconds": 1.0,
+    "rms_db": -26.4,
+    "peak_db": -6.0,
+    "brightness_hz": 1228,
+    "attack_s": 0.03,
+    "decay_s": 0.39,
+    "variant": "B",
+    "crest_db": 20.4,
+    "valid": true
+   },
+   {
+    "file": "retreat_C.wav",
+    "seconds": 1.0,
+    "rms_db": -26.7,
+    "peak_db": -6.0,
+    "brightness_hz": 771,
+    "attack_s": 0.03,
+    "decay_s": 0.35,
+    "variant": "C",
+    "crest_db": 20.7,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "retreat-failed",
+  "name": "후퇴 실패",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "retreat-failed_A.wav",
+    "seconds": 0.579,
+    "rms_db": -25.2,
+    "peak_db": -6.0,
+    "brightness_hz": 619,
+    "attack_s": 0.09,
+    "decay_s": 0.06,
+    "variant": "A",
+    "crest_db": 19.2,
+    "valid": true
+   },
+   {
+    "file": "retreat-failed_B.wav",
+    "seconds": 0.61,
+    "rms_db": -26.5,
+    "peak_db": -6.0,
+    "brightness_hz": 357,
+    "attack_s": 0.07,
+    "decay_s": 0.08,
+    "variant": "B",
+    "crest_db": 20.5,
+    "valid": true
+   },
+   {
+    "file": "retreat-failed_C.wav",
+    "seconds": 0.573,
+    "rms_db": -28.5,
+    "peak_db": -6.0,
+    "brightness_hz": 422,
+    "attack_s": 0.01,
+    "decay_s": 0.18,
+    "variant": "C",
+    "crest_db": 22.5,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "candle-out",
+  "name": "양초가 꺼짐",
+  "asked": 1.2,
+  "rule": "darkest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "candle-out_A.wav",
+    "seconds": 1.2,
+    "rms_db": -21.8,
+    "peak_db": -6.0,
+    "brightness_hz": 3521,
+    "attack_s": 0.18,
+    "decay_s": 0.69,
+    "variant": "A",
+    "crest_db": 15.8,
+    "valid": true
+   },
+   {
+    "file": "candle-out_B.wav",
+    "seconds": 1.2,
+    "rms_db": -23.2,
+    "peak_db": -6.0,
+    "brightness_hz": 3413,
+    "attack_s": 0.11,
+    "decay_s": 0.4,
+    "variant": "B",
+    "crest_db": 17.2,
+    "valid": true
+   },
+   {
+    "file": "candle-out_C.wav",
+    "seconds": 1.185,
+    "rms_db": -20.7,
+    "peak_db": -6.0,
+    "brightness_hz": 3444,
+    "attack_s": 0.23,
+    "decay_s": 0.64,
+    "variant": "C",
+    "crest_db": 14.7,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "thunder",
+  "name": "번개",
+  "asked": 1.5,
+  "rule": "darkest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "thunder_A.wav",
+    "seconds": 1.48,
+    "rms_db": -28.8,
+    "peak_db": -6.0,
+    "brightness_hz": 1505,
+    "attack_s": 0.02,
+    "decay_s": 0.14,
+    "variant": "A",
+    "crest_db": 22.8,
+    "valid": true
+   },
+   {
+    "file": "thunder_B.wav",
+    "seconds": 1.225,
+    "rms_db": -18.6,
+    "peak_db": -6.0,
+    "brightness_hz": 460,
+    "attack_s": 0.16,
+    "decay_s": 0.45,
+    "variant": "B",
+    "crest_db": 12.6,
+    "valid": true
+   },
+   {
+    "file": "thunder_C.wav",
+    "seconds": 1.48,
+    "rms_db": -17.9,
+    "peak_db": -6.0,
+    "brightness_hz": 801,
+    "attack_s": 0.11,
+    "decay_s": 0.27,
+    "variant": "C",
+    "crest_db": 11.9,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "victory",
+  "name": "승리",
+  "asked": 2.0,
+  "rule": "darkest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "victory_A.wav",
+    "seconds": 2.0,
+    "rms_db": -26.9,
+    "peak_db": -6.0,
+    "brightness_hz": 1070,
+    "attack_s": 0.0,
+    "decay_s": 0.68,
+    "variant": "A",
+    "crest_db": 20.9,
+    "valid": true
+   },
+   {
+    "file": "victory_B.wav",
+    "seconds": 1.822,
+    "rms_db": -21.6,
+    "peak_db": -6.0,
+    "brightness_hz": 364,
+    "attack_s": 0.05,
+    "decay_s": 0.8,
+    "variant": "B",
+    "crest_db": 15.6,
+    "valid": true
+   },
+   {
+    "file": "victory_C.wav",
+    "seconds": 1.849,
+    "rms_db": -26.1,
+    "peak_db": -6.0,
+    "brightness_hz": 250,
+    "attack_s": 0.01,
+    "decay_s": 0.58,
+    "variant": "C",
+    "crest_db": 20.1,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "defeat",
+  "name": "패배",
+  "asked": 2.0,
+  "rule": "darkest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "defeat_A.wav",
+    "seconds": 2.0,
+    "rms_db": -20.0,
+    "peak_db": -6.0,
+    "brightness_hz": 283,
+    "attack_s": 0.34,
+    "decay_s": 0.82,
+    "variant": "A",
+    "crest_db": 14.0,
+    "valid": true
+   },
+   {
+    "file": "defeat_B.wav",
+    "seconds": 2.0,
+    "rms_db": -20.8,
+    "peak_db": -6.0,
+    "brightness_hz": 208,
+    "attack_s": 0.08,
+    "decay_s": 1.09,
+    "variant": "B",
+    "crest_db": 14.8,
+    "valid": true
+   },
+   {
+    "file": "defeat_C.wav",
+    "seconds": 2.0,
+    "rms_db": -16.4,
+    "peak_db": -6.0,
+    "brightness_hz": 144,
+    "attack_s": 0.48,
+    "decay_s": 0.82,
+    "variant": "C",
+    "crest_db": 10.4,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "button",
+  "name": "버튼",
+  "asked": 0.5,
+  "rule": "crispest",
+  "pick": "A",
+  "candidates": [
+   {
+    "file": "button_A.wav",
+    "seconds": 0.288,
+    "rms_db": -29.9,
+    "peak_db": -6.0,
+    "brightness_hz": 6650,
+    "attack_s": 0.02,
+    "decay_s": 0.04,
+    "variant": "A",
+    "crest_db": 23.9,
+    "valid": true
+   },
+   {
+    "file": "button_B.wav",
+    "seconds": 0.279,
+    "rms_db": -19.1,
+    "peak_db": -6.0,
+    "brightness_hz": 1269,
+    "attack_s": 0.03,
+    "decay_s": 0.22,
+    "variant": "B",
+    "crest_db": 13.1,
+    "valid": true
+   },
+   {
+    "file": "button_C.wav",
+    "seconds": 0.44,
+    "rms_db": -29.7,
+    "peak_db": -6.0,
+    "brightness_hz": 7633,
+    "attack_s": 0.08,
+    "decay_s": 0.03,
+    "variant": "C",
+    "crest_db": 23.7,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "item-place",
+  "name": "아이템 넣기",
+  "asked": 0.6,
+  "rule": "crispest",
+  "pick": "B",
+  "candidates": [
+   {
+    "file": "item-place_A.wav",
+    "seconds": 0.479,
+    "rms_db": -22.6,
+    "peak_db": -6.0,
+    "brightness_hz": 1616,
+    "attack_s": 0.03,
+    "decay_s": 0.09,
+    "variant": "A",
+    "crest_db": 16.6,
+    "valid": true
+   },
+   {
+    "file": "item-place_B.wav",
+    "seconds": 0.6,
+    "rms_db": -29.6,
+    "peak_db": -6.0,
+    "brightness_hz": 1980,
+    "attack_s": 0.0,
+    "decay_s": 0.14,
+    "variant": "B",
+    "crest_db": 23.6,
+    "valid": true
+   },
+   {
+    "file": "item-place_C.wav",
+    "seconds": 0.444,
+    "rms_db": -27.5,
+    "peak_db": -6.0,
+    "brightness_hz": 1185,
+    "attack_s": 0.01,
+    "decay_s": 0.19,
+    "variant": "C",
+    "crest_db": 21.5,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "node-move",
+  "name": "노드 이동",
+  "asked": 0.8,
+  "rule": "crispest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "node-move_A.wav",
+    "seconds": 0.8,
+    "rms_db": -28.5,
+    "peak_db": -6.0,
+    "brightness_hz": 1175,
+    "attack_s": 0.13,
+    "decay_s": 0.18,
+    "variant": "A",
+    "crest_db": 22.5,
+    "valid": true
+   },
+   {
+    "file": "node-move_B.wav",
+    "seconds": 0.8,
+    "rms_db": -28.9,
+    "peak_db": -6.0,
+    "brightness_hz": 1148,
+    "attack_s": 0.0,
+    "decay_s": 0.35,
+    "variant": "B",
+    "crest_db": 22.9,
+    "valid": true
+   },
+   {
+    "file": "node-move_C.wav",
+    "seconds": 0.8,
+    "rms_db": -29.0,
+    "peak_db": -6.0,
+    "brightness_hz": 1597,
+    "attack_s": 0.03,
+    "decay_s": 0.29,
+    "variant": "C",
+    "crest_db": 23.0,
+    "valid": true
+   }
+  ]
+ },
+ {
+  "key": "depart",
+  "name": "원정 출발",
+  "asked": 1.5,
+  "rule": "darkest",
+  "pick": "C",
+  "candidates": [
+   {
+    "file": "depart_A.wav",
+    "seconds": 1.146,
+    "rms_db": -26.7,
+    "peak_db": -6.0,
+    "brightness_hz": 401,
+    "attack_s": 0.07,
+    "decay_s": 0.44,
+    "variant": "A",
+    "crest_db": 20.7,
+    "valid": true
+   },
+   {
+    "file": "depart_B.wav",
+    "seconds": 1.48,
+    "rms_db": -28.4,
+    "peak_db": -6.0,
+    "brightness_hz": 740,
+    "attack_s": 0.06,
+    "decay_s": 0.68,
+    "variant": "B",
+    "crest_db": 22.4,
+    "valid": true
+   },
+   {
+    "file": "depart_C.wav",
+    "seconds": 1.229,
+    "rms_db": -24.4,
+    "peak_db": -6.0,
+    "brightness_hz": 333,
+    "attack_s": 0.17,
+    "decay_s": 0.44,
+    "variant": "C",
+    "crest_db": 18.4,
+    "valid": true
+   }
+  ]
+ }
+]

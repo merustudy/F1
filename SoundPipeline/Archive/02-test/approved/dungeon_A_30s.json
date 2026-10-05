@@ -1,0 +1,50 @@
+{
+  "key": "dungeon",
+  "name": "던전",
+  "variant": "A",
+  "plan": {
+    "chunks": [
+      {
+        "text": "[Abandoned mine]",
+        "duration_ms": 30000,
+        "positive_styles": [
+          "92 BPM",
+          "creeping minor groove",
+          "plucked double bass",
+          "low clarinet and bassoon counter line",
+          "dry hand percussion and wooden clicks",
+          "mischievous but ominous",
+          "steady mid energy",
+          "instrumental only",
+          "small dark chamber folk ensemble",
+          "minor key",
+          "loopable steady groove",
+          "no build-up",
+          "no ending",
+          "dry intimate room production"
+        ],
+        "negative_styles": [
+          "vocals",
+          "singing",
+          "choir",
+          "cheerful",
+          "major key",
+          "bright and bouncy",
+          "children's toy music",
+          "ukulele",
+          "glockenspiel",
+          "epic orchestral swell",
+          "big cinematic drums",
+          "electronic dance",
+          "synth lead",
+          "8-bit chiptune",
+          "fade out"
+        ],
+        "context_adherence": "high"
+      }
+    ]
+  },
+  "seconds": 30,
+  "model": "music_v2_5",
+  "time": "2026-10-05T18:57:01+09:00"
+}
