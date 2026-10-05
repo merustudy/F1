@@ -17,7 +17,8 @@ namespace F1.UI
     /// light fades and the whole stage takes the darkness that lay beyond its reach.
     ///
     /// Presentation only: the share comes from the battle time, nothing here changes the battle, and
-    /// the flicker and the fading run on real time like a figure's breathing.
+    /// the flicker and the fading run on the frame clock (Time.time) like a figure's breathing, so a
+    /// kill moment slows them with the rest of the stage.
     /// </summary>
     public sealed class CandleView : MonoBehaviour
     {

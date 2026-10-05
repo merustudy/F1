@@ -11,7 +11,7 @@ namespace F1.UI
     /// never stands frozen, and it can flash a tint for a moment and be moved as a whole for a
     /// lunge, a recoil or a walk; none of that changes where the place is laid out.
     ///
-    /// For a moment it can show a pose instead of the figure (a mercenary's attack or hit pose,
+    /// For a moment it can show a pose instead of the figure (a unit's attack or hit pose,
     /// Docs/Design/10 §5). A pose is drawn on a canvas three figure canvases wide and an eighth
     /// deeper, with the figure canvas in the middle and its floor line where the figure's is
     /// (ArtPipeline: Docs/Architecture/13), so the art's place widens to that and stands on the

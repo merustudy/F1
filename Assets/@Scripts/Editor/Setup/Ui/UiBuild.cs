@@ -387,18 +387,6 @@ namespace F1.Editor.Setup
             return group;
         }
 
-        /// <summary>Arranges children in rows of fixed-size cells.</summary>
-        public static GridLayoutGroup Grid(RectTransform rect, Vector2 cellSize, float spacing, int columns)
-        {
-            var group = rect.gameObject.AddComponent<GridLayoutGroup>();
-            group.cellSize = cellSize;
-            group.spacing = new Vector2(spacing, spacing);
-            group.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            group.constraintCount = columns;
-            group.childAlignment = TextAnchor.UpperLeft;
-            return group;
-        }
-
         // ---- Scrolling -----------------------------------------------------------------------
 
         /// <summary>

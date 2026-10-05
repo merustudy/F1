@@ -24,7 +24,6 @@ namespace F1.UI
         public static readonly Color Good = Rgb(0x58, 0xB3, 0x68);
         public static readonly Color Danger = Rgb(0xC0, 0x39, 0x2B);
         public static readonly Color Party = Rgb(0x2C, 0x4A, 0x70);
-        public static readonly Color PartyTarget = Rgb(0x3F, 0x74, 0xB0);
         public static readonly Color Enemy = Rgb(0x70, 0x35, 0x2C);
         public static readonly Color Shield = Rgb(0x8F, 0xD3, 0xF4);
         public static readonly Color Burn = Rgb(0xF3, 0x9C, 0x12);

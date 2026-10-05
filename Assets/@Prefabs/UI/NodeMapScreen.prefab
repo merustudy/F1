@@ -710,7 +710,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 5592254370659490361}
   _figureView: {fileID: 4615915358625953565}
-  _card: {fileID: 2305029621894303610}
+  _info: {fileID: 2305029621894303610}
   _name: {fileID: 7538501741077783982}
   _job: {fileID: 4965771946845274725}
   _hp: {fileID: 632372974870275702}
@@ -2765,7 +2765,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 5265240343100809447}
   _figureView: {fileID: 3989298429964909954}
-  _card: {fileID: 1030135059452890218}
+  _info: {fileID: 1030135059452890218}
   _name: {fileID: 6838333180937582556}
   _job: {fileID: 7299129109034188672}
   _hp: {fileID: 8983889653606997098}
@@ -6481,7 +6481,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 8538172369870474043}
   _figureView: {fileID: 552368119901235691}
-  _card: {fileID: 8899889034616579287}
+  _info: {fileID: 8899889034616579287}
   _name: {fileID: 7408894055955505951}
   _job: {fileID: 6385927828291977006}
   _hp: {fileID: 3633015403283398329}
@@ -11358,7 +11358,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 5861586483375701121}
   _figureView: {fileID: 1831570698596223436}
-  _card: {fileID: 7037751373841718349}
+  _info: {fileID: 7037751373841718349}
   _name: {fileID: 5741657263897746907}
   _job: {fileID: 8828628254942089416}
   _hp: {fileID: 1539547273544698642}

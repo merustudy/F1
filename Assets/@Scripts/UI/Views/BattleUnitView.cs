@@ -20,7 +20,7 @@ namespace F1.UI
     ///
     /// The presenter moves it for a moment when something happens: it lunges when its weapon
     /// fires, recoils and flashes when it is hit, and walks into its new column when it advances.
-    /// A mercenary has an attack pose and a hit pose drawn after its figure (Docs/Design/10 §5):
+    /// A unit has an attack pose and a hit pose drawn after its figure (Docs/Design/10 §5; a monster's since round 28):
     /// the attack pose shows while a weapon's lunge plays, the hit pose while a blow's recoil plays,
     /// each 0.05 s more, then the figure again; the later of the two wins.
     /// A lunge and a recoil move the figure (and the shadow under it) only: the marks stay in the

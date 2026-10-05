@@ -48,7 +48,7 @@ namespace F1.Editor.Setup
         const float BattleBackgroundHeight = BattleBackgroundWidth * 1536f / 2304f;
         const float BattleBackgroundFloor = 0.57f;
 
-        const float BattleMarksTop = BattleFigureHeight + PlateGap;
+        const float BattleMarksTop = BattleFigureHeight + MarksGap;
 
         /// <summary>A unit on the stage: the figure and the marks under its feet.</summary>
         const float BattleUnitHeight = BattleMarksTop + MarksHeight;

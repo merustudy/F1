@@ -12,7 +12,7 @@ namespace F1.UI
 {
     /// <summary>
     /// The party between battles, in the battle screen's shape: on the stage, one column per row
-    /// (row 1 on the right) with the figure, the plate and the move buttons under it, placed where
+    /// (row 1 on the right) with the figure, the marks and the move buttons under it, placed where
     /// the battle screen places its party columns (<see cref="FieldLayout"/>); in the board panel
     /// under the stage, each row's board stacked in the panel column under its figure, as in
     /// battle; the potions in the strip above the right half; and the inventory as a popup over
@@ -62,9 +62,6 @@ namespace F1.UI
 
         /// <summary>Whether the inventory popup is open.</summary>
         public bool InventoryOpen { get; private set; }
-
-        /// <summary>The columns by row: index 0 is row 1.</summary>
-        public IReadOnlyList<PartyColumnView> Columns => _columns;
 
         /// <summary>The entries of the inventory popup in inventory order; the ones beyond the inventory are hidden.</summary>
         public IReadOnlyList<InventoryEntryView> InventoryEntries => _entries;

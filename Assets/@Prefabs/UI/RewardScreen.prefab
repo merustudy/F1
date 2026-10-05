@@ -2224,7 +2224,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 4956341269165209627}
   _figureView: {fileID: 5438143448557776199}
-  _card: {fileID: 8809267193579444941}
+  _info: {fileID: 8809267193579444941}
   _name: {fileID: 2545487176931859224}
   _job: {fileID: 1275916759143886109}
   _hp: {fileID: 836842863464975469}
@@ -4905,7 +4905,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 3911151019015921173}
   _figureView: {fileID: 6739799228042783207}
-  _card: {fileID: 1164204951024928664}
+  _info: {fileID: 1164204951024928664}
   _name: {fileID: 3387076173183609214}
   _job: {fileID: 5666354604296808520}
   _hp: {fileID: 2088044954085751740}
@@ -15642,7 +15642,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 1783194587942556906}
   _figureView: {fileID: 5653134930978462989}
-  _card: {fileID: 3670045284952024010}
+  _info: {fileID: 3670045284952024010}
   _name: {fileID: 8827596750677648260}
   _job: {fileID: 4058256505820766357}
   _hp: {fileID: 1671416703366790642}
@@ -16581,7 +16581,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: F1.Runtime::F1.UI.PartyColumnView
   _figure: {fileID: 7461658648993385779}
   _figureView: {fileID: 8940844645618825851}
-  _card: {fileID: 3130157134418929909}
+  _info: {fileID: 3130157134418929909}
   _name: {fileID: 4042394050360937367}
   _job: {fileID: 3361980301317424856}
   _hp: {fileID: 3096663655198675954}

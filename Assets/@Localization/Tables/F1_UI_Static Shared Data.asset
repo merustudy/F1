@@ -993,7 +993,7 @@ MonoBehaviour:
     - rid: 636489279218909217
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: On the HP bar of a plate. {0} = HP. {1} = max HP.
+        m_CommentText: On the HP bar under a unit's feet. {0} = HP. {1} = max HP.
     - rid: 636489279218909218
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1089,7 +1089,7 @@ MonoBehaviour:
     - rid: 636489279218909248
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: On the HP bar of a plate. {0} = HP. {1} = max HP.
+        m_CommentText: On the HP bar under a unit's feet. {0} = HP. {1} = max HP.
     - rid: 636489279218909249
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:

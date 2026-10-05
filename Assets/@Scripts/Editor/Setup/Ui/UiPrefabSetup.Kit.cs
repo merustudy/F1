@@ -14,7 +14,7 @@ namespace F1.Editor.Setup
         /// piece shrinks the frame's border further (borderScale below 1).
         ///
         /// The marks under a unit's feet (2026-10-05 round 29, Slay the Spire's way): no plate behind
-        /// them, the stage shows through. From the top of their box, PlateGap under the feet: the HP bar
+        /// them, the stage shows through. From the top of their box, MarksGap under the feet: the HP bar
         /// with its numbers on it (MarksBarInset in from each side of the column: 160 in a column of
         /// 180), then the state line. The badge at the bar's left end reaches out of the box.
         /// </summary>
@@ -71,7 +71,7 @@ namespace F1.Editor.Setup
         const float GradeBadgeInset = 5f;
 
         /// <summary>The space between a figure and its marks, and between the marks and what stands under them.</summary>
-        const float PlateGap = 6f;
+        const float MarksGap = 6f;
 
         /// <summary>A unit's name shrinks down to this size when it does not fit the head of its board.</summary>
         const float UnitNameMinSize = 10f;

@@ -20,7 +20,7 @@ namespace F1.UI
     {
         [SerializeField] GameObject _figure;
         [SerializeField] FigureView _figureView;
-        [SerializeField] GameObject _card;
+        [SerializeField] GameObject _info;
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _job;
         [SerializeField] TMP_Text _hp;
@@ -62,7 +62,7 @@ namespace F1.UI
         {
             Member = -1;
             _figure.SetActive(false);
-            _card.SetActive(false);
+            _info.SetActive(false);
             _board.SetActive(false);
         }
 
@@ -74,7 +74,7 @@ namespace F1.UI
             Member = memberIndex;
             _figure.SetActive(true);
             _figureView.Show(art.OfJob(member.JobId));
-            _card.SetActive(true);
+            _info.SetActive(true);
             _name.text = UiText.Mercenary(member.MercenaryId);
             _job.text = UiText.Job(member.JobId);
             _hp.text = UiStrings.Get(UiKeys.Board.Hp, member.Hp, member.MaxHp);

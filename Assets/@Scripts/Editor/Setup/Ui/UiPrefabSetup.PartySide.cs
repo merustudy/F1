@@ -44,8 +44,8 @@ namespace F1.Editor.Setup
         /// move buttons, each a gap under the one above. The marks are lower than the plates they replaced (2026-10-05 round 29),
         /// and the column stands on the panel, so its figures came 46 down with them.
         /// </summary>
-        const float PartyMarksTop = BattleFigureHeight + PlateGap;
-        const float PartyMoveTop = PartyMarksTop + MarksHeight + PlateGap;
+        const float PartyMarksTop = BattleFigureHeight + MarksGap;
+        const float PartyMoveTop = PartyMarksTop + MarksHeight + MarksGap;
         const float PartyColumnHeight = PartyMoveTop + PartyMoveHeight;
 
         /// <summary>
@@ -163,7 +163,7 @@ namespace F1.Editor.Setup
             var view = column.gameObject.AddComponent<PartyColumnView>();
             UiBuild.SetReference(view, "_figure", figure.gameObject);
             UiBuild.SetReference(view, "_figureView", figureView);
-            UiBuild.SetReference(view, "_card", info.gameObject);
+            UiBuild.SetReference(view, "_info", info.gameObject);
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReference(view, "_hp", marks.Hp);
             UiBuild.SetReference(view, "_hpBar", marks.HpBar);

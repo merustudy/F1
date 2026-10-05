@@ -430,7 +430,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Battle_WhenARowEmpties_TheCardsBehindMoveForward_AndTheDeadAreNamed()
+        public IEnumerator Battle_WhenARowEmpties_TheUnitsBehindMoveForward_AndTheDeadAreNamed()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return UiTestUtil.ReachAnEnemyAdvanceInTheBossBattle();
@@ -443,7 +443,7 @@ namespace F1.Tests
             Assert.IsNotEmpty(dead);
             Assert.IsNotEmpty(living);
 
-            // Only the living have a card, one per column, and each stands in the column of the row the engine says.
+            // Only the living stand on the stage, one per column, and each stands in the column of the row the engine says.
             var shown = new System.Collections.Generic.List<BattleUnitView>();
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {

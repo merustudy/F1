@@ -67,11 +67,6 @@ namespace F1.UI
             }
         }
 
-        public static string Row(int row)
-        {
-            return UiStrings.Get(RowKey(row));
-        }
-
         /// <summary>Milliseconds as seconds with one decimal, for example "2.9".</summary>
         public static string Seconds(int milliseconds)
         {
