@@ -95,7 +95,7 @@ Snapshot: 2026-10-03 (9단계는 완료: 그림 열하나를 게임에 연결했
     Builder `PartySide.cs`(무대 262, 패널·줄·설명 줄·"인벤토리로", 팝업 높이 640), `NodeMap.cs`(맵 630, 노드 정보와 버튼을 패널로), `Reward.cs`(안내와 버튼을 패널로).
     Test의 버튼 경로가 `Frame/BoardPanel/...`로 바뀌었다(Enter, InventoryToggle, Skip, RewardToInventory). 그림 Test에 파티 줄의 얼굴.
   - 스크린샷 34장(`Tools/screenshots.sh`): 전투(`_05`, `_15`, `_18`)의 패널이 목업과 같다. 둘은 `Archive/07-battle-panel/game/`에 두었다.
-- 누계: 호출 137회, 약 $3.37(상한 $10). (연출 3차까지 59회 $1.41, Round 11 컨셉 시험 23회 $0.57, Round 12 그림체 전환 55회 $1.39. 전환의 기록은 `active/a-art-restyle.md`)
+- 누계: 호출 137회, 약 $3.37(상한 $10). (연출 3차까지 59회 $1.41, Round 11 컨셉 시험 23회 $0.57, Round 12 그림체 전환 55회 $1.39. 전환의 기록은 `completed/a-art-restyle.md`)
 
 ## Done
 

@@ -3,8 +3,9 @@
 단계, 결정 관문, 진행 상태를 소유한다. 규칙은 [CLAUDE.md](../CLAUDE.md)가, 상세는 Owner 문서가 소유한다.
 이 문서는 Authority가 아니다.
 
-- 갱신: 2026-10-05. 1~9단계는 끝났다. 그 뒤 Slice A 개정 1~6, 전투 UI 개정(보드 패널, 세로 열 V안), 그림·UI 라운드(9단계 뒤 ~ Round 31)를 했다.
-  다음 단계는 10(소리)이고 G11(소리 방향)을 먼저 정한다. 일괄 승인과 권장안으로 정한 것은 "사후 검토 대기" 표가 모은다.
+- 갱신: 2026-10-06. 1~10단계가 끝났고 **Slice A를 완료했다**(사용자 "Slice A는 여기서 완료 및 세션 정리"). 그사이 Slice A 개정 1~6, 전투 UI 개정(보드 패널, 세로 열 V안),
+  그림·UI 라운드(9단계 뒤 ~ Round 31), 10단계(소리: 효과음 스물여섯, 곡 셋)를 했다. 다음은 11단계: **새 Slice B(전투 시스템 완성)의 범위 문서**.
+  처음의 Slice B 후보(Architecture/09의 Deferred)는 Slice C로 미뤘다. 일괄 승인과 권장안으로 정한 것은 "사후 검토 대기" 표가 모은다.
 - 이 문서는 2026-10-05에 줄였다(사용자 "권장안대로"). 날짜마다의 갱신 기록과 라운드마다의 절(지시·목업·판정·구현·검증·호출)은
   Git(커밋 `dcfaff4`의 이 파일)과 각 라운드의 `ArtPipeline/Archive/<폴더>/README.md`에 있다.
 
@@ -14,11 +15,13 @@
 | 10-02 | 9단계(그림 파이프라인, 직업 여섯과 광산의 몬스터 다섯), G9 잠정, 광산 배경과 캐릭터 간격(B안), 전투 UI의 틀 |
 | 10-03 | 아이템 아이콘 스물한 개, 그림체 시험(06 보류, 11 실패), 전투 보드 패널(A안), 개정 5, 연출 라운드 1~3차, 세로 열(V안) |
 | 10-04 | 그림체 전환(Round 12)과 일괄 승인, UI 꾸미기(13)·디아블로 컨셉(14), 개정 6(최대 7칸), Round 16~25(촛불 빛, 외곽선, 쿨다운 빛, 공격·피격 모션과 자세, 표정, 무덤, 성기사의 머리, 아이템 분류) |
-| 10-05 | Round 26~30(몬스터의 자세, 주술사의 무기, 발밑 표시, 결정타), 목업 MP4를 Git에서 뺌, 용병 1000명의 비용·용량 검토, 그림의 압축(Round 31), 리팩토링 검토와 정리(R1)·얼굴 빼기, 문서 줄이기 |
+| 10-05 | Round 26~30(몬스터의 자세, 주술사의 무기, 발밑 표시, 결정타), 목업 MP4를 Git에서 뺌, 용병 1000명의 비용·용량 검토, 그림의 압축(Round 31), 리팩토링 검토와 정리(R1)·얼굴 빼기, 문서 줄이기, 10단계(소리: G11과 설계 승인, 음량 버튼 안 2, 시험 라운드, 나머지의 권장 판정, 모두 연결) |
+| 10-06 | Slice A 완료와 세션 정리. 새 Slice B(전투 시스템 완성)의 방향, 처음의 Slice B 후보는 Slice C로 |
 
-- 커밋: 세션 정리마다 주제별로 커밋하고 `origin/feature/slice-a`에 푸시했다. 2026-10-05 세 번째 세션 정리에서 Round 31(`a399dea`, `f04fd9e`, `dcfaff4`)과
-  정리(R1)·얼굴 빼기·문서 줄이기를 올렸다.
+- 커밋: 세션 정리마다 주제별로 커밋하고 `origin/feature/slice-a`에 푸시했다. 2026-10-06 세션 정리에서 10단계(소리)와 Slice A 완료를
+  여섯 커밋(기획, Architecture, 소리 파이프라인, 소리 코드와 Test, 소리 파일과 생성물, Roadmap과 Handoff)으로 올렸다.
 - 유료 호출(그림): 누계 212회, 약 $5.40(상한 $10). 장부 `ArtPipeline/Archive/calls.csv`.
+- 유료 호출(소리): 누계 87회, 추정 약 $1.28(상한 $10). 장부 `SoundPipeline/Archive/calls.csv`.
 
 - 상태 값: 대기 / 진행 / 완료
 - 단계 번호는 고정이다. CLAUDE.md와 대화가 번호로 가리킨다.
@@ -130,6 +133,19 @@ G9를 정한 뒤 9단계의 설계안(Architecture/13)과 결정할 것 다섯 �
   15회, 약 $0.44(상한 $10).
 - 권장안으로 정한 세부는 아래 "사후 검토 대기"에 올렸다.
 
+### 10단계의 승인 (2026-10-05)
+
+G11·10단계의 검토 보고(방향 셋, 도구와 예산, 범위, 음량, 진행 방식)와 설계안(Design/12 【제안】, Architecture/14 초안, 음량 버튼 목업)을 보고 사용자가 답했다:
+"모두 권장안대로". 그 전에 ElevenLabs 계정이 Starter 이상이라고 알렸다(키는 키체인에 있다).
+
+1. G11: A 어두운 카툰. Design/12를 【확정】으로 바꾸고 Architecture/14를 CLAUDE.md에 등록했다.
+2. Slice A의 소리: 효과음 스물여섯(아이템은 분류마다, 용병의 죽음이 가장 무겁다)과 곡 셋(로비, 던전, 보스). Architecture/09의 표현 범위로 옮겼다.
+3. 음량: 음악과 효과음을 따로 켬·작게·끔. 자리는 타이틀의 설정 한 줄(목업 안 2, Architecture/12 "타이틀"). `settings.json` 버전 2(Architecture/07).
+4. 도구와 예산: ElevenLabs(Starter 이상), 상한 $10(구독료 포함). 장부는 `SoundPipeline/Archive/calls.csv`.
+5. 진행: 시험 라운드(효과음 셋 × 후보 셋 9회, 던전 곡 30초 × 셋 3회)를 먼저 하고, 사용자가 들어 보고 판정한 뒤 나머지는 다시 지시를 받아 생성한다.
+
+- 단계 절차의 3(설계 승인)을 위 답으로 대체했다. 권장안으로 정한 세부는 아래 "사후 검토 대기"에 올렸다.
+
 ## 사후 검토 대기 (일괄 승인으로 정한 것)
 
 일괄 승인 범위(3~8단계)와 열 개정에서 권장안으로 정한 결정이다. 하나씩 승인받은 것이 아니므로 사용자가 검토하고 바꿀 수 있다.
@@ -187,7 +203,10 @@ G9를 정한 뒤 9단계의 설계안(Architecture/13)과 결정할 것 다섯 �
 | 목업 MP4를 Git에 올리지 않는 것 (사용자는 "필요 있나, 없다면 … 깃업로드 제외하는 방안 검토"를 지시했다. 정한 것: 올리지 않음, 거르는 범위는 목업 스크립트가 MP4를 만드는 `ArtPipeline/Archive/**/*.mp4`만, `.gitattributes`의 `*.mp4` LFS 줄은 둠, 커밋된 여덟은 지운 것만 커밋하고 이력은 고치지 않음) | `.gitignore`, Architecture/13 "구조", 각 라운드 README "MP4 목업" |
 | 그림의 압축(Round 31)의 세부 (사용자는 원인 확인과 권고 수정안의 구현을 지시했다. 정한 것: 자세만 2의 거듭제곱으로 — 여백 대신 64/63배로 늘려 화면 코드를 그대로 두는 것, 맞추기·리뷰는 2016x1008에서 하고 쓸 때만 늘리는 것, 전신·UI·아이콘·얼굴·포션은 무압축으로 두는 것(전신은 3:4 캔버스라 그림 자리 계산을 바꿔야 한다), 압축을 검사하는 종류는 자세와 배경이고 검사가 실제 Import 형식을 보는 것. 또렷함(Mipmap 끔 등)과 에디터의 품질 단계 Very Low는 따로 판정) | Architecture/13 "후처리 (`pose`)"·"Import 정책", `ArtSetup.ImportPolicy`, `ArtPipeline/Archive/31-texture-compression/README.md` |
 | 리팩토링 검토의 정리(R1)와 얼굴 빼기 (사용자는 "1.2.3. 모두 권장안대로"를 지시했고, 얼굴 빼기는 이유를 들은 뒤 "이대로 두자"로 확인했다. 정한 것: 얼굴을 게임에서 뺀 것 — 그림 열하나, 주소 `face/…`, `ArtAddress.FaceOf`, `JobData`·`EnemyData`의 `Face`, `ExpeditionArt`의 읽어 두기, `ArtSetup`의 `Face` 정책과 검사, 얼굴의 Test 셋. `cutface.py`, `Rosters`의 `FaceDx`·`FaceDy`, Archive의 원본은 남김. R1: 참조 없는 코드 넷(`UiBuild.Grid`, `UiText.Row`, `UiPalette.PartyTarget`, `PartySideView.Columns`) 삭제, 낡은 주석(자세는 몬스터도, 양초는 `Time.time`, 명패), 이름 `PartyColumnView._info`(전 `_card`)·`MarksGap`(전 `PlateGap`)·Test `Battle_WhenARowEmpties_TheUnitsBehindMoveForward_AndTheDeadAreNamed`, 번역 메모 둘) | Architecture/12 "유닛의 그림", 13 "얼굴", Handoff "리팩토링 검토" |
-| 문서 줄이기(2026-10-05)의 세부 (사용자는 "권장안대로"를 지시했다. 정한 것: Roadmap의 날짜별 갱신 기록을 표 하나로, 9단계 뒤 ~ Round 29의 절들을 라운드 표 하나로 (상세는 Git `dcfaff4`의 이 파일과 각 라운드의 Archive README), 사후 검토 대기 표·결정 관문·단계 1~9·개정·승인의 절은 그대로. Handoff는 Workstreams README의 Template과 줄 수(200줄 아래)로, 라운드의 상세는 Archive README와 Git이 가진다) | 이 문서 머리, `Docs/Workstreams/active/a-art-restyle.md` |
+| 문서 줄이기(2026-10-05)의 세부 (사용자는 "권장안대로"를 지시했다. 정한 것: Roadmap의 날짜별 갱신 기록을 표 하나로, 9단계 뒤 ~ Round 29의 절들을 라운드 표 하나로 (상세는 Git `dcfaff4`의 이 파일과 각 라운드의 Archive README), 사후 검토 대기 표·결정 관문·단계 1~9·개정·승인의 절은 그대로. Handoff는 Workstreams README의 Template과 줄 수(200줄 아래)로, 라운드의 상세는 Archive README와 Git이 가진다) | 이 문서 머리, `Docs/Workstreams/completed/a-art-restyle.md` |
+| 10단계 설계의 세부 (사용자는 "모두 권장안대로"를 지시했다. 정한 것: 모든 소리를 App Scope로 Boot(`BOOT-13`)에서 읽는 것, 소리 목록을 CSV가 아니라 코드(`SoundCatalog`)에 두는 것, 아이템 소리를 분류마다 하나로(기타 분류와 거절 소리는 없음), 겹침 60ms와 효과음 AudioSource 여덟, 높낮이 ±3%, 곡 바꾸기 0.5초, 음량 100·30·0과 설정 버전 2(옛 파일은 100으로), `SoundPipeline` 폴더와 장부, 거절된 후보를 Git에 올리지 않는 것, Import 정책(효과음 모노·ADPCM, 배경음 스트리밍·Vorbis 70)) | Design/12, Architecture/14, 07 "Schema Version", 12 "타이틀" |
+| 10단계 첫 연결의 세부 (사용자는 "모두 a로 구현"을 지시했다. 정한 것: 곡을 다시 만들지 않고 승인한 30초 후보를 악구(4마디) 단위로 잘라 반복(8마디 20.87초), 곡을 mp3가 아니라 wav로(Unity가 한 번만 압축), 음악의 기본 크기 0.6배, 모든 버튼에 클릭(출발·노드에 들어가기·두 "인벤토리로"는 자기 소리만), 화면이 청할 수 있는 소리 스물여섯을 모두 연결하고 목록에 없는 것은 조용히, 결정타의 일격은 피격 소리 없이 결정타 소리만, 화상·폭풍의 피해는 소리 없음, 이어하기로 연 폭풍 중의 전투는 양초 소리 없음, 승리·패배는 결과 창이 뜰 때(후퇴로 끝나면 없음), 결정타 분리(R2·R3)는 이번에 하지 않음: 소리가 `BattleScreen`의 결정타 코드를 건드리지 않았다) | Architecture/14, 12 "타이틀", `SoundPipeline/Archive/02-test/README.md` |
+| 10단계 나머지 소리의 권장 판정(Round 03, 사용자는 "남은 것도 생성후 알아서 권장안 연결"을 지시했다. 정한 것: 효과음 스물셋과 로비·보스 곡의 후보를 잴 수 있는 기준으로 고름(규칙과 수치는 `03-rest/README.md`), 곡 후보를 60초로, 반복은 닮은 정도가 0.02 안이면 더 긴 것, 로비 B·보스 B를 8마디로, 파티 쪽 칸과 보상 카드를 조용히 하고 누른 결과대로 넣기나 클릭 한 소리) | Architecture/14 "승인 라운드", `SoundPipeline/Archive/03-rest/README.md` |
 | 연출 라운드의 세부 (300ms보다 오래된 이벤트는 재생하지 않음, 큰 피해의 기준 20%, 숫자의 크기·속도·쌓임, 돌진 26·밀림 12·걷기 0.35초, 숨쉬기 2%, HP 잔상의 지연과 속도, 폭풍의 어두워짐 10초와 최대 0.5, 시계의 자리와 크기, 자막 세 줄, 헤더의 던전·층, 틀의 타일과 `tint` 변형, 다이얼의 84% 상자, 생성한 틀 여섯의 모습) | Architecture/12 "연출"·"UI의 그림", 13, Design/10 §5, `ArtPipeline/Archive/09-battle-ui-feel/README.md` |
 
 화면은 `Tools/screenshots.sh`로 PNG를 뽑아 볼 수 있다. 직접 플레이하려면 Unity에서 `Assets/@Scenes/Boot.unity`를 열고 Play한다.
@@ -208,7 +227,6 @@ G9를 정한 뒤 9단계의 설계안(Architecture/13)과 결정할 것 다섯 �
 
 | # | 미결 결정 | 근거 문서 위치 | 늦어도 |
 |---|---|---|---|
-| G11 | 소리 방향 | 기획문서에 없음, Kit/05 "승인 라운드" | 10단계 시작 전 |
 | G17 | 게임 제목(`productName`)과 Bundle Identifier. Save 경로가 여기서 나온다. 바꾸면 그 전의 Save를 찾지 못한다 | 현재값 `F1`, `com.funitup.f1` (`ProjectSetup`), Architecture/07 | 출시 전 |
 
 ## 결정 관문 — 결정됨 (2026-09-30)
@@ -226,6 +244,7 @@ G9를 정한 뒤 9단계의 설계안(Architecture/13)과 결정할 것 다섯 �
 | G8 | 결정론 세부: 정수 밀리초, 고정된 처리 순서, 용도별 PCG32 스트림, 정수 수치, 이벤트 로그 재생 | Design/09 §5, Design/02 §3 |
 | G9 | **2026-10-04 개정**: 캐릭터·몬스터의 그림체는 미국 카툰 포스터의 손맛(흔들리는 잉크선, 낙서 획, 부푼 과장, 캐릭터마다 다른 체형, 매력적인 캐리커처 얼굴, 시선은 적 쪽)에 지금의 평면·낮은 채도 색을 얹은 것. 기준 그림은 확정한 직업 셋의 시트. (2026-10-02의 잠정안 — 기준 그림의 스타일, 6등신, 흰 눈 — 은 Design/10 §7에 기록.) 아이템·배경·UI는 그대로. 옛 안(다크 중세 흉상, 대규모 로스터, 소영주·공성전)은 채택하지 않는다 (2026-09-30) | Design/10, `ArtPipeline/References/Character/style_ref_roster.png`, `Archive/12-roar-style` |
 | G10 | Git LFS를 쓴다. TextMeshPro 기본 리소스(ttf, png)가 3단계에 들어오므로 3단계 시작 때 설정했다 | `.gitattributes` |
+| G11 | **2026-10-05**: 소리 방향은 어두운 카툰(실제 재료의 묵직하고 마른 효과음, 작은 편성의 단조 곡, 밝은 소리 없음). 용병의 죽음이 가장 무겁다. Slice A는 효과음 스물여섯과 곡 셋, 음량은 음악·효과음 따로 (사용자 "모두 권장안대로") | Design/12, Architecture/14 |
 | G12 | Prefix는 `F1` | CLAUDE.md |
 | G13 | 대상 OS는 Windows와 macOS. `companyName`은 `funitup`. 기준 해상도 1920x1080(16:9), 기본은 전체 화면 창, 창 크기 조절 가능 | `ProjectSetup`, Architecture/02 |
 | G14 | 식별자는 영어 snake_case 문자열 `Id` 하나(정수 Id 없음), 조회는 `Dictionary<string, T>`. 변환 코드는 Unity 비의존이고 `Tools/Sim`이 같은 코드로 돌린다 | Architecture/05 |
@@ -471,13 +490,13 @@ G9를 정한 뒤 9단계의 설계안(Architecture/13)과 결정할 것 다섯 �
 - 검증: `Tools/chain.sh` 통과(setup OK — Prefab 셋·Stamp 재생성, sim OK, EditMode 616/616, PlayMode 44/44(`[Explicit]` 스크린샷 4개 제외)). `git diff --check` 깨끗. 시뮬 수치는 돌리지 않았다(규칙의 상한만 바뀌어 결과가 같다). 스크린샷은 Handoff.
 - 권장안으로 정한 세부는 "사후 검토 대기"에 올렸다.
 - 커밋됨 (2026-10-04 밤 세션 정리: 네 커밋(기획 / 화면 / 그림 파이프라인·기록 / Roadmap·Handoff)). 남은 것: 사용자의 직접 플레이(높아진 칸과 아이콘의 여백).
-- 기록: `ArtPipeline/Archive/15-seven-cells/README.md`. Handoff: `Docs/Workstreams/active/a-art-restyle.md`
+- 기록: `ArtPipeline/Archive/15-seven-cells/README.md`. Handoff: `Docs/Workstreams/completed/a-art-restyle.md`
 
 ### 9단계 뒤의 그림 라운드 (Round 3~31) — 상태: 완료 (모두 구현하고 체인을 통과했다. 권장안으로 정한 세부는 "사후 검토 대기")
 
 9단계의 파이프라인으로 사용자가 이어서 지시한 라운드다(2026-10-02 ~ 10-05). 번호가 붙은 단계가 아니다. 단계 절차 3은 라운드마다의 목업 승인이나
 일괄 승인("모두 권장안으로", 2026-10-03·04)으로 대체했다. 지시·목업·판정·구현·검증·호출은 그 라운드의 README(`ArtPipeline/Archive/<폴더>/README.md`)에 있다.
-Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battle-feel.md`·`a-rows-items.md`, Round 12부터는 `Docs/Workstreams/active/a-art-restyle.md`.
+Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battle-feel.md`·`a-rows-items.md`, Round 12부터는 `Docs/Workstreams/completed/a-art-restyle.md`.
 
 | 폴더 | 날짜 | 무엇 | 결과 |
 |---|---|---|---|
@@ -510,19 +529,45 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
 | `30-kill-moment` | 10-05 | 적의 결정타(B, 0.5초 25%, 줌 1.1배) | 구현 |
 | `31-texture-compression` | 10-05 | 그림의 압축(자세의 파일 2048x1024) | 구현 |
 
-- 남은 것: 사용자의 직접 플레이(Handoff "Open"), 스프라이트 여럿의 데이터 설계【미결】, 넓은 자세의 키와 폭【미결】, 남은 무압축 그림(전신·UI)과 또렷함,
+- 남은 것: 사용자의 직접 플레이(`Docs/Workstreams/completed/a-art-restyle.md` "Open"), 스프라이트 여럿의 데이터 설계【미결】, 넓은 자세의 키와 폭【미결】, 남은 무압축 그림(전신·UI)과 또렷함,
   Deferred UI 틀(인벤토리 팝업, 보상 카드, 타이틀·로비·정산), 타이틀·본부의 배경(보류).
 - 리팩토링 검토(2026-10-05): 큰 리팩토링은 필요 없다. 정리(R1)와 얼굴 빼기를 했다. 결정타 분리(R2·R3)는 다음 전투 라운드의 첫 커밋으로(Handoff "리팩토링 검토").
 
-### 10. 소리 — 상태: 대기
+### 10. 소리 — 상태: 완료 (사후 검토 대기: 권장으로 고른 소리와 로비 곡의 이음매를 들어 보기)
 
 - 범위: 효과음·배경음 생성 파이프라인, 승인 라운드, `SoundManager` 배선(Kit/05).
 - 완료 기준: 승인된 소리만 배선됐다. Import 정책이 Setup 코드로 고정됐다. 체인 통과.
 - 결정할 것: G11, 예산.
+- 2026-10-05 시작: G11과 10단계를 검토해 보고했고(방향 셋, 도구와 예산, 범위, 음량, 진행 방식), 사용자가 계정이 Starter 이상임을 알리고 "진행"을 지시했다.
+  키는 키체인에 있다(`ELEVENLABS_API_KEY`). 권장안으로 설계안을 썼고(Design/12, Architecture/14, 타이틀의 음량 버튼 목업 넷) 사용자가 "모두 권장안대로" 승인했다
+  (위 "10단계의 승인"). 예산: 상한 $10(구독료 포함), 장부 `SoundPipeline/Archive/calls.csv`.
+- 2026-10-05 시험 라운드: `SoundPipeline`(스타일 문서, 소재 효과음 스물여섯·곡 셋, 도구 다섯)을 만들고 12회 호출했다(피격·용병의 죽음·버튼 × 후보 셋, 던전 곡 30초 × 셋. 추정 $0.24).
+  판정 대기. 기록 `SoundPipeline/Archive/02-test/README.md`.
+- 2026-10-05 판정과 첫 연결: 사용자 "모두 a로 구현"(피격·용병의 죽음·버튼·던전 곡 모두 A). `SoundManager`·`SoundOutput`·`SoundCatalog`(승인된 소리만), `AudioSetup`과 Group `F1-Audio`,
+  설정 버전 2(음량), 타이틀의 설정 줄(목업 안 2), 화면과 전투가 청하는 소리(기획의 스물여섯 모두), 곡이 화면을 따름, Boot `BOOT-13`. 던전 곡은 A를 8마디(20.87초) 반복으로 잘라 wav로 넣었다(`loop_bgm.py`).
+  나머지 효과음 스물셋과 로비·보스 곡은 목록에 없어 아직 나지 않는다(다음 생성 라운드, 지시 대기).
+  체인 통과(EditMode 656/656, PlayMode 60/60), 스크린샷 45장(타이틀의 설정 줄). 커밋 안 함.
+- 2026-10-05 나머지와 권장 연결: 사용자 "남은 것도 생성후 알아서 권장안 연결". 효과음 스물셋 × 셋(69회)과 로비·보스 곡 60초 × 셋(6회)을 만들고, 잴 수 있는 기준
+  (Round 02에서 직접 고른 넷과 모두 맞는 규칙: 짧은 효과음은 가장 또렷한 것, 긴 효과음은 가장 어두운 것, 곡은 이음매가 잘 닮은 것 가운데 가장 어두운 것)으로 골라 모두 연결했다
+  (효과음 스물여섯, 곡 셋). 로비 곡의 이음매(닮은 정도 0.72)는 사용자가 들어 볼 것. 칸 클릭은 결과대로 한 소리. 기록 `SoundPipeline/Archive/03-rest/README.md`.
+  체인 통과(EditMode 656/656, PlayMode 60/60). 커밋 안 함.
+- 2026-10-06 완료: 사용자 "Slice A는 여기서 완료 및 세션 정리". 세션 정리에서 주제별로 커밋하고 푸시했다.
+- Handoff: `Docs/Workstreams/completed/a10-sound.md`
+- 선행: 9단계 완료.
 
-### 11. 플레이테스트 -> 수정 -> Slice B — 상태: 대기
+### 11. Slice B 범위: 전투 시스템 완성 — 상태: 대기
 
-- 범위: Slice A 플레이테스트, 수정, Slice B 범위 문서.
-- 완료 기준: Slice B 범위 문서가 승인됐다.
-- 결정할 것: Slice B 범위(Architecture/09의 Deferred에서 고른다).
+2026-10-06 사용자: "Slice A는 여기서 완료 및 세션 정리. 기존 Slice B를 C로 미루고 새로운 Slice B에서는 전투 시스템을 완성하자".
+처음의 "플레이테스트 -> 수정 -> Slice B"를 이것으로 바꿨다. Slice A를 여기서 완료했으므로 Slice A만의 플레이테스트 단계는 두지 않고, 직접 플레이로 볼 것은 Slice B의 입력으로 옮긴다.
+
+- 범위: 새 Slice B(전투 시스템 완성)의 범위 문서와 그 기획. 사용자가 든 네 가지:
+  1. 전투 런을 15~30분 단위로 확장 (확인할 것: "전투 런"이 원정 한 번, 곧 던전 한 번을 도는 플레이 시간인지)
+  2. 아이템 조합 등의 기획 추가
+  3. 피로도 시스템을 구체적으로 도입할지 (Slice A에는 원정마다 깎이고 쉬기로 돌아오는 피로도가 있다: Design/04 §3)
+  4. 스테미나 시스템을 도입할지
+- 완료 기준: Slice B 범위 문서(Architecture/09)와 그 기획(Docs/Design)이 승인됐다. 그 뒤 구현 단계(12~)를 이 표에 더한다.
+- 결정할 것: 위 넷마다 선택지와 권장안(레퍼런스는 출처와 함께, 수치는 시뮬 우선 워크플로: Design/09 §4).
+  Slice C 후보는 처음의 Deferred(성장, 경제, 유물, 나머지 지역, 기한·최종 보스·승패, 100일 시뮬, 나머지 그림·소리, 여러 저장 슬롯).
+- 입력: 직접 플레이로 볼 것(`Docs/Workstreams/completed/a-art-restyle.md`, `a10-sound.md`의 Open), 플레이테스트 뒤로 미룬 결정(적 정보 숨김 Design/03 §1,
+  조합 절벽의 나머지 선택지 Design/08 §7·§8), 결정타 분리(R2·R3, 전투의 쓰러짐·결정타를 고치는 첫 커밋으로).
 - 사용자 작업: Windows에서 확인하려면 첫 Windows 빌드 전에 Unity Hub에서 Windows Build Support 모듈을 추가한다.
