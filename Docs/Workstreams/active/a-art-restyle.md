@@ -1,6 +1,6 @@
-# 그림체 전환과 UI 라운드 (Round 12~25) — 포스터의 손맛 + 평면 색, 디아블로 컨셉 UI, 아이템 칸 개정 6, 촛불 빛, 외곽선 1/2과 눈동자, 쿨다운 빛, 공격·피격 모션, 진지한 표정, 무덤, 성기사의 머리, 공격·피격 자세와 아이템 분류, 외곽선 2/3
+# 그림체 전환과 UI 라운드 (Round 12~30) — 포스터의 손맛 + 평면 색, 디아블로 컨셉 UI, 아이템 칸 개정 6, 촛불 빛, 외곽선 1/2과 눈동자, 쿨다운 빛, 공격·피격 모션, 진지한 표정, 무덤, 성기사의 머리, 공격·피격 자세와 아이템 분류, 외곽선 2/3, 몬스터의 공격·피격 자세, 유닛의 발밑 표시, 결정타
 
-Snapshot: 2026-10-04 밤 (마지막: 열네 번째 판정 "권장안으로 변경 구현" — **외곽선 2/3 구현**(띠 4 → 1.35px, 그림 스물세 장·얼굴 열하나 다시 맞춤, 호출 없음). 그 전: 열세 번째 지시 — **캐릭터 외곽선 2/3·1/2 목업**(Round 25, 띠만 좁혀 다시 맞춤, 게임 스크린샷과 발키리 동작 MP4). 그 전: 열두 번째 판정 "승인" — **공격·피격 자세의 게임 연결(Round 23) + 아이템 분류 다섯과 발동할 때의 움직임(Round 24) 구현**(체인·스크린샷 통과, 호출 없음). 그 전: 열한 번째 판정 — 아이템 분류 다섯(무기 장비·방어 장비·공격 아이템·지원 아이템·기타), 공격 자세는 무기 장비만, 방어·공격·기타는 A 돌진, 지원은 C 맥동과 빛 → 두 번째 검토(Round 24 README). 그 전: 열 번째 판정 — 치유의 지팡이는 무기, 선명도 MaxSize 2048. **Round 23 설계안 + Round 24의 승인 뒤 구현**. 그 전: 아홉 번째 판정 "모두 맞음 승인" — **공격·피격 자세 열두 장 확정**, 새 규칙(용병의 기본 그림이 확정되면 공격·피격 자세를 더한다). 그 전: 여덟 번째 판정 — 성기사 공격을 손을 고쳐 다시 그림, 손의 규칙은 양손에 각각 장비를 든 경우에만. 그 전: 일곱 번째 판정 — 머리 띠를 남녀로, **성기사 연결**(체인·스크린샷 통과), **용병 여섯의 공격·피격 자세 생성**(Round 23, 호출 12회, 판정 대기). 그 전: 재발 방지를 넣고 성기사를 다시 그림(Round 22). 그 전: 여섯 번째 판정 "권장안으로 모두 반영" — **무덤 2안-B 구현**(체인·스크린샷 통과). 다음 절차는 사용자가 정했다: 용병 이미지 재확인 → 캐릭터들의 공격·피격 이미지 생성 → 승인 후 구현. 그 전: 진지한 표정 여섯 연결, 정보칸 제자리 구현, Round 19 모션 시험. 모두 2026-10-05 세션 정리에서 커밋·푸시됨)
+Snapshot: 2026-10-05 (마지막: 서른한 번째 지시 "이상태로 세션 정리하자. 그리고 MP4 파일 깃에 업로드할 필요 있나 …" — 목업 MP4는 Git에 올리지 않기로(`.gitignore`), Round 26~30을 여섯 커밋으로 올리고 푸시. 그 전: 서른 번째 지시 "목업 mp4는 모두 삭제 해줘" — Archive의 MP4 13개를 휴지통 `F1-mockup-mp4-20261005/`로 옮김, 각 README에 다시 만드는 스크립트. 그 전: 스물아홉 번째 지시 "1.1배로 나머지 수치는 이대로 구현 시작" — **결정타 구현됨**(0.5초 25%, 어둠 목업의 60% = 알파 0.87, 줌 1.1배, 떨림 없음. 체인 통과, 호출 없음). 그 전: 스물여덟 번째 지시 "B로 가자 … 1.12배, 1.16배 … 슬로우 모션시에는 화면 떨림은 빼는 게 … 어둠 60%" — **결정타 B 정함**, 줌 셋의 목업 `Archive/30-kill-moment/mock-kill-zoom.mp4`(떨림 없음, 어둠 60%, 판정 대기, 호출 없음). 그 전: 스물일곱 번째 지시 "A/b 만 목업 만들어줘" — **결정타 목업** `Archive/30-kill-moment/mock-kill.mp4`(지금·A·B, 판정 대기, 호출 없음). 그 전: 스물여섯 번째 지시 "다키스트 던전 이펙트 방식-적이 죽을 때 … 분석 및 도입 가능성 검토" — **적의 결정타 강조 분석**(Round 30, 【제안】 A~D, 판정 대기, 호출 없음). 그 전: 스물다섯 번째 지시 "권장안 구현" — **유닛의 발밑 표시 구현됨**(명패 없음, 보드 머리 띠, 무대 48 내림, 몬스터 이름 붉은 글, 파티 쪽도 같이. 체인 통과, 호출 없음, 커밋 안 됨). 그 전: 스물네 번째 지시 "이름 패널 가로 크기를 아이템 칸에 알맞게, 몬스터 이름은 약간 붉은색 계열로 … 목업 이미지 제공" — 띠 186, 몬스터 이름 A 붉은 글(권장)/B 띠도 붉게(`mock5-*`, 호출 없음, 판정 대기). 그 전: 스물세 번째 지시 "1. B안 2. 48 내림 위 안을 적용해서 목업 이미지 제공. 내 승인 후 구현" — **적용한 목업**(전투 넷과 노드 맵·보상의 파티 쪽, 호출 없음, 승인 대기). 그 전: 스물두 번째 지시 "1. 2안으로 2. 두가지 목업 제공. 보고나서 결정 3. 캐릭터와 무대 내리는 버전 목업 제공. 보고나서 결정" — **명패 2안(StS식) 정함**, 이름 A(올리면)·B(보드 머리, 권장)와 무대 48 내림(권장)의 목업(호출 없음, 판정 대기). 그 전: 스물한 번째 지시 "다 별로 … 다키스트 던전·슬레이 더 스파이어 검토 뒤 다시 제안(하나는 패널 없는 안)" — **명패 두 번째 제안**(1 DD식·2 StS식(권장)·3 작은 이름표, 조각 2회, 판정 대기). 그 전: 스무 번째 지시 "캐릭터 hp 정보칸 ui도 현재에 맞추어 다시 생성(목업 제안 3가지 제공)" — **유닛 명패 목업 세 안**(Round 29, 견본 조각 호출 6회, 판정 대기, 커밋 안 됨). 그 전: 열아홉 번째 판정 "권장안 반영" — 아이콘 승인·연결, **몬스터 자세의 게임 연결 구현**(적 다섯의 자세 열 장, 공격하는 유닛을 맨 앞에, 파이프라인 타입 `enemy_attack`·`enemy_hit`), 체인·스크린샷 44장 통과, 호출 없음, 커밋 안 됨. 그 전: 열여덟 번째 판정 "1.2.확인 / 3. 잠깐 덮이는 거는 괜찮은듯 / 구현 시작" — **구현 1(기획·데이터)**: 등불 지팡이, 저주의 침 삭제, 시뮬 같음, 체인 통과. **구현 2**: 아이콘 생성(승인 대기). **몬스터 자세의 게임 연결 설계안**(승인 대기). 커밋 안 됨. 그 전: 열일곱 번째 판정 "주술사에게 저주의 침 대신 무기 장비, 공격 이미지 하나", "감독관 망치를 용병 앞에", "나머지는 만족. 일단 주술사 공격 이미지 내가 확인 후 최종 구현 요청 할게" — Round 27 확정, **주술사의 공격 자세**(Round 28, 호출 1회, 판정 대기, 무기·연결은 최종 구현 요청 뒤, 커밋 안 됨). 그 전: 열여섯 번째 판정 "확정. 나머지 진행" — 약탈자 두 장 확정, **몬스터 넷의 공격·피격 자세**(Round 27, 호출 7회). 그 전: 열다섯 번째 지시 "이번에는 몬스터 차례야 … 일단 테스트 이미지 1세트 생성" — **몬스터의 공격·피격 자세 시험**(Round 26, 고블린 약탈자 한 세트, 호출 2회). 그 전: 열네 번째 판정 "권장안으로 변경 구현" — **외곽선 2/3 구현**(띠 4 → 1.35px, 그림 스물세 장·얼굴 열하나 다시 맞춤, 호출 없음). 그 전: 열세 번째 지시 — **캐릭터 외곽선 2/3·1/2 목업**(Round 25, 띠만 좁혀 다시 맞춤, 게임 스크린샷과 발키리 동작 MP4). 그 전: 열두 번째 판정 "승인" — **공격·피격 자세의 게임 연결(Round 23) + 아이템 분류 다섯과 발동할 때의 움직임(Round 24) 구현**(체인·스크린샷 통과, 호출 없음). 그 전: 열한 번째 판정 — 아이템 분류 다섯(무기 장비·방어 장비·공격 아이템·지원 아이템·기타), 공격 자세는 무기 장비만, 방어·공격·기타는 A 돌진, 지원은 C 맥동과 빛 → 두 번째 검토(Round 24 README). 그 전: 열 번째 판정 — 치유의 지팡이는 무기, 선명도 MaxSize 2048. **Round 23 설계안 + Round 24의 승인 뒤 구현**. 그 전: 아홉 번째 판정 "모두 맞음 승인" — **공격·피격 자세 열두 장 확정**, 새 규칙(용병의 기본 그림이 확정되면 공격·피격 자세를 더한다). 그 전: 여덟 번째 판정 — 성기사 공격을 손을 고쳐 다시 그림, 손의 규칙은 양손에 각각 장비를 든 경우에만. 그 전: 일곱 번째 판정 — 머리 띠를 남녀로, **성기사 연결**(체인·스크린샷 통과), **용병 여섯의 공격·피격 자세 생성**(Round 23, 호출 12회, 판정 대기). 그 전: 재발 방지를 넣고 성기사를 다시 그림(Round 22). 그 전: 여섯 번째 판정 "권장안으로 모두 반영" — **무덤 2안-B 구현**(체인·스크린샷 통과). 다음 절차는 사용자가 정했다: 용병 이미지 재확인 → 캐릭터들의 공격·피격 이미지 생성 → 승인 후 구현. 그 전: 진지한 표정 여섯 연결, 정보칸 제자리 구현, Round 19 모션 시험. Round 25까지는 2026-10-05 세션 정리에서 커밋·푸시됨)
 
 ## Goal
 
@@ -21,6 +21,8 @@ Snapshot: 2026-10-04 밤 (마지막: 열네 번째 판정 "권장안으로 변�
 - 그 뒤 **쿨다운 빛**(Round 18, 목업 B안 촛불 금빛 + 전투의 빈 칸 어둡게)을 구현했다(아래 절). 같은 날 밤 세 번째 세션 정리에서 네 커밋(기획 / 화면 / 그림 파이프라인·기록 / Roadmap·Handoff)으로 올리고 푸시했다.
 - 그 뒤 Round 19~25(공격·피격 모션 시험, 진지한 표정, 무덤, 성기사의 머리, 공격·피격 자세 열두 장과 연결, 아이템 분류 다섯과 움직임, 외곽선 2/3)를 진행했다(아래 절).
   2026-10-05 세션 정리에서 여섯 커밋(기획 / 데이터 / 그림 파이프라인과 그림 / 화면 / 기록 / Roadmap·Handoff)으로 올리고 푸시했다. 목업 MP4를 올리려고 `.gitattributes`에 `*.mp4`를 LFS로 더했다.
+- 그 뒤 Round 26(몬스터의 공격·피격 자세 시험: 고블린 약탈자 한 세트, 확정), Round 27(나머지 넷, 확정), Round 28(주술사의 무기와 공격 자세, 그리는 순서, 몬스터 자세의 게임 연결 — 구현됨), Round 29(유닛 명패를 없애고 발밑 표시와 보드 머리 띠로 — 구현됨), Round 30(적의 결정타 — 구현됨)을 했다(아래 절).
+  2026-10-05 두 번째 세션 정리에서 여섯 커밋(기획 / 데이터 / 그림 파이프라인과 그림 / 화면 / 기록 / Roadmap·Handoff)으로 올리고 푸시했다. 목업 MP4는 Git에 올리지 않는다(`.gitignore`의 `/ArtPipeline/Archive/**/*.mp4`. 커밋했던 여덟은 지웠고 이력 `1417cab`에 남는다).
 - 올린 포스터는 저작권이 있는 그림이라 저장소에 넣지 않았다. 시험은 이 세션의 올린 파일을 `--reference`로 붙였다. 앞으로의 생성은 우리 그림의 시트를 기준 그림으로 쓰므로 포스터가 필요 없다.
 
 ## Done
@@ -203,7 +205,77 @@ Snapshot: 2026-10-04 밤 (마지막: 열네 번째 판정 "권장안으로 변�
   이 폴더의 `thin_outline.py`·`mock_outline_motion.py`는 "지금"을 `before/`에서 읽는다.
 - `mock_outline_motion.py`: Round 23의 `Six` 장면에 안마다의 그림(아스트리드 세 장, 세드릭, 약탈자, 주술사), 그림은 `drawn()`(밉맵 2단계 + Bilinear: 게임과의 차이 8.0, LANCZOS 16.4, 1단계 11.2). `mock-motion.mp4`, `mock-motion-steps.png`.
 
+## 몬스터의 공격·피격 자세 시험 (Round 26, 2026-10-05)
+
+- 지시: "이번에는 몬스터 차례야. 용병 이미지처럼 공격 모션 및 피격 모션 생성해보자. 일단 테스트 이미지 1세트 생성". 시험이라 `Assets`·데이터·화면 코드·`tools/`·지금 스타일 문서는 그대로다(몬스터의 자세는 Architecture/13의 Deferred).
+- 고른 몬스터(권장안): 고블린 약탈자(양손 무기, 자주 나옴, 무기 `rusty_blade`가 무기 장비, 4층 목업 장면의 적 1열). 1세트 = 공격 + 피격(호출 2회, 라운드 상한 2).
+- 세트 `ArtPipeline/Archive/26-monster-motion/`: `STYLE_RUNTIME-motion.md`(지금 §1·§2 + 자세의 금지, §5·§6 = §25·§26의 몬스터판, 던전 절은 장비 문장만 "붙인 그림 그대로"), `attack.csv`·`hit.csv`(정체 목록 + 자세 + 표정),
+  `make_references.py` → `references/`(눈동자를 지운 확정 원본 `17-outline-pupils/approved/enemy/`, 공격은 오른쪽 3분의 1·피격은 가운데). 생성은 `gen_image.py --type enemy`에 `--style --roster --reference --size 1536x1024`.
+- `fit_monster_poses.py`: 얼굴·디딘 뒷발(맨 오른쪽 발, 피부색)·칼날·모자·양초의 면적비의 중앙값(공격 1.033, 피격 0.997; 등불은 1.16으로 혼자 커서 뺐다), 뒷발을 게임 그림(`fit_figure`의 자리, 키 68)의 뒷발에, 색 맞춤(`fit_pose`의 것), 2016x1008. `fit.txt`.
+- `review_monster_poses.py` → `review-poses.png`, `mock_monster_poses.py` → `mock-poses.mp4`(Round 23의 `Six` 장면 + Round 25의 게임식 그리기, 위 지금 / 아래 시험)와 `mock-steps.png`. 후보 `candidates/`(raw, wide, 게임 그림의 idle_wide).
+- 본 것: 같은 약탈자, 눈동자 없는 노란 눈(테두리의 작은 혹은 게임 그림에도 있는 Round 17의 흔적), 공격 칼끝은 바닥선까지(아래로는 안 감), 피격의 칼은 약 10% 짧게 그려짐, 머리·발은 같은 크기.
+- 판정(같은 날, 사용자): "확정. 나머지 진행" — 약탈자의 두 장과 규칙 확정(Design/10 §5 【확정】). 남긴 두 질문(주술사, 감독관의 포효)은 답이 없어 권장안으로 Round 27에 넘겼다.
+
+## 몬스터 넷의 공격·피격 자세 (Round 27, 2026-10-05)
+
+- 지시: "확정. 나머지 진행"(Round 26의 판정). 권장안(사후 검토): 주술사는 피격만(무기 장비가 없어 공격 자세가 보이지 않는다), 감독관의 공격 자세는 망치를 내리치며 포효하는 한 장(포효도 무기 장비). 호출 7회(상한 7).
+- 세트 `ArtPipeline/Archive/27-monster-poses/`: `STYLE_RUNTIME-motion.md`(Round 26의 문서 + 짐승·부츠·날아가는 화살의 몇 문장), `attack.csv`(쥐·궁수·감독관)·`hit.csv`(넷), `make_references.py` → `references/`. 생성은 Round 26과 같은 명령.
+- `fit_monster_poses.py`: 발의 색(맨 아래 12분의 1의 가장 흔한 밝은 색, 감독관은 부츠의 어두운 갈색 `FOOT_COLOUR`), 디딘 뒷발(오른쪽 절반의 바닥에서 위로 6분의 1 안의 맨 오른쪽 덩어리, 발 안의 잉크선은 마스크를 키워 이음), 부위(`PARTS`: 쥐의 코·귀, 궁수의 얼굴, 주술사의 밀랍·플라스크, 감독관의 얼굴. 포즈의 점은 그 부위의 색을 찾아 시작)의 면적비 중앙값,
+  `--debug`는 잰 것을 칠한 `output/monster_fit/<key>.png`. `heads.json`(머리의 자리)과 `fit.txt`. 배율: 쥐 1.061/1.034, 궁수 1.029/0.992, 주술사 1.011, 감독관 1.013/0.958.
+- `review_monster_poses.py` → `review-poses.png`(다섯 모두, 약탈자는 Round 26), `mock_monster_poses.py` → `mock-poses.mp4`(44초, 다섯이 차례로 적 1열, 감독관은 `FigureScale` 150%로 밉맵 1단계, 적 1열의 명패는 뺌)와 `mock-steps.png`.
+- 본 것: 일곱 장 모두 같은 몬스터, 눈동자 없음(눈만 크게 잘라 확인), 머리는 대기와 같은 크기. 감독관 피격의 망치가 소재와 달리 머리 위로(캔버스 안), 주술사 피격은 한 색이 크게 달라 색 맞춤(ΔE 10.0 → 3.4). 150%의 감독관이 공격하면 망치가 아스트리드 쪽까지 닿는다.
+- 판정(같은 날, 사용자): 주술사에게 저주의 침 대신 무기 장비와 공격 자세(Round 28), 감독관 망치를 용병 앞에(Round 28), **"나머지는 만족"** — 일곱 장과 감독관의 공격 자세 한 장(포효에도) 확정.
+
+## 주술사의 무기와 공격 자세 (Round 28, 2026-10-05)
+
+- 지시: "고블린 주술사에게 저주의 침 대신 무기 장비류(생성)를 새로 만들어주고 주고 공격 이미지 하나 생성", "감독관 망치 내릴때 이미지가 용병 뒤쪽이 아닌 앞쪽으로 배치(망치 가려짐)", "나머지는 만족. 일단 주술사 공격 이미지 내가 확인 후 최종 구현 요청 할게".
+  → 이번에는 공격 자세 한 장만(호출 1회). 무기의 데이터·아이콘과 몬스터 자세의 게임 연결은 최종 구현 요청 때.
+- 세트 `ArtPipeline/Archive/28-shaman-weapon/`: `attack.csv`(Round 27의 주술사 정체 목록 + 지팡이로 내리치는 자세), 시험 문서와 기준 그림은 Round 27의 것. `fit_shaman_attack.py`(Round 27의 `fit_monster_poses`를 가져다 씀: 1.065, 색은 그린 그대로), `review_shaman.py` → `review-shaman.png`,
+  `mock_shaman_overseer.py` → `mock-poses.mp4`(17.6초)·`mock-steps.png`(Round 27의 장면을 게임의 순서로, 공격하는 쪽을 맨 앞에).
+- 새 무기 【제안】: 등불 지팡이(`lantern_staff`, 이미 든 지팡이, 저주의 침의 수치 그대로, 주술사 `lantern_staff:10+mending_chant:12`, 저주의 침은 데이터에서 빼는 것을 권장). 바꿀 곳: `ItemData.csv`·`EnemyData.csv`·생성 JSON, `ShippedDataTests`, `Rosters/item.csv`, Addressables, Architecture/05, Design/02·03·07·08, 아이콘(호출 1회, 승인 뒤).
+- 그리는 순서: 게임은 적 1열을 파티 1열 위에 그린다(`UiPrefabSetup.Battle`의 Field: 맨 뒤 열부터, 파티 다음에 적). 감독관의 망치는 게임에서 이미 앞. Round 27의 목업이 거꾸로였다(Round 19 장면의 순서).
+  【제안】 공격하는 동안은 양쪽 모두 공격하는 유닛을 맨 앞에(열을 잠깐 마지막 자식으로). 150%의 망치머리가 아스트리드의 명패 오른쪽 위를 잠깐 덮는다(→ 사용자 "잠깐 덮이는 거는 괜찮은듯").
+- 판정: "1.2.확인 / 3. 잠깐 덮이는 거는 괜찮은듯 / 구현 시작". **구현 1 — 기획·데이터**: Design/02 §4 【확정】·10 §5·08 메모·Architecture/05, `ItemData.csv`(`hex_spit` 줄 → `lantern_staff`, Icon 비움), `EnemyData.csv`, 생성 JSON(`Tools/Sim transform`), `ShippedDataTests`,
+  저주의 침 아이콘 → `Archive/28-shaman-weapon/removed/`(Assets에서 지움), `Rosters/item.csv`. 시뮬 전후(원정 시드 7 × 200 × 파티 둘, trace 둘) 같음. Setup이 Addressables의 `item/hex-spit`을 빼고 글꼴 아틀라스를 다시 만들었다('침' 빠짐, 368 → 367자: 데이터와 함께 커밋할 것).
+  PlayMode `UiFlowTests.Battle_WhenARowEmpties_TheCardsBehindMoveForward_AndTheDeadAreNamed`가 아이콘 없는 아이템(등불 지팡이)에서 `Single`로 실패 → 아이콘이 있을 때만 아이콘 색을 본다(주석의 의도대로). 체인 통과(EditMode 625/625, PlayMode 51/51).
+- **구현 2 — 아이콘**: `gen_image.py --type item --key lantern_staff`(호출 1회, $0.015), `review-icon.png` → 사용자 "권장안 반영"으로 승인, `Assets/@Art/Item/lantern_staff.png`, `Icon` = `item/lantern-staff`, 확정 원본 `approved/item/`.
+- **게임 연결 설계안** → "권장안 반영"(그리는 순서 A). **구현 3 — 몬스터 자세의 게임 연결**:
+  코드: `EnemyData.AttackPose`·`HitPose`, `ArtAddress.PoseOf`의 설명, `ExpeditionArt`(`Addresses`에 적의 자세, `AttackPoseOfEnemy`·`HitPoseOfEnemy`), `ArtSetup.Files`(적의 자세, `Pose` 정책), `BattleScreen`(적에게도 `Bind`, `ArrangeColumns`·`AttackingIn`: Field의 원래 순서 + 공격 중인 Column을 마지막에),
+  `BattleUnitView`(`Attacking`·`_attackLeft`: 돌진과 0.05초 더, 쓰러져 숨은 유닛은 세지 않음). 그림 `Assets/@Art/Pose/Enemy/<id>_attack|hit.png` 열 장.
+  파이프라인: `STYLE_RUNTIME.md` §27·§28(Round 27 시험 문서의 몬스터 문장, 눈은 "같은 한 가지 색", 던전 컨셉 없음)과 Generation Types 두 행, `gen_image.py` 타입 `enemy_attack`·`enemy_hit`(`pose_figure`, `pose_place` "right"),
+  `Rosters/enemy_attack.csv`·`enemy_hit.csv`(Round 26~28의 소재 + 잰 배율), `Rosters/enemy.csv`의 `Feet`, `tools/fit_pose.py`(`fit_enemy_pose`, `enemy_back_foot`, `foot_colour`, `enemy_idle_wide`), `tools/review_pose.py --enemies`. 원본은 `output/enemy_attack|enemy_hit/`.
+  확인: 정식 도구의 기준 그림 열 장이 Round 26·27의 것과, 맞춘 자세 열 장이 확정 후보와 픽셀까지 같다. Test: EditMode(`DefinitionTests`, `ArtSetupTests`), PlayMode 새 둘(적의 자세, 공격하는 유닛이 맨 앞), 용병 Test의 "적은 자세 없음" 삭제,
+  `UiTestUtil.EnterTheBossBattle`, 스크린샷 `MonsterPoses_Korean`(`ko_26`~`ko_28`, `Archive/28-shaman-weapon/game/`).
+
+## 유닛 명패 다시 그리기 (Round 29, 2026-10-05)
+
+- 지시: "캐릭터 hp 정보칸 ui도 현재에 맞추어 다시 생성(목업 제안 3가지 제공)". 지금 명패 = `gothic_plate`를 편의 색으로 칠한 판(`plate_party`·`enemy`·`danger`·`target`·`label`) + 도형 배지(`KitBadge`의 내장 원) + 이름·HP(`trough`)·상태 줄(`UiPrefabSetup.Kit.BuildPlate`, 전투와 파티 쪽이 같이 씀).
+- 견본 조각(호출 6회): `Archive/29-plates/frames.csv`(`ui_frame` `plate29_a_iron`·`b_stone`·`c_leather`, 360x184)와 `pieces.csv`(`ui_piece` `badge29_a_stud`·`b_bone`·`c_seal`). 산출물은 `output/ui_frame|ui_piece/`(저장소 밖).
+- `mock_plates.py`: 지금 게임의 4층 전투 스크린샷(`game/ko_15_now.png`) 위의 명패 여섯을 2배로 다시 그림(지금도 게임의 조각으로 같은 코드). 편의 색은 A 띠·B 돌·C 봉인을 다시 칠해서(`recolour`). A는 빈사·포션 대상에서 쇠 전체를 물들이고 빈사 줄의 글을 줄인다.
+  `mock-compare.png`, `mock-states.png`, `mock-<now|A|B|C>.png`. 권장 A(README "권장").
+- 첫 판정: "다 별로 마음에 안드네" → 레퍼런스 검토(README "레퍼런스 검토", 출처): 다키스트 던전·슬레이 더 스파이어·몬스터 트레인 모두 유닛 뒤판 없이 발밑의 막대와 아이콘, 이름·숫자는 올리면.
+- 두 번째 제안: `run_clean_shots.sh`(프로젝트를 `cp -c`로 복제, 복제본의 `BattleUnitView.Bind`가 `_plate`를 숨김, `AfterAnAdvance_Korean`·`DeathsDoor_Korean` → `game/ko_15_noplate.png`·`ko_18_noplate.png`),
+  조각 `frames2.csv`(`bar29_thin`, `tag29_slim`, 호출 2회), `mock_plates2.py` → `mock2-compare.png`·`mock2-deathsdoor.png`·`mock2-states.png`·`mock2-<1|2|3>.png`. 1 DD식 / **2 StS식(권장)** / 3 작은 이름표.
+- 두 번째 판정: "1. 2안으로 2. 두가지 목업 제공 … 3. 캐릭터와 무대 내리는 버전 목업 제공" → 2안. 세 번째 목업(호출 없음):
+  `run_lowered_shots.sh <scratch> <px> <seed>`(복제본에서 명패를 숨기고(`PLATES=1`이면 그대로) `BattleFieldTop`을 내리고 `AppRoot.NewRunSeed`를 고정 → `game/ko_15_s7_*`, `ko_18_s7_*`).
+  새 런의 시드는 OS에서 와서 첫 전투의 적이 찍을 때마다 바뀐다: 비교하는 화면은 같은 시드로 찍는다. `mock_plates3.py` → `mock3-names.png`(지금 / A / B), `mock3-lowered-15.png`·`mock3-lowered-18.png`(지금 / 2안 / 2안 48 내림).
+- 세 번째 판정: "1. B안 2. 48 내림 위 안을 적용해서 목업 이미지 제공. 내 승인 후 구현". 적용한 목업(호출 없음): `run_party_shots.sh <scratch> 7`(복제본에서 전투는 명패를 숨기고 48 내림,
+  파티 쪽은 명패를 숨기고 `PartyMoveTop`을 표시 높이 46으로 → 그림 46 내림. `EveryScreen_Korean`. `PLATES=1`이면 지금) → `game/ko_<04|05|07|09>_s7_<party|now>.png`.
+  `mock_plates4.py` → `mock4-battle-05|15|18|09.png`, `mock4-party.png`. 자리: Column의 가운데(파티 210·400·590·780, 적 1140·1330·1520·1710), 걸어가는 표시는 지금 화면의 명패 자리.
+  맡긴 범위의 권장안(README "적용한 목업"): 파티 쪽도 같이(직업은 막대 아래), 상태 줄 글 15, 머리 띠 조각 `tag29_slim`·`badge29_a_stud`는 목업 승인과 함께 들임.
+- 사용자 의견: 띠 폭을 아이템 칸에, 몬스터 이름은 붉은 계열 → `mock_plates5.py`(띠 186 = 칸의 먹 테두리 307~492, 몬스터 이름 #F28C7E. B는 띠의 쇠도 붉게) → `mock5-detail.png`, `mock5-<장면>-<A|B>.png`.
+- 판정 "권장안 구현"(A) → **구현됨**. 코드의 자리: `UiPrefabSetup.Kit`(`Marks*` 상수, `BuildMarks`, `MarksStateLine`, `BoardHead*`, `BuildBoardHead`), `UiPrefabSetup.Battle`(`BattleFieldTop` 254, `BoardColumnsTop` 2, 포션 대상의 빛 `TargetLight*`),
+  `UiPrefabSetup.PartySide`(`PartyMarksTop`, 머리 띠), `BattleUnitView`(`Rim`·`RimFor`·`RimShown`·`BadgeShown`·`TargetLit`·`MarksRect`. 행 번호와 이름은 없다), `BattleBoardView`(`_row`·`_name`·`StandIn`), `BattleScreen`(보드의 `StandIn`),
+  `UiPalette`(`RimShield`·`RimDanger`·`RimTarget`·`TargetLight`·`EnemyName`), `UiBuild.Outlined`, `FontSetup`(외곽선 재질 `OutlineMaterialPath`). 조각: `UiArt.NameTag`(Border 30. 높이 22라 borderScale 22/30)·`GoldStud`.
+  Test 이름이 바뀐 것: `Battle_AUnitAtDeathsDoor_ShowsItUnderItsFeet`, `Battle_TheMarksStayInTheColumn_WhileTheFigureLungesOrRecoils`.
+
 ## Open
+
+- **결정타**(Round 30, 구현됨)는 플레이로 본다: 0.5초의 느림과 어둠·줌의 느낌, 한 전투에 여러 번일 때의 피로, x2에서의 길이. 사후 검토: Roadmap "사후 검토 대기"의 Round 30 줄. `ArtPipeline/Archive/30-kill-moment/README.md`.
+  코드의 자리: `BattleScreen`의 `Kill*` 상수와 `KillMoment`, `OnKillingBlow`·`AdvanceKillMoment`·`RenderKillMoment`·`SlowFor`·`ArrangeColumns`, `BattlePresenter.KillingBlowAt`, `BattleClock.SlowPercent`, `BattleFxLayer.ScaleOf`.
+  Prefab의 무대가 `StageBack`(배경·빛)과 `StageFront`(전장)로 나뉘어 Test의 경로가 `Frame/StageFront/Field/…`다. 결정타 동안 `Time.timeScale`이 0.25이고 화면이 닫히면 `OnDisable`이 되돌린다.
+- **유닛의 발밑 표시**(Round 29, 구현됨)는 플레이로 본다: 판 없는 표시의 읽힘(외곽선 0.3과 글자 부풀림 0.3), 머리 띠의 이름(14)과 몬스터의 붉은 글, 48 내린 무대, 노드 맵·보상의 46 내린 파티. 사후 검토: 파티 쪽도 같이 바꾼 것, 직업을 막대 아래에 둔 것, 상태 줄 글 15, 일곱 칸 보드는 가방 아래가 패널 밖으로 8 나가는 것(지금 직업은 모두 다섯 칸). `ArtPipeline/Archive/29-plates/README.md`.
+- **몬스터의 공격·피격 자세와 공격하는 유닛을 맨 앞에**(Round 28 구현 3)는 플레이로 본다: 적의 자세가 보이는 시간, 뒤 열 공격의 앞 그리기, 150% 감독관의 망치가 명패를 잠깐 덮는 인상, 주술사의 등불 지팡이 공격. 조절은 `BattleUnitView`의 `PoseExtra`(공격 자세와 맨 앞 그리기가 같이 쓴다).
 
 - **외곽선 2/3**(Round 25)은 플레이로 본다: 얇아진 외곽선으로 유닛이 배경과 구별되는지(어두운 옷의 몬스터, 밝은 바닥 위의 발), 보스(150%)의 인상. 조절은 `FIGURE_OUTLINE` 하나로 한다:
   전신 `gen_image.py --refit`, 자세 `tools/fit_pose.py`, 얼굴 `tools/cutface.py`를 다시 돌려 Assets에 넣는다(호출 없음). 1/2 안은 0.4.
@@ -230,6 +302,11 @@ Snapshot: 2026-10-04 밤 (마지막: 열네 번째 판정 "권장안으로 변�
 
 ## Verification
 
+- 몬스터 자세의 게임 연결(Round 28 구현 3, 2026-10-05): `Tools/chain.sh` setup OK(자세 열 장과 아이콘 Import, Addressables 11개 더함), sim OK, EditMode 626/626, PlayMode 53/53(`[Explicit]` 스크린샷 8개 제외). `Tools/screenshots.sh` 44장(8/8): `ko_26`(150% 감독관의 망치가 용병 앞), `ko_27`(3열 주술사의 지팡이가 2열 약탈자 앞), `ko_28`(약탈자의 피격 자세), 주술사의 칸에 등불 지팡이 아이콘. `git diff --check` 깨끗.
+- 등불 지팡이 데이터(Round 28 구현 1, 2026-10-05): 시뮬 전후(원정 시드 7, 200회 × 파티 둘, trace 둘) 같음. `Tools/chain.sh`: setup OK(Addressables·글꼴 아틀라스 갱신), sim OK, EditMode 625/625, PlayMode 51/51(`[Explicit]` 스크린샷 7개 제외. 첫 실행은 50/51: 위의 Test를 고친 뒤 `chain.sh playmode`). `git diff --check` 깨끗.
+- 주술사의 공격 자세(Round 28, 2026-10-05): `--dry-run` 뒤 호출 1회(장부 203회, 약 $5.19). 잰 부위(뒷발·밀랍·플라스크·얼굴)를 칠해 확인. 리뷰 시트·목업은 호출 없음. `Assets`·코드·데이터가 그대로라 체인은 돌리지 않았다.
+- 몬스터 넷의 자세(Round 27, 2026-10-05): `--dry-run`으로 일곱 프롬프트를 확인한 뒤 호출 7회(장부 202회, 약 $5.16). 맞추기는 `--debug`의 칠한 그림으로 부위와 뒷발을 확인했다. 리뷰 시트·목업은 호출 없음. `Assets`·코드·데이터가 그대로라 체인은 돌리지 않았다.
+- 몬스터 자세 시험(Round 26, 2026-10-05): `--dry-run`으로 두 프롬프트를 확인한 뒤 호출 2회(장부 195회, 약 $4.94). 리뷰 시트·목업은 호출 없음. `Assets`·코드·데이터가 그대로라 체인은 돌리지 않았다.
 - 외곽선 2/3(Round 25) `Tools/chain.sh`(2026-10-04 밤): setup OK(그림 서른넷 다시 Import: 전신 열하나, 자세 열둘, 얼굴 열하나), sim OK, EditMode 625/625, PlayMode 51/51(`[Explicit]` 스크린샷 7개 제외).
   `Tools/screenshots.sh` 41장(7/7): 4층 전투·1층 전투의 얇아진 외곽선(`Archive/25-outline-thin/game/implemented_*.png`, `before-after.png`). `git diff --check` 깨끗.
   목업의 게임 스크린샷(프로젝트 복제, 두 안 모두 7/7·41장)은 같은 폴더의 `game/`·`compare-*.png`.
@@ -254,9 +331,11 @@ Snapshot: 2026-10-04 밤 (마지막: 열네 번째 판정 "권장안으로 변�
 
 ## Next Action (제안)
 
+- 사용자가 결정타(Round 30)와 유닛의 발밑 표시(Round 29)를 플레이로 본다(Open). Roadmap "사후 검토 대기"의 Round 29·30 항목과 목업 MP4를 Git에 올리지 않는 것을 검토한다.
+- 사용자가 몬스터의 자세와 맨 앞 그리기를 플레이로 본다(Open). Roadmap "사후 검토 대기"의 Round 26~28 항목을 검토한다.
 - 사용자가 새 외곽선(2/3)을 플레이로 본다(Open의 항목).
 - 사용자가 공격·피격 자세와 지원의 맥동을 플레이로 본다(Open의 항목). Roadmap "사후 검토 대기"의 Round 23·24 구현 항목을 검토한다.
-- 커밋하지 않을 것(세션 정리 때마다): Unity가 만든 `Assets/AddressableAssetsData/OSX.meta`, `ProfileDataSourceSettings.asset(.meta)`, `ProjectSettings/ScriptableBuildPipeline.json`.
+- 커밋하지 않을 것(세션 정리 때마다): Unity가 만든 `Assets/AddressableAssetsData/OSX.meta`, `ProfileDataSourceSettings.asset(.meta)`, `ProjectSettings/ScriptableBuildPipeline.json`. 목업 MP4는 `.gitignore`가 거른다(보여 주는 것은 그대로, 다시 만들 때는 그 라운드의 목업 스크립트).
 0. 사용자가 Unity에서 새 런으로 직접 플레이한다: 쿨다운 빛(어둠 85%에서 아이콘이 읽히는지, 금빛과 앞머리, 번쩍인 뒤 어둠이 돌아오는 것), 촛불 빛(반원의 세기, 양초와 함께 내려가고 폭풍에 꺼지는 것), 새 칸(180x60, 간격 2)의 인상과 아이콘의 여백, 새 그림체의 인상과 간격·겹침·키, 보스의 1.5배, 디아블로 UI(돌 패널, 쇠 명패, 뼈색 칸, 비네트 세기)와 양초의 흔들림·가늘어짐·꺼짐·연기(폭풍은 전투 시작 후 `StormStartMs`).
    조절은 데이터 한 칸(`EnemyData.FigureScale`)이나 `UiPrefabSetup.Kit`·`Battle`의 상수로 한다. 옛 저장은 그림만 바뀌어 그대로 이어지지만 새 런이 보기 좋다.
 1. Roadmap "사후 검토 대기"의 Round 12~14, 개정 6, Round 16~18, Round 21~24 항목(권고안으로 정한 세부)을 사용자가 검토한다. 바꾸면 체인·스크린샷으로 확인하고 커밋한다.
