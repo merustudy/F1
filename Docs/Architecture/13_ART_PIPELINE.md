@@ -22,7 +22,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 ├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy(용병은 Gender, 양손에 각각 장비를 들면 Hands도, 적은 자세를 맞출 발의 색 Feet: 밝은 색 규칙이 발을 찾지 못할 때), 자세(attack, hit)는 Scale(잰 배율을 덮어쓸 때. enemy_attack, enemy_hit는 늘), 소품은 Height, Flip, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
 ├─ Archive
 │  ├─ calls.csv                # 유료 호출의 장부: 시각, 대상, 모델, 사용량, 추정 비용
-│  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본
+│  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본, 목업과 그 스크립트 (움직임 목업의 MP4는 gitignore)
 ├─ tools
 │  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference 는 그림체 시험용, --size 는 넓은 자세를 그릴 전신 그림의 캔버스(1536x1024 등)
 │  ├─ run_roster.py            # Roster의 빠진 항목을 하나씩 돌린다. --max-calls 가 필수다
@@ -37,6 +37,9 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 ```
 
 폴더는 첫 실제 파일과 함께 만든다.
+
+움직임 목업의 MP4는 Git에 올리지 않는다(`.gitignore`의 `/ArtPipeline/Archive/**/*.mp4`). 판정과 결과는 README와 스크린샷(PNG)이 갖고,
+MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 게임에 넣는 영상이 생기면 `Assets` 아래에서 LFS로 올라간다(`.gitattributes`).
 
 ## 스타일 문서
 

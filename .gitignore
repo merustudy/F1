@@ -77,6 +77,9 @@ Desktop.ini
 __pycache__/
 *.pyc
 /ArtPipeline/output/
+# Motion mockups (MP4) are shown for a decision and not kept in Git: the round's mock script
+# makes them again without paid calls (Docs/Architecture/13_ART_PIPELINE.md)
+/ArtPipeline/Archive/**/*.mp4
 
 # Local secrets (API keys live in the macOS login keychain, never in files)
 .env

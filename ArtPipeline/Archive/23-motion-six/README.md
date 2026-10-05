@@ -160,3 +160,6 @@ Round 19의 발키리 산출물은 이름이 겹쳐 `output/character/round19/`�
    이번 열두 장의 원본을 `output/attack/`, `output/hit/`로 옮겨 `fit_pose.py`로 다시 맞추니 열 장은 게임의 파일과 바이트까지 같았고, 대마법사 둘은 소재의 `Scale`(1.093, 0.906)이 반올림이라 1px 달라 도구의 산출물로 바꿨다.
 4. Test: EditMode(자세 주소, Entry에 두 자세, 자세의 파일 경로), PlayMode `Battle_AMercenaryShowsItsAttackPoseWhileItsWeaponLunges_AndItsHitPoseWhileItRecoils`. 스크린샷 `ko_23`·`ko_24`(`game/`: 1열 아스트리드의 공격 자세, 2열 세드릭의 피격 자세. 발이 대기 그림과 같은 바닥선에 선다). 확인 결과는 Round 24 README "구현".
 
+## MP4 목업 (2026-10-05)
+
+이 라운드의 MP4 목업은 사용자 지시("목업 mp4는 모두 삭제 해줘")로 지웠다. 휴지통의 `F1-mockup-mp4-20261005/23-motion-six/`에 옮겨 두었다. 다시 보려면 `mock_poses.py`로 만든다(호출 없음). Git의 이력(커밋 `1417cab`)에도 남아 `git restore --source 1417cab -- <파일>`로 되살릴 수 있다. 앞으로 만드는 MP4는 Git에 올리지 않는다(`.gitignore`).

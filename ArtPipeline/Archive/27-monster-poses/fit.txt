@@ -1,0 +1,11 @@
+cave_rat: Height 40, feet (172, 124, 100), game figure x0.4805 at (768, 518), back foot x 1177.3, sole 855.3
+  attack: back foot 1.116, nose 1.014, near ear 1.061 -> median 1.061, colours worst dE 2.1 -> 1.5 moved, x 600..1235, y 519..871 (floor 876)
+  hit: back foot 1.079, nose 0.965, near ear 1.034 -> median 1.034, colours worst dE 1.9 -> 1.2 moved, x 865..1329, y 480..870 (floor 876)
+goblin_archer: Height 68, feet (132, 124, 92), game figure x0.6685 at (705, 267), back foot x 1260.3, sole 871.3
+  attack: back foot 1.045, face 1.013 -> median 1.029, colours worst dE 1.4 -> 1.1 moved, x 651..1313, y 246..877 (floor 876)
+  hit: back foot 0.982, face 1.003 -> median 0.992, colours worst dE 2.3 -> 0.9 moved, x 853..1477, y 245..876 (floor 876)
+goblin_shaman: Height 68, feet (132, 124, 100), game figure x0.6253 at (705, 267), back foot x 1243.6, sole 872.9
+  hit: back foot 1.011, wax 1.022, flask 0.922 -> median 1.011, colours worst dE 10.0 -> 3.4 moved, x 835..1411, y 303..876 (floor 876)
+mine_overseer: Height 97, feet (76, 52, 44), game figure x0.6938 at (684, 182), back foot x 1178.0, sole 872.3
+  attack: back foot 1.031, face 0.995 -> median 1.013, colours worst dE 3.1 -> 0.8 moved, x 312..1266, y 311..949 (floor 876)
+  hit: back foot 0.987, face 0.930 -> median 0.958, colours worst dE 2.4 -> 0.9 moved, x 660..1404, y 167..876 (floor 876)

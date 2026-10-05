@@ -1,0 +1,1 @@
+goblin_shaman attack: back foot 1.065, wax 1.101, flask 1.044 -> median 1.065, colours worst dE 2.7 -> 6.3 as drawn, x 478..1300, y 397..877 (floor 876)

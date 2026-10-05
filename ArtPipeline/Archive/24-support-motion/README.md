@@ -103,3 +103,6 @@
    `game/ko_25_battle_support_pulse.png`(3열 엘라의 맥동과 뒤의 빛), `game/ko_08_map_item_selected.png`(롱소드의 설명 "무기 장비"). 자세 두 장은 `../23-motion-six/game/`.
    스크린샷은 Test의 "긴 첫 전투"(HP 100000, 아이템 없음이라 저절로 발동하지 않음)에서 움직임을 직접 불러 찍었다.
 
+## MP4 목업 (2026-10-05)
+
+이 라운드의 MP4 목업은 사용자 지시("목업 mp4는 모두 삭제 해줘")로 지웠다. 휴지통의 `F1-mockup-mp4-20261005/24-support-motion/`에 옮겨 두었다. 다시 보려면 `mock_support.py`로 만든다(호출 없음). Git의 이력(커밋 `1417cab`)에도 남아 `git restore --source 1417cab -- <파일>`로 되살릴 수 있다. 앞으로 만드는 MP4는 Git에 올리지 않는다(`.gitignore`).
