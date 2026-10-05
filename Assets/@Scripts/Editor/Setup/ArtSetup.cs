@@ -8,6 +8,7 @@ using F1.Data;
 using F1.Editor.Data;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 
 namespace F1.Editor.Setup
 {
@@ -29,10 +30,11 @@ namespace F1.Editor.Setup
         /// <summary>How a kind of art is imported. Everything else is the same for all art.</summary>
         readonly struct ImportPolicy
         {
-            public ImportPolicy(bool cutOut, bool mipMaps, int maxTextureSize, float pixelsPerUnit, int border = 0)
+            public ImportPolicy(bool cutOut, bool mipMaps, bool compressed, int maxTextureSize, float pixelsPerUnit, int border = 0)
             {
                 CutOut = cutOut;
                 MipMaps = mipMaps;
+                Compressed = compressed;
                 MaxTextureSize = maxTextureSize;
                 PixelsPerUnit = pixelsPerUnit;
                 Border = border;
@@ -44,6 +46,13 @@ namespace F1.Editor.Setup
             /// <summary>For art that is shown much smaller than it is drawn.</summary>
             public bool MipMaps { get; }
 
+            /// <summary>
+            /// The texture comes out block-compressed: a quarter of the memory of an uncompressed one, or less. Unity compresses
+            /// a mip-mapped texture only when both of its sides are powers of two and keeps any other size uncompressed (RGBA32),
+            /// whatever compression is asked for; a kind whose canvas is not such a size says so here (2026-10-05).
+            /// </summary>
+            public bool Compressed { get; }
+
             public int MaxTextureSize { get; }
             public float PixelsPerUnit { get; }
 
@@ -51,16 +60,19 @@ namespace F1.Editor.Setup
             public int Border { get; }
         }
 
-        /// <summary>A full-body figure: its canvas is 672x896 and it is shown much smaller than that.</summary>
-        static readonly ImportPolicy Figure = new ImportPolicy(cutOut: true, mipMaps: true, maxTextureSize: 1024, pixelsPerUnit: 100f);
+        /// <summary>
+        /// A full-body figure: its canvas is 672x896 and it is shown much smaller than that. Uncompressed: the canvas (3:4) is
+        /// not a power of two on both sides.
+        /// </summary>
+        static readonly ImportPolicy Figure = new ImportPolicy(cutOut: true, mipMaps: true, compressed: false, maxTextureSize: 1024, pixelsPerUnit: 100f);
 
         /// <summary>A background: its canvas is 2304x1536 and it is shown at about that size, so it is not scaled down.</summary>
-        static readonly ImportPolicy Scene = new ImportPolicy(cutOut: false, mipMaps: false, maxTextureSize: 4096, pixelsPerUnit: 100f);
+        static readonly ImportPolicy Scene = new ImportPolicy(cutOut: false, mipMaps: false, compressed: true, maxTextureSize: 4096, pixelsPerUnit: 100f);
 
-        /// <summary>A piece of the user interface is drawn at twice the size it has on screen.</summary>
+        /// <summary>A piece of the user interface is drawn at twice the size it has on screen. Uncompressed, like a figure: its sizes are not powers of two.</summary>
         static ImportPolicy Interface(int border)
         {
-            return new ImportPolicy(cutOut: true, mipMaps: true, maxTextureSize: 512, pixelsPerUnit: 200f, border: border);
+            return new ImportPolicy(cutOut: true, mipMaps: true, compressed: false, maxTextureSize: 512, pixelsPerUnit: 200f, border: border);
         }
 
         /// <summary>An item's icon is drawn at twice the size of its cell, like an icon of the interface.</summary>
@@ -70,10 +82,11 @@ namespace F1.Editor.Setup
         static readonly ImportPolicy Face = Interface(border: 0);
 
         /// <summary>
-        /// A mercenary's attack or hit pose: the figure canvas in the middle of a canvas three times as wide and an eighth
-        /// deeper (2016x1008). Kept at its size, so that it is as sharp as the figure it stands in for (2026-10-04).
+        /// A unit's attack or hit pose: the figure canvas in the middle of a canvas three times as wide and an eighth deeper
+        /// (2016x1008), in a file of 2048x1024 (scaled by 64/63, powers of two) so that it is compressed (2026-10-05).
+        /// Kept at its size, so that it is as sharp as the figure it stands in for (2026-10-04).
         /// </summary>
-        static readonly ImportPolicy Pose = new ImportPolicy(cutOut: true, mipMaps: true, maxTextureSize: 2048, pixelsPerUnit: 100f);
+        static readonly ImportPolicy Pose = new ImportPolicy(cutOut: true, mipMaps: true, compressed: true, maxTextureSize: 2048, pixelsPerUnit: 100f);
 
         readonly struct ArtFile
         {
@@ -224,9 +237,20 @@ namespace F1.Editor.Setup
                     continue;
                 }
 
-                foreach (string problem in PolicyProblems(importer, file.Policy))
+                List<string> policyProblems = PolicyProblems(importer, file.Policy);
+                foreach (string problem in policyProblems)
                 {
                     problems.Add($"{file.Name}: {problem}. Run F1/Setup/Sync Art.");
+                }
+
+                if (policyProblems.Count == 0 && file.Policy.Compressed)
+                {
+                    var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(file.AssetPath);
+                    if (!GraphicsFormatUtility.IsCompressedFormat(texture.graphicsFormat))
+                    {
+                        problems.Add($"{file.Name}: stored uncompressed ({texture.format}, {texture.width}x{texture.height}). " +
+                            "Unity compresses a mip-mapped picture only when both sides are powers of two.");
+                    }
                 }
             }
 

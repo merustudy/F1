@@ -22,7 +22,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 REPO = ROOT.parent
 sys.path.insert(0, str(TOOLS))
-from fit_pose import FLOOR, OUTPUT, enemy_idle_wide, idle_wide  # noqa: E402
+from fit_pose import FLOOR, OUTPUT, WIDE, enemy_idle_wide, idle_wide  # noqa: E402
 
 FONT = REPO / "Assets/@Fonts/Source/Pretendard/Pretendard-Medium.ttf"
 Z = 0.5
@@ -41,7 +41,9 @@ def characters():
 
 def row(key, hands, enemy=False):
     poses = ("enemy_attack", "enemy_hit") if enemy else ("attack", "hit")
-    images = [enemy_idle_wide(key) if enemy else idle_wide(key)] + [Image.open(OUTPUT / pose / f"{key}.png").convert("RGBA") for pose in poses]
+    # A pose file is its canvas scaled to 2048x1024 (fit_pose.TEXTURE): stood back on the canvas of the figure beside it.
+    images = [enemy_idle_wide(key) if enemy else idle_wide(key)] + [
+        Image.open(OUTPUT / pose / f"{key}.png").convert("RGBA").resize(WIDE, Image.LANCZOS) for pose in poses]
     boxes = [image.getchannel("A").getbbox() for image in images]
     top = min(b[1] for b in boxes) - 12
     bottom = max(b[3] for b in boxes) + 12

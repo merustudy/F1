@@ -29,7 +29,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 │  ├─ cutout.py                # 단색 배경의 그림에서 캐릭터를 오려 낸다. 호출하지 않는다
 │  ├─ cutface.py               # 확정된 전신 그림에서 얼굴을 잘라 낸다 (전투의 보드 패널). 호출하지 않는다
 │  ├─ ui_variants.py           # 맞춘 틀에서 게임에 넣을 Sprite를 만든다: 바탕색을 바꾼 변형. 호출하지 않는다
-│  ├─ fit_pose.py              # 용병과 몬스터의 공격·피격 자세를 확정 그림과 같은 크기·자리의 자세 캔버스(2016x1008)에 세운다. 호출하지 않는다
+│  ├─ fit_pose.py              # 용병과 몬스터의 공격·피격 자세를 확정 그림과 같은 크기·자리의 자세 캔버스(2016x1008)에 세우고 2048x1024 파일로 쓴다. 호출하지 않는다
 │  ├─ review_pose.py           # 자세의 리뷰 시트: 용병마다 대기/공격/피격, 양손 장비의 손(--enemies 는 몬스터). 호출하지 않는다
 │  └─ review_sheet.py          # 리뷰 시트. 호출하지 않는다. 용병(character)은 지금 게임의 용병 전원과 한 줄에 세우고 머리를 같은 배율로 맞대 본다(FACE_BAND, 성별은 Roster의 Gender)
 └─ output/                     # 생성 직후 산출물 (gitignore)
@@ -133,6 +133,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 자세는 확정 그림을 대신해 잠깐 보이므로, 그 그림과 같은 크기·자리에 세운다(`tools/fit_pose.py`. Round 19·23의 규칙).
 
 - 캔버스: 그림 캔버스(672x896)를 가운데에 둔 **2016x1008**(양옆으로 672씩, 바닥선 아래로 112). 바닥선은 그림 캔버스와 같은 높이다. 화면은 그림 자리(225x300)를 가운데에 둔 675x338로 그린다(`12_UI.md` "유닛의 그림").
+- 파일: 캔버스를 64/63배 한 **2048x1024**(두 변이 2의 거듭제곱. 아래 "Import 정책"의 압축). 화면은 캔버스의 비율(2:1, 바닥선 112/1008)로만 그리므로 자리가 그대로다. 맞추기와 리뷰는 2016x1008에서 하고 쓸 때만 늘린다(`fit_pose.texture`).
 - 배율: 자세가 바뀌어도 크기가 그대로인 부위로 잰다. 둥근 금 장식(걸쇠, 리벳, 버클, 징)의 긴 지름을 확정 원본과 자세에서 재어 큰 것 넷의 중앙값의 비. 금 장식이 없거나 가려져 맞지 않으면 소재의 `Scale`로 덮어쓴다
   (Round 23: 대마법사는 지팡이의 수정, 마검사는 부츠의 네모 버클, 성기사 피격은 허리 버클과 머리로 잰 값). 리뷰 시트에서 머리가 대기 그림과 같은 크기로 보이는지 본다.
 - 자리: 디딘 뒷발(부츠 가죽색의 맨 왼쪽 무리)을 확정 그림의 뒷발 자리에 두고, 그 발바닥이 바닥선이다. 돌진에서도 밀림에서도 뒷발은 땅에 있다. 앞발은 들릴 수 있고 무기는 바닥선 아래로 내려갈 수 있다.
@@ -268,12 +269,12 @@ UI의 틀과 아이콘
 3. Entry -> 없다. 화면 Prefab이 Sprite를 직접 가리킨다 (Import 정책은 UI의 것이라 MaxSize 512에 맞춰 384x512로 줄어든다. 그림 자리 225x300의 1.7배)
 
 용병의 공격·피격 자세 (전신 그림이 확정되면 더한다)
-1. PNG   -> Assets/@Art/Pose/Job/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2016x1008)
+1. PNG   -> Assets/@Art/Pose/Job/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2048x1024)
 2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
 몬스터의 공격·피격 자세 (전신 그림이 확정되면 더한다. 2026-10-05)
-1. PNG   -> Assets/@Art/Pose/Enemy/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2016x1008)
+1. PNG   -> Assets/@Art/Pose/Enemy/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2048x1024)
 2. CSV   -> 없다. Figure가 있는 적마다 "pose/enemy/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf, EnemyData.AttackPose/HitPose)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 용병의 자세와 같다)
 
@@ -294,7 +295,10 @@ UI의 틀과 아이콘
 - Import 정책은 Setup 코드 한 곳(`ArtSetup`)이 강제한다. 전신 그림: Sprite(Single), `alphaIsTransparency`, Mipmap, Full Rect, MaxSize 1024, 높은 품질의 압축.
   배경: 같되 불투명(`alphaIsTransparency` 없음), Mipmap 없음(화면에 거의 제 크기로 깔린다), MaxSize 4096(캔버스 2304x1536을 줄이지 않는다).
   UI: 전신 그림과 같되 Pixels Per Unit 200(화면 크기의 2배로 그려져 있다), MaxSize 512, 틀에는 `UiArt`의 Border.
-  자세: 전신 그림과 같되 MaxSize 2048(2016x1008을 줄이지 않아 전신 그림과 같은 선명도. 2026-10-04 "권장안 반영").
+  자세: 전신 그림과 같되 MaxSize 2048(2048x1024를 줄이지 않아 전신 그림과 같은 선명도. 2026-10-04 "권장안 반영").
+  압축: 모두 높은 품질의 압축(BC7)을 요청하지만 Unity는 Mipmap이 있는 텍스처를 두 변이 모두 2의 거듭제곱일 때만 압축하고, 다른 크기는 요청과 상관없이 무압축(RGBA32, 메모리 4배)으로 둔다.
+  그래서 자세의 파일은 2048x1024이고 압축된다. 배경은 Mipmap이 없어 압축된다. 전신 그림(3:4)·UI·아이템 아이콘·얼굴·포션은 무압축이다(2026-10-05, `Archive/31-texture-compression`).
+  압축돼야 하는 종류(자세, 배경)가 무압축으로 Import되면 `ArtSetup.FindProblems`가 잡는다(`ImportPolicy.Compressed`).
   아이템의 아이콘과 유닛의 얼굴: UI의 아이콘과 같다(화면 크기의 2배, Border 없음).
   정책과 다르면 다시 Import한다. Inspector에서 고치지 않는다. 체인의 setup 단계가 부른다.
 - 화면은 열리기 전에 쓸 그림을 `ResourceManager`로 읽어 둔다. Addressables를 직접 부르지 않는다(`12_UI.md` "유닛의 그림", "전투 화면").

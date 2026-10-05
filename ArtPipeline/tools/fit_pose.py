@@ -15,11 +15,14 @@ that figure (Docs/Architecture/13_ART_PIPELINE.md "후처리 (pose)", the rules 
 - Place: the pose canvas is three figure canvases wide and an eighth deeper (2016x1008): the figure canvas (672x896) in
   the middle, its floor line where the figure's is. The pose's back foot (the leftmost boot) stands where the approved
   figure's back foot is and its sole on the floor line; a weapon may come down below it, into the room under the line.
+- File: the canvas scaled by 64/63 to 2048x1024, a power of two on both sides. Unity block-compresses a mip-mapped
+  texture only at such a size and stores any other size uncompressed, at four times the memory (round 31). The screen
+  draws a pose by its canvas's proportions (2:1, the floor line 112 of 1008 up), which the scaling keeps.
 - Colours: each main colour of the pose (the approved raw's, found by quantizing it) is moved by the difference of its
   mean from the approved figure's, the ink and the white held where they are; kept only when the worst colour comes
   nearer (CIE76 delta E).
 - The ring around the silhouette is the figures' (FIGURE_OUTLINE, UI_LINE).
-Writes output/<type>/<key>.png: the file that goes to Assets/@Art/Pose/Job/<key>_<type>.png.
+Writes output/<type>/<key>.png (2048x1024): the file that goes to Assets/@Art/Pose/Job/<key>_<type>.png.
 
 A monster's pose (enemy_attack, enemy_hit; rounds 26 to 28) is stood the same way, turned for a creature that faces left
 and stands on bare feet, paws or boots:
@@ -33,7 +36,7 @@ and stands on bare feet, paws or boots:
   ArtPipeline/Archive/26-monster-motion, 27-monster-poses, 28-shaman-weapon).
 - Place: the back foot on the back foot of the game's figure, placed as gen_image.fit_figure places it (Rosters/enemy.csv's
   Height, bound by the canvas width), in the middle of the pose canvas. Colours and the ring as a mercenary's.
-Writes output/<type>/<key>.png: the file that goes to Assets/@Art/Pose/Enemy/<key>_<attack|hit>.png.
+Writes output/<type>/<key>.png (2048x1024): the file that goes to Assets/@Art/Pose/Enemy/<key>_<attack|hit>.png.
 """
 import argparse
 import colorsys
@@ -58,6 +61,7 @@ FOOT_BRIDGE = 9                       # the feet's mask grows by this filter to 
 BELOW = 112
 SIDE = FIGURE_CANVAS[0]               # room beside the figure canvas, on each side
 WIDE = (FIGURE_CANVAS[0] + 2 * SIDE, FIGURE_CANVAS[1] + BELOW)
+TEXTURE = (2048, 1024)                # the file: WIDE scaled by 64/63, powers of two so that Unity compresses it
 FLOOR = FIGURE_CANVAS[1] - FIGURE_FLOOR_MARGIN
 DISCS = 4                             # how many of the largest discs are compared
 NEAR = 26                             # a pixel belongs to a main colour within this distance (RGB)
@@ -248,6 +252,11 @@ def place(raw, ratio, origin, box):
     return ring(canvas)
 
 
+def texture(canvas):
+    """The pose canvas as the file the game imports: scaled to TEXTURE, its proportions kept."""
+    return canvas.resize(TEXTURE, Image.LANCZOS)
+
+
 def roster_scales(kind):
     """Key -> the roster's Scale of a pose type, where one is written."""
     with (ROSTERS / f"{kind}.csv").open(encoding="utf-8", newline="") as handle:
@@ -293,7 +302,7 @@ def fit_pose(kind, key, scales):
     matched = match_colours(raw, main, approved_means)
     before, after = worst(means(raw, main), approved_means), worst(means(matched, main), approved_means)
     out = OUTPUT / kind / f"{key}.png"
-    place(matched if after < before else raw, r, origin, b).save(out)
+    texture(place(matched if after < before else raw, r, origin, b)).save(out)
     below = origin[1] + round((b[3] - b[1]) * r) - FLOOR
     right = origin[0] + round((b[2] - b[0]) * r)
     print(f"{kind}/{key}: discs {[round(d) for d in pose_discs[:DISCS]]} against {[round(d) for d in approved_discs[:DISCS]]} -> "
@@ -410,7 +419,7 @@ def fit_enemy_pose(kind, key, scales):
     matched = match_colours(raw, main, approved_means)
     before, after = worst(means(raw, main), approved_means), worst(means(matched, main), approved_means)
     out = OUTPUT / kind / f"{key}.png"
-    place(matched if after < before else raw, r, origin, b).save(out)
+    texture(place(matched if after < before else raw, r, origin, b)).save(out)
     right, bottom = origin[0] + round((b[2] - b[0]) * r), origin[1] + round((b[3] - b[1]) * r)
     print(f"{kind}/{key}: feet {colour}, Scale {scales[key]}, colours worst dE {before:.1f} -> {after:.1f} {'moved' if after < before else 'as drawn'}, "
           f"x {origin[0]}..{right}, {bottom - FLOOR:+d} below the floor -> {out.relative_to(ROOT.parent)}")
