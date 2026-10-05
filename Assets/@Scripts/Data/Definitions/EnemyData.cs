@@ -95,6 +95,14 @@ namespace F1.Data
         /// <summary>The address of the face cut out of the figure (<see cref="ArtAddress.FaceOf"/>). Null when the enemy has no figure.</summary>
         [JsonIgnore]
         public string Face => ArtAddress.FaceOf(Figure);
+
+        /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the enemy has no figure.</summary>
+        [JsonIgnore]
+        public string AttackPose => ArtAddress.PoseOf(Figure, ArtAddress.Attack);
+
+        /// <summary>The address of the hit pose drawn after the figure. Null when the enemy has no figure.</summary>
+        [JsonIgnore]
+        public string HitPose => ArtAddress.PoseOf(Figure, ArtAddress.Hit);
     }
 
     /// <summary>A set of enemies that fights together, and where in a dungeon it appears.</summary>

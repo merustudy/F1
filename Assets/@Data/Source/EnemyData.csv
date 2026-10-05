@@ -2,5 +2,5 @@ Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale
 cave_rat,동굴 쥐,Cave Rat,2,40,rat_bite:10,unit/enemy/cave-rat,100
 goblin_raider,고블린 약탈자,Goblin Raider,4,80,rusty_blade:15,unit/enemy/goblin-raider,100
 goblin_archer,고블린 궁수,Goblin Archer,4,55,crude_bow:14,unit/enemy/goblin-archer,100
-goblin_shaman,고블린 주술사,Goblin Shaman,5,60,hex_spit:10+mending_chant:12,unit/enemy/goblin-shaman,100
+goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_chant:12,unit/enemy/goblin-shaman,100
 mine_overseer,광산 감독관,Mine Overseer,9,300,overseer_maul:27+overseer_roar:22,unit/enemy/mine-overseer,150

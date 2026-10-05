@@ -218,12 +218,12 @@
       "Icon": "item/herb-pouch"
     },
     {
-      "Id": "hex_spit",
+      "Id": "lantern_staff",
       "Name": {
-        "en-US": "Hex Spit",
-        "ko-KR": "저주의 침"
+        "en-US": "Lantern Staff",
+        "ko-KR": "등불 지팡이"
       },
-      "Category": "Attack",
+      "Category": "Weapon",
       "Size": 1,
       "CooldownMs": 3800,
       "Rows": {
@@ -239,7 +239,7 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/hex-spit"
+      "Icon": "item/lantern-staff"
     },
     {
       "Id": "longbow",

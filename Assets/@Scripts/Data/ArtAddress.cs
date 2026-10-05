@@ -50,8 +50,9 @@ namespace F1.Data
 
         /// <summary>
         /// The address of a pose of a unit: the figure's address under "pose", with the pose after its last segment
-        /// ("unit/job/knight" is "pose/job/knight-attack"). A mercenary's attack and hit poses are drawn after its figure
-        /// is approved (Docs/Design/10 §2), so a job that has a figure has both and the data names only the figure.
+        /// ("unit/job/knight" is "pose/job/knight-attack"). A unit's attack and hit poses are drawn after its figure is
+        /// approved (Docs/Design/10 §2, §5: the mercenaries' and the monsters'), so a job or an enemy that has a figure has
+        /// both and the data names only the figure.
         /// Null for a unit without a figure.
         /// </summary>
         /// <param name="pose"><see cref="Attack"/> or <see cref="Hit"/>.</param>

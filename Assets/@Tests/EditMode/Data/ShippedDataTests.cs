@@ -135,7 +135,7 @@ namespace F1.Tests
             Assert.AreEqual(ItemCategory.Weapon, data.Items.Get("healing_staff").Category);
             Assert.AreEqual(ItemCategory.Armor, data.Items.Get("buckler").Category);
             Assert.AreEqual(ItemCategory.Attack, data.Items.Get("ember_flask").Category);
-            Assert.AreEqual(ItemCategory.Attack, data.Items.Get("hex_spit").Category);
+            Assert.AreEqual(ItemCategory.Weapon, data.Items.Get("lantern_staff").Category);
             foreach (string support in new[] { "ward_charm", "herb_pouch", "mending_chant" })
             {
                 Assert.AreEqual(ItemCategory.Support, data.Items.Get(support).Category, support);

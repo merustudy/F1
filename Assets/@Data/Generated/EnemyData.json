@@ -62,7 +62,7 @@
       "MaxHp": 60,
       "Items": [
         {
-          "ItemId": "hex_spit",
+          "ItemId": "lantern_staff",
           "Grade": 10
         },
         {

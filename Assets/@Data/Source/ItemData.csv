@@ -16,7 +16,7 @@ ember_flask,불씨 플라스크,Ember Flask,Attack,1,4500,all,Burn,EnemyFront,1,
 rat_bite,물어뜯기,Bite,Weapon,1,2000,front:2,Damage,EnemyFront,1,100,,,,,0,item/rat-bite
 rusty_blade,녹슨 칼,Rusty Blade,Weapon,1,2800,front:2,Damage,EnemyFront,1,100,,,,,0,item/rusty-blade
 crude_bow,조잡한 활,Crude Bow,Weapon,1,3400,back:3,Damage,EnemyBack,1,90,,,,,0,item/crude-bow
-hex_spit,저주의 침,Hex Spit,Attack,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0,item/hex-spit
+lantern_staff,등불 지팡이,Lantern Staff,Weapon,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0,item/lantern-staff
 mending_chant,치유 주문,Mending Chant,Support,1,5500,back:3,Heal,AllyLowestHp,,100,,,,,0,item/mending-chant
 overseer_maul,감독관의 망치,Overseer's Maul,Weapon,1,4500,front:2,Damage,EnemyFront,1,150,,,,,0,item/overseer-maul
 overseer_roar,감독관의 포효,Overseer's Roar,Weapon,1,6000,front:2,Damage,EnemyAll,,60,,,,,0,item/overseer-roar

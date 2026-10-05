@@ -258,6 +258,12 @@ namespace F1.Tests
             Assert.AreEqual("pose/job/x-hit", job.HitPose);
             Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).AttackPose, "No pose without a figure.");
             Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).HitPose);
+            var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
+            var enemy = new EnemyData("goblin_raider", name, 1, 10, items, "unit/enemy/goblin-raider");
+            Assert.AreEqual("pose/enemy/goblin-raider-attack", enemy.AttackPose, "A monster has its poses too (Docs/Design/10 §5).");
+            Assert.AreEqual("pose/enemy/goblin-raider-hit", enemy.HitPose);
+            Assert.IsNull(new EnemyData("x", name, 1, 10, items).AttackPose, "No pose without a figure.");
+            Assert.IsNull(new EnemyData("x", name, 1, 10, items).HitPose);
             Assert.AreEqual("pose/job/goblin-raider-hit", ArtAddress.PoseOf("unit/job/goblin-raider", ArtAddress.Hit));
             Assert.IsNull(ArtAddress.PoseOf(null, ArtAddress.Attack));
         }
