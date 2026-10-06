@@ -77,11 +77,11 @@ namespace F1.Tests
             yield return WaitForRedraw();
         }
 
-        /// <summary>Waits until no kill moment is shown: its fallen have gone and the dark and the zoom are back.</summary>
+        /// <summary>Waits until no moment is shown on the stage: a kill moment's fallen have gone and the dark and the zoom are back.</summary>
         public static IEnumerator WaitForTheKillMoment(BattleScreen battle, float timeoutSeconds = DefaultTimeoutSeconds)
         {
             float deadline = Time.realtimeSinceStartup + timeoutSeconds;
-            while (battle.KillMomentShown)
+            while (battle.MomentShown)
             {
                 if (Time.realtimeSinceStartup > deadline)
                 {
@@ -211,9 +211,35 @@ namespace F1.Tests
             yield return WaitForRedraw();
         }
 
+        /// <summary>The camp window on the node map, and its rest and mend cards.</summary>
+        public const string CampBox = "Frame/Map/Camp/CampWindow/CampBox";
+        public const string CampRest = CampBox + "/CampChoices/Rest";
+        public const string CampMend = CampBox + "/CampChoices/Mend";
+
+        /// <summary>
+        /// On the node map, goes into the first node that can be chosen: a battle opens the battle screen; a camp opens its
+        /// window over the map, where the party rests, and the map is shown again.
+        /// </summary>
+        public static IEnumerator GoIntoTheFirstNode()
+        {
+            NodeMapScreen map = Screen<NodeMapScreen>();
+            Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            Click(map, "Frame/BoardPanel/Enter");
+            if (Managers.Expedition.Phase != GamePhase.Camp)
+            {
+                yield return WaitForScreen(ScreenId.Battle);
+                yield break;
+            }
+
+            yield return WaitForRedraw();
+            Click(map, CampRest);
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            yield return WaitForRedraw();
+        }
+
         /// <summary>
         /// From the title: a new run, a full party with a champion in row 1 (<see cref="StageChampion"/>), every battle on the
-        /// way won and every reward skipped, and the boss's battle entered and left paused at its start.
+        /// way won and every reward skipped, a rest at every camp, and the boss's battle entered and left paused at its start.
         /// </summary>
         public static IEnumerator EnterTheBossBattle()
         {
@@ -228,14 +254,11 @@ namespace F1.Tests
             int guard = 0;
             while (true)
             {
-                Assert.Less(++guard, 50, "The boss was not reached.");
+                Assert.Less(++guard, 100, "The boss was not reached.");
                 switch (Managers.Expedition.Phase)
                 {
                     case GamePhase.NodeMap:
-                        NodeMapScreen map = Screen<NodeMapScreen>();
-                        Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-                        Click(map, "Frame/BoardPanel/Enter");
-                        yield return WaitForScreen(ScreenId.Battle);
+                        yield return GoIntoTheFirstNode();
                         break;
 
                     case GamePhase.Battle:
@@ -314,6 +337,64 @@ namespace F1.Tests
             {
                 Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The battle ended before anyone was at death's door.");
                 Managers.Expedition.AdvanceBattle(100);
+            }
+
+            yield return WaitForRedraw();
+        }
+
+        /// <summary>
+        /// From the title: a new run, a full party, the first node, and its battle advanced (and left paused) to the moment a
+        /// mercenary (the valkyrie, in row 1) broke down at the fatigue threshold (round 36). Staged: everyone leaves a few hits short of the threshold
+        /// after the entry cost (far enough that the breakdown cannot come in the frames before the clock is paused), with so
+        /// much HP and so weak a weapon that the battle lasts until somebody has been hit that often (a hit raises the fatigue;
+        /// a kill would bring it down).
+        /// </summary>
+        public static IEnumerator ReachABreakdownInTheFirstBattle()
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            FillParty(Screen<LobbyScreen>());
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+
+            BalanceData balance = Managers.Data.Data.Balance;
+            Assume.That(balance.FatigueOnHit, Is.GreaterThan(0), "A hit raises fatigue.");
+            IReadOnlyList<ExpeditionMember> members = Managers.Expedition.Expedition.Members;
+            foreach (ExpeditionMember member in members)
+            {
+                member.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, member.Items) - 6 * balance.FatigueOnHit;
+                member.MaxHp = 100000;
+                member.Hp = member.MaxHp;
+                member.Items[0] = new EquippedItem(member.Items[0].Item, 1);
+            }
+
+            // The valkyrie stands in row 1, where the hits land: hers are the state poses drawn so far (round 38).
+            ExpeditionMember valkyrie = members.Single(m => m.JobId == "valkyrie");
+            ExpeditionMember front = members.Single(m => m.Row == BattleRows.Front);
+            if (valkyrie != front)
+            {
+                front.Row = valkyrie.Row;
+                valkyrie.Row = BattleRows.Front;
+            }
+
+            NodeMapScreen map = Screen<NodeMapScreen>();
+            Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            Click(map, "Frame/BoardPanel/Enter");
+            yield return WaitForScreen(ScreenId.Battle);
+            Screen<BattleScreen>().Clock.Paused = true;
+            yield return WaitForRedraw();
+
+            // Small steps with a frame between them, so that the breakdown is still recent when it is drawn, and is drawn in the
+            // frame it is reached (the caller sees its banner at its start).
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            Assert.IsFalse(engine.Events.Any(e => e.Kind == BattleEventKind.BrokeDown), "The breakdown came before the clock was paused: stage more hits.");
+            int guard = 0;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.BrokeDown))
+            {
+                Assert.AreEqual(BattleResult.Ongoing, engine.Result, "The battle ended before anyone broke down.");
+                Assert.Less(guard++, 1200, "Nobody broke down within two minutes of battle.");
+                Managers.Expedition.AdvanceBattle(100);
+                yield return null;
             }
 
             yield return WaitForRedraw();

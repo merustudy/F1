@@ -11,7 +11,8 @@ namespace F1.UI
     /// attack and hit poses, the icons of the items and the bottles of the potions. A screen loads it before it opens, so its views
     /// ask for a picture without waiting. A unit or an item whose data names no art has none, and
     /// its view shows the placeholder (the silhouette, the item's name); art that is named but
-    /// does not load fails the screen.
+    /// does not load fails the screen. The poses of a breakdown and of a virtue (round 38) are the one
+    /// exception: drawn job by job, they are loaded where they are registered and are null where they are not.
     /// </summary>
     public sealed class ExpeditionArt
     {
@@ -39,7 +40,31 @@ namespace F1.UI
                 }
             }
 
+            foreach (string address in OptionalAddresses(data))
+            {
+                if (!sprites.ContainsKey(address) && await resource.ExistsAsync(address))
+                {
+                    sprites.Add(address, await resource.LoadAsync<Sprite>(address, ResourceScope.Expedition));
+                }
+            }
+
             return new ExpeditionArt(data, sprites);
+        }
+
+        /// <summary>
+        /// The addresses the data names but a job may not have yet: the poses of a breakdown and of a virtue (round 38), drawn job by job
+        /// and loaded where they are registered.
+        /// </summary>
+        public static IEnumerable<string> OptionalAddresses(StaticData data)
+        {
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                if (job.Figure != null)
+                {
+                    yield return job.BrokenPose;
+                    yield return job.ResolutePose;
+                }
+            }
         }
 
         /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its two poses), then the items, then the potions, each in id order.</summary>
@@ -118,6 +143,21 @@ namespace F1.UI
             return Of(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).HitPose);
         }
 
+        /// <summary>
+        /// A mercenary's pose for the moment of a breakdown (an affliction, or the collapse; round 38): its job's. Null when the job has
+        /// no figure or the pose is not drawn yet, and the figure stands through the moment.
+        /// </summary>
+        public Sprite BrokenPoseOfMercenary(string mercenaryId)
+        {
+            return OfOptional(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).BrokenPose);
+        }
+
+        /// <summary>A mercenary's pose for the moment of a virtue, as <see cref="BrokenPoseOfMercenary"/>.</summary>
+        public Sprite ResolutePoseOfMercenary(string mercenaryId)
+        {
+            return OfOptional(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).ResolutePose);
+        }
+
         /// <summary>An enemy's attack pose (Docs/Design/10 §5). Null when the enemy has no figure.</summary>
         public Sprite AttackPoseOfEnemy(string enemyId)
         {
@@ -145,6 +185,12 @@ namespace F1.UI
         Sprite Of(string address)
         {
             return address == null ? null : _sprites[address];
+        }
+
+        /// <summary>A picture that may not be there: null for an address that was not registered.</summary>
+        Sprite OfOptional(string address)
+        {
+            return address != null && _sprites.TryGetValue(address, out Sprite sprite) ? sprite : null;
         }
     }
 }

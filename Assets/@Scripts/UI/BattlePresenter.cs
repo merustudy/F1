@@ -13,8 +13,8 @@ namespace F1.UI
     /// cell, a fallen enemy fades and a fallen mercenary turns into a grave (the screen shows it and
     /// keeps the party's places meanwhile), an enemy felled by a unit's item is a kill moment (the
     /// screen slows, darkens and draws in on the two, then lets the enemy fade; Docs/Design/10 §5),
-    /// a heavy blow shakes the stage, the storm's lightning flashes,
-    /// and each event that reads as a sentence goes to the panel's captions. Each event asks for its sound
+    /// a heavy blow shakes the stage, the storm's lightning flashes, a breakdown is a moment the screen plays
+    /// (round 38, B: the slow, the dark, the zoom, the state pose, the burst and the word), and each event that reads as a sentence goes to the panel's captions. Each event asks for its sound
     /// (Docs/Architecture/14_SOUND.md "소리를 내는 자리"), so a skipped event makes none either. It reads the event
     /// log the engine has already settled and never changes anything in it. Only what just
     /// happened is played: when a long stretch of battle arrives at once (a continued battle,
@@ -42,6 +42,7 @@ namespace F1.UI
         readonly Func<bool> _killMoments;
         readonly Action<UnitRef, UnitRef> _killMoment;
         readonly Action<SoundEffect> _sound;
+        readonly Action<UnitRef, FatigueStateData> _breakdown;
         int _played;
 
         /// <param name="unitView">The stage view of a unit, or null when it has none.</param>
@@ -54,6 +55,8 @@ namespace F1.UI
         /// <param name="killMoment">Plays an enemy's fall to a unit's item as a kill moment, the striker first: the screen's to
         /// do, as it slows the battle and holds the fallen until the moment is over, then lets it fade with its words.</param>
         /// <param name="sound">Plays a sound effect. Without it the battle is silent.</param>
+        /// <param name="breakdown">Plays the moment of a mercenary's breakdown into a state (or, with a null state, its collapse at the most
+        /// fatigue): the screen's to do, as it slows the battle and lights the unit as for a kill moment. Without it only the sound plays.</param>
         public BattlePresenter(
             BattleEngine engine,
             StaticData data,
@@ -65,7 +68,8 @@ namespace F1.UI
             Action<UnitRef> partyFell = null,
             Func<bool> killMoments = null,
             Action<UnitRef, UnitRef> killMoment = null,
-            Action<SoundEffect> sound = null)
+            Action<SoundEffect> sound = null,
+            Action<UnitRef, FatigueStateData> breakdown = null)
         {
             _engine = engine;
             _data = data;
@@ -78,6 +82,7 @@ namespace F1.UI
             _killMoments = killMoments;
             _killMoment = killMoment;
             _sound = sound;
+            _breakdown = breakdown;
 
             // What happened before the screen opened (a battle continued from a save) is not replayed.
             _played = engine.Events.Count;
@@ -205,6 +210,21 @@ namespace F1.UI
                     _fx.Shake(4f);
                     _fx.Float(_clock, UiStrings.Get(UiKeys.Fx.Storm, e.A), UiPalette.Burn, true);
                     Sound(SoundEffect.Thunder);
+                    break;
+                case BattleEventKind.BrokeDown:
+                {
+                    // The breakdown (round 38, B): the screen plays its moment. An affliction sounds as death's door does, a virtue as a
+                    // death roll survived: the nearest of the shipped sounds (Docs/Architecture/14_SOUND.md).
+                    FatigueStateData state = _data.FatigueStates.Get(e.Id);
+                    _breakdown?.Invoke(e.Target, state);
+                    Sound(state.Kind == FatigueStateKind.Virtue ? SoundEffect.Survived : SoundEffect.DeathsDoor);
+                    break;
+                }
+
+                case BattleEventKind.Collapsed:
+                    // The collapse at the most fatigue: the breakdown's moment with its own words. What it brings (death's door, or the
+                    // death) is logged right after and plays as its own event, with its words, shake and sound.
+                    _breakdown?.Invoke(e.Target, null);
                     break;
             }
         }

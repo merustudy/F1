@@ -69,7 +69,7 @@ namespace F1.UI
                 RewardOption reward = rewards[i];
                 if (reward.Kind == RewardKind.Item)
                 {
-                    var item = new EquippedItem(data.Items.Get(reward.Id), reward.Grade);
+                    var item = new EquippedItem(data.Items.Get(reward.Id), reward.Grade, tier: reward.Tier);
                     bool selected = i == _selectedOption;
                     _options[i].Show(
                         UiStrings.Get(UiKeys.Reward.Item),
@@ -77,7 +77,8 @@ namespace F1.UI
                         UiText.ItemDetails(item),
                         UiStrings.Get(selected ? UiKeys.Reward.Selected : UiKeys.Reward.Select),
                         selected,
-                        true);
+                        true,
+                        reward.Tier);
                 }
                 else
                 {
@@ -96,6 +97,7 @@ namespace F1.UI
             // With an item picked, the boards show where it can go; otherwise the party side is its usual self.
             int option = _selectedOption;
             _party.ExternalCanPlace = option < 0 ? null : (member, cell) => manager.CanPlaceReward(option, member, cell);
+            _party.ExternalMerges = option < 0 ? null : (member, cell) => manager.RewardMergesAt(option, member, cell);
             _toInventory.interactable = option >= 0 && manager.CanTakeRewardToInventory(option);
             _inventoryToggleLabel.text = UiStrings.Get(_party.InventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
             _party.Refresh();

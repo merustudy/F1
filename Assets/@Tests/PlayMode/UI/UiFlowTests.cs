@@ -7,6 +7,7 @@ using F1.Flow;
 using F1.Gameplay;
 using F1.UI;
 using NUnit.Framework;
+using TMPro;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -185,14 +186,8 @@ namespace F1.Tests
                 switch (Managers.Expedition.Phase)
                 {
                     case GamePhase.NodeMap:
-                    {
-                        NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
-                        MapNodeView node = UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable);
-                        UiTestUtil.Click(node.Button);
-                        UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
-                        yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+                        yield return UiTestUtil.GoIntoTheFirstNode();
                         break;
-                    }
 
                     case GamePhase.Battle:
                     {
@@ -395,6 +390,60 @@ namespace F1.Tests
             yield return TaskUtil.Await(first);
             Assert.AreEqual(ScreenId.Lobby, Managers.UI.CurrentId);
             Assert.IsFalse(Managers.UI.IsBusy);
+        }
+
+        [UnityTest]
+        public IEnumerator Lobby_FatigueShowsAsTenPips_RedFromTheBreakdownOn()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            BalanceData balance = Managers.Data.Data.Balance;
+            Assume.That(balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 20.");
+            Assume.That(balance.FatigueBreakdown, Is.EqualTo(100));
+
+            // A fresh mercenary: ten empty pips, violet words.
+            RosterEntryView fresh = UiTestUtil.Views<RosterEntryView>(lobby)[0];
+            Assert.AreEqual(10, fresh.FatiguePips.Count);
+            Assert.IsTrue(fresh.FatiguePips.All(p => p.Ratio == 0f));
+            Assert.AreEqual(UiPalette.Fatigue, fresh.Fatigue.color);
+
+            // 128: five full violet pips, then one full and one 8/20 red one, then nothing; the words red.
+            RunRules.FindMercenary(Managers.Run.Run, Managers.Run.Run.Roster[0].Id).Fatigue = 128;
+            lobby.Refresh();
+            yield return null;
+            RosterEntryView tired = UiTestUtil.Views<RosterEntryView>(lobby)[0];
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, tired.FatiguePips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f));
+            Assert.IsTrue(tired.FatiguePips.Take(5).All(p => p.FillColor == UiPalette.FatigueBar));
+            Assert.IsTrue(tired.FatiguePips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
+            Assert.AreEqual(UiPalette.FatigueDanger, tired.Fatigue.color);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Fatigue, 128, 200), tired.Fatigue.text);
+        }
+
+        /// <summary>A mercenary that came home in an affliction (round 36): its name after the fatigue words, and what it does at the right end of the passive's line.</summary>
+        [UnityTest]
+        public IEnumerator Lobby_AMercenaryThatCameHomeAfflicted_IsNamedWithItsStateAndWhatItDoes()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            StaticData data = Managers.Data.Data;
+            FatigueStateData fearful = data.FatigueStates.Get("fearful");
+            MercenaryState tired = Managers.Run.Run.Roster[0];
+            tired.Fatigue = 128;
+            tired.AfflictionId = fearful.Id;
+            lobby.Refresh();
+            yield return null;
+
+            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            string words = UiStrings.Get(UiKeys.Lobby.Fatigue, 128, data.Balance.MaxFatigue);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.FatigueState, words, UiText.FatigueStateName(fearful)), entries[0].Fatigue.text);
+            Assert.AreEqual(UiPalette.FatigueDanger, entries[0].Fatigue.color);
+            Assert.AreEqual(UiText.Name(fearful.Description), entries[0].State.text);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Fatigue, 0, data.Balance.MaxFatigue), entries[1].Fatigue.text, "The others: the words alone.");
+            Assert.AreEqual(string.Empty, entries[1].State.text);
         }
 
         [UnityTest]
@@ -729,6 +778,520 @@ namespace F1.Tests
             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
             yield return null;
             Assert.IsFalse(party.InventoryPanel.activeSelf);
+        }
+
+        [UnityTest]
+        public IEnumerator PartySide_EquipmentShowsItsFatigue_OnItsCell_AndInAllOnTheHeadOfTheBoard()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            // Found on the way: a weapon and an armor cost fatigue, a support item does not; the base weapon never does.
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            Assert.AreEqual(string.Empty, row1.FatigueTotal, "Only the base weapon: nothing on the head.");
+            front.Items.Add(new EquippedItem(data.Items.Get("dagger"), 8));
+            front.Items.Add(new EquippedItem(data.Items.Get("buckler"), 8));
+            front.Items.Add(new EquippedItem(data.Items.Get("herb_pouch"), 8));
+            map.Refresh();
+            yield return null;
+
+            int cost = data.Balance.FatigueEquipment;
+            Assert.AreEqual(string.Empty, row1.Slots[0].FatigueTag, "The base weapon.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.FatigueTag, cost), row1.Slots[1].FatigueTag, "The dagger.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.FatigueTag, cost), row1.Slots[2].FatigueTag, "The buckler.");
+            Assert.AreEqual(string.Empty, row1.Slots[3].FatigueTag, "The herb pouch.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.FatigueTotal, 2 * cost), row1.FatigueTotal);
+            Assert.AreEqual(string.Empty, party.ColumnOfRow(2).FatigueTotal, "Another board with only its base weapon.");
+
+            // The chosen item's line says what it costs, or that a base weapon costs nothing.
+            string detail = UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail");
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.FatigueCost, cost), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.BaseWeapon), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            Assert.AreNotEqual(detail, UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+        }
+
+        /// <summary>
+        /// The fatigue under a member's feet (round 36, C) and its state: the pips fill as in the lobby, the state line names the job
+        /// and the state in its colour, and a click on the line explains the state on the detail line; a click again, or a click on
+        /// a cell, puts it down.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PartySide_FatigueShowsAsPipsUnderTheHpBar_AndAStateIsNamedAndExplainedOnClick()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            Assume.That(data.Balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 20.");
+            Assume.That(data.Balance.FatigueBreakdown, Is.EqualTo(100));
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            PartyColumnView row2 = party.ColumnOfRow(2);
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            Assert.AreEqual(10, row1.FatiguePips.Count);
+            Assert.IsTrue(row1.FatiguePips.All(p => p.Ratio == 0f), "Fresh.");
+            Assert.AreEqual(UiText.Job(front.JobId), row1.JobLine);
+            Assert.IsFalse(row1.StateButton.interactable, "No state: the line takes no click.");
+
+            // 128 and fearful: five full violet pips, one full and one 8/20 red one; the job, then the affliction in red.
+            FatigueStateData fearful = data.FatigueStates.Get("fearful");
+            front.Fatigue = 128;
+            front.StateId = fearful.Id;
+            map.Refresh();
+            yield return null;
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, row1.FatiguePips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f));
+            Assert.IsTrue(row1.FatiguePips.Take(5).All(p => p.FillColor == UiPalette.FatigueBar));
+            Assert.IsTrue(row1.FatiguePips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
+            Assert.AreEqual(UiText.JobLine(front.JobId, fearful), row1.JobLine);
+            StringAssert.Contains(UiText.FatigueStateName(fearful), row1.JobLine);
+            StringAssert.Contains(ColorUtility.ToHtmlStringRGB(UiPalette.FatigueDanger), row1.JobLine);
+            Assert.IsTrue(row1.StateButton.interactable);
+            Assert.IsTrue(row2.FatiguePips.All(p => p.Ratio == 0f), "The others are fresh.");
+            Assert.IsFalse(row2.StateButton.interactable);
+
+            // The click explains the state; another puts it down.
+            string hint = UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail");
+            UiTestUtil.Click(row1.StateButton);
+            yield return null;
+            Assert.AreEqual(UiText.FatigueStateDetail(fearful), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            StringAssert.Contains(UiText.Name(fearful.Description), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            UiTestUtil.Click(row1.StateButton);
+            yield return null;
+            Assert.AreEqual(hint, UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+
+            // A virtue in gold; a cell click puts the state down.
+            FatigueStateData focused = data.FatigueStates.Get("focused");
+            front.Fatigue = 40;
+            front.StateId = focused.Id;
+            map.Refresh();
+            yield return null;
+            StringAssert.Contains(ColorUtility.ToHtmlStringRGB(UiPalette.Virtue), row1.JobLine);
+            UiTestUtil.Click(row1.StateButton);
+            yield return null;
+            StringAssert.Contains(UiText.Name(focused.Description), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return null;
+            StringAssert.DoesNotContain(UiText.Name(focused.Description), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+        }
+
+        /// <summary>
+        /// In battle the party's units carry the fatigue pips (the enemies none), and the breakdown at the threshold is a moment on the
+        /// stage (round 38, B): the battle slows, the stage darkens but the unit and draws in on it, the unit holds its state pose with the
+        /// glow and the burst behind it and the state's word over its head, a caption and a sound; then everything goes and the state's
+        /// name stays under its feet. The valkyrie breaks down: hers are the state poses drawn so far.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_PartyUnitsShowFatiguePips_AndABreakdownIsAMomentOnTheStage()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachABreakdownInTheFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            BalanceData balance = engine.Setup.Balance;
+            float pip = (float)balance.MaxFatigue / FatiguePips.Count;
+
+            BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(battle);
+            foreach (BattleUnitView unit in units)
+            {
+                Assert.AreEqual(unit.Unit.Side == BattleSide.Party, unit.PipsShown, "Only a mercenary has fatigue: " + unit.name);
+                if (unit.Unit.Side == BattleSide.Party)
+                {
+                    Assert.AreEqual(unit.Unit.Fatigue / pip, unit.FatiguePips.Sum(p => p.Ratio), 0.01f, "The pips hold the fatigue, a tenth each.");
+                }
+            }
+
+            BattleEvent down = engine.Events.First(e => e.Kind == BattleEventKind.BrokeDown);
+            FatigueStateData state = Managers.Data.Data.FatigueStates.Get(down.Id);
+            bool virtue = state.Kind == FatigueStateKind.Virtue;
+            BattleUnitView broken = units.Single(u => u.Unit.Ref.Equals(down.Target));
+            Assert.AreEqual("valkyrie", Managers.Data.Data.Mercenaries.Get(broken.Unit.Setup.SourceId).JobId, "The valkyrie, staged in row 1, broke down.");
+
+            // A quarter of a second in: the slow stretch, the dark and the zoom at full, the pose held, the burst and the word on.
+            yield return new WaitForSecondsRealtime(0.25f);
+            Assert.IsTrue(battle.BreakdownMomentShown, "The breakdown is a moment on the stage.");
+            Assert.IsTrue(battle.MomentSlows, "The moment holds the battle slow.");
+            Assert.Greater(battle.KillDarkness, 0.5f, "The rest of the stage is dark.");
+            Assert.Greater(battle.StageZoom, 1.1f, "The stage is drawn in on the unit.");
+            Assert.Less(battle.KillDarkLayer.GetSiblingIndex(), broken.transform.parent.GetSiblingIndex(), "The unit stands over the dark.");
+            Assert.IsTrue(broken.HoldsPose, "The unit holds its state pose.");
+            Assert.IsTrue(broken.Figure.ShowsPose);
+            Assert.AreEqual(virtue ? "valkyrie_resolute" : "valkyrie_broken", broken.Figure.Art.name, "The pose of the state's kind.");
+            Assert.IsTrue(battle.Fx.BurstShown, "The glow and the burst stand behind the unit.");
+            Assert.AreEqual(1, battle.Fx.BurstsShown);
+            Assert.IsTrue(battle.Fx.WordShown, "The state's word stands over its head.");
+            Assert.AreEqual(UiText.FatigueStateName(state), battle.Fx.WordText);
+            Assert.AreEqual(UiPalette.FatigueState(state.Kind), battle.Fx.WordColor);
+            Assert.AreEqual(UiText.FatigueStateName(state), broken.FatigueStateShown, "The state's name under its feet.");
+            Assert.IsTrue(units.Where(u => u != broken).All(u => u.FatigueStateShown == string.Empty), "Nobody else is in a state.");
+            Assert.IsTrue(battle.Captions.Any(c => c.Contains(UiText.FatigueStateName(state))), "The breakdown reads as a caption.");
+            Assert.IsTrue(Managers.Sound.Asked.Contains(virtue ? SoundEffect.Survived : SoundEffect.DeathsDoor), "The breakdown sounds.");
+
+            // Then everything of the moment goes by itself; the state stays.
+            yield return new WaitForSecondsRealtime(3f);
+            Assert.IsFalse(battle.MomentShown, "The moment is over.");
+            Assert.AreEqual(1f, battle.StageZoom, 1e-4f, "The zoom is back.");
+            Assert.AreEqual(0f, battle.KillDarkness, "The dark is gone.");
+            Assert.IsFalse(battle.Fx.BurstShown);
+            Assert.IsFalse(battle.Fx.WordShown);
+            Assert.IsFalse(broken.HoldsPose);
+            Assert.IsFalse(broken.Figure.ShowsPose, "The figure is back.");
+            Assert.AreEqual(UiText.FatigueStateName(state), broken.FatigueStateShown);
+        }
+
+        [UnityTest]
+        public IEnumerator NodeMap_TheLongMapScrollsUp_AndOpensOnTheFloorThePartyStandsOn()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            ScrollRect scroll = map.MapScroll;
+
+            Assert.AreEqual(NodeMapScreen.FloorSpacing,
+                map.NodeView(nodes.OnFloor(2)[0].Id).Rect.anchoredPosition.y - map.NodeView(nodes.OnFloor(1)[0].Id).Rect.anchoredPosition.y, 0.01f,
+                "The floors stand FloorSpacing apart.");
+            Assert.Greater(scroll.content.rect.height, scroll.viewport.rect.height, "The whole map does not fit: it scrolls.");
+            Assert.AreEqual(0f, scroll.verticalNormalizedPosition, 0.001f, "It opens at the first floor.");
+            Assert.IsTrue(nodes.OnFloor(1).All(node => InView(map, node)));
+            Assert.IsFalse(nodes.OnFloor(nodes.FloorCount).Any(node => InView(map, node)), "The boss is out of view.");
+
+            // Deep in the map (staged): the map opens on the floor the party stands on, with the way on above it.
+            MapNode deep = nodes.OnFloor(10)[0];
+            yield return StandOn(deep);
+            map = UiTestUtil.Screen<NodeMapScreen>();
+            Assert.IsTrue(InView(map, deep));
+            foreach (int next in deep.NextNodeIds)
+            {
+                Assert.IsTrue(UiTestUtil.PointerReaches(map.NodeView(next).Button), $"Node {next} on the next floor can be clicked.");
+            }
+
+            Assert.IsFalse(nodes.OnFloor(1).Any(node => InView(map, node)), "The first floor has scrolled away.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.Progress, 10, nodes.FloorCount), UiTestUtil.TextAt(map, "Frame/Header/Progress"));
+        }
+
+        [UnityTest]
+        public IEnumerator NodeMap_EveryNodeShowsTheMarkerAndNameOfItsKind_AndAnEliteSaysItIsStrong()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            var names = new Dictionary<MapNodeKind, string>
+            {
+                { MapNodeKind.Battle, "전투" }, { MapNodeKind.Elite, "정예" }, { MapNodeKind.Camp, "야영지" }, { MapNodeKind.Boss, "보스" },
+            };
+            var markers = new Dictionary<MapNodeKind, string>
+            {
+                { MapNodeKind.Battle, "node_battle" }, { MapNodeKind.Elite, "node_elite" }, { MapNodeKind.Camp, "node_camp" }, { MapNodeKind.Boss, "node_boss" },
+            };
+
+            foreach (MapNode node in nodes.Nodes)
+            {
+                MapNodeView view = map.NodeView(node.Id);
+                Assert.AreEqual(names[node.Kind], view.Label, $"Node {node.Id}.");
+                Assert.AreEqual(markers[node.Kind], view.Icon.name, $"Node {node.Id}.");
+            }
+
+            Assert.IsTrue(nodes.OnFloor(nodes.FloorCount - 1).All(node => node.Kind == MapNodeKind.Camp), "The floor before the boss is all camps.");
+            Assert.AreEqual("누가 기다리는지는 들어가 봐야 압니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+
+            // An elite chosen (when the map has one; most maps do): its hint says that a strong band waits, not who.
+            MapNode elite = nodes.Nodes.FirstOrDefault(node => node.Kind == MapNodeKind.Elite);
+            if (elite != null)
+            {
+                yield return StandOn(nodes.Nodes.First(node => node.NextNodeIds.Contains(elite.Id)));
+                map = UiTestUtil.Screen<NodeMapScreen>();
+                UiTestUtil.Click(map.NodeView(elite.Id).Button);
+                yield return null;
+                Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, elite.Floor, "정예"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+                Assert.AreEqual("강한 적 무리가 기다립니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+                Assert.AreEqual("전투 시작", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
+            }
+        }
+
+        [UnityTest]
+        public IEnumerator Camp_ItsWindowOpensOverTheMap_AndRestingHealsAndGoesOn()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            BalanceData balance = Managers.Data.Data.Balance;
+
+            // Staged on the floor before the camp floor: every way on is a camp.
+            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
+            yield return StandOn(before);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            MapNode camp = nodes.Get(before.NextNodeIds[0]);
+            Assert.AreEqual(MapNodeKind.Camp, camp.Kind);
+            UiTestUtil.Click(map.NodeView(camp.Id).Button);
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, camp.Floor, "야영지"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+            Assert.AreEqual("싸움 없이 쉬어 가는 곳입니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual("야영지로", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
+
+            // In: the window over the map, the panel pointing at it, and no battle: the node map stays.
+            ExpeditionMember hurt = Managers.Expedition.Expedition.Members[0];
+            hurt.Hp = 1;
+            hurt.Fatigue = 50;
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.Camp, Managers.Expedition.Phase);
+            Assert.AreSame(map, Managers.UI.Current, "A camp is on the node map.");
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
+            Assert.AreEqual("지도 위의 창에서 고릅니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual(UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"), UiTestUtil.TextAt(map, "Frame/Map/Camp/CampWindow/CampBox/CampTitle"));
+            Assert.AreEqual($"HP {balance.CampHealPercent}% 회복\n피로도 -{balance.CampFatigueRelief}", UiTestUtil.TextAt(map, UiTestUtil.CampRest + "/RestBody"));
+            Assert.IsTrue(InView(map, camp), "The map followed the party up to the camp's floor.");
+            Assert.IsFalse(UiTestUtil.PointerReaches(map.NodeView(camp.Id).Button), "The window's shade takes the map's clicks.");
+
+            // Rest: the living heal and shed fatigue, the window closes, and the only way on, the boss, is chosen.
+            UiTestUtil.Click(map, UiTestUtil.CampRest);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            Assert.AreEqual(1 + hurt.MaxHp * balance.CampHealPercent / 100, hurt.Hp);
+            Assert.AreEqual(50 - balance.CampFatigueRelief, hurt.Fatigue);
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+            Assert.AreEqual("전투 시작", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
+        }
+
+        [UnityTest]
+        public IEnumerator Cells_ShowATierAboveBronzeAsARim_OnThePartySideAndInBattle()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            front.Items.Add(new EquippedItem(data.Items.Get("dagger"), 8, tier: ItemTier.Silver));
+            front.Items.Add(new EquippedItem(data.Items.Get("buckler"), 8, tier: ItemTier.Gold));
+            map.Refresh();
+            yield return null;
+
+            Assert.IsNull(row1.Slots[0].TierRim, "Bronze: the plain cell.");
+            Assert.AreEqual(UiPalette.TierSilver, row1.Slots[1].TierRim);
+            Assert.AreEqual(UiPalette.TierGold, row1.Slots[2].TierRim);
+            Assert.IsNull(row1.Slots[3].TierRim, "An empty cell.");
+            Assert.AreEqual(string.Empty, row1.Slots[1].MergeMark, "Nothing merges into it.");
+
+            // The chosen item's title names its tier.
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            StringAssert.Contains(UiText.TierWord(ItemTier.Silver), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+
+            // In battle the party's cells carry the same rims; the enemies' items are Bronze.
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return UiTestUtil.WaitForRedraw();
+            BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(battle);
+            Assert.AreEqual(UiPalette.TierSilver, cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "dagger").TierRim);
+            Assert.AreEqual(UiPalette.TierGold, cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "buckler").TierRim);
+            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierRim == null));
+        }
+
+        [UnityTest]
+        public IEnumerator PartySide_AChosenItem_MarksTheCellItWouldMergeInto_AndPuttingItThereMerges()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            PartyColumnView row2 = party.ColumnOfRow(2);
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            expedition.Members[row1.Member].Items.Add(new EquippedItem(data.Items.Get("dagger"), 8));
+            expedition.Members[row2.Member].Items.Add(new EquippedItem(data.Items.Get("dagger"), 9));
+            map.Refresh();
+            yield return null;
+            Assert.AreEqual(string.Empty, row2.Slots[1].MergeMark, "Nothing is chosen.");
+
+            // The row-1 dagger chosen: row 2's dagger is marked with the tier the merge makes, and the detail line says so.
+            EquippedItem chosen = expedition.Members[row1.Member].Items[1];
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Silver)), row2.Slots[1].MergeMark);
+            Assert.AreEqual(UiPalette.TierSilver, row2.Slots[1].TierRim);
+            Assert.AreEqual(string.Empty, row2.Slots[0].MergeMark, "Another item.");
+            Assert.AreEqual(string.Empty, row1.Slots[1].MergeMark, "Not into itself.");
+            StringAssert.Contains(UiText.MergeHint(chosen), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+
+            // Put there, they merge: one Silver dagger at the better grade on row 2, none on row 1.
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(row2.Slots[1].Button);
+            yield return null;
+            EquippedItem merged = expedition.Members[row2.Member].Items[1];
+            Assert.AreEqual(ItemTier.Silver, merged.Tier);
+            Assert.AreEqual(9, merged.Grade, "The better grade of the two.");
+            Assert.AreEqual(1, expedition.Members[row1.Member].Items.Count, "The dagger left row 1's board.");
+            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.AreEqual(UiPalette.TierSilver, row2.Slots[1].TierRim);
+            Assert.AreEqual(string.Empty, row2.Slots[1].MergeMark);
+        }
+
+        [UnityTest]
+        public IEnumerator Reward_ACardShowsItsTier_AndTakenOntoTheSameItem_Merges()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            yield return UiTestUtil.FinishBattle();
+            RewardScreen reward = UiTestUtil.Screen<RewardScreen>();
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            StaticData data = Managers.Data.Data;
+
+            // Staged: the item reward is Silver, and row 1 already holds the same item at Silver.
+            int index = expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            RewardOption option = expedition.PendingRewards[index];
+            expedition.PendingRewards[index] = new RewardOption(RewardKind.Item, option.Id, option.Grade, ItemTier.Silver);
+            PartySideView party = reward.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            ExpeditionMember front = expedition.Members[row1.Member];
+            front.Items.Add(new EquippedItem(data.Items.Get(option.Id), 8, tier: ItemTier.Silver));
+            reward.Refresh();
+            yield return null;
+
+            RewardOptionView[] cards = UiTestUtil.Views<RewardOptionView>(reward);
+            Assert.AreEqual(UiPalette.TierSilver, cards[index].Stripe);
+            StringAssert.Contains(UiText.TierWord(ItemTier.Silver), cards[index].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "OptionTitle").text);
+            for (int i = 0; i < cards.Length; i++)
+            {
+                if (expedition.PendingRewards[i].Kind == RewardKind.Potion)
+                {
+                    Assert.IsNull(cards[i].Stripe, "A potion has no tier.");
+                }
+            }
+
+            // The card picked: the cell with the same item is marked with Gold, and a click there merges them.
+            UiTestUtil.Click(cards[index].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Gold)), row1.Slots[1].MergeMark);
+            Assert.IsTrue(row1.Slots[1].Button.interactable);
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            Assert.AreEqual(2, front.Items.Count, "The base weapon and the merge.");
+            Assert.AreEqual(ItemTier.Gold, front.Items[1].Tier);
+            Assert.AreEqual(option.Id, front.Items[1].Item.Id);
+        }
+
+        [UnityTest]
+        public IEnumerator Camp_Mend_ChoosesAnItemOnTheBoards_ShowsItsChange_AndRaisesItATier()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            BalanceData balance = Managers.Data.Data.Balance;
+            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
+            yield return StandOn(before);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            UiTestUtil.Click(map.NodeView(before.NextNodeIds[0]).Button);
+            yield return null;
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend").gameObject.activeSelf);
+
+            // The mend card: the window turns to the mend step, the boards wait for the item and the inventory stays out of it.
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            UiTestUtil.Click(map, UiTestUtil.CampMend);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.MendTitle, nodes.FloorCount - 1), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.MendHint), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampHint"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.MendHint), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/InventoryToggle").gameObject.activeSelf);
+            Assert.IsFalse(party.ToInventory.gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend/MendPlate").gameObject.activeSelf, "Nothing is chosen yet.");
+            Assert.IsFalse(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampMend/MendConfirm").interactable);
+            Assert.IsTrue(row1.Slots[0].Button.interactable, "The base weapon can be mended.");
+            Assert.IsFalse(row1.Slots[1].Button.interactable, "An empty cell cannot.");
+
+            // The weapon chosen: the plate says its tier and its effects before and after, and the detail line its facts.
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            EquippedItem weapon = front.Items[0];
+            ItemEffect effect = weapon.Item.Effects[0];
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend/MendPlate").gameObject.activeSelf);
+            string change = UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendChange");
+            StringAssert.Contains(UiText.Name(weapon.Item.Name), change);
+            StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Bronze), UiText.TierWord(ItemTier.Silver)), change);
+            StringAssert.Contains(
+                UiText.Change(UiText.Effect(effect, weapon.Magnitude(balance, effect)), weapon.TierUp().Magnitude(balance, effect).ToString()),
+                UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendEffects"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampMend/MendConfirm").interactable);
+            StringAssert.Contains(UiText.ItemTitle(weapon), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+
+            // Back leaves the choice; mend again and confirm: the weapon is Silver and still the base weapon, and the boss is next.
+            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
+            Assert.AreEqual(GamePhase.Camp, Managers.Expedition.Phase);
+            UiTestUtil.Click(map, UiTestUtil.CampMend);
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(row1.Slots[0].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendConfirm");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            Assert.AreEqual(ItemTier.Silver, front.Items[0].Tier);
+            Assert.IsTrue(front.Items[0].IsBase);
+            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/InventoryToggle").gameObject.activeSelf);
+            Assert.AreEqual(UiPalette.TierSilver, row1.Slots[0].TierRim);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+        }
+
+        /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
+        static IEnumerator DepartToTheMap()
+        {
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+        }
+
+        /// <summary>Stands the party on a node (staged: a test moves it along the map directly) and opens the node map again, as after a battle there.</summary>
+        static IEnumerator StandOn(MapNode node)
+        {
+            Managers.Expedition.Expedition.CurrentNodeId = node.Id;
+            yield return TaskUtil.Await(Managers.UI.ShowAsync(ScreenId.NodeMap));
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+        }
+
+        /// <summary>Whether the middle of a node is inside the map's view.</summary>
+        static bool InView(NodeMapScreen map, MapNode node)
+        {
+            var corners = new Vector3[4];
+            map.MapScroll.viewport.GetWorldCorners(corners);
+            Vector3 middle = map.NodeView(node.Id).Rect.position;
+            return middle.x > corners[0].x && middle.x < corners[2].x && middle.y > corners[0].y && middle.y < corners[2].y;
         }
 
         [UnityTest]
@@ -1397,7 +1960,7 @@ namespace F1.Tests
             UnitRef strikerRef = engine.Events[at - 1].Source;
             yield return null;
 
-            Assert.IsTrue(battle.KillMomentSlows, "A unit's item felled it: a kill moment.");
+            Assert.IsTrue(battle.MomentSlows, "A unit's item felled it: a kill moment.");
             Assert.IsTrue(Managers.Sound.Asked.Contains(SoundEffect.KillMoment), "The kill moment has its sound.");
             Assert.AreEqual(MusicTrack.Boss, Managers.Sound.Track, "The boss battle has the boss's music.");
             yield return null;
@@ -1434,13 +1997,13 @@ namespace F1.Tests
             }
 
             float until = Time.realtimeSinceStartup + 2f;
-            while (battle.KillMomentSlows && Time.realtimeSinceStartup < until)
+            while (battle.MomentSlows && Time.realtimeSinceStartup < until)
             {
                 yield return null;
             }
 
             yield return null;
-            Assert.IsFalse(battle.KillMomentSlows, "The slow time is over.");
+            Assert.IsFalse(battle.MomentSlows, "The slow time is over.");
             Assert.AreEqual(1f, Time.timeScale, "The motions run at their speed again.");
             Assert.AreEqual(100, battle.Clock.SlowPercent);
             Assert.AreEqual(ghosts + 1, battle.Fx.GhostsShown, "The fallen goes as a ghost.");

@@ -40,9 +40,10 @@ namespace F1.Editor.Setup
         const float PartyFieldTop = BoardPanelTop - PartyPanelGap - PartyColumnHeight;
 
         /// <summary>
-        /// From the top of a column: the figure, the marks under its feet (as in battle, the state line naming the job), then the
-        /// move buttons, each a gap under the one above. The marks are lower than the plates they replaced (2026-10-05 round 29),
-        /// and the column stands on the panel, so its figures came 46 down with them.
+        /// From the top of a column: the figure, the marks under its feet (as in battle, the state line naming the job and the
+        /// member's state), then the move buttons, each a gap under the one above. The marks are lower than the plates they
+        /// replaced (2026-10-05 round 29), and the column stands on the panel, so its figures came 46 down with them (and 4 more
+        /// with the fatigue pips, 2026-10-06 round 36).
         /// </summary>
         const float PartyMarksTop = BattleFigureHeight + MarksGap;
         const float PartyMoveTop = PartyMarksTop + MarksHeight + MarksGap;
@@ -57,6 +58,7 @@ namespace F1.Editor.Setup
         const float PanelTitleTop = 24f;
         const float PanelHintTop = 72f;
         const float PanelDetailTop = 122f;
+        const float PanelDetailHeight = 104f;
         const float PanelButtonsTop = 258f;
         const float PanelButtonHeight = 76f;
 
@@ -96,7 +98,7 @@ namespace F1.Editor.Setup
 
             // The right half: the selected item's facts (or how to use the boards), and the button that takes it off its board.
             TextMeshProUGUI detail = UiBuild.Label("PartyDetail", panel.transform, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(detail, PanelRightX, PanelDetailTop, PanelRightWidth, 54f);
+            UiBuild.Box(detail, PanelRightX, PanelDetailTop, PanelRightWidth, PanelDetailHeight);
             ButtonParts toInventory = KitLocalizedButton("ToInventory", panel.transform, UiKeys.Board.ToInventory, UiPalette.ButtonQuiet, 24f);
             UiBuild.Silence(toInventory.Button);
             UiBuild.Box(toInventory.Rect, toInventoryX, PanelButtonsTop, toInventoryWidth, PanelButtonHeight);
@@ -123,8 +125,10 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's column on the stage: the figure, then what is known of whoever stands there:
-        /// the marks (HP, and the job on the state line) and the two buttons that move the member a
-        /// row. The row and the name are on the head of the row's board. The view sets the column's place and width when the screen opens, so every part is
+        /// the marks (HP, the fatigue pips, and the job with the member's state on the state line) and
+        /// the two buttons that move the member a row. The state line takes a click (round 36, the state's
+        /// words then read on the detail line). The row and the name are on the head of the row's board.
+        /// The view sets the column's place and width when the screen opens, so every part is
         /// a line that stretches across the column. Every object is named after the row, because a
         /// prefab must not repeat a name. The row's board is in its column of the panel
         /// (<see cref="BuildPartyBoard"/>).
@@ -142,10 +146,13 @@ namespace F1.Editor.Setup
             RectTransform info = UiBuild.Rect(p + "Info", column);
             UiBuild.Stretch(info, 0f, PartyMarksTop, 0f, 0f);
 
-            // The marks of the battle screen; the state line names the job.
+            // The marks of the battle screen; the state line names the job and, after it, the member's state. A clear button over
+            // the line takes the click on the state's name (live only while there is one; the view decides).
             MarksParts marks = BuildMarks(info, p, raycastTarget: false);
             UiBuild.Line(marks.Marks, 0f, MarksHeight);
             TextMeshProUGUI job = MarksStateLine(UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label(p + "Job", marks.Marks, 15f, UiPalette.TextDim))));
+            Image stateHit = MarksStateLine(UiBuild.Image(p + "State", marks.Marks, Color.clear, raycastTarget: true));
+            Button state = UiBuild.MakeButton(stateHit);
 
             // Forward goes towards row 1 (to the right), back the other way: the left and the right half of one line.
             // Half a column is narrow, so the labels may shrink.
@@ -166,8 +173,10 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_figureView", figureView);
             UiBuild.SetReference(view, "_info", info.gameObject);
             UiBuild.SetReference(view, "_job", job);
+            UiBuild.SetReference(view, "_state", state);
             UiBuild.SetReference(view, "_hp", marks.Hp);
             UiBuild.SetReference(view, "_hpBar", marks.HpBar);
+            UiBuild.SetReferences(view, "_fatiguePips", marks.Pips);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
             return view;
@@ -191,10 +200,15 @@ namespace F1.Editor.Setup
             ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
 
             // The head: the column is its row, so the stud never changes; the view writes whoever stands in it.
-            BuildBoardHead(board, p + "Board", out TextMeshProUGUI rowText, out TextMeshProUGUI name);
+            Image head = BuildBoardHead(board, p + "Board", out TextMeshProUGUI rowText, out TextMeshProUGUI name);
             rowText.text = row.ToString(CultureInfo.InvariantCulture);
 
+            // At the head's right end, the fatigue the board's equipment costs when a battle starts (round 32, B1).
+            TextMeshProUGUI fatigueText = BuildFatigueTag(head.transform, p + "BoardFatigue", new Vector2(1f, 0.5f), new Vector2(-FatigueTagInset, -FatigueHeadDrop), out GameObject fatigue);
+
             UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_fatigueTotal", fatigue);
+            UiBuild.SetReference(view, "_fatigueTotalText", fatigueText);
             UiBuild.SetReference(view, "_board", board.gameObject);
             UiBuild.SetReference(view, "_slotTemplate", slotTemplate);
             UiBuild.SetReference(view, "_slotParent", cells);
@@ -237,6 +251,22 @@ namespace F1.Editor.Setup
             TextMeshProUGUI grade = KitBadge(frame.transform, name + "Badge", name + "Grade", 14f, out Image badge);
             UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(GradeBadgeInset, GradeBadgeInset), new Vector2(GradeBadgeSize, GradeBadgeSize));
 
+            // The fatigue tag at the top-right corner: "+1" on equipment that costs fatigue when a battle starts (round 32, B1).
+            TextMeshProUGUI fatigueText = BuildFatigueTag(frame.transform, name + "Fatigue", Vector2.one, new Vector2(-FatigueTagInset, -FatigueTagInset), out GameObject fatigue);
+
+            // The mark of a cell the chosen item would merge into (round 35): a veil over the cell with the words of the tier the
+            // merge makes; and over everything the tier rim, which the view colours and shows for a tier above Bronze or a merge.
+            RectTransform merge = UiBuild.Rect(name + "Merge", frame.transform);
+            UiBuild.Stretch(merge);
+            Image veil = UiBuild.Image(name + "MergeVeil", merge, new Color(0.08f, 0.09f, 0.12f, MergeVeilAlpha));
+            UiBuild.Stretch(veil.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
+            TextMeshProUGUI mergeText = UiBuild.SingleLine(UiBuild.Label(name + "MergeText", merge, MergeMarkFontSize, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Stretch(mergeText.rectTransform);
+            merge.gameObject.SetActive(false);
+            Image tierRim = KitFrame(name + "TierRim", frame.transform, UiArt.TierRim);
+            UiBuild.Stretch(tierRim.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
+            tierRim.enabled = false;
+
             var view = frame.gameObject.AddComponent<ItemSlotView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_frame", frame);
@@ -246,9 +276,30 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_badge", badge.gameObject);
             UiBuild.SetReference(view, "_grade", grade);
             UiBuild.SetReference(view, "_text", text);
+            UiBuild.SetReference(view, "_fatigue", fatigue);
+            UiBuild.SetReference(view, "_fatigueText", fatigueText);
+            UiBuild.SetReference(view, "_tierRim", tierRim);
+            UiBuild.SetReference(view, "_merge", merge.gameObject);
+            UiBuild.SetReference(view, "_mergeText", mergeText);
 
             frame.gameObject.SetActive(false);
             return view;
+        }
+
+        /// <summary>
+        /// A fatigue tag (round 32, B1): the violet pill with its words, anchored by its corner or end to the same point of its
+        /// parent and moved in by <paramref name="position"/>. Hidden until a view shows a cost; a head's view also sets its width.
+        /// </summary>
+        static TextMeshProUGUI BuildFatigueTag(Transform parent, string name, Vector2 anchor, Vector2 position, out GameObject tag)
+        {
+            Image pill = KitFrame(name, parent, UiArt.FatigueTag);
+            UiBuild.Place(pill.rectTransform, anchor, anchor, position, new Vector2(FatigueTagCellWidth, FatigueTagHeight));
+            TextMeshProUGUI words = UiBuild.SingleLine(UiBuild.Label(name + "Text", pill.transform, FatigueTagFontSize, UiPalette.Fatigue, TextAlignmentOptions.Center));
+            words.overflowMode = TextOverflowModes.Overflow;
+            UiBuild.Stretch(words.rectTransform);
+            tag = pill.gameObject;
+            tag.SetActive(false);
+            return words;
         }
 
         /// <summary>

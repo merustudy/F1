@@ -85,6 +85,22 @@ namespace F1.Tests
             yield return Capture("ko_18_battle_deaths_door");
         }
 
+        /// <summary>
+        /// A battle a quarter of a second into the moment a mercenary (the valkyrie) broke down (round 38, B): the stage dark but her,
+        /// drawn in on her, her state pose with the glow and the burst behind and the state's word over her head, the pips under her
+        /// feet; then the same battle once the moment has gone, the state's name staying under her feet.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Breakdown_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.ReachABreakdownInTheFirstBattle();
+            yield return new WaitForSecondsRealtime(0.25f);
+            yield return Capture("ko_38_battle_breakdown");
+            yield return new WaitForSecondsRealtime(2.5f);
+            yield return Capture("ko_39_battle_state");
+        }
+
         /// <summary>The candle's light: a battle five seconds before the storm (the candle low, its light pulled in) and once the storm has put it out.</summary>
         [UnityTest]
         public IEnumerator TheStorm_Korean()
@@ -211,6 +227,7 @@ namespace F1.Tests
 
             bool capturedReward = false;
             bool capturedBoard = false;
+            bool capturedLongMap = false;
             bool capturedBoss = false;
             int guard = 0;
             while (Managers.Expedition.Phase != GamePhase.Settlement)
@@ -235,11 +252,91 @@ namespace F1.Tests
                             yield return Capture(prefix + "_17_map_inventory_selected");
                             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
+
+                            // Equipment found on the way costs fatigue (round 32, B1): staged on the row-1 member's board for one picture,
+                            // a weapon, an armor and a support item, then taken away again so the rest of the run is the same.
+                            ExpeditionMember front = Managers.Expedition.Expedition.Members[party.ColumnOfRow(1).Member];
+                            int carried = front.Items.Count;
+                            foreach (string found in new[] { "dagger", "buckler", "herb_pouch" })
+                            {
+                                front.Items.Add(new EquippedItem(Managers.Data.Data.Items.Get(found), 8));
+                            }
+
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+                            yield return Capture(prefix + "_30_map_fatigue");
+                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+
+                            // Tiers (round 35): the buckler Gold and the herb pouch Diamond on their cells, a second Bronze dagger on row 2's
+                            // board, and the row-1 dagger chosen, which marks the cell it would merge into.
+                            front.Items[carried + 1] = new EquippedItem(front.Items[carried + 1].Item, 8, tier: ItemTier.Gold);
+                            front.Items[carried + 2] = new EquippedItem(front.Items[carried + 2].Item, 8, tier: ItemTier.Diamond);
+                            ExpeditionMember second = Managers.Expedition.Expedition.Members[party.ColumnOfRow(2).Member];
+                            second.Items.Add(new EquippedItem(Managers.Data.Data.Items.Get("dagger"), 9));
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+                            yield return Capture(prefix + "_35_map_tiers");
+                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+                            second.Items.RemoveAt(second.Items.Count - 1);
+                            front.Items.RemoveRange(carried, front.Items.Count - carried);
+
+                            // Fatigue and a state under the feet (round 36): the row-1 member tired and fearful, its state clicked, so
+                            // that the detail line explains it; then as before, so the rest of the run is the same.
+                            int fatigue = front.Fatigue;
+                            front.Fatigue = 128;
+                            front.StateId = "fearful";
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(party.ColumnOfRow(1).StateButton);
+                            yield return Capture(prefix + "_36_map_state");
+                            UiTestUtil.Click(party.ColumnOfRow(1).StateButton);
+                            front.Fatigue = fatigue;
+                            front.StateId = null;
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
                         }
 
-                        UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
-                        UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
-                        yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+                        if (capturedBoard && !capturedLongMap)
+                        {
+                            // The long map (round 34), staged: deep in it with an elite chosen (or the first way on, on a map
+                            // without one), then on the floor before the camp floor with a camp chosen, its window, and the
+                            // rest; the boss is next.
+                            capturedLongMap = true;
+                            NodeMap nodes = Managers.Expedition.Expedition.Map;
+                            MapNode deep = nodes.Nodes.FirstOrDefault(n => n.Floor >= 8 && n.NextNodeIds.Any(id => nodes.Get(id).Kind == MapNodeKind.Elite))
+                                ?? nodes.OnFloor(10)[0];
+                            Managers.Expedition.Expedition.CurrentNodeId = deep.Id;
+                            yield return TaskUtil.Await(Managers.UI.ShowAsync(ScreenId.NodeMap));
+                            map = UiTestUtil.Screen<NodeMapScreen>();
+                            MapNode ahead = deep.NextNodeIds.Select(nodes.Get).OrderByDescending(n => n.Kind == MapNodeKind.Elite).First();
+                            UiTestUtil.Click(map.NodeView(ahead.Id).Button);
+                            yield return Capture(prefix + "_31_map_deep");
+
+                            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
+                            Managers.Expedition.Expedition.CurrentNodeId = before.Id;
+                            yield return TaskUtil.Await(Managers.UI.ShowAsync(ScreenId.NodeMap));
+                            map = UiTestUtil.Screen<NodeMapScreen>();
+                            UiTestUtil.Click(map.NodeView(before.NextNodeIds[0]).Button);
+                            yield return Capture(prefix + "_32_map_camp");
+                            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_33_camp");
+
+                            // The mend step (round 35) with the row-1 weapon chosen, then back to the two cards and the rest.
+                            UiTestUtil.Click(map, UiTestUtil.CampMend);
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(map.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[0].Button);
+                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_34_camp_mend");
+                            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(map, UiTestUtil.CampRest);
+                            yield return UiTestUtil.WaitForRedraw();
+                        }
+
+                        yield return UiTestUtil.GoIntoTheFirstNode();
                         break;
 
                     case GamePhase.Battle:
@@ -305,6 +402,18 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<SettlementScreen>(), "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             yield return Capture(prefix + "_12_lobby_after");
+
+            // A mercenary that came home afflicted (round 36), staged on the first of the roster for one picture, then as before.
+            MercenaryState first = Managers.Run.Run.Roster[0];
+            int homeFatigue = first.Fatigue;
+            first.Fatigue = 128;
+            first.AfflictionId = "fearful";
+            UiTestUtil.Screen<LobbyScreen>().Refresh();
+            yield return Capture(prefix + "_37_lobby_affliction");
+            first.Fatigue = homeFatigue;
+            first.AfflictionId = null;
+            UiTestUtil.Screen<LobbyScreen>().Refresh();
+            yield return null;
 
             // A failed save: the save directory is made unwritable for one command.
             Directory.Delete(_saveRoot, true);

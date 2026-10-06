@@ -1,4 +1,5 @@
 using System.Globalization;
+using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
@@ -10,8 +11,11 @@ namespace F1.UI
     /// One item on a member's board (as high as the cells it takes, stacked as in battle) or
     /// one empty cell. An item shows its icon, as in battle, with its grade on the badge at the
     /// bottom-left corner; an item without an icon shows its name with the grade under it, smaller
-    /// and dimmer; an empty cell says so. The chosen item's cell is the brass one. A cell that
-    /// takes no click now is dimmed by its button.
+    /// and dimmer; an empty cell says so. Equipment that costs fatigue when a battle starts has the
+    /// cost on the violet tag at the top-right corner (round 32, B1). An item above Bronze has the rim
+    /// inside the cell's line in its tier's colour, and a cell the chosen item would merge into shows the
+    /// tier the merge makes on a veil, with the rim in that colour (round 35, A). The chosen item's cell is
+    /// the brass one. A cell that takes no click now is dimmed by its button.
     /// <see cref="Index"/> is the first cell the view covers.
     /// </summary>
     public sealed class ItemSlotView : MonoBehaviour
@@ -27,6 +31,11 @@ namespace F1.UI
         [SerializeField] GameObject _badge;
         [SerializeField] TMP_Text _grade;
         [SerializeField] TMP_Text _text;
+        [SerializeField] GameObject _fatigue;
+        [SerializeField] TMP_Text _fatigueText;
+        [SerializeField] Image _tierRim;
+        [SerializeField] GameObject _merge;
+        [SerializeField] TMP_Text _mergeText;
 
         public Button Button => _button;
 
@@ -42,9 +51,35 @@ namespace F1.UI
         /// <summary>The grade on the badge, or an empty string while the badge is hidden.</summary>
         public string Grade => _badge.activeSelf ? _grade.text : string.Empty;
 
+        /// <summary>The words on the fatigue tag, or an empty string while it is hidden.</summary>
+        public string FatigueTag => _fatigue.activeSelf ? _fatigueText.text : string.Empty;
+
+        /// <summary>The colour of the rim, or null while the cell has none (an empty cell, a Bronze item that nothing merges into).</summary>
+        public Color? TierRim => _tierRim.enabled ? _tierRim.color : (Color?)null;
+
+        /// <summary>The words of the merge mark, or an empty string while it is hidden.</summary>
+        public string MergeMark => _merge.activeSelf ? _mergeText.text : string.Empty;
+
         /// <param name="icon">The item's icon, or null when it has none or the cell is empty.</param>
-        public void Show(EquippedItem item, Sprite icon, bool selected, bool interactable)
+        /// <param name="fatigueCost">What the item adds to its owner's fatigue when a battle starts; 0 hides the tag.</param>
+        /// <param name="merges">Whether the chosen item would merge into this one: the cell is marked with the tier the merge makes.</param>
+        public void Show(EquippedItem item, Sprite icon, bool selected, bool interactable, int fatigueCost, bool merges)
         {
+            _fatigue.SetActive(item != null && fatigueCost > 0);
+            _fatigueText.text = _fatigue.activeSelf ? UiStrings.Get(UiKeys.Board.FatigueTag, fatigueCost) : string.Empty;
+
+            // The rim in the item's tier above Bronze; while the chosen item would merge in here, in the tier the merge makes, over the veil and its words.
+            merges &= item != null;
+            _merge.SetActive(merges);
+            _tierRim.enabled = item != null && (merges || item.Tier > ItemTier.Bronze);
+            if (_tierRim.enabled)
+            {
+                ItemTier shown = merges ? item.Tier + 1 : item.Tier;
+                _tierRim.color = UiPalette.TierRim(shown);
+                _mergeText.text = merges ? UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(shown)) : string.Empty;
+                _mergeText.color = UiPalette.TierText(shown);
+            }
+
             Item = item;
             bool pictured = item != null && icon != null;
 

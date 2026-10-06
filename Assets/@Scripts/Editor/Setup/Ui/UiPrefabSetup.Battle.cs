@@ -126,6 +126,15 @@ namespace F1.Editor.Setup
         const float StageFxTop = 84f;
         const float StageFxHeight = BoardPanelTop - StageFxTop;
 
+        /// <summary>
+        /// The moment of a breakdown (2026-10-06 round 38, "B"): behind the unit, on a layer of the field right over the kill moment's dark,
+        /// the glow in the state's colour and the effect burst (BattleFxLayer sizes and places them); over its head the state's word, large,
+        /// and the unit's name under it, in the fx layer.
+        /// </summary>
+        const float BreakdownWordSize = 84f;
+        const float BreakdownNameSize = 30f;
+        const float BreakdownWordWidth = 700f;
+
         /// <summary>The shadow under a figure's feet: a dark ellipse.</summary>
         const float ShadowWidth = 150f;
         const float ShadowHeight = 26f;
@@ -220,6 +229,16 @@ namespace F1.Editor.Setup
             UiBuild.Box(killDark, -BattleFieldLeft, StageFxTop - BattleFieldTop, 1920f, StageFxHeight);
             killDark.enabled = false;
 
+            // The moment of a breakdown (round 38): its glow and burst lie on this layer, which the screen keeps right over the dark and
+            // under the columns a moment lights (BattleScreen.ArrangeColumns), so that they stand behind the lit unit. Off until shown.
+            RectTransform momentFx = UiBuild.Box(UiBuild.Rect("MomentFx", field), -BattleFieldLeft, StageFxTop - BattleFieldTop, 1920f, StageFxHeight);
+            Image momentGlow = UiBuild.Image("MomentGlow", momentFx, Color.white);
+            momentGlow.sprite = UiArt.Load(UiArt.Glow);
+            momentGlow.enabled = false;
+            Image momentBurst = UiBuild.Image("MomentBurst", momentFx, Color.white);
+            momentBurst.preserveAspect = true;
+            momentBurst.enabled = false;
+
             // The board panel: one column per row on each side, under the stage's column of that row.
             // A unit's board (its cells stacked) is put in the column of the row it stands in, as its
             // figure is put in that row's stage column; the screen places both when it opens. The
@@ -278,12 +297,35 @@ namespace F1.Editor.Setup
             ghostTemplate.preserveAspect = true;
             ghostTemplate.gameObject.SetActive(false);
             FloatingTextView floatingTemplate = BuildFloatingText(fx);
+
+            // The word of a breakdown (round 38) over the unit's head: the state's name large in the state's colour, the unit's name under
+            // it, outlined over the stage. Off until the fx layer shows it.
+            RectTransform word = UiBuild.Rect("BreakdownWord", fx);
+            UiBuild.Size(word, BreakdownWordWidth, BreakdownWordSize + BreakdownNameSize + 20f);
+            var wordGroup = word.gameObject.AddComponent<CanvasGroup>();
+            wordGroup.blocksRaycasts = false;
+            wordGroup.interactable = false;
+            TextMeshProUGUI wordText = UiBuild.Outlined(UiBuild.Label("BreakdownState", word, BreakdownWordSize, UiPalette.FatigueDanger, TextAlignmentOptions.Bottom));
+            wordText.textWrappingMode = TextWrappingModes.NoWrap;
+            UiBuild.Line(wordText, 0f, BreakdownWordSize + 12f);
+            TextMeshProUGUI wordName = UiBuild.Outlined(UiBuild.Label("BreakdownName", word, BreakdownNameSize, UiPalette.Text, TextAlignmentOptions.Top));
+            wordName.textWrappingMode = TextWrappingModes.NoWrap;
+            UiBuild.Line(wordName, BreakdownWordSize + 14f, BreakdownNameSize + 6f);
+            word.gameObject.SetActive(false);
+
             var fxLayer = fx.gameObject.AddComponent<BattleFxLayer>();
             UiBuild.SetReference(fxLayer, "_floatingTemplate", floatingTemplate);
             UiBuild.SetReference(fxLayer, "_ghostTemplate", ghostTemplate);
             UiBuild.SetReference(fxLayer, "_flash", flash);
             UiBuild.SetReference(fxLayer, "_dangerVignette", dangerVignette);
             UiBuild.SetReference(fxLayer, "_shaken", field);
+            UiBuild.SetReference(fxLayer, "_momentFx", momentFx);
+            UiBuild.SetReference(fxLayer, "_momentGlow", momentGlow);
+            UiBuild.SetReference(fxLayer, "_momentBurst", momentBurst);
+            UiBuild.SetReference(fxLayer, "_word", word);
+            UiBuild.SetReference(fxLayer, "_wordGroup", wordGroup);
+            UiBuild.SetReference(fxLayer, "_wordText", wordText);
+            UiBuild.SetReference(fxLayer, "_wordName", wordName);
 
             // Result: covers the field when the battle has ended.
             Image overlay = UiBuild.Image("ResultPanel", frame, UiPalette.Overlay, raycastTarget: true);
@@ -335,6 +377,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_stageBack", stageBack);
             UiBuild.SetReference(screen, "_stageFront", stageFront);
             UiBuild.SetReference(screen, "_killDark", killDark);
+            UiBuild.SetReference(screen, "_momentFx", momentFx);
+            UiBuild.SetReference(screen, "_inkBurst", UiArt.Load(UiArt.InkBurst));
+            UiBuild.SetReference(screen, "_lightBurst", UiArt.Load(UiArt.LightBurst));
             UiBuild.SetReference(screen, "_field", field);
             UiBuild.SetReferences(screen, "_partyRows", partyRows);
             UiBuild.SetReferences(screen, "_enemyRows", enemyRows);
@@ -498,7 +543,8 @@ namespace F1.Editor.Setup
             RectTransform figure = BuildFigure(root, "UnitFigure", takesClicks: true, out FigureView figureView);
             UiBuild.Line(figure, 0f, BattleFigureHeight);
 
-            // The marks: HP with its badge and rim, then the line of states. The row and the name are on the unit's board.
+            // The marks: HP with its badge and rim, the fatigue pips (a party unit's; the view hides them for an enemy), then the
+            // line of states. The row and the name are on the unit's board.
             MarksParts marks = BuildMarks(root, "Unit", raycastTarget: true);
             UiBuild.Line(marks.Marks, BattleMarksTop, MarksHeight);
 
@@ -513,6 +559,11 @@ namespace F1.Editor.Setup
             line.childControlHeight = true;
             GameObject statusChip = BuildStateChip(states, "UnitStatus", UiArt.DeathsDoor, UiPalette.Text, out TextMeshProUGUI status);
             GameObject burnChip = BuildStateChip(states, "UnitBurn", UiArt.Burn, UiPalette.Burn, out TextMeshProUGUI burn);
+
+            // After them, the state of the breakdown by name in its colour (round 36). Words alone: its pictures are still to be drawn.
+            TextMeshProUGUI fatigueState = UiBuild.Outlined(UiBuild.Label("UnitFatigueState", states, 15f, UiPalette.FatigueDanger));
+            fatigueState.textWrappingMode = TextWrappingModes.NoWrap;
+            fatigueState.gameObject.SetActive(false);
 
             var view = root.gameObject.AddComponent<BattleUnitView>();
             UiBuild.SetReference(view, "_button", button);
@@ -530,6 +581,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_burn", burn);
             UiBuild.SetReference(view, "_statusChip", statusChip);
             UiBuild.SetReference(view, "_status", status);
+            UiBuild.SetReference(view, "_pipsRow", marks.PipsRow.gameObject);
+            UiBuild.SetReferences(view, "_fatiguePips", marks.Pips);
+            UiBuild.SetReference(view, "_fatigueState", fatigueState);
 
             root.gameObject.SetActive(false);
             return view;
@@ -725,6 +779,11 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(flash.rectTransform, rim, rim, rim, rim);
             flash.enabled = false;
 
+            // Over everything, the tier rim (round 35, A): the view colours and shows it for a tier above Bronze.
+            Image tierRim = KitFrame("ItemTierRim", cell.transform, UiArt.TierRim);
+            UiBuild.Stretch(tierRim.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
+            tierRim.enabled = false;
+
             var view = cell.gameObject.AddComponent<BattleItemView>();
             UiBuild.SetReference(view, "_light", light.rectTransform);
             UiBuild.SetReference(view, "_dark", darkFill);
@@ -734,6 +793,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_flash", flash);
+            UiBuild.SetReference(view, "_tierRim", tierRim);
 
             cell.gameObject.SetActive(false);
             return view;

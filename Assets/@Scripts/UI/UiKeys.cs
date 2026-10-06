@@ -45,6 +45,7 @@ namespace F1.UI
             public const string Day = "Lobby.Day";
             public const string Roster = "Lobby.Roster";
             public const string Fatigue = "Lobby.Fatigue";
+            public const string FatigueState = "Lobby.FatigueState";
             public const string Remove = "Lobby.Remove";
             public const string Expedition = "Lobby.Expedition";
             public const string Affinity = "Lobby.Affinity";
@@ -56,7 +57,6 @@ namespace F1.UI
             public const string Depart = "Lobby.Depart";
             public const string DepartOk = "Lobby.DepartOk";
             public const string PartyTooSmall = "Lobby.PartyTooSmall";
-            public const string NotEnoughFatigue = "Lobby.NotEnoughFatigue";
             public const string Fallen = "Lobby.Fallen";
             public const string RunOver = "Lobby.RunOver";
             public const string RunOverDay = "Lobby.RunOverDay";
@@ -72,6 +72,22 @@ namespace F1.UI
             public const string NodeTitle = "Map.NodeTitle";
             public const string Unknown = "Map.Unknown";
             public const string Enter = "Map.Enter";
+            public const string Elite = "Map.Elite";
+            public const string Camp = "Map.Camp";
+            public const string EliteHint = "Map.EliteHint";
+            public const string CampHint = "Map.CampHint";
+            public const string EnterCamp = "Map.EnterCamp";
+            public const string AtCamp = "Map.AtCamp";
+            public const string CampChoose = "Map.CampChoose";
+            public const string Rest = "Map.Rest";
+            public const string RestHeal = "Map.RestHeal";
+            public const string RestFatigue = "Map.RestFatigue";
+            public const string Mend = "Map.Mend";
+            public const string MendBody = "Map.MendBody";
+            public const string MendTitle = "Map.MendTitle";
+            public const string MendHint = "Map.MendHint";
+            public const string MendBack = "Map.MendBack";
+            public const string MendConfirm = "Map.MendConfirm";
         }
 
         public static class Board
@@ -88,6 +104,11 @@ namespace F1.UI
             public const string InventoryHint = "Board.InventoryHint";
             public const string InventoryEmpty = "Board.InventoryEmpty";
             public const string ToInventory = "Board.ToInventory";
+            public const string FatigueTag = "Board.FatigueTag";
+            public const string MergeInto = "Board.MergeInto";
+            public const string FatigueTotal = "Board.FatigueTotal";
+            public const string JobState = "Board.JobState";
+            public const string StateDetail = "Board.StateDetail";
         }
 
         public static class Item
@@ -104,6 +125,14 @@ namespace F1.UI
             public const string RowsFrontOne = "Item.RowsFrontOne";
             public const string RowsBack = "Item.RowsBack";
             public const string RowsBackOne = "Item.RowsBackOne";
+            public const string FatigueCost = "Item.FatigueCost";
+            public const string BaseWeapon = "Item.BaseWeapon";
+            public const string Bronze = "Item.Bronze";
+            public const string Silver = "Item.Silver";
+            public const string Gold = "Item.Gold";
+            public const string Diamond = "Item.Diamond";
+            public const string MergeHint = "Item.MergeHint";
+            public const string Change = "Item.Change";
         }
 
         public static class Effect
@@ -173,6 +202,7 @@ namespace F1.UI
             public const string RetreatSucceeded = "Fx.RetreatSucceeded";
             public const string RetreatFailed = "Fx.RetreatFailed";
             public const string Storm = "Fx.Storm";
+            public const string Collapsed = "Fx.Collapsed";
         }
 
         public static class Log
@@ -199,6 +229,14 @@ namespace F1.UI
             public const string RetreatFailed = "Log.RetreatFailed";
             public const string RetreatSucceeded = "Log.RetreatSucceeded";
             public const string Storm = "Log.Storm";
+            public const string BrokeDown = "Log.BrokeDown";
+            public const string Virtue = "Log.Virtue";
+            public const string Collapsed = "Log.Collapsed";
+            public const string FatigueStateEnded = "Log.FatigueStateEnded";
+            public const string FatigueDog = "Log.FatigueDog";
+            public const string FatigueAllyDog = "Log.FatigueAllyDog";
+            public const string FatigueAllyDeath = "Log.FatigueAllyDeath";
+            public const string FatigueVirtue = "Log.FatigueVirtue";
         }
 
         public static class Death
@@ -229,6 +267,7 @@ namespace F1.UI
             public const string Survivors = "Settle.Survivors";
             public const string Fallen = "Settle.Fallen";
             public const string Fatigue = "Settle.Fatigue";
+            public const string SurvivorState = "Settle.SurvivorState";
             public const string Days = "Settle.Days";
             public const string ItemsLost = "Settle.ItemsLost";
             public const string RunOver = "Settle.RunOver";

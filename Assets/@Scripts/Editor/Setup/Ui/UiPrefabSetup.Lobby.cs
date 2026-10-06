@@ -97,6 +97,10 @@ namespace F1.Editor.Setup
             return screen;
         }
 
+        /// <summary>The fatigue pips of a roster line (FatiguePips.Count of them): the gap between two, and how wide they all are.</summary>
+        const float FatiguePipGap = 4f;
+        const float FatiguePipsWidth = 590f;
+
         /// <summary>The template of one roster line. The lobby clones it per mercenary.</summary>
         static RosterEntryView BuildRosterEntry(Transform parent)
         {
@@ -106,10 +110,26 @@ namespace F1.Editor.Setup
 
             TextMeshProUGUI name = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryName", entry, 32f, UiPalette.Text), 20f, 8f, 220f, 40f));
             TextMeshProUGUI job = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryJob", entry, 24f, UiPalette.TextDim), 250f, 12f, 190f, 34f));
-            TextMeshProUGUI fatigue = UiBuild.Box(UiBuild.Label("EntryFatigue", entry, 22f, UiPalette.Text, TextAlignmentOptions.Right), 410f, 12f, 200f, 34f);
-            UiBar fatigueBar = UiBuild.Bar("EntryFatigueBar", entry, UiPalette.Good);
-            UiBuild.Box(fatigueBar, 20f, 54f, 590f, 14f);
-            TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 20f, UiPalette.TextDim), 20f, 76f, 590f, 32f));
+            // The fatigue words grow to the left when an affliction's name follows them (round 36): their box reaches back over the
+            // job's, whose words are short and left-aligned, and they stay on one line.
+            TextMeshProUGUI fatigue = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryFatigue", entry, 22f, UiPalette.Fatigue, TextAlignmentOptions.Right), 330f, 12f, 280f, 34f));
+
+            // Fatigue as pips (2026-10-06 round 33, C, Darkest Dungeon's way): FatiguePips.Count bars side by side in the bar's place,
+            // each a tenth of the most fatigue; the view fills them and colours the ones past the breakdown.
+            RectTransform pips = UiBuild.Box(UiBuild.Rect("EntryFatiguePips", entry), 20f, 54f, FatiguePipsWidth, 14f);
+            var fatiguePips = new UiBar[FatiguePips.Count];
+            float pipWidth = (FatiguePipsWidth - FatiguePipGap * (fatiguePips.Length - 1)) / fatiguePips.Length;
+            for (int i = 0; i < fatiguePips.Length; i++)
+            {
+                float left = Mathf.Round(i * (pipWidth + FatiguePipGap));
+                float right = Mathf.Round(i * (pipWidth + FatiguePipGap) + pipWidth);
+                fatiguePips[i] = UiBuild.Bar("EntryFatiguePip" + i, pips, UiPalette.FatigueBar);
+                UiBuild.Box(fatiguePips[i], left, 0f, right - left, 14f);
+            }
+
+            // The passive on the left of the line under the pips and, at its right end, what the mercenary's affliction does (round 36; empty without one).
+            TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 20f, UiPalette.TextDim), 20f, 76f, 380f, 32f));
+            TextMeshProUGUI state = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryState", entry, 18f, UiPalette.FatigueDanger, TextAlignmentOptions.Right), 410f, 76f, 200f, 32f));
 
             // One button per row, then the button that takes the mercenary out of the party. The row
             // buttons are lined up against the right edge of their box, so the ones the lobby hides
@@ -135,7 +155,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReference(view, "_passive", passive);
             UiBuild.SetReference(view, "_fatigue", fatigue);
-            UiBuild.SetReference(view, "_fatigueBar", fatigueBar);
+            UiBuild.SetReference(view, "_state", state);
+            UiBuild.SetReferences(view, "_fatiguePips", fatiguePips);
             UiBuild.SetReferences(view, "_rows", rowButtons);
             UiBuild.SetReferences(view, "_rowFrames", rowFrames);
             UiBuild.SetReference(view, "_remove", remove.Button);

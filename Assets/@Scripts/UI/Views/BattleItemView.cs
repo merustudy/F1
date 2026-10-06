@@ -1,3 +1,4 @@
+using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
@@ -59,6 +60,7 @@ namespace F1.UI
         [SerializeField] Image _icon;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _flash;
+        [SerializeField] Image _tierRim;
 
         BattleItemState _item;
         bool _shownActive;
@@ -94,6 +96,9 @@ namespace F1.UI
         /// <summary>How dark the part not charged yet is now: ChargeShade, less while the flash of a firing plays.</summary>
         public float Darkness => _dark.color.a;
 
+        /// <summary>The colour of the rim of a tier above Bronze (round 35, A), or null for a Bronze item.</summary>
+        public Color? TierRim => _tierRim.enabled ? _tierRim.color : (Color?)null;
+
         /// <param name="cells">How many cells of the board the item takes.</param>
         /// <param name="icon">The item's icon, or null when it has none.</param>
         /// <param name="mirrored">Whether the icon points the other way: the enemy's side.</param>
@@ -106,6 +111,8 @@ namespace F1.UI
             _icon.enabled = icon != null;
             _mirror = mirrored ? -1f : 1f;
             _icon.rectTransform.localScale = new Vector3(_mirror, 1f, 1f);
+            _tierRim.enabled = item.Equipped.Tier > ItemTier.Bronze;
+            _tierRim.color = UiPalette.TierRim(item.Equipped.Tier);
 
             var rect = (RectTransform)transform;
             rect.sizeDelta = new Vector2(CellWidth, BoardHeight(cells));

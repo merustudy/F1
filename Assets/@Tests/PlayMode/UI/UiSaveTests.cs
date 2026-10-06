@@ -63,6 +63,33 @@ namespace F1.Tests
         }
 
         [UnityTest]
+        public IEnumerator Continue_AfterTheAppWasClosedAtACamp_ShowsTheCampWindowOverTheMapAgain()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return NewRunWithParty();
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            // Staged on the floor before the camp floor, then into a camp: entering it is saved.
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
+            Managers.Expedition.Expedition.CurrentNodeId = before.Id;
+            Managers.Expedition.EnterNode(before.NextNodeIds[0]);
+
+            yield return BootTestUtil.RestartApp();
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/Continue");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            Assert.AreEqual(GamePhase.Camp, Managers.Expedition.Phase);
+            Assert.AreEqual(before.NextNodeIds[0], Managers.Expedition.Expedition.CurrentNodeId);
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf, "The camp's window is open again.");
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(map, UiTestUtil.CampRest);
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+        }
+
+        [UnityTest]
         public IEnumerator Continue_AfterTheAppWasClosedMidBattle_ShowsThatBattlePausedAtTheConfirmedTime()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");

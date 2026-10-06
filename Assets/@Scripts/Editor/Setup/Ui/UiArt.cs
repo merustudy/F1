@@ -60,6 +60,19 @@ namespace F1.Editor.Setup
         public const string Slot = "Frame/slot";
         public const string SlotSelected = "Frame/slot_selected";
 
+        /// <summary>
+        /// The fatigue tag (2026-10-06 round 32, B1): a plum pill with a violet rim. On a party-side cell whose item costs
+        /// fatigue it says "+1"; on the head of the board it says the total. Round ends: its border is half its height, so
+        /// it stretches sideways only. Drawn (Archive/32-equipment-fatigue/draw_tag.py).
+        /// </summary>
+        public const string FatigueTag = "Frame/fatigue_tag";
+
+        /// <summary>
+        /// The rim of an item cell at a tier above Bronze (2026-10-06 round 35, A): a white band with a dark hairline inside,
+        /// tinted with the tier's colour by the cell. Drawn (Archive/35-tiers/draw_rim.py); its border is the band and the line.
+        /// </summary>
+        public const string TierRim = "Frame/tier_rim";
+
         /// <summary>The trough of a bar: a dark iron recess (the HP bar under a unit's feet).</summary>
         public const string Trough = "Frame/trough";
 
@@ -102,6 +115,10 @@ namespace F1.Editor.Setup
         public const string NodeBattle = "Icon/node_battle";
         public const string NodeBoss = "Icon/node_boss";
 
+        /// <summary>The markers of the long expedition's nodes (2026-10-06 round 34): an elite (the battle's swords on a red diamond) and a camp (crossed logs and a flame). Drawn (Archive/34-long-map/draw_icons.py).</summary>
+        public const string NodeElite = "Icon/node_elite";
+        public const string NodeCamp = "Icon/node_camp";
+
         /// <summary>A soft darkening towards the edges, clear in the middle, stretched over the stage (the red of death's door) and over the whole screen (the Diablo kit's gloom). Drawn (Archive/16-candle-light/draw_pieces.py, which turned round 09's inside-out ramp the right way).</summary>
         public const string Vignette = "Icon/vignette";
 
@@ -120,6 +137,14 @@ namespace F1.Editor.Setup
         /// </summary>
         public const string ChargeRamp = "Icon/charge_ramp";
 
+        /// <summary>
+        /// The effect bursts of the moment of a breakdown (2026-10-06 round 38, "B"): the ink burst of an affliction and of the collapse, the
+        /// light burst of a virtue, laid behind the unit with the glow in the state's colour. Drawn in round 38 (`Archive/38-breakdown-fx`),
+        /// kept at 512 from the 1024 raws.
+        /// </summary>
+        public const string InkBurst = "Icon/ink_burst";
+        public const string LightBurst = "Icon/light_burst";
+
         public const string Shield = "Icon/shield";
         public const string Burn = "Icon/burn";
         public const string DeathsDoor = "Icon/deaths_door";
@@ -137,6 +162,8 @@ namespace F1.Editor.Setup
             new Piece(PlateLabel, 44),
             new Piece(Slot, 16),
             new Piece(SlotSelected, 16),
+            new Piece(FatigueTag, 20),
+            new Piece(TierRim, 12),
             new Piece(Trough, 30),
             new Piece(PotionSlot, 30),
             new Piece(PotionSlotSelected, 30),
@@ -153,10 +180,14 @@ namespace F1.Editor.Setup
             new Piece(Glow),
             new Piece(NodeBattle),
             new Piece(NodeBoss),
+            new Piece(NodeElite),
+            new Piece(NodeCamp),
             new Piece(Vignette),
             new Piece(CandleDark),
             new Piece(CandleWarm),
             new Piece(ChargeRamp),
+            new Piece(InkBurst),
+            new Piece(LightBurst),
             new Piece(Shield),
             new Piece(Burn),
             new Piece(DeathsDoor),

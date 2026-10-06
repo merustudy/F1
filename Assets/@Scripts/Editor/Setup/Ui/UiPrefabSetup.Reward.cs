@@ -56,6 +56,9 @@ namespace F1.Editor.Setup
         const float RewardCardHeight = 132f;
         const float RewardCardGap = 8f;
 
+        /// <summary>The stripe of an item's tier at the card's left edge (2026-10-06 round 35).</summary>
+        const float RewardStripeWidth = 6f;
+
         /// <summary>One reward card. The whole card is the button; the kind, the title and the action share the first line, the facts fill the rest.</summary>
         static RewardOptionView BuildRewardOption(Transform parent)
         {
@@ -67,6 +70,15 @@ namespace F1.Editor.Setup
             UiBuild.Silence(button);
             Transform option = frame.transform;
 
+            // The tier stripe down the left edge; the view colours and shows it for a tier above Bronze.
+            Image stripe = UiBuild.Image("OptionStripe", option, UiPalette.TierSilver);
+            stripe.rectTransform.anchorMin = Vector2.zero;
+            stripe.rectTransform.anchorMax = new Vector2(0f, 1f);
+            stripe.rectTransform.pivot = new Vector2(0f, 0.5f);
+            stripe.rectTransform.offsetMin = Vector2.zero;
+            stripe.rectTransform.offsetMax = new Vector2(RewardStripeWidth, 0f);
+            stripe.enabled = false;
+
             TextMeshProUGUI kind = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionKind", option, 19f, UiPalette.TextDim), 20f, 12f, 110f, 28f));
             TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionTitle", option, 26f, UiPalette.Text), 130f, 6f, 500f, 38f));
             TextMeshProUGUI action = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("OptionAction", option, 22f, UiPalette.Text, TextAlignmentOptions.Right), 640f, 8f, 260f, 34f));
@@ -76,6 +88,7 @@ namespace F1.Editor.Setup
             var view = frame.gameObject.AddComponent<RewardOptionView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_frame", frame);
+            UiBuild.SetReference(view, "_stripe", stripe);
             UiBuild.SetReference(view, "_kind", kind);
             UiBuild.SetReference(view, "_title", title);
             UiBuild.SetReference(view, "_body", body);

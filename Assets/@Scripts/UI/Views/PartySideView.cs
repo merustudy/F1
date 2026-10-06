@@ -20,7 +20,8 @@ namespace F1.UI
     /// "to inventory" takes the clicked item off its board; an inventory item and then a cell puts
     /// it on a board (whatever was there goes to the inventory). The inventory has a fixed number
     /// of cells, so what would not fit there is not offered. Which cells and buttons take a click
-    /// is asked of the manager, cell by cell. The node map and the reward screen both show it.
+    /// is asked of the manager, cell by cell. Clicking the name of a member's state under its feet
+    /// (round 36) explains the state on the detail line. The node map and the reward screen both show it.
     /// </summary>
     public sealed class PartySideView : MonoBehaviour
     {
@@ -40,11 +41,12 @@ namespace F1.UI
         readonly List<InventoryEntryView> _entries = new List<InventoryEntryView>();
 
         // At most one of these is selected: an item on a board (member and its first cell), an item of the inventory,
-        // or a potion (whose words then show on the detail line; the potions cannot be used here).
+        // a potion (whose words then show on the detail line; the potions cannot be used here), or a member's state (the same).
         int _selectedMember = -1;
         int _selectedCell = -1;
         int _selectedInventory = -1;
         int _selectedPotion = -1;
+        int _selectedState = -1;
         ExpeditionArt _art;
 
         /// <summary>
@@ -59,6 +61,19 @@ namespace F1.UI
         /// the view does nothing; the reward screen uses this to place a chosen item.
         /// </summary>
         public Func<int, int, bool> CellClickOverride { get; set; }
+
+        /// <summary>With <see cref="ExternalCanPlace"/>: which cells the screen's chosen item would merge into (the reward screen's item). Null for none.</summary>
+        public Func<int, int, bool> ExternalMerges { get; set; }
+
+        /// <summary>
+        /// With <see cref="ExternalCanPlace"/>: the cell the screen has chosen on the boards (the camp's item to mend), shown as the
+        /// brass cell and described on the detail line. -1 for none.
+        /// </summary>
+        public int ExternalSelectedMember { get; set; } = -1;
+        public int ExternalSelectedCell { get; set; } = -1;
+
+        /// <summary>What the detail line says while nothing is chosen, in place of how to use the boards. Null for the usual words.</summary>
+        public string DetailOverride { get; set; }
 
         /// <summary>Whether the inventory popup is open.</summary>
         public bool InventoryOpen { get; private set; }
@@ -87,6 +102,7 @@ namespace F1.UI
                 column.Forward.onClick.AddListener(() => OnMoveClicked(column, -1));
                 column.Back.onClick.AddListener(() => OnMoveClicked(column, 1));
                 column.CellClicked += cell => OnCellClicked(column.Member, cell);
+                column.StateClicked += () => OnStateClicked(column.Member);
             }
 
             for (int i = 0; i < expedition.Potions.Length; i++)
@@ -136,6 +152,7 @@ namespace F1.UI
             _selectedCell = -1;
             _selectedInventory = -1;
             _selectedPotion = -1;
+            _selectedState = -1;
         }
 
         /// <summary>
@@ -166,14 +183,18 @@ namespace F1.UI
                 }
 
                 int member = m;
+                int selectedMember = external ? ExternalSelectedMember : _selectedMember;
+                int selectedCell = external ? ExternalSelectedCell : _selectedCell;
+                EquippedItem chosen = external ? null : SelectedItem(expedition);
                 column.Show(
                     m,
                     expedition.Members[m],
                     _art,
                     manager.CanMoveToRow(m, row - 1),
                     manager.CanMoveToRow(m, row + 1),
-                    m == _selectedMember ? _selectedCell : -1,
-                    cell => external ? ExternalCanPlace(member, cell) : CanClickCell(member, cell));
+                    m == selectedMember ? selectedCell : -1,
+                    cell => external ? ExternalCanPlace(member, cell) : CanClickCell(member, cell),
+                    cell => external ? ExternalMerges != null && ExternalMerges(member, cell) : chosen != null && manager.MergesAt(chosen, member, cell));
             }
 
             for (int i = 0; i < _potions.Count; i++)
@@ -190,18 +211,33 @@ namespace F1.UI
 
             _toInventory.interactable = !external && _selectedMember >= 0 && manager.CanMoveToInventory(_selectedMember, _selectedCell);
 
-            EquippedItem selected = SelectedItem(expedition);
+            EquippedItem selected = external ? ExternalSelectedItem(expedition) : SelectedItem(expedition);
             string chosenPotion = _selectedPotion >= 0 ? expedition.Potions[_selectedPotion] : null;
+            string chosenState = _selectedState >= 0 && _selectedState < expedition.Members.Count ? expedition.Members[_selectedState].StateId : null;
             if (chosenPotion != null)
             {
                 PotionData potion = data.Potions.Get(chosenPotion);
                 _detail.text = UiText.Name(potion.Name) + " — " + UiText.PotionDetails(potion);
             }
+            else if (chosenState != null)
+            {
+                // The state whose name was clicked under a member's feet: what it does (round 36).
+                _detail.text = UiText.FatigueStateDetail(data.FatigueStates.Get(chosenState));
+            }
+            else if (selected == null)
+            {
+                _detail.text = DetailOverride ?? UiStrings.Get(UiKeys.Board.Hint);
+            }
             else
             {
-                _detail.text = selected == null
-                    ? UiStrings.Get(UiKeys.Board.Hint)
-                    : UiText.ItemTitle(selected) + " — " + UiText.ItemSummary(selected);
+                // The chosen item's facts; and, while a board holds what it merges into, what putting it there does (round 35).
+                string detail = UiText.ItemTitle(selected) + " — " + UiText.ItemSummary(selected);
+                if (!external && manager.HasMergeTarget(selected))
+                {
+                    detail += "\n" + UiText.MergeHint(selected);
+                }
+
+                _detail.text = detail;
             }
         }
 
@@ -243,6 +279,19 @@ namespace F1.UI
             }
 
             return -1;
+        }
+
+        /// <summary>The item at the cell the owning screen has chosen, or null.</summary>
+        EquippedItem ExternalSelectedItem(ExpeditionState expedition)
+        {
+            if (ExternalSelectedMember < 0 || ExternalSelectedMember >= expedition.Members.Count)
+            {
+                return null;
+            }
+
+            List<EquippedItem> board = expedition.Members[ExternalSelectedMember].Items;
+            int index = ItemBoard.IndexAtCell(board, ExternalSelectedCell);
+            return index < 0 ? null : board[index];
         }
 
         EquippedItem SelectedItem(ExpeditionState expedition)
@@ -301,10 +350,23 @@ namespace F1.UI
         /// <summary>A potion's slot shows its words on the detail line while it is chosen; clicking it again puts it down. Nothing else changes: potions are used in battle.</summary>
         void OnPotionClicked(int slot)
         {
-            _selectedPotion = _selectedPotion == slot ? -1 : slot;
-            _selectedMember = -1;
-            _selectedCell = -1;
-            _selectedInventory = -1;
+            bool again = slot == _selectedPotion;
+            ClearSelection();
+            _selectedPotion = again ? -1 : slot;
+            Refresh();
+        }
+
+        /// <summary>The name of a member's state under its feet shows what the state does on the detail line while it is chosen; clicking it again puts it down (round 36).</summary>
+        void OnStateClicked(int member)
+        {
+            if (member < 0)
+            {
+                return;
+            }
+
+            bool again = member == _selectedState;
+            ClearSelection();
+            _selectedState = again ? -1 : member;
             Refresh();
         }
 
@@ -326,6 +388,7 @@ namespace F1.UI
             }
 
             _selectedPotion = -1;
+            _selectedState = -1;
             ExpeditionManager manager = Managers.Expedition;
             SoundEffect sound = SoundEffect.Button;
             if (_selectedInventory >= 0)

@@ -4,6 +4,7 @@ using System.Globalization;
 using F1.Core;
 using F1.Data;
 using F1.Gameplay;
+using UnityEngine;
 
 namespace F1.UI
 {
@@ -74,27 +75,108 @@ namespace F1.UI
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", tenths / 10, tenths % 10);
         }
 
+        /// <summary>"Name · tier · grade", the tier in its colour (round 35).</summary>
         public static string ItemTitle(EquippedItem item)
         {
-            return UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), item.Grade);
+            return UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), TierWord(item.Tier), item.Grade);
+        }
+
+        /// <summary>The name of a tier (Docs/Design/02_Combat_System.md §4).</summary>
+        public static string TierName(ItemTier tier)
+        {
+            switch (tier)
+            {
+                case ItemTier.Bronze: return UiStrings.Get(UiKeys.Item.Bronze);
+                case ItemTier.Silver: return UiStrings.Get(UiKeys.Item.Silver);
+                case ItemTier.Gold: return UiStrings.Get(UiKeys.Item.Gold);
+                case ItemTier.Diamond: return UiStrings.Get(UiKeys.Item.Diamond);
+                default: throw new ArgumentOutOfRangeException(nameof(tier), tier, null);
+            }
+        }
+
+        /// <summary>The name of a tier in the tier's colour.</summary>
+        public static string TierWord(ItemTier tier)
+        {
+            return Colored(TierName(tier), UiPalette.TierText(tier));
+        }
+
+        /// <summary>Under a chosen item's facts: what putting it on the same item at the same tier does (round 35).</summary>
+        public static string MergeHint(EquippedItem item)
+        {
+            return UiStrings.Get(UiKeys.Item.MergeHint, Name(item.Item.Name), TierWord(item.Tier), TierWord(item.Tier + 1));
+        }
+
+        /// <summary>The name of a state of the breakdown: an affliction or a virtue (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
+        public static string FatigueStateName(FatigueStateData state)
+        {
+            return Name(state.Name);
+        }
+
+        /// <summary>The name of a state in its colour: red for an affliction, gold for a virtue (round 36).</summary>
+        public static string FatigueStateWord(FatigueStateData state)
+        {
+            return Colored(Name(state.Name), UiPalette.FatigueState(state.Kind));
+        }
+
+        /// <summary>"공포: 아이템이 25% 느리게 돈다": the state and what it does, for the party side's detail line.</summary>
+        public static string FatigueStateDetail(FatigueStateData state)
+        {
+            return UiStrings.Get(UiKeys.Board.StateDetail, FatigueStateWord(state), Name(state.Description));
+        }
+
+        /// <summary>The job on the state line under a party member's feet, with the member's state after it while it is in one: "마검사 · 공포".</summary>
+        public static string JobLine(string jobId, FatigueStateData state)
+        {
+            return state == null ? Job(jobId) : UiStrings.Get(UiKeys.Board.JobState, Job(jobId), FatigueStateWord(state));
+        }
+
+        /// <summary>A value before and after a change: "11 → 22".</summary>
+        public static string Change(string before, string after)
+        {
+            return UiStrings.Get(UiKeys.Item.Change, before, after);
         }
 
         const string FactSeparator = " / ";
 
-        /// <summary>Category, size, cooldown and where it works on one line, then each effect on its own line.</summary>
+        /// <summary>Category, size, cooldown, where it works and its fatigue on one line, then each effect on its own line.</summary>
         public static string ItemDetails(EquippedItem item)
         {
-            var lines = new List<string> { string.Join(FactSeparator, ItemFacts(item)) };
+            List<string> facts = ItemFacts(item);
+            AddFatigue(facts, item);
+            var lines = new List<string> { string.Join(FactSeparator, facts) };
             lines.AddRange(ItemEffects(item));
             return string.Join("\n", lines);
         }
 
-        /// <summary>The same facts and effects as <see cref="ItemDetails"/> on one line.</summary>
+        /// <summary>The same facts and effects as <see cref="ItemDetails"/> on one line, the fatigue last.</summary>
         public static string ItemSummary(EquippedItem item)
         {
             List<string> parts = ItemFacts(item);
             parts.AddRange(ItemEffects(item));
+            AddFatigue(parts, item);
             return string.Join(FactSeparator, parts);
+        }
+
+        /// <summary>
+        /// What the item costs in fatigue when a battle starts (round 32): in the fatigue's violet for equipment that
+        /// costs, "no fatigue" dimmed for a base weapon, nothing for the rest (Docs/Design/04_Lobby_100Day_Economy.md §3).
+        /// </summary>
+        static void AddFatigue(List<string> parts, EquippedItem item)
+        {
+            int cost = FatigueRules.ItemCost(Managers.Data.Data.Balance, item);
+            if (cost > 0)
+            {
+                parts.Add(Colored(UiStrings.Get(UiKeys.Item.FatigueCost, cost), UiPalette.Fatigue));
+            }
+            else if (item.IsBase)
+            {
+                parts.Add(Colored(UiStrings.Get(UiKeys.Item.BaseWeapon), UiPalette.TextDim));
+            }
+        }
+
+        static string Colored(string text, Color color)
+        {
+            return "<color=#" + ColorUtility.ToHtmlStringRGB(color) + ">" + text + "</color>";
         }
 
         /// <summary>The words of an item's category (Docs/Design/02_Combat_System.md §4).</summary>
@@ -133,9 +215,10 @@ namespace F1.UI
         static List<string> ItemEffects(EquippedItem item)
         {
             var effects = new List<string>();
+            BalanceData balance = Managers.Data.Data.Balance;
             foreach (ItemEffect effect in item.Item.Effects)
             {
-                effects.Add(Effect(effect, item.Grade));
+                effects.Add(Effect(effect, item.Magnitude(balance, effect)));
             }
 
             return effects;
@@ -152,9 +235,10 @@ namespace F1.UI
             return rows.Reach == 1 ? UiStrings.Get(UiKeys.Item.RowsBackOne) : UiStrings.Get(UiKeys.Item.RowsBack, rows.Reach);
         }
 
-        public static string Effect(ItemEffect effect, int grade)
+        /// <param name="magnitude">The effect's size on the item it is of (<see cref="EquippedItem.Magnitude"/>: its grade and tier).</param>
+        public static string Effect(ItemEffect effect, int magnitude)
         {
-            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), effect.MagnitudeAt(grade));
+            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), magnitude);
         }
 
         public static string PotionDetails(PotionData potion)

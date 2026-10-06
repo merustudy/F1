@@ -16,12 +16,18 @@ namespace F1.Editor.Setup
         /// The marks under a unit's feet (2026-10-05 round 29, Slay the Spire's way): no plate behind
         /// them, the stage shows through. From the top of their box, MarksGap under the feet: the HP bar
         /// with its numbers on it (MarksBarInset in from each side of the column: 160 in a column of
-        /// 180), then the state line. The badge at the bar's left end reaches out of the box.
+        /// 180), the row of fatigue pips under it (2026-10-06 round 36, C), then the state line. The badge
+        /// at the bar's left end reaches out of the box.
         /// </summary>
-        const float MarksHeight = 46f;
+        const float MarksHeight = 50f;
         const float MarksBarTop = 2f;
         const float MarksBarHeight = 22f;
         const float MarksBarInset = 10f;
+
+        /// <summary>The fatigue pips under the bar, as wide as the bar: FatiguePips.Count of them with a gap between two (round 36, C).</summary>
+        const float MarksPipsTop = 26f;
+        const float MarksPipsHeight = 4f;
+        const float MarksPipGap = 2f;
 
         /// <summary>How far the rim of a state shows around the bar.</summary>
         const float MarksRim = 2f;
@@ -31,8 +37,8 @@ namespace F1.Editor.Setup
         const float MarksBadgeOut = 20f;
         const float MarksBadgeRise = 7f;
 
-        /// <summary>The state line under the bar, starting a little in from the bar's left end.</summary>
-        const float MarksStateTop = 28f;
+        /// <summary>The state line under the pips, starting a little in from the bar's left end.</summary>
+        const float MarksStateTop = 32f;
         const float MarksStateHeight = 18f;
         const float MarksStateIndent = 6f;
 
@@ -70,6 +76,27 @@ namespace F1.Editor.Setup
         const float GradeBadgeSize = 24f;
         const float GradeBadgeInset = 5f;
 
+        /// <summary>
+        /// The fatigue tag of the party side (2026-10-06 round 32, B1): on a cell, at its top-right corner as far in as the grade
+        /// badge is from the bottom-left one, saying "+1"; on the head of a board, at its right end as far in, saying the total.
+        /// The head's tag is as wide as its words and the pad on either side (the view sizes it), and sits a pixel low, with
+        /// the name's glyphs (the strip's art has more rim above).
+        /// </summary>
+        const float FatigueTagHeight = 20f;
+        const float FatigueTagCellWidth = 30f;
+        const float FatigueTagInset = 5f;
+        const float FatigueTagFontSize = 13f;
+        const float FatigueHeadDrop = 1f;
+
+        /// <summary>
+        /// The tier rim of an item cell (2026-10-06 round 35, A): the drawn band (UiArt.TierRim) stretched this far inside the cell's
+        /// line, on the party side and in battle. A cell the chosen item would merge into shows the tier the merge makes on a veil
+        /// of this alpha, in words of this size.
+        /// </summary>
+        const float TierRimInset = 3f;
+        const float MergeVeilAlpha = 0.6f;
+        const float MergeMarkFontSize = 20f;
+
         /// <summary>The space between a figure and its marks, and between the marks and what stands under them.</summary>
         const float MarksGap = 6f;
 
@@ -104,6 +131,8 @@ namespace F1.Editor.Setup
             public TextMeshProUGUI Hp;
             public Image Badge;
             public TextMeshProUGUI BadgeNumber;
+            public RectTransform PipsRow;
+            public UiBar[] Pips;
         }
 
         /// <summary>A colour of the palette at this alpha.</summary>
@@ -222,10 +251,11 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The marks under a unit's feet: its HP as a bar with the numbers on it, the badge at the bar's
-        /// left end (the view shows it with a shield or at death's door), and behind the bar the rim the
-        /// view colours with the unit's state. They stretch across the column; the caller places them and
-        /// adds the state line under the bar. The words are outlined: they stand on the stage. Every
-        /// object is named after the prefix, because a prefab must not repeat a name.
+        /// left end (the view shows it with a shield or at death's door), behind the bar the rim the
+        /// view colours with the unit's state, and under the bar the row of fatigue pips (round 36, C; the
+        /// view fills them, and hides the row for an enemy). They stretch across the column; the caller
+        /// places them and adds the state line under the pips. The words are outlined: they stand on the
+        /// stage. Every object is named after the prefix, because a prefab must not repeat a name.
         /// </summary>
         static MarksParts BuildMarks(Transform parent, string prefix, bool raycastTarget)
         {
@@ -253,10 +283,24 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(number.rectTransform);
             badge.gameObject.SetActive(false);
 
-            return new MarksParts { Marks = marks, Rim = rim, HpBar = hpBar, HpTrack = track, Hp = hp, Badge = badge, BadgeNumber = number };
+            // Under the bar, the fatigue as pips (round 36, C): a line as wide as the bar, so that it follows the column's width,
+            // with the pips laid along it by shares and the gap taken off between two of them.
+            RectTransform pipsRow = UiBuild.Line(UiBuild.Rect(prefix + "Pips", marks), MarksPipsTop, MarksPipsHeight, MarksBarInset, MarksBarInset);
+            var pips = new UiBar[FatiguePips.Count];
+            for (int i = 0; i < pips.Length; i++)
+            {
+                pips[i] = UiBuild.Bar(prefix + "Pip" + i, pipsRow, UiPalette.FatigueBar);
+                var pip = (RectTransform)pips[i].transform;
+                pip.anchorMin = new Vector2((float)i / pips.Length, 0f);
+                pip.anchorMax = new Vector2((float)(i + 1) / pips.Length, 1f);
+                pip.offsetMin = new Vector2(i == 0 ? 0f : MarksPipGap / 2f, 0f);
+                pip.offsetMax = new Vector2(i == pips.Length - 1 ? 0f : -MarksPipGap / 2f, 0f);
+            }
+
+            return new MarksParts { Marks = marks, Rim = rim, HpBar = hpBar, HpTrack = track, Hp = hp, Badge = badge, BadgeNumber = number, PipsRow = pipsRow, Pips = pips };
         }
 
-        /// <summary>Where the state line of a unit's marks is: under the HP bar, from a little in from its left end.</summary>
+        /// <summary>Where the state line of a unit's marks is: under the fatigue pips, from a little in from the bar's left end.</summary>
         static T MarksStateLine<T>(T component)
             where T : Component
         {

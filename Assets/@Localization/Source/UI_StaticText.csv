@@ -27,19 +27,19 @@ Title.VolumeNotSaved,Shown when changing a volume failed because settings could 
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
 Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 Lobby.Roster,Header of the mercenary list.,로스터,Roster
-Lobby.Fatigue,{0} = fatigue points left. {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
+Lobby.Fatigue,{0} = fatigue (0 is fresh; it builds up on expeditions). {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
+Lobby.FatigueState,"On a roster line of a mercenary in an affliction: the fatigue words, then the affliction's name. {0} = the fatigue words (Lobby.Fatigue). {1} = the affliction.",{0} · {1},{0} · {1}
 Lobby.Remove,Takes a mercenary out of the party.,제외,Remove
 Lobby.Expedition,Header of the expedition panel.,원정,Expedition
 Lobby.Affinity,{0} = name of the dungeon's affinity.,지역 속성: {0},Affinity: {0}
-Lobby.Cost,{0} = fatigue cost. {1} = days the dungeon takes.,피로도 -{0} · {1}일 소요,Fatigue -{0} · takes {1} days
+Lobby.Cost,{0} = days the dungeon takes.,{0}일 소요,Takes {0} days
 Lobby.Cleared,{0} = times this dungeon was cleared.,클리어 {0}회,Clears: {0}
 Lobby.Party,Header of the party preview.,파티,Party
 Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
-Lobby.Rest,{0} = fatigue restored. {1} = days that pass.,쉬기 (+{0} 피로도 · {1}일),Rest (+{0} fatigue · {1}d)
+Lobby.Rest,{0} = how much fatigue comes down. {1} = days that pass.,쉬기 (피로도 -{0} · {1}일),Rest (fatigue -{0} · {1}d)
 Lobby.Depart,Starts the expedition.,원정 출발,Depart
 Lobby.DepartOk,The party can leave.,출발할 수 있습니다,Ready to depart
 Lobby.PartyTooSmall,{0} = minimum party size.,파티에 용병을 {0}명 이상 넣으세요,The party needs at least {0}
-Lobby.NotEnoughFatigue,A party member cannot pay the dungeon's fatigue cost.,피로도가 모자란 용병이 있습니다,Someone in the party is too tired
 Lobby.Fallen,{0} = names of the dead.,전사자: {0},Fallen: {0}
 Lobby.RunOver,No mercenary is left alive.,용병단이 전멸했습니다,The company has fallen
 Lobby.RunOverDay,{0} = day the run ended.,{0}일차에 끝났습니다,It ended on day {0}
@@ -51,6 +51,22 @@ Map.SelectNode,Shown until a node is selected.,갈 곳을 고르세요,Choose wh
 Map.NodeTitle,{0} = floor. {1} = node kind.,{0}층 · {1},Floor {0} · {1}
 Map.Unknown,Shown in place of an enemy list: who waits at a node is not shown before the battle.,누가 기다리는지는 들어가 봐야 압니다.,Who waits inside is found out inside.
 Map.Enter,Starts the battle at the selected node.,전투 시작,Fight
+Map.Elite,Label of an elite node: a stronger band waits there.,정예,Elite
+Map.Camp,Label of a camp node: a rest without a fight.,야영지,Camp
+Map.EliteHint,Shown when an elite node is selected.,강한 적 무리가 기다립니다.,A strong band waits here.
+Map.CampHint,Shown when a camp node is selected.,싸움 없이 쉬어 가는 곳입니다.,A place to rest without a fight.
+Map.EnterCamp,Goes into the selected camp node.,야영지로,Make Camp
+Map.AtCamp,In the panel while the party is at a camp: the choice is in the window over the map.,지도 위의 창에서 고릅니다.,Choose in the window over the map.
+Map.CampChoose,In the camp window under its title.,하나를 고르면 다음 층으로 갑니다.,"Choose one, then go on to the next floor."
+Map.Rest,The camp's rest: the title of its card.,쉬기,Rest
+Map.RestHeal,On the rest card. {0} = percent of max HP each living mercenary heals.,HP {0}% 회복,Heal {0}% HP
+Map.RestFatigue,On the rest card. {0} = fatigue taken off.,피로도 -{0},Fatigue -{0}
+Map.Mend,The camp's upkeep: the title of its card and of its step.,정비,Mend
+Map.MendBody,On the mend card.,보드의 아이템 하나를 한 단계 위로,One item on a board goes a tier up
+Map.MendTitle,Title of the camp window while an item is chosen to mend. {0} = floor.,{0}층 · 야영지 · 정비,Floor {0} · Camp · Mend
+Map.MendHint,In the camp window while an item is chosen to mend.,왼쪽 보드에서 올릴 아이템을 고르세요.,Choose the item to raise on a board on the left.
+Map.MendBack,Leaves the mend step for the camp's two choices.,돌아가기,Back
+Map.MendConfirm,Mends the chosen item and goes on.,정비하기,Mend it
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.EmptySlot,An empty item or potion slot.,빈 칸,Empty
 Board.Grade,{0} = item grade.,등급 {0},Grade {0}
@@ -63,7 +79,12 @@ Board.InventoryTitle,Title of the inventory popup. {0} = cells in use. {1} = all
 Board.InventoryHint,How to use the inventory popup.,아이템을 누른 뒤 왼쪽 보드의 칸을 누르면 들어갑니다. 찬 칸이면 그 아이템이 인벤토리로 옵니다.,"Click an item, then a cell of a board on the left, to put it there. An item already there comes to the inventory."
 Board.InventoryEmpty,Shown in the inventory popup when it holds nothing.,비어 있음,Empty
 Board.ToInventory,Sends the selected board item to the inventory.,인벤토리로,To inventory
-Item.Title,{0} = item name. {1} = grade.,{0} · 등급 {1},{0} · Grade {1}
+Board.FatigueTag,On the violet tag of a board item that costs fatigue when a battle starts. {0} = the cost.,+{0},+{0}
+Board.FatigueTotal,On the violet tag at the right end of a board's head: the fatigue the board's equipment costs when a battle starts. {0} = the total.,피로 +{0},Fatigue +{0}
+Board.JobState,"On the state line under a party member's feet while the member is in a state of the breakdown. {0} = job. {1} = the state's name (an affliction or a virtue).",{0} · {1},{0} · {1}
+Board.StateDetail,"On the detail line when the state's name under a member's feet was clicked. {0} = the state's name. {1} = what it does.",{0}: {1},{0}: {1}
+Board.MergeInto,On a board cell the chosen item would merge into. {0} = the tier the merge makes.,합치기 → {0},Merge → {0}
+Item.Title,{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade.,{0} · {1} · 등급 {2},{0} · {1} · Grade {2}
 Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
 Item.Armor,Item category: defensive gear.,방어 장비,Armor
 Item.Attack,Item category: an attack that is not a weapon.,공격 아이템,Attack item
@@ -75,6 +96,14 @@ Item.RowsFront,The item only works while its owner stands within the front N row
 Item.RowsFrontOne,The item only works in the front row.,맨 앞에서만 발동,Only in the front row
 Item.RowsBack,The item only works while its owner stands within the rear N rows of the living line. {0} = N (2 or more).,뒤에서 {0}번째 자리까지만 발동,Only within the rear {0} rows
 Item.RowsBackOne,The item only works in the rearmost row.,맨 뒤에서만 발동,Only in the rearmost row
+Item.FatigueCost,In an item's facts: equipment that costs fatigue when a battle starts. {0} = the cost.,전투마다 피로 +{0},Fatigue +{0} each battle
+Item.BaseWeapon,In a base weapon's facts: it costs no fatigue.,기본 무기: 피로 없음,Base weapon: no fatigue
+Item.Bronze,The first tier of an item.,동,Bronze
+Item.Silver,The second tier of an item.,은,Silver
+Item.Gold,The third tier of an item.,금,Gold
+Item.Diamond,The last tier of an item.,다이아,Diamond
+Item.MergeHint,"Under a chosen item's facts when a board holds the same item at the same tier. {0} = item name. {1} = its tier. {2} = the tier up.",같은 {0}·{1} 위에 놓으면 합쳐서 {2} 하나가 됩니다.,"Put it on another {0} ({1}) and they merge into one {2}."
+Item.Change,A value before and after a change. {0} = before. {1} = after.,{0} → {1},{0} → {1}
 Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
 Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}
@@ -134,6 +163,14 @@ Log.PotionUsed,{0} = potion. {1} = target.,포션 {0} → {1},Potion {0} → {1}
 Log.RetreatFailed,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 실패,Retreat {0}% · rolled {1} · failed
 Log.RetreatSucceeded,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 성공,Retreat {0}% · rolled {1} · succeeded
 Log.Storm,{0} = damage.,폭풍이 모두에게 피해 {0},The storm hits everyone for {0}
+Log.BrokeDown,"{0} = unit. {1} = the affliction. {2} = roll 0..99. {3} = virtue chance (a roll below it is a virtue).",{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 고통 {1},{0}: breakdown (virtue {3}%) · rolled {2} · affliction: {1}
+Log.Virtue,"{0} = unit. {1} = the virtue. {2} = roll. {3} = virtue chance.",{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 각성 {1},{0}: breakdown (virtue {3}%) · rolled {2} · virtue: {1}
+Log.Collapsed,"{0} = unit. Its fatigue reached the maximum: death's door, or death if it was there already (the death is logged after).",{0}: 피로가 가득 차 쓰러짐,{0} collapsed from fatigue
+Log.FatigueStateEnded,"{0} = unit. {1} = the affliction that ended because the fatigue came back under the threshold.",{0}: {1}에서 벗어남,{0} is free of {1}
+Log.FatigueDog,"Fatigue from reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 빈사로 피로 +{1} → {2},{0}: death's door · fatigue +{1} → {2}
+Log.FatigueAllyDog,"Fatigue from an ally reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 빈사로 피로 +{1} → {2},{0}: an ally at death's door · fatigue +{1} → {2}
+Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 죽음으로 피로 +{1} → {2},{0}: an ally died · fatigue +{1} → {2}
+Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
 Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
 Reward.Title,Header of the reward screen.,보상을 고르세요,Choose a reward
@@ -151,7 +188,8 @@ Settle.Wiped,Expedition result.,파티 전멸,The party was wiped out
 Settle.Retreated,Expedition result.,후퇴,Retreated
 Settle.Survivors,{0} = names.,생환: {0},Returned: {0}
 Settle.Fallen,{0} = names.,전사: {0},Fallen: {0}
-Settle.Fatigue,{0} = fatigue cost.,생환자의 피로도 -{0},Fatigue of those who returned: -{0}
+Settle.Fatigue,"{0} = each survivor's name and the fatigue they came back with, separated by commas.",생환자의 피로도: {0},Fatigue of those who returned: {0}
+Settle.SurvivorState,"One survivor in Settle.Fatigue who came back in an affliction. {0} = name and fatigue. {1} = the affliction.",{0} ({1}),{0} ({1})
 Settle.Days,{0} = days passed. {1} = the new day.,{0}일이 지나 {1}일차가 되었습니다,{0} days passed. It is now day {1}
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
@@ -168,3 +206,4 @@ Fx.Died,A unit died.,쓰러짐,Fallen
 Fx.RetreatSucceeded,The retreat roll succeeded.,후퇴!,Retreat!
 Fx.RetreatFailed,The retreat roll failed.,후퇴 실패,Retreat failed
 Fx.Storm,{0} = damage of this storm tick. Rises from the clock.,폭풍 -{0},Storm -{0}
+Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue

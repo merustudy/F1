@@ -28,6 +28,9 @@ namespace F1.UI
             _fillImage.color = color;
         }
 
+        /// <summary>The colour of the fill.</summary>
+        public Color FillColor => _fillImage.color;
+
         /// <summary>Stretches a fill of a bar to this share of its area, from the left.</summary>
         public static void Fill(RectTransform rect, float ratio)
         {

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Globalization;
 using F1.Core;
 using F1.Gameplay;
 using TMPro;
@@ -48,9 +50,23 @@ namespace F1.UI
             _survivors.text = UiStrings.Get(UiKeys.Settle.Survivors, UiText.MercenaryList(report.SurvivorIds));
             _fallen.text = UiStrings.Get(UiKeys.Settle.Fallen, UiText.MercenaryList(report.FallenIds));
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
-            _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, report.FatigueCost) : string.Empty;
+            _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
             _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
             _runOver.text = report.RunIsOver ? UiStrings.Get(UiKeys.Settle.RunOver) : string.Empty;
+        }
+
+        /// <summary>Each survivor with the fatigue they came back with, and the affliction they came home in: "로언 128 (공포), 카이 30".</summary>
+        static string SurvivorFatigue(SettlementReport report)
+        {
+            var entries = new List<string>();
+            for (int i = 0; i < report.SurvivorIds.Count; i++)
+            {
+                string entry = UiText.Mercenary(report.SurvivorIds[i]) + " " + report.SurvivorFatigue[i].ToString(CultureInfo.InvariantCulture);
+                string stateId = report.SurvivorStates[i];
+                entries.Add(stateId == null ? entry : UiStrings.Get(UiKeys.Settle.SurvivorState, entry, UiText.FatigueStateName(Managers.Data.Data.FatigueStates.Get(stateId))));
+            }
+
+            return string.Join(", ", entries);
         }
 
         void OnConfirm()

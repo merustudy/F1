@@ -72,6 +72,26 @@ namespace F1.UI
         const float KillZoomOutFrom = 0.45f;
         const float KillZoomOut = 0.2f;
 
+        /// <summary>
+        /// The moment of a breakdown (2026-10-06 round 38, "B"; Docs/Design/04 §3): the kill moment's grammar for a mercenary whose fatigue
+        /// reached the threshold (an affliction or a virtue) or its maximum (the collapse). For BreakdownSlowFor seconds the battle and the
+        /// motions run at KillSlowPercent, the rest of the stage darkens (KillDark) under the unit, the stage draws in BreakdownZoom times
+        /// towards it, and the dark and the zoom go back over BreakdownOut from then. Meanwhile the unit holds its state pose (the figure
+        /// swapped as for an attack, where its job has the pose), shivers (an affliction) or swells (a virtue) and flashes in the state's
+        /// colour, the glow and the effect burst stand behind it and the state's word over its head (BattleFxLayer). At a speed above
+        /// KillMomentTopSpeed there is no slow, dark or zoom; the rest plays. The mockup: ArtPipeline/Archive/38-breakdown-fx.
+        /// </summary>
+        internal const float BreakdownSlowFor = 0.8f;
+        internal const float BreakdownZoom = 1.2f;
+        internal const float BreakdownOut = 0.25f;
+        internal const float BreakdownLength = BreakdownSlowFor + BreakdownOut;
+        const float ShiverFor = 0.5f;
+        const float ShiverAmplitude = 4f;
+        const float InkBurstSize = 416f;
+        const float LightBurstSize = 352f;
+        static readonly Color AfflictionTint = new Color(0.62f, 0.52f, 0.72f);
+        static readonly Color VirtueTint = new Color(1f, 0.92f, 0.62f);
+
         static readonly int[] Speeds = { 100, 200, 400 };
 
         [SerializeField] Image _background;
@@ -91,6 +111,9 @@ namespace F1.UI
         [SerializeField] RectTransform _stageBack;
         [SerializeField] RectTransform _stageFront;
         [SerializeField] Image _killDark;
+        [SerializeField] RectTransform _momentFx;
+        [SerializeField] Sprite _inkBurst;
+        [SerializeField] Sprite _lightBurst;
         [SerializeField] RectTransform _field;
         [SerializeField] RectTransform[] _partyRows;
         [SerializeField] RectTransform[] _enemyRows;
@@ -138,7 +161,7 @@ namespace F1.UI
 
         /// <summary>True once the clock has been drawn: a candle already out when the screen opens (a battle continued in the storm) makes no sound.</summary>
         bool _clockShown;
-        KillMoment _kill;
+        StageMoment _moment;
 
         /// <summary>Where the kill moment's dark lies when nothing is drawn in: its place in the field, and its corner in the frame (the stage's box).</summary>
         Vector2 _killDarkPlace;
@@ -148,8 +171,12 @@ namespace F1.UI
         Vector2 _killCentre;
         Vector2 _stageRest;
 
-        /// <summary>A kill moment on show: whom it lights, how long it has run (real seconds), how fast, and whether its fallen have gone.</summary>
-        sealed class KillMoment
+        /// <summary>
+        /// A moment on the stage: a kill moment, or the moment of a breakdown (round 38). Whom it lights (its fallen, whom it holds on the
+        /// stage, and those who stand out of the dark: the strikers, or the one who broke down), how long it has run (real seconds), how
+        /// fast, whether its slow time is over, and its own times and zoom.
+        /// </summary>
+        sealed class StageMoment
         {
             public readonly List<BattleUnitView> Fallen = new List<BattleUnitView>();
             public readonly List<BattleUnitView> Strikers = new List<BattleUnitView>();
@@ -158,8 +185,37 @@ namespace F1.UI
             /// <summary>The speed it was struck at, as a factor: its times are divided by it.</summary>
             public float Pace = 1f;
 
-            /// <summary>True once the slow time is over and the fallen have gone: the dark and the zoom are going back.</summary>
+            /// <summary>True once the slow time is over (and a kill moment's fallen have gone): the dark and the zoom are going back.</summary>
             public bool Released;
+
+            /// <summary>True for a kill moment: its fallen go, with their words and ghosts, when the slow time is over.</summary>
+            public bool Kill;
+
+            public float SlowFor;
+            public float Zoom;
+            public float DarkOutFrom;
+            public float DarkOut;
+            public float ZoomOutFrom;
+            public float ZoomOut;
+            public float Length;
+
+            public static StageMoment KillMoment(float pace)
+            {
+                return new StageMoment
+                {
+                    Kill = true, Pace = pace, SlowFor = KillSlowFor, Zoom = KillZoom, DarkOutFrom = KillDarkOutFrom, DarkOut = KillDarkOut,
+                    ZoomOutFrom = KillZoomOutFrom, ZoomOut = KillZoomOut, Length = KillLength,
+                };
+            }
+
+            public static StageMoment Breakdown(float pace)
+            {
+                return new StageMoment
+                {
+                    Pace = pace, SlowFor = BreakdownSlowFor, Zoom = BreakdownZoom, DarkOutFrom = BreakdownSlowFor, DarkOut = BreakdownOut,
+                    ZoomOutFrom = BreakdownSlowFor, ZoomOut = BreakdownOut, Length = BreakdownLength,
+                };
+            }
         }
 
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
@@ -178,10 +234,16 @@ namespace F1.UI
         public CandleView Candle => _candle;
 
         /// <summary>True while a kill moment is shown, until its dark and zoom are back. For tests.</summary>
-        public bool KillMomentShown => _kill != null;
+        public bool KillMomentShown => _moment != null && _moment.Kill;
 
-        /// <summary>True while a kill moment holds the fallen and slows the battle. For tests.</summary>
-        public bool KillMomentSlows => _kill != null && !_kill.Released;
+        /// <summary>True while the moment of a breakdown is shown (round 38). For tests.</summary>
+        public bool BreakdownMomentShown => _moment != null && !_moment.Kill;
+
+        /// <summary>True while any moment is shown.</summary>
+        public bool MomentShown => _moment != null;
+
+        /// <summary>True while a moment holds the battle slow (a kill moment holds its fallen meanwhile). For tests.</summary>
+        public bool MomentSlows => _moment != null && !_moment.Released;
 
         /// <summary>How far the stage is drawn in: 1 when it is not.</summary>
         public float StageZoom => _stageFront.localScale.x;
@@ -277,7 +339,7 @@ namespace F1.UI
             _killDarkHome = new Vector3(frameRect.xMin + _field.anchoredPosition.x + _killDarkPlace.x, frameRect.yMax + _field.anchoredPosition.y + _killDarkPlace.y, 0f);
             _stageRest = frameRect.center;
             _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell,
-                KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect);
+                KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect, OnBreakdown);
             RenderCaptions();
             Managers.Sound.PlayMusic(IsBossBattle() ? MusicTrack.Boss : MusicTrack.Dungeon);
         }
@@ -336,9 +398,9 @@ namespace F1.UI
             }
 
             BattleUnitView strikerView = UnitViewOf(striker);
-            if (_kill == null || _kill.Released)
+            if (_moment == null || _moment.Released)
             {
-                if (_kill == null)
+                if (_moment == null)
                 {
                     Vector3 centre = FigureCentre(fallenView);
                     if (strikerView != null)
@@ -349,20 +411,20 @@ namespace F1.UI
                     _killCentre = _stageFront.parent.InverseTransformPoint(centre);
                 }
 
-                _kill = new KillMoment { Pace = _clock.SpeedPercent / 100f };
+                _moment = StageMoment.KillMoment(_clock.SpeedPercent / 100f);
             }
 
-            if (!_kill.Fallen.Contains(fallenView))
+            if (!_moment.Fallen.Contains(fallenView))
             {
-                _kill.Fallen.Add(fallenView);
+                _moment.Fallen.Add(fallenView);
             }
 
-            if (strikerView != null && !_kill.Strikers.Contains(strikerView))
+            if (strikerView != null && !_moment.Strikers.Contains(strikerView))
             {
-                _kill.Strikers.Add(strikerView);
+                _moment.Strikers.Add(strikerView);
             }
 
-            SlowFor(_kill);
+            SlowFor(_moment);
         }
 
         static Vector3 FigureCentre(BattleUnitView view)
@@ -371,10 +433,64 @@ namespace F1.UI
             return figure.TransformPoint(figure.rect.center);
         }
 
-        /// <summary>The battle and the motions run slow while the moment holds its fallen, at the speed chosen otherwise.</summary>
-        void SlowFor(KillMoment kill)
+        /// <summary>
+        /// A mercenary broke down into a state, or (with a null state) collapsed at the most fatigue (round 38, "B"): the moment of a
+        /// breakdown. At the speeds that play kill moments the battle slows, the stage darkens but the unit and draws in on it (a moment
+        /// already on takes the unit in instead); at every speed the unit holds its state pose (where its job has one), shivers or swells
+        /// and flashes in the state's colour, the glow and the burst stand behind it and the state's word over its head.
+        /// </summary>
+        void OnBreakdown(UnitRef unit, FatigueStateData state)
         {
-            bool slow = kill != null && !kill.Released;
+            BattleUnitView view = UnitViewOf(unit);
+            if (view == null)
+            {
+                return;
+            }
+
+            bool virtue = state != null && state.Kind == FatigueStateKind.Virtue;
+            Color color = state == null ? UiPalette.FatigueDanger : UiPalette.FatigueState(state.Kind);
+            float pace = _clock.SpeedPercent / 100f;
+            if (KillMomentsOn())
+            {
+                if (_moment == null || _moment.Released)
+                {
+                    if (_moment == null)
+                    {
+                        _killCentre = _stageFront.parent.InverseTransformPoint(FigureCentre(view));
+                    }
+
+                    _moment = StageMoment.Breakdown(pace);
+                }
+
+                if (!_moment.Strikers.Contains(view))
+                {
+                    _moment.Strikers.Add(view);
+                }
+
+                SlowFor(_moment);
+            }
+
+            string mercenaryId = view.Unit.Setup.SourceId;
+            view.HoldPose(virtue ? _art.ResolutePoseOfMercenary(mercenaryId) : _art.BrokenPoseOfMercenary(mercenaryId), BreakdownLength / pace);
+            if (virtue)
+            {
+                view.Pulse();
+            }
+            else
+            {
+                view.Shiver(ShiverFor / pace, ShiverAmplitude);
+            }
+
+            view.Flash(virtue ? VirtueTint : AfflictionTint);
+            _fx.Burst(view.FigureRect, virtue ? _lightBurst : _inkBurst, color, virtue ? LightBurstSize : InkBurstSize, virtue, BreakdownSlowFor / pace, BreakdownOut / pace);
+            string word = state == null ? UiStrings.Get(UiKeys.Fx.Collapsed) : UiText.FatigueStateName(state);
+            _fx.Word(view.FigureRect, word, UiText.Name(view.Unit.Setup.Name), color, pace);
+        }
+
+        /// <summary>The battle and the motions run slow while the moment holds its fallen, at the speed chosen otherwise.</summary>
+        void SlowFor(StageMoment moment)
+        {
+            bool slow = moment != null && !moment.Released;
             _clock.SlowPercent = slow ? KillSlowPercent : 100;
             float scale = slow ? KillSlowPercent / 100f : 1f;
             if (!Mathf.Approximately(Time.timeScale, scale))
@@ -383,31 +499,31 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The moment runs on real time, paused or not: when its slow time is over its fallen go, as any fallen enemy goes.</summary>
+        /// <summary>The moment runs on real time, paused or not: when its slow time is over a kill moment's fallen go, as any fallen enemy goes.</summary>
         void AdvanceKillMoment(float realSeconds)
         {
-            if (_kill == null)
+            if (_moment == null)
             {
                 return;
             }
 
-            _kill.Age += realSeconds;
-            if (!_kill.Released && _kill.Age >= KillSlowFor / _kill.Pace)
+            _moment.Age += realSeconds;
+            if (!_moment.Released && _moment.Age >= _moment.SlowFor / _moment.Pace)
             {
-                _kill.Released = true;
-                foreach (BattleUnitView fallen in _kill.Fallen)
+                _moment.Released = true;
+                foreach (BattleUnitView fallen in _moment.Fallen)
                 {
                     _fx.Ghost(fallen.FigureArt);
                     _fx.Float(fallen.FigureRect, UiStrings.Get(UiKeys.Fx.Died), UiPalette.Danger, true);
                 }
             }
 
-            if (_kill.Age >= KillLength / _kill.Pace)
+            if (_moment.Age >= _moment.Length / _moment.Pace)
             {
-                _kill = null;
+                _moment = null;
             }
 
-            SlowFor(_kill);
+            SlowFor(_moment);
         }
 
         /// <summary>The dark over the stage and how far the stage is drawn in, by the moment's curves; the dark stays on the stage's box.</summary>
@@ -415,11 +531,11 @@ namespace F1.UI
         {
             float dark = 0f;
             float zoom = 1f;
-            if (_kill != null)
+            if (_moment != null)
             {
-                float t = _kill.Age * _kill.Pace;
-                dark = KillDark * Mathf.Min(Smooth(t / KillDarkIn), 1f - Smooth((t - KillDarkOutFrom) / KillDarkOut));
-                zoom = 1f + (KillZoom - 1f) * Mathf.Min(Smooth(t / KillZoomIn), 1f - Smooth((t - KillZoomOutFrom) / KillZoomOut));
+                float t = _moment.Age * _moment.Pace;
+                dark = KillDark * Mathf.Min(Smooth(t / KillDarkIn), 1f - Smooth((t - _moment.DarkOutFrom) / _moment.DarkOut));
+                zoom = 1f + (_moment.Zoom - 1f) * Mathf.Min(Smooth(t / KillZoomIn), 1f - Smooth((t - _moment.ZoomOutFrom) / _moment.ZoomOut));
             }
 
             // Scaled about their own pivot and moved by as much as keeps the moment's point where it is: drawn in about that point.
@@ -433,7 +549,7 @@ namespace F1.UI
             _killDark.color = new Color(0f, 0f, 0f, dark);
             RectTransform rect = _killDark.rectTransform;
             rect.localScale = new Vector3(1f / zoom, 1f / zoom, 1f);
-            if (_kill != null)
+            if (_moment != null)
             {
                 rect.position = _stageFront.parent.TransformPoint(_killDarkHome);
             }
@@ -452,7 +568,7 @@ namespace F1.UI
         /// <summary>The time scale is the engine's, not the screen's: whatever closes the screen, the motions run at their speed again.</summary>
         void OnDisable()
         {
-            _kill = null;
+            _moment = null;
             _clock.SlowPercent = 100;
             if (!Mathf.Approximately(Time.timeScale, 1f))
             {
@@ -622,6 +738,7 @@ namespace F1.UI
                 if (pass == 1)
                 {
                     PutAt(_killDark.transform, ref index);
+                    PutAt(_momentFx, ref index);
                 }
             }
         }
@@ -639,12 +756,12 @@ namespace F1.UI
         /// <summary>How a kill moment lights a column: 2 for one who struck, 1 for one who fell, 0 for the rest.</summary>
         int KillLight(Transform column)
         {
-            if (_kill == null)
+            if (_moment == null)
             {
                 return 0;
             }
 
-            foreach (BattleUnitView view in _kill.Strikers)
+            foreach (BattleUnitView view in _moment.Strikers)
             {
                 if (view.gameObject.activeSelf && view.transform.parent == column)
                 {
@@ -652,7 +769,7 @@ namespace F1.UI
                 }
             }
 
-            foreach (BattleUnitView view in _kill.Fallen)
+            foreach (BattleUnitView view in _moment.Fallen)
             {
                 if (view.gameObject.activeSelf && view.transform.parent == column)
                 {
@@ -743,9 +860,9 @@ namespace F1.UI
             // panel (with the rows on their boards' heads); they walk on when the last grave has gone. While a kill moment holds
             // its fallen, they stay on the stage and the enemy keeps its places the same way.
             bool graves = _fx.GravesLeft > 0f;
-            bool killHold = KillMomentSlows;
+            bool killHold = MomentSlows;
             Place(_partyViews, _partyRows, view => view.Unit, graves, WalkIn);
-            Place(_enemyViews, _enemyRows, view => view.Unit, killHold, WalkIn, view => killHold && _kill.Fallen.Contains(view));
+            Place(_enemyViews, _enemyRows, view => view.Unit, killHold, WalkIn, view => killHold && _moment.Fallen.Contains(view));
             ArrangeColumns();
             Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, StandIn);
             Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, killHold, StandIn);
@@ -778,7 +895,7 @@ namespace F1.UI
             }
 
             // The last enemy's kill moment is seen before the result covers the stage.
-            if (!ongoing && !_resultShown && _kill == null)
+            if (!ongoing && !_resultShown && _moment == null)
             {
                 ShowResult(engine);
             }

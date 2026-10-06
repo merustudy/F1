@@ -96,7 +96,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864202
-    m_Localized: "Fatigue -{0} \xB7 takes {1} days"
+    m_Localized: Takes {0} days
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -114,7 +114,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864206
-    m_Localized: "Rest (+{0} fatigue \xB7 {1}d)"
+    m_Localized: "Rest (fatigue -{0} \xB7 {1}d)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -131,10 +131,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864210
-    m_Localized: Someone in the party is too tired
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864211
     m_Localized: 'Fallen: {0}'
     m_Metadata:
@@ -200,7 +196,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864230
-    m_Localized: "{0} \xB7 Grade {1}"
+    m_Localized: "{0} \xB7 {1} \xB7 Grade {2}"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -517,7 +513,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864306
-    m_Localized: 'Fatigue of those who returned: -{0}'
+    m_Localized: 'Fatigue of those who returned: {0}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -779,6 +775,187 @@ MonoBehaviour:
     m_Localized: The setting could not be saved, so the volume was not changed.
     m_Metadata:
       m_Items: []
+  - m_Id: 1916220080119808
+    m_Localized: +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1916220088508416
+    m_Localized: Fatigue +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1916220088508417
+    m_Localized: Fatigue +{0} each battle
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1916220088508418
+    m_Localized: 'Base weapon: no fatigue'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400367181824
+    m_Localized: Elite
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764736
+    m_Localized: Camp
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764737
+    m_Localized: A strong band waits here.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764738
+    m_Localized: A place to rest without a fight.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764739
+    m_Localized: Make Camp
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764740
+    m_Localized: Choose in the window over the map.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764741
+    m_Localized: Choose one, then go on to the next floor.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764742
+    m_Localized: Rest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1944400379764743
+    m_Localized: Heal {0}% HP
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 1944400379764744
+    m_Localized: Fatigue -{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2017500580536320
+    m_Localized: Mend
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500593119232
+    m_Localized: One item on a board goes a tier up
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500593119233
+    m_Localized: "Floor {0} \xB7 Camp \xB7 Mend"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2017500593119234
+    m_Localized: Choose the item to raise on a board on the left.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500593119235
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500593119236
+    m_Localized: Mend it
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500593119237
+    m_Localized: "Merge \u2192 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2017500597313536
+    m_Localized: Bronze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500597313537
+    m_Localized: Silver
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500597313538
+    m_Localized: Gold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500597313539
+    m_Localized: Diamond
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2017500597313540
+    m_Localized: Put it on another {0} ({1}) and they merge into one {2}.
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2017500597313541
+    m_Localized: "{0} \u2192 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041123999571968
+    m_Localized: "{0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124012154880
+    m_Localized: "{0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124012154881
+    m_Localized: '{0}: {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349184
+    m_Localized: "{0}: breakdown (virtue {3}%) \xB7 rolled {2} \xB7 affliction: {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349185
+    m_Localized: "{0}: breakdown (virtue {3}%) \xB7 rolled {2} \xB7 virtue: {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349186
+    m_Localized: '{0} collapsed from fatigue'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349187
+    m_Localized: '{0} is free of {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349188
+    m_Localized: "{0}: death's door \xB7 fatigue +{1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349189
+    m_Localized: "{0}: an ally at death's door \xB7 fatigue +{1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349190
+    m_Localized: "{0}: an ally died \xB7 fatigue +{1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349191
+    m_Localized: "{0}: the virtue \xB7 fatigue {1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349192
+    m_Localized: '{0} ({1})'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2041124016349195
+    m_Localized: Collapsed from fatigue
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -864,3 +1041,24 @@ MonoBehaviour:
         - id: 1060957215252490
         - id: 1854534669295616
         - id: 1854534681878528
+        - id: 1916220080119808
+        - id: 1916220088508416
+        - id: 1916220088508417
+        - id: 1944400379764743
+        - id: 1944400379764744
+        - id: 2017500593119233
+        - id: 2017500593119237
+        - id: 2017500597313540
+        - id: 2017500597313541
+        - id: 2041123999571968
+        - id: 2041124012154880
+        - id: 2041124012154881
+        - id: 2041124016349184
+        - id: 2041124016349185
+        - id: 2041124016349186
+        - id: 2041124016349187
+        - id: 2041124016349188
+        - id: 2041124016349189
+        - id: 2041124016349190
+        - id: 2041124016349191
+        - id: 2041124016349192

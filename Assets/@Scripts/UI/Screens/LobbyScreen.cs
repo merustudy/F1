@@ -61,7 +61,7 @@ namespace F1.UI
 
             _dungeonName.text = UiText.Name(dungeon.Name);
             _dungeonAffinity.text = UiStrings.Get(UiKeys.Lobby.Affinity, UiText.Name(data.Affinities.Get(dungeon.AffinityId).Name));
-            _dungeonCost.text = UiStrings.Get(UiKeys.Lobby.Cost, dungeon.FatigueCost, dungeon.DurationDays);
+            _dungeonCost.text = UiStrings.Get(UiKeys.Lobby.Cost, dungeon.DurationDays);
             run.ClearedDungeons.TryGetValue(dungeon.Id, out int cleared);
             _dungeonCleared.text = UiStrings.Get(UiKeys.Lobby.Cleared, cleared);
 
@@ -114,15 +114,20 @@ namespace F1.UI
                     canTake[i] = Managers.Run.CanPlaceInParty(mercenary.Id, i + 1);
                 }
 
+                // An affliction came home with the mercenary (a virtue never does: Docs/Design/04_Lobby_100Day_Economy.md §3).
                 JobData job = data.Jobs.Get(mercenary.JobId);
+                FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 entry.Show(
                     UiText.Mercenary(mercenary.Id),
                     UiText.Name(job.Name),
                     UiText.Passive(job),
                     mercenary.Fatigue,
                     data.Balance.MaxFatigue,
+                    data.Balance.FatigueBreakdown,
                     RowOf(run, mercenary.Id),
-                    canTake);
+                    canTake,
+                    affliction == null ? null : UiText.FatigueStateName(affliction),
+                    affliction == null ? null : UiText.Name(affliction.Description));
             }
 
             var gone = new List<string>();
@@ -175,7 +180,6 @@ namespace F1.UI
             {
                 case DepartCheck.Ok: return UiStrings.Get(UiKeys.Lobby.DepartOk);
                 case DepartCheck.PartyTooSmall: return UiStrings.Get(UiKeys.Lobby.PartyTooSmall, balance.MinPartySize);
-                case DepartCheck.NotEnoughFatigue: return UiStrings.Get(UiKeys.Lobby.NotEnoughFatigue);
                 default: return UiStrings.Get(UiKeys.Lobby.RunOver);
             }
         }

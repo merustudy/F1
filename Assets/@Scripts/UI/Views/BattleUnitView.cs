@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using F1.Data;
 using F1.Gameplay;
 using TMPro;
@@ -11,8 +12,9 @@ namespace F1.UI
     /// has none) and the marks under its feet (2026-10-05 round 29, Slay the Spire's way: no plate).
     /// The marks are its HP as a bar with the numbers on it, a badge at the bar's left end (a shield
     /// and its number, or the skull at death's door), a rim around the bar in the colour of its state
-    /// (<see cref="Rim"/>) and a line of states under the bar: the burn as an icon with a number, or
-    /// the death's door state. While a potion can be used on the unit, a light lies on the floor at
+    /// (<see cref="Rim"/>), under the bar a party unit's fatigue as pips (2026-10-06 round 36, C; an
+    /// enemy has none) and a line of states: the burn as an icon with a number, or the death's door
+    /// state, and after them the name of the unit's affliction or virtue while it is in one. While a potion can be used on the unit, a light lies on the floor at
     /// its feet. Both sides' marks look the same: where the unit stands says its side. Its row and
     /// name, and its items, are its board in the panel column under the stage
     /// (<see cref="BattleBoardView"/>). It shows what the engine says; texts are rebuilt only when
@@ -22,7 +24,9 @@ namespace F1.UI
     /// fires, recoils and flashes when it is hit, and walks into its new column when it advances.
     /// A unit has an attack pose and a hit pose drawn after its figure (Docs/Design/10 §5; a monster's since round 28):
     /// the attack pose shows while a weapon's lunge plays, the hit pose while a blow's recoil plays,
-    /// each 0.05 s more, then the figure again; the later of the two wins.
+    /// each 0.05 s more, then the figure again; the later of the two wins. A mercenary may hold a state pose through the
+    /// moment of a breakdown (<see cref="HoldPose"/>, round 38): the lunge and the recoil leave it alone meanwhile, and it
+    /// shivers (<see cref="Shiver"/>) for an affliction.
     /// A lunge and a recoil move the figure (and the shadow under it) only: the marks stay in the
     /// column so that they can be read while the figure acts (2026-10-04, round 19). A walk moves
     /// both: the unit has moved to another column. No motion moves the column itself.
@@ -64,12 +68,18 @@ namespace F1.UI
         [SerializeField] TMP_Text _burn;
         [SerializeField] GameObject _statusChip;
         [SerializeField] TMP_Text _status;
+        [SerializeField] GameObject _pipsRow;
+        [SerializeField] UiBar[] _fatiguePips;
+        [SerializeField] TMP_Text _fatigueState;
 
         BattleUnit _unit;
         int _shownHp = -1;
         int _shownShield = -1;
         int _shownBurn = -1;
         long _shownStatus = -1;
+        int _shownFatigue = -1;
+        string _shownState;
+        bool _stateShown;
         Rim _shownRim = Rim.None;
 
         Vector2 _marksBase;
@@ -84,6 +94,10 @@ namespace F1.UI
         Sprite _hitPose;
         float _poseLeft = -1f;
         float _attackLeft = -1f;
+        float _holdLeft = -1f;
+        float _shiverLeft = -1f;
+        float _shiverFor = 1f;
+        float _shiverAmplitude;
 
         public Button Button => _button;
         public BattleUnit Unit => _unit;
@@ -109,8 +123,23 @@ namespace F1.UI
         /// <summary>True while the light of a potion's target lies at the unit's feet.</summary>
         public bool TargetLit => _targetLight.enabled;
 
+        /// <summary>True while the row of fatigue pips is shown: a party unit's. An enemy's is hidden.</summary>
+        public bool PipsShown => _pipsRow.activeSelf;
+
+        /// <summary>The fatigue pips under the HP bar, left to right: each a tenth of the most fatigue (round 36, C).</summary>
+        public IReadOnlyList<UiBar> FatiguePips => _fatiguePips;
+
+        /// <summary>The name of the affliction or virtue on the state line, or an empty string while the unit is in none.</summary>
+        public string FatigueStateShown => _fatigueState.gameObject.activeSelf ? _fatigueState.text : string.Empty;
+
         /// <summary>True while a lunge, a recoil or a walk moves the unit.</summary>
         public bool Moving => _lungeAge >= 0f || _recoilAge >= 0f || _walkAge >= 0f;
+
+        /// <summary>True while a state pose is held through the moment of a breakdown.</summary>
+        public bool HoldsPose => _holdLeft > 0f;
+
+        /// <summary>True while the unit shivers (the moment of an affliction).</summary>
+        public bool Shivering => _shiverLeft > 0f;
 
         /// <summary>True when the unit has a hit pose: its red flash is at half strength (Docs/Design/10 §5).</summary>
         public bool HasHitPose => _hitPose != null;
@@ -132,6 +161,9 @@ namespace F1.UI
             _figureView.SetScale(figureScale);
             _attackPose = attackPose;
             _hitPose = hitPose;
+
+            // Only a mercenary has fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3).
+            _pipsRow.SetActive(unit.Side == BattleSide.Party);
         }
 
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>
@@ -141,6 +173,8 @@ namespace F1.UI
             _shownShield = -1;
             _shownBurn = -1;
             _shownStatus = -1;
+            _shownFatigue = -1;
+            _stateShown = false;
         }
 
         /// <summary>A step towards the other side and back: an item that strikes or guards fired.</summary>
@@ -173,13 +207,38 @@ namespace F1.UI
 
         void ShowPose(Sprite pose, float motion)
         {
-            if (pose == null)
+            // A held state pose is not interrupted by the poses of a lunge or a recoil.
+            if (pose == null || _holdLeft > 0f)
             {
                 return;
             }
 
             _figureView.ShowPose(pose);
             _poseLeft = motion + PoseExtra;
+        }
+
+        /// <summary>
+        /// Holds a pose in place of the figure for this long (the moment of a breakdown, round 38: the broken pose or the resolute pose),
+        /// then shows the figure again. Nothing happens without a pose (a job whose state poses are not drawn yet keeps its figure).
+        /// </summary>
+        public void HoldPose(Sprite pose, float seconds)
+        {
+            if (pose == null)
+            {
+                return;
+            }
+
+            _figureView.ShowPose(pose);
+            _holdLeft = Mathf.Max(0.01f, seconds);
+            _poseLeft = -1f;
+        }
+
+        /// <summary>A shiver that dies down: the figure trembles sideways by up to the amplitude (the moment of an affliction, round 38).</summary>
+        public void Shiver(float seconds, float amplitude)
+        {
+            _shiverFor = Mathf.Max(0.01f, seconds);
+            _shiverLeft = _shiverFor;
+            _shiverAmplitude = amplitude;
         }
 
         /// <summary>The unit was put in a new column: it starts this far from it (where it was) and walks in.</summary>
@@ -249,8 +308,9 @@ namespace F1.UI
             }
 
             RenderStatus(balance, timeMs);
+            RenderFatigue(balance);
 
-            // The state line holds either the death's door state or what the unit carries.
+            // The state line holds either the death's door state or what the unit carries, and after it the state of the breakdown.
             SetShown(_statusChip, _unit.InDog);
             SetShown(_burnChip, !_unit.InDog && _unit.Burn > 0);
 
@@ -298,6 +358,24 @@ namespace F1.UI
                 {
                     _figureView.ShowFigure();
                 }
+            }
+
+            // The held pose and the shiver belong to the moment of a breakdown, which runs on real time (BattleScreen): they keep pace
+            // with its dark and zoom while the battle and the motions run slow.
+            if (_holdLeft > 0f)
+            {
+                _holdLeft -= Time.unscaledDeltaTime;
+                if (_holdLeft <= 0f)
+                {
+                    _holdLeft = -1f;
+                    _figureView.ShowFigure();
+                }
+            }
+
+            if (_shiverLeft > 0f)
+            {
+                x += Random.Range(-1f, 1f) * _shiverAmplitude * (_shiverLeft / _shiverFor);
+                _shiverLeft -= Time.unscaledDeltaTime;
             }
 
             if (_lungeAge >= 0f)
@@ -369,6 +447,36 @@ namespace F1.UI
             if (chip.activeSelf != shown)
             {
                 chip.SetActive(shown);
+            }
+        }
+
+        /// <summary>A party unit's fatigue as pips, and its affliction or virtue by name in its colour (round 36). An enemy has neither.</summary>
+        void RenderFatigue(BalanceData balance)
+        {
+            if (_unit.Side != BattleSide.Party)
+            {
+                return;
+            }
+
+            if (_unit.Fatigue != _shownFatigue)
+            {
+                _shownFatigue = _unit.Fatigue;
+                UI.FatiguePips.Show(_fatiguePips, _unit.Fatigue, balance.MaxFatigue, balance.FatigueBreakdown);
+            }
+
+            string stateId = _unit.State?.Id;
+            if (_stateShown && stateId == _shownState)
+            {
+                return;
+            }
+
+            _stateShown = true;
+            _shownState = stateId;
+            SetShown(_fatigueState.gameObject, _unit.State != null);
+            if (_unit.State != null)
+            {
+                _fatigueState.text = UiText.FatigueStateName(_unit.State);
+                _fatigueState.color = UiPalette.FatigueState(_unit.State.Kind);
             }
         }
 

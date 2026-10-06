@@ -145,11 +145,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909202
-  - m_Id: 9766393864210
-    m_Key: Lobby.NotEnoughFatigue
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909203
   - m_Id: 9766393864211
     m_Key: Lobby.Fallen
     m_Metadata:
@@ -860,6 +855,206 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673231716122629
+  - m_Id: 1916220080119808
+    m_Key: Board.FatigueTag
+    m_Metadata:
+      m_Items:
+      - rid: 8623673235571474432
+  - m_Id: 1916220088508416
+    m_Key: Board.FatigueTotal
+    m_Metadata:
+      m_Items:
+      - rid: 8623673235571474433
+  - m_Id: 1916220088508417
+    m_Key: Item.FatigueCost
+    m_Metadata:
+      m_Items:
+      - rid: 8623673235571474434
+  - m_Id: 1916220088508418
+    m_Key: Item.BaseWeapon
+    m_Metadata:
+      m_Items:
+      - rid: 8623673235571474435
+  - m_Id: 1944400367181824
+    m_Key: Map.Elite
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819968
+  - m_Id: 1944400379764736
+    m_Key: Map.Camp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819969
+  - m_Id: 1944400379764737
+    m_Key: Map.EliteHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819970
+  - m_Id: 1944400379764738
+    m_Key: Map.CampHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819971
+  - m_Id: 1944400379764739
+    m_Key: Map.EnterCamp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819972
+  - m_Id: 1944400379764740
+    m_Key: Map.AtCamp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819973
+  - m_Id: 1944400379764741
+    m_Key: Map.CampChoose
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819974
+  - m_Id: 1944400379764742
+    m_Key: Map.Rest
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819975
+  - m_Id: 1944400379764743
+    m_Key: Map.RestHeal
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819976
+  - m_Id: 1944400379764744
+    m_Key: Map.RestFatigue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673237332819977
+  - m_Id: 2017500580536320
+    m_Key: Map.Mend
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465600
+  - m_Id: 2017500593119232
+    m_Key: Map.MendBody
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465601
+  - m_Id: 2017500593119233
+    m_Key: Map.MendTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465602
+  - m_Id: 2017500593119234
+    m_Key: Map.MendHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465603
+  - m_Id: 2017500593119235
+    m_Key: Map.MendBack
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465604
+  - m_Id: 2017500593119236
+    m_Key: Map.MendConfirm
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465605
+  - m_Id: 2017500593119237
+    m_Key: Board.MergeInto
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465606
+  - m_Id: 2017500597313536
+    m_Key: Item.Bronze
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465607
+  - m_Id: 2017500597313537
+    m_Key: Item.Silver
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465608
+  - m_Id: 2017500597313538
+    m_Key: Item.Gold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465609
+  - m_Id: 2017500597313539
+    m_Key: Item.Diamond
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465610
+  - m_Id: 2017500597313540
+    m_Key: Item.MergeHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465611
+  - m_Id: 2017500597313541
+    m_Key: Item.Change
+    m_Metadata:
+      m_Items:
+      - rid: 8623673241901465612
+  - m_Id: 2041123999571968
+    m_Key: Lobby.FatigueState
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860608
+  - m_Id: 2041124012154880
+    m_Key: Board.JobState
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860609
+  - m_Id: 2041124012154881
+    m_Key: Board.StateDetail
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860610
+  - m_Id: 2041124016349184
+    m_Key: Log.BrokeDown
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860611
+  - m_Id: 2041124016349185
+    m_Key: Log.Virtue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860612
+  - m_Id: 2041124016349186
+    m_Key: Log.Collapsed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860613
+  - m_Id: 2041124016349187
+    m_Key: Log.FatigueStateEnded
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860614
+  - m_Id: 2041124016349188
+    m_Key: Log.FatigueDog
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860615
+  - m_Id: 2041124016349189
+    m_Key: Log.FatigueAllyDog
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860616
+  - m_Id: 2041124016349190
+    m_Key: Log.FatigueAllyDeath
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860617
+  - m_Id: 2041124016349191
+    m_Key: Log.FatigueVirtue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860618
+  - m_Id: 2041124016349192
+    m_Key: Settle.SurvivorState
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860619
+  - m_Id: 2041124016349195
+    m_Key: Fx.Collapsed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673243377860622
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -931,7 +1126,8 @@ MonoBehaviour:
     - rid: 636489279218909191
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = fatigue points left. {1} = maximum.'
+        m_CommentText: '{0} = fatigue (0 is fresh; it builds up on expeditions).
+          {1} = maximum.'
     - rid: 636489279218909192
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -947,7 +1143,7 @@ MonoBehaviour:
     - rid: 636489279218909195
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = fatigue cost. {1} = days the dungeon takes.'
+        m_CommentText: '{0} = days the dungeon takes.'
     - rid: 636489279218909196
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -963,7 +1159,7 @@ MonoBehaviour:
     - rid: 636489279218909199
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = fatigue restored. {1} = days that pass.'
+        m_CommentText: '{0} = how much fatigue comes down. {1} = days that pass.'
     - rid: 636489279218909200
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -976,10 +1172,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = minimum party size.'
-    - rid: 636489279218909203
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: A party member cannot pay the dungeon's fatigue cost.
     - rid: 636489279218909204
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1039,7 +1231,7 @@ MonoBehaviour:
     - rid: 636489279218909223
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = item name. {1} = grade.'
+        m_CommentText: '{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade.'
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1320,7 +1512,8 @@ MonoBehaviour:
     - rid: 636489279218909299
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = fatigue cost.'
+        m_CommentText: '{0} = each survivor''s name and the fatigue they came back
+          with, separated by commas.'
     - rid: 636489279218909300
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1569,3 +1762,186 @@ MonoBehaviour:
       data:
         m_CommentText: Shown when changing a volume failed because settings could
           not be written.
+    - rid: 8623673235571474432
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the violet tag of a board item that costs fatigue when
+          a battle starts. {0} = the cost.
+    - rid: 8623673235571474433
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the violet tag at the right end of a board''s head: the
+          fatigue the board''s equipment costs when a battle starts. {0} = the total.'
+    - rid: 8623673235571474434
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In an item''s facts: equipment that costs fatigue when a
+          battle starts. {0} = the cost.'
+    - rid: 8623673235571474435
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In a base weapon''s facts: it costs no fatigue.'
+    - rid: 8623673237332819968
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Label of an elite node: a stronger band waits there.'
+    - rid: 8623673237332819969
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Label of a camp node: a rest without a fight.'
+    - rid: 8623673237332819970
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when an elite node is selected.
+    - rid: 8623673237332819971
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when a camp node is selected.
+    - rid: 8623673237332819972
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Goes into the selected camp node.
+    - rid: 8623673237332819973
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In the panel while the party is at a camp: the choice is
+          in the window over the map.'
+    - rid: 8623673237332819974
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the camp window under its title.
+    - rid: 8623673237332819975
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The camp''s rest: the title of its card.'
+    - rid: 8623673237332819976
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the rest card. {0} = percent of max HP each living mercenary
+          heals.
+    - rid: 8623673237332819977
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the rest card. {0} = fatigue taken off.
+    - rid: 8623673241901465600
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The camp''s upkeep: the title of its card and of its step.'
+    - rid: 8623673241901465601
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the mend card.
+    - rid: 8623673241901465602
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the camp window while an item is chosen to mend.
+          {0} = floor.
+    - rid: 8623673241901465603
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the camp window while an item is chosen to mend.
+    - rid: 8623673241901465604
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Leaves the mend step for the camp's two choices.
+    - rid: 8623673241901465605
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Mends the chosen item and goes on.
+    - rid: 8623673241901465606
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On a board cell the chosen item would merge into. {0} = the
+          tier the merge makes.
+    - rid: 8623673241901465607
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The first tier of an item.
+    - rid: 8623673241901465608
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The second tier of an item.
+    - rid: 8623673241901465609
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The third tier of an item.
+    - rid: 8623673241901465610
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The last tier of an item.
+    - rid: 8623673241901465611
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under a chosen item's facts when a board holds the same item
+          at the same tier. {0} = item name. {1} = its tier. {2} = the tier up.
+    - rid: 8623673241901465612
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A value before and after a change. {0} = before. {1} = after.
+    - rid: 8623673243377860608
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On a roster line of a mercenary in an affliction: the fatigue
+          words, then the affliction''s name. {0} = the fatigue words (Lobby.Fatigue).
+          {1} = the affliction.'
+    - rid: 8623673243377860609
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the state line under a party member's feet while the member
+          is in a state of the breakdown. {0} = job. {1} = the state's name (an affliction
+          or a virtue).
+    - rid: 8623673243377860610
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the detail line when the state's name under a member's
+          feet was clicked. {0} = the state's name. {1} = what it does.
+    - rid: 8623673243377860611
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = the affliction. {2} = roll 0..99. {3} =
+          virtue chance (a roll below it is a virtue).'
+    - rid: 8623673243377860612
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = the virtue. {2} = roll. {3} = virtue chance.'
+    - rid: 8623673243377860613
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. Its fatigue reached the maximum: death''s door,
+          or death if it was there already (the death is logged after).'
+    - rid: 8623673243377860614
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = unit. {1} = the affliction that ended because the fatigue
+          came back under the threshold.'
+    - rid: 8623673243377860615
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Fatigue from reaching death's door. {0} = unit. {1} = amount.
+          {2} = fatigue after.
+    - rid: 8623673243377860616
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Fatigue from an ally reaching death's door. {0} = unit. {1}
+          = amount. {2} = fatigue after.
+    - rid: 8623673243377860617
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Fatigue from an ally's death. {0} = unit. {1} = amount. {2}
+          = fatigue after.
+    - rid: 8623673243377860618
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A virtue brought the fatigue down. {0} = unit. {1} = the change
+          (negative). {2} = fatigue after.
+    - rid: 8623673243377860619
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: One survivor in Settle.Fatigue who came back in an affliction.
+          {0} = name and fatigue. {1} = the affliction.
+    - rid: 8623673243377860622
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The word over a mercenary whose fatigue reached its maximum,
+          in the moment of its collapse (it went to death's door, or died there).
+          The unit's name is written under it.

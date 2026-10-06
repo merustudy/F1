@@ -1,3 +1,4 @@
+using F1.Data;
 using UnityEngine;
 
 namespace F1.UI
@@ -54,6 +55,69 @@ namespace F1.UI
         /// <summary>The blood of the Diablo kit (2026-10-04): the HP fill, and the lighter tone of the HP just lost that trails behind it.</summary>
         public static readonly Color Blood = Rgb(0x8A, 0x16, 0x18);
         public static readonly Color BloodLight = Rgb(0xD8, 0x6A, 0x5A);
+
+        /// <summary>
+        /// Fatigue (2026-10-06 round 32): a pale violet that no other mark uses, so the cost of equipment is not read as a burn's
+        /// orange or the cooldown's gold. The words on the fatigue tag and the cost in an item's facts.
+        /// </summary>
+        public static readonly Color Fatigue = Rgb(0xCF, 0xBA, 0xF7);
+
+        /// <summary>
+        /// The lobby's fatigue pips (2026-10-06 round 33, C): a pip below the breakdown in the violet of the fatigue tag's rim, one past it
+        /// in a red that keeps some of the violet; the words past the breakdown take the red too.
+        /// </summary>
+        public static readonly Color FatigueBar = Rgb(0x9E, 0x84, 0xDA);
+        public static readonly Color FatigueDanger = Rgb(0xC8, 0x4B, 0x6E);
+
+        /// <summary>
+        /// The states of the breakdown (2026-10-06 round 36): an affliction's name, the lines of its banner and the lobby's words
+        /// take the red of the fatigue past the threshold (FatigueDanger); a virtue's take this gold (the gold of the Gold tier's words).
+        /// </summary>
+        public static readonly Color Virtue = Rgb(0xF7, 0xC8, 0x4A);
+
+        /// <summary>The colour of a state of the breakdown: red for an affliction, gold for a virtue.</summary>
+        public static Color FatigueState(FatigueStateKind kind)
+        {
+            return kind == FatigueStateKind.Virtue ? Virtue : FatigueDanger;
+        }
+
+        /// <summary>
+        /// The tiers of an item (2026-10-06 round 35, A): the rim of a cell, the stripe of a reward card and the mark of a cell an
+        /// item would merge into take the tier's colour; its name in words takes the lighter tone, which reads on the dark panels.
+        /// Bronze is never a rim (a Bronze cell is the plain cell), only a word.
+        /// </summary>
+        public static readonly Color TierBronze = Rgb(0xB0, 0x6E, 0x3A);
+        public static readonly Color TierSilver = Rgb(0x8C, 0x9C, 0xB2);
+        public static readonly Color TierGold = Rgb(0xE2, 0xA2, 0x1E);
+        public static readonly Color TierDiamond = Rgb(0x2E, 0xC4, 0xE8);
+        public static readonly Color TierBronzeText = Rgb(0xD8, 0x92, 0x58);
+        public static readonly Color TierSilverText = Rgb(0xD5, 0xDE, 0xEA);
+        public static readonly Color TierGoldText = Rgb(0xF7, 0xC8, 0x4A);
+        public static readonly Color TierDiamondText = Rgb(0x6F, 0xE3, 0xF8);
+
+        /// <summary>The colour of a tier's rim, stripe or mark.</summary>
+        public static Color TierRim(ItemTier tier)
+        {
+            switch (tier)
+            {
+                case ItemTier.Silver: return TierSilver;
+                case ItemTier.Gold: return TierGold;
+                case ItemTier.Diamond: return TierDiamond;
+                default: return TierBronze;
+            }
+        }
+
+        /// <summary>The colour of a tier's name in words.</summary>
+        public static Color TierText(ItemTier tier)
+        {
+            switch (tier)
+            {
+                case ItemTier.Silver: return TierSilverText;
+                case ItemTier.Gold: return TierGoldText;
+                case ItemTier.Diamond: return TierDiamondText;
+                default: return TierBronzeText;
+            }
+        }
 
         /// <summary>The outline tone of the art, for a shape that stands next to it without a sprite.</summary>
         public static readonly Color Ink = Rgb(0x18, 0x09, 0x07);
