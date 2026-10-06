@@ -60,9 +60,9 @@ namespace F1.Tests
                 { "InventoryCells", 10 },
                 { "CampHealPercent", 30 },
                 { "CampFatigueRelief", 20 },
-                { "TierSilverPercent", 200 },
-                { "TierGoldPercent", 300 },
-                { "TierDiamondPercent", 400 },
+                { "TierBronzePercent", 200 },
+                { "TierSilverPercent", 300 },
+                { "TierGoldPercent", 400 },
                 { "MapBranchChancePercent", 50 },
                 { "FinalBossLevel", 14 },
             };

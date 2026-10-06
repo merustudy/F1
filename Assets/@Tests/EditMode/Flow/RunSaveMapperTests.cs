@@ -179,10 +179,10 @@ namespace F1.Tests
             yield return Case("RewardsOutsideTheRewardPhase", e => e.PendingRewards.Add(new RewardRecord { Kind = "Item", Id = "knife", Grade = 8 }));
             yield return Case("BattleRecordOutsideABattle", e => e.Battle = new BattleRecord { Inputs = new List<BattleInputRecord>(), LogHash = "0" });
             yield return Case("NoRewardsInTheRewardPhase", e => e.PendingRewards.Clear(), ExpeditionPhase.ChoosingReward);
-            yield return Case("RewardKindUnknown", e => e.PendingRewards[0].Kind = "Gold", ExpeditionPhase.ChoosingReward);
+            yield return Case("RewardKindUnknown", e => e.PendingRewards[0].Kind = "Silver", ExpeditionPhase.ChoosingReward);
             yield return Case("RewardItemUnknown", e => e.PendingRewards.Add(new RewardRecord { Kind = "Item", Id = "excalibur", Grade = 8 }), ExpeditionPhase.ChoosingReward);
             yield return Case("RewardPotionWithGrade", e => e.PendingRewards.Add(new RewardRecord { Kind = "Potion", Id = "tonic", Grade = 3 }), ExpeditionPhase.ChoosingReward);
-            yield return Case("RewardPotionWithATier", e => e.PendingRewards.Add(new RewardRecord { Kind = "Potion", Id = "tonic", Grade = 0, Tier = "Silver" }), ExpeditionPhase.ChoosingReward);
+            yield return Case("RewardPotionWithATier", e => e.PendingRewards.Add(new RewardRecord { Kind = "Potion", Id = "tonic", Grade = 0, Tier = "Bronze" }), ExpeditionPhase.ChoosingReward);
             yield return Case("RewardTierUnknown", e => e.PendingRewards[0].Tier = "Copper", ExpeditionPhase.ChoosingReward);
             yield return Case("NoBattleRecordInABattle", e => e.Battle = null, ExpeditionPhase.InBattle);
             yield return Case("ConfirmedTimeNegative", e => e.Battle.ConfirmedTimeMs = -1, ExpeditionPhase.InBattle);
@@ -374,9 +374,32 @@ namespace F1.Tests
             RunSaveMigrator.Migrate(save, data);
 
             Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items.TrueForAll(i => i.Tier == "Bronze")));
-            Assert.AreEqual("Bronze", save.Expedition.Inventory.Single().Tier);
-            Assert.IsTrue(save.Expedition.PendingRewards.TrueForAll(r => r.Tier == "Bronze"));
+            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items.TrueForAll(i => i.Tier == "Common")));
+            Assert.AreEqual("Common", save.Expedition.Inventory.Single().Tier);
+            Assert.IsTrue(save.Expedition.PendingRewards.TrueForAll(r => r.Tier == "Common"));
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
+        }
+
+        [Test]
+        public void Migrate_From6_RenamesTheTiers()
+        {
+            // Version 6 named the tiers Bronze, Silver, Gold and Diamond; version 7 calls the same four Common, Bronze, Silver and Gold (round 41).
+            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingReward);
+            save.SchemaVersion = 6;
+            ItemRecord first = save.Expedition.Members[0].Items[0];
+            first.Tier = "Bronze";
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8, Tier = "Silver" });
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8, Tier = "Gold" });
+            RewardRecord reward = save.Expedition.PendingRewards.First(r => r.Kind == "Item");
+            reward.Tier = "Diamond";
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.AreEqual("Common", first.Tier);
+            Assert.AreEqual("Bronze", save.Expedition.Inventory[0].Tier);
+            Assert.AreEqual("Silver", save.Expedition.Inventory[1].Tier);
+            Assert.AreEqual("Gold", reward.Tier);
             Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
         }
 
@@ -386,19 +409,19 @@ namespace F1.Tests
             RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingReward);
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
             ExpeditionMember first = expedition.Members[0];
-            first.Items[0] = new EquippedItem(first.Items[0].Item, first.Items[0].Grade, isBase: true, tier: ItemTier.Gold);
-            expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8, tier: ItemTier.Silver));
+            first.Items[0] = new EquippedItem(first.Items[0].Item, first.Items[0].Grade, isBase: true, tier: ItemTier.Silver);
+            expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8, tier: ItemTier.Bronze));
             RewardOption reward = expedition.PendingRewards.First(r => r.Kind == RewardKind.Item);
-            expedition.PendingRewards[expedition.PendingRewards.IndexOf(reward)] = new RewardOption(RewardKind.Item, reward.Id, reward.Grade, ItemTier.Diamond);
+            expedition.PendingRewards[expedition.PendingRewards.IndexOf(reward)] = new RewardOption(RewardKind.Item, reward.Id, reward.Grade, ItemTier.Gold);
 
             RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
 
-            Assert.AreEqual(ItemTier.Gold, read.Members[0].Items[0].Tier);
+            Assert.AreEqual(ItemTier.Silver, read.Members[0].Items[0].Tier);
             Assert.IsTrue(read.Members[0].Items[0].IsBase);
-            Assert.AreEqual(ItemTier.Silver, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
-            Assert.AreEqual(ItemTier.Diamond, read.PendingRewards.First(r => r.Kind == RewardKind.Item).Tier);
-            Assert.AreEqual("Gold", again.Expedition.Members[0].Items[0].Tier, "Stored by name.");
+            Assert.AreEqual(ItemTier.Bronze, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
+            Assert.AreEqual(ItemTier.Gold, read.PendingRewards.First(r => r.Kind == RewardKind.Item).Tier);
+            Assert.AreEqual("Silver", again.Expedition.Members[0].Items[0].Tier, "Stored by name.");
         }
 
         [Test]

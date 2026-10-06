@@ -33,7 +33,7 @@ namespace F1.Gameplay
     /// <summary>One of the choices offered after a won battle.</summary>
     public sealed class RewardOption
     {
-        public RewardOption(RewardKind kind, string id, int grade, ItemTier tier = ItemTier.Bronze)
+        public RewardOption(RewardKind kind, string id, int grade, ItemTier tier = ItemTier.Common)
         {
             Kind = kind;
             Id = id;
@@ -49,7 +49,7 @@ namespace F1.Gameplay
         /// <summary>Item grade. 0 for a potion.</summary>
         public int Grade { get; }
 
-        /// <summary>Item tier. Bronze for a potion.</summary>
+        /// <summary>Item tier. Common for a potion.</summary>
         public ItemTier Tier { get; }
     }
 

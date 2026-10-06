@@ -26,9 +26,9 @@
       "CampFloor": 15,
       "EnemyHpPerFloorPercent": 3,
       "EnemyGradePerFloor": 0,
-      "SilverFloor": 5,
-      "GoldFloor": 10,
-      "DiamondFloor": 0
+      "BronzeFloor": 5,
+      "SilverFloor": 10,
+      "GoldFloor": 0
     }
   ]
 }

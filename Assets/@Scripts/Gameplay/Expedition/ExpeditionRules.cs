@@ -540,7 +540,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Whether an item merges into another (Docs/Design/02_Combat_System.md §4 "합치기"): the same item at the same tier, below
-        /// Diamond, two different items and neither a base weapon. They become one a tier up where the second one is.
+        /// Gold, two different items and neither a base weapon. They become one a tier up where the second one is.
         /// </summary>
         public static bool CanMerge(EquippedItem item, EquippedItem into)
         {
@@ -591,7 +591,7 @@ namespace F1.Gameplay
         /// <summary>Whether an item of this id and tier merges into the item given (null for none).</summary>
         static bool MergesInto(string itemId, ItemTier tier, EquippedItem into)
         {
-            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Diamond;
+            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Gold;
         }
 
         /// <summary>
@@ -618,11 +618,11 @@ namespace F1.Gameplay
             return index < 0 ? null : items[index];
         }
 
-        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (the camp's upkeep): any item below Diamond, a base weapon too.</summary>
+        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (the camp's upkeep): any item below Gold, a base weapon too.</summary>
         public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int cell)
         {
             EquippedItem item = LivingItemAt(state, memberIndex, cell);
-            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Tier < ItemTier.Diamond;
+            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Tier < ItemTier.Gold;
         }
 
         /// <summary>The camp's upkeep: the item at a cell goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>

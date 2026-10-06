@@ -66,7 +66,7 @@ namespace F1.Data
             return target == TargetMode.EnemyFront || target == TargetMode.EnemyBack;
         }
 
-        /// <summary>Effect size at a grade, at Bronze: grade x PowerPercent / 100, rounded down, at least 1.</summary>
+        /// <summary>Effect size at a grade, at Common: grade x PowerPercent / 100, rounded down, at least 1.</summary>
         public int MagnitudeAt(int grade)
         {
             return MagnitudeAt(grade, 100);

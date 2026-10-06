@@ -215,7 +215,7 @@ namespace F1.Editor.Data
                 "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "DurationDays",
                 "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background,
                 "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
-                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "SilverFloor", "GoldFloor", "DiamondFloor"));
+                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "BronzeFloor", "SilverFloor", "GoldFloor"));
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -236,9 +236,9 @@ namespace F1.Editor.Data
                 row.Int("CampFloor"),
                 row.Int("EnemyHpPerFloorPercent"),
                 row.Int("EnemyGradePerFloor"),
+                row.Int("BronzeFloor"),
                 row.Int("SilverFloor"),
-                row.Int("GoldFloor"),
-                row.Int("DiamondFloor")));
+                row.Int("GoldFloor")));
         }
     }
 

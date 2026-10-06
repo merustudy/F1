@@ -191,7 +191,7 @@ namespace F1.Sim
 
         /// <summary>
         /// At a camp: rests when someone is badly hurt or at or over the fatigue threshold (or without player input); otherwise
-        /// mends (a tier up) the first item below Diamond that works where its owner stands, from the front member back. Returns
+        /// mends (a tier up) the first item below Gold that works where its owner stands, from the front member back. Returns
         /// true for mending.
         /// </summary>
         public bool ChooseAtCamp(StaticData data, ExpeditionState state)

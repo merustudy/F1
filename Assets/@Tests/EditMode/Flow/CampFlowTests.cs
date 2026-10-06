@@ -88,10 +88,10 @@ namespace F1.Tests
             kit.Expedition.UpgradeAtCamp(0, 0);
 
             Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
-            Assert.AreEqual(ItemTier.Silver, kit.Expedition.Expedition.Members[0].Items[0].Tier);
+            Assert.AreEqual(ItemTier.Bronze, kit.Expedition.Expedition.Members[0].Items[0].Tier);
             Assert.AreEqual(MapNodeKind.Boss, kit.Expedition.AvailableNodes().Single().Kind);
             ExpeditionRecord saved = kit.Save.Load<RunSaveData>(RunManager.FileName).Value.Expedition;
-            Assert.AreEqual("Silver", saved.Members[0].Items[0].Tier, "The upkeep is saved.");
+            Assert.AreEqual("Bronze", saved.Members[0].Items[0].Tier, "The upkeep is saved.");
             Assert.IsFalse(kit.Expedition.CanUpgradeAtCamp(0, 0), "Not on the map.");
         }
 

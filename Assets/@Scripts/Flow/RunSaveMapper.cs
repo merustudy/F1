@@ -378,7 +378,7 @@ namespace F1.Flow
                 }
                 else
                 {
-                    Require(data.Potions.Contains(reward.Id) && reward.Grade == 0 && tier == ItemTier.Bronze, $"Reward potion '{reward.Id}' is not valid.");
+                    Require(data.Potions.Contains(reward.Id) && reward.Grade == 0 && tier == ItemTier.Common, $"Reward potion '{reward.Id}' is not valid.");
                 }
 
                 state.PendingRewards.Add(new RewardOption(kind, reward.Id, reward.Grade, tier));

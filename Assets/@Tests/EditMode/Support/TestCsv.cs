@@ -13,7 +13,7 @@ namespace F1.Tests
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,2\nStormGrowth,2\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
-            "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierSilverPercent,200\nTierGoldPercent,300\nTierDiamondPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n";
+            "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
@@ -48,7 +48,7 @@ namespace F1.Tests
 
         public const string Dungeons =
             "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background," +
-            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyGradePerFloor,SilverFloor,GoldFloor,DiamondFloor\n" +
+            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyGradePerFloor,BronzeFloor,SilverFloor,GoldFloor\n" +
             "mine,광산,Mine,swift,2,2,3,2,8,2,tonic,background/dungeon/mine,2,20,0,0,0,5,1,2,0,0\n";
 
         public const string Mercenaries =

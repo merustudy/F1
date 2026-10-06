@@ -87,9 +87,9 @@ namespace F1.Data
             new KeySpec(nameof(InventoryCells), ItemData.MaxSize, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
+            new KeySpec(nameof(TierBronzePercent), 100, Big),
             new KeySpec(nameof(TierSilverPercent), 100, Big),
             new KeySpec(nameof(TierGoldPercent), 100, Big),
-            new KeySpec(nameof(TierDiamondPercent), 100, Big),
             new KeySpec(nameof(MapBranchChancePercent), 0, 100),
             new KeySpec(nameof(FinalBossLevel), 2, Big),
         };
@@ -132,9 +132,9 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: unknown key '{unknown}'.");
             }
 
-            if (TierSilverPercent <= 100 || TierGoldPercent <= TierSilverPercent || TierDiamondPercent <= TierGoldPercent)
+            if (TierBronzePercent <= 100 || TierSilverPercent <= TierBronzePercent || TierGoldPercent <= TierSilverPercent)
             {
-                throw new DataException($"{DefinitionName}: every tier must be stronger than the one under it (Bronze is 100).");
+                throw new DataException($"{DefinitionName}: every tier must be stronger than the one under it (Common is 100).");
             }
 
             if (FatigueBreakdown > MaxFatigue)
@@ -216,19 +216,19 @@ namespace F1.Data
         /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>
         public int CampHealPercent => _values[nameof(CampHealPercent)];
         public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];
-        /// <summary>How big an item's effects are at a tier, in percent of Bronze's.</summary>
+        /// <summary>How big an item's effects are at a tier, in percent of Common's.</summary>
+        public int TierBronzePercent => _values[nameof(TierBronzePercent)];
         public int TierSilverPercent => _values[nameof(TierSilverPercent)];
         public int TierGoldPercent => _values[nameof(TierGoldPercent)];
-        public int TierDiamondPercent => _values[nameof(TierDiamondPercent)];
 
-        /// <summary>The percent of Bronze's effects an item has at a tier: 100 at Bronze.</summary>
+        /// <summary>The percent of Common's effects an item has at a tier: 100 at Common.</summary>
         public int TierPercent(ItemTier tier)
         {
             switch (tier)
             {
+                case ItemTier.Bronze: return TierBronzePercent;
                 case ItemTier.Silver: return TierSilverPercent;
                 case ItemTier.Gold: return TierGoldPercent;
-                case ItemTier.Diamond: return TierDiamondPercent;
                 default: return 100;
             }
         }

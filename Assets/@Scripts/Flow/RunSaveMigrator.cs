@@ -51,6 +51,11 @@ namespace F1.Flow
             {
                 From5To6(save);
             }
+
+            if (save.SchemaVersion == 6)
+            {
+                From6To7(save);
+            }
         }
 
         /// <summary>
@@ -125,7 +130,10 @@ namespace F1.Flow
             save.SchemaVersion = 4;
         }
 
-        /// <summary>Version 4 had no item tiers (Slice B stage 14): every item and every reward was what is now Bronze.</summary>
+        /// <summary>The name version 5 gave the tier every item had before tiers (From6To7 renames it to Common).</summary>
+        const string Version5Bronze = "Bronze";
+
+        /// <summary>Version 4 had no item tiers (Slice B stage 14): every item and every reward was what version 5 called Bronze, now Common.</summary>
         static void From4To5(RunSaveData save)
         {
             if (save.Expedition != null)
@@ -145,7 +153,7 @@ namespace F1.Flow
                     {
                         if (reward != null)
                         {
-                            reward.Tier = nameof(ItemTier.Bronze);
+                            reward.Tier = Version5Bronze;
                         }
                     }
                 }
@@ -160,6 +168,67 @@ namespace F1.Flow
             save.SchemaVersion = 6;
         }
 
+        /// <summary>
+        /// Version 6 named the tiers Bronze, Silver, Gold and Diamond (The Bazaar's). Version 7 (2026-10-07 round 41) calls the same four
+        /// Common, Bronze, Silver and Gold: the base tier is unmarked and the three above it read as copper, silver and gold. Only the
+        /// names change; a name that is not one of the four is left for the validation to refuse.
+        /// </summary>
+        static void From6To7(RunSaveData save)
+        {
+            if (save.Expedition != null)
+            {
+                if (save.Expedition.Members != null)
+                {
+                    foreach (MemberRecord member in save.Expedition.Members)
+                    {
+                        RenameTiers(member?.Items);
+                    }
+                }
+
+                RenameTiers(save.Expedition.Inventory);
+                if (save.Expedition.PendingRewards != null)
+                {
+                    foreach (RewardRecord reward in save.Expedition.PendingRewards)
+                    {
+                        if (reward != null)
+                        {
+                            reward.Tier = Version7Name(reward.Tier);
+                        }
+                    }
+                }
+            }
+
+            save.SchemaVersion = 7;
+        }
+
+        static void RenameTiers(List<ItemRecord> items)
+        {
+            if (items == null)
+            {
+                return;
+            }
+
+            foreach (ItemRecord item in items)
+            {
+                if (item != null)
+                {
+                    item.Tier = Version7Name(item.Tier);
+                }
+            }
+        }
+
+        static string Version7Name(string version6Name)
+        {
+            switch (version6Name)
+            {
+                case "Bronze": return nameof(ItemTier.Common);
+                case "Silver": return nameof(ItemTier.Bronze);
+                case "Gold": return nameof(ItemTier.Silver);
+                case "Diamond": return nameof(ItemTier.Gold);
+                default: return version6Name;
+            }
+        }
+
         static void MarkBronze(List<ItemRecord> items)
         {
             if (items == null)
@@ -171,7 +240,7 @@ namespace F1.Flow
             {
                 if (item != null)
                 {
-                    item.Tier = nameof(ItemTier.Bronze);
+                    item.Tier = Version5Bronze;
                 }
             }
         }

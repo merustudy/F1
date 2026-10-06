@@ -15,7 +15,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 6;
+        public const int CurrentSchemaVersion = 7;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -108,8 +108,8 @@ namespace F1.Save
         /// <summary>True for a base weapon: the job's weapon given when the expedition left.</summary>
         public bool Base;
 
-        /// <summary>The tier's name: Bronze, Silver, Gold or Diamond (version 5). An entry that does not name one is Bronze, as every item was before.</summary>
-        public string Tier = "Bronze";
+        /// <summary>The tier's name: Common, Bronze, Silver or Gold (version 7; version 5 named them Bronze, Silver, Gold, Diamond). An entry that does not name one is Common, as every item was before.</summary>
+        public string Tier = "Common";
     }
 
     public sealed class RewardRecord
@@ -118,8 +118,8 @@ namespace F1.Save
         public string Id;
         public int Grade;
 
-        /// <summary>The tier's name of an item reward; Bronze for a potion (version 5). An entry that does not name one is Bronze.</summary>
-        public string Tier = "Bronze";
+        /// <summary>The tier's name of an item reward; Common for a potion (version 7, as above). An entry that does not name one is Common.</summary>
+        public string Tier = "Common";
     }
 
     /// <summary>

@@ -41,16 +41,16 @@ namespace F1.Data
     }
 
     /// <summary>
-    /// The tier of an item (Docs/Design/02_Combat_System.md §4, The Bazaar's Bronze, Silver, Gold and Diamond). An item's
-    /// effects grow with its tier by the percent the balance data gives it; two of the same item at the same tier merge into
-    /// one a tier up, and Diamond is the last.
+    /// The tier of an item (Docs/Design/02_Combat_System.md §4). Common is the tier an item is found at and the base weapon's;
+    /// two of the same item at the same tier merge into one a tier up (The Bazaar's way), and Gold is the last. Renamed on
+    /// 2026-10-07 (round 41) from Bronze·Silver·Gold·Diamond: the three tiers above the base read as copper, silver and gold.
     /// </summary>
     public enum ItemTier
     {
+        Common,
         Bronze,
         Silver,
         Gold,
-        Diamond,
     }
 
     public enum EffectKind

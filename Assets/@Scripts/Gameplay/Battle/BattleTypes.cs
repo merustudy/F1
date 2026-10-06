@@ -23,7 +23,7 @@ namespace F1.Gameplay
     public sealed class EquippedItem
     {
         /// <param name="isBase">True for a base weapon: the job's weapon a mercenary leaves on the expedition with.</param>
-        public EquippedItem(ItemData item, int grade, bool isBase = false, ItemTier tier = ItemTier.Bronze)
+        public EquippedItem(ItemData item, int grade, bool isBase = false, ItemTier tier = ItemTier.Common)
         {
             Item = item ?? throw new ArgumentNullException(nameof(item));
             if (grade < 1)
@@ -31,7 +31,7 @@ namespace F1.Gameplay
                 throw new ArgumentOutOfRangeException(nameof(grade), grade, "Grade must be at least 1.");
             }
 
-            if (tier < ItemTier.Bronze || tier > ItemTier.Diamond)
+            if (tier < ItemTier.Common || tier > ItemTier.Gold)
             {
                 throw new ArgumentOutOfRangeException(nameof(tier), tier, "Not a tier.");
             }
@@ -44,7 +44,7 @@ namespace F1.Gameplay
         public ItemData Item { get; }
         public int Grade { get; }
 
-        /// <summary>Bronze, Silver, Gold or Diamond: the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
+        /// <summary>Common, Bronze, Silver or Gold: the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
         public ItemTier Tier { get; }
 
         /// <summary>The size of one of the item's effects at its grade and tier.</summary>
@@ -56,9 +56,9 @@ namespace F1.Gameplay
         /// <summary>The same item a tier up: what two of it merge into, or what a camp's upkeep makes of it.</summary>
         public EquippedItem TierUp()
         {
-            if (Tier == ItemTier.Diamond)
+            if (Tier == ItemTier.Gold)
             {
-                throw new InvalidOperationException($"'{Item.Id}' is Diamond already.");
+                throw new InvalidOperationException($"'{Item.Id}' is Gold already.");
             }
 
             return new EquippedItem(Item, Grade, IsBase, Tier + 1);

@@ -57,9 +57,9 @@ namespace F1.Data
             int campFloor = 0,
             int enemyHpPerFloorPercent = 0,
             int enemyGradePerFloor = 0,
+            int bronzeFloor = 0,
             int silverFloor = 0,
-            int goldFloor = 0,
-            int diamondFloor = 0)
+            int goldFloor = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -111,7 +111,7 @@ namespace F1.Data
             }
 
             int lastTierFloor = 0;
-            foreach (int tierFloor in new[] { silverFloor, goldFloor, diamondFloor })
+            foreach (int tierFloor in new[] { bronzeFloor, silverFloor, goldFloor })
             {
                 if (tierFloor == 0)
                 {
@@ -120,13 +120,13 @@ namespace F1.Data
 
                 if (tierFloor < 1 || tierFloor > floors || tierFloor <= lastTierFloor)
                 {
-                    throw new DataException($"{DefinitionName} '{id}': the floors where Silver, Gold and Diamond rewards start are 0 (never) or map floors, each deeper than the one before.");
+                    throw new DataException($"{DefinitionName} '{id}': the floors where Bronze, Silver and Gold rewards start are 0 (never) or map floors, each deeper than the one before.");
                 }
 
                 lastTierFloor = tierFloor;
             }
 
-            if ((goldFloor != 0 && silverFloor == 0) || (diamondFloor != 0 && goldFloor == 0))
+            if ((silverFloor != 0 && bronzeFloor == 0) || (goldFloor != 0 && silverFloor == 0))
             {
                 throw new DataException($"{DefinitionName} '{id}': a tier's rewards cannot start where the tier under it never does.");
             }
@@ -146,9 +146,9 @@ namespace F1.Data
             CampFloor = campFloor;
             EnemyHpPerFloorPercent = enemyHpPerFloorPercent;
             EnemyGradePerFloor = enemyGradePerFloor;
+            BronzeFloor = bronzeFloor;
             SilverFloor = silverFloor;
             GoldFloor = goldFloor;
-            DiamondFloor = diamondFloor;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -212,15 +212,15 @@ namespace F1.Data
         [JsonProperty(Order = 18, Required = Required.Always)]
         public int EnemyGradePerFloor { get; }
 
-        /// <summary>The first floor whose battles reward Silver, Gold and Diamond items; 0 for never. An elite rewards one tier up.</summary>
+        /// <summary>The first floor whose battles reward Bronze, Silver and Gold items; 0 for never. An elite rewards one tier up.</summary>
         [JsonProperty(Order = 19, Required = Required.Always)]
-        public int SilverFloor { get; }
+        public int BronzeFloor { get; }
 
         [JsonProperty(Order = 20, Required = Required.Always)]
-        public int GoldFloor { get; }
+        public int SilverFloor { get; }
 
         [JsonProperty(Order = 21, Required = Required.Always)]
-        public int DiamondFloor { get; }
+        public int GoldFloor { get; }
 
         /// <summary>Whether a node of this floor may be an elite: never on the first floor or the camp floor.</summary>
         public bool EliteCanStandOn(int floor)
@@ -243,10 +243,15 @@ namespace F1.Data
             return ItemGradeBase + (floor - 1) * ItemGradePerFloor;
         }
 
-        /// <summary>Tier of reward items offered after winning on a floor: the deepest tier started by then, one more for an elite (Diamond at most).</summary>
+        /// <summary>Tier of reward items offered after winning on a floor: the deepest tier started by then, one more for an elite (Gold at most).</summary>
         public ItemTier RewardTierAt(int floor, bool elite)
         {
-            ItemTier tier = ItemTier.Bronze;
+            ItemTier tier = ItemTier.Common;
+            if (BronzeFloor != 0 && floor >= BronzeFloor)
+            {
+                tier = ItemTier.Bronze;
+            }
+
             if (SilverFloor != 0 && floor >= SilverFloor)
             {
                 tier = ItemTier.Silver;
@@ -257,12 +262,7 @@ namespace F1.Data
                 tier = ItemTier.Gold;
             }
 
-            if (DiamondFloor != 0 && floor >= DiamondFloor)
-            {
-                tier = ItemTier.Diamond;
-            }
-
-            return elite && tier < ItemTier.Diamond ? tier + 1 : tier;
+            return elite && tier < ItemTier.Gold ? tier + 1 : tier;
         }
     }
 

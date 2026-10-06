@@ -31,7 +31,7 @@ namespace F1.Tests
             return new EquippedItem(data.Items.Get(id), grade, tier: tier);
         }
 
-        /// <summary>A board as "blade:Bronze knife:Silver".</summary>
+        /// <summary>A board as "blade:Common knife:Bronze".</summary>
         static string Board(ExpeditionMember member)
         {
             return string.Join(" ", member.Items.Select(i => $"{i.Item.Id}:{i.Tier}"));
@@ -42,28 +42,28 @@ namespace F1.Tests
         [Test]
         public void Balance_RefusesTiersThatDoNotGrow()
         {
-            Assert.Throws<DataException>(() => TestData.Balance(("TierSilverPercent", 100)), "Silver is not above Bronze.");
-            Assert.Throws<DataException>(() => TestData.Balance(("TierGoldPercent", 200)), "Gold is not above Silver.");
-            Assert.Throws<DataException>(() => TestData.Balance(("TierDiamondPercent", 250)), "Diamond is under Gold.");
-            Assert.DoesNotThrow(() => TestData.Balance(("TierSilverPercent", 150), ("TierGoldPercent", 200), ("TierDiamondPercent", 250)));
+            Assert.Throws<DataException>(() => TestData.Balance(("TierBronzePercent", 100)), "Bronze is not above Common.");
+            Assert.Throws<DataException>(() => TestData.Balance(("TierSilverPercent", 200)), "Silver is not above Bronze.");
+            Assert.Throws<DataException>(() => TestData.Balance(("TierGoldPercent", 250)), "Gold is under Silver.");
+            Assert.DoesNotThrow(() => TestData.Balance(("TierBronzePercent", 150), ("TierSilverPercent", 200), ("TierGoldPercent", 250)));
         }
 
         [Test]
         public void Dungeon_RefusesTierFloorsOutOfOrder_OrOffTheMap()
         {
             var potions = new List<string>();
-            DungeonData Make(int silver, int gold, int diamond)
+            DungeonData Make(int bronze, int silver, int gold)
             {
-                return new DungeonData("d", TestData.Text("d"), "swift", 10, 2, 3, 2, 8, 0, potions, silverFloor: silver, goldFloor: gold, diamondFloor: diamond);
+                return new DungeonData("d", TestData.Text("d"), "swift", 10, 2, 3, 2, 8, 0, potions, bronzeFloor: bronze, silverFloor: silver, goldFloor: gold);
             }
 
             Assert.DoesNotThrow(() => Make(3, 6, 9));
-            Assert.DoesNotThrow(() => Make(0, 0, 0), "Bronze everywhere.");
+            Assert.DoesNotThrow(() => Make(0, 0, 0), "Common everywhere.");
             Assert.DoesNotThrow(() => Make(4, 0, 0));
-            Assert.Throws<DataException>(() => Make(6, 3, 0), "Gold before Silver.");
+            Assert.Throws<DataException>(() => Make(6, 3, 0), "Silver before Bronze.");
             Assert.Throws<DataException>(() => Make(3, 3, 0), "Two tiers from one floor.");
             Assert.Throws<DataException>(() => Make(3, 6, 11), "Off the map.");
-            Assert.Throws<DataException>(() => Make(0, 5, 0), "Gold where Silver never starts.");
+            Assert.Throws<DataException>(() => Make(0, 5, 0), "Silver where Bronze never starts.");
             Assert.Throws<DataException>(() => Make(-1, 0, 0));
         }
 
@@ -72,14 +72,14 @@ namespace F1.Tests
         [Test]
         public void ATier_MakesAnItemsEffects_ItsPercentOfBronzes()
         {
-            BalanceData balance = TestData.Balance(("TierDiamondPercent", 450));
+            BalanceData balance = TestData.Balance(("TierGoldPercent", 450));
             ItemData knife = TestData.Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50);
             ItemEffect cut = knife.Effects[0];
 
-            Assert.AreEqual(5, new EquippedItem(knife, 10).Magnitude(balance, cut), "Bronze: grade 10 x 50%.");
-            Assert.AreEqual(10, new EquippedItem(knife, 10, tier: ItemTier.Silver).Magnitude(balance, cut), "200%.");
-            Assert.AreEqual(15, new EquippedItem(knife, 10, tier: ItemTier.Gold).Magnitude(balance, cut), "300%.");
-            Assert.AreEqual(22, new EquippedItem(knife, 10, tier: ItemTier.Diamond).Magnitude(balance, cut), "450% of 5 is 22.5, rounded down.");
+            Assert.AreEqual(5, new EquippedItem(knife, 10).Magnitude(balance, cut), "Common: grade 10 x 50%.");
+            Assert.AreEqual(10, new EquippedItem(knife, 10, tier: ItemTier.Bronze).Magnitude(balance, cut), "200%.");
+            Assert.AreEqual(15, new EquippedItem(knife, 10, tier: ItemTier.Silver).Magnitude(balance, cut), "300%.");
+            Assert.AreEqual(22, new EquippedItem(knife, 10, tier: ItemTier.Gold).Magnitude(balance, cut), "450% of 5 is 22.5, rounded down.");
         }
 
         [Test]
@@ -98,8 +98,8 @@ namespace F1.Tests
                 return battle.Events.Single(e => e.Kind == BattleEventKind.Damaged).A;
             }
 
-            Assert.AreEqual(7, FirstHit(ItemTier.Bronze));
-            Assert.AreEqual(21, FirstHit(ItemTier.Gold));
+            Assert.AreEqual(7, FirstHit(ItemTier.Common));
+            Assert.AreEqual(21, FirstHit(ItemTier.Silver));
         }
 
         // ---- Rewards -------------------------------------------------------------------------
@@ -108,18 +108,18 @@ namespace F1.Tests
         public void RewardTier_IsTheDeepestTierStartedByTheFloor_OneUpAtAnElite()
         {
             var potions = new List<string>();
-            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 12, 2, 3, 2, 8, 0, potions, silverFloor: 4, goldFloor: 8, diamondFloor: 12);
+            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 12, 2, 3, 2, 8, 0, potions, bronzeFloor: 4, silverFloor: 8, goldFloor: 12);
 
-            Assert.AreEqual(ItemTier.Bronze, dungeon.RewardTierAt(3, elite: false));
-            Assert.AreEqual(ItemTier.Silver, dungeon.RewardTierAt(3, elite: true));
-            Assert.AreEqual(ItemTier.Silver, dungeon.RewardTierAt(4, elite: false));
-            Assert.AreEqual(ItemTier.Gold, dungeon.RewardTierAt(8, elite: false));
-            Assert.AreEqual(ItemTier.Diamond, dungeon.RewardTierAt(11, elite: true));
-            Assert.AreEqual(ItemTier.Diamond, dungeon.RewardTierAt(12, elite: true), "Diamond is the last.");
+            Assert.AreEqual(ItemTier.Common, dungeon.RewardTierAt(3, elite: false));
+            Assert.AreEqual(ItemTier.Bronze, dungeon.RewardTierAt(3, elite: true));
+            Assert.AreEqual(ItemTier.Bronze, dungeon.RewardTierAt(4, elite: false));
+            Assert.AreEqual(ItemTier.Silver, dungeon.RewardTierAt(8, elite: false));
+            Assert.AreEqual(ItemTier.Gold, dungeon.RewardTierAt(11, elite: true));
+            Assert.AreEqual(ItemTier.Gold, dungeon.RewardTierAt(12, elite: true), "Gold is the last.");
 
             var bronze = new DungeonData("e", TestData.Text("e"), "swift", 12, 2, 3, 2, 8, 0, potions);
-            Assert.AreEqual(ItemTier.Bronze, bronze.RewardTierAt(12, elite: false), "No tier floors: Bronze everywhere.");
-            Assert.AreEqual(ItemTier.Silver, bronze.RewardTierAt(12, elite: true));
+            Assert.AreEqual(ItemTier.Common, bronze.RewardTierAt(12, elite: false), "No tier floors: Common everywhere.");
+            Assert.AreEqual(ItemTier.Bronze, bronze.RewardTierAt(12, elite: true));
         }
 
         [Test]
@@ -128,7 +128,7 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, silverFloor: 1),
+                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, bronzeFloor: 1),
             };
             var data = new StaticData(parts);
             ExpeditionState state = Expedition(data);
@@ -138,9 +138,9 @@ namespace F1.Tests
             Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase);
 
             int index = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            Assert.IsTrue(state.PendingRewards.Where(r => r.Kind == RewardKind.Item).All(r => r.Tier == ItemTier.Silver), "Silver from floor 1.");
+            Assert.IsTrue(state.PendingRewards.Where(r => r.Kind == RewardKind.Item).All(r => r.Tier == ItemTier.Bronze), "Bronze from floor 1.");
             ExpeditionRules.TakeItemRewardToInventory(data, state, index);
-            Assert.AreEqual(ItemTier.Silver, state.Inventory.Single().Tier);
+            Assert.AreEqual(ItemTier.Bronze, state.Inventory.Single().Tier);
         }
 
         // ---- Merging -------------------------------------------------------------------------
@@ -152,14 +152,14 @@ namespace F1.Tests
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
             ExpeditionMember ben = state.Members[1];
-            anna.Items.Add(Item(data, "knife", ItemTier.Silver, grade: 8));
-            ben.Items.Add(Item(data, "knife", ItemTier.Silver, grade: 9));
+            anna.Items.Add(Item(data, "knife", ItemTier.Bronze, grade: 8));
+            ben.Items.Add(Item(data, "knife", ItemTier.Bronze, grade: 9));
 
             Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 1, 1, 1));
             ExpeditionRules.MoveItem(state, 0, 1, 1, 1);
 
-            Assert.AreEqual("blade:Bronze", Board(anna), "The knife left anna's board.");
-            Assert.AreEqual("staff:Bronze knife:Gold", Board(ben), "Ben's knife is a tier up, where it was.");
+            Assert.AreEqual("blade:Common", Board(anna), "The knife left anna's board.");
+            Assert.AreEqual("staff:Common knife:Silver", Board(ben), "Ben's knife is a tier up, where it was.");
             Assert.AreEqual(9, ben.Items[1].Grade, "At the better grade of the two.");
             Assert.IsFalse(ben.Items[1].IsBase);
         }
@@ -170,50 +170,50 @@ namespace F1.Tests
             StaticData data = TestData.Data(("InventoryCells", 4));
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze));
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze));
+            anna.Items.Add(Item(data, "knife", ItemTier.Common));
+            anna.Items.Add(Item(data, "knife", ItemTier.Common));
 
             // On one board: the second knife onto the first.
             ExpeditionRules.MoveItem(state, 0, 2, 0, 1);
-            Assert.AreEqual("blade:Bronze knife:Silver", Board(anna));
+            Assert.AreEqual("blade:Common knife:Bronze", Board(anna));
 
             // From a full inventory onto a full board.
-            anna.Items.Add(Item(data, "charm", ItemTier.Bronze));
+            anna.Items.Add(Item(data, "charm", ItemTier.Common));
             state.Inventory.Add(new EquippedItem(data.Items.Get("ballista"), 8));
-            state.Inventory.Add(Item(data, "knife", ItemTier.Silver));
+            state.Inventory.Add(Item(data, "knife", ItemTier.Bronze));
             Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, state));
             Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 1, 0, 1));
             ExpeditionRules.PlaceFromInventory(data, state, 1, 0, 1);
-            Assert.AreEqual("blade:Bronze knife:Gold charm:Bronze", Board(anna));
+            Assert.AreEqual("blade:Common knife:Silver charm:Common", Board(anna));
             Assert.AreEqual("ballista", state.Inventory.Single().Item.Id);
 
             // From a reward.
             state.Phase = ExpeditionPhase.ChoosingReward;
-            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Gold));
+            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Silver));
             Assert.IsTrue(ExpeditionRules.CanPlaceReward(data, state, 0, 0, 1));
             ExpeditionRules.TakeItemReward(data, state, 0, 0, 1);
-            Assert.AreEqual("blade:Bronze knife:Diamond charm:Bronze", Board(anna));
+            Assert.AreEqual("blade:Common knife:Gold charm:Common", Board(anna));
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
             Assert.IsEmpty(state.PendingRewards);
         }
 
         [Test]
-        public void DifferentTiers_DifferentItems_ADiamond_AndBaseWeapons_DoNotMerge()
+        public void DifferentTiers_DifferentItems_AGold_AndBaseWeapons_DoNotMerge()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
             ExpeditionMember ben = state.Members[1];
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze));
-            ben.Items.Add(Item(data, "knife", ItemTier.Silver));
+            anna.Items.Add(Item(data, "knife", ItemTier.Common));
+            ben.Items.Add(Item(data, "knife", ItemTier.Bronze));
 
             Assert.IsFalse(ExpeditionRules.CanMerge(anna.Items[1], ben.Items[1]), "Different tiers.");
             ExpeditionRules.MoveItem(state, 0, 1, 1, 1);
-            Assert.AreEqual("blade:Bronze knife:Silver", Board(anna), "They trade places instead.");
-            Assert.AreEqual("staff:Bronze knife:Bronze", Board(ben));
+            Assert.AreEqual("blade:Common knife:Bronze", Board(anna), "They trade places instead.");
+            Assert.AreEqual("staff:Common knife:Common", Board(ben));
 
-            Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Bronze), Item(data, "charm", ItemTier.Bronze)), "Different items.");
-            Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Diamond), Item(data, "knife", ItemTier.Diamond)), "Diamond is the last.");
+            Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Common), Item(data, "charm", ItemTier.Common)), "Different items.");
+            Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Gold), Item(data, "knife", ItemTier.Gold)), "Gold is the last.");
 
             // Anna (tank) and cora (striker) both left with a blade.
             EquippedItem annas = anna.Items[0];
@@ -230,8 +230,8 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze));
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze));
+            anna.Items.Add(Item(data, "knife", ItemTier.Common));
+            anna.Items.Add(Item(data, "knife", ItemTier.Common));
             Assert.AreEqual(2 * data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, anna.Items));
 
             ExpeditionRules.MoveItem(state, 0, 2, 0, 1);
@@ -245,9 +245,9 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
             ExpeditionMember ben = state.Members[1];
-            ben.Items.Add(Item(data, "knife", ItemTier.Bronze));
-            EquippedItem knife = Item(data, "knife", ItemTier.Bronze);
-            EquippedItem silverKnife = Item(data, "knife", ItemTier.Silver);
+            ben.Items.Add(Item(data, "knife", ItemTier.Common));
+            EquippedItem knife = Item(data, "knife", ItemTier.Common);
+            EquippedItem silverKnife = Item(data, "knife", ItemTier.Bronze);
 
             Assert.IsTrue(ExpeditionRules.MergesAt(state, knife, 1, 1));
             Assert.IsFalse(ExpeditionRules.MergesAt(state, knife, 1, 0), "The staff.");
@@ -258,7 +258,7 @@ namespace F1.Tests
             Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, ben.Items[1]), "Not into itself.");
 
             state.Phase = ExpeditionPhase.ChoosingReward;
-            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Bronze));
+            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Common));
             state.PendingRewards.Add(new RewardOption(RewardKind.Potion, "tonic", 0));
             Assert.IsTrue(ExpeditionRules.RewardMergesAt(state, 0, 1, 1));
             Assert.IsFalse(ExpeditionRules.RewardMergesAt(state, 1, 1, 1), "A potion.");
@@ -298,7 +298,7 @@ namespace F1.Tests
             Assert.IsTrue(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0));
             ExpeditionRules.UpgradeAtCamp(state, 0, 0);
 
-            Assert.AreEqual(ItemTier.Silver, anna.Items[0].Tier);
+            Assert.AreEqual(ItemTier.Bronze, anna.Items[0].Tier);
             Assert.IsTrue(anna.Items[0].IsBase, "A base weapon stays one.");
             Assert.AreEqual(10, anna.Items[0].Grade);
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
@@ -306,15 +306,15 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheCampsUpkeep_RefusesADiamond_AnEmptyCell_TheDead_AndAnywhereButACamp()
+        public void TheCampsUpkeep_RefusesAGold_AnEmptyCell_TheDead_AndAnywhereButACamp()
         {
             StaticData data = CaveWithACamp();
             ExpeditionState state = AtTheCamp(data);
-            state.Members[0].Items.Add(Item(data, "knife", ItemTier.Diamond));
+            state.Members[0].Items.Add(Item(data, "knife", ItemTier.Gold));
             state.Members[1].Alive = false;
             state.Members[1].Hp = 0;
 
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 1), "Diamond is the last.");
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 1), "Gold is the last.");
             Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 2), "Nothing there.");
             Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 1, 0), "The dead.");
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.UpgradeAtCamp(state, 0, 1));

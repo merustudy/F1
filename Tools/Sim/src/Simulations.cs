@@ -314,7 +314,7 @@ namespace F1.Sim
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
-                + $"bronze {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, diamond {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
+                + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, bronze {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             stats.All.Print("all battles");
             foreach (KeyValuePair<int, BattleStats> floor in stats.ByFloor)
             {
