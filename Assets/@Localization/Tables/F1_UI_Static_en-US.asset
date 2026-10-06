@@ -878,10 +878,6 @@ MonoBehaviour:
     m_Localized: Gold
     m_Metadata:
       m_Items: []
-  - m_Id: 2017500597313539
-    m_Localized: Diamond
-    m_Metadata:
-      m_Items: []
   - m_Id: 2017500597313540
     m_Localized: Put it on another {0} ({1}) and they merge into one {2}.
     m_Metadata:
@@ -956,6 +952,20 @@ MonoBehaviour:
     m_Localized: Collapsed from fatigue
     m_Metadata:
       m_Items: []
+  - m_Id: 2271577767927808
+    m_Localized: "{0} \xB7 Grade {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2271577780510720
+    m_Localized: Common
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2271577780510721
+    m_Localized: Put it on another {0} and they merge into one {1}.
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1062,3 +1072,5 @@ MonoBehaviour:
         - id: 2041124016349190
         - id: 2041124016349191
         - id: 2041124016349192
+        - id: 2271577767927808
+        - id: 2271577780510721

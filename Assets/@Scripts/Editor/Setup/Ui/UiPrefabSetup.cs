@@ -29,6 +29,13 @@ namespace F1.Editor.Setup
 
         public const string SaveErrorOverlayPath = PrefabDirectory + "/SaveErrorOverlay.prefab";
 
+        /// <summary>
+        /// The shader that draws a sprite as a one-colour silhouette (2026-10-07 round 41, the tier outline) and the material made from it:
+        /// a generated asset next to the prefabs, made once and kept, which the prefabs reference so that the shader ships with them.
+        /// </summary>
+        public const string SilhouetteShaderPath = "Assets/@Shaders/Silhouette.shader";
+        public const string SilhouetteMaterialPath = PrefabDirectory + "/Silhouette.mat";
+
         public static string PrefabPath(ScreenId id)
         {
             return $"{PrefabDirectory}/{id}Screen.prefab";
@@ -40,6 +47,24 @@ namespace F1.Editor.Setup
             List<string> paths = ScreenCatalog.All.Select(PrefabPath).ToList();
             paths.Add(SaveErrorOverlayPath);
             return paths;
+        }
+
+        static Material SilhouetteMaterial()
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(SilhouetteMaterialPath);
+            if (material == null)
+            {
+                var shader = AssetDatabase.LoadAssetAtPath<Shader>(SilhouetteShaderPath);
+                if (shader == null)
+                {
+                    throw new InvalidOperationException($"The silhouette shader is not at {SilhouetteShaderPath}.");
+                }
+
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, SilhouetteMaterialPath);
+            }
+
+            return material;
         }
 
         [MenuItem("F1/Setup/Rebuild UI Prefabs")]

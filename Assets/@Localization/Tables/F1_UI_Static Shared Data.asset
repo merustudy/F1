@@ -975,11 +975,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673241901465609
-  - m_Id: 2017500597313539
-    m_Key: Item.Diamond
-    m_Metadata:
-      m_Items:
-      - rid: 8623673241901465610
   - m_Id: 2017500597313540
     m_Key: Item.MergeHint
     m_Metadata:
@@ -1055,6 +1050,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673243377860622
+  - m_Id: 2271577767927808
+    m_Key: Item.TitlePlain
+    m_Metadata:
+      m_Items:
+      - rid: 8623673257781362688
+  - m_Id: 2271577780510720
+    m_Key: Item.Common
+    m_Metadata:
+      m_Items:
+      - rid: 8623673257781362689
+  - m_Id: 2271577780510721
+    m_Key: Item.MergeHintPlain
+    m_Metadata:
+      m_Items:
+      - rid: 8623673257781362690
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1231,7 +1241,8 @@ MonoBehaviour:
     - rid: 636489279218909223
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade.'
+        m_CommentText: '{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade.
+          A Common item uses Item.TitlePlain.'
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1856,16 +1867,12 @@ MonoBehaviour:
     - rid: 8623673241901465607
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: The first tier of an item.
+        m_CommentText: The first tier above Common (one merge).
     - rid: 8623673241901465608
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: The second tier of an item.
+        m_CommentText: The second tier above Common.
     - rid: 8623673241901465609
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The third tier of an item.
-    - rid: 8623673241901465610
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The last tier of an item.
@@ -1945,3 +1952,18 @@ MonoBehaviour:
         m_CommentText: The word over a mercenary whose fatigue reached its maximum,
           in the moment of its collapse (it went to death's door, or died there).
           The unit's name is written under it.
+    - rid: 8623673257781362688
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The title of a Common item (no tier word). {0} = item name.
+          {1} = grade.
+    - rid: 8623673257781362689
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "The tier an item is found at. Not written in titles; only
+          where a tier word is needed (the camp's mend: \uC77C\uBC18 \u2192 \uB3D9)."
+    - rid: 8623673257781362690
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Item.MergeHint for a Common item, which names no tier of its
+          own. {0} = item name. {1} = the tier up.

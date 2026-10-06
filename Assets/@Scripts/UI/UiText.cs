@@ -75,10 +75,12 @@ namespace F1.UI
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", tenths / 10, tenths % 10);
         }
 
-        /// <summary>"Name · tier · grade", the tier in its colour (round 35).</summary>
+        /// <summary>"Name · tier · grade", the tier in its colour (round 35); a Common item leaves the tier out: "Name · grade" (round 41).</summary>
         public static string ItemTitle(EquippedItem item)
         {
-            return UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), TierWord(item.Tier), item.Grade);
+            return item.Tier == ItemTier.Common
+                ? UiStrings.Get(UiKeys.Item.TitlePlain, Name(item.Item.Name), item.Grade)
+                : UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), TierWord(item.Tier), item.Grade);
         }
 
         /// <summary>The name of a tier (Docs/Design/02_Combat_System.md §4).</summary>
@@ -86,10 +88,10 @@ namespace F1.UI
         {
             switch (tier)
             {
+                case ItemTier.Common: return UiStrings.Get(UiKeys.Item.Common);
                 case ItemTier.Bronze: return UiStrings.Get(UiKeys.Item.Bronze);
                 case ItemTier.Silver: return UiStrings.Get(UiKeys.Item.Silver);
                 case ItemTier.Gold: return UiStrings.Get(UiKeys.Item.Gold);
-                case ItemTier.Diamond: return UiStrings.Get(UiKeys.Item.Diamond);
                 default: throw new ArgumentOutOfRangeException(nameof(tier), tier, null);
             }
         }
@@ -100,10 +102,12 @@ namespace F1.UI
             return Colored(TierName(tier), UiPalette.TierText(tier));
         }
 
-        /// <summary>Under a chosen item's facts: what putting it on the same item at the same tier does (round 35).</summary>
+        /// <summary>Under a chosen item's facts: what putting it on the same item at the same tier does (round 35). A Common item names no tier of its own.</summary>
         public static string MergeHint(EquippedItem item)
         {
-            return UiStrings.Get(UiKeys.Item.MergeHint, Name(item.Item.Name), TierWord(item.Tier), TierWord(item.Tier + 1));
+            return item.Tier == ItemTier.Common
+                ? UiStrings.Get(UiKeys.Item.MergeHintPlain, Name(item.Item.Name), TierWord(item.Tier + 1))
+                : UiStrings.Get(UiKeys.Item.MergeHint, Name(item.Item.Name), TierWord(item.Tier), TierWord(item.Tier + 1));
         }
 
         /// <summary>The name of a state of the breakdown: an affliction or a virtue (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>

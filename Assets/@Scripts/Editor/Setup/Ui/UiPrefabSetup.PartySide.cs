@@ -222,9 +222,9 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One cell of a board, in a slot of the kit: the name with the grade under it, in one text
-        /// (the view writes the two lines). The lines never wrap; a name too long for the cell
-        /// shrinks. It is as wide as a cell; its height is set at runtime, the cells its item takes, stacked.
+        /// One cell of a board, in a slot of the kit: the icon over the silhouette of its tier's outline, the name with the grade
+        /// under it in one text for an item without an icon (the view writes the two lines; they never wrap, a long name shrinks),
+        /// the fatigue tag, the merge mark and the tier tag. It is as wide as a cell; its height is set at runtime, the cells its item takes, stacked.
         /// </summary>
         static ItemSlotView BuildItemSlot(Transform parent, string name)
         {
@@ -244,41 +244,41 @@ namespace F1.Editor.Setup
             text.textWrappingMode = TextWrappingModes.NoWrap;
             UiBuild.ShrinkToFit(text, 13f);
 
-            // The icon in the place the battle's cell gives it, and the grade badge at the bottom-left corner over it.
+            // Behind the icon, the silhouette that becomes the tier's outline (round 41); then the icon in the place the battle's cell gives it.
+            Image outline = BuildOutline(frame.transform, name + "Outline", out SilhouetteOutline outlineEffect);
             Image icon = UiBuild.Image(name + "Icon", frame.transform, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
-            TextMeshProUGUI grade = KitBadge(frame.transform, name + "Badge", name + "Grade", 14f, out Image badge);
-            UiBuild.Place(badge.rectTransform, Vector2.zero, Vector2.zero, new Vector2(GradeBadgeInset, GradeBadgeInset), new Vector2(GradeBadgeSize, GradeBadgeSize));
 
             // The fatigue tag at the top-right corner: "+1" on equipment that costs fatigue when a battle starts (round 32, B1).
             TextMeshProUGUI fatigueText = BuildFatigueTag(frame.transform, name + "Fatigue", Vector2.one, new Vector2(-FatigueTagInset, -FatigueTagInset), out GameObject fatigue);
 
             // The mark of a cell the chosen item would merge into (round 35): a veil over the cell with the words of the tier the
-            // merge makes; and over everything the tier rim, which the view colours and shows for a tier above Bronze or a merge.
+            // merge makes, lifted off the tier tag; the view shows that tier's outline and stars with it.
             RectTransform merge = UiBuild.Rect(name + "Merge", frame.transform);
             UiBuild.Stretch(merge);
             Image veil = UiBuild.Image(name + "MergeVeil", merge, new Color(0.08f, 0.09f, 0.12f, MergeVeilAlpha));
-            UiBuild.Stretch(veil.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
+            UiBuild.Stretch(veil.rectTransform, MergeVeilInset, MergeVeilInset, MergeVeilInset, MergeVeilInset);
             TextMeshProUGUI mergeText = UiBuild.SingleLine(UiBuild.Label(name + "MergeText", merge, MergeMarkFontSize, UiPalette.Text, TextAlignmentOptions.Center));
-            UiBuild.Stretch(mergeText.rectTransform);
+            UiBuild.Stretch(mergeText.rectTransform, 0f, 0f, 0f, MergeMarkLift);
             merge.gameObject.SetActive(false);
-            Image tierRim = KitFrame(name + "TierRim", frame.transform, UiArt.TierRim);
-            UiBuild.Stretch(tierRim.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
-            tierRim.enabled = false;
+
+            // Over everything, the tier tag with the stars (round 41): the view shows it for a tier above Common or a merge.
+            Image tierTag = BuildTierTag(frame.transform, name + "Tier", out Image[] stars);
 
             var view = frame.gameObject.AddComponent<ItemSlotView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_frame", frame);
             UiBuild.SetReference(view, "_plain", UiArt.Load(UiArt.Slot));
             UiBuild.SetReference(view, "_selected", UiArt.Load(UiArt.SlotSelected));
+            UiBuild.SetReference(view, "_outline", outline);
+            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
             UiBuild.SetReference(view, "_icon", icon);
-            UiBuild.SetReference(view, "_badge", badge.gameObject);
-            UiBuild.SetReference(view, "_grade", grade);
             UiBuild.SetReference(view, "_text", text);
             UiBuild.SetReference(view, "_fatigue", fatigue);
             UiBuild.SetReference(view, "_fatigueText", fatigueText);
-            UiBuild.SetReference(view, "_tierRim", tierRim);
+            UiBuild.SetReference(view, "_tierTag", tierTag);
+            UiBuild.SetReferences(view, "_stars", stars);
             UiBuild.SetReference(view, "_merge", merge.gameObject);
             UiBuild.SetReference(view, "_mergeText", mergeText);
 

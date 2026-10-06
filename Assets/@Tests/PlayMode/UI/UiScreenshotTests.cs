@@ -268,10 +268,10 @@ namespace F1.Tests
                             yield return Capture(prefix + "_30_map_fatigue");
                             UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
 
-                            // Tiers (round 35): the buckler Gold and the herb pouch Diamond on their cells, a second Bronze dagger on row 2's
+                            // Tiers (round 35): the buckler Silver and the herb pouch Gold on their cells, a second Common dagger on row 2's
                             // board, and the row-1 dagger chosen, which marks the cell it would merge into.
-                            front.Items[carried + 1] = new EquippedItem(front.Items[carried + 1].Item, 8, tier: ItemTier.Gold);
-                            front.Items[carried + 2] = new EquippedItem(front.Items[carried + 2].Item, 8, tier: ItemTier.Diamond);
+                            front.Items[carried + 1] = new EquippedItem(front.Items[carried + 1].Item, 8, tier: ItemTier.Silver);
+                            front.Items[carried + 2] = new EquippedItem(front.Items[carried + 2].Item, 8, tier: ItemTier.Gold);
                             ExpeditionMember second = Managers.Expedition.Expedition.Members[party.ColumnOfRow(2).Member];
                             second.Items.Add(new EquippedItem(Managers.Data.Data.Items.Get("dagger"), 9));
                             map.Refresh();
@@ -334,6 +334,11 @@ namespace F1.Tests
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.Click(map, UiTestUtil.CampRest);
                             yield return UiTestUtil.WaitForRedraw();
+
+                            // The tiers in battle (round 41): the rearmost member's weapon as if mended once (Bronze), so that the boss
+                            // battle shows a cell's outline under the charge's dark and the tier tag above it (the rear survives the longest).
+                            ExpeditionMember rear = Managers.Expedition.Expedition.Members.OrderByDescending(m => m.Row).First(m => m.Alive);
+                            rear.Items[0] = new EquippedItem(rear.Items[0].Item, rear.Items[0].Grade, isBase: true, tier: ItemTier.Bronze);
                         }
 
                         yield return UiTestUtil.GoIntoTheFirstNode();

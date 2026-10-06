@@ -750,6 +750,9 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(light.rectTransform);
             light.rectTransform.anchorMax = new Vector2(0f, 1f);
 
+            // Behind the icon, the silhouette that becomes the tier's outline (round 41). The dark lies over both.
+            Image outline = BuildOutline(cell.transform, "ItemOutline", out SilhouetteOutline outlineEffect);
+
             TextMeshProUGUI name = UiBuild.ShrinkToFit(
                 UiBuild.SingleLine(UiBuild.Label("ItemName", cell.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
             UiBuild.Stretch(name.rectTransform, 10f, 0f, 10f, 0f);
@@ -779,10 +782,8 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(flash.rectTransform, rim, rim, rim, rim);
             flash.enabled = false;
 
-            // Over everything, the tier rim (round 35, A): the view colours and shows it for a tier above Bronze.
-            Image tierRim = KitFrame("ItemTierRim", cell.transform, UiArt.TierRim);
-            UiBuild.Stretch(tierRim.rectTransform, TierRimInset, TierRimInset, TierRimInset, TierRimInset);
-            tierRim.enabled = false;
+            // Over everything, the tier tag with the stars (round 41): the view shows it for a tier above Common. It stays above the dark.
+            Image tierTag = BuildTierTag(cell.transform, "ItemTier", out Image[] stars);
 
             var view = cell.gameObject.AddComponent<BattleItemView>();
             UiBuild.SetReference(view, "_light", light.rectTransform);
@@ -793,7 +794,10 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_flash", flash);
-            UiBuild.SetReference(view, "_tierRim", tierRim);
+            UiBuild.SetReference(view, "_outline", outline);
+            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
+            UiBuild.SetReference(view, "_tierTag", tierTag);
+            UiBuild.SetReferences(view, "_stars", stars);
 
             cell.gameObject.SetActive(false);
             return view;

@@ -70,8 +70,8 @@ namespace F1.Editor.Setup
             UiBuild.Silence(button);
             Transform option = frame.transform;
 
-            // The tier stripe down the left edge; the view colours and shows it for a tier above Bronze.
-            Image stripe = UiBuild.Image("OptionStripe", option, UiPalette.TierSilver);
+            // The tier stripe down the left edge; the view colours and shows it for a tier above Common.
+            Image stripe = UiBuild.Image("OptionStripe", option, UiPalette.TierBronze);
             stripe.rectTransform.anchorMin = Vector2.zero;
             stripe.rectTransform.anchorMax = new Vector2(0f, 1f);
             stripe.rectTransform.pivot = new Vector2(0f, 0.5f);

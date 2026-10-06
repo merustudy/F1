@@ -17,7 +17,8 @@ namespace F1.UI
     /// big item takes more than one cell and the cell grows downwards; its icon is scaled to fit that
     /// shape. An enemy's icon is mirrored so that its weapon points at the party. When the item fires,
     /// the cell flashes and the icon pops for a moment, and the dark comes back as the flash fades
-    /// (<see cref="Pulse"/>).
+    /// (<see cref="Pulse"/>). An item above Common wears its tier (2026-10-07 round 41): the outline around its icon in
+    /// the tier's colour, under the dark like the icon, and the tier tag with the tier's stars at the bottom-left corner, above it.
     /// </summary>
     public sealed class BattleItemView : MonoBehaviour
     {
@@ -57,10 +58,13 @@ namespace F1.UI
         [SerializeField] Image _darkEdge;
         [SerializeField] Image _glow;
         [SerializeField] Image _front;
+        [SerializeField] Image _outline;
+        [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _flash;
-        [SerializeField] Image _tierRim;
+        [SerializeField] Image _tierTag;
+        [SerializeField] Image[] _stars;
 
         BattleItemState _item;
         bool _shownActive;
@@ -96,8 +100,14 @@ namespace F1.UI
         /// <summary>How dark the part not charged yet is now: ChargeShade, less while the flash of a firing plays.</summary>
         public float Darkness => _dark.color.a;
 
-        /// <summary>The colour of the rim of a tier above Bronze (round 35, A), or null for a Bronze item.</summary>
-        public Color? TierRim => _tierRim.enabled ? _tierRim.color : (Color?)null;
+        /// <summary>The tier the cell marks (the item's, above Common), or null for a Common item.</summary>
+        public ItemTier? TierShown { get; private set; }
+
+        /// <summary>How many stars the tier tag shows; 0 while it is hidden.</summary>
+        public int Stars { get; private set; }
+
+        /// <summary>The outline's colour, or null while the icon has no outline (a Common item, or no icon to outline).</summary>
+        public Color? OutlineColor => _outline.enabled ? _outline.color : (Color?)null;
 
         /// <param name="cells">How many cells of the board the item takes.</param>
         /// <param name="icon">The item's icon, or null when it has none.</param>
@@ -110,9 +120,8 @@ namespace F1.UI
             _icon.sprite = icon;
             _icon.enabled = icon != null;
             _mirror = mirrored ? -1f : 1f;
-            _icon.rectTransform.localScale = new Vector3(_mirror, 1f, 1f);
-            _tierRim.enabled = item.Equipped.Tier > ItemTier.Bronze;
-            _tierRim.color = UiPalette.TierRim(item.Equipped.Tier);
+            ScaleIcon(1f);
+            ShowTier(item.Equipped.Tier, icon);
 
             var rect = (RectTransform)transform;
             rect.sizeDelta = new Vector2(CellWidth, BoardHeight(cells));
@@ -161,7 +170,7 @@ namespace F1.UI
             if (t >= 1f)
             {
                 _pulseAge = -1f;
-                _icon.rectTransform.localScale = new Vector3(_mirror, 1f, 1f);
+                ScaleIcon(1f);
                 _flash.color = new Color(FlashLight.r, FlashLight.g, FlashLight.b, 0f);
                 _flash.enabled = false;
                 SetDarkness(ChargeShade);
@@ -169,7 +178,7 @@ namespace F1.UI
             }
 
             float pop = 1f + PulsePop * Mathf.Sin(t * Mathf.PI);
-            _icon.rectTransform.localScale = new Vector3(_mirror * pop, pop, 1f);
+            ScaleIcon(pop);
             _flash.color = new Color(FlashLight.r, FlashLight.g, FlashLight.b, PulseFlash * (1f - t));
             _flash.enabled = true;
 
@@ -236,6 +245,40 @@ namespace F1.UI
             color.a = alpha;
             _dark.color = color;
             _darkEdge.color = color;
+        }
+
+        /// <summary>The icon and its outline, mirrored for an enemy, popped by this much while the item fires.</summary>
+        void ScaleIcon(float pop)
+        {
+            var scale = new Vector3(_mirror * pop, pop, 1f);
+            _icon.rectTransform.localScale = scale;
+            _outline.rectTransform.localScale = scale;
+        }
+
+        /// <summary>The outline behind the icon and the tier tag with its stars, in the tier's colours; nothing for Common (round 41).</summary>
+        void ShowTier(ItemTier tier, Sprite icon)
+        {
+            TierShown = tier > ItemTier.Common ? tier : (ItemTier?)null;
+            Stars = TierStyle.Stars(tier);
+            _outline.enabled = TierShown.HasValue && icon != null;
+            if (_outline.enabled)
+            {
+                _outline.sprite = icon;
+                _outline.color = UiPalette.TierMark(tier);
+                _outlineEffect.Thickness = TierStyle.Outline(tier);
+            }
+
+            _tierTag.gameObject.SetActive(Stars > 0);
+            if (Stars > 0)
+            {
+                _tierTag.color = UiPalette.TierMark(tier);
+                _tierTag.rectTransform.sizeDelta = new Vector2(TierStyle.TagWidth(Stars), TierStyle.TagHeight);
+                for (int i = 0; i < _stars.Length; i++)
+                {
+                    _stars[i].enabled = i < Stars;
+                    _stars[i].color = UiPalette.TierText(tier);
+                }
+            }
         }
 
         /// <summary>An item that cannot be used in the owner's row is dimmed.</summary>

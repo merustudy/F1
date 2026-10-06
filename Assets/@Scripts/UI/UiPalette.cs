@@ -71,9 +71,9 @@ namespace F1.UI
 
         /// <summary>
         /// The states of the breakdown (2026-10-06 round 36): an affliction's name, the lines of its banner and the lobby's words
-        /// take the red of the fatigue past the threshold (FatigueDanger); a virtue's take this gold (the gold of the Gold tier's words).
+        /// take the red of the fatigue past the threshold (FatigueDanger); a virtue's take this gold (the gold of the Gold tier's words, round 41).
         /// </summary>
-        public static readonly Color Virtue = Rgb(0xF7, 0xC8, 0x4A);
+        public static readonly Color Virtue = Rgb(0xF0, 0xC8, 0x5A);
 
         /// <summary>The colour of a state of the breakdown: red for an affliction, gold for a virtue.</summary>
         public static Color FatigueState(FatigueStateKind kind)
@@ -82,28 +82,29 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The tiers of an item (2026-10-06 round 35, A): the rim of a cell, the stripe of a reward card and the mark of a cell an
-        /// item would merge into take the tier's colour; its name in words takes the lighter tone, which reads on the dark panels.
-        /// Bronze is never a rim (a Bronze cell is the plain cell), only a word.
+        /// The tiers of an item (2026-10-07 round 41, palette P3): the outline around an icon, the stars on the tier tag, the stripe
+        /// of a reward card and the mark of a cell an item would merge into take the tier's colour — copper, silver and gold for
+        /// the three tiers above Common, deep enough to read on a bone cell; a tier's name in words takes the lighter tone, which
+        /// reads on the dark panels. Common has no mark (a Common cell is the plain cell) and its word is a plain bone tone, used
+        /// only where a tier word is needed ("일반 → 동" at the camp).
         /// </summary>
-        public static readonly Color TierBronze = Rgb(0xB0, 0x6E, 0x3A);
-        public static readonly Color TierSilver = Rgb(0x8C, 0x9C, 0xB2);
-        public static readonly Color TierGold = Rgb(0xE2, 0xA2, 0x1E);
-        public static readonly Color TierDiamond = Rgb(0x2E, 0xC4, 0xE8);
-        public static readonly Color TierBronzeText = Rgb(0xD8, 0x92, 0x58);
-        public static readonly Color TierSilverText = Rgb(0xD5, 0xDE, 0xEA);
-        public static readonly Color TierGoldText = Rgb(0xF7, 0xC8, 0x4A);
-        public static readonly Color TierDiamondText = Rgb(0x6F, 0xE3, 0xF8);
+        public static readonly Color TierBronze = Rgb(0xA8, 0x68, 0x3A);
+        public static readonly Color TierSilver = Rgb(0x9A, 0xA7, 0xB8);
+        public static readonly Color TierGold = Rgb(0xD4, 0xA2, 0x32);
+        public static readonly Color TierCommonText = Rgb(0xC9, 0xC2, 0xB0);
+        public static readonly Color TierBronzeText = Rgb(0xD5, 0x9A, 0x66);
+        public static readonly Color TierSilverText = Rgb(0xD3, 0xDB, 0xE4);
+        public static readonly Color TierGoldText = Rgb(0xF0, 0xC8, 0x5A);
 
-        /// <summary>The colour of a tier's rim, stripe or mark.</summary>
-        public static Color TierRim(ItemTier tier)
+        /// <summary>The colour of a tier's marks (outline, stars, stripe, merge mark). Clear for Common, which has none.</summary>
+        public static Color TierMark(ItemTier tier)
         {
             switch (tier)
             {
+                case ItemTier.Bronze: return TierBronze;
                 case ItemTier.Silver: return TierSilver;
                 case ItemTier.Gold: return TierGold;
-                case ItemTier.Diamond: return TierDiamond;
-                default: return TierBronze;
+                default: return Color.clear;
             }
         }
 
@@ -112,10 +113,10 @@ namespace F1.UI
         {
             switch (tier)
             {
+                case ItemTier.Bronze: return TierBronzeText;
                 case ItemTier.Silver: return TierSilverText;
                 case ItemTier.Gold: return TierGoldText;
-                case ItemTier.Diamond: return TierDiamondText;
-                default: return TierBronzeText;
+                default: return TierCommonText;
             }
         }
 

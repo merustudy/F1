@@ -68,10 +68,14 @@ namespace F1.Editor.Setup
         public const string FatigueTag = "Frame/fatigue_tag";
 
         /// <summary>
-        /// The rim of an item cell at a tier above Bronze (2026-10-06 round 35, A): a white band with a dark hairline inside,
-        /// tinted with the tier's colour by the cell. Drawn (Archive/35-tiers/draw_rim.py); its border is the band and the line.
+        /// The tier tag of an item cell (2026-10-07 round 41): an ink pill with a white rim, which the cell tints with the tier's
+        /// colour, at the cell's bottom-left corner, carrying the tier's stars. Round ends: its border is half its height, so it
+        /// stretches sideways only. Drawn (Archive/41-tier-marks/draw_pieces.py).
         /// </summary>
-        public const string TierRim = "Frame/tier_rim";
+        public const string TierTag = "Frame/tier_tag";
+
+        /// <summary>A star of the tier tag (round 41): white with an ink outline, tinted with the tier's word colour. Drawn (Archive/41-tier-marks/draw_pieces.py).</summary>
+        public const string Star = "Icon/star";
 
         /// <summary>The trough of a bar: a dark iron recess (the HP bar under a unit's feet).</summary>
         public const string Trough = "Frame/trough";
@@ -163,7 +167,7 @@ namespace F1.Editor.Setup
             new Piece(Slot, 16),
             new Piece(SlotSelected, 16),
             new Piece(FatigueTag, 20),
-            new Piece(TierRim, 12),
+            new Piece(TierTag, 20),
             new Piece(Trough, 30),
             new Piece(PotionSlot, 30),
             new Piece(PotionSlotSelected, 30),
@@ -192,6 +196,7 @@ namespace F1.Editor.Setup
             new Piece(Burn),
             new Piece(DeathsDoor),
             new Piece(Storm),
+            new Piece(Star),
         };
 
         /// <summary>Whether the piece of this name is tiled rather than stretched.</summary>

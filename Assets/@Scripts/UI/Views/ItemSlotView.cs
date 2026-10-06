@@ -1,4 +1,3 @@
-using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
 using TMPro;
@@ -9,14 +8,15 @@ namespace F1.UI
 {
     /// <summary>
     /// One item on a member's board (as high as the cells it takes, stacked as in battle) or
-    /// one empty cell. An item shows its icon, as in battle, with its grade on the badge at the
-    /// bottom-left corner; an item without an icon shows its name with the grade under it, smaller
-    /// and dimmer; an empty cell says so. Equipment that costs fatigue when a battle starts has the
-    /// cost on the violet tag at the top-right corner (round 32, B1). An item above Bronze has the rim
-    /// inside the cell's line in its tier's colour, and a cell the chosen item would merge into shows the
-    /// tier the merge makes on a veil, with the rim in that colour (round 35, A). The chosen item's cell is
-    /// the brass one. A cell that takes no click now is dimmed by its button.
-    /// <see cref="Index"/> is the first cell the view covers.
+    /// one empty cell. An item shows its icon, as in battle; an item without an icon shows its
+    /// name with the grade under it, smaller and dimmer; an empty cell says so. Equipment that
+    /// costs fatigue when a battle starts has the cost on the violet tag at the top-right corner
+    /// (round 32, B1). An item above Common wears its tier (2026-10-07 round 41): the outline around
+    /// its icon in the tier's colour, thicker at a higher tier, and the tier tag with the tier's stars
+    /// at the bottom-left corner; a cell the chosen item would merge into shows the tier the merge makes
+    /// on a veil, with that tier's outline and stars (round 35). The chosen item's cell is the brass one.
+    /// A cell that takes no click now is dimmed by its button. The grade badge of 2026-10-03 is gone
+    /// (round 41): the grade is in the item's title. <see cref="Index"/> is the first cell the view covers.
     /// </summary>
     public sealed class ItemSlotView : MonoBehaviour
     {
@@ -27,13 +27,14 @@ namespace F1.UI
         [SerializeField] Image _frame;
         [SerializeField] Sprite _plain;
         [SerializeField] Sprite _selected;
+        [SerializeField] Image _outline;
+        [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
-        [SerializeField] GameObject _badge;
-        [SerializeField] TMP_Text _grade;
         [SerializeField] TMP_Text _text;
         [SerializeField] GameObject _fatigue;
         [SerializeField] TMP_Text _fatigueText;
-        [SerializeField] Image _tierRim;
+        [SerializeField] Image _tierTag;
+        [SerializeField] Image[] _stars;
         [SerializeField] GameObject _merge;
         [SerializeField] TMP_Text _mergeText;
 
@@ -48,14 +49,20 @@ namespace F1.UI
         /// <summary>The icon on show, or null while words stand in for it.</summary>
         public Sprite Icon => _icon.enabled ? _icon.sprite : null;
 
-        /// <summary>The grade on the badge, or an empty string while the badge is hidden.</summary>
-        public string Grade => _badge.activeSelf ? _grade.text : string.Empty;
-
         /// <summary>The words on the fatigue tag, or an empty string while it is hidden.</summary>
         public string FatigueTag => _fatigue.activeSelf ? _fatigueText.text : string.Empty;
 
-        /// <summary>The colour of the rim, or null while the cell has none (an empty cell, a Bronze item that nothing merges into).</summary>
-        public Color? TierRim => _tierRim.enabled ? _tierRim.color : (Color?)null;
+        /// <summary>The tier the cell marks (the item's above Common, or the tier a merge into it would make), or null while it marks none.</summary>
+        public ItemTier? TierShown { get; private set; }
+
+        /// <summary>How many stars the tier tag shows; 0 while it is hidden.</summary>
+        public int Stars { get; private set; }
+
+        /// <summary>The outline's colour, or null while the icon has no outline (no tier, or no icon to outline).</summary>
+        public Color? OutlineColor => _outline.enabled ? _outline.color : (Color?)null;
+
+        /// <summary>The outline's thickness on show; 0 while there is none.</summary>
+        public float OutlineThickness => _outline.enabled ? _outlineEffect.Thickness : 0f;
 
         /// <summary>The words of the merge mark, or an empty string while it is hidden.</summary>
         public string MergeMark => _merge.activeSelf ? _mergeText.text : string.Empty;
@@ -68,34 +75,59 @@ namespace F1.UI
             _fatigue.SetActive(item != null && fatigueCost > 0);
             _fatigueText.text = _fatigue.activeSelf ? UiStrings.Get(UiKeys.Board.FatigueTag, fatigueCost) : string.Empty;
 
-            // The rim in the item's tier above Bronze; while the chosen item would merge in here, in the tier the merge makes, over the veil and its words.
-            merges &= item != null;
-            _merge.SetActive(merges);
-            _tierRim.enabled = item != null && (merges || item.Tier > ItemTier.Bronze);
-            if (_tierRim.enabled)
-            {
-                ItemTier shown = merges ? item.Tier + 1 : item.Tier;
-                _tierRim.color = UiPalette.TierRim(shown);
-                _mergeText.text = merges ? UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(shown)) : string.Empty;
-                _mergeText.color = UiPalette.TierText(shown);
-            }
-
             Item = item;
             bool pictured = item != null && icon != null;
+            merges &= item != null;
+
+            // The tier the cell marks: the item's own above Common, or the one a merge into it would make (round 35), over the veil and its words.
+            TierShown = item == null ? (ItemTier?)null : merges ? item.Tier + 1 : item.Tier > ItemTier.Common ? item.Tier : (ItemTier?)null;
+            _merge.SetActive(merges);
+            if (merges)
+            {
+                _mergeText.text = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(TierShown.Value));
+                _mergeText.color = UiPalette.TierText(TierShown.Value);
+            }
 
             _icon.sprite = icon;
             _icon.enabled = pictured;
-            _badge.SetActive(pictured);
-            _grade.text = pictured ? item.Grade.ToString(CultureInfo.InvariantCulture) : string.Empty;
+            ShowTier(TierShown, pictured);
 
             _text.enabled = !pictured;
             _text.text = item == null
                 ? UiStrings.Get(UiKeys.Board.EmptySlot)
                 : pictured ? string.Empty : UiText.Name(item.Item.Name) + string.Format(GradeLine, UiStrings.Get(UiKeys.Board.Grade, item.Grade));
-            _text.color = item == null ? UiPalette.InkTextDim : UiPalette.InkText;
+            _text.color = item == null ? UiPalette.InkTextDim : TierShown.HasValue && !pictured ? UiPalette.TierMark(TierShown.Value) : UiPalette.InkText;
 
             _frame.sprite = selected ? _selected : _plain;
             _button.interactable = interactable;
+        }
+
+        /// <summary>
+        /// The outline behind the icon and the tier tag with its stars, in the tier's colours; nothing for Common (round 41).
+        /// An item without an icon has nothing to outline: its words take the tier's colour instead.
+        /// </summary>
+        void ShowTier(ItemTier? tier, bool pictured)
+        {
+            Stars = tier.HasValue ? TierStyle.Stars(tier.Value) : 0;
+            _outline.enabled = tier.HasValue && pictured;
+            if (_outline.enabled)
+            {
+                _outline.sprite = _icon.sprite;
+                _outline.color = UiPalette.TierMark(tier.Value);
+                _outlineEffect.Thickness = TierStyle.Outline(tier.Value);
+            }
+
+            _tierTag.gameObject.SetActive(Stars > 0);
+            if (Stars > 0)
+            {
+                _tierTag.color = UiPalette.TierMark(tier.Value);
+                _tierTag.rectTransform.sizeDelta = new Vector2(TierStyle.TagWidth(Stars), TierStyle.TagHeight);
+                for (int i = 0; i < _stars.Length; i++)
+                {
+                    _stars[i].enabled = i < Stars;
+                    _stars[i].color = UiPalette.TierText(tier.Value);
+                }
+            }
         }
 
         /// <summary>The height of the view in its column: the cells the item takes, stacked.</summary>

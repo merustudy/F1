@@ -1071,7 +1071,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Cells_ShowATierAboveBronzeAsARim_OnThePartySideAndInBattle()
+        public IEnumerator Cells_ShowATierAboveCommon_AsAnOutlineAndStars_OnThePartySideAndInBattle()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
@@ -1080,25 +1080,33 @@ namespace F1.Tests
             PartySideView party = map.GetComponentInChildren<PartySideView>();
             PartyColumnView row1 = party.ColumnOfRow(1);
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
-            front.Items.Add(new EquippedItem(data.Items.Get("dagger"), 8, tier: ItemTier.Silver));
-            front.Items.Add(new EquippedItem(data.Items.Get("buckler"), 8, tier: ItemTier.Gold));
+            front.Items.Add(new EquippedItem(data.Items.Get("dagger"), 8, tier: ItemTier.Bronze));
+            front.Items.Add(new EquippedItem(data.Items.Get("buckler"), 8, tier: ItemTier.Silver));
             map.Refresh();
             yield return null;
 
-            Assert.IsNull(row1.Slots[0].TierRim, "Bronze: the plain cell.");
-            Assert.AreEqual(UiPalette.TierSilver, row1.Slots[1].TierRim);
-            Assert.AreEqual(UiPalette.TierGold, row1.Slots[2].TierRim);
-            Assert.IsNull(row1.Slots[3].TierRim, "An empty cell.");
+            Assert.IsNull(row1.Slots[0].TierShown, "Common: the plain cell, no outline, no stars.");
+            Assert.AreEqual(0, row1.Slots[0].Stars);
+            Assert.IsNull(row1.Slots[0].OutlineColor);
+            Assert.AreEqual(ItemTier.Bronze, row1.Slots[1].TierShown);
+            Assert.AreEqual(1, row1.Slots[1].Stars);
+            Assert.AreEqual(UiPalette.TierBronze, row1.Slots[1].OutlineColor);
+            Assert.AreEqual(TierStyle.Outline(ItemTier.Bronze), row1.Slots[1].OutlineThickness);
+            Assert.AreEqual(ItemTier.Silver, row1.Slots[2].TierShown);
+            Assert.AreEqual(2, row1.Slots[2].Stars);
+            Assert.AreEqual(UiPalette.TierSilver, row1.Slots[2].OutlineColor);
+            Assert.Greater(row1.Slots[2].OutlineThickness, row1.Slots[1].OutlineThickness, "A higher tier draws a thicker outline.");
+            Assert.IsNull(row1.Slots[3].TierShown, "An empty cell.");
             Assert.AreEqual(string.Empty, row1.Slots[1].MergeMark, "Nothing merges into it.");
 
             // The chosen item's title names its tier.
             UiTestUtil.Click(row1.Slots[1].Button);
             yield return null;
-            StringAssert.Contains(UiText.TierWord(ItemTier.Silver), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
             UiTestUtil.Click(row1.Slots[1].Button);
             yield return null;
 
-            // In battle the party's cells carry the same rims; the enemies' items are Bronze.
+            // In battle the party's cells carry the same outlines and stars; the enemies' items are Common.
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
@@ -1106,9 +1114,15 @@ namespace F1.Tests
             battle.Clock.Paused = true;
             yield return UiTestUtil.WaitForRedraw();
             BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(battle);
-            Assert.AreEqual(UiPalette.TierSilver, cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "dagger").TierRim);
-            Assert.AreEqual(UiPalette.TierGold, cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "buckler").TierRim);
-            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierRim == null));
+            BattleItemView dagger = cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "dagger");
+            BattleItemView buckler = cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "buckler");
+            Assert.AreEqual(ItemTier.Bronze, dagger.TierShown);
+            Assert.AreEqual(1, dagger.Stars);
+            Assert.AreEqual(UiPalette.TierBronze, dagger.OutlineColor);
+            Assert.AreEqual(ItemTier.Silver, buckler.TierShown);
+            Assert.AreEqual(2, buckler.Stars);
+            Assert.AreEqual(UiPalette.TierSilver, buckler.OutlineColor);
+            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierShown == null && c.Stars == 0 && c.OutlineColor == null));
         }
 
         [UnityTest]
@@ -1132,22 +1146,22 @@ namespace F1.Tests
             EquippedItem chosen = expedition.Members[row1.Member].Items[1];
             UiTestUtil.Click(row1.Slots[1].Button);
             yield return null;
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Silver)), row2.Slots[1].MergeMark);
-            Assert.AreEqual(UiPalette.TierSilver, row2.Slots[1].TierRim);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze)), row2.Slots[1].MergeMark);
+            Assert.AreEqual(ItemTier.Bronze, row2.Slots[1].TierShown);
             Assert.AreEqual(string.Empty, row2.Slots[0].MergeMark, "Another item.");
             Assert.AreEqual(string.Empty, row1.Slots[1].MergeMark, "Not into itself.");
             StringAssert.Contains(UiText.MergeHint(chosen), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
 
-            // Put there, they merge: one Silver dagger at the better grade on row 2, none on row 1.
+            // Put there, they merge: one Bronze dagger at the better grade on row 2, none on row 1.
             Managers.Sound.ForgetEffects();
             UiTestUtil.Click(row2.Slots[1].Button);
             yield return null;
             EquippedItem merged = expedition.Members[row2.Member].Items[1];
-            Assert.AreEqual(ItemTier.Silver, merged.Tier);
+            Assert.AreEqual(ItemTier.Bronze, merged.Tier);
             Assert.AreEqual(9, merged.Grade, "The better grade of the two.");
             Assert.AreEqual(1, expedition.Members[row1.Member].Items.Count, "The dagger left row 1's board.");
             CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
-            Assert.AreEqual(UiPalette.TierSilver, row2.Slots[1].TierRim);
+            Assert.AreEqual(ItemTier.Bronze, row2.Slots[1].TierShown);
             Assert.AreEqual(string.Empty, row2.Slots[1].MergeMark);
         }
 
@@ -1161,20 +1175,20 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             StaticData data = Managers.Data.Data;
 
-            // Staged: the item reward is Silver, and row 1 already holds the same item at Silver.
+            // Staged: the item reward is Bronze, and row 1 already holds the same item at Bronze.
             int index = expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
             RewardOption option = expedition.PendingRewards[index];
-            expedition.PendingRewards[index] = new RewardOption(RewardKind.Item, option.Id, option.Grade, ItemTier.Silver);
+            expedition.PendingRewards[index] = new RewardOption(RewardKind.Item, option.Id, option.Grade, ItemTier.Bronze);
             PartySideView party = reward.GetComponentInChildren<PartySideView>();
             PartyColumnView row1 = party.ColumnOfRow(1);
             ExpeditionMember front = expedition.Members[row1.Member];
-            front.Items.Add(new EquippedItem(data.Items.Get(option.Id), 8, tier: ItemTier.Silver));
+            front.Items.Add(new EquippedItem(data.Items.Get(option.Id), 8, tier: ItemTier.Bronze));
             reward.Refresh();
             yield return null;
 
             RewardOptionView[] cards = UiTestUtil.Views<RewardOptionView>(reward);
-            Assert.AreEqual(UiPalette.TierSilver, cards[index].Stripe);
-            StringAssert.Contains(UiText.TierWord(ItemTier.Silver), cards[index].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "OptionTitle").text);
+            Assert.AreEqual(UiPalette.TierBronze, cards[index].Stripe);
+            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), cards[index].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "OptionTitle").text);
             for (int i = 0; i < cards.Length; i++)
             {
                 if (expedition.PendingRewards[i].Kind == RewardKind.Potion)
@@ -1183,15 +1197,15 @@ namespace F1.Tests
                 }
             }
 
-            // The card picked: the cell with the same item is marked with Gold, and a click there merges them.
+            // The card picked: the cell with the same item is marked with Silver, and a click there merges them.
             UiTestUtil.Click(cards[index].Button);
             yield return UiTestUtil.WaitForRedraw();
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Gold)), row1.Slots[1].MergeMark);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Silver)), row1.Slots[1].MergeMark);
             Assert.IsTrue(row1.Slots[1].Button.interactable);
             UiTestUtil.Click(row1.Slots[1].Button);
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             Assert.AreEqual(2, front.Items.Count, "The base weapon and the merge.");
-            Assert.AreEqual(ItemTier.Gold, front.Items[1].Tier);
+            Assert.AreEqual(ItemTier.Silver, front.Items[1].Tier);
             Assert.AreEqual(option.Id, front.Items[1].Item.Id);
         }
 
@@ -1238,14 +1252,14 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend/MendPlate").gameObject.activeSelf);
             string change = UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendChange");
             StringAssert.Contains(UiText.Name(weapon.Item.Name), change);
-            StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Bronze), UiText.TierWord(ItemTier.Silver)), change);
+            StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Common), UiText.TierWord(ItemTier.Bronze)), change);
             StringAssert.Contains(
                 UiText.Change(UiText.Effect(effect, weapon.Magnitude(balance, effect)), weapon.TierUp().Magnitude(balance, effect).ToString()),
                 UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendEffects"));
             Assert.IsTrue(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampMend/MendConfirm").interactable);
             StringAssert.Contains(UiText.ItemTitle(weapon), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
 
-            // Back leaves the choice; mend again and confirm: the weapon is Silver and still the base weapon, and the boss is next.
+            // Back leaves the choice; mend again and confirm: the weapon is Bronze and still the base weapon, and the boss is next.
             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
@@ -1258,12 +1272,12 @@ namespace F1.Tests
             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendConfirm");
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
-            Assert.AreEqual(ItemTier.Silver, front.Items[0].Tier);
+            Assert.AreEqual(ItemTier.Bronze, front.Items[0].Tier);
             Assert.IsTrue(front.Items[0].IsBase);
             CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
             Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
             Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/InventoryToggle").gameObject.activeSelf);
-            Assert.AreEqual(UiPalette.TierSilver, row1.Slots[0].TierRim);
+            Assert.AreEqual(ItemTier.Bronze, row1.Slots[0].TierShown);
             Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
         }
 
@@ -1305,7 +1319,7 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
 
             // The party side: every member stands as the figure of its job, and its board shows
-            // the icon of each item with the grade on its badge; an empty cell shows words only.
+            // the icon of each item without a tier mark (Common); an empty cell shows words only.
             StaticData data = Managers.Data.Data;
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             PartySideView party = map.GetComponentInChildren<PartySideView>();
@@ -1333,14 +1347,14 @@ namespace F1.Tests
                     Assert.AreSame(item, slot.Item, item.Item.Id);
                     Assert.IsNotNull(slot.Icon, item.Item.Id);
                     Assert.AreEqual(item.Item.Id, slot.Icon.name, item.Item.Id);
-                    Assert.AreEqual(item.Grade.ToString(), slot.Grade, item.Item.Id);
+                    Assert.IsNull(slot.TierShown, $"{item.Item.Id}: a Common item wears no tier.");
                     Assert.IsFalse(slot.GetComponentsInChildren<TMPro.TMP_Text>().First(text => text.name.EndsWith("Text")).enabled, $"The words of {item.Item.Id} are hidden behind its icon.");
                 }
 
                 ItemSlotView empty = column.Slots[member.Items.Count];
                 Assert.IsNull(empty.Item, member.MercenaryId);
                 Assert.IsNull(empty.Icon, member.MercenaryId);
-                Assert.IsEmpty(empty.Grade, member.MercenaryId);
+                Assert.IsNull(empty.TierShown, member.MercenaryId);
                 Assert.AreEqual(UiStrings.Get(UiKeys.Board.EmptySlot), empty.GetComponentsInChildren<TMPro.TMP_Text>().First(text => text.name.EndsWith("Text")).text, member.MercenaryId);
             }
 

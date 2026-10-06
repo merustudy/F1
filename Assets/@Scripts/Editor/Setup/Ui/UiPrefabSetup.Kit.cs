@@ -72,13 +72,9 @@ namespace F1.Editor.Setup
         /// <summary>The gloom of the Diablo kit: a soft darkening towards the edges of the whole screen.</summary>
         const float ScreenVignetteAlpha = 0.35f;
 
-        /// <summary>The grade badge of an item on the party side: its size, and its distance from the cell's bottom-left corner.</summary>
-        const float GradeBadgeSize = 24f;
-        const float GradeBadgeInset = 5f;
-
         /// <summary>
-        /// The fatigue tag of the party side (2026-10-06 round 32, B1): on a cell, at its top-right corner as far in as the grade
-        /// badge is from the bottom-left one, saying "+1"; on the head of a board, at its right end as far in, saying the total.
+        /// The fatigue tag of the party side (2026-10-06 round 32, B1): on a cell, at its top-right corner as far in as the tier
+        /// tag is from the bottom-left one, saying "+1"; on the head of a board, at its right end as far in, saying the total.
         /// The head's tag is as wide as its words and the pad on either side (the view sizes it), and sits a pixel low, with
         /// the name's glyphs (the strip's art has more rim above).
         /// </summary>
@@ -89,13 +85,16 @@ namespace F1.Editor.Setup
         const float FatigueHeadDrop = 1f;
 
         /// <summary>
-        /// The tier rim of an item cell (2026-10-06 round 35, A): the drawn band (UiArt.TierRim) stretched this far inside the cell's
-        /// line, on the party side and in battle. A cell the chosen item would merge into shows the tier the merge makes on a veil
-        /// of this alpha, in words of this size.
+        /// The marks of a tier above Common on an item cell (2026-10-07 round 41): the outline around the icon (TierStyle), and the
+        /// tier tag at the cell's bottom-left corner, as far in as the fatigue tag is from the top-right one. A cell the chosen item
+        /// would merge into shows the tier the merge makes on a veil of this alpha inside the cell's line, in words of this size,
+        /// lifted a little off the tag.
         /// </summary>
-        const float TierRimInset = 3f;
+        const float TierTagInset = 5f;
+        const float MergeVeilInset = 3f;
         const float MergeVeilAlpha = 0.6f;
         const float MergeMarkFontSize = 20f;
+        const float MergeMarkLift = 6f;
 
         /// <summary>The space between a figure and its marks, and between the marks and what stands under them.</summary>
         const float MarksGap = 6f;
@@ -234,19 +233,38 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// A badge with a number on it: a brass disc with a dark rim. The grade of an item on its cell
-        /// on the party side. The caller places the rim. Takes no clicks.
+        /// The silhouette behind an item's icon that becomes the outline of its tier (round 41): the same sprite in the icon's
+        /// place, drawn in one colour by the silhouette material and copied around a circle by SilhouetteOutline. Off until the
+        /// view shows a tier.
         /// </summary>
-        static TextMeshProUGUI KitBadge(Transform parent, string name, string textName, float fontSize, out Image rim)
+        static Image BuildOutline(Transform parent, string name, out SilhouetteOutline effect)
         {
-            rim = UiBuild.Image(name, parent, UiPalette.Ink);
-            rim.sprite = UiBuild.BuiltinSprite("UI/Skin/Knob.psd");
-            Image face = UiBuild.Image(name + "Face", rim.transform, UiPalette.Brass);
-            face.sprite = UiBuild.BuiltinSprite("UI/Skin/Knob.psd");
-            UiBuild.Stretch(face.rectTransform, 3f, 3f, 3f, 3f);
-            TextMeshProUGUI number = UiBuild.Label(textName, rim.transform, fontSize, UiPalette.Ink, TextAlignmentOptions.Center);
-            UiBuild.Stretch(number.rectTransform);
-            return number;
+            Image outline = UiBuild.Image(name, parent, Color.white);
+            outline.preserveAspect = true;
+            outline.material = SilhouetteMaterial();
+            UiBuild.Stretch(outline.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
+            effect = outline.gameObject.AddComponent<SilhouetteOutline>();
+            outline.enabled = false;
+            return outline;
+        }
+
+        /// <summary>
+        /// The tier tag at a cell's bottom-left corner (round 41): the pill, which the view tints and widens to the tier's
+        /// stars, and every star it could carry, from the left. Off until the view shows a tier. Takes no clicks.
+        /// </summary>
+        static Image BuildTierTag(Transform parent, string name, out Image[] stars)
+        {
+            Image pill = KitFrame(name, parent, UiArt.TierTag);
+            UiBuild.Place(pill.rectTransform, Vector2.zero, Vector2.zero, new Vector2(TierTagInset, TierTagInset), new Vector2(TierStyle.TagWidth(TierStyle.MostStars), TierStyle.TagHeight));
+            stars = new Image[TierStyle.MostStars];
+            for (int i = 0; i < stars.Length; i++)
+            {
+                stars[i] = KitIcon(name + "Star" + (i + 1), pill.transform, UiArt.Star);
+                UiBuild.Place(stars[i].rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(TierStyle.TagPad + i * TierStyle.StarPitch, 0f), new Vector2(TierStyle.StarSize, TierStyle.StarSize));
+            }
+
+            pill.gameObject.SetActive(false);
+            return pill;
         }
 
         /// <summary>
