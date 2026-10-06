@@ -48,7 +48,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void EveryShippedDungeon_ProducesAMapAndBattleSetupsForEveryNode()
+        public void EveryShippedDungeon_ProducesAMapAndBattleSetupsForEveryFoughtNode()
         {
             StaticData data = LoadShipped();
             List<PartyMember> party = FirstParty(data);
@@ -60,8 +60,14 @@ namespace F1.Tests
                     ExpeditionState state = ExpeditionRules.Create(data, dungeon.Id, seed, party);
                     foreach (MapNode node in state.Map.Nodes)
                     {
-                        BattleSetup setup = ExpeditionRules.BuildBattleSetup(data, state, node.EnemyGroupId, seed);
-                        Assert.DoesNotThrow(() => new BattleEngine(setup), $"{dungeon.Id} {node.EnemyGroupId}");
+                        if (!node.IsFought)
+                        {
+                            Assert.IsNull(node.EnemyGroupId, $"{dungeon.Id}: nobody waits at camp {node.Id}");
+                            continue;
+                        }
+
+                        BattleSetup setup = ExpeditionRules.BuildBattleSetup(data, state, node.EnemyGroupId, seed, node.Floor);
+                        Assert.DoesNotThrow(() => new BattleEngine(setup), $"{dungeon.Id} {node.EnemyGroupId} on floor {node.Floor}");
                     }
                 }
             }

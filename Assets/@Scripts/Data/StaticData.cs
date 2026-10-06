@@ -16,6 +16,7 @@ namespace F1.Data
         public IEnumerable<AffinityData> Affinities;
         public IEnumerable<DungeonData> Dungeons;
         public IEnumerable<MercenaryData> Mercenaries;
+        public IEnumerable<FatigueStateData> FatigueStates;
     }
 
     /// <summary>
@@ -88,6 +89,7 @@ namespace F1.Data
             Affinities = Index(parts.Affinities, x => x.Id, AffinityData.DefinitionName, problems);
             Dungeons = Index(parts.Dungeons, x => x.Id, DungeonData.DefinitionName, problems);
             Mercenaries = Index(parts.Mercenaries, x => x.Id, MercenaryData.DefinitionName, problems);
+            FatigueStates = Index(parts.FatigueStates, x => x.Id, FatigueStateData.DefinitionName, problems);
 
             if (Balance != null)
             {
@@ -109,12 +111,28 @@ namespace F1.Data
         public DataTable<AffinityData> Affinities { get; }
         public DataTable<DungeonData> Dungeons { get; }
         public DataTable<MercenaryData> Mercenaries { get; }
+        public DataTable<FatigueStateData> FatigueStates { get; }
+
+        /// <summary>The states of a kind, in id order: what the breakdown at the fatigue threshold picks from.</summary>
+        public List<FatigueStateData> FatigueStatesOf(FatigueStateKind kind)
+        {
+            return FatigueStates.Ordered.Where(state => state.Kind == kind).ToList();
+        }
 
         /// <summary>Non-boss groups that can appear on a battle floor (1-based) of a dungeon, in id order.</summary>
+        /// <summary>The groups a battle node of a floor can hold: neither a boss nor an elite group.</summary>
         public List<EnemyGroupData> GroupsFor(string dungeonId, int floor)
         {
             return EnemyGroups.Ordered
-                .Where(group => group.DungeonId == dungeonId && !group.IsBoss && group.MinFloor <= floor && floor <= group.MaxFloor)
+                .Where(group => group.DungeonId == dungeonId && !group.IsBoss && !group.IsElite && group.MinFloor <= floor && floor <= group.MaxFloor)
+                .ToList();
+        }
+
+        /// <summary>The groups an elite node of a floor can hold.</summary>
+        public List<EnemyGroupData> ElitesFor(string dungeonId, int floor)
+        {
+            return EnemyGroups.Ordered
+                .Where(group => group.DungeonId == dungeonId && group.IsElite && group.MinFloor <= floor && floor <= group.MaxFloor)
                 .ToList();
         }
 
@@ -190,11 +208,17 @@ namespace F1.Data
                     problems.Add($"{what}: needs exactly one boss group, found {bossGroups}.");
                 }
 
+                // Every floor that can have a battle node needs a group for it, and every floor that can have an elite node an elite group.
                 for (int floor = 1; floor <= dungeon.Floors; floor++)
                 {
-                    if (GroupsFor(dungeon.Id, floor).Count == 0)
+                    if (floor != dungeon.CampFloor && GroupsFor(dungeon.Id, floor).Count == 0)
                     {
                         problems.Add($"{what}: no enemy group can appear on floor {floor}.");
+                    }
+
+                    if (dungeon.EliteCanStandOn(floor) && ElitesFor(dungeon.Id, floor).Count == 0)
+                    {
+                        problems.Add($"{what}: an elite node can stand on floor {floor} but no elite group can appear there.");
                     }
                 }
             }
@@ -212,6 +236,12 @@ namespace F1.Data
             if (Dungeons.Count == 0)
             {
                 problems.Add($"{DungeonData.DefinitionName}: at least one dungeon is required.");
+            }
+
+            // The breakdown picks an affliction or a virtue: there must be one of each to pick.
+            if (FatigueStatesOf(FatigueStateKind.Affliction).Count == 0 || FatigueStatesOf(FatigueStateKind.Virtue).Count == 0)
+            {
+                problems.Add($"{FatigueStateData.DefinitionName}: at least one affliction and one virtue are required.");
             }
 
             if (!Items.Ordered.Any(item => item.RewardWeight > 0) && !Potions.Ordered.Any(potion => potion.RewardWeight > 0))

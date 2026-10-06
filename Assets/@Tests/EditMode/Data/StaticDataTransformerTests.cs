@@ -100,18 +100,41 @@ namespace F1.Tests
             Assert.IsTrue(lair.IsBoss);
             CollectionAssert.AreEqual(new[] { "ogre", "rat", "rat" }, lair.Enemies, "From the front: row 1 first.");
             CollectionAssert.AreEqual(new[] { "rat", "rat" }, data.EnemyGroups.Get("rats").Enemies);
+            Assert.IsFalse(lair.IsElite);
+            Assert.IsTrue(data.EnemyGroups.Get("ogre_guard").IsElite);
 
             Assert.AreEqual(-80, data.Affinities.Get("swift").EnemyCooldownPermille);
 
             DungeonData mine = data.Dungeons.Get("mine");
             Assert.AreEqual("swift", mine.AffinityId);
             Assert.AreEqual(2, mine.Floors);
-            Assert.AreEqual(30, mine.FatigueCost);
+            Assert.AreEqual(2, mine.DurationDays);
             Assert.AreEqual(10, mine.RewardGradeAt(2));
             CollectionAssert.AreEqual(new[] { "tonic" }, mine.StartingPotions);
             Assert.AreEqual("background/dungeon/mine", mine.Background);
+            Assert.AreEqual(2, mine.EliteMinFloor);
+            Assert.AreEqual(20, mine.EliteChancePercent);
+            Assert.AreEqual(0, mine.CampMinFloor);
+            Assert.AreEqual(0, mine.CampChancePercent);
+            Assert.AreEqual(0, mine.CampFloor);
+            Assert.AreEqual(5, mine.EnemyHpPerFloorPercent);
+            Assert.AreEqual(1, mine.EnemyGradePerFloor);
+            Assert.AreEqual(2, mine.SilverFloor);
+            Assert.AreEqual(0, mine.GoldFloor);
+            Assert.AreEqual(0, mine.DiamondFloor);
+            Assert.AreEqual(ItemTier.Bronze, mine.RewardTierAt(1, elite: false));
+            Assert.AreEqual(ItemTier.Silver, mine.RewardTierAt(2, elite: false));
+            Assert.AreEqual(ItemTier.Gold, mine.RewardTierAt(2, elite: true), "An elite rewards a tier up.");
+            Assert.AreEqual(300, data.Balance.TierPercent(ItemTier.Gold));
 
             Assert.AreEqual("knight", data.Mercenaries.Get("rowan").JobId);
+
+            FatigueStateData fearful = data.FatigueStates.Get("fearful");
+            Assert.AreEqual(FatigueStateKind.Affliction, fearful.Kind);
+            Assert.AreEqual(25, fearful.CooldownPercent);
+            Assert.AreEqual("느리다", fearful.Description.Resolve("ko-KR"));
+            Assert.AreEqual(FatigueStateKind.Virtue, data.FatigueStates.Get("focused").Kind);
+            Assert.AreEqual(-20, data.FatigueStates.Get("focused").CooldownPercent);
         }
 
         [Test]
@@ -212,8 +235,8 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenTheBackgroundCellIsEmpty_TheDungeonHasNoArt()
         {
-            string dungeons = TestCsv.Dungeons.Replace(",tonic,background/dungeon/mine", ",tonic,");
-            StringAssert.Contains(",tonic,\n", dungeons);
+            string dungeons = TestCsv.Dungeons.Replace(",tonic,background/dungeon/mine,", ",tonic,,");
+            StringAssert.Contains(",tonic,,", dungeons);
 
             StaticData data = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Dungeon, dungeons)).Data;
 
@@ -331,8 +354,8 @@ namespace F1.Tests
         [TestCase("rat+rat+rat+rat+rat", Description = "More than one per row can hold.")]
         public void Transform_WhenAnEnemyGroupDoesNotFitOnePerRow_Reports(string enemies)
         {
-            string groups = TestCsv.EnemyGroups.Replace("rats,mine,1,2,false,rat+rat", "rats,mine,1,2,false," + enemies);
-            StringAssert.Contains("rats,mine,1,2,false," + enemies + "\n", groups);
+            string groups = TestCsv.EnemyGroups.Replace("rats,mine,1,2,false,false,rat+rat", "rats,mine,1,2,false,false," + enemies);
+            StringAssert.Contains("rats,mine,1,2,false,false," + enemies + "\n", groups);
 
             DataTransformException exception = TransformFails(StaticDataFiles.EnemyGroup, groups);
 

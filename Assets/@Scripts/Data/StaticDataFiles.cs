@@ -39,6 +39,7 @@ namespace F1.Data
         public static readonly Entry Affinity = new Entry(AffinityData.DefinitionName, "affinity");
         public static readonly Entry Dungeon = new Entry(DungeonData.DefinitionName, "dungeon");
         public static readonly Entry Mercenary = new Entry(MercenaryData.DefinitionName, "mercenary");
+        public static readonly Entry FatigueState = new Entry(FatigueStateData.DefinitionName, "fatigue-state");
 
         public static readonly IReadOnlyList<Entry> All = new[]
         {
@@ -51,6 +52,7 @@ namespace F1.Data
             Affinity,
             Dungeon,
             Mercenary,
+            FatigueState,
         };
     }
 }

@@ -118,7 +118,7 @@
       },
       "MaxHp": 100,
       "ItemSlots": 5,
-      "WeaponItemId": "sword",
+      "WeaponItemId": "longsword",
       "WeaponGrade": 12,
       "RecommendedRow": 2,
       "Passive": {

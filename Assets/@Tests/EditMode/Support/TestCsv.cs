@@ -9,11 +9,11 @@ namespace F1.Tests
     {
         public const string Balance =
             "Key,Value\n" +
-            "PartySize,3\nMinPartySize,1\nTotalDays,100\nMaxFatigue,100\nFatigueRecoveryPerDay,10\nRestDays,1\n" +
+            "PartySize,3\nMinPartySize,1\nTotalDays,100\nMaxFatigue,200\nFatigueRecoveryPerDay,10\nFatigueBreakdown,100\nFatigueBattleEntry,3\nFatigueEquipment,1\nFatigueOnHit,2\nFatigueOnDog,10\nFatigueOnAllyDog,5\nFatigueOnAllyDeath,15\nFatigueOnKill,2\nVirtueChancePercent,25\nVirtueFatigue,40\nRestDays,1\n" +
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,2\nStormGrowth,2\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
-            "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nInventoryCells,10\nMapBranchChancePercent,50\nFinalBossLevel,14\n";
+            "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierSilverPercent,200\nTierGoldPercent,300\nTierDiamondPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
@@ -37,22 +37,29 @@ namespace F1.Tests
             "ogre,오우거,Ogre,9,200,claw:12+mace:8,,150\n";
 
         public const string EnemyGroups =
-            "Id,DungeonId,MinFloor,MaxFloor,IsBoss,Enemies\n" +
-            "rats,mine,1,2,false,rat+rat\n" +
-            "ogre_lair,mine,0,0,true,ogre+rat+rat\n";
+            "Id,DungeonId,MinFloor,MaxFloor,IsBoss,IsElite,Enemies\n" +
+            "rats,mine,1,2,false,false,rat+rat\n" +
+            "ogre_guard,mine,2,2,false,true,ogre+rat\n" +
+            "ogre_lair,mine,0,0,true,false,ogre+rat+rat\n";
 
         public const string Affinities =
             "Id,Name.ko-KR,Name.en-US,EnemyCooldownPermille\n" +
             "swift,신속,Swift,-80\n";
 
         public const string Dungeons =
-            "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,FatigueCost,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background\n" +
-            "mine,광산,Mine,swift,2,2,3,30,2,8,2,tonic,background/dungeon/mine\n";
+            "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background," +
+            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyGradePerFloor,SilverFloor,GoldFloor,DiamondFloor\n" +
+            "mine,광산,Mine,swift,2,2,3,2,8,2,tonic,background/dungeon/mine,2,20,0,0,0,5,1,2,0,0\n";
 
         public const string Mercenaries =
             "Id,Name.ko-KR,Name.en-US,JobId\n" +
             "rowan,로언,Rowan,knight\n" +
             "ella,엘라,Ella,bishop\n";
+
+        public const string FatigueStates =
+            "Id,Name.ko-KR,Name.en-US,Kind,CooldownPercent,HealTakenPercent,DeathChanceDelta,Description.ko-KR,Description.en-US\n" +
+            "fearful,공포,Fearful,Affliction,25,0,0,느리다,Slower\n" +
+            "focused,집중,Focused,Virtue,-20,0,0,빠르다,Faster\n";
 
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()
@@ -68,6 +75,7 @@ namespace F1.Tests
                 { StaticDataFiles.Affinity.SourceFileName, Affinities },
                 { StaticDataFiles.Dungeon.SourceFileName, Dungeons },
                 { StaticDataFiles.Mercenary.SourceFileName, Mercenaries },
+                { StaticDataFiles.FatigueState.SourceFileName, FatigueStates },
             };
         }
 

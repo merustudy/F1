@@ -1,2 +1,2 @@
-Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,FatigueCost,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background
-abandoned_mine,버려진 광산,Abandoned Mine,swift,3,2,3,30,2,8,2,healing_potion+healing_potion,background/dungeon/abandoned-mine
+Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background,EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyGradePerFloor,SilverFloor,GoldFloor,DiamondFloor
+abandoned_mine,버려진 광산,Abandoned Mine,swift,15,2,4,5,8,0,healing_potion+healing_potion,background/dungeon/abandoned-mine,6,15,6,15,15,3,0,5,10,0

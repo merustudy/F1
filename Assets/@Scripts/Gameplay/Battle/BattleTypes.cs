@@ -19,10 +19,11 @@ namespace F1.Gameplay
         Retreated,
     }
 
-    /// <summary>An item at a grade, in a unit's item slot.</summary>
+    /// <summary>An item at a grade and a tier, in a unit's item slot.</summary>
     public sealed class EquippedItem
     {
-        public EquippedItem(ItemData item, int grade)
+        /// <param name="isBase">True for a base weapon: the job's weapon a mercenary leaves on the expedition with.</param>
+        public EquippedItem(ItemData item, int grade, bool isBase = false, ItemTier tier = ItemTier.Bronze)
         {
             Item = item ?? throw new ArgumentNullException(nameof(item));
             if (grade < 1)
@@ -30,11 +31,44 @@ namespace F1.Gameplay
                 throw new ArgumentOutOfRangeException(nameof(grade), grade, "Grade must be at least 1.");
             }
 
+            if (tier < ItemTier.Bronze || tier > ItemTier.Diamond)
+            {
+                throw new ArgumentOutOfRangeException(nameof(tier), tier, "Not a tier.");
+            }
+
             Grade = grade;
+            IsBase = isBase;
+            Tier = tier;
         }
 
         public ItemData Item { get; }
         public int Grade { get; }
+
+        /// <summary>Bronze, Silver, Gold or Diamond: the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
+        public ItemTier Tier { get; }
+
+        /// <summary>The size of one of the item's effects at its grade and tier.</summary>
+        public int Magnitude(BalanceData balance, ItemEffect effect)
+        {
+            return effect.MagnitudeAt(Grade, balance.TierPercent(Tier));
+        }
+
+        /// <summary>The same item a tier up: what two of it merge into, or what a camp's upkeep makes of it.</summary>
+        public EquippedItem TierUp()
+        {
+            if (Tier == ItemTier.Diamond)
+            {
+                throw new InvalidOperationException($"'{Item.Id}' is Diamond already.");
+            }
+
+            return new EquippedItem(Item, Grade, IsBase, Tier + 1);
+        }
+
+        /// <summary>
+        /// A base weapon: given when the expedition left, not found in it. It stays one when it moves to another
+        /// board, and it costs no fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3 "장비 피로").
+        /// </summary>
+        public bool IsBase { get; }
     }
 
     /// <summary>Everything the battle needs to know about one unit at the start.</summary>
@@ -55,6 +89,10 @@ namespace F1.Gameplay
         public PassiveSpec Passive;
         /// <summary>Mercenaries enter Death-or-Glory at 0 HP. Enemies die.</summary>
         public bool HasDog;
+
+        /// <summary>The fatigue the unit starts with (a mercenary's, after the cost of entering; 0 for an enemy) and the state it is in, or null.</summary>
+        public int Fatigue;
+        public FatigueStateData FatigueState;
     }
 
     /// <summary>
@@ -73,6 +111,9 @@ namespace F1.Gameplay
         public int EnemyCooldownPermille;
         /// <summary>Potion slots in order. A null entry is an empty slot.</summary>
         public IReadOnlyList<PotionData> Potions;
+
+        /// <summary>The states the breakdown at the fatigue threshold picks from, in id order. Needed only when a party unit can reach the threshold.</summary>
+        public IReadOnlyList<FatigueStateData> FatigueStates;
     }
 
     /// <summary>Identifies a unit inside a battle. <see cref="None"/> when there is no unit (burn, storm).</summary>
@@ -170,6 +211,15 @@ namespace F1.Gameplay
         StormTicked,
         /// <summary>A = (int)BattleResult.</summary>
         BattleEnded,
+
+        /// <summary>A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue"), A = change, C = fatigue after.</summary>
+        FatigueChanged,
+        /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent, C = 1 for a virtue.</summary>
+        BrokeDown,
+        /// <summary>The unit's fatigue reached its maximum. Target, C = 1 if it died (it was at death's door already), else it went to death's door.</summary>
+        Collapsed,
+        /// <summary>An affliction ended: fatigue came back under the threshold. Target, Id = the state's id.</summary>
+        FatigueStateEnded,
     }
 
     /// <summary>
@@ -181,6 +231,14 @@ namespace F1.Gameplay
         public const string CauseBurn = "burn";
         public const string CauseStorm = "storm";
         public const string CausePassive = "passive";
+
+        /// <summary>The causes of a <see cref="BattleEventKind.FatigueChanged"/> event, in its Id.</summary>
+        public const string FatigueHit = "hit";
+        public const string FatigueDog = "dog";
+        public const string FatigueAllyDog = "ally_dog";
+        public const string FatigueAllyDeath = "ally_death";
+        public const string FatigueKill = "kill";
+        public const string FatigueVirtue = "virtue";
 
         public BattleEvent(int timeMs, BattleEventKind kind, UnitRef source, UnitRef target, string id, int a, int b, int c)
         {

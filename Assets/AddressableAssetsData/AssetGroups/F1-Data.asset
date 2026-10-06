@@ -39,6 +39,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-app
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7ac8ed9e24da7430fb334a8879846a89
+    m_Address: data/app/fatigue-state
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7fd5a07d1d69f4565b1e041805b425ac
     m_Address: data/app/item
     m_ReadOnly: 0

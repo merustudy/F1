@@ -113,10 +113,16 @@ namespace F1.Data
             int minFloor,
             int maxFloor,
             bool isBoss,
-            IReadOnlyList<string> enemies)
+            IReadOnlyList<string> enemies,
+            bool isElite = false)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             DungeonId = DataId.Require(dungeonId, $"{DefinitionName} '{id}' DungeonId");
+
+            if (isBoss && isElite)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a group is a boss group or an elite group, not both.");
+            }
 
             if (isBoss)
             {
@@ -144,6 +150,7 @@ namespace F1.Data
             MaxFloor = maxFloor;
             IsBoss = isBoss;
             Enemies = enemies;
+            IsElite = isElite;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -165,5 +172,9 @@ namespace F1.Data
         /// <summary>Enemy ids from the front: the first stands in row 1, the next in row 2 and so on.</summary>
         [JsonProperty(Order = 6, Required = Required.Always)]
         public IReadOnlyList<string> Enemies { get; }
+
+        /// <summary>An elite group waits on the map's elite nodes, never on a battle node (Docs/Design/03_Dungeon_Structure.md §1).</summary>
+        [JsonProperty(Order = 7, Required = Required.Always)]
+        public bool IsElite { get; }
     }
 }

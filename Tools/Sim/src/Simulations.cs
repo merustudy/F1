@@ -23,6 +23,12 @@ namespace F1.Sim
         public int PotionsUsed;
         public int RetreatAttempts;
         public int PartyAdvances;
+
+        /// <summary>The fatigue of the party in battle: breakdowns into an affliction or a virtue, collapses at the maximum (and how many killed).</summary>
+        public int Afflictions;
+        public int Virtues;
+        public int Collapses;
+        public int CollapseDeaths;
         public readonly Dictionary<string, int> DeathsByMercenary = new Dictionary<string, int>();
 
         public void Add(BattleEngine battle)
@@ -77,6 +83,21 @@ namespace F1.Sim
                     case BattleEventKind.RetreatAttempted:
                         RetreatAttempts++;
                         break;
+                    case BattleEventKind.BrokeDown:
+                        if (e.C == 1)
+                        {
+                            Virtues++;
+                        }
+                        else
+                        {
+                            Afflictions++;
+                        }
+
+                        break;
+                    case BattleEventKind.Collapsed:
+                        Collapses++;
+                        CollapseDeaths += e.C;
+                        break;
                 }
             }
 
@@ -99,6 +120,10 @@ namespace F1.Sim
             Console.WriteLine($"  duration avg {DurationMs / Battles / 1000.0:F1}s, longest {LongestMs / 1000.0:F1}s, reached storm {Percent(ReachedStorm, Battles)}");
             Console.WriteLine($"  per battle: deaths {Ratio(Deaths, Battles)}, DoG entries {Ratio(DogEntries, Battles)}, grace breaks {Ratio(GraceBreaks, Battles)}, death rolls {Ratio(DeathRolls, Battles)}");
             Console.WriteLine($"  per battle: potions {Ratio(PotionsUsed, Battles)}, retreat attempts {Ratio(RetreatAttempts, Battles)}, party advances {Ratio(PartyAdvances, Battles)}");
+            if (Afflictions + Virtues + Collapses > 0)
+            {
+                Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths})");
+            }
             if (DeathsByMercenary.Count > 0)
             {
                 string byMercenary = string.Join(", ", DeathsByMercenary.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => $"{p.Key} {p.Value}"));
@@ -247,6 +272,30 @@ namespace F1.Sim
             public int BattlesWon;
             public int ItemsOnBoards;
             public int ItemsInInventory;
+
+            /// <summary>Fatigue the survivors came back with, and how many came back.</summary>
+            public long SurvivorFatigue;
+            public int Survivors;
+            public int HighestFatigue;
+
+            /// <summary>Fatigue paid for equipment when battles started, and for how many members in all those battles.</summary>
+            public long EquipmentFatigue;
+            public int MemberBattles;
+
+            /// <summary>Nodes entered by kind, and the battle time of whole expeditions.</summary>
+            public int Elites;
+            public int Camps;
+            public long BattleTimeMs;
+
+            /// <summary>Expeditions in which someone broke down, and the survivors who came home at or over the threshold, or afflicted.</summary>
+            public int ExpeditionsWithBreakdown;
+            public int SurvivorsAtBreakdown;
+            public int SurvivorsAfflicted;
+
+            /// <summary>Items merged a tier up, items mended at camps, and the items on the boards at the end by tier.</summary>
+            public int Merges;
+            public int Mends;
+            public readonly int[] TiersAtEnd = new int[4];
             public readonly BattleStats All = new BattleStats();
             public readonly SortedDictionary<int, BattleStats> ByFloor = new SortedDictionary<int, BattleStats>();
         }
@@ -260,6 +309,12 @@ namespace F1.Sim
             Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
+            Console.WriteLine($"  fatigue of the survivors at the end: avg {Average(stats.SurvivorFatigue, stats.Survivors)}, highest {stats.HighestFatigue}; equipment fatigue per member per battle {Average(stats.EquipmentFatigue, stats.MemberBattles)}");
+            Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
+                + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
+            Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
+            Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
+                + $"bronze {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, diamond {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             stats.All.Print("all battles");
             foreach (KeyValuePair<int, BattleStats> floor in stats.ByFloor)
             {
@@ -324,17 +379,40 @@ namespace F1.Sim
             {
                 ulong seed = SeedDeriver.Derive(baseSeed, "sim", run);
                 ExpeditionState state = ExpeditionRules.Create(data, dungeonId, seed, party);
+                bool brokeDown = false;
                 while (state.Phase != ExpeditionPhase.Finished)
                 {
                     if (state.Phase == ExpeditionPhase.ChoosingReward)
                     {
-                        policy.ChooseReward(data, state);
+                        stats.Merges += policy.ChooseReward(data, state);
+                        continue;
+                    }
+
+                    if (state.Phase == ExpeditionPhase.AtCamp)
+                    {
+                        stats.Mends += policy.ChooseAtCamp(data, state) ? 1 : 0;
                         continue;
                     }
 
                     MapNode node = SimPolicy.ChooseNode(ExpeditionRules.AvailableNodes(state));
+                    if (node.Kind == MapNodeKind.Camp)
+                    {
+                        ExpeditionRules.EnterCamp(state, node.Id);
+                        stats.Camps++;
+                        continue;
+                    }
+
+                    stats.Elites += node.Kind == MapNodeKind.Elite ? 1 : 0;
+                    foreach (ExpeditionMember member in state.Members.Where(m => m.Alive))
+                    {
+                        stats.EquipmentFatigue += FatigueRules.EquipmentCost(data.Balance, member.Items);
+                        stats.MemberBattles++;
+                    }
+
                     var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, node.Id));
                     policy.RunBattle(battle);
+                    stats.BattleTimeMs += battle.TimeMs;
+                    brokeDown |= battle.Events.Any(e => e.Kind == BattleEventKind.BrokeDown);
                     all.Add(battle);
                     if (!byFloor.TryGetValue(node.Floor, out BattleStats floorStats))
                     {
@@ -362,10 +440,28 @@ namespace F1.Sim
 
                 stats.BattlesWon += state.BattlesWon;
                 stats.ItemsOnBoards += state.Members.Sum(m => m.Items.Count);
+                foreach (EquippedItem item in state.Members.SelectMany(m => m.Items))
+                {
+                    stats.TiersAtEnd[(int)item.Tier]++;
+                }
                 stats.ItemsInInventory += state.Inventory.Count;
+                stats.ExpeditionsWithBreakdown += brokeDown ? 1 : 0;
+                foreach (ExpeditionMember member in state.Members.Where(m => m.Alive))
+                {
+                    stats.SurvivorFatigue += member.Fatigue;
+                    stats.Survivors++;
+                    stats.HighestFatigue = Math.Max(stats.HighestFatigue, member.Fatigue);
+                    stats.SurvivorsAtBreakdown += member.Fatigue >= data.Balance.FatigueBreakdown ? 1 : 0;
+                    stats.SurvivorsAfflicted += member.StateId != null && data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction ? 1 : 0;
+                }
             }
 
             return stats;
+        }
+
+        static string Average(long total, int count)
+        {
+            return count == 0 ? "-" : $"{(double)total / count:F2}";
         }
 
         static string Describe(List<PartyMember> party)

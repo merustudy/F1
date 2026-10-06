@@ -13,6 +13,16 @@ namespace F1.Data
         /// <summary>The pose a mercenary's figure is swapped for while a blow from a unit knocks it back.</summary>
         public const string Hit = "hit";
 
+        /// <summary>
+        /// The pose a mercenary's figure holds through the moment of a breakdown at the fatigue threshold that brought an affliction,
+        /// and of the collapse at the most fatigue (2026-10-06 round 38; Docs/Design/04 §3). Drawn job by job: a job without the file
+        /// keeps its figure in that moment (ExpeditionArt).
+        /// </summary>
+        public const string Broken = "broken";
+
+        /// <summary>The pose for the moment of a virtue, as <see cref="Broken"/>.</summary>
+        public const string Resolute = "resolute";
+
         /// <summary>Null for "no art". Anything else must be text without spaces.</summary>
         /// <param name="owner">The definition the value belongs to, for the error.</param>
         /// <param name="column">The name of the column, for the error.</param>

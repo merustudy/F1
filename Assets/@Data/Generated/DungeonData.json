@@ -8,18 +8,27 @@
         "ko-KR": "버려진 광산"
       },
       "AffinityId": "swift",
-      "Floors": 3,
+      "Floors": 15,
       "MapMinWidth": 2,
-      "MapMaxWidth": 3,
-      "FatigueCost": 30,
-      "DurationDays": 2,
+      "MapMaxWidth": 4,
+      "DurationDays": 5,
       "ItemGradeBase": 8,
-      "ItemGradePerFloor": 2,
+      "ItemGradePerFloor": 0,
       "StartingPotions": [
         "healing_potion",
         "healing_potion"
       ],
-      "Background": "background/dungeon/abandoned-mine"
+      "Background": "background/dungeon/abandoned-mine",
+      "EliteMinFloor": 6,
+      "EliteChancePercent": 15,
+      "CampMinFloor": 6,
+      "CampChancePercent": 15,
+      "CampFloor": 15,
+      "EnemyHpPerFloorPercent": 3,
+      "EnemyGradePerFloor": 0,
+      "SilverFloor": 5,
+      "GoldFloor": 10,
+      "DiamondFloor": 0
     }
   ]
 }

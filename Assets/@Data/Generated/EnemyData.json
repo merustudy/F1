@@ -36,6 +36,27 @@
       "FigureScale": 100
     },
     {
+      "Id": "goblin_hexer",
+      "Name": {
+        "en-US": "Goblin Hexer",
+        "ko-KR": "고블린 주술 대가"
+      },
+      "Level": 7,
+      "MaxHp": 110,
+      "Items": [
+        {
+          "ItemId": "lantern_staff",
+          "Grade": 15
+        },
+        {
+          "ItemId": "mending_chant",
+          "Grade": 18
+        }
+      ],
+      "Figure": "unit/enemy/goblin-shaman",
+      "FigureScale": 115
+    },
+    {
       "Id": "goblin_raider",
       "Name": {
         "en-US": "Goblin Raider",
@@ -74,13 +95,34 @@
       "FigureScale": 100
     },
     {
+      "Id": "goblin_veteran",
+      "Name": {
+        "en-US": "Goblin Veteran",
+        "ko-KR": "고블린 고참"
+      },
+      "Level": 6,
+      "MaxHp": 150,
+      "Items": [
+        {
+          "ItemId": "rusty_blade",
+          "Grade": 22
+        },
+        {
+          "ItemId": "buckler",
+          "Grade": 14
+        }
+      ],
+      "Figure": "unit/enemy/goblin-raider",
+      "FigureScale": 115
+    },
+    {
       "Id": "mine_overseer",
       "Name": {
         "en-US": "Mine Overseer",
         "ko-KR": "광산 감독관"
       },
       "Level": 9,
-      "MaxHp": 300,
+      "MaxHp": 400,
       "Items": [
         {
           "ItemId": "overseer_maul",

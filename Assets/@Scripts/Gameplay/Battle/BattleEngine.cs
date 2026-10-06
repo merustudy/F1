@@ -27,6 +27,7 @@ namespace F1.Gameplay
         readonly PotionData[] _potions;
         readonly Pcg32 _battleRng;
         readonly Pcg32 _inputRng;
+        readonly Pcg32 _fatigueRng;
         readonly List<BattleEvent> _events = new List<BattleEvent>();
         readonly List<BattleInput> _inputs = new List<BattleInput>();
 
@@ -72,10 +73,33 @@ namespace F1.Gameplay
 
             _battleRng = new Pcg32(setup.Seed, RngStream.Battle);
             _inputRng = new Pcg32(setup.Seed, RngStream.Input);
+            _fatigueRng = new Pcg32(setup.Seed, RngStream.Fatigue);
             _nextBurnTickMs = _balance.BurnTickMs;
             _nextStormTickMs = _balance.StormStartMs;
 
             Log(BattleEventKind.BattleStarted, UnitRef.None, UnitRef.None, null, 0, 0, 0);
+
+            // The fatigue a mercenary brings in is judged at once (Docs/Design/04_Lobby_100Day_Economy.md §3): at the maximum it
+            // collapses, at the threshold without a state it breaks down. A state it brings in sets its items' first cooldown.
+            foreach (BattleUnit unit in _party)
+            {
+                if (unit.State != null)
+                {
+                    foreach (BattleItemState item in unit.Items)
+                    {
+                        item.NextFireMs = CooldownOf(unit, item);
+                    }
+                }
+
+                ResolveFatigue(unit);
+            }
+
+            CheckEnd();
+            if (Result != BattleResult.Ongoing)
+            {
+                return;
+            }
+
             ApplyBattleStartPassives(_party);
             ApplyBattleStartPassives(_enemies);
         }
@@ -315,6 +339,12 @@ namespace F1.Gameplay
             return scaled < _balance.MinCooldownMs ? _balance.MinCooldownMs : (int)scaled;
         }
 
+        /// <summary>The cooldown an item of a unit cycles with now: its own, changed by the unit's fatigue state (an affliction slows, a virtue quickens).</summary>
+        int CooldownOf(BattleUnit owner, BattleItemState item)
+        {
+            return owner.State == null ? item.CooldownMs : EffectiveCooldown(item.CooldownMs, owner.State.CooldownPercent * 10);
+        }
+
         /// <summary>Battle time of the next burn tick, item activation or storm tick.</summary>
         public int NextAutomaticEventMs()
         {
@@ -392,7 +422,7 @@ namespace F1.Gameplay
                         continue;
                     }
 
-                    item.NextFireMs += item.CooldownMs;
+                    item.NextFireMs += CooldownOf(unit, item);
                     Activate(unit, item);
                     if (Result != BattleResult.Ongoing)
                     {
@@ -409,7 +439,7 @@ namespace F1.Gameplay
 
             foreach (ItemEffect effect in data.Effects)
             {
-                int magnitude = effect.MagnitudeAt(item.Equipped.Grade);
+                int magnitude = item.Equipped.Magnitude(_balance, effect);
                 bool weaponDamage = effect.Kind == EffectKind.Damage && data.Category == ItemCategory.Weapon;
                 if (weaponDamage)
                 {
@@ -654,7 +684,11 @@ namespace F1.Gameplay
             }
         }
 
-        /// <summary>Shield absorbs first. Damage that gets through is a hit, which matters at 0 HP.</summary>
+        /// <summary>
+        /// Shield absorbs first. Damage that gets through is a hit, which matters at 0 HP, and which tires a mercenary
+        /// (Docs/Design/04_Lobby_100Day_Economy.md §3): the hit itself, and more for reaching death's door, which tires the
+        /// allies too. An enemy killed by a mercenary's item relieves that mercenary a little.
+        /// </summary>
         void ApplyDamage(BattleUnit target, int amount, UnitRef source, string cause)
         {
             int absorbed = Math.Min(target.Shield, amount);
@@ -677,22 +711,41 @@ namespace F1.Gameplay
                 if (target.Hp == 0)
                 {
                     Kill(target);
+                    if (!source.IsNone && source.Side == BattleSide.Party)
+                    {
+                        ChangeFatigue(Unit(source), -_balance.FatigueOnKill, BattleEvent.FatigueKill);
+                    }
                 }
 
                 return;
             }
 
+            bool enteredDog = false;
             if (wasInDog)
             {
                 DogHit(target);
             }
             else if (target.Hp == 0)
             {
-                target.InDog = true;
-                target.GraceHits = 0;
-                target.GraceEndMs = TimeMs + _balance.DogGraceMs;
-                Log(BattleEventKind.DogEntered, UnitRef.None, target.Ref, null, target.GraceEndMs, 0, 0);
+                EnterDog(target);
+                enteredDog = true;
             }
+
+            // The hit tires the one hit (if it lives), and death's door tires it and its allies.
+            ChangeFatigue(target, _balance.FatigueOnHit, BattleEvent.FatigueHit);
+            if (enteredDog)
+            {
+                ChangeFatigue(target, _balance.FatigueOnDog, BattleEvent.FatigueDog);
+                ChangeAlliesFatigue(target, _balance.FatigueOnAllyDog, BattleEvent.FatigueAllyDog);
+            }
+        }
+
+        void EnterDog(BattleUnit target)
+        {
+            target.InDog = true;
+            target.GraceHits = 0;
+            target.GraceEndMs = TimeMs + _balance.DogGraceMs;
+            Log(BattleEventKind.DogEntered, UnitRef.None, target.Ref, null, target.GraceEndMs, 0, 0);
         }
 
         /// <summary>
@@ -713,17 +766,26 @@ namespace F1.Gameplay
                 Log(BattleEventKind.GraceBroken, UnitRef.None, target.Ref, null, target.GraceHits, 0, 0);
             }
 
+            // A fatigue state moves the chance (a reckless mercenary dies more easily, a stalwart one less).
+            int chance = _balance.DogDeathChancePercent + (target.State?.DeathChanceDelta ?? 0);
+            chance = Math.Max(0, Math.Min(100, chance));
             int roll = _battleRng.NextInt(100);
-            bool died = roll < _balance.DogDeathChancePercent;
-            Log(BattleEventKind.DeathRolled, UnitRef.None, target.Ref, null, _balance.DogDeathChancePercent, roll, died ? 1 : 0);
+            bool died = roll < chance;
+            Log(BattleEventKind.DeathRolled, UnitRef.None, target.Ref, null, chance, roll, died ? 1 : 0);
             if (died)
             {
                 Kill(target);
             }
         }
 
+        /// <summary>Heals the target, by less or more under a fatigue state (hopeless takes half, stalwart half again).</summary>
         void ApplyHeal(BattleUnit target, int amount, UnitRef source, string cause)
         {
+            if (target.State != null)
+            {
+                amount = FatigueRules.Scaled(amount, target.State.HealTakenPercent);
+            }
+
             int before = target.Hp;
             target.Hp = Math.Min(target.MaxHp, target.Hp + amount);
             Log(BattleEventKind.Healed, source, target.Ref, cause, amount, target.Hp - before, target.Hp);
@@ -757,6 +819,136 @@ namespace F1.Gameplay
             Log(BattleEventKind.Died, UnitRef.None, target.Ref, null, 0, 0, 0);
             AdvanceBehind(target);
             RefreshSide(SideOf(target));
+
+            // A mercenary's death tires the others.
+            if (target.Side == BattleSide.Party)
+            {
+                ChangeAlliesFatigue(target, _balance.FatigueOnAllyDeath, BattleEvent.FatigueAllyDeath);
+            }
+        }
+
+        // ---- Fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3) --------------------------------
+
+        /// <summary>
+        /// Moves a mercenary's fatigue (an enemy's never moves) and judges it: at the maximum it collapses; at the threshold without
+        /// a state it breaks down; under the threshold an affliction ends. Logged only when it moved.
+        /// </summary>
+        void ChangeFatigue(BattleUnit unit, int amount, string cause)
+        {
+            if (unit.Side != BattleSide.Party || !unit.Alive || amount == 0)
+            {
+                return;
+            }
+
+            int before = unit.Fatigue;
+            unit.Fatigue = FatigueRules.Add(_balance, before, amount);
+            if (unit.Fatigue != before)
+            {
+                Log(BattleEventKind.FatigueChanged, UnitRef.None, unit.Ref, cause, unit.Fatigue - before, 0, unit.Fatigue);
+            }
+            else if (amount < 0 || before < _balance.MaxFatigue)
+            {
+                return;
+            }
+
+            // Unchanged at the maximum by more fatigue: it collapses again (Docs/Design/04_Lobby_100Day_Economy.md §3).
+            ResolveFatigue(unit);
+        }
+
+        /// <summary>Tires every other living mercenary.</summary>
+        void ChangeAlliesFatigue(BattleUnit of, int amount, string cause)
+        {
+            foreach (BattleUnit ally in _party)
+            {
+                if (ally != of)
+                {
+                    ChangeFatigue(ally, amount, cause);
+                }
+            }
+        }
+
+        void ResolveFatigue(BattleUnit unit)
+        {
+            if (!unit.Alive)
+            {
+                return;
+            }
+
+            if (unit.Fatigue >= _balance.MaxFatigue)
+            {
+                Collapse(unit);
+                return;
+            }
+
+            if (unit.State != null && FatigueRules.AfflictionEnds(_balance, unit.State, unit.Fatigue))
+            {
+                Log(BattleEventKind.FatigueStateEnded, UnitRef.None, unit.Ref, unit.State.Id, 0, 0, 0);
+                unit.State = null;
+                return;
+            }
+
+            if (unit.State == null && unit.Fatigue >= _balance.FatigueBreakdown)
+            {
+                BreakDown(unit);
+            }
+        }
+
+        /// <summary>
+        /// The breakdown at the threshold: by VirtueChancePercent a virtue, which also brings the fatigue down to VirtueFatigue,
+        /// otherwise an affliction; which one of its kind is drawn from the setup's states. Both rolls come from the fatigue
+        /// stream, so death rolls never move.
+        /// </summary>
+        void BreakDown(BattleUnit unit)
+        {
+            int roll = _fatigueRng.NextInt(100);
+            bool virtue = roll < _balance.VirtueChancePercent;
+            List<FatigueStateData> pool = StatesOf(virtue ? FatigueStateKind.Virtue : FatigueStateKind.Affliction);
+            if (pool.Count == 0)
+            {
+                throw new InvalidOperationException($"The battle setup names no {(virtue ? "virtue" : "affliction")} to break down into.");
+            }
+
+            unit.State = pool[_fatigueRng.NextInt(pool.Count)];
+            Log(BattleEventKind.BrokeDown, UnitRef.None, unit.Ref, unit.State.Id, roll, _balance.VirtueChancePercent, virtue ? 1 : 0);
+            if (virtue && unit.Fatigue > _balance.VirtueFatigue)
+            {
+                int before = unit.Fatigue;
+                unit.Fatigue = _balance.VirtueFatigue;
+                Log(BattleEventKind.FatigueChanged, UnitRef.None, unit.Ref, BattleEvent.FatigueVirtue, unit.Fatigue - before, 0, unit.Fatigue);
+            }
+        }
+
+        List<FatigueStateData> StatesOf(FatigueStateKind kind)
+        {
+            var states = new List<FatigueStateData>();
+            if (Setup.FatigueStates != null)
+            {
+                foreach (FatigueStateData state in Setup.FatigueStates)
+                {
+                    if (state.Kind == kind)
+                    {
+                        states.Add(state);
+                    }
+                }
+            }
+
+            return states;
+        }
+
+        /// <summary>The collapse at the maximum: the unit goes to death's door (which tires its allies), or dies if it was there already.</summary>
+        void Collapse(BattleUnit unit)
+        {
+            bool dies = unit.InDog;
+            Log(BattleEventKind.Collapsed, UnitRef.None, unit.Ref, null, 0, 0, dies ? 1 : 0);
+            if (dies)
+            {
+                Kill(unit);
+                return;
+            }
+
+            unit.Hp = 0;
+            EnterDog(unit);
+            ChangeAlliesFatigue(unit, _balance.FatigueOnAllyDog, BattleEvent.FatigueAllyDog);
         }
 
         /// <summary>
@@ -802,7 +994,7 @@ namespace F1.Gameplay
                     bool usable = item.Equipped.Item.UsableIn(unit.Row, lineLength);
                     if (usable && !item.Active)
                     {
-                        item.NextFireMs = TimeMs + item.CooldownMs;
+                        item.NextFireMs = TimeMs + CooldownOf(unit, item);
                     }
 
                     item.Active = usable;

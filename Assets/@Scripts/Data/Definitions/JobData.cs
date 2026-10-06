@@ -195,5 +195,16 @@ namespace F1.Data
         /// <summary>The address of the hit pose drawn after the figure. Null when the job has no figure.</summary>
         [JsonIgnore]
         public string HitPose => ArtAddress.PoseOf(Figure, ArtAddress.Hit);
+
+        /// <summary>
+        /// The address of the pose held through the moment of a breakdown (an affliction, or the collapse), drawn after the figure
+        /// (round 38). Null when the job has no figure. The file is drawn job by job: where it is not yet, the figure stands in.
+        /// </summary>
+        [JsonIgnore]
+        public string BrokenPose => ArtAddress.PoseOf(Figure, ArtAddress.Broken);
+
+        /// <summary>The address of the pose held through the moment of a virtue, as <see cref="BrokenPose"/>.</summary>
+        [JsonIgnore]
+        public string ResolutePose => ArtAddress.PoseOf(Figure, ArtAddress.Resolute);
     }
 }

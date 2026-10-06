@@ -58,6 +58,16 @@ namespace F1.Data
             new KeySpec(nameof(TotalDays), 1, Big),
             new KeySpec(nameof(MaxFatigue), 1, Big),
             new KeySpec(nameof(FatigueRecoveryPerDay), 0, Big),
+            new KeySpec(nameof(FatigueBreakdown), 1, Big),
+            new KeySpec(nameof(FatigueBattleEntry), 0, Big),
+            new KeySpec(nameof(FatigueEquipment), 0, Big),
+            new KeySpec(nameof(FatigueOnHit), 0, Big),
+            new KeySpec(nameof(FatigueOnDog), 0, Big),
+            new KeySpec(nameof(FatigueOnAllyDog), 0, Big),
+            new KeySpec(nameof(FatigueOnAllyDeath), 0, Big),
+            new KeySpec(nameof(FatigueOnKill), 0, Big),
+            new KeySpec(nameof(VirtueChancePercent), 0, 100),
+            new KeySpec(nameof(VirtueFatigue), 0, Big),
             new KeySpec(nameof(RestDays), 1, Big),
             new KeySpec(nameof(DogGraceMs), 0, Big),
             new KeySpec(nameof(DogGraceBreakHits), 1, 100),
@@ -75,6 +85,11 @@ namespace F1.Data
             new KeySpec(nameof(MinCooldownMs), 50, Big),
             new KeySpec(nameof(RewardChoices), 1, 5),
             new KeySpec(nameof(InventoryCells), ItemData.MaxSize, 100),
+            new KeySpec(nameof(CampHealPercent), 0, 100),
+            new KeySpec(nameof(CampFatigueRelief), 0, Big),
+            new KeySpec(nameof(TierSilverPercent), 100, Big),
+            new KeySpec(nameof(TierGoldPercent), 100, Big),
+            new KeySpec(nameof(TierDiamondPercent), 100, Big),
             new KeySpec(nameof(MapBranchChancePercent), 0, 100),
             new KeySpec(nameof(FinalBossLevel), 2, Big),
         };
@@ -117,6 +132,21 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: unknown key '{unknown}'.");
             }
 
+            if (TierSilverPercent <= 100 || TierGoldPercent <= TierSilverPercent || TierDiamondPercent <= TierGoldPercent)
+            {
+                throw new DataException($"{DefinitionName}: every tier must be stronger than the one under it (Bronze is 100).");
+            }
+
+            if (FatigueBreakdown > MaxFatigue)
+            {
+                throw new DataException($"{DefinitionName}: FatigueBreakdown cannot exceed MaxFatigue.");
+            }
+
+            if (VirtueFatigue >= FatigueBreakdown)
+            {
+                throw new DataException($"{DefinitionName}: VirtueFatigue must be under FatigueBreakdown, or a virtue would break down again at once.");
+            }
+
             if (MinPartySize > PartySize)
             {
                 throw new DataException($"{DefinitionName}: MinPartySize cannot exceed PartySize.");
@@ -141,8 +171,30 @@ namespace F1.Data
         public int PartySize => _values[nameof(PartySize)];
         public int MinPartySize => _values[nameof(MinPartySize)];
         public int TotalDays => _values[nameof(TotalDays)];
+        /// <summary>The most fatigue a mercenary can carry (it builds up from 0). Reaching it is collapsing (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
         public int MaxFatigue => _values[nameof(MaxFatigue)];
+        /// <summary>How much fatigue comes down for each day a mercenary stays home.</summary>
         public int FatigueRecoveryPerDay => _values[nameof(FatigueRecoveryPerDay)];
+        /// <summary>Where breaking down begins: the breakdown check (Docs/Design/04_Lobby_100Day_Economy.md §3). The lobby shows the fatigue past it in red.</summary>
+        public int FatigueBreakdown => _values[nameof(FatigueBreakdown)];
+
+        /// <summary>
+        /// Fatigue a mercenary gains in battle (Docs/Design/04_Lobby_100Day_Economy.md §3): from a hit the shield did not stop, from
+        /// reaching death's door, from an ally reaching it, from an ally dying; and what killing an enemy takes off.
+        /// </summary>
+        public int FatigueOnHit => _values[nameof(FatigueOnHit)];
+        public int FatigueOnDog => _values[nameof(FatigueOnDog)];
+        public int FatigueOnAllyDog => _values[nameof(FatigueOnAllyDog)];
+        public int FatigueOnAllyDeath => _values[nameof(FatigueOnAllyDeath)];
+        public int FatigueOnKill => _values[nameof(FatigueOnKill)];
+
+        /// <summary>The breakdown at the threshold: the chance it is a virtue rather than an affliction, and the fatigue a virtue brings the unit down to.</summary>
+        public int VirtueChancePercent => _values[nameof(VirtueChancePercent)];
+        public int VirtueFatigue => _values[nameof(VirtueFatigue)];
+        /// <summary>The fatigue every living member pays when a battle starts.</summary>
+        public int FatigueBattleEntry => _values[nameof(FatigueBattleEntry)];
+        /// <summary>The fatigue each piece of equipment on a board (not a base weapon) adds when a battle starts.</summary>
+        public int FatigueEquipment => _values[nameof(FatigueEquipment)];
         public int RestDays => _values[nameof(RestDays)];
         public int DogGraceMs => _values[nameof(DogGraceMs)];
         public int DogGraceBreakHits => _values[nameof(DogGraceBreakHits)];
@@ -161,6 +213,25 @@ namespace F1.Data
         public int RewardChoices => _values[nameof(RewardChoices)];
         /// <summary>Cells of the expedition inventory. An item takes its size there as on a board, so it holds at least the biggest item.</summary>
         public int InventoryCells => _values[nameof(InventoryCells)];
+        /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>
+        public int CampHealPercent => _values[nameof(CampHealPercent)];
+        public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];
+        /// <summary>How big an item's effects are at a tier, in percent of Bronze's.</summary>
+        public int TierSilverPercent => _values[nameof(TierSilverPercent)];
+        public int TierGoldPercent => _values[nameof(TierGoldPercent)];
+        public int TierDiamondPercent => _values[nameof(TierDiamondPercent)];
+
+        /// <summary>The percent of Bronze's effects an item has at a tier: 100 at Bronze.</summary>
+        public int TierPercent(ItemTier tier)
+        {
+            switch (tier)
+            {
+                case ItemTier.Silver: return TierSilverPercent;
+                case ItemTier.Gold: return TierGoldPercent;
+                case ItemTier.Diamond: return TierDiamondPercent;
+                default: return 100;
+            }
+        }
         /// <summary>Chance that a map node also leads to the neighbour of its nearest node on the next floor.</summary>
         public int MapBranchChancePercent => _values[nameof(MapBranchChancePercent)];
         /// <summary>The enemy level reserved for the final boss. No other enemy may use it or a higher one.</summary>

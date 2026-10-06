@@ -4,4 +4,4 @@ valkyrie,발키리,Valkyrie,120,5,greataxe,12,1,Always,SelfInDog,,WeaponPowerPer
 bishop,주교,Bishop,90,5,healing_staff,10,3,Heal,None,,Shield,EventTarget,10,회복시킨 대상에게 보호막 {0},Healed targets also gain {0} Shield,unit/job/bishop
 paladin,성기사,Paladin,130,5,mace,9,1,BattleStart,InRows,front:1,Shield,AllyAll,8,맨 앞: 전투 시작 때 아군 전체에 보호막 {0},Front row: every ally gains {0} Shield at the start of battle,unit/job/paladin
 archmage,대마법사,Archmage,80,5,fire_staff,10,3,Always,InRows,back:2,WeaponPowerPercent,Self,25,뒤에서 2번째 자리까지: 무기 피해 +{0}%,Rear 2 rows: weapon damage +{0}%,unit/job/archmage
-spellblade,마검사,Spellblade,100,5,sword,12,2,WeaponHit,None,,Burn,EventTarget,3,무기 적중 시 화상 {0},Weapon hits apply {0} Burn,unit/job/spellblade
+spellblade,마검사,Spellblade,100,5,longsword,12,2,WeaponHit,None,,Burn,EventTarget,3,무기 적중 시 화상 {0},Weapon hits apply {0} Burn,unit/job/spellblade

@@ -464,30 +464,6 @@
       "Icon": "item/spear"
     },
     {
-      "Id": "sword",
-      "Name": {
-        "en-US": "Sword",
-        "ko-KR": "소드"
-      },
-      "Category": "Weapon",
-      "Size": 1,
-      "CooldownMs": 2900,
-      "Rows": {
-        "From": "Front",
-        "Reach": 2
-      },
-      "Effects": [
-        {
-          "Kind": "Damage",
-          "Target": "EnemyFront",
-          "Reach": 1,
-          "PowerPercent": 100
-        }
-      ],
-      "RewardWeight": 0,
-      "Icon": "item/sword"
-    },
-    {
       "Id": "ward_charm",
       "Name": {
         "en-US": "Ward Charm",

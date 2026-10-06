@@ -92,6 +92,8 @@ namespace F1.Gameplay
         public const ulong Battle = 3UL;
         /// <summary>Retreat rolls. Separate so that retreat attempts never change death rolls.</summary>
         public const ulong Input = 4UL;
+        /// <summary>The breakdown at the fatigue threshold: virtue or affliction, and which one. Separate so that it never changes death rolls.</summary>
+        public const ulong Fatigue = 5UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

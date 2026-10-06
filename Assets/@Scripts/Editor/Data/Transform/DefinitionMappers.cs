@@ -183,14 +183,15 @@ namespace F1.Editor.Data
     {
         public static List<EnemyGroupData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(new[] { RowMapping.Id, "DungeonId", "MinFloor", "MaxFloor", "IsBoss", "Enemies" });
+            table.RequireHeaders(new[] { RowMapping.Id, "DungeonId", "MinFloor", "MaxFloor", "IsBoss", "IsElite", "Enemies" });
             return RowMapping.MapRows(table, errors, row => new EnemyGroupData(
                 row.Id(RowMapping.Id),
                 row.Id("DungeonId"),
                 row.Int("MinFloor"),
                 row.Int("MaxFloor"),
                 row.Bool("IsBoss"),
-                row.IdList("Enemies")));
+                row.IdList("Enemies"),
+                row.Bool("IsElite")));
         }
     }
 
@@ -211,8 +212,10 @@ namespace F1.Editor.Data
         public static List<DungeonData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "FatigueCost", "DurationDays",
-                "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background));
+                "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "DurationDays",
+                "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background,
+                "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
+                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "SilverFloor", "GoldFloor", "DiamondFloor"));
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -221,12 +224,37 @@ namespace F1.Editor.Data
                 row.Int("Floors"),
                 row.Int("MapMinWidth"),
                 row.Int("MapMaxWidth"),
-                row.Int("FatigueCost"),
                 row.Int("DurationDays"),
                 row.Int("ItemGradeBase"),
                 row.Int("ItemGradePerFloor"),
                 row.IdList("StartingPotions"),
-                RowMapping.ReadArt(row, RowMapping.Background)));
+                RowMapping.ReadArt(row, RowMapping.Background),
+                row.Int("EliteMinFloor"),
+                row.Int("EliteChancePercent"),
+                row.Int("CampMinFloor"),
+                row.Int("CampChancePercent"),
+                row.Int("CampFloor"),
+                row.Int("EnemyHpPerFloorPercent"),
+                row.Int("EnemyGradePerFloor"),
+                row.Int("SilverFloor"),
+                row.Int("GoldFloor"),
+                row.Int("DiamondFloor")));
+        }
+    }
+
+    internal static class FatigueStateMapper
+    {
+        public static List<FatigueStateData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(RowMapping.Headers("Kind", "CooldownPercent", "HealTakenPercent", "DeathChanceDelta", "Description.ko-KR", "Description.en-US"));
+            return RowMapping.MapRows(table, errors, row => new FatigueStateData(
+                row.Id(RowMapping.Id),
+                row.Localized(RowMapping.Name),
+                row.Enum<FatigueStateKind>("Kind"),
+                row.Int("CooldownPercent"),
+                row.Int("HealTakenPercent"),
+                row.Int("DeathChanceDelta"),
+                row.Localized("Description")));
         }
     }
 

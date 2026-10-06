@@ -40,6 +40,19 @@ namespace F1.Data
         Other,
     }
 
+    /// <summary>
+    /// The tier of an item (Docs/Design/02_Combat_System.md §4, The Bazaar's Bronze, Silver, Gold and Diamond). An item's
+    /// effects grow with its tier by the percent the balance data gives it; two of the same item at the same tier merge into
+    /// one a tier up, and Diamond is the last.
+    /// </summary>
+    public enum ItemTier
+    {
+        Bronze,
+        Silver,
+        Gold,
+        Diamond,
+    }
+
     public enum EffectKind
     {
         Damage,
@@ -103,5 +116,16 @@ namespace F1.Data
     {
         Heal,
         Shield,
+    }
+
+    /// <summary>
+    /// What a fatigue state is (Docs/Design/04_Lobby_100Day_Economy.md §3): an affliction, which the breakdown at the
+    /// threshold usually brings and which ends when fatigue comes back under it, or a virtue, which it brings by chance and
+    /// which lasts until the expedition ends.
+    /// </summary>
+    public enum FatigueStateKind
+    {
+        Affliction,
+        Virtue,
     }
 }

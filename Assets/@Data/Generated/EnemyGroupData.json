@@ -4,15 +4,44 @@
     {
       "Id": "ambush",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 2,
-      "MaxFloor": 3,
+      "MinFloor": 3,
+      "MaxFloor": 11,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
         "goblin_archer",
         "goblin_archer",
         "goblin_shaman"
-      ]
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "archer_line",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 9,
+      "MaxFloor": 14,
+      "IsBoss": false,
+      "Enemies": [
+        "goblin_raider",
+        "goblin_raider",
+        "goblin_archer",
+        "goblin_archer"
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "hexer_circle",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 9,
+      "MaxFloor": 14,
+      "IsBoss": false,
+      "Enemies": [
+        "goblin_raider",
+        "goblin_veteran",
+        "goblin_hexer",
+        "goblin_hexer"
+      ],
+      "IsElite": true
     },
     {
       "Id": "overseer_guard",
@@ -22,47 +51,79 @@
       "IsBoss": true,
       "Enemies": [
         "mine_overseer",
+        "goblin_veteran",
+        "goblin_hexer"
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "raid_party",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 7,
+      "MaxFloor": 14,
+      "IsBoss": false,
+      "Enemies": [
+        "goblin_raider",
+        "goblin_raider",
         "goblin_raider",
         "goblin_shaman"
-      ]
+      ],
+      "IsElite": false
     },
     {
       "Id": "raider_patrol",
       "DungeonId": "abandoned_mine",
       "MinFloor": 1,
-      "MaxFloor": 3,
+      "MaxFloor": 6,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
         "goblin_raider",
         "goblin_raider"
-      ]
+      ],
+      "IsElite": false
     },
     {
       "Id": "raider_warband",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 2,
-      "MaxFloor": 3,
+      "MinFloor": 3,
+      "MaxFloor": 11,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
         "goblin_raider",
         "goblin_archer",
         "goblin_shaman"
-      ]
+      ],
+      "IsElite": false
     },
     {
       "Id": "rat_pack",
       "DungeonId": "abandoned_mine",
       "MinFloor": 1,
-      "MaxFloor": 2,
+      "MaxFloor": 9,
       "IsBoss": false,
       "Enemies": [
         "cave_rat",
         "cave_rat",
         "cave_rat",
         "cave_rat"
-      ]
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "veteran_guard",
+      "DungeonId": "abandoned_mine",
+      "MinFloor": 6,
+      "MaxFloor": 14,
+      "IsBoss": false,
+      "Enemies": [
+        "goblin_veteran",
+        "goblin_veteran",
+        "goblin_archer",
+        "goblin_hexer"
+      ],
+      "IsElite": true
     }
   ]
 }

@@ -9,6 +9,9 @@ namespace F1.Gameplay
         InBattle,
         ChoosingReward,
         Finished,
+
+        /// <summary>At a camp node: the party chooses what to do there before going on.</summary>
+        AtCamp,
     }
 
     public enum ExpeditionResult
@@ -30,11 +33,12 @@ namespace F1.Gameplay
     /// <summary>One of the choices offered after a won battle.</summary>
     public sealed class RewardOption
     {
-        public RewardOption(RewardKind kind, string id, int grade)
+        public RewardOption(RewardKind kind, string id, int grade, ItemTier tier = ItemTier.Bronze)
         {
             Kind = kind;
             Id = id;
             Grade = grade;
+            Tier = tier;
         }
 
         public RewardKind Kind { get; }
@@ -44,6 +48,9 @@ namespace F1.Gameplay
 
         /// <summary>Item grade. 0 for a potion.</summary>
         public int Grade { get; }
+
+        /// <summary>Item tier. Bronze for a potion.</summary>
+        public ItemTier Tier { get; }
     }
 
     /// <summary>A mercenary while on an expedition. HP and items exist only here.</summary>
@@ -63,21 +70,35 @@ namespace F1.Gameplay
 
         /// <summary>Cells of the board, from the job.</summary>
         public int ItemSlots;
+
+        /// <summary>Fatigue (0 = fresh, see <see cref="FatigueRules"/>). It came from the roster and goes back to it at the settlement.</summary>
+        public int Fatigue;
+
+        /// <summary>The affliction or virtue the member is in (a FatigueStateData id), or null. An affliction came from the roster or the breakdown; a virtue ends with the expedition.</summary>
+        public string StateId;
     }
 
-    /// <summary>Who goes on an expedition and where they stand.</summary>
+    /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>
     public readonly struct PartyMember
     {
-        public PartyMember(string mercenaryId, string jobId, int row)
+        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null)
         {
             MercenaryId = mercenaryId;
             JobId = jobId;
             Row = row;
+            Fatigue = fatigue;
+            AfflictionId = afflictionId;
         }
 
         public string MercenaryId { get; }
         public string JobId { get; }
         public int Row { get; }
+
+        /// <summary>The mercenary's fatigue when the expedition leaves.</summary>
+        public int Fatigue { get; }
+
+        /// <summary>The affliction the mercenary leaves with, or null.</summary>
+        public string AfflictionId { get; }
     }
 
     /// <summary>

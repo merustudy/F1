@@ -10,8 +10,11 @@ namespace F1.Gameplay
         public string Id;
         public string JobId;
 
-        /// <summary>Remaining fatigue points. Expeditions spend them; days off restore them.</summary>
+        /// <summary>Fatigue: 0 is fresh. It builds up on expeditions and comes down on days off (see <see cref="FatigueRules"/>).</summary>
         public int Fatigue;
+
+        /// <summary>The affliction the mercenary came home with (a FatigueStateData id), or null. It ends when fatigue comes back under the threshold.</summary>
+        public string AfflictionId;
     }
 
     public sealed class PartySlot
@@ -49,12 +52,12 @@ namespace F1.Gameplay
         public bool IsOver;
     }
 
+    /// <summary>Whether the lobby party can leave. Fatigue does not stop anyone: sending a tired mercenary is the player's call.</summary>
     public enum DepartCheck
     {
         Ok,
         RunIsOver,
         PartyTooSmall,
-        NotEnoughFatigue,
     }
 
     /// <summary>What the return settlement changed, for the result screen.</summary>
@@ -64,7 +67,12 @@ namespace F1.Gameplay
         public ExpeditionResult Result;
         public List<string> FallenIds = new List<string>();
         public List<string> SurvivorIds = new List<string>();
-        public int FatigueCost;
+
+        /// <summary>The fatigue each survivor came back with, in the order of <see cref="SurvivorIds"/>.</summary>
+        public List<int> SurvivorFatigue = new List<int>();
+
+        /// <summary>The affliction each survivor came home in (a FatigueStateData id), or null, in the order of <see cref="SurvivorIds"/>. A virtue ended with the expedition.</summary>
+        public List<string> SurvivorStates = new List<string>();
         public int DaysPassed;
         public int DayAfter;
         public bool RunIsOver;

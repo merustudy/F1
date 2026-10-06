@@ -55,6 +55,7 @@ namespace F1.Editor.Data
                 Affinities = Map(StaticDataFiles.Affinity, readSource, AffinityMapper.Map, errors),
                 Dungeons = Map(StaticDataFiles.Dungeon, readSource, DungeonMapper.Map, errors),
                 Mercenaries = Map(StaticDataFiles.Mercenary, readSource, MercenaryMapper.Map, errors),
+                FatigueStates = Map(StaticDataFiles.FatigueState, readSource, FatigueStateMapper.Map, errors),
             };
 
             // Row errors are reported before data set checks: a broken row would only cause

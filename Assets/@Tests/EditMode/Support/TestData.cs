@@ -29,8 +29,18 @@ namespace F1.Tests
                 { "PartySize", 3 },
                 { "MinPartySize", 1 },
                 { "TotalDays", 100 },
-                { "MaxFatigue", 100 },
+                { "MaxFatigue", 200 },
                 { "FatigueRecoveryPerDay", 10 },
+                { "FatigueBreakdown", 100 },
+                { "FatigueBattleEntry", 5 },
+                { "FatigueEquipment", 1 },
+                { "FatigueOnHit", 0 },
+                { "FatigueOnDog", 0 },
+                { "FatigueOnAllyDog", 0 },
+                { "FatigueOnAllyDeath", 0 },
+                { "FatigueOnKill", 0 },
+                { "VirtueChancePercent", 25 },
+                { "VirtueFatigue", 40 },
                 { "RestDays", 1 },
                 { "DogGraceMs", 3000 },
                 { "DogGraceBreakHits", 3 },
@@ -48,6 +58,11 @@ namespace F1.Tests
                 { "MinCooldownMs", 200 },
                 { "RewardChoices", 3 },
                 { "InventoryCells", 10 },
+                { "CampHealPercent", 30 },
+                { "CampFatigueRelief", 20 },
+                { "TierSilverPercent", 200 },
+                { "TierGoldPercent", 300 },
+                { "TierDiamondPercent", 400 },
                 { "MapBranchChancePercent", 50 },
                 { "FinalBossLevel", 14 },
             };
@@ -163,6 +178,19 @@ namespace F1.Tests
             return unit;
         }
 
+        /// <summary>The fatigue states of the test data: an affliction and a virtue of each kind of change.</summary>
+        public static List<FatigueStateData> FatigueStates()
+        {
+            return new List<FatigueStateData>
+            {
+                new FatigueStateData("fearful", Text("fearful"), FatigueStateKind.Affliction, 25, 0, 0, Text("slower")),
+                new FatigueStateData("hopeless", Text("hopeless"), FatigueStateKind.Affliction, 0, -50, 0, Text("half healing")),
+                new FatigueStateData("reckless", Text("reckless"), FatigueStateKind.Affliction, 0, 0, 25, Text("deadlier door")),
+                new FatigueStateData("focused", Text("focused"), FatigueStateKind.Virtue, -20, 0, 0, Text("faster")),
+                new FatigueStateData("stalwart", Text("stalwart"), FatigueStateKind.Virtue, 0, 50, -15, Text("hardier")),
+            };
+        }
+
         /// <summary>A battle with seed 1, no affinity and no potions. Tests set the fields they need.</summary>
         public static BattleSetup Setup(BalanceData balance, BattleUnitSetup[] party, BattleUnitSetup[] enemies)
         {
@@ -174,7 +202,16 @@ namespace F1.Tests
                 Enemies = enemies,
                 EnemyCooldownPermille = 0,
                 Potions = new PotionData[0],
+                FatigueStates = FatigueStates(),
             };
+        }
+
+        /// <summary>Starts the unit with this fatigue and, when given, in this state.</summary>
+        public static BattleUnitSetup WithFatigue(this BattleUnitSetup unit, int fatigue, FatigueStateData state = null)
+        {
+            unit.Fatigue = fatigue;
+            unit.FatigueState = state;
+            return unit;
         }
 
         public static BattleUnitSetup[] Units(params BattleUnitSetup[] units)
@@ -240,7 +277,7 @@ namespace F1.Tests
                 },
                 Dungeons = new List<DungeonData>
                 {
-                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 30, 2, 8, 2, new List<string> { "tonic" }),
+                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }),
                 },
                 Mercenaries = new List<MercenaryData>
                 {
@@ -249,6 +286,7 @@ namespace F1.Tests
                     new MercenaryData("cora", Text("cora"), "striker"),
                     new MercenaryData("dan", Text("dan"), "tank"),
                 },
+                FatigueStates = FatigueStates(),
             };
         }
 

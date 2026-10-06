@@ -1,0 +1,6 @@
+Id,Name.ko-KR,Name.en-US,Kind,CooldownPercent,HealTakenPercent,DeathChanceDelta,Description.ko-KR,Description.en-US
+fearful,공포,Fearful,Affliction,25,0,0,아이템이 25% 느리게 돈다,Items cycle 25% slower
+hopeless,절망,Hopeless,Affliction,0,-50,0,받는 회복이 절반이다,Takes half the healing
+reckless,무모,Reckless,Affliction,0,0,25,빈사의 사망 확률 +25%p,Death chance at death's door +25%p
+focused,집중,Focused,Virtue,-20,0,0,아이템이 20% 빠르게 돈다,Items cycle 20% faster
+stalwart,강인,Stalwart,Virtue,0,50,-15,받는 회복 +50%. 빈사의 사망 확률 -15%p,Takes 50% more healing. Death chance at death's door -15%p

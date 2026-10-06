@@ -6,7 +6,8 @@ namespace F1.Gameplay
 {
     /// <summary>
     /// The lobby and run rules (Docs/Design/04_Lobby_100Day_Economy.md): roster, party, fatigue,
-    /// days and the return settlement. Pure functions over <see cref="RunState"/>.
+    /// days and the return settlement. Pure functions over <see cref="RunState"/>. Fatigue builds up
+    /// on an expedition (<see cref="FatigueRules"/>) and comes down on the days a mercenary stays home.
     /// </summary>
     public static class RunRules
     {
@@ -24,7 +25,7 @@ namespace F1.Gameplay
                 {
                     Id = mercenary.Id,
                     JobId = mercenary.JobId,
-                    Fatigue = data.Balance.MaxFatigue,
+                    Fatigue = 0,
                 });
             }
 
@@ -163,19 +164,12 @@ namespace F1.Gameplay
                 return DepartCheck.PartyTooSmall;
             }
 
-            DungeonData dungeon = data.Dungeons.Get(dungeonId);
-            foreach (PartySlot slot in state.Party)
-            {
-                if (FindMercenary(state, slot.MercenaryId).Fatigue < dungeon.FatigueCost)
-                {
-                    return DepartCheck.NotEnoughFatigue;
-                }
-            }
-
+            // Only a dungeon that exists can be chosen; fatigue never keeps anyone home.
+            data.Dungeons.Get(dungeonId);
             return DepartCheck.Ok;
         }
 
-        /// <summary>Passes RestDays. Everyone in the roster recovers fatigue.</summary>
+        /// <summary>Passes RestDays. Everyone in the roster recovers: their fatigue comes down.</summary>
         public static void Rest(StaticData data, RunState state)
         {
             if (state.IsOver)
@@ -198,7 +192,8 @@ namespace F1.Gameplay
             var party = new List<PartyMember>();
             foreach (PartySlot slot in state.Party)
             {
-                party.Add(new PartyMember(slot.MercenaryId, FindMercenary(state, slot.MercenaryId).JobId, slot.Row));
+                MercenaryState mercenary = FindMercenary(state, slot.MercenaryId);
+                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId));
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);
@@ -209,8 +204,8 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The return settlement, in this order: items and potions vanish (with the expedition state),
-        /// the dead leave the roster for good, survivors pay fatigue, days pass and those who stayed
-        /// home recover, and a clear is recorded.
+        /// the dead leave the roster for good, survivors keep the fatigue they came back with, days pass
+        /// and those who stayed home recover, and a clear is recorded.
         /// </summary>
         public static SettlementReport Settle(StaticData data, RunState state, ExpeditionState expedition)
         {
@@ -224,7 +219,6 @@ namespace F1.Gameplay
             {
                 DungeonId = dungeon.Id,
                 Result = expedition.Result,
-                FatigueCost = dungeon.FatigueCost,
                 DaysPassed = dungeon.DurationDays,
             };
 
@@ -240,8 +234,12 @@ namespace F1.Gameplay
 
                 if (member.Alive)
                 {
-                    mercenary.Fatigue = Math.Max(0, mercenary.Fatigue - dungeon.FatigueCost);
+                    // The fatigue comes home, and an affliction with it; a virtue ends with the expedition.
+                    mercenary.Fatigue = member.Fatigue;
+                    mercenary.AfflictionId = member.StateId != null && data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction ? member.StateId : null;
                     report.SurvivorIds.Add(member.MercenaryId);
+                    report.SurvivorFatigue.Add(member.Fatigue);
+                    report.SurvivorStates.Add(mercenary.AfflictionId);
                 }
                 else
                 {
@@ -294,7 +292,7 @@ namespace F1.Gameplay
             SetPartyRows(state, rows);
         }
 
-        /// <summary>Advances the day counter. Mercenaries not in <paramref name="away"/> recover fatigue for each day.</summary>
+        /// <summary>Advances the day counter. Mercenaries not in <paramref name="away"/> recover: their fatigue comes down for each day.</summary>
         static void PassDays(StaticData data, RunState state, int days, HashSet<string> away)
         {
             state.Day += days;
@@ -306,7 +304,8 @@ namespace F1.Gameplay
                     continue;
                 }
 
-                mercenary.Fatigue = Math.Min(data.Balance.MaxFatigue, mercenary.Fatigue + recovery);
+                mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -recovery);
+                mercenary.AfflictionId = FatigueRules.StateAfter(data, mercenary.AfflictionId, mercenary.Fatigue);
             }
         }
     }

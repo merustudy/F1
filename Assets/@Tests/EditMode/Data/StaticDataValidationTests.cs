@@ -50,10 +50,10 @@ namespace F1.Tests
                 p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "tower", 1, 2, false, new[] { "grunt" }))));
 
             StringAssert.Contains("Dungeon 'cave' AffinityId: 'regen' does not exist", ProblemOf(p =>
-                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "regen", 2, 2, 3, 30, 2, 8, 2, new List<string> { "tonic" }) }));
+                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "regen", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }) }));
 
             StringAssert.Contains("Dungeon 'cave' StartingPotions: 'elixir' does not exist", ProblemOf(p =>
-                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 30, 2, 8, 2, new List<string> { "elixir" }) }));
+                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "elixir" }) }));
 
             StringAssert.Contains("Mercenary 'anna' JobId: 'samurai' does not exist", ProblemOf(p =>
                 p.Mercenaries = Replace(p.Mercenaries, m => m.Id == "anna", new MercenaryData("anna", TestData.Text("anna"), "samurai"))));

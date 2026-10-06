@@ -6,6 +6,14 @@
       "Value": 1000
     },
     {
+      "Key": "CampFatigueRelief",
+      "Value": 20
+    },
+    {
+      "Key": "CampHealPercent",
+      "Value": 30
+    },
+    {
       "Key": "DogDeathChancePercent",
       "Value": 30
     },
@@ -16,6 +24,38 @@
     {
       "Key": "DogGraceMs",
       "Value": 3000
+    },
+    {
+      "Key": "FatigueBattleEntry",
+      "Value": 2
+    },
+    {
+      "Key": "FatigueBreakdown",
+      "Value": 100
+    },
+    {
+      "Key": "FatigueEquipment",
+      "Value": 1
+    },
+    {
+      "Key": "FatigueOnAllyDeath",
+      "Value": 10
+    },
+    {
+      "Key": "FatigueOnAllyDog",
+      "Value": 3
+    },
+    {
+      "Key": "FatigueOnDog",
+      "Value": 5
+    },
+    {
+      "Key": "FatigueOnHit",
+      "Value": 1
+    },
+    {
+      "Key": "FatigueOnKill",
+      "Value": 3
     },
     {
       "Key": "FatigueRecoveryPerDay",
@@ -35,7 +75,7 @@
     },
     {
       "Key": "MaxFatigue",
-      "Value": 100
+      "Value": 200
     },
     {
       "Key": "MinCooldownMs",
@@ -94,8 +134,28 @@
       "Value": 1000
     },
     {
+      "Key": "TierDiamondPercent",
+      "Value": 400
+    },
+    {
+      "Key": "TierGoldPercent",
+      "Value": 300
+    },
+    {
+      "Key": "TierSilverPercent",
+      "Value": 200
+    },
+    {
       "Key": "TotalDays",
       "Value": 100
+    },
+    {
+      "Key": "VirtueChancePercent",
+      "Value": 25
+    },
+    {
+      "Key": "VirtueFatigue",
+      "Value": 40
     }
   ]
 }

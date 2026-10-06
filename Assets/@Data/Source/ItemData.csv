@@ -1,5 +1,4 @@
 Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,RewardWeight,Icon
-sword,소드,Sword,Weapon,1,2900,front:2,Damage,EnemyFront,1,100,,,,,0,item/sword
 longsword,롱소드,Longsword,Weapon,1,3000,front:2,Damage,EnemyFront,1,110,,,,,0,item/longsword
 greataxe,대도끼,Greataxe,Weapon,1,3600,front:1,Damage,EnemyFront,1,190,,,,,0,item/greataxe
 mace,메이스,Mace,Weapon,1,3200,front:2,Damage,EnemyFront,1,100,Shield,Self,,40,0,item/mace

@@ -289,13 +289,12 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var potions = new List<string>();
 
-            Assert.DoesNotThrow(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 0, 2, 3, 30, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 3, 2, 30, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, DungeonData.MaxMapWidth + 1, 30, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, -1, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 0, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 0, 2, potions));
+            Assert.DoesNotThrow(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 0, 2, 3, 2, 8, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 3, 2, 2, 8, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, DungeonData.MaxMapWidth + 1, 2, 8, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 0, 8, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 0, 2, potions));
         }
 
         [Test]
@@ -304,11 +303,11 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var potions = new List<string>();
 
-            Assert.IsNull(new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions).Background, "No background by default.");
-            Assert.AreEqual("background/dungeon/d", new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, "background/dungeon/d").Background);
+            Assert.IsNull(new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions).Background, "No background by default.");
+            Assert.AreEqual("background/dungeon/d", new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, "background/dungeon/d").Background);
 
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, ""));
-            DataException error = Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 30, 2, 8, 2, potions, "background/ dungeon/d"));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, ""));
+            DataException error = Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, "background/ dungeon/d"));
             StringAssert.Contains("Background", error.Message, "The error names the column.");
         }
 
@@ -330,7 +329,7 @@ namespace F1.Tests
         [Test]
         public void DungeonData_RewardGradeGrowsByFloor()
         {
-            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 3, 2, 3, 30, 2, 8, 2, new List<string>());
+            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 3, 2, 3, 2, 8, 2, new List<string>());
 
             Assert.AreEqual(8, dungeon.RewardGradeAt(1));
             Assert.AreEqual(12, dungeon.RewardGradeAt(3));

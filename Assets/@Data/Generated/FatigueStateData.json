@@ -1,0 +1,80 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "fearful",
+      "Name": {
+        "en-US": "Fearful",
+        "ko-KR": "공포"
+      },
+      "Kind": "Affliction",
+      "CooldownPercent": 25,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "Description": {
+        "en-US": "Items cycle 25% slower",
+        "ko-KR": "아이템이 25% 느리게 돈다"
+      }
+    },
+    {
+      "Id": "focused",
+      "Name": {
+        "en-US": "Focused",
+        "ko-KR": "집중"
+      },
+      "Kind": "Virtue",
+      "CooldownPercent": -20,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "Description": {
+        "en-US": "Items cycle 20% faster",
+        "ko-KR": "아이템이 20% 빠르게 돈다"
+      }
+    },
+    {
+      "Id": "hopeless",
+      "Name": {
+        "en-US": "Hopeless",
+        "ko-KR": "절망"
+      },
+      "Kind": "Affliction",
+      "CooldownPercent": 0,
+      "HealTakenPercent": -50,
+      "DeathChanceDelta": 0,
+      "Description": {
+        "en-US": "Takes half the healing",
+        "ko-KR": "받는 회복이 절반이다"
+      }
+    },
+    {
+      "Id": "reckless",
+      "Name": {
+        "en-US": "Reckless",
+        "ko-KR": "무모"
+      },
+      "Kind": "Affliction",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 25,
+      "Description": {
+        "en-US": "Death chance at death's door +25%p",
+        "ko-KR": "빈사의 사망 확률 +25%p"
+      }
+    },
+    {
+      "Id": "stalwart",
+      "Name": {
+        "en-US": "Stalwart",
+        "ko-KR": "강인"
+      },
+      "Kind": "Virtue",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 50,
+      "DeathChanceDelta": -15,
+      "Description": {
+        "en-US": "Takes 50% more healing. Death chance at death's door -15%p",
+        "ko-KR": "받는 회복 +50%. 빈사의 사망 확률 -15%p"
+      }
+    }
+  ]
+}

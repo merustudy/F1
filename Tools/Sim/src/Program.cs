@@ -36,6 +36,7 @@ namespace F1.Sim
                     case "expedition": return Expedition(store, options);
                     case "formations": return Formations(store, options);
                     case "trace": return Trace(store, options);
+                    case "map": return Map(store, options);
                     default:
                         PrintUsage();
                         return 2;
@@ -142,6 +143,20 @@ namespace F1.Sim
             return 0;
         }
 
+        /// <summary>Prints the map of one expedition: one node per line, "id floor column kind group next,ids".</summary>
+        static int Map(StaticDataFileStore store, Dictionary<string, string> options)
+        {
+            StaticData data = LoadGenerated(store);
+            DungeonData dungeon = data.Dungeons.Get(Option(options, "dungeon", data.Dungeons.Ordered[0].Id));
+            NodeMap map = MapGenerator.Generate(data, dungeon, ulong.Parse(Option(options, "seed", "1"), CultureInfo.InvariantCulture));
+            foreach (MapNode node in map.Nodes)
+            {
+                Console.WriteLine($"{node.Id} {node.Floor} {node.Column} {node.Kind} {node.EnemyGroupId ?? "-"} {string.Join(",", node.NextNodeIds)}");
+            }
+
+            return 0;
+        }
+
         const string DefaultParty = "knight,spellblade,bishop,archmage";
 
         /// <summary>Loads static data exactly as the game does: generated JSON through StaticDataLoader.</summary>
@@ -207,6 +222,8 @@ namespace F1.Sim
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  formations   Whole expeditions for every order of the party, front to back");
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
+            Console.WriteLine("  map          The map of one expedition, one node per line");
+            Console.WriteLine("               --dungeon id  --seed n");
             Console.WriteLine("  trace        Event log of one battle");
             Console.WriteLine("               --dungeon id  --group id  --party a,b,c  --policy none|balanced|safe  --seed n");
             Console.WriteLine("  A party member is a mercenary id or a job id. Add a row (:1, :2, ...) to every member to set the rows;");

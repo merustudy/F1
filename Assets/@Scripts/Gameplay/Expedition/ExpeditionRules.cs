@@ -38,6 +38,11 @@ namespace F1.Gameplay
                     throw new ArgumentException($"Mercenary '{member.MercenaryId}' is in the party twice.", nameof(party));
                 }
 
+                if (member.Fatigue < 0 || member.Fatigue > balance.MaxFatigue)
+                {
+                    throw new ArgumentException($"Fatigue of '{member.MercenaryId}' is outside 0..{balance.MaxFatigue}.", nameof(party));
+                }
+
                 JobData job = data.Jobs.Get(member.JobId);
                 state.Members.Add(new ExpeditionMember
                 {
@@ -47,8 +52,10 @@ namespace F1.Gameplay
                     MaxHp = job.MaxHp,
                     Hp = job.MaxHp,
                     Alive = true,
-                    Items = new List<EquippedItem> { new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade) },
+                    Items = new List<EquippedItem> { new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade, isBase: true) },
                     ItemSlots = job.ItemSlots,
+                    Fatigue = member.Fatigue,
+                    StateId = member.AfflictionId,
                 });
             }
 
@@ -89,6 +96,11 @@ namespace F1.Gameplay
             return nodes;
         }
 
+        /// <summary>
+        /// Enters a node that is fought (a battle, an elite, the boss) and starts its battle. Every living member pays the
+        /// fatigue of going into a battle with the board it carries (<see cref="FatigueRules.BattleEntryCost"/>) before the
+        /// battle is set up.
+        /// </summary>
         public static BattleSetup BeginBattle(StaticData data, ExpeditionState state, int nodeId)
         {
             RequirePhase(state, ExpeditionPhase.ChoosingNode);
@@ -97,8 +109,21 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"Node {nodeId} cannot be chosen now.");
             }
 
+            if (!state.Map.Get(nodeId).IsFought)
+            {
+                throw new InvalidOperationException($"Node {nodeId} is a camp: nobody is fought there.");
+            }
+
             state.CurrentNodeId = nodeId;
             state.Phase = ExpeditionPhase.InBattle;
+            foreach (ExpeditionMember member in state.Members)
+            {
+                if (member.Alive)
+                {
+                    member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, FatigueRules.BattleEntryCost(data.Balance, member.Items));
+                }
+            }
+
             return BuildBattleSetup(data, state);
         }
 
@@ -110,11 +135,14 @@ namespace F1.Gameplay
         {
             RequirePhase(state, ExpeditionPhase.InBattle);
             MapNode node = state.Map.Get(state.CurrentNodeId);
-            return BuildBattleSetup(data, state, node.EnemyGroupId, SeedDeriver.Derive(state.Seed, "battle", node.Id));
+            return BuildBattleSetup(data, state, node.EnemyGroupId, SeedDeriver.Derive(state.Seed, "battle", node.Id), node.Floor);
         }
 
-        /// <summary>The current party against a given enemy group. The simulator uses this to test one group directly.</summary>
-        public static BattleSetup BuildBattleSetup(StaticData data, ExpeditionState state, string enemyGroupId, ulong battleSeed)
+        /// <summary>
+        /// The current party against a given enemy group on a floor. The simulator uses this to test one group directly.
+        /// The enemies of a floor deeper than the first are stronger by the dungeon's per-floor share; the boss is as its data says.
+        /// </summary>
+        public static BattleSetup BuildBattleSetup(StaticData data, ExpeditionState state, string enemyGroupId, ulong battleSeed, int floor = 1)
         {
             EnemyGroupData group = data.EnemyGroups.Get(enemyGroupId);
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
@@ -127,10 +155,11 @@ namespace F1.Gameplay
                 AddPartyRow(data, state, row, party);
             }
 
+            int deeper = group.IsBoss ? 0 : Math.Max(0, floor - 1);
             var enemies = new List<BattleUnitSetup>();
             for (int i = 0; i < group.Enemies.Count; i++)
             {
-                enemies.Add(EnemySetup(data.Enemies.Get(group.Enemies[i]), BattleRows.Front + i, data));
+                enemies.Add(EnemySetup(data.Enemies.Get(group.Enemies[i]), BattleRows.Front + i, data, dungeon, deeper));
             }
 
             var potions = new List<PotionData>();
@@ -147,7 +176,49 @@ namespace F1.Gameplay
                 Enemies = enemies,
                 EnemyCooldownPermille = affinity.EnemyCooldownPermille,
                 Potions = potions,
+                FatigueStates = data.FatigueStates.Ordered,
             };
+        }
+
+        /// <summary>Enters a camp node (Docs/Design/03_Dungeon_Structure.md §1). The party stays there until it chooses what to do.</summary>
+        public static void EnterCamp(ExpeditionState state, int nodeId)
+        {
+            RequirePhase(state, ExpeditionPhase.ChoosingNode);
+            if (!AvailableNodes(state).Exists(node => node.Id == nodeId))
+            {
+                throw new InvalidOperationException($"Node {nodeId} cannot be chosen now.");
+            }
+
+            if (state.Map.Get(nodeId).Kind != MapNodeKind.Camp)
+            {
+                throw new InvalidOperationException($"Node {nodeId} is not a camp.");
+            }
+
+            state.CurrentNodeId = nodeId;
+            state.Phase = ExpeditionPhase.AtCamp;
+        }
+
+        /// <summary>
+        /// Rests at the camp: every living member gets back <c>CampHealPercent</c> of their maximum HP and their fatigue comes down by
+        /// <c>CampFatigueRelief</c>. Then the party goes on to the next floor.
+        /// </summary>
+        public static void RestAtCamp(StaticData data, ExpeditionState state)
+        {
+            RequirePhase(state, ExpeditionPhase.AtCamp);
+            BalanceData balance = data.Balance;
+            foreach (ExpeditionMember member in state.Members)
+            {
+                if (!member.Alive)
+                {
+                    continue;
+                }
+
+                member.Hp = Math.Min(member.MaxHp, member.Hp + member.MaxHp * balance.CampHealPercent / 100);
+                member.Fatigue = FatigueRules.Add(balance, member.Fatigue, -balance.CampFatigueRelief);
+                member.StateId = FatigueRules.StateAfter(data, member.StateId, member.Fatigue);
+            }
+
+            state.Phase = ExpeditionPhase.ChoosingNode;
         }
 
         /// <summary>Applies a finished battle: HP, deaths, potions, then the next phase or the end of the expedition.</summary>
@@ -165,8 +236,10 @@ namespace F1.Gameplay
                 member.Alive = unit.Alive;
                 member.Hp = unit.Alive ? unit.Hp : 0;
 
-                // Those who advanced during the battle keep the row they ended in.
+                // Those who advanced during the battle keep the row they ended in; what the battle did to their fatigue stays too.
                 member.Row = unit.Row;
+                member.Fatigue = unit.Fatigue;
+                member.StateId = unit.State?.Id;
             }
 
             for (int i = 0; i < state.Potions.Length; i++)
@@ -218,14 +291,28 @@ namespace F1.Gameplay
             }
 
             RewardOption option = state.PendingRewards[optionIndex];
-            return option.Kind == RewardKind.Item && CanPlaceItem(data, state, data.Items.Get(option.Id).Size, memberIndex, cell);
+            return option.Kind == RewardKind.Item
+                && (MergesInto(option.Id, option.Tier, LivingItemAt(state, memberIndex, cell))
+                    || CanPlaceItem(data, state, data.Items.Get(option.Id).Size, memberIndex, cell));
         }
 
+        /// <summary>
+        /// Takes an item reward onto a cell of a member's board: into the free cells or in place of the item there (which goes to
+        /// the inventory), or, onto the same item at the same tier, merged with it a tier up.
+        /// </summary>
         public static void TakeItemReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int cell)
         {
             RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
             ExpeditionMember member = RequireLivingMember(state, memberIndex);
-            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade);
+            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade, tier: option.Tier);
+            EquippedItem there = LivingItemAt(state, memberIndex, cell);
+            if (CanMerge(item, there))
+            {
+                Merge(member.Items, item, there, null);
+                EndReward(state);
+                return;
+            }
+
             if (!CanPlaceItem(data, state, item.Item.Size, memberIndex, cell))
             {
                 throw new InvalidOperationException($"'{item.Item.Id}' cannot go at cell {cell} of '{member.MercenaryId}': it does not fit there, or what is there would not fit the inventory.");
@@ -251,7 +338,7 @@ namespace F1.Gameplay
         public static void TakeItemRewardToInventory(StaticData data, ExpeditionState state, int optionIndex)
         {
             RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
-            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade);
+            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade, tier: option.Tier);
             if (item.Item.Size > FreeInventoryCells(data, state))
             {
                 throw new InvalidOperationException($"'{item.Item.Id}' does not fit the inventory's free cells.");
@@ -323,6 +410,11 @@ namespace F1.Gameplay
             }
 
             int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
+            if (toIndex >= 0 && CanMerge(from.Items[fromIndex], to.Items[toIndex]))
+            {
+                return true;
+            }
+
             if (from == to)
             {
                 // Within one board the item only changes place: to the end (unless it is there
@@ -353,7 +445,11 @@ namespace F1.Gameplay
             int fromIndex = ItemBoard.IndexAtCell(from.Items, fromCell);
             int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
             EquippedItem moved = from.Items[fromIndex];
-            if (toIndex < 0)
+            if (toIndex >= 0 && CanMerge(moved, to.Items[toIndex]))
+            {
+                Merge(to.Items, moved, to.Items[toIndex], from.Items);
+            }
+            else if (toIndex < 0)
             {
                 from.Items.RemoveAt(fromIndex);
                 to.Items.Add(moved);
@@ -409,7 +505,13 @@ namespace F1.Gameplay
                 return false;
             }
 
-            int size = state.Inventory[inventoryIndex].Item.Size;
+            EquippedItem item = state.Inventory[inventoryIndex];
+            if (CanMerge(item, LivingItemAt(state, memberIndex, cell)))
+            {
+                return true;
+            }
+
+            int size = item.Item.Size;
             return CanPlaceItem(state, size, memberIndex, cell, FreeInventoryCells(data, state) + size);
         }
 
@@ -422,8 +524,119 @@ namespace F1.Gameplay
             }
 
             EquippedItem item = state.Inventory[inventoryIndex];
+            ExpeditionMember member = state.Members[memberIndex];
+            EquippedItem there = LivingItemAt(state, memberIndex, cell);
+            if (CanMerge(item, there))
+            {
+                Merge(member.Items, item, there, state.Inventory);
+                return;
+            }
+
             state.Inventory.RemoveAt(inventoryIndex);
-            PutOnBoard(state, state.Members[memberIndex], cell, item);
+            PutOnBoard(state, member, cell, item);
+        }
+
+        // ---- Tiers: merging and the camp's upkeep --------------------------------------------
+
+        /// <summary>
+        /// Whether an item merges into another (Docs/Design/02_Combat_System.md §4 "합치기"): the same item at the same tier, below
+        /// Diamond, two different items and neither a base weapon. They become one a tier up where the second one is.
+        /// </summary>
+        public static bool CanMerge(EquippedItem item, EquippedItem into)
+        {
+            return item != null && !ReferenceEquals(item, into) && !item.IsBase && MergesInto(item.Item.Id, item.Tier, into);
+        }
+
+        /// <summary>Whether putting an item (of a board or the inventory) on a cell of a living member's board would merge it into the item there.</summary>
+        public static bool MergesAt(ExpeditionState state, EquippedItem item, int memberIndex, int cell)
+        {
+            return CanMerge(item, LivingItemAt(state, memberIndex, cell));
+        }
+
+        /// <summary>Whether taking an item reward onto a cell of a living member's board would merge it into the item there.</summary>
+        public static bool RewardMergesAt(ExpeditionState state, int optionIndex, int memberIndex, int cell)
+        {
+            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
+            {
+                return false;
+            }
+
+            RewardOption option = state.PendingRewards[optionIndex];
+            return option.Kind == RewardKind.Item && MergesInto(option.Id, option.Tier, LivingItemAt(state, memberIndex, cell));
+        }
+
+        /// <summary>Whether some cell of a living member's board holds what the item would merge into.</summary>
+        public static bool HasMergeTarget(ExpeditionState state, EquippedItem item)
+        {
+            for (int m = 0; m < state.Members.Count; m++)
+            {
+                ExpeditionMember member = state.Members[m];
+                if (!member.Alive)
+                {
+                    continue;
+                }
+
+                foreach (EquippedItem there in member.Items)
+                {
+                    if (CanMerge(item, there))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>Whether an item of this id and tier merges into the item given (null for none).</summary>
+        static bool MergesInto(string itemId, ItemTier tier, EquippedItem into)
+        {
+            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Diamond;
+        }
+
+        /// <summary>
+        /// Merges an item into another on a board: the board's item becomes the merge, a tier up at the better grade of the two,
+        /// and the item merged in leaves the list it came from (null for a reward, which comes from nowhere).
+        /// </summary>
+        static void Merge(List<EquippedItem> board, EquippedItem item, EquippedItem into, List<EquippedItem> source)
+        {
+            int index = board.IndexOf(into);
+            board[index] = new EquippedItem(into.Item, Math.Max(item.Grade, into.Grade), tier: into.Tier + 1);
+            source?.Remove(item);
+        }
+
+        /// <summary>The item at a cell of a living member's board between battles, or null.</summary>
+        static EquippedItem LivingItemAt(ExpeditionState state, int memberIndex, int cell)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
+            {
+                return null;
+            }
+
+            List<EquippedItem> items = state.Members[memberIndex].Items;
+            int index = ItemBoard.IndexAtCell(items, cell);
+            return index < 0 ? null : items[index];
+        }
+
+        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (the camp's upkeep): any item below Diamond, a base weapon too.</summary>
+        public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int cell)
+        {
+            EquippedItem item = LivingItemAt(state, memberIndex, cell);
+            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Tier < ItemTier.Diamond;
+        }
+
+        /// <summary>The camp's upkeep: the item at a cell goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>
+        public static void UpgradeAtCamp(ExpeditionState state, int memberIndex, int cell)
+        {
+            if (!CanUpgradeAtCamp(state, memberIndex, cell))
+            {
+                throw new InvalidOperationException($"Nothing at cell {cell} of member {memberIndex} can go a tier up now.");
+            }
+
+            List<EquippedItem> items = state.Members[memberIndex].Items;
+            int index = ItemBoard.IndexAtCell(items, cell);
+            items[index] = items[index].TierUp();
+            state.Phase = ExpeditionPhase.ChoosingNode;
         }
 
         /// <summary>
@@ -456,7 +669,7 @@ namespace F1.Gameplay
         /// </summary>
         public static bool CanMoveToRow(ExpeditionState state, int memberIndex, int row)
         {
-            if (state.Phase != ExpeditionPhase.ChoosingNode && state.Phase != ExpeditionPhase.ChoosingReward)
+            if (!IsBetweenBattles(state))
             {
                 return false;
             }
@@ -499,7 +712,9 @@ namespace F1.Gameplay
         static List<RewardOption> GenerateRewards(StaticData data, ExpeditionState state, MapNode node)
         {
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "reward", node.Id), RngStream.Reward);
-            int grade = data.Dungeons.Get(state.DungeonId).RewardGradeAt(node.Floor);
+            DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
+            int grade = dungeon.RewardGradeAt(node.Floor);
+            ItemTier tier = dungeon.RewardTierAt(node.Floor, node.Kind == MapNodeKind.Elite);
 
             var candidates = new List<RewardOption>();
             var weights = new List<int>();
@@ -507,7 +722,7 @@ namespace F1.Gameplay
             {
                 if (item.RewardWeight > 0)
                 {
-                    candidates.Add(new RewardOption(RewardKind.Item, item.Id, grade));
+                    candidates.Add(new RewardOption(RewardKind.Item, item.Id, grade, tier));
                     weights.Add(item.RewardWeight);
                 }
             }
@@ -569,26 +784,30 @@ namespace F1.Gameplay
                     ItemSlots = member.ItemSlots,
                     Passive = data.Jobs.Get(member.JobId).Passive,
                     HasDog = true,
+                    Fatigue = member.Fatigue,
+                    FatigueState = member.StateId == null ? null : data.FatigueStates.Get(member.StateId),
                 });
             }
         }
 
-        static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data)
+        /// <param name="deeper">How many floors below the first the enemy stands: its HP and item grades grow by the dungeon's share for each.</param>
+        static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data, DungeonData dungeon, int deeper)
         {
             var items = new List<EquippedItem>();
             foreach (ItemGrant grant in enemy.Items)
             {
-                items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade));
+                items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade + deeper * dungeon.EnemyGradePerFloor));
             }
 
             // An enemy's board is exactly what it carries: there are no empty cells to show.
+            int maxHp = (int)((long)enemy.MaxHp * (100 + deeper * dungeon.EnemyHpPerFloorPercent) / 100);
             return new BattleUnitSetup
             {
                 SourceId = enemy.Id,
                 Name = enemy.Name,
                 Row = row,
-                MaxHp = enemy.MaxHp,
-                Hp = enemy.MaxHp,
+                MaxHp = maxHp,
+                Hp = maxHp,
                 Items = items,
                 ItemSlots = ItemBoard.UsedCells(items),
                 Passive = null,
@@ -647,9 +866,10 @@ namespace F1.Gameplay
             }
         }
 
+        /// <summary>Choosing a node, a reward, or what to do at a camp: the boards and the rows can be rearranged.</summary>
         static bool IsBetweenBattles(ExpeditionState state)
         {
-            return state.Phase == ExpeditionPhase.ChoosingNode || state.Phase == ExpeditionPhase.ChoosingReward;
+            return state.Phase == ExpeditionPhase.ChoosingNode || state.Phase == ExpeditionPhase.ChoosingReward || state.Phase == ExpeditionPhase.AtCamp;
         }
 
         static bool IsLivingMember(ExpeditionState state, int memberIndex)

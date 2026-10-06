@@ -44,6 +44,8 @@ namespace F1.Gameplay
             Row = setup.Row;
             Hp = setup.Hp;
             Alive = true;
+            Fatigue = setup.Fatigue;
+            State = setup.FatigueState;
         }
 
         public BattleSide Side { get; }
@@ -75,5 +77,9 @@ namespace F1.Gameplay
         public int GraceEndMs { get; internal set; }
 
         public int GraceHits { get; internal set; }
+
+        /// <summary>The unit's fatigue now (a party unit's; an enemy's stays 0), and the affliction or virtue it is in, or null (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
+        public int Fatigue { get; internal set; }
+        public FatigueStateData State { get; internal set; }
     }
 }

@@ -47,16 +47,16 @@ namespace F1.Tests
         }
 
         [Test]
-        public void NewRun_StartsOnDayOne_WithTheStartingRosterAtFullFatigue_AndNoParty()
+        public void NewRun_StartsOnDayOne_WithTheStartingRosterFresh_AndNoParty()
         {
-            StaticData data = TestData.Data(("MaxFatigue", 100));
+            StaticData data = TestData.Data();
 
             RunState run = RunRules.NewRun(data, 123);
 
             Assert.AreEqual(123UL, run.Seed);
             Assert.AreEqual(1, run.Day);
             CollectionAssert.AreEqual(new[] { "anna", "ben", "cora", "dan" }, run.Roster.Select(m => m.Id));
-            Assert.IsTrue(run.Roster.All(m => m.Fatigue == 100));
+            Assert.IsTrue(run.Roster.All(m => m.Fatigue == 0), "Fatigue builds up from 0.");
             Assert.AreEqual("tank", RunRules.FindMercenary(run, "anna").JobId);
             Assert.IsEmpty(run.Party);
             Assert.IsEmpty(run.Fallen);
@@ -177,9 +177,9 @@ namespace F1.Tests
         }
 
         [Test]
-        public void CanDepart_NeedsAPartyOfMinimumSize_WithEnoughFatigue()
+        public void CanDepart_NeedsAPartyOfMinimumSize_AndFatigueKeepsNobodyHome()
         {
-            StaticData data = TestData.Data(("MinPartySize", 1));
+            StaticData data = TestData.Data(("MinPartySize", 1), ("MaxFatigue", 200));
             RunState run = RunRules.NewRun(data, 1);
 
             Assert.AreEqual(DepartCheck.PartyTooSmall, RunRules.CanDepart(data, run, "cave"));
@@ -187,14 +187,24 @@ namespace F1.Tests
             RunRules.SetParty(data, run, Party(("anna", 1)));
             Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"));
 
-            RunRules.FindMercenary(run, "anna").Fatigue = 29;
-            Assert.AreEqual(DepartCheck.NotEnoughFatigue, RunRules.CanDepart(data, run, "cave"), "The dungeon costs 30.");
-
-            RunRules.FindMercenary(run, "anna").Fatigue = 30;
-            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"));
+            RunRules.FindMercenary(run, "anna").Fatigue = 200;
+            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"), "Sending a tired mercenary is the player's call.");
 
             run.IsOver = true;
             Assert.AreEqual(DepartCheck.RunIsOver, RunRules.CanDepart(data, run, "cave"));
+        }
+
+        [Test]
+        public void BeginExpedition_EveryMemberLeavesWithTheirFatigue()
+        {
+            StaticData data = TestData.Data();
+            RunState run = RunWithParty(data);
+            RunRules.FindMercenary(run, "ben").Fatigue = 45;
+
+            ExpeditionState expedition = RunRules.BeginExpedition(data, run, "cave");
+
+            Assert.AreEqual(45, expedition.Members.Single(m => m.MercenaryId == "ben").Fatigue);
+            Assert.AreEqual(0, expedition.Members.Single(m => m.MercenaryId == "anna").Fatigue);
         }
 
         [Test]
@@ -226,38 +236,40 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Rest_PassesRestDays_AndEveryoneRecoversUpToTheMaximum()
+        public void Rest_PassesRestDays_AndEveryonesFatigueComesDown_NotBelowZero()
         {
-            StaticData data = TestData.Data(("RestDays", 1), ("FatigueRecoveryPerDay", 10), ("MaxFatigue", 100));
+            StaticData data = TestData.Data(("RestDays", 1), ("FatigueRecoveryPerDay", 10));
             RunState run = RunRules.NewRun(data, 1);
             RunRules.FindMercenary(run, "anna").Fatigue = 40;
-            RunRules.FindMercenary(run, "ben").Fatigue = 95;
+            RunRules.FindMercenary(run, "ben").Fatigue = 5;
 
             RunRules.Rest(data, run);
 
             Assert.AreEqual(2, run.Day);
-            Assert.AreEqual(50, RunRules.FindMercenary(run, "anna").Fatigue);
-            Assert.AreEqual(100, RunRules.FindMercenary(run, "ben").Fatigue);
+            Assert.AreEqual(30, RunRules.FindMercenary(run, "anna").Fatigue);
+            Assert.AreEqual(0, RunRules.FindMercenary(run, "ben").Fatigue);
         }
 
         [Test]
-        public void Settle_SurvivorsPayFatigue_DaysPass_ThoseAtHomeRecover_AndTheClearIsRecorded()
+        public void Settle_SurvivorsKeepTheirFatigue_DaysPass_ThoseAtHomeRecover_AndTheClearIsRecorded()
         {
-            StaticData data = TestData.Data(("FatigueRecoveryPerDay", 10), ("MaxFatigue", 100));
+            StaticData data = TestData.Data(("FatigueRecoveryPerDay", 10));
             RunState run = RunWithParty(data);
             RunRules.FindMercenary(run, "dan").Fatigue = 50;
             ExpeditionState expedition = FinishedExpedition(data, run, ExpeditionResult.Cleared);
+            expedition.Members.Single(m => m.MercenaryId == "anna").Fatigue = 37;
 
             SettlementReport report = RunRules.Settle(data, run, expedition);
 
-            Assert.AreEqual(70, RunRules.FindMercenary(run, "anna").Fatigue, "100 - 30, and no recovery while away.");
-            Assert.AreEqual(70, RunRules.FindMercenary(run, "dan").Fatigue, "Stayed home for 2 days: 50 + 20.");
+            Assert.AreEqual(37, RunRules.FindMercenary(run, "anna").Fatigue, "What she came back with, and no recovery while away.");
+            Assert.AreEqual(30, RunRules.FindMercenary(run, "dan").Fatigue, "Stayed home for 2 days: 50 - 20.");
             Assert.AreEqual(3, run.Day, "The dungeon takes 2 days.");
             Assert.AreEqual(1, run.ClearedDungeons["cave"]);
             Assert.IsFalse(run.IsOver);
 
             Assert.AreEqual(ExpeditionResult.Cleared, report.Result);
-            Assert.AreEqual(30, report.FatigueCost);
+            CollectionAssert.AreEqual(new[] { 37, 0, 0 }, report.SurvivorFatigue, "In the order of the survivors.");
+            CollectionAssert.AreEqual(new string[] { null, null, null }, report.SurvivorStates, "Nobody came home afflicted.");
             Assert.AreEqual(2, report.DaysPassed);
             Assert.AreEqual(3, report.DayAfter);
             CollectionAssert.AreEqual(new[] { "anna", "ben", "cora" }, report.SurvivorIds);
@@ -311,19 +323,6 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Fatigue_NeverDropsBelowZero()
-        {
-            StaticData data = TestData.Data();
-            RunState run = RunWithParty(data);
-            ExpeditionState expedition = FinishedExpedition(data, run, ExpeditionResult.Retreated);
-            RunRules.FindMercenary(run, "anna").Fatigue = 10;
-
-            RunRules.Settle(data, run, expedition);
-
-            Assert.AreEqual(0, RunRules.FindMercenary(run, "anna").Fatigue);
-        }
-
-        [Test]
         public void ALoop_LobbyExpeditionReturnLobby_ChangesTheRunAndCanBeRepeated()
         {
             StaticData data = TestData.Data(("DogDeathChancePercent", 0));
@@ -351,8 +350,8 @@ namespace F1.Tests
 
             Assert.AreEqual(5, run.Day, "Two expeditions of two days from day 1.");
             Assert.AreEqual(2, run.ExpeditionCount);
-            Assert.AreEqual(40, RunRules.FindMercenary(run, "anna").Fatigue, "100 - 30 - 30.");
-            Assert.AreEqual(100, RunRules.FindMercenary(run, "dan").Fatigue);
+            Assert.Greater(RunRules.FindMercenary(run, "anna").Fatigue, 0, "Battles built her fatigue up.");
+            Assert.AreEqual(0, RunRules.FindMercenary(run, "dan").Fatigue, "Dan stayed home and was fresh.");
         }
     }
 }

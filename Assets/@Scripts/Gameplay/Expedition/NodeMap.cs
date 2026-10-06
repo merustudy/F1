@@ -4,10 +4,17 @@ using F1.Data;
 
 namespace F1.Gameplay
 {
+    /// <summary>What waits on a node (Docs/Design/03_Dungeon_Structure.md §1).</summary>
     public enum MapNodeKind
     {
         Battle,
         Boss,
+
+        /// <summary>A harder battle against an elite group.</summary>
+        Elite,
+
+        /// <summary>No battle: the party rests (or, later, mends an item) and goes on.</summary>
+        Camp,
     }
 
     public sealed class MapNode
@@ -31,7 +38,12 @@ namespace F1.Gameplay
         public int Column { get; }
 
         public MapNodeKind Kind { get; }
+
+        /// <summary>The group fought there. Null for a camp.</summary>
         public string EnemyGroupId { get; }
+
+        /// <summary>True for the kinds that are fought: a battle, an elite and the boss.</summary>
+        public bool IsFought => Kind != MapNodeKind.Camp;
 
         /// <summary>Nodes on the next floor that can be chosen after this one. Empty for the boss.</summary>
         public IReadOnlyList<int> NextNodeIds { get; }
@@ -78,7 +90,8 @@ namespace F1.Gameplay
 
     /// <summary>
     /// Builds the map of an expedition from its seed (Docs/Design/03_Dungeon_Structure.md §1).
-    /// The same seed always gives the same map.
+    /// The same seed always gives the same map. A node's kind is drawn only where an elite or a camp
+    /// may stand, so a dungeon without them draws exactly what it drew before they existed.
     /// </summary>
     public static class MapGenerator
     {
@@ -109,12 +122,23 @@ namespace F1.Gameplay
             {
                 int floor = i + 1;
                 List<EnemyGroupData> groups = data.GroupsFor(dungeon.Id, floor);
+                List<EnemyGroupData> elites = data.ElitesFor(dungeon.Id, floor);
                 bool lastBattleFloor = i == widths.Length - 1;
                 List<int>[] edges = lastBattleFloor ? null : ConnectFloors(widths[i], widths[i + 1], data.Balance.MapBranchChancePercent, rng);
 
                 for (int column = 0; column < widths[i]; column++)
                 {
-                    EnemyGroupData group = groups[rng.NextInt(groups.Count)];
+                    MapNodeKind kind = DrawKind(dungeon, floor, rng);
+                    string groupId = null;
+                    if (kind == MapNodeKind.Battle)
+                    {
+                        groupId = groups[rng.NextInt(groups.Count)].Id;
+                    }
+                    else if (kind == MapNodeKind.Elite)
+                    {
+                        groupId = elites[rng.NextInt(elites.Count)].Id;
+                    }
+
                     var next = new List<int>();
                     if (lastBattleFloor)
                     {
@@ -128,7 +152,7 @@ namespace F1.Gameplay
                         }
                     }
 
-                    nodes.Add(new MapNode(firstIdOfFloor[i] + column, floor, column, MapNodeKind.Battle, group.Id, next));
+                    nodes.Add(new MapNode(firstIdOfFloor[i] + column, floor, column, kind, groupId, next));
                 }
             }
 
@@ -141,6 +165,30 @@ namespace F1.Gameplay
                 new List<int>()));
 
             return new NodeMap(nodes, dungeon.Floors + 1);
+        }
+
+        /// <summary>
+        /// A node's kind: the camp floor is all camps; elsewhere an elite or a camp by chance where the dungeon allows one
+        /// (elite first), otherwise a battle. A chance is drawn only where it can come true.
+        /// </summary>
+        static MapNodeKind DrawKind(DungeonData dungeon, int floor, Pcg32 rng)
+        {
+            if (floor == dungeon.CampFloor)
+            {
+                return MapNodeKind.Camp;
+            }
+
+            if (dungeon.EliteCanStandOn(floor) && rng.NextInt(100) < dungeon.EliteChancePercent)
+            {
+                return MapNodeKind.Elite;
+            }
+
+            if (dungeon.CampCanStandOn(floor) && rng.NextInt(100) < dungeon.CampChancePercent)
+            {
+                return MapNodeKind.Camp;
+            }
+
+            return MapNodeKind.Battle;
         }
 
         /// <summary>

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace F1.Data
 {
-    /// <summary>One effect of an item. Its size is grade x PowerPercent / 100 (at least 1).</summary>
+    /// <summary>One effect of an item. Its size is grade x PowerPercent / 100 (at least 1), times the percent of the item's tier.</summary>
     public sealed class ItemEffect
     {
         /// <param name="reach">
@@ -66,11 +66,17 @@ namespace F1.Data
             return target == TargetMode.EnemyFront || target == TargetMode.EnemyBack;
         }
 
-        /// <summary>Effect size at a grade: grade x PowerPercent / 100, rounded down, at least 1.</summary>
+        /// <summary>Effect size at a grade, at Bronze: grade x PowerPercent / 100, rounded down, at least 1.</summary>
         public int MagnitudeAt(int grade)
         {
-            int magnitude = grade * PowerPercent / 100;
-            return magnitude < 1 ? 1 : magnitude;
+            return MagnitudeAt(grade, 100);
+        }
+
+        /// <summary>Effect size at a grade and a tier's percent (<see cref="BalanceData.TierPercent"/>): grade x PowerPercent x tierPercent / 10000, rounded down, at least 1.</summary>
+        public int MagnitudeAt(int grade, int tierPercent)
+        {
+            long magnitude = (long)grade * PowerPercent * tierPercent / 10000;
+            return magnitude < 1 ? 1 : (int)magnitude;
         }
     }
 
