@@ -113,10 +113,10 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`와 `DungeonData`에 있다.
 
-- 단계는 `ItemTier`(동·은·금·다이아, `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 보상 후보(`RewardOption.Tier`)가 갖는다. 등급은 그대로 있다.
+- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 보상 후보(`RewardOption.Tier`)가 갖는다. 등급은 그대로 있다.
 - 효과 크기는 한 곳에서 센다: `EquippedItem.Magnitude(balance, effect)` = `ItemEffect.MagnitudeAt(등급, BalanceData.TierPercent(단계))`(정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
 - 보상의 단계는 `DungeonData.RewardTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 보상 후보에 싣는다.
-- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 다이아 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드의 칸에 놓는 세 명령
+- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드의 칸에 놓는 세 명령
   (`MoveItem`, `PlaceFromInventory`, `TakeItemReward`)이 놓을 자리의 아이템과 합쳐지면 합친다: 그 자리에 한 단계 위(높은 등급), 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
 - 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.

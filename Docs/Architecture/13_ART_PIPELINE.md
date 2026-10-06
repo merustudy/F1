@@ -218,7 +218,8 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   지도의 정예와 야영지 표식 `node_elite`(전투의 검을 붉은 마름모 위에)와 `node_camp`(장작 둘과 불꽃)(34. 96x96, 화면의 2배)는 `Archive/34-long-map/draw_icons.py`가 `Assets/@Art/UI/Icon`에 바로 그린다.
   붕괴의 순간의 **효과 조각** `ink_burst`(먹 튐: 검정에 붉은 보라 핏줄)와 `light_burst`(빛살: 크림 원판과 금빛 빛살)(38. 1024 원본을 512로)는 `Archive/38-breakdown-fx`의 시험 문서(`STYLE_RUNTIME-fx.md`: `ui_piece`의 자리에 "무대 위의 효과 조각")와 소재(`fx.csv`)로 생성한 것이다.
   무대에서 유닛 뒤에 상태 색의 `glow`와 함께 선다(`12_UI.md` "연출"). 사용자가 먹 튐 2차(붉은 보라 먹)보다 1차를 골랐고 둘 다 0.8배(416·352)로 쓴다.
-  아이템 칸의 단계 테 `tier_rim`(35. 흰 띠 8과 안쪽의 검은 반투명 선 2, 40x40, Border 12. 화면이 단계의 색으로 물들인다)은 `Archive/35-tiers/draw_rim.py`가 `Assets/@Art/UI/Frame`에 바로 그린다.
+  아이템 칸의 단계 표 `tier_tag`(41. 먹색 알약에 흰 테 3, 64x40, Border 20이라 옆으로만 늘어난다. 화면이 단계의 색으로 물들인다)와 그 별 `star`(41. 흰 별에 먹 외곽선, 24x24. 화면이 단계의 글 색으로 물들인다)는
+  `Archive/41-tier-marks/draw_pieces.py`가 `Assets/@Art/UI`에 바로 그린다. Round 35의 단계 테 `tier_rim`은 Round 41이 뺐다. 단계의 외곽선은 조각이 아니라 아이콘 자신의 실루엣이다(`12_UI.md` "단계").
   양초의 빛처럼 화면에서 크게 늘이는 부드러운 경사는 2배로 그리지 않는다(UI의 MaxSize 512 안에서 512x256. 늘여도 경사는 매끄럽다).
 
 ## 승인 라운드

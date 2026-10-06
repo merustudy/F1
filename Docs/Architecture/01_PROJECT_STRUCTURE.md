@@ -37,7 +37,8 @@ Assets
 ├─ @Data            # Source/*.csv, Generated/*.json
 ├─ @Localization    # Source/UI_StaticText.csv, Settings/, Locales/, Tables/
 ├─ @Fonts           # Source/<Family>/ (ttf + LICENSE + README), TMP/
-├─ @Prefabs         # UI/ (화면 Prefab. Setup 코드가 만든 생성물)
+├─ @Prefabs         # UI/ (화면 Prefab과 실루엣 재질 Silhouette.mat. Setup 코드가 만든 생성물)
+├─ @Shaders         # 손으로 쓴 셰이더. Silhouette.shader(UI의 실루엣: 아이템 단계의 외곽선. Round 41) 하나
 ├─ @Art             # Unit/Job, Unit/Enemy, Pose/Job, Pose/Enemy, Background/Dungeon, Item, UI/Frame, UI/Icon (승인된 그림. ArtPipeline에서 온다 -> 13_ART_PIPELINE.md)
 ├─ @Audio           # Sfx, Bgm (승인된 소리. SoundPipeline에서 온다 -> 14_SOUND.md)
 │
