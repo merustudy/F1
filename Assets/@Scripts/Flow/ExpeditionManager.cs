@@ -73,7 +73,12 @@ namespace F1.Flow
                     return GamePhase.Lobby;
                 }
 
-                return Expedition.Phase == ExpeditionPhase.ChoosingReward ? GamePhase.Reward : GamePhase.NodeMap;
+                switch (Expedition.Phase)
+                {
+                    case ExpeditionPhase.ChoosingReward: return GamePhase.Reward;
+                    case ExpeditionPhase.AtCamp: return GamePhase.Camp;
+                    default: return GamePhase.NodeMap;
+                }
             }
         }
 
@@ -144,13 +149,67 @@ namespace F1.Flow
             return Phase == GamePhase.NodeMap ? ExpeditionRules.AvailableNodes(Expedition) : new List<MapNode>();
         }
 
+        /// <summary>Enters a node: a battle starts there, or the party makes camp.</summary>
         public void EnterNode(int nodeId)
         {
             _run.RequireWritable();
             Require(GamePhase.NodeMap);
+            if (Expedition.Map.Get(nodeId).Kind == MapNodeKind.Camp)
+            {
+                ExpeditionRules.EnterCamp(Expedition, nodeId);
+                Commit();
+                return;
+            }
+
             BattleSetup setup = ExpeditionRules.BeginBattle(_data.Data, Expedition, nodeId);
             Battle = new BattleSession(new BattleEngine(setup), Expedition.Map.Get(nodeId));
             _checkedEvents = Battle.Engine.Events.Count;
+            Commit();
+        }
+
+        // ---- Camp ----------------------------------------------------------------------------
+
+        /// <summary>Rests at the camp: HP and fatigue come back, and the party goes on to the next floor.</summary>
+        public void RestAtCamp()
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Camp);
+            ExpeditionRules.RestAtCamp(_data.Data, Expedition);
+            Commit();
+        }
+
+        // ---- Tiers ---------------------------------------------------------------------------
+
+        /// <summary>Whether putting an item of a board or the inventory on a cell would merge it into the item there (a tier up).</summary>
+        public bool MergesAt(EquippedItem item, int memberIndex, int cell)
+        {
+            return IsBetweenBattles && ExpeditionRules.MergesAt(Expedition, item, memberIndex, cell);
+        }
+
+        /// <summary>Whether taking an item reward onto a cell would merge it into the item there.</summary>
+        public bool RewardMergesAt(int optionIndex, int memberIndex, int cell)
+        {
+            return Phase == GamePhase.Reward && ExpeditionRules.RewardMergesAt(Expedition, optionIndex, memberIndex, cell);
+        }
+
+        /// <summary>Whether some board holds what the item would merge into.</summary>
+        public bool HasMergeTarget(EquippedItem item)
+        {
+            return IsBetweenBattles && ExpeditionRules.HasMergeTarget(Expedition, item);
+        }
+
+        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (its upkeep).</summary>
+        public bool CanUpgradeAtCamp(int memberIndex, int cell)
+        {
+            return Phase == GamePhase.Camp && ExpeditionRules.CanUpgradeAtCamp(Expedition, memberIndex, cell);
+        }
+
+        /// <summary>The camp's upkeep: the item at a cell goes a tier up, and the party goes on.</summary>
+        public void UpgradeAtCamp(int memberIndex, int cell)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Camp);
+            ExpeditionRules.UpgradeAtCamp(Expedition, memberIndex, cell);
             Commit();
         }
 
@@ -346,7 +405,7 @@ namespace F1.Flow
             Report = null;
         }
 
-        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Reward;
+        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Reward || Phase == GamePhase.Camp;
 
         /// <summary>
         /// Applies an ended battle to the expedition, and an ended expedition to the run, in the
@@ -419,7 +478,7 @@ namespace F1.Flow
         {
             if (!IsBetweenBattles)
             {
-                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map or the reward choice.");
+                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map, the reward choice or a camp.");
             }
         }
     }

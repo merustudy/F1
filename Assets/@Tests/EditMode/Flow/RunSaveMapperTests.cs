@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using F1.Data;
 using F1.Flow;
 using F1.Gameplay;
@@ -99,7 +100,7 @@ namespace F1.Tests
             yield return Case("UnknownJob", r => r.Roster[3].JobId = "nojob");
             yield return Case("MercenaryTwice", r => r.Roster[3].Id = r.Roster[0].Id);
             yield return Case("FatigueNegative", r => r.Roster[3].Fatigue = -1);
-            yield return Case("FatigueAboveMaximum", r => r.Roster[3].Fatigue = 101);
+            yield return Case("FatigueAboveMaximum", r => r.Roster[3].Fatigue = 201);
             yield return Case("FallenIsAlsoAlive", r => r.Fallen.Add(r.Roster[3].Id));
             yield return Case("FallenUnknown", r => r.Fallen.Add("nobody"));
             yield return Case("PartyMemberNotInRoster", r => r.Party[0].MercenaryId = "nobody");
@@ -142,6 +143,7 @@ namespace F1.Tests
             yield return Case("SeedOfAnotherRun", e => e.Seed = "1");
             yield return Case("PhaseFinished", e => e.Phase = "Finished");
             yield return Case("PhaseUnknown", e => e.Phase = "Resting");
+            yield return Case("CampingAtABattleNode", e => e.Phase = "AtCamp");
             yield return Case("NoMembers", e => e.Members.Clear());
             yield return Case("MemberNotInRoster", e => e.Members[0].MercenaryId = "dan2");
             yield return Case("MemberTwice", e => e.Members[1].MercenaryId = e.Members[0].MercenaryId);
@@ -153,6 +155,13 @@ namespace F1.Tests
             yield return Case("EmptyEntryOnTheBoard", e => e.Members[0].Items.Add(null));
             yield return Case("UnknownItem", e => e.Members[0].Items[0].ItemId = "excalibur");
             yield return Case("ItemGradeZero", e => e.Members[0].Items[0].Grade = 0);
+            yield return Case("ItemTierUnknown", e => e.Members[0].Items[0].Tier = "Platinum");
+            yield return Case("ItemTierMissing", e => e.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8, Tier = null }));
+            yield return Case("MemberFatigueNegative", e => e.Members[0].Fatigue = -1);
+            yield return Case("MemberFatigueAboveMaximum", e => e.Members[0].Fatigue = 201);
+            yield return Case("MemberStateUnknown", e => e.Members[0].State = "sleepy");
+            yield return Case("MemberAfflictedUnderTheBreakdown", e => { e.Members[0].State = "fearful"; e.Members[0].Fatigue = 50; });
+            yield return Case("FoundItemMarkedAsABaseWeapon", e => e.Inventory.Add(new ItemRecord { ItemId = "ballista", Grade = 8, Base = true }));
             yield return Case("BoardOverItsCells", e => e.Members[0].Items.Add(new ItemRecord { ItemId = "ballista", Grade = 8 }), ExpeditionPhase.ChoosingNode);
             yield return Case("InventoryMissing", e => e.Inventory = null);
             yield return Case("InventoryUnknownItem", e => e.Inventory.Add(new ItemRecord { ItemId = "excalibur", Grade = 8 }));
@@ -173,6 +182,8 @@ namespace F1.Tests
             yield return Case("RewardKindUnknown", e => e.PendingRewards[0].Kind = "Gold", ExpeditionPhase.ChoosingReward);
             yield return Case("RewardItemUnknown", e => e.PendingRewards.Add(new RewardRecord { Kind = "Item", Id = "excalibur", Grade = 8 }), ExpeditionPhase.ChoosingReward);
             yield return Case("RewardPotionWithGrade", e => e.PendingRewards.Add(new RewardRecord { Kind = "Potion", Id = "tonic", Grade = 3 }), ExpeditionPhase.ChoosingReward);
+            yield return Case("RewardPotionWithATier", e => e.PendingRewards.Add(new RewardRecord { Kind = "Potion", Id = "tonic", Grade = 0, Tier = "Silver" }), ExpeditionPhase.ChoosingReward);
+            yield return Case("RewardTierUnknown", e => e.PendingRewards[0].Tier = "Copper", ExpeditionPhase.ChoosingReward);
             yield return Case("NoBattleRecordInABattle", e => e.Battle = null, ExpeditionPhase.InBattle);
             yield return Case("ConfirmedTimeNegative", e => e.Battle.ConfirmedTimeMs = -1, ExpeditionPhase.InBattle);
             yield return Case("InputAfterTheConfirmedTime", e => e.Battle.Inputs[0].TimeMs = e.Battle.ConfirmedTimeMs + 1, ExpeditionPhase.InBattle);
@@ -245,13 +256,14 @@ namespace F1.Tests
         [Test]
         public void Migrate_AcceptsTheCurrentVersion_AndRefusesOthers()
         {
-            Assert.DoesNotThrow(() => RunSaveMigrator.Migrate(new RunSaveData()));
-            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveMigrator.OldestReadableVersion - 1 }));
-            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveData.CurrentSchemaVersion + 1 }));
+            StaticData data = TestData.Data();
+            Assert.DoesNotThrow(() => RunSaveMigrator.Migrate(new RunSaveData(), data));
+            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveMigrator.OldestReadableVersion - 1 }, data));
+            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(new RunSaveData { SchemaVersion = RunSaveData.CurrentSchemaVersion + 1 }, data));
         }
 
         [Test]
-        public void Migrate_From2To3_CompactsTheBoards_AndAddsAnEmptyInventory()
+        public void Migrate_From2_CompactsTheBoards_AndAddsAnEmptyInventory()
         {
             // Version 2 stored one entry per slot, null for an empty one, and no inventory.
             RunSaveData save = ValidSave(out StaticData data);
@@ -259,19 +271,146 @@ namespace F1.Tests
             save.Expedition.Inventory = null;
             save.Expedition.Members[0].Items = new List<ItemRecord> { null, new ItemRecord { ItemId = "blade", Grade = 10 }, null };
             save.Expedition.Members[1].Items = new List<ItemRecord> { null, null, null };
+            save.Run.Roster.ForEach(m => m.Fatigue = 100);
 
-            RunSaveMigrator.Migrate(save);
+            RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(3, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
             Assert.IsEmpty(save.Expedition.Inventory);
             CollectionAssert.AreEqual(new[] { "blade" }, save.Expedition.Members[0].Items.ConvertAll(i => i.ItemId));
             Assert.IsEmpty(save.Expedition.Members[1].Items);
             Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
 
             var home = new RunSaveData { SchemaVersion = 2, Run = save.Run, Expedition = null };
-            RunSaveMigrator.Migrate(home);
-            Assert.AreEqual(3, home.SchemaVersion);
+            RunSaveMigrator.Migrate(home, data);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, home.SchemaVersion);
             Assert.IsNull(home.Expedition);
+        }
+
+        [Test]
+        public void Migrate_From3_TurnsTheFatigueLeftIntoTheFatigueSpent_AndMarksTheJobWeaponsAsBase()
+        {
+            // Version 3 counted fatigue down from 100, members carried none, and nothing was marked as a base weapon.
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 3;
+            save.Run.Roster.ForEach(m => m.Fatigue = 100);
+            save.Run.Roster.Find(m => m.Id == "anna").Fatigue = 70;
+            save.Expedition.Members.ForEach(m => { m.Fatigue = 0; m.Items.ForEach(i => i.Base = false); });
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "blade", Grade = 10 });
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.AreEqual(30, save.Run.Roster.Find(m => m.Id == "anna").Fatigue, "70 left of 100: 30 spent.");
+            Assert.AreEqual(0, save.Run.Roster.Find(m => m.Id == "dan").Fatigue, "Fresh.");
+            Assert.AreEqual(30, save.Expedition.Members.Find(m => m.MercenaryId == "anna").Fatigue, "She carries what she left with.");
+            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items[0].Base), "Everyone's job weapon.");
+            CollectionAssert.AreEqual(new[] { true, false }, save.Expedition.Inventory.ConvertAll(i => i.Base), "A job weapon in the inventory too; the knife was found.");
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
+        }
+
+        [Test]
+        public void Read_Refuses_ARosterWithAVirtue_OrAnAfflictionUnderTheBreakdown_AndKeepsAValidAffliction()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            MercenaryRecord dan = save.Run.Roster.Find(m => m.Id == "dan");
+
+            dan.Fatigue = 120;
+            dan.Affliction = "fearful";
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
+            Assert.AreEqual("fearful", run.Roster.Find(m => m.Id == "dan").AfflictionId);
+
+            dan.Affliction = "focused";
+            AssertRefused(save, data);
+            dan.Affliction = "fearful";
+            dan.Fatigue = 99;
+            AssertRefused(save, data);
+            dan.Affliction = "nothing";
+            dan.Fatigue = 120;
+            AssertRefused(save, data);
+        }
+
+        [Test]
+        public void Save_KeepsTheStateOfAMemberAndTheAfflictionOfAMercenary_AndVersion5ReadsWithNone()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            expedition.Members[0].Fatigue = 110;
+            expedition.Members[0].StateId = "hopeless";
+            expedition.Members[1].Fatigue = 40;
+            expedition.Members[1].StateId = "stalwart";
+            run.Roster.Find(m => m.Id == "dan").Fatigue = 150;
+            run.Roster.Find(m => m.Id == "dan").AfflictionId = "reckless";
+
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.AreEqual("hopeless", again.Expedition.Members[0].State);
+            Assert.AreEqual("stalwart", again.Expedition.Members[1].State, "A virtue on the way.");
+            Assert.AreEqual("reckless", again.Run.Roster.Find(m => m.Id == "dan").Affliction);
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
+            Assert.AreEqual("hopeless", read.Members[0].StateId);
+            Assert.AreEqual("stalwart", read.Members[1].StateId);
+
+            // Version 5 knew no states.
+            RunSaveData old = ValidSave(out data);
+            old.SchemaVersion = 5;
+            old.Run.Roster.ForEach(m => m.Affliction = null);
+            old.Expedition.Members.ForEach(m => m.State = null);
+            RunSaveMigrator.Migrate(old, data);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, old.SchemaVersion);
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(old, data, out RunState _, out ExpeditionState _));
+        }
+
+        [Test]
+        public void Migrate_From4_MakesEveryItemAndRewardBronze()
+        {
+            // Version 4 had no tiers.
+            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingReward);
+            save.SchemaVersion = 4;
+            save.Expedition.Members.ForEach(m => m.Items.ForEach(i => i.Tier = null));
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8, Tier = null });
+            save.Expedition.PendingRewards.ForEach(r => r.Tier = null);
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items.TrueForAll(i => i.Tier == "Bronze")));
+            Assert.AreEqual("Bronze", save.Expedition.Inventory.Single().Tier);
+            Assert.IsTrue(save.Expedition.PendingRewards.TrueForAll(r => r.Tier == "Bronze"));
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
+        }
+
+        [Test]
+        public void Save_KeepsTheTierOfEveryItemAndReward()
+        {
+            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingReward);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            ExpeditionMember first = expedition.Members[0];
+            first.Items[0] = new EquippedItem(first.Items[0].Item, first.Items[0].Grade, isBase: true, tier: ItemTier.Gold);
+            expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8, tier: ItemTier.Silver));
+            RewardOption reward = expedition.PendingRewards.First(r => r.Kind == RewardKind.Item);
+            expedition.PendingRewards[expedition.PendingRewards.IndexOf(reward)] = new RewardOption(RewardKind.Item, reward.Id, reward.Grade, ItemTier.Diamond);
+
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
+
+            Assert.AreEqual(ItemTier.Gold, read.Members[0].Items[0].Tier);
+            Assert.IsTrue(read.Members[0].Items[0].IsBase);
+            Assert.AreEqual(ItemTier.Silver, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
+            Assert.AreEqual(ItemTier.Diamond, read.PendingRewards.First(r => r.Kind == RewardKind.Item).Tier);
+            Assert.AreEqual("Gold", again.Expedition.Members[0].Items[0].Tier, "Stored by name.");
+        }
+
+        [Test]
+        public void Save_KeepsEachMembersFatigue_AndWhichItemIsABaseWeapon()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+
+            Assert.IsTrue(expedition.Members.TrueForAll(m => m.Fatigue == 0 + data.Balance.FatigueBattleEntry), "One battle was entered with only the base weapons.");
+            Assert.IsTrue(expedition.Members.TrueForAll(m => m.Items[0].IsBase), "Everyone left with their base weapon.");
+            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items[0].Base));
         }
     }
 }

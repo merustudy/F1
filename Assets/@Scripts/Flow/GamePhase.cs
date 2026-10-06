@@ -14,6 +14,8 @@ namespace F1.Flow
         Battle,
         /// <summary>On an expedition, choosing a reward.</summary>
         Reward,
+        /// <summary>On an expedition, at a camp node: choosing what to do there.</summary>
+        Camp,
         /// <summary>The expedition ended and its settlement report has not been confirmed.</summary>
         Settlement,
     }

@@ -176,7 +176,7 @@ namespace F1.Tests
             Assert.AreEqual(GamePhase.Lobby, restarted.Expedition.Phase, "The report is not saved; the settlement already is.");
             Assert.IsNull(restarted.Expedition.Report);
             Assert.AreEqual(3, restarted.Run.Run.Day);
-            Assert.AreEqual(70, RunRules.FindMercenary(restarted.Run.Run, "anna").Fatigue);
+            Assert.AreEqual(15, RunRules.FindMercenary(restarted.Run.Run, "anna").Fatigue, "Three battles at 5: what she came back with.");
             Assert.AreEqual(1, restarted.Run.Run.ClearedDungeons["cave"]);
         }
 

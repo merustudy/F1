@@ -71,6 +71,21 @@ namespace F1.Core
             _open.Add(scope, new ScopeState());
         }
 
+        /// <summary>
+        /// Whether an address is registered. For art that exists for some units only (the poses of a breakdown, drawn job by job; round 38):
+        /// the screen loads it where it is and shows the figure where it is not. The address must be a valid logical address all the same.
+        /// </summary>
+        public async Task<bool> ExistsAsync(string address)
+        {
+            RequireInitialized();
+            LogicalAddress.Require(address);
+            AsyncOperationHandle<IList<IResourceLocation>> locations = Addressables.LoadResourceLocationsAsync(address);
+            await locations.Task;
+            bool exists = locations.Status == AsyncOperationStatus.Succeeded && locations.Result != null && locations.Result.Count > 0;
+            Addressables.Release(locations);
+            return exists;
+        }
+
         /// <summary>Loads an asset into a scope. Loading the same address again returns the same asset.</summary>
         public async Task<T> LoadAsync<T>(string address, ResourceScope scope)
             where T : UnityEngine.Object

@@ -153,7 +153,7 @@ namespace F1.Tests
             Assert.AreEqual(ExpeditionResult.Retreated, kit.Expedition.Report.Result);
             Assert.IsFalse(kit.Run.IsAway);
             Assert.AreEqual(3, kit.Run.Run.Day, "The dungeon takes two days even when the party retreats.");
-            Assert.AreEqual(70, RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue);
+            Assert.AreEqual(5, RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue, "One battle was entered.");
 
             kit.Expedition.CloseBattle();
             Assert.AreEqual(GamePhase.Settlement, kit.Expedition.Phase);

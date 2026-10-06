@@ -7,13 +7,15 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 3: a member's Items is the board in order with no empty entries, and the expedition
-    /// has an Inventory. Version 2 stored one entry per slot (null for an empty one) and no inventory;
-    /// RunSaveMigrator brings it up. Version 1 stored "Front"/"Rear" rows and is not read any more.
+    /// Version 4 (Slice B): fatigue builds up from 0 (a mercenary's Fatigue was what was left of the
+    /// maximum), a member carries its Fatigue on the expedition, and an item says whether it is a base
+    /// weapon. Version 3 (boards without empty entries, an Inventory) and version 2 (one entry per slot,
+    /// no inventory) are brought up by RunSaveMigrator. Version 1 stored "Front"/"Rear" rows and is not
+    /// read any more.
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 3;
+        public const int CurrentSchemaVersion = 6;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -38,7 +40,12 @@ namespace F1.Save
     {
         public string Id;
         public string JobId;
+
+        /// <summary>0 is fresh; it builds up on expeditions.</summary>
         public int Fatigue;
+
+        /// <summary>The affliction the mercenary came home with (a FatigueState id), or null (version 6).</summary>
+        public string Affliction;
     }
 
     public sealed class PartySlotRecord
@@ -85,12 +92,24 @@ namespace F1.Save
 
         /// <summary>The item board in order. No null entries; the cells come from the job.</summary>
         public List<ItemRecord> Items;
+
+        /// <summary>The fatigue the member carries on the expedition. It goes to the roster at the settlement.</summary>
+        public int Fatigue;
+
+        /// <summary>The affliction or virtue the member is in (a FatigueState id), or null (version 6).</summary>
+        public string State;
     }
 
     public sealed class ItemRecord
     {
         public string ItemId;
         public int Grade;
+
+        /// <summary>True for a base weapon: the job's weapon given when the expedition left.</summary>
+        public bool Base;
+
+        /// <summary>The tier's name: Bronze, Silver, Gold or Diamond (version 5). An entry that does not name one is Bronze, as every item was before.</summary>
+        public string Tier = "Bronze";
     }
 
     public sealed class RewardRecord
@@ -98,6 +117,9 @@ namespace F1.Save
         public string Kind;
         public string Id;
         public int Grade;
+
+        /// <summary>The tier's name of an item reward; Bronze for a potion (version 5). An entry that does not name one is Bronze.</summary>
+        public string Tier = "Bronze";
     }
 
     /// <summary>

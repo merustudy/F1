@@ -34,8 +34,8 @@ namespace F1.Tests
             RunState run = kit.Run.Run;
             Assert.AreEqual(GamePhase.Lobby, kit.Expedition.Phase);
             Assert.AreEqual(3, run.Day, "The dungeon takes two days.");
-            Assert.AreEqual(70, RunRules.FindMercenary(run, "anna").Fatigue, "The dungeon costs 30 fatigue.");
-            Assert.AreEqual(100, RunRules.FindMercenary(run, "dan").Fatigue, "Dan stayed home.");
+            Assert.AreEqual(15, RunRules.FindMercenary(run, "anna").Fatigue, "Three battles at 5 fatigue each, no equipment, and no recovery while away.");
+            Assert.AreEqual(0, RunRules.FindMercenary(run, "dan").Fatigue, "Dan stayed home and was fresh.");
             Assert.AreEqual(1, run.ClearedDungeons["cave"]);
             Assert.AreEqual(4, run.Roster.Count);
 
@@ -51,7 +51,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void WhenFatigueRunsOut_RestingMakesThePartyAbleToDepartAgain()
+        public void Fatigue_CarriesOverFromExpeditionToExpedition_AndRestingBringsItDown()
         {
             FlowTestKit kit = new FlowTestKit().InLobby();
             for (int i = 0; i < 3; i++)
@@ -61,13 +61,13 @@ namespace F1.Tests
                 kit.Expedition.AcknowledgeReport();
             }
 
-            Assert.AreEqual(10, RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue);
-            Assert.AreEqual(DepartCheck.NotEnoughFatigue, kit.Run.CanDepart("cave"));
+            Assert.AreEqual(45, RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue, "Three expeditions of three battles at 5.");
+            Assert.AreEqual(DepartCheck.Ok, kit.Run.CanDepart("cave"), "Fatigue keeps nobody home.");
 
             kit.Run.Rest();
             kit.Run.Rest();
 
-            Assert.AreEqual(DepartCheck.Ok, kit.Run.CanDepart("cave"), "Two days of rest restore 20 fatigue.");
+            Assert.AreEqual(25, RunRules.FindMercenary(kit.Run.Run, "anna").Fatigue, "Two days of rest take 20 off.");
         }
 
         [TestCase(1)]

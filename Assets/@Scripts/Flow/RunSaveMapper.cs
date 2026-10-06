@@ -50,7 +50,7 @@ namespace F1.Flow
 
             foreach (MercenaryState mercenary in run.Roster)
             {
-                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue });
+                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId });
             }
 
             foreach (PartySlot slot in run.Party)
@@ -93,12 +93,14 @@ namespace F1.Flow
                     Hp = member.Hp,
                     Alive = member.Alive,
                     Items = ToRecords(member.Items),
+                    Fatigue = member.Fatigue,
+                    State = member.StateId,
                 });
             }
 
             foreach (RewardOption reward in expedition.PendingRewards)
             {
-                record.PendingRewards.Add(new RewardRecord { Kind = reward.Kind.ToString(), Id = reward.Id, Grade = reward.Grade });
+                record.PendingRewards.Add(new RewardRecord { Kind = reward.Kind.ToString(), Id = reward.Id, Grade = reward.Grade, Tier = reward.Tier.ToString() });
             }
 
             if (battle != null)
@@ -131,7 +133,7 @@ namespace F1.Flow
             var records = new List<ItemRecord>();
             foreach (EquippedItem item in items)
             {
-                records.Add(new ItemRecord { ItemId = item.Item.Id, Grade = item.Grade });
+                records.Add(new ItemRecord { ItemId = item.Item.Id, Grade = item.Grade, Base = item.IsBase, Tier = item.Tier.ToString() });
             }
 
             return records;
@@ -171,7 +173,8 @@ namespace F1.Flow
                 Require(data.Jobs.Contains(mercenary.JobId), $"Unknown job '{mercenary.JobId}'.");
                 Require(known.Add(mercenary.Id), $"Mercenary '{mercenary.Id}' is listed twice.");
                 Require(mercenary.Fatigue >= 0 && mercenary.Fatigue <= data.Balance.MaxFatigue, $"Fatigue of '{mercenary.Id}' is out of range.");
-                run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue });
+                RequireState(data, mercenary.Affliction, mercenary.Fatigue, $"'{mercenary.Id}'", atHome: true);
+                run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction });
             }
 
             foreach (string fallen in record.Fallen)
@@ -244,6 +247,8 @@ namespace F1.Flow
                 Require(member.MaxHp >= 1 && member.Hp >= 0 && member.Hp <= member.MaxHp, $"HP of '{member.MercenaryId}' is out of range.");
                 Require(member.Alive || member.Hp == 0, $"Dead member '{member.MercenaryId}' has HP.");
                 Require(BattleRows.IsValid(member.Row), $"Row of '{member.MercenaryId}' is out of range.");
+                Require(member.Fatigue >= 0 && member.Fatigue <= balance.MaxFatigue, $"Fatigue of member '{member.MercenaryId}' is out of range.");
+                RequireState(data, member.State, member.Fatigue, $"member '{member.MercenaryId}'", atHome: false);
 
                 // The board's cells come from the job; the items must still fit them.
                 int cells = data.Jobs.Get(member.JobId).ItemSlots;
@@ -265,6 +270,8 @@ namespace F1.Flow
                     Alive = member.Alive,
                     Items = items,
                     ItemSlots = cells,
+                    Fatigue = member.Fatigue,
+                    StateId = member.State,
                 });
             }
 
@@ -291,7 +298,10 @@ namespace F1.Flow
             return state;
         }
 
-        /// <summary>A list of items (a board or the inventory): every entry present, known and graded.</summary>
+        /// <summary>
+        /// A list of items (a board or the inventory): every entry present, known and graded. A base weapon
+        /// must be the weapon of some job: nothing found on the way can become free of fatigue.
+        /// </summary>
         static List<EquippedItem> ToItems(List<ItemRecord> records, StaticData data, string what)
         {
             Require(records != null, $"{what} is missing.");
@@ -301,10 +311,24 @@ namespace F1.Flow
                 Require(item != null, $"{what} has an empty entry.");
                 Require(data.Items.Contains(item.ItemId), $"Unknown item '{item.ItemId}'.");
                 Require(item.Grade >= 1, $"Grade of '{item.ItemId}' must be at least 1.");
-                items.Add(new EquippedItem(data.Items.Get(item.ItemId), item.Grade));
+                Require(!item.Base || IsJobWeapon(data, item.ItemId), $"'{item.ItemId}' is marked as a base weapon but no job carries it.");
+                items.Add(new EquippedItem(data.Items.Get(item.ItemId), item.Grade, item.Base, Parse<ItemTier>(item.Tier)));
             }
 
             return items;
+        }
+
+        static bool IsJobWeapon(StaticData data, string itemId)
+        {
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                if (job.WeaponItemId == itemId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>The recorded inputs of the battle in progress, in order.</summary>
@@ -336,6 +360,8 @@ namespace F1.Flow
             Require(record.CurrentNodeId < state.Map.Nodes.Count, $"Node {record.CurrentNodeId} is not on the map.");
             MapNode node = state.Map.Get(record.CurrentNodeId);
             Require(state.Phase == ExpeditionPhase.InBattle || node.Kind != MapNodeKind.Boss, "The expedition cannot continue past the boss.");
+            Require((state.Phase == ExpeditionPhase.AtCamp) == (node.Kind == MapNodeKind.Camp && state.Phase != ExpeditionPhase.ChoosingNode),
+                "Only a camp node is camped at, and a camp node is either camped at or left behind.");
         }
 
         static void ReadRewards(ExpeditionRecord record, StaticData data, ExpeditionState state)
@@ -345,16 +371,17 @@ namespace F1.Flow
             {
                 Require(reward != null, "A reward is missing.");
                 RewardKind kind = Parse<RewardKind>(reward.Kind);
+                ItemTier tier = Parse<ItemTier>(reward.Tier);
                 if (kind == RewardKind.Item)
                 {
                     Require(data.Items.Contains(reward.Id) && reward.Grade >= 1, $"Reward item '{reward.Id}' is not valid.");
                 }
                 else
                 {
-                    Require(data.Potions.Contains(reward.Id) && reward.Grade == 0, $"Reward potion '{reward.Id}' is not valid.");
+                    Require(data.Potions.Contains(reward.Id) && reward.Grade == 0 && tier == ItemTier.Bronze, $"Reward potion '{reward.Id}' is not valid.");
                 }
 
-                state.PendingRewards.Add(new RewardOption(kind, reward.Id, reward.Grade));
+                state.PendingRewards.Add(new RewardOption(kind, reward.Id, reward.Grade, tier));
             }
         }
 
@@ -390,6 +417,23 @@ namespace F1.Flow
         }
 
         /// <summary>Only names defined by the enum are accepted; numbers are not.</summary>
+        /// <summary>
+        /// A saved fatigue state must exist; an affliction must stand at or over the threshold (under it, it would have ended); a
+        /// mercenary at home holds only an affliction (a virtue ends with the expedition).
+        /// </summary>
+        static void RequireState(StaticData data, string stateId, int fatigue, string who, bool atHome)
+        {
+            if (stateId == null)
+            {
+                return;
+            }
+
+            Require(data.FatigueStates.Contains(stateId), $"Unknown fatigue state '{stateId}' of {who}.");
+            FatigueStateData state = data.FatigueStates.Get(stateId);
+            Require(!atHome || state.Kind == FatigueStateKind.Affliction, $"{who} holds the virtue '{stateId}' at home.");
+            Require(state.Kind != FatigueStateKind.Affliction || fatigue >= data.Balance.FatigueBreakdown, $"{who} holds the affliction '{stateId}' under the breakdown.");
+        }
+
         static TEnum Parse<TEnum>(string name)
             where TEnum : struct
         {

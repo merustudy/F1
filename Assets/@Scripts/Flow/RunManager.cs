@@ -73,7 +73,7 @@ namespace F1.Flow
             {
                 try
                 {
-                    RunSaveMigrator.Migrate(save);
+                    RunSaveMigrator.Migrate(save, data);
                     RunSaveMapper.Read(save, data, out run, out expedition);
                     battle = save.Expedition?.Battle;
                     return true;
