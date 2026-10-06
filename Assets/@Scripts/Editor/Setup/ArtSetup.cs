@@ -177,6 +177,19 @@ namespace F1.Editor.Setup
                 }
             }
 
+            // The poses of a breakdown and of a virtue (2026-10-06 round 38) are drawn job by job: a job whose file is there gets its entry,
+            // one whose file is not drawn yet is left out, and the screen shows its figure in that moment (ExpeditionArt).
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                foreach (string address in new[] { job.BrokenPose, job.ResolutePose })
+                {
+                    if (address != null && LogicalAddress.IsValid(address) && seen.Add(address) && File.Exists(AssetPath(address)))
+                    {
+                        files.Add(new ArtFile(address, AssetPath(address), Pose, new AddressEntry(AssetPath(address), address, ResourceScope.Expedition, ArtGroup)));
+                    }
+                }
+            }
+
             foreach (UiArt.Piece piece in UiArt.All)
             {
                 files.Add(new ArtFile(piece.Name, piece.AssetPath, Interface(piece.Border), null));

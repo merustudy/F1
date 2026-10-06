@@ -263,13 +263,22 @@ def roster_scales(kind):
         return {row["Key"]: float(row["Scale"]) for row in csv.DictReader(handle) if (row.get("Scale") or "").strip()}
 
 
+def roster_heights():
+    """Key -> Height of Rosters/character.csv: the share of the figure canvas a mercenary's figure stands at (gen_image.fit_figure)."""
+    with (ROSTERS / "character.csv").open(encoding="utf-8", newline="") as handle:
+        return {row["Key"]: int(row["Height"]) for row in csv.DictReader(handle) if (row.get("Height") or "").strip()}
+
+
 def approved_place(key):
     """The approved figure on the pose canvas: (raw, ratio, origin of its subject's box, box, back foot x on the canvas,
-    boot colour), as gen_image.fit_figure fits it (Height 90, bound by the canvas width), its canvas in the middle."""
+    boot colour), as gen_image.fit_figure fits it (the roster's Height, bound by the canvas width, never scaled up), its
+    canvas in the middle. The game's figure (Assets/@Art/Unit/Job/<key>.png) is this fit: a pose stood against it keeps the
+    unit's size on the stage (round 40: the spellblade's Height is 79 since round 39, not the 90 this once assumed)."""
     approved = Image.open(OUTPUT / "character" / f"{key}.raw.png").convert("RGBA")
     box = subject_box(approved)
     width, height = box[2] - box[0], box[3] - box[1]
-    ratio = min(round(FIGURE_CANVAS[1] * 0.9) / height, (FIGURE_CANVAS[0] - 2 * FIGURE_SIDE_MARGIN) / width)
+    target = round(FIGURE_CANVAS[1] * roster_heights().get(key, 90) / 100)
+    ratio = min(target / height, (FIGURE_CANVAS[0] - 2 * FIGURE_SIDE_MARGIN) / width, 1.0)
     x = (FIGURE_CANVAS[0] - round(width * ratio)) // 2 + SIDE
     leather = boot_colour(approved)
     back, soles, _ = feet(approved, leather)

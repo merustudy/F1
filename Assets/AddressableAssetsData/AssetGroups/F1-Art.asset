@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06be297a7fc8248258ee9d5b07dd0f39
+    m_Address: pose/job/knight-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 09fb679c0bb374c9682fdfb2b6faacc3
     m_Address: unit/job/paladin
     m_ReadOnly: 0
@@ -87,6 +93,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3217c4b83871646d292172b83a53da69
+    m_Address: pose/job/archmage-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 35ad7d7c5060c47c0af39791bd0cabe3
     m_Address: pose/job/knight-attack
     m_ReadOnly: 0
@@ -101,6 +113,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
     m_Address: potion/healing-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 408ddbe761b32404897a1c9a190ea943
+    m_Address: pose/job/bishop-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -123,6 +141,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 528ece6239c3b42cd8935abc6a14128a
+    m_Address: pose/job/spellblade-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 56c069291186e44889592ec7a4866f92
     m_Address: unit/enemy/goblin-archer
     m_ReadOnly: 0
@@ -131,6 +155,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5b1de3acad00c454ebd910ff8802dcc1
     m_Address: item/mace
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5b302dc88de5749c291a06933ba84cbf
+    m_Address: pose/job/paladin-resolute
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -183,6 +213,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 774597c89f9e44481a97541d83484b02
+    m_Address: pose/job/paladin-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 798b4478ae983436ba25dc9f5d1254f9
+    m_Address: pose/job/archmage-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -213,6 +255,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 902321a0bffb24f91b80085aeca1afe1
+    m_Address: pose/job/knight-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9e5bf5ff7950f439fa56d1d1b76592ab
+    m_Address: pose/job/valkyrie-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3023d20283bb42a2b4c0e75497dd2bc
     m_Address: unit/enemy/cave-rat
     m_ReadOnly: 0
@@ -221,12 +275,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a4ad8ae318fda454c8283c0255eeb848
     m_Address: item/longsword
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a6c8f0c68966046b79723c7183444c72
-    m_Address: item/sword
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -243,6 +291,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a8b281629aaf24915b6ee2d0b80bed69
+    m_Address: pose/job/valkyrie-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad990f5f1691f4415adcf89bd7c7e849
     m_Address: pose/job/archmage-attack
     m_ReadOnly: 0
@@ -251,6 +305,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aed91b06bab47424ba9de9c294801f3b
     m_Address: item/halberd
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b19fadef0e8294fdc8844d23ee21057c
+    m_Address: pose/job/bishop-resolute
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -329,6 +389,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: eb9166aa2dea54fd994471e5589a3d54
     m_Address: item/overseer-roar
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ecd1e85d5031c4da899ed31a60f345d2
+    m_Address: pose/job/spellblade-resolute
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

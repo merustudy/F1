@@ -607,13 +607,15 @@ def bullet_rules(body: str) -> str:
 
 
 def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", held: bool = False, cells: int = 0,
-                 style: Path = None) -> str:
+                 style: Path = None, tail: str = "") -> str:
     """Assembles the prompt in the order the style document prescribes.
 
     held: the attached reference is the figure of the unit that holds the subject, so the prompt
     ends with the type's rule for that instead of its rule for a plain style reference.
     cells: for an item, how many cells it takes; the rules of that shape follow the item's own.
     style: another style document than STYLE_RUNTIME.md, for a style test (--style). Same format.
+    tail: the sentence that ends the subject instead of the type's, for a style test that draws the
+    type's subject in another framing (--tail; round 37: a bust of a mercenary).
     """
     style = style or STYLE_RUNTIME
     text = style.read_text(encoding="utf-8")
@@ -653,7 +655,7 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
 
     parts = [
         shared,
-        f"Subject: {subject}. {extra + ' ' if extra else ''}{spec['tail']}",
+        f"Subject: {subject}. {extra + ' ' if extra else ''}{tail or spec['tail']}",
         f"Composition: {composition}{' ' + shape if shape else ''}",
     ]
     if theme:
@@ -1252,6 +1254,9 @@ def parse_args():
     parser.add_argument("--reference", default="",
                         help="Style reference for this run instead of the type's. Attached as it is, never mirrored: "
                              "give one that already faces the way the subject should.")
+    parser.add_argument("--tail", default="",
+                        help="The sentence that ends the subject instead of the type's (a style test in another framing, "
+                             "e.g. a bust instead of a full body).")
     parser.add_argument("--dry-run", action="store_true",
                         help="Check the files and print the prompt. Reads no key and makes no call.")
     parser.add_argument("--refit", action="store_true",
@@ -1321,7 +1326,7 @@ def main() -> int:
                   f"{', 좌우를 뒤집어 붙인다' if mirror else ''}{', 이 아이템을 든 유닛' if held else ''}"
                   f"{', --reference 로 받은 것' if custom_reference is not None else ''})")
 
-        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style)
+        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style, args.tail)
         print(f"[2/6] {style if args.style else style.name} 로 프롬프트 조립 ({len(prompt):,} chars"
               f"{f', 소재는 {roster}' if roster else ''}).")
 
