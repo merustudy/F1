@@ -145,6 +145,8 @@ PlayMusic(track)        # 곡을 바꾼다. 같은 곡이 흐르고 있으면 �
 | `Damaged` (화상, 폭풍) | 없음. 숫자만 뜬다. 폭풍은 번개가 소리를 낸다 |
 | `Healed`, `ShieldGained`, `BurnApplied` | 회복, 보호막, 불붙음 |
 | `DogEntered` | 빈사 |
+| `BrokeDown` (2026-10-06 Round 36) | 고통이면 빈사의 소리, 각성이면 버텼다의 소리. 붕괴의 소리는 아직 만들지 않았다(만들 때 바꾼다) |
+| `Collapsed`, `FatigueStateEnded`, `FatigueChanged` | 없음. 쓰러짐 뒤에 오는 빈사나 사망이 낸다 |
 | `DeathRolled` (살았다) | 버텼다 |
 | `Died` | 적: 쓰러짐(결정타면 결정타의 소리 하나). 용병: 용병의 죽음 |
 | `PotionUsed` | 포션 |

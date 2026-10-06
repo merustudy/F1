@@ -24,7 +24,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 │  ├─ calls.csv                # 유료 호출의 장부: 시각, 대상, 모델, 사용량, 추정 비용
 │  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본, 목업과 그 스크립트 (움직임 목업의 MP4는 gitignore)
 ├─ tools
-│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference 는 그림체 시험용, --size 는 넓은 자세를 그릴 전신 그림의 캔버스(1536x1024 등)
+│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference, --tail(타입의 꼬리 문장을 바꾼다: 초상 시험) 은 그림체 시험용, --size 는 넓은 자세를 그릴 전신 그림의 캔버스(1536x1024 등)
 │  ├─ run_roster.py            # Roster의 빠진 항목을 하나씩 돌린다. --max-calls 가 필수다
 │  ├─ cutout.py                # 단색 배경의 그림에서 캐릭터를 오려 낸다. 호출하지 않는다
 │  ├─ cutface.py               # 확정된 전신 그림에서 얼굴을 잘라 낸다 (지금 게임은 얼굴을 쓰지 않는다. 아래 "얼굴"). 호출하지 않는다
@@ -83,6 +83,10 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
   - **양손에 각각 다른 장비를 들면 손을 지킨다**(2026-10-04, Design/10 §5. Round 23의 성기사 공격이 철퇴와 방패를 바꿔 들었다. 한 손에만 무기를 든 용병은 손이 바뀌어도 된다: 사용자 판정, 마검사 공격은 그대로): 그런 용병의 소재는 장비마다 든 손을 적는다(대기 그림에서 본 대로. 오른쪽을 보는 4분의 3 측면에서 앞(보는 사람의 왼쪽)의 팔이 오른팔).
     소재가 그 손과 어긋나는 움직임을 시키지 않는다(먼 팔의 방패를 "왼쪽 뒤로" 보내라는 문장이 손을 바꾸게 했다). 시험 문서는 §3에 "양손에 각각 다른 것을 들면 각 손은 그것을 그대로 든다", §4에 손의 절, 금지에 무기와 방패가 손을 바꾸는 것을 둔다.
   - **자세 그림의 점검**(판정에 내기 전에 모두 본다): 같은 인물인가, 양손에 각각 장비를 든 용병은 각 손이 대기 그림과 같은가, 머리가 대기와 같은 크기인가, 디딘 뒷발과 바닥선, 무기가 잘리지 않았는가, 표정이 소재대로인가. 리뷰 시트는 그런 용병의 든 손을 적어 세 그림(대기·공격·피격)을 맞대 보게 한다.
+- **붕괴·각성의 자세**(2026-10-06 Round 38 "B", Design/10 §5): 붕괴의 순간 용병의 그림이 공격 자세처럼 **상태의 자세**로 바뀌었다가 돌아온다(`12_UI.md` "연출"). 그리는 길은 피격 자세의 것이다:
+  `gen_image.py --type hit --key <job> --name <job>_broken|<job>_resolute --style Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md --roster Archive/38-breakdown-fx/broken.csv|resolute.csv`(§25를 "제자리에 선 상태의 자세"로, 색의 기분을 더한 시험 문서. 소재는 그 라운드의 것),
+  맞추기는 `Archive/38-breakdown-fx/fit_state_poses.py`(`tools/fit_pose.py`를 그 직업의 확정 원본에 대고 돌린다). 파일은 `Assets/@Art/Pose/Job/<Id>_broken.png`, `<Id>_resolute.png`(2048x1024), 주소는 `pose/job/<kebab-id>-broken`, `-resolute`(`ArtAddress.Broken`·`Resolute`, `JobData.BrokenPose`·`ResolutePose`).
+  **직업마다 따로 그리는 선택 그림**이다(발키리는 Round 38, 나머지 다섯은 Round 40에 확정 — `Archive/40-state-poses/`: 소재 `broken.csv`·`resolute.csv`, 맞추기 `fit_state_poses.py --scale`. 지금은 여섯 직업 모두 있다): `ArtSetup.Files`는 파일이 있는 것만 Entry로 만들고, `ExpeditionArt`는 `ResourceManager.ExistsAsync`로 등록된 것만 읽으며, 없는 직업은 그 순간 대기 그림 그대로다. 정식 타입(`broken`·`resolute`)으로 올리고 선택을 거두는 일은 Slice C의 후보다(Round 40 권장안: 생성 도구·스타일 문서·로스터·`fit_pose` 네 곳을 바꾸는 일).
 - **몬스터의 공격·피격 자세**(2026-10-05, Design/10 §5. Round 26~28의 시험이 확정되어 정식 타입이 됐다): `gen_image.py --type enemy_attack|enemy_hit --key <enemy>`. 용병의 것을 왼쪽을 보는 몬스터로 돌린 것이다:
   기준 그림은 그 몬스터의 확정 원본(`output/enemy/<key>.raw.png`, 눈동자를 지운 것)을 같은 캔버스에 앉혀 공격은 **오른쪽** 3분의 1에(왼쪽으로 돌진할 자리), 피격은 가운데에. 스타일 문서 §27(구도: 왼쪽, 눈동자 없는 한 가지 색의 눈, 발·짐승의 발·부츠가 바닥선에, 장비 그대로, 날아가는 화살 없음, 우스꽝스럽게 위협적인 얼굴)과 §28(기준 그림 규칙).
   던전 컨셉은 붙이지 않는다(확정 그림이 이미 지니고, 자세는 그 장비를 그대로 지킨다. 던전 절의 "장비 하나를 걸친다"는 장비를 바꾸게 할 수 있었다). 소재는 정체 목록(확정 그림에서 읽은 체형·장비·무기, 눈의 색) + 자세 + 표정(공격은 사나운 비명·포효, 피격은 한 눈을 감은 찡그림).
@@ -136,6 +140,8 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 - 파일: 캔버스를 64/63배 한 **2048x1024**(두 변이 2의 거듭제곱. 아래 "Import 정책"의 압축). 화면은 캔버스의 비율(2:1, 바닥선 112/1008)로만 그리므로 자리가 그대로다. 맞추기와 리뷰는 2016x1008에서 하고 쓸 때만 늘린다(`fit_pose.texture`).
 - 배율: 자세가 바뀌어도 크기가 그대로인 부위로 잰다. 둥근 금 장식(걸쇠, 리벳, 버클, 징)의 긴 지름을 확정 원본과 자세에서 재어 큰 것 넷의 중앙값의 비. 금 장식이 없거나 가려져 맞지 않으면 소재의 `Scale`로 덮어쓴다
   (Round 23: 대마법사는 지팡이의 수정, 마검사는 부츠의 네모 버클, 성기사 피격은 허리 버클과 머리로 잰 값). 리뷰 시트에서 머리가 대기 그림과 같은 크기로 보이는지 본다.
+  모델이 장식과 무기를 몸보다 작게 그리면(Round 40의 상태 자세: 장식 0.7~0.85배, 머리 0.85~1.0배) **머리 크기**가 기준이다 — 자세는 그 유닛의 머리와 몸이 그대로 보여야 하므로 장식의 배율은 버리고, 두 눈 사이의 거리와 격자 시트로 잰 머리 크기를 `Scale`로 적는다(`Archive/40-state-poses/README.md` "맞추기").
+- 기준 크기: 확정 그림을 게임의 그림(`Assets/@Art/Unit/Job/<Id>.png`)과 같은 크기로 세운다 — `Rosters/character.csv`의 **Height**로 맞추고 키우지 않는다(`fit_figure`와 같은 규칙. `approved_place`). Round 40까지는 늘 90으로 세워 Height 79인 마검사(Round 39)의 자세가 게임 안에서 13.7% 컸다.
 - 자리: 디딘 뒷발(부츠 가죽색의 맨 왼쪽 무리)을 확정 그림의 뒷발 자리에 두고, 그 발바닥이 바닥선이다. 돌진에서도 밀림에서도 뒷발은 땅에 있다. 앞발은 들릴 수 있고 무기는 바닥선 아래로 내려갈 수 있다.
 - 색: 확정 원본의 주요 색(14색으로 줄인 팔레트)마다 평균의 차이만큼 옮기되, 가장 큰 차이를 줄일 때만 쓴다(CIE76 ΔE). 잉크와 흰색은 그대로.
 - 둘레의 띠는 전신 그림과 같다(`FIGURE_OUTLINE`, `UI_LINE`, `ring_alpha`). 결과는 `output/<type>/<key>.png`, 캔버스 밖으로 나가면 경고한다.
@@ -208,6 +214,11 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   유닛의 명패 `plate_party`·`plate_enemy`·`plate_danger`·`plate_target`은 2026-10-05 명패를 없애며 지웠다(`plate_label`은 남는다). 그때 더한 **보드의 머리 띠** `name_tag`는 `iron_tag`를 색 그대로(`tint`) 쓴 것이고,
   그 왼쪽 끝의 **금 징** `gold_stud`는 늘이지 않는 `ui_piece`다. 둘 다 Round 29의 견본(`tag29_slim`, `badge29_a_stud`)을 사용자가 목업으로 승인해 같은 소재로 `Rosters/ui_frame.csv`·`ui_piece.csv`에 올렸다(`Archive/29-plates/`).
   **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
+  장비 피로의 표 `fatigue_tag`(32. 자주 바탕에 연보라 테, 끝이 둥근 64x40. Border 20이라 옆으로만 늘어난다)는 `Archive/32-equipment-fatigue/draw_tag.py`가 `Assets/@Art/UI/Frame`에 바로 그린다.
+  지도의 정예와 야영지 표식 `node_elite`(전투의 검을 붉은 마름모 위에)와 `node_camp`(장작 둘과 불꽃)(34. 96x96, 화면의 2배)는 `Archive/34-long-map/draw_icons.py`가 `Assets/@Art/UI/Icon`에 바로 그린다.
+  붕괴의 순간의 **효과 조각** `ink_burst`(먹 튐: 검정에 붉은 보라 핏줄)와 `light_burst`(빛살: 크림 원판과 금빛 빛살)(38. 1024 원본을 512로)는 `Archive/38-breakdown-fx`의 시험 문서(`STYLE_RUNTIME-fx.md`: `ui_piece`의 자리에 "무대 위의 효과 조각")와 소재(`fx.csv`)로 생성한 것이다.
+  무대에서 유닛 뒤에 상태 색의 `glow`와 함께 선다(`12_UI.md` "연출"). 사용자가 먹 튐 2차(붉은 보라 먹)보다 1차를 골랐고 둘 다 0.8배(416·352)로 쓴다.
+  아이템 칸의 단계 테 `tier_rim`(35. 흰 띠 8과 안쪽의 검은 반투명 선 2, 40x40, Border 12. 화면이 단계의 색으로 물들인다)은 `Archive/35-tiers/draw_rim.py`가 `Assets/@Art/UI/Frame`에 바로 그린다.
   양초의 빛처럼 화면에서 크게 늘이는 부드러운 경사는 2배로 그리지 않는다(UI의 MaxSize 512 안에서 512x256. 늘여도 경사는 매끄럽다).
 
 ## 승인 라운드
@@ -268,6 +279,11 @@ UI의 틀과 아이콘
 1. PNG   -> Assets/@Art/Pose/Job/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2048x1024)
 2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
+
+용병의 붕괴·각성 자세 (2026-10-06 Round 38. 직업마다 따로 그린다: 지금은 발키리만)
+1. PNG   -> Assets/@Art/Pose/Job/<Id>_broken.png, <Id>_resolute.png (fit_pose.py의 산출물 그대로, 2048x1024)
+2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-broken", "-resolute"가 따라 나온다 (JobData.BrokenPose/ResolutePose)
+3. Entry -> 파일이 있는 직업만 (ArtSetup.Files. Group F1-Art, Scope Expedition. ExpeditionArt가 ResourceManager.ExistsAsync로 묻고 읽는다)
 
 몬스터의 공격·피격 자세 (전신 그림이 확정되면 더한다. 2026-10-05)
 1. PNG   -> Assets/@Art/Pose/Enemy/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2048x1024)

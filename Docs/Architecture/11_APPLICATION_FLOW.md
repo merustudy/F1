@@ -45,8 +45,9 @@ Application 계층이 하는 일은 넷이다.
 
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
-| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발 |
-| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기, 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
+| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
+| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
+| `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기 |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기 |
 | `Reward` | 원정 중이고 보상을 고를 차례 | 보상 받기(보드나 인벤토리로), 넘기기, 아이템 옮기기, 자리 바꾸기 |
 | `Settlement` | 확인하지 않은 정산 보고가 있다 | 확인 |
@@ -58,6 +59,11 @@ Application 계층이 하는 일은 넷이다.
   원정 중의 자리 바꾸기는 `ExpeditionManager.MoveToRow`다. 어느 열이 가능한지는 Domain의 자리 규칙이 정한다(`08_GAMEPLAY_DOMAIN.md` "자리 (열)").
 
 ## 전투 진행
+
+- 노드에 들어가는 명령(`EnterNode`)은 그 호출 안에서 살아 있는 구성원의 피로를 올리고(전투에 들어가는 비용, `08_GAMEPLAY_DOMAIN.md` "피로")
+  전투를 세운 뒤 한 번에 저장한다. 이어하기는 저장된 피로로 같은 전투를 다시 만들 뿐 다시 더하지 않는다.
+- 야영지 노드면 `EnterNode`는 전투를 세우지 않고 야영지에 들어가(`ExpeditionRules.EnterCamp`) 저장한다. 피로는 오르지 않는다.
+  `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, 칸)`이 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
 
 ```text
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo
@@ -73,6 +79,7 @@ Application 계층이 하는 일은 넷이다.
 
 - 원정이 끝나는 순간(클리어, 전멸, 후퇴) 같은 호출 안에서 `RunRules.Settle`을 적용하고 `ExpeditionState`를 버린다.
 - `SettlementReport`는 화면에 보이기 위해 남긴다. 확인(`AcknowledgeReport`)하면 버린다. 저장하지 않는다.
+  살아 돌아온 용병마다 원정에서 쌓인 피로도를 담는다(`SurvivorFatigue`); 그 값이 로스터에 남는다.
 
 ## 확정과 저장
 

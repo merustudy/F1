@@ -53,6 +53,7 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 InitializeAsync()
 BeginScope(scope) / IsScopeOpen(scope)
 LoadAsync<T>(address, scope)                 # 같은 Scope에서 같은 Address는 한 번만 Load하고 같은 Asset을 돌려준다
+ExistsAsync(address)                         # 등록된 Address인지. 있을 수도 없을 수도 있는 그림(직업마다 따로 그리는 붕괴·각성 자세)만 묻는다 (2026-10-06)
 InstantiateAsync(address, parent, scope)
 ReleaseInstance(instance)
 ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Instance를 전부 놓는다
@@ -60,6 +61,7 @@ ReleaseScope(scope)                          # 그 Scope의 Asset Handle과 Inst
 
 - 열리지 않은 Scope에 Load하면 예외다. 이미 열린 Scope를 또 열어도, 닫힌 Scope를 Release해도 예외다.
 - 등록되지 않은 Address는 `ResourceLoadException`이다. 에러 로그 없이 예외로만 알린다.
+- `ExistsAsync`는 그런 예외를 피하려고 아무 데서나 부르는 것이 아니다. 데이터가 이름 짓지만 파일이 직업마다 따로 생기는 그림(`ExpeditionArt.OptionalAddresses`)에만 쓴다. 그 밖의 그림은 이름이 있으면 있어야 한다.
 - Scene이 Unload되면 그 Scene에 있던 Instance는 Scene과 함께 사라지고 Addressables가 그 Handle을 스스로 놓는다.
   `ResourceManager`는 이미 놓인 Handle을 다시 놓지 않는다.
 

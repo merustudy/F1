@@ -9,7 +9,7 @@ Domain 코드의 구조, 결정론을 지키는 방법, 상태 Type, 시뮬 실�
 Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Managers, Save DTO를 참조하지 않는다
 ├─ Random       Pcg32, RngStream, SeedDeriver
 ├─ Battle       BattleEngine, BattleSetup, BattleUnit, BattleEvent, BattleInput, BattleLog, Formation
-├─ Expedition   ExpeditionState, ExpeditionRules, ItemBoard, NodeMap, MapGenerator
+├─ Expedition   ExpeditionState, ExpeditionRules, ItemBoard, FatigueRules, NodeMap, MapGenerator
 └─ Run          RunState, RunRules, SettlementReport
 ```
 
@@ -22,7 +22,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 | 수명 | 상태 | 규칙 | 끝나면 |
 |---|---|---|---|
 | 런 | `RunState`: 시드, 날짜, 로스터(피로도), 파티, 원정 횟수, 클리어 기록 | `RunRules` | 용병이 하나도 없으면 `IsOver` |
-| 원정 | `ExpeditionState`: 던전, 시드, 맵, 구성원(HP, 보드), 인벤토리, 포션, 단계 | `ExpeditionRules` | `RunRules.Settle`로 런에 반영하고 버린다 |
+| 원정 | `ExpeditionState`: 던전, 시드, 맵, 구성원(HP, 보드, 피로도), 인벤토리, 포션, 단계 | `ExpeditionRules` | `RunRules.Settle`로 런에 반영하고 버린다 |
 | 전투 | `BattleEngine` 안의 유닛, 쿨다운, 포션, 이벤트 로그, 입력 기록 | `BattleEngine` | `ExpeditionRules.CompleteBattle`로 원정에 반영하고 버린다 |
 
 - 상태 Type은 Plain 객체다. 규칙은 상태를 인자로 받는 static 함수(`RunRules`, `ExpeditionRules`)와 `BattleEngine`에만 있다.
@@ -76,6 +76,51 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 전투의 `BattleUnitSetup.Items`는 보드 그대로의 목록(빈 칸 없음)이고 `ItemSlots`는 화면이 빈 칸을 그리기 위한 칸 수다
   (적은 가진 아이템의 크기 합). `BattleItemState.SlotIndex`는 보드의 순서이고 발동 순서다.
 
+## 피로
+
+규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §3이 소유한다. 피로도는 0에서 쌓이는 정수이고 0~`MaxFatigue` 안에 머문다.
+
+- 셈은 `FatigueRules` 한 곳에 있다: 장비가 피로를 내는지(`CostsFatigue`: 무기 장비나 방어 장비이고 기본 무기가 아님), 아이템 하나와 보드의 비용,
+  전투에 들어갈 때의 비용(`BattleEntryCost` = `FatigueBattleEntry` + 장비), 범위 안에 묶는 더하기(`Add`). 화면도 같은 함수로 비용을 보인다.
+- 기본 무기는 아이템 인스턴스의 표시다(`EquippedItem.IsBase`). `ExpeditionRules.Create`가 직업의 무기에만 붙이고, 보드 사이로 옮겨도 남는다.
+  보상과 인벤토리에서 꺼낸 아이템은 기본 무기가 아니다.
+- 수명: 로스터의 `MercenaryState.Fatigue` → 출발할 때 `PartyMember`로 원정의 `ExpeditionMember.Fatigue`에 → 원정 동안 쌓임 → `RunRules.Settle`이
+  살아 돌아온 구성원의 값을 로스터에 쓴다. 원정에 나가지 않은 날(`PassDays`)에는 로스터의 값이 내려간다.
+- 쌓이는 곳(12단계): `ExpeditionRules.BeginBattle`이 전투를 세우기 전에 살아 있는 구성원마다 전투에 들어가는 비용을 더한다. 그래서
+  `BuildBattleSetup`은 그대로 상태만의 함수이고, 이어하기는 이미 더한 값으로 같은 전투를 다시 만든다(두 번 더하지 않는다).
+- 전투 안의 피로(15단계): `BattleUnitSetup.Fatigue`·`FatigueState`로 들어가 `BattleUnit.Fatigue`·`State`가 되고, 전투가 끝나면 `CompleteBattle`이 구성원에 되쓴다(`ExpeditionMember.StateId`).
+  엔진은 파티 유닛의 피로만 움직인다(`ChangeFatigue`: 피격·빈사·동료의 빈사와 죽음·처치의 덜어 냄, 이벤트 `FatigueChanged`) 그리고 움직일 때마다 판정한다(`ResolveFatigue`):
+  `MaxFatigue`면 쓰러짐(`Collapse`, 이벤트 `Collapsed`: 빈사로, 이미 빈사면 죽음), `FatigueBreakdown` 이상이고 상태가 없으면 붕괴 판정(`BreakDown`, 이벤트 `BrokeDown`),
+  상태가 고통이고 문턱 아래면 풀림(`FatigueStateEnded`). 전투가 시작할 때 들어온 피로를 같은 함수로 먼저 판정한다(`BattleStarted` 뒤, 패시브 앞).
+- 붕괴 판정의 난수는 `RngStream.Fatigue`(사망 판정의 `Battle` 스트림과 다름)다: 각성인지, 어느 상태인지 두 번 뽑는다. 상태의 목록은 `BattleSetup.FatigueStates`(데이터의 id 순)에서 온다.
+- 상태의 효과는 `FatigueStateData`의 세 수치다: 쿨다운은 `CooldownOf(유닛, 아이템)`이 발동 때마다 센다(들어온 상태는 첫 쿨다운부터), 받는 회복은 `ApplyHeal`에서 `FatigueRules.Scaled`,
+  빈사의 사망 확률은 `DogHit`에서 더해 0~100에 묶는다. 고통이 풀리는 세 자리(전투의 처치, 야영지의 쉬기, 로비의 쉬는 날)는 모두 `FatigueRules.AfflictionEnds`·`StateAfter`로 묻는다.
+
+## 긴 원정: 노드 종류와 깊은 층
+
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§4가 소유한다. 수치는 `DungeonData`와 `BalanceData`에 있다.
+
+- 노드 종류는 `MapNodeKind`(전투, 정예, 야영지, 보스)다. 싸우는 노드(`MapNode.IsFought`)만 적 무리를 갖는다. 야영지에는 `EnemyGroupId`가 없다.
+- `MapGenerator`가 노드마다 맵 난수로 종류를 뽑는다: 야영지 층(`CampFloor`)은 모두 야영지, 그 밖에서 정예가 설 수 있으면(`DungeonData.EliteCanStandOn`) 정예 확률,
+  아니면 야영지가 설 수 있으면(`CampCanStandOn`) 야영지 확률, 나머지는 전투다. 자격이 없는 층에서는 난수를 쓰지 않으므로 정예·야영지가 없는 데이터의 맵은 전과 같다.
+  정예 노드는 정예 무리(`EnemyGroupData.IsElite`, `StaticData.ElitesFor`)에서, 전투 노드는 정예가 아닌 무리에서 고른다. 정예가 설 수 있는 층마다 정예 무리가 있어야 한다(`StaticData`의 검증).
+- 야영지: `ExpeditionRules.EnterCamp`가 야영지 노드로 옮겨 `ExpeditionPhase.AtCamp`로 둔다(피로를 더하지 않는다). 그동안 고를 노드는 없고(`AvailableNodes`가 빈다) 보드와 자리는 바꿀 수 있다.
+  `RestAtCamp`는 살아 있는 구성원마다 HP를 최대의 `CampHealPercent`%만큼(최대를 넘지 않게) 올리고 피로를 `CampFatigueRelief`만큼 내린 뒤(`FatigueRules.Add`) `ChoosingNode`로 돌린다. 정비는 14단계다.
+- 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템 등급 `EnemyGradePerFloor`만큼 올린다.
+  보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
+
+## 단계와 합치기 (Slice B 14단계)
+
+규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`와 `DungeonData`에 있다.
+
+- 단계는 `ItemTier`(동·은·금·다이아, `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 보상 후보(`RewardOption.Tier`)가 갖는다. 등급은 그대로 있다.
+- 효과 크기는 한 곳에서 센다: `EquippedItem.Magnitude(balance, effect)` = `ItemEffect.MagnitudeAt(등급, BalanceData.TierPercent(단계))`(정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
+- 보상의 단계는 `DungeonData.RewardTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 보상 후보에 싣는다.
+- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 다이아 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드의 칸에 놓는 세 명령
+  (`MoveItem`, `PlaceFromInventory`, `TakeItemReward`)이 놓을 자리의 아이템과 합쳐지면 합친다: 그 자리에 한 단계 위(높은 등급), 놓은 것은 원래 목록에서 빠진다.
+  각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
+- 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
@@ -123,11 +168,14 @@ dotnet run --project Tools/Sim -- battle     --group <id> --party a,b,c --policy
 dotnet run --project Tools/Sim -- expedition --dungeon <id> --party a,b,c --policy ... --runs n --seed n
 dotnet run --project Tools/Sim -- formations --dungeon <id> --party a,b,c --policy ... --runs n --seed n
 dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy ... --seed n
+dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 ```
 
 - 파티는 용병 id나 직업 id로 적는다. 모두에게 열 번호를 붙이면 그 열에 세운다(`knight:1,spellblade:2,bishop:3,archmage:4`).
   붙이지 않으면 직업의 권장 열 순서로 앞에서부터 세운다.
 - `formations`는 같은 파티를 가능한 모든 순서로 세워 같은 시드로 돌린다. 자리가 결과를 얼마나 바꾸는지 본다.
+- `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
+  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율을 함께 적는다. 정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11.
 
 - 게임과 같은 Generated JSON을 `StaticDataLoader`로 읽고, 같은 Domain 코드를 돌린다.
 - 정책(`SimPolicy`)은 플레이어 입력을 대신한다. 게임 규칙이 아니라 시뮬 도구의 일부이고, 게임과 같은 API(`TryUsePotion`, `TryRetreat`,
@@ -142,7 +190,11 @@ dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy
 - 결정론 Test: 같은 Setup과 입력의 반복 실행, 진행 간격과 무관함, `Replay`와 실제 진행의 일치. 전진이 일어나는 전투도 포함한다.
 - 자리 규칙은 `FormationTests`가, 전투 중의 전진과 아이템이 켜지는 것은 `BattleEngineTests`의 "Advancing" 묶음이 고정한다.
   보드와 인벤토리는 `ItemBoardTests`와 `ExpeditionRulesTests`의 "Rewards and the item board" 묶음이 고정한다.
-- 출고 데이터 감사: 모든 던전의 맵과 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
+  피로(장비의 비용, 기본 무기, 전투에 들어갈 때 쌓임, 범위)는 `FatigueRulesTests`, 로스터와 정산은 `RunRulesTests`가 고정한다.
+  긴 원정(노드 종류의 배치, 정예 무리, 야영지와 쉬기, 깊은 층의 적, 데이터 검증)은 `LongExpeditionTests`, 야영지의 명령과 저장은 `CampFlowTests`가 고정한다.
+  단계(효과 크기, 보상의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
+  전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
+- 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
 ## Validation
 
@@ -151,6 +203,7 @@ dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy
 - 새 상수가 `BalanceData`나 Definition에 있는가? 코드에 숫자로 들어가지 않았는가?
 - 자리를 바꾸는 새 코드가 `Formation`을 거치는가? 빈 열을 사이에 둔 줄이 상태에 남지 않는가?
 - 보드를 바꾸는 새 코드가 `ItemBoard`를 거치는가? 칸 수를 넘는 보드가 상태에 남지 않는가?
+- 피로를 바꾸는 새 코드가 `FatigueRules.Add`를 거치는가? 0~`MaxFatigue` 밖의 값이 상태에 남지 않는가?
 - 결과에 영향을 주는 새 난수 사용이 시드에서 파생한 `Pcg32`인가?
 
 ## Deferred and Forbidden
