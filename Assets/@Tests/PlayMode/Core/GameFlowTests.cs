@@ -85,6 +85,10 @@ namespace F1.Tests
                         // The camp floor of the long map (stage 13): the party rests and goes on.
                         expedition.RestAtCamp();
                         break;
+                    case GamePhase.Shop:
+                        // A shop node (stage 17): the party buys nothing and goes on.
+                        expedition.LeaveShop();
+                        break;
                 }
             }
 

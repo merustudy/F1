@@ -67,6 +67,19 @@ Map.MendTitle,Title of the camp window while an item is chosen to mend. {0} = fl
 Map.MendHint,In the camp window while an item is chosen to mend.,왼쪽 보드에서 올릴 아이템을 고르세요.,Choose the item to raise on a board on the left.
 Map.MendBack,Leaves the mend step for the camp's two choices.,돌아가기,Back
 Map.MendConfirm,Mends the chosen item and goes on.,정비하기,Mend it
+Map.Shop,"Label of a shop node: items for the region coins, no fight (round 44).",상점,Shop
+Map.ShopHint,Shown when a shop node is selected.,지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.,A place to buy items for region coins. No fight.
+Map.EnterShop,Goes into the selected shop node.,상점으로,Enter the shop
+Map.AtShop,In the panel while the party is at a shop: the buying is in the window over the map.,지도 위의 창에서 삽니다.,Buy in the window over the map.
+Map.ShopChoose,In the shop window under its title.,지역 코인으로 삽니다. 나가면 다음 층으로 갑니다.,"Buy with region coins. Leave, and go on to the next floor."
+Map.ShopBuyHint,In the panel while an offer of the shop is picked.,넣을 칸을 누르면 삽니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.,Click the cell to put it in to buy it. Or take it straight into the inventory.
+Map.ShopCoinsLabel,In the shop window before the coins the party has.,가진 코인,Coins
+Map.ShopRefresh,The shop's refresh button; its cost follows.,새로고침,Refresh
+Map.ShopLeave,Leaves the shop and goes on to the next floor.,나가기,Leave
+Map.ShopSold,On the tile of an offer that was bought.,팔림,Sold
+Map.ShopItemSub,Under the name of an item on offer. {0} = category. {1} = cells it takes.,{0} · {1}칸,{0} · {1} cells
+Map.ShopBought,On the detail line after a purchase. {0} = what was bought. {1} = coins before. {2} = coins after.,구매: {0} · 코인 {1} → {2},Bought: {0} · coins {1} → {2}
+Map.Coins,A number of region coins beside the coin mark (the header; an offer's price; the refresh cost). {0} = coins.,{0},{0}
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.EmptySlot,An empty item or potion slot.,빈 칸,Empty
 Board.Grade,{0} = item grade.,등급 {0},Grade {0}
@@ -140,6 +153,7 @@ Battle.Victory,Battle result.,승리,Victory
 Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
 Battle.Retreated,Battle result.,후퇴 성공,Retreated
 Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
+Battle.Coins,On the result window: the region coins the victory brought (round 44). {0} = coins.,지역 코인 +{0},Region coins +{0}
 Battle.ShowLog,Opens the log of the finished battle from the result panel.,로그 보기,View log
 Battle.LogTitle,Title of the battle log viewer.,전투 로그,Battle log
 Battle.FigurePlaceholder,Shown in the figure placeholder of a unit until there is art.,전신 이미지 자리,Full-body art here

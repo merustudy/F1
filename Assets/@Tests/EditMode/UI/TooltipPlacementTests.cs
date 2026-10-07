@@ -6,7 +6,7 @@ namespace F1.Tests
 {
     /// <summary>
     /// Where an item's card goes (round 42): above the board panel over the cell's column on the party side, beside the board
-    /// in battle. Top-left pixel space of the screen.
+    /// in battle, and under the shop's window over the offer's tile (round 44). Top-left pixel space of the screen.
     /// </summary>
     public sealed class TooltipPlacementTests
     {
@@ -80,6 +80,37 @@ namespace F1.Tests
             card = TooltipPlacement.Beside(farRight, Size, false, Panel, Screen, out _, out cardIsLeft);
             Assert.IsTrue(cardIsLeft, "No room on the right: to the left instead.");
             Assert.AreEqual(farRight.xMin - TooltipPlacement.BesideGap, card.xMax, 0.001f);
+        }
+
+        [Test]
+        public void Below_CentresTheCardOnTheTile_JustUnderTheWindow_AndPointsTheNotchUpAtTheTile()
+        {
+            var window = new Rect(1030f, 216f, 820f, 360f);
+            var tile = new Rect(1067f, 324f, 186f, 160f);
+
+            Rect card = TooltipPlacement.Below(tile, Size, window.yMax, Screen, out float notchX);
+
+            Assert.AreEqual(tile.center.x, card.center.x, 0.001f);
+            Assert.AreEqual(window.yMax + TooltipPlacement.Gap, card.y, 0.001f, "Its top edge is just under the window.");
+            Assert.AreEqual(Size, card.size);
+            Assert.AreEqual(tile.center.x - card.x, notchX, 0.001f, "The notch is over the tile's middle.");
+        }
+
+        [Test]
+        public void Below_StaysInsideTheScreen_AndTheNotchStillPointsAtTheTile()
+        {
+            var right = new Rect(1700f, 324f, 186f, 160f);
+            Rect card = TooltipPlacement.Below(right, Size, 576f, Screen, out float notchX);
+            Assert.AreEqual(Screen.xMax - TooltipPlacement.ScreenMargin, card.xMax, 0.001f, "Pushed in from the right edge.");
+            Assert.AreEqual(right.center.x - card.x, notchX, 0.001f, "The notch still points at the tile.");
+
+            var farRight = new Rect(1800f, 324f, 186f, 160f);
+            TooltipPlacement.Below(farRight, Size, 576f, Screen, out notchX);
+            Assert.AreEqual(Size.x - TooltipPlacement.NotchInset, notchX, 0.001f, "The notch keeps off the card's corner.");
+
+            var tall = new Vector2(400f, 600f);
+            card = TooltipPlacement.Below(farRight, tall, 576f, Screen, out _);
+            Assert.AreEqual(Screen.yMax - TooltipPlacement.ScreenMargin, card.yMax, 0.001f, "Lifted to stay on the screen.");
         }
 
         [Test]

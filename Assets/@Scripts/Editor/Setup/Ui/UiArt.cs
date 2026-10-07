@@ -123,6 +123,12 @@ namespace F1.Editor.Setup
         public const string NodeElite = "Icon/node_elite";
         public const string NodeCamp = "Icon/node_camp";
 
+        /// <summary>The marker of a shop node (2026-10-07 round 44, A): a stack of coins. Drawn (Archive/44-shop-node/draw_icons.py).</summary>
+        public const string NodeShop = "Icon/node_shop";
+
+        /// <summary>The region coin (round 44): a brass disc with a dark edge and a glint, beside every number of coins. Drawn (Archive/44-shop-node/draw_icons.py).</summary>
+        public const string Coin = "Icon/coin";
+
         /// <summary>A soft darkening towards the edges, clear in the middle, stretched over the stage (the red of death's door) and over the whole screen (the Diablo kit's gloom). Drawn (Archive/16-candle-light/draw_pieces.py, which turned round 09's inside-out ramp the right way).</summary>
         public const string Vignette = "Icon/vignette";
 
@@ -186,6 +192,8 @@ namespace F1.Editor.Setup
             new Piece(NodeBoss),
             new Piece(NodeElite),
             new Piece(NodeCamp),
+            new Piece(NodeShop),
+            new Piece(Coin),
             new Piece(Vignette),
             new Piece(CandleDark),
             new Piece(CandleWarm),

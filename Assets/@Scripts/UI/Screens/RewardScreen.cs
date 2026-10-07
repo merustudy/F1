@@ -26,6 +26,7 @@ namespace F1.UI
         [SerializeField] Button _inventoryToggle;
         [SerializeField] TMP_Text _inventoryToggleLabel;
         [SerializeField] PartySideView _party;
+        [SerializeField] TMP_Text _coins;
 
         readonly List<RewardOptionView> _options = new List<RewardOptionView>();
         int _selectedOption = -1;
@@ -63,6 +64,7 @@ namespace F1.UI
             ExpeditionManager manager = Managers.Expedition;
             StaticData data = Managers.Data.Data;
             List<RewardOption> rewards = manager.Expedition.PendingRewards;
+            _coins.text = UiStrings.Get(UiKeys.Map.Coins, manager.Expedition.Coins);
 
             for (int i = 0; i < _options.Count; i++)
             {

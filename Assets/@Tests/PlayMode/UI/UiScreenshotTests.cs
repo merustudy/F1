@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using F1.Core;
@@ -313,6 +314,29 @@ namespace F1.Tests
                             MapNode ahead = deep.NextNodeIds.Select(nodes.Get).OrderByDescending(n => n.Kind == MapNodeKind.Elite).First();
                             UiTestUtil.Click(map.NodeView(ahead.Id).Button);
                             yield return Capture(prefix + "_31_map_deep");
+
+                            // The shop (round 44), staged like the elite when the map has one (most do): before a shop node with coins
+                            // to spend, the node chosen; its window; an offer picked, with its card under the window.
+                            MapNode shopNode = nodes.Nodes.FirstOrDefault(n => n.Kind == MapNodeKind.Shop);
+                            if (shopNode != null)
+                            {
+                                Managers.Expedition.Expedition.CurrentNodeId = nodes.Nodes.First(n => n.NextNodeIds.Contains(shopNode.Id)).Id;
+                                Managers.Expedition.Expedition.Coins = 37;
+                                yield return TaskUtil.Await(Managers.UI.ShowAsync(ScreenId.NodeMap));
+                                map = UiTestUtil.Screen<NodeMapScreen>();
+                                UiTestUtil.Click(map.NodeView(shopNode.Id).Button);
+                                yield return Capture(prefix + "_41_map_shop");
+                                UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+                                yield return UiTestUtil.WaitForRedraw();
+                                yield return Capture(prefix + "_42_shop");
+                                IReadOnlyList<RewardOption> stock = Managers.Expedition.ShopStock;
+                                UiTestUtil.Click(map.ShopTiles[Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == RewardKind.Item)].Button);
+                                yield return UiTestUtil.WaitForRedraw();
+                                yield return Capture(prefix + "_43_shop_pick");
+                                UiTestUtil.PressTheBackground();
+                                UiTestUtil.Click(map, UiTestUtil.ShopLeave);
+                                yield return UiTestUtil.WaitForRedraw();
+                            }
 
                             MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
                             Managers.Expedition.Expedition.CurrentNodeId = before.Id;

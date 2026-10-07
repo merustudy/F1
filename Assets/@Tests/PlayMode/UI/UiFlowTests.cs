@@ -992,11 +992,11 @@ namespace F1.Tests
             NodeMap nodes = Managers.Expedition.Expedition.Map;
             var names = new Dictionary<MapNodeKind, string>
             {
-                { MapNodeKind.Battle, "전투" }, { MapNodeKind.Elite, "정예" }, { MapNodeKind.Camp, "야영지" }, { MapNodeKind.Boss, "보스" },
+                { MapNodeKind.Battle, "전투" }, { MapNodeKind.Elite, "정예" }, { MapNodeKind.Camp, "야영지" }, { MapNodeKind.Shop, "상점" }, { MapNodeKind.Boss, "보스" },
             };
             var markers = new Dictionary<MapNodeKind, string>
             {
-                { MapNodeKind.Battle, "node_battle" }, { MapNodeKind.Elite, "node_elite" }, { MapNodeKind.Camp, "node_camp" }, { MapNodeKind.Boss, "node_boss" },
+                { MapNodeKind.Battle, "node_battle" }, { MapNodeKind.Elite, "node_elite" }, { MapNodeKind.Camp, "node_camp" }, { MapNodeKind.Shop, "node_shop" }, { MapNodeKind.Boss, "node_boss" },
             };
 
             foreach (MapNode node in nodes.Nodes)
@@ -1068,6 +1068,104 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
             Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
             Assert.AreEqual("전투 시작", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
+        }
+
+        [UnityTest]
+        public IEnumerator Shop_ItsWindowOpensOverTheMap_AnOfferIsPickedAndBoughtOntoABoard_AndTheRefreshCostsMoreEachTime()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            MapNode shop = nodes.Nodes.FirstOrDefault(n => n.Kind == MapNodeKind.Shop);
+            Assume.That(shop, Is.Not.Null, "This map has no shop node (a few maps in a hundred have none): nothing to test on it.");
+
+            // Staged before the shop with coins to spend: the chosen node says what it is and how to go in, and the header the coins.
+            yield return StandOn(nodes.Nodes.First(n => n.NextNodeIds.Contains(shop.Id)));
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            Managers.Expedition.Expedition.Coins = 100;
+            UiTestUtil.Click(map.NodeView(shop.Id).Button);
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, shop.Floor, "상점"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+            Assert.AreEqual("지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual("상점으로", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
+            Assert.AreEqual("100", UiTestUtil.TextAt(map, "Frame/Header/Coins"));
+
+            // In: the window over the map with a tile per offer, the coins and the refresh at its base cost; the way in makes room for buying into the inventory; no battle.
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.Shop, Managers.Expedition.Phase);
+            Assert.AreSame(map, Managers.UI.Current, "A shop is on the node map.");
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/Map/Shop").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/ShopBuy").gameObject.activeSelf);
+            Assert.AreEqual("지도 위의 창에서 삽니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            IReadOnlyList<RewardOption> stock = Managers.Expedition.ShopStock;
+            Assert.AreEqual(stock.Count, map.ShopTiles.Count(t => t.gameObject.activeSelf));
+            Assert.AreEqual("100", UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
+            Assert.AreEqual(data.Balance.ShopRefreshBase.ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopRefreshCost));
+            Assert.IsFalse(UiTestUtil.PointerReaches(map.NodeView(shop.Id).Button), "The window's shade takes the map's clicks.");
+
+            // The price stands beside the coin on every tile on sale, laid out as wide as its number and drawn whole: a label cut to its
+            // own width with an ellipsis lost every glyph of a two-digit price to a rounding error once (round 44).
+            foreach (ShopTileView shown in map.ShopTiles.Where(t => t.gameObject.activeSelf && !t.IsSold))
+            {
+                var priceText = UiTestUtil.At(shown, shown.name + "Fill/" + shown.name + "Price/" + shown.name + "PriceText").GetComponent<TMP_Text>();
+                Assert.Greater(priceText.rectTransform.rect.width, 0f, $"{shown.name}: the price label has no width.");
+                Assert.AreEqual(priceText.text.Length, priceText.textInfo.characterCount, $"{shown.name}: the price '{priceText.text}' is not drawn whole.");
+            }
+
+            var cost = UiTestUtil.At(map, UiTestUtil.ShopRefreshCost).GetComponent<TMP_Text>();
+            Assert.AreEqual(cost.text.Length, cost.textInfo.characterCount, "The refresh cost is drawn whole.");
+
+            // An item picked: its tile is the brass one, its card opens under the window with the notch up at it, the panel says how to buy.
+            int slot = Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == RewardKind.Item);
+            ShopTileView tile = map.ShopTiles[slot];
+            string bought = stock[slot].Id;
+            int price = Managers.Expedition.PriceOf(stock[slot]);
+            Assert.AreEqual(price.ToString(), tile.Price);
+            UiTestUtil.Click(tile.Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(slot, map.PickedOffer);
+            Assert.AreEqual(ShopTileState.Picked, tile.State);
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            Assert.IsTrue(party.Tooltip.IsShown);
+            Assert.AreEqual(ItemTooltipView.Notch.Top, party.Tooltip.NotchShown);
+            Assert.AreEqual(bought, party.Tooltip.Item.Item.Id);
+            Assert.Greater(party.Tooltip.Placed.y, party.Tooltip.Anchor.yMax, "The card hangs under the tile.");
+            Assert.AreEqual("넣을 칸을 누르면 삽니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(map, "Frame/BoardPanel/ShopBuy").interactable, "It fits the inventory.");
+
+            // Bought onto the first free cell of the row-1 board: the coins are paid, the tile is sold, the item is on the board.
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            int carried = front.Items.Count;
+            ItemSlotView free = row1.Slots.First(s => s.gameObject.activeSelf && s.Item == null);
+            UiTestUtil.Click(free.Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(100 - price, Managers.Expedition.Expedition.Coins);
+            Assert.AreEqual(carried + 1, front.Items.Count);
+            Assert.AreEqual(bought, front.Items[carried].Item.Id, "The stock's slot is empty now: the id was kept from before.");
+            Assert.IsTrue(tile.IsSold);
+            Assert.AreEqual(-1, map.PickedOffer);
+            Assert.AreEqual((100 - price).ToString(), UiTestUtil.TextAt(map, "Frame/Header/Coins"));
+            Assert.AreEqual((100 - price).ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
+
+            // The refresh: every slot is drawn anew (the sold one too), the coins pay its cost, and the next one costs more.
+            int before = Managers.Expedition.Expedition.Coins;
+            UiTestUtil.Click(map, UiTestUtil.ShopRefresh);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(before - data.Balance.ShopRefreshBase, Managers.Expedition.Expedition.Coins);
+            Assert.IsTrue(map.ShopTiles[slot].gameObject.activeSelf && !map.ShopTiles[slot].IsSold, "The sold slot is filled again.");
+            Assert.AreEqual((data.Balance.ShopRefreshBase + data.Balance.ShopRefreshStep).ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopRefreshCost));
+
+            // Leave: the window closes and the way on is offered.
+            UiTestUtil.Click(map, UiTestUtil.ShopLeave);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Shop").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
+            Assert.IsTrue(shop.NextNodeIds.All(id => map.NodeView(id).Button.interactable), "The next floor is offered.");
         }
 
         [UnityTest]

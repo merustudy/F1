@@ -22,6 +22,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(titlePlate, 960f - TitlePlateWidth / 2f, 4f, TitlePlateWidth, TitlePlateHeight);
             TextMeshProUGUI rewardTitle = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.LocalizedLabel("RewardTitle", titlePlate.transform, UiKeys.Reward.Title, 26f, UiPalette.Brass, TextAlignmentOptions.Center)), 18f);
             UiBuild.Stretch(rewardTitle.rectTransform, 20f, 8f, 20f, 8f);
+            TextMeshProUGUI coins = BuildHeaderCoins(header.transform);
 
             // The rewards, one under the other, as wide as the right half, under the potions and above the panel. Three cards fit the room.
             RectTransform options = UiBuild.Box(UiBuild.Rect("Options", frame), 980f, PartyRightTop, 920f, BoardPanelTop - 16f - PartyRightTop);
@@ -49,6 +50,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_inventoryToggle", inventoryToggle.Button);
             UiBuild.SetReference(screen, "_inventoryToggleLabel", inventoryToggle.Label);
             UiBuild.SetReference(screen, "_party", party);
+            UiBuild.SetReference(screen, "_coins", coins);
             return screen;
         }
 

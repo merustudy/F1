@@ -966,6 +966,67 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 2552399917998080
+    m_Localized: Shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580992
+    m_Localized: A place to buy items for region coins. No fight.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580993
+    m_Localized: Enter the shop
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580994
+    m_Localized: Buy in the window over the map.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580995
+    m_Localized: Buy with region coins. Leave, and go on to the next floor.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580996
+    m_Localized: Click the cell to put it in to buy it. Or take it straight into
+      the inventory.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580997
+    m_Localized: Coins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580998
+    m_Localized: Refresh
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930580999
+    m_Localized: Leave
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930581000
+    m_Localized: Sold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2552399930581001
+    m_Localized: "{0} \xB7 {1} cells"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2552399930581002
+    m_Localized: "Bought: {0} \xB7 coins {1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2552399930581003
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2552399930581004
+    m_Localized: Region coins +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1074,3 +1135,7 @@ MonoBehaviour:
         - id: 2041124016349192
         - id: 2271577767927808
         - id: 2271577780510721
+        - id: 2552399930581001
+        - id: 2552399930581002
+        - id: 2552399930581003
+        - id: 2552399930581004

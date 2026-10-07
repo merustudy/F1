@@ -54,6 +54,7 @@ namespace F1.UI
                 case GamePhase.Battle: return ScreenId.Battle;
                 case GamePhase.Reward: return ScreenId.Reward;
                 case GamePhase.Camp: return ScreenId.NodeMap;
+                case GamePhase.Shop: return ScreenId.NodeMap;
                 case GamePhase.Settlement: return ScreenId.Settlement;
                 default: throw new ArgumentOutOfRangeException(nameof(phase), phase, null);
             }

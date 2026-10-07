@@ -1065,6 +1065,76 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673257781362690
+  - m_Id: 2552399917998080
+    m_Key: Map.Shop
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689920
+  - m_Id: 2552399930580992
+    m_Key: Map.ShopHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689921
+  - m_Id: 2552399930580993
+    m_Key: Map.EnterShop
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689922
+  - m_Id: 2552399930580994
+    m_Key: Map.AtShop
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689923
+  - m_Id: 2552399930580995
+    m_Key: Map.ShopChoose
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689924
+  - m_Id: 2552399930580996
+    m_Key: Map.ShopBuyHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689925
+  - m_Id: 2552399930580997
+    m_Key: Map.ShopCoinsLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689926
+  - m_Id: 2552399930580998
+    m_Key: Map.ShopRefresh
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689927
+  - m_Id: 2552399930580999
+    m_Key: Map.ShopLeave
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689928
+  - m_Id: 2552399930581000
+    m_Key: Map.ShopSold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689929
+  - m_Id: 2552399930581001
+    m_Key: Map.ShopItemSub
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689930
+  - m_Id: 2552399930581002
+    m_Key: Map.ShopBought
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689931
+  - m_Id: 2552399930581003
+    m_Key: Map.Coins
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689932
+  - m_Id: 2552399930581004
+    m_Key: Battle.Coins
+    m_Metadata:
+      m_Items:
+      - rid: 8623673275332689933
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1967,3 +2037,65 @@ MonoBehaviour:
       data:
         m_CommentText: Item.MergeHint for a Common item, which names no tier of its
           own. {0} = item name. {1} = the tier up.
+    - rid: 8623673275332689920
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Label of a shop node: items for the region coins, no fight
+          (round 44).'
+    - rid: 8623673275332689921
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown when a shop node is selected.
+    - rid: 8623673275332689922
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Goes into the selected shop node.
+    - rid: 8623673275332689923
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In the panel while the party is at a shop: the buying is
+          in the window over the map.'
+    - rid: 8623673275332689924
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the shop window under its title.
+    - rid: 8623673275332689925
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the panel while an offer of the shop is picked.
+    - rid: 8623673275332689926
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the shop window before the coins the party has.
+    - rid: 8623673275332689927
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The shop's refresh button; its cost follows.
+    - rid: 8623673275332689928
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Leaves the shop and goes on to the next floor.
+    - rid: 8623673275332689929
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the tile of an offer that was bought.
+    - rid: 8623673275332689930
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the name of an item on offer. {0} = category. {1} =
+          cells it takes.
+    - rid: 8623673275332689931
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the detail line after a purchase. {0} = what was bought.
+          {1} = coins before. {2} = coins after.
+    - rid: 8623673275332689932
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A number of region coins beside the coin mark (the header;
+          an offer's price; the refresh cost). {0} = coins.
+    - rid: 8623673275332689933
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the result window: the region coins the victory brought
+          (round 44). {0} = coins.'

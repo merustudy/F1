@@ -1132,6 +1132,13 @@ namespace F1.UI
                 _resultDetail.text = string.Join("\n", lines);
             }
 
+            // The region coins the victory brought (round 44), under the deaths; nothing for a boss (the expedition ends) or a loss.
+            int coins = Managers.Expedition.BattleCoins;
+            if (coins > 0)
+            {
+                _resultDetail.text += "\n\n" + UiStrings.Get(UiKeys.Battle.Coins, coins);
+            }
+
             RenderControls(engine, engine.Setup.Balance, false);
         }
 

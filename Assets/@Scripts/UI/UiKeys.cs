@@ -88,6 +88,19 @@ namespace F1.UI
             public const string MendHint = "Map.MendHint";
             public const string MendBack = "Map.MendBack";
             public const string MendConfirm = "Map.MendConfirm";
+            public const string Shop = "Map.Shop";
+            public const string ShopHint = "Map.ShopHint";
+            public const string EnterShop = "Map.EnterShop";
+            public const string AtShop = "Map.AtShop";
+            public const string ShopChoose = "Map.ShopChoose";
+            public const string ShopBuyHint = "Map.ShopBuyHint";
+            public const string ShopCoinsLabel = "Map.ShopCoinsLabel";
+            public const string ShopRefresh = "Map.ShopRefresh";
+            public const string ShopLeave = "Map.ShopLeave";
+            public const string ShopSold = "Map.ShopSold";
+            public const string ShopItemSub = "Map.ShopItemSub";
+            public const string ShopBought = "Map.ShopBought";
+            public const string Coins = "Map.Coins";
         }
 
         public static class Board
@@ -185,6 +198,7 @@ namespace F1.UI
             public const string Defeat = "Battle.Defeat";
             public const string Retreated = "Battle.Retreated";
             public const string NoDeaths = "Battle.NoDeaths";
+            public const string Coins = "Battle.Coins";
             public const string ShowLog = "Battle.ShowLog";
             public const string LogTitle = "Battle.LogTitle";
             public const string FigurePlaceholder = "Battle.FigurePlaceholder";

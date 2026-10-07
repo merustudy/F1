@@ -223,23 +223,29 @@ namespace F1.Tests
         public const string CampRest = CampBox + "/CampChoices/Rest";
         public const string CampMend = CampBox + "/CampChoices/Mend";
 
+        /// <summary>The shop's window on the node map (round 44), its refresh and leave buttons, and the cost on the refresh.</summary>
+        public const string ShopBox = "Frame/Map/Shop/ShopWindow/ShopBox";
+        public const string ShopRefresh = ShopBox + "/ShopRefresh";
+        public const string ShopRefreshCost = ShopRefresh + "/ShopRefreshRow/ShopRefreshCost";
+        public const string ShopLeave = ShopBox + "/ShopLeave";
+
         /// <summary>
         /// On the node map, goes into the first node that can be chosen: a battle opens the battle screen; a camp opens its
-        /// window over the map, where the party rests, and the map is shown again.
+        /// window over the map, where the party rests, and a shop its window, which the party leaves at once; the map is shown again.
         /// </summary>
         public static IEnumerator GoIntoTheFirstNode()
         {
             NodeMapScreen map = Screen<NodeMapScreen>();
             Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             Click(map, "Frame/BoardPanel/Enter");
-            if (Managers.Expedition.Phase != GamePhase.Camp)
+            if (Managers.Expedition.Phase != GamePhase.Camp && Managers.Expedition.Phase != GamePhase.Shop)
             {
                 yield return WaitForScreen(ScreenId.Battle);
                 yield break;
             }
 
             yield return WaitForRedraw();
-            Click(map, CampRest);
+            Click(map, Managers.Expedition.Phase == GamePhase.Camp ? CampRest : ShopLeave);
             Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
             yield return WaitForRedraw();
         }

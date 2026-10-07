@@ -27,12 +27,13 @@ namespace F1.UI
         [SerializeField] Sprite _bossIcon;
         [SerializeField] Sprite _eliteIcon;
         [SerializeField] Sprite _campIcon;
+        [SerializeField] Sprite _shopIcon;
         [SerializeField] TMP_Text _label;
 
         public Button Button => _button;
         public RectTransform Rect => (RectTransform)transform;
 
-        /// <summary>The marker on show: the swords of a battle, the swords on a red diamond of an elite, the fire of a camp or the skull of the boss.</summary>
+        /// <summary>The marker on show: the swords of a battle, the swords on a red diamond of an elite, the fire of a camp, the coins of a shop or the skull of the boss.</summary>
         public Sprite Icon => _icon.sprite;
 
         /// <summary>The name under the node.</summary>
@@ -69,6 +70,7 @@ namespace F1.UI
                 case MapNodeKind.Boss: return _bossIcon;
                 case MapNodeKind.Elite: return _eliteIcon;
                 case MapNodeKind.Camp: return _campIcon;
+                case MapNodeKind.Shop: return _shopIcon;
                 default: return _battleIcon;
             }
         }

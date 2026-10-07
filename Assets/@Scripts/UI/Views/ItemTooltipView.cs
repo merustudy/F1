@@ -9,8 +9,8 @@ namespace F1.UI
     /// An item's card (2026-10-07 round 42, Docs/Architecture/12_UI.md "툴팁"): its title, facts, effects, fatigue and, on the
     /// party side, what merging it does, on an ink card with a brass hairline and the tier's stripe. The party side floats it
     /// above the board panel over the cell's column with a notch down towards the cell; the battle stands it beside the board
-    /// with a notch on the edge facing the cell (mockup 6). It takes no clicks: the screen closes it on the next press anywhere
-    /// (<see cref="PointerPress"/>).
+    /// with a notch on the edge facing the cell (mockup 6); the shop (round 44) floats it under its window with a notch up towards
+    /// the offer's tile. It takes no clicks: the screen closes it on the next press anywhere (<see cref="PointerPress"/>).
     /// </summary>
     public sealed class ItemTooltipView : MonoBehaviour
     {
@@ -21,10 +21,12 @@ namespace F1.UI
             Bottom,
             Left,
             Right,
+            Top,
         }
 
         [SerializeField] Image _stripe;
         [SerializeField] RectTransform _notchBottom;
+        [SerializeField] RectTransform _notchTop;
         [SerializeField] RectTransform _notchLeft;
         [SerializeField] RectTransform _notchRight;
         [SerializeField] TMP_Text _title;
@@ -80,6 +82,17 @@ namespace F1.UI
             Place(placed, anchor);
         }
 
+        /// <summary>The shop (round 44): under the shop's window, over the offer's tile, the notch pointing up at the tile.</summary>
+        public void ShowBelow(EquippedItem item, string mergeHint, RectTransform tile, RectTransform window)
+        {
+            var parent = (RectTransform)transform.parent;
+            Vector2 size = Fill(item, mergeHint, true);
+            Rect anchor = LocalRect(tile, parent);
+            Rect placed = TooltipPlacement.Below(anchor, size, LocalRect(window, parent).yMax, Screen(parent), out float notchX);
+            ShowNotch(Notch.Top, notchX);
+            Place(placed, anchor);
+        }
+
         public void Hide()
         {
             Item = null;
@@ -121,9 +134,11 @@ namespace F1.UI
             _notchBottom.gameObject.SetActive(notch == Notch.Bottom);
             _notchLeft.gameObject.SetActive(notch == Notch.Left);
             _notchRight.gameObject.SetActive(notch == Notch.Right);
+            _notchTop.gameObject.SetActive(notch == Notch.Top);
             switch (notch)
             {
                 case Notch.Bottom: _notchBottom.anchoredPosition = new Vector2(at, 1f); break;
+                case Notch.Top: _notchTop.anchoredPosition = new Vector2(at, -1f); break;
                 case Notch.Left: _notchLeft.anchoredPosition = new Vector2(1f, -at); break;
                 case Notch.Right: _notchRight.anchoredPosition = new Vector2(-1f, -at); break;
             }
