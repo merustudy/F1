@@ -2072,7 +2072,13 @@ namespace F1.Tests
                 "The storm is what killed it: the party carries nothing.");
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsFalse(battle.KillMomentShown);
-            Assert.AreEqual(1f, Time.timeScale);
+            // A member worn down by the long battle's blows may break down (round 38) and slow the stage on its own; that moment is
+            // not the kill moment this test is about (the hit's fatigue is 2 since stage 16, so it happens in some runs).
+            if (!battle.BreakdownMomentShown)
+            {
+                Assert.AreEqual(1f, Time.timeScale);
+            }
+
             Assert.Greater(battle.Fx.GhostsShown, ghosts, "It fades at once.");
         }
 

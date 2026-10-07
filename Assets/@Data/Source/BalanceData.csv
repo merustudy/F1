@@ -7,11 +7,11 @@ FatigueRecoveryPerDay,10
 FatigueBreakdown,100
 FatigueBattleEntry,2
 FatigueEquipment,1
-FatigueOnHit,1
+FatigueOnHit,2
 FatigueOnDog,5
 FatigueOnAllyDog,3
 FatigueOnAllyDeath,10
-FatigueOnKill,3
+FatigueOnKill,5
 VirtueChancePercent,25
 VirtueFatigue,40
 RestDays,1

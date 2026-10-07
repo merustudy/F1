@@ -89,7 +89,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 쌓이는 곳(12단계): `ExpeditionRules.BeginBattle`이 전투를 세우기 전에 살아 있는 구성원마다 전투에 들어가는 비용을 더한다. 그래서
   `BuildBattleSetup`은 그대로 상태만의 함수이고, 이어하기는 이미 더한 값으로 같은 전투를 다시 만든다(두 번 더하지 않는다).
 - 전투 안의 피로(15단계): `BattleUnitSetup.Fatigue`·`FatigueState`로 들어가 `BattleUnit.Fatigue`·`State`가 되고, 전투가 끝나면 `CompleteBattle`이 구성원에 되쓴다(`ExpeditionMember.StateId`).
-  엔진은 파티 유닛의 피로만 움직인다(`ChangeFatigue`: 피격·빈사·동료의 빈사와 죽음·처치의 덜어 냄, 이벤트 `FatigueChanged`) 그리고 움직일 때마다 판정한다(`ResolveFatigue`):
+  엔진은 파티 유닛의 피로만 움직인다(`ChangeFatigue`: 피격·빈사·동료의 빈사와 죽음·처치의 덜어 냄, 이벤트 `FatigueChanged`. 화상 틱의 피해는 피격이지만 피로를 올리지 않고 폭풍 틱은 올린다 — `ApplyDamage`가 원인 `burn`을 가른다, Design/04 §3) 그리고 움직일 때마다 판정한다(`ResolveFatigue`):
   `MaxFatigue`면 쓰러짐(`Collapse`, 이벤트 `Collapsed`: 빈사로, 이미 빈사면 죽음), `FatigueBreakdown` 이상이고 상태가 없으면 붕괴 판정(`BreakDown`, 이벤트 `BrokeDown`),
   상태가 고통이고 문턱 아래면 풀림(`FatigueStateEnded`). 전투가 시작할 때 들어온 피로를 같은 함수로 먼저 판정한다(`BattleStarted` 뒤, 패시브 앞).
 - 붕괴 판정의 난수는 `RngStream.Fatigue`(사망 판정의 `Battle` 스트림과 다름)다: 각성인지, 어느 상태인지 두 번 뽑는다. 상태의 목록은 `BattleSetup.FatigueStates`(데이터의 id 순)에서 온다.

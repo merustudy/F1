@@ -60,6 +60,28 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ABurnTick_IsAHitThatTiresNobody_AStormTickTires()
+        {
+            // The enemy's hex burns 3 at 2500 ms (and again at 5000); the ticks at 3000, 4000, 5000 deal 3, 2, 1.
+            // The storm starts at 6000 and deals 1 a tick. 2026-10-07 decision: a burn tick raises no fatigue, a storm tick does.
+            BalanceData balance = Balance(("StormStartMs", 6000), ("StormTickMs", 1000), ("StormBaseDamage", 1), ("StormGrowth", 0));
+            var hex = new EquippedItem(TestData.Item("hex", 2500, EffectKind.Burn, TargetMode.EnemyFront, 100, ItemCategory.Support), 3);
+            var battle = new BattleEngine(TestData.Setup(balance, TestData.Units(TestData.Mercenary("a", 1, 100)), TestData.Units(TestData.Enemy("e", 1, 1000, hex))));
+
+            battle.AdvanceTo(4500);
+            Assert.AreEqual(95, battle.Party[0].Hp, "Two burn ticks got through.");
+            Assert.AreEqual(2, Of(battle, BattleEventKind.Damaged).Count(e => e.Id == BattleEvent.CauseBurn));
+            Assert.AreEqual(0, battle.Party[0].Fatigue, "A burn tick tires nobody.");
+            Assert.IsEmpty(Of(battle, BattleEventKind.FatigueChanged));
+
+            battle.AdvanceTo(6000);
+            Assert.AreEqual(90, battle.Party[0].Hp, "The ticks at 5000 (1) and 6000 (3: the hex burned again at 5000), then the first storm tick (1).");
+            Assert.AreEqual(BattleEvent.CauseStorm, Of(battle, BattleEventKind.Damaged).Last().Id);
+            Assert.AreEqual(balance.FatigueOnHit, battle.Party[0].Fatigue, "The storm tick is a hit that tires.");
+            CollectionAssert.AreEqual(new[] { "hit" }, Of(battle, BattleEventKind.FatigueChanged).Select(e => e.Id));
+        }
+
+        [Test]
         public void DeathsDoor_TiresTheOneWhoReachesIt_AndItsAllies_AndADeathTiresTheAlliesMore()
         {
             BalanceData balance = Balance(("DogDeathChancePercent", 100), ("DogGraceBreakHits", 1));

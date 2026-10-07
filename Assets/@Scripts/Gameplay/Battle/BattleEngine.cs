@@ -731,8 +731,13 @@ namespace F1.Gameplay
                 enteredDog = true;
             }
 
-            // The hit tires the one hit (if it lives), and death's door tires it and its allies.
-            ChangeFatigue(target, _balance.FatigueOnHit, BattleEvent.FatigueHit);
+            // The hit tires the one hit (if it lives), and death's door tires it and its allies. A burn tick is a hit
+            // (death's door counts it) but tires nobody; a storm tick does (Docs/Design/04_Lobby_100Day_Economy.md §3).
+            if (cause != BattleEvent.CauseBurn)
+            {
+                ChangeFatigue(target, _balance.FatigueOnHit, BattleEvent.FatigueHit);
+            }
+
             if (enteredDog)
             {
                 ChangeFatigue(target, _balance.FatigueOnDog, BattleEvent.FatigueDog);

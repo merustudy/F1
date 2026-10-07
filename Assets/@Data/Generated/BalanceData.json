@@ -51,11 +51,11 @@
     },
     {
       "Key": "FatigueOnHit",
-      "Value": 1
+      "Value": 2
     },
     {
       "Key": "FatigueOnKill",
-      "Value": 3
+      "Value": 5
     },
     {
       "Key": "FatigueRecoveryPerDay",
