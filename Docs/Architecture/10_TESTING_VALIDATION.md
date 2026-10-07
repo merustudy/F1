@@ -61,6 +61,17 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 - PlayMode Test가 실제 Save 폴더를 건드리지 않는가?
 - 체인 결과를 XML로 확인했는가?
 
+## 플레이 기록 (16단계)
+
+직접 플레이의 시간을 화면별로 나눠 보기 위한 진단 기록이다. 게임 규칙, 저장, Test의 판정에 쓰지 않는다.
+
+- `PlayLog`(`@Scripts/Core/Bootstrap`)가 쓴다. `AppRoot`가 만들어 `UIManager.ScreenShown`에 묶는다: 화면이 열릴 때마다 한 줄
+  (시각, 화면, 상태 `phase= day= floor=<선 층>/<층 수> node= speed=`)이고, 부팅 때 `Boot` 한 줄(Locale, 저장된 런의 상태)이다. 열 사이는 탭이다.
+- 파일: `<persistentDataPath>/Logs/play-<시작 시각>.log`. 앱을 켤 때마다 하나이고 첫 줄을 쓸 때 만든다.
+  macOS에서는 `~/Library/Application Support/funitup/F1/Logs/`. 저장 폴더(`Saves/`)와 Git 밖이다. PlayMode Test는 임시 저장 루트 안의 `Logs/`에 써서 루트와 함께 지워진다.
+- 쓰기에 실패하면 조용히 멈춘다(게임에 영향 없음). Test: `PlayLogTests`(EditMode).
+- 집계: `Tools/playlog.py [파일]`(없으면 가장 새 파일) — 화면별 분·횟수·비율, 처음과 끝, 시간순 줄. 야영지 창과 인벤토리 팝업은 화면이 아니라 노드 맵의 시간에 든다.
+
 ## Deferred and Forbidden
 
 - Deferred: CI, 성능 Test, Player Build 자동 검증.

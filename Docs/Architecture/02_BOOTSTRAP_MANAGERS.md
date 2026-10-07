@@ -16,6 +16,7 @@ Manager 목록과 의존 방향은 `CLAUDE.md` §4가 소유한다.
 - Manager를 **전부 생성한 뒤** `Managers.Configure`로 한 번에 등록한다.
 - 초기화 상태는 `InitializationState`(NotStarted, Initializing, Initialized, Failed)로 노출한다.
 - 파괴될 때 `Managers`를 비운다.
+- 16단계의 플레이 기록(`PlayLog`)을 만들어 `UIManager.ScreenShown`에 묶는다. 저장 루트 옆의 `Logs/`에 쓴다(`10_TESTING_VALIDATION.md` "플레이 기록").
 
 ## Managers
 

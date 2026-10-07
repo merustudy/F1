@@ -61,7 +61,7 @@ Assets
 ```text
 Assets/@Scripts
 ├─ Core
-│  ├─ Bootstrap      # AppRoot, BootstrapView, MainSceneRoot, BootStep, InitializationState
+│  ├─ Bootstrap      # AppRoot, BootstrapView, MainSceneRoot, BootStep, InitializationState, PlayLog(16단계의 플레이 기록)
 │  ├─ Manager        # Managers (Service Container)
 │  ├─ Resource       # ResourceManager, ResourceScope
 │  ├─ Scene          # SceneManagerEx

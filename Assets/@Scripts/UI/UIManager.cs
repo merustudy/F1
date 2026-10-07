@@ -30,6 +30,9 @@ namespace F1.UI
         /// <summary>True while a screen is being replaced.</summary>
         public bool IsBusy { get; private set; }
 
+        /// <summary>A screen has come up (after <see cref="UIScreen.Open"/>). The play log of the tuning stage listens (Docs/Architecture/10_TESTING_VALIDATION.md "플레이 기록").</summary>
+        public event Action<ScreenId> ScreenShown;
+
         /// <summary>The overlay that blocks the game while a save has failed.</summary>
         public SaveErrorOverlay SaveError => _saveError;
 
@@ -108,6 +111,7 @@ namespace F1.UI
                 Current = screen;
                 CurrentId = id;
                 screen.Open();
+                ScreenShown?.Invoke(id);
 
                 // Screens are added last, so the overlay is moved back on top of them.
                 _saveError.transform.SetAsLastSibling();

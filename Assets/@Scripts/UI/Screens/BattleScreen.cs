@@ -141,6 +141,8 @@ namespace F1.UI
         /// <summary>The speed the player last chose. Kept for the session so every battle starts at it.</summary>
         static int _preferredSpeedPercent = Speeds[0];
 
+        /// <summary>The speed the player last chose, for the play log (AppRoot).</summary>
+        internal static int PreferredSpeedPercent => _preferredSpeedPercent;
         readonly BattleClock _clock = new BattleClock();
         readonly List<BattleUnitView> _partyViews = new List<BattleUnitView>();
         readonly List<BattleUnitView> _enemyViews = new List<BattleUnitView>();

@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using F1.Flow;
+using F1.Gameplay;
 using F1.Save;
 using F1.UI;
 using UnityEngine;
@@ -72,6 +73,28 @@ namespace F1.Core
             }
 
             return BitConverter.ToUInt64(bytes, 0);
+        }
+
+        /// <summary>
+        /// What the play log writes beside a screen: the game phase, the day and, on an expedition, the floor the party
+        /// stands on (0 before the first node), the node and the battle speed last chosen.
+        /// </summary>
+        static string PlayLogState(RunManager run, ExpeditionManager expedition)
+        {
+            if (!run.HasRun)
+            {
+                return "phase=NoRun";
+            }
+
+            string state = $"phase={expedition.Phase} day={run.Run.Day}";
+            ExpeditionState trip = expedition.Expedition;
+            if (trip != null)
+            {
+                int floor = trip.CurrentNodeId >= 0 ? trip.Map.Get(trip.CurrentNodeId).Floor : 0;
+                state += $" floor={floor}/{trip.Map.FloorCount} node={trip.CurrentNodeId}";
+            }
+
+            return state + $" speed={BattleScreen.PreferredSpeedPercent}";
         }
 
         async Awaitable InitializeAsync()
@@ -153,6 +176,11 @@ namespace F1.Core
 
                 step = BootStep.ShowMainUi;
                 await ui.BindAsync(main.UiRoot);
+                // The play log of the tuning stage (Docs/Architecture/10_TESTING_VALIDATION.md "플레이 기록"): one line per
+                // screen, beside the saves and never in them. Tests keep it inside their temporary save root.
+                var playLog = new PlayLog(Path.Combine(SaveRootOverride != null ? saveRoot : Application.persistentDataPath, PlayLog.FolderName));
+                ui.ScreenShown += id => playLog.Append(id.ToString(), PlayLogState(run, expedition));
+                playLog.Append("Boot", $"locale={setting.LocaleCode} run={run.LoadStatus}");
                 await ui.ShowAsync(ScreenId.Title);
 
                 State = InitializationState.Initialized;
