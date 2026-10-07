@@ -37,14 +37,14 @@
 
 | 파일 | 내용 |
 |---|---|
-| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다 |
+| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다. 17단계: 상점의 `ShopSlots`·`ShopRefreshBase`·`ShopRefreshStep`, 코인의 `CoinsPerEnemy`·`CoinsPerFloor`·`EliteCoinPercent` |
 | `JobData.csv` | 직업: 이름, 최대 HP, 보드의 칸 수, 기본 무기와 등급, 패시브(자리 조건 포함)와 그 설명문, 권장 열 |
-| `ItemData.csv` | 아이템: 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 보상 가중치 |
-| `PotionData.csv` | 포션: 효과와 크기, 보상 가중치, 병 아이콘 |
+| `ItemData.csv` | 아이템: 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 보상 가중치, 상점의 값 `Price`(일반 기준. 0이면 팔지 않음, 17단계) |
+| `PotionData.csv` | 포션: 효과와 크기, 보상 가중치, 병 아이콘, 상점의 값 `Price`(17단계) |
 | `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급, 그림과 그림의 크기 배율(보스는 더 크게) |
 | `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 정예 여부(Slice B), 서는 순서(앞에서부터, 넷까지) |
 | `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
-| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B) (피로도 비용은 Slice B에서 없앴다) |
+| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다) |
 | `MercenaryData.csv` | 시작 로스터: 이름, 직업 |
 | `FatigueStateData.csv` | 피로의 붕괴 판정이 주는 상태(Slice B): 종류(고통·각성), 쿨다운·받는 회복·빈사 사망 확률의 변화, 이름과 설명 |
 

@@ -48,6 +48,7 @@ Application 계층이 하는 일은 넷이다.
 | `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
 | `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기 |
+| `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기 |
 | `Reward` | 원정 중이고 보상을 고를 차례 | 보상 받기(보드나 인벤토리로), 넘기기, 아이템 옮기기, 자리 바꾸기 |
 | `Settlement` | 확인하지 않은 정산 보고가 있다 | 확인 |
@@ -64,6 +65,8 @@ Application 계층이 하는 일은 넷이다.
   전투를 세운 뒤 한 번에 저장한다. 이어하기는 저장된 피로로 같은 전투를 다시 만들 뿐 다시 더하지 않는다.
 - 야영지 노드면 `EnterNode`는 전투를 세우지 않고 야영지에 들어가(`ExpeditionRules.EnterCamp`) 저장한다. 피로는 오르지 않는다.
   `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, 칸)`이 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
+- 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
+  이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
 
 ```text
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo

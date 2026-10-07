@@ -100,14 +100,30 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§4가 소유한다. 수치는 `DungeonData`와 `BalanceData`에 있다.
 
-- 노드 종류는 `MapNodeKind`(전투, 정예, 야영지, 보스)다. 싸우는 노드(`MapNode.IsFought`)만 적 무리를 갖는다. 야영지에는 `EnemyGroupId`가 없다.
+- 노드 종류는 `MapNodeKind`(전투, 정예, 야영지, 보스, 상점(17단계))다. 싸우는 노드(`MapNode.IsFought`)만 적 무리를 갖는다. 야영지와 상점에는 `EnemyGroupId`가 없다.
 - `MapGenerator`가 노드마다 맵 난수로 종류를 뽑는다: 야영지 층(`CampFloor`)은 모두 야영지, 그 밖에서 정예가 설 수 있으면(`DungeonData.EliteCanStandOn`) 정예 확률,
-  아니면 야영지가 설 수 있으면(`CampCanStandOn`) 야영지 확률, 나머지는 전투다. 자격이 없는 층에서는 난수를 쓰지 않으므로 정예·야영지가 없는 데이터의 맵은 전과 같다.
+  아니면 야영지가 설 수 있으면(`CampCanStandOn`) 야영지 확률, 아니면 상점이 설 수 있으면(`ShopCanStandOn`: 1층과 야영지 층이 아닌 `ShopMinFloor`부터) 상점 확률, 나머지는 전투다.
+  자격이 없는 층에서는 난수를 쓰지 않으므로 정예·야영지·상점이 없는 데이터의 맵은 전과 같다.
   정예 노드는 정예 무리(`EnemyGroupData.IsElite`, `StaticData.ElitesFor`)에서, 전투 노드는 정예가 아닌 무리에서 고른다. 정예가 설 수 있는 층마다 정예 무리가 있어야 한다(`StaticData`의 검증).
 - 야영지: `ExpeditionRules.EnterCamp`가 야영지 노드로 옮겨 `ExpeditionPhase.AtCamp`로 둔다(피로를 더하지 않는다). 그동안 고를 노드는 없고(`AvailableNodes`가 빈다) 보드와 자리는 바꿀 수 있다.
   `RestAtCamp`는 살아 있는 구성원마다 HP를 최대의 `CampHealPercent`%만큼(최대를 넘지 않게) 올리고 피로를 `CampFatigueRelief`만큼 내린 뒤(`FatigueRules.Add`) `ChoosingNode`로 돌린다. 정비는 14단계다.
 - 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템 등급 `EnemyGradePerFloor`만큼 올린다.
   보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
+
+## 상점과 지역 코인 (Slice B 17단계)
+
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`(`ShopSlots`, `ShopRefreshBase`, `ShopRefreshStep`, `CoinsPerEnemy`, `CoinsPerFloor`, `EliteCoinPercent`),
+`DungeonData`(`ShopMinFloor`, `ShopChancePercent`), `ItemData`·`PotionData`의 `Price`에 있다.
+
+- 코인은 `ExpeditionState.Coins`(정수)다. 런 상태에는 없다. `ExpeditionRules.CompleteBattle`이 이긴 전투의 코인(`CoinsFor(노드)`: 적마다 + 층마다, 정예는 배, 보스와 싸우지 않는 노드는 0)을 더한다.
+  원정이 끝나면 `ExpeditionState`와 함께 버려진다(정산은 코인을 모른다).
+- 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `RewardOption`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
+  `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
+- 물건은 보상과 같은 추첨(`DrawOptions`: 보상 가중치, 겹침 없음, 빈 포션 칸이 있을 때만 포션)에 "값이 있는 것만"을 더한 것이고, 단계·등급은 그 층의 전투 보상과 같다.
+  난수는 `RngStream.Shop`(보상 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열고, 새로고침 k번째의 물건은 같은 스트림을 처음부터 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
+- 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
+- 사는 명령은 보상의 것과 짝이다: `BuyToBoard`(놓을 자리의 아이템과 합쳐지면 합치고, 아니면 `PutOnBoard`), `BuyToInventory`, `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
+  `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.
 
 ## 단계와 합치기 (Slice B 14단계)
 
@@ -147,6 +163,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 런 시드 -> 원정 시드 = Derive(런 시드, "expedition", 원정 순번)
 원정 시드 -> 맵 난수 = Derive(원정 시드, "map", 0)
           -> 보상 난수 = Derive(원정 시드, "reward", 노드 id)
+          -> 상점 난수 = Derive(원정 시드, "shop", 노드 id)
           -> 전투 시드 = Derive(원정 시드, "battle", 노드 id)
 ```
 
@@ -175,7 +192,8 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
   붙이지 않으면 직업의 권장 열 순서로 앞에서부터 세운다.
 - `formations`는 같은 파티를 가능한 모든 순서로 세워 같은 시드로 돌린다. 자리가 결과를 얼마나 바꾸는지 본다.
 - `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
-  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율을 함께 적는다. 정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11.
+  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
+  정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13.
 
 - 게임과 같은 Generated JSON을 `StaticDataLoader`로 읽고, 같은 Domain 코드를 돌린다.
 - 정책(`SimPolicy`)은 플레이어 입력을 대신한다. 게임 규칙이 아니라 시뮬 도구의 일부이고, 게임과 같은 API(`TryUsePotion`, `TryRetreat`,
@@ -194,6 +212,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
   긴 원정(노드 종류의 배치, 정예 무리, 야영지와 쉬기, 깊은 층의 적, 데이터 검증)은 `LongExpeditionTests`, 야영지의 명령과 저장은 `CampFlowTests`가 고정한다.
   단계(효과 크기, 보상의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
   전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
+  상점과 지역 코인(상점 노드의 배치, 물건과 값, 사기, 새로고침, 나가기, 전투의 코인, 데이터 검증)은 `ShopRulesTests`, 상점의 명령과 저장은 `ShopFlowTests`가 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
 ## Validation
@@ -208,6 +227,6 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 
 ## Deferred and Forbidden
 
-- Deferred: 유물, 성장과 전직, 경제, 나머지 지역 속성과 노드 종류, 최종 보스, 런의 승패, 100일 전체 시뮬.
+- Deferred: 유물, 성장과 전직, 로비의 경제(지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스, 런의 승패, 100일 전체 시뮬.
 - Forbidden: Domain에서 Unity/Managers/Save DTO 참조, 결과 계산에 부동소수점이나 시드 밖 난수 사용, 표현 계층이 상태를 바꾸기,
   규칙 없이 추가한 효과 어휘, 시뮬 통계를 Test 통과 조건으로 쓰기.

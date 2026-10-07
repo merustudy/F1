@@ -216,6 +216,7 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
   장비 피로의 표 `fatigue_tag`(32. 자주 바탕에 연보라 테, 끝이 둥근 64x40. Border 20이라 옆으로만 늘어난다)는 `Archive/32-equipment-fatigue/draw_tag.py`가 `Assets/@Art/UI/Frame`에 바로 그린다.
   지도의 정예와 야영지 표식 `node_elite`(전투의 검을 붉은 마름모 위에)와 `node_camp`(장작 둘과 불꽃)(34. 96x96, 화면의 2배)는 `Archive/34-long-map/draw_icons.py`가 `Assets/@Art/UI/Icon`에 바로 그린다.
+  상점의 표식 `node_shop`(코인 더미. 96x96)과 지역 코인 `coin`(놋쇠 원판, 64x64. 헤더·값·새로고침의 수 옆)(44)은 `Archive/44-shop-node/draw_icons.py`가 같은 곳에 그린다. 그림으로 바꾸는 것은 지시가 있을 때다.
   붕괴의 순간의 **효과 조각** `ink_burst`(먹 튐: 검정에 붉은 보라 핏줄)와 `light_burst`(빛살: 크림 원판과 금빛 빛살)(38. 1024 원본을 512로)는 `Archive/38-breakdown-fx`의 시험 문서(`STYLE_RUNTIME-fx.md`: `ui_piece`의 자리에 "무대 위의 효과 조각")와 소재(`fx.csv`)로 생성한 것이다.
   무대에서 유닛 뒤에 상태 색의 `glow`와 함께 선다(`12_UI.md` "연출"). 사용자가 먹 튐 2차(붉은 보라 먹)보다 1차를 골랐고 둘 다 0.8배(416·352)로 쓴다.
   아이템 칸의 단계 표 `tier_tag`(41. 먹색 알약에 흰 테 3, 64x40, Border 20이라 옆으로만 늘어난다. 화면이 단계의 색으로 물들인다)와 그 별 `star`(41. 흰 별에 먹 외곽선, 24x24. 화면이 단계의 글 색으로 물들인다)는
