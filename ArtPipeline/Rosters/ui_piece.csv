@@ -6,6 +6,6 @@ map_roll,"a rolled-up parchment map lying on its side, seen from the front: a sh
 dice,"two bone-colored six-sided dice lying next to each other, one turned a little, with dark ink pips, seen from the front",220x120,6
 candle_holder,"a candle holder of blackened iron seen from the front: a shallow round dish on a short stem, with a small bone-colored skull fixed to the front of the dish. Nothing stands on the dish",290x150,6
 candle_body,"a tall thick plain candle of cream wax seen from the front, standing upright, with two or three drips of wax running down its side and a short dark wick at its top. No flame, no holder",134x382,6
-candle_flame,"a single candle flame seen from the front: a teardrop of warm orange with a lighter yellow core and a dark base. No candle, no wick, no smoke",60x110,6
+candle_flame,"a single candle flame seen from the front: a teardrop of warm orange with a lighter yellow core and a dark base. No candle, no wick, no smoke",60x110,2
 skulls,"a small heap of three bone-colored skulls lying on the ground seen from the front, one on its side, with dark eye sockets",240x140,6
 gold_stud,a round stud of aged gold seen from the front: a small flat disc with a raised rim and a plain smooth middle,64x64,4
