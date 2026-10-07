@@ -59,7 +59,9 @@ namespace F1.Data
             int enemyGradePerFloor = 0,
             int bronzeFloor = 0,
             int silverFloor = 0,
-            int goldFloor = 0)
+            int goldFloor = 0,
+            int shopMinFloor = 0,
+            int shopChancePercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -98,6 +100,11 @@ namespace F1.Data
             if (eliteMinFloor < 0 || campMinFloor < 0 || eliteChancePercent < 0 || eliteChancePercent > 100 || campChancePercent < 0 || campChancePercent > 100)
             {
                 throw new DataException($"{DefinitionName} '{id}': the elite and camp floors cannot be negative and their chances are 0..100.");
+            }
+
+            if (shopMinFloor < 0 || shopChancePercent < 0 || shopChancePercent > 100)
+            {
+                throw new DataException($"{DefinitionName} '{id}': the shop floor cannot be negative and its chance is 0..100.");
             }
 
             if (campFloor != 0 && (campFloor < 2 || campFloor > floors))
@@ -149,6 +156,8 @@ namespace F1.Data
             BronzeFloor = bronzeFloor;
             SilverFloor = silverFloor;
             GoldFloor = goldFloor;
+            ShopMinFloor = shopMinFloor;
+            ShopChancePercent = shopChancePercent;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -222,6 +231,13 @@ namespace F1.Data
         [JsonProperty(Order = 21, Required = Required.Always)]
         public int GoldFloor { get; }
 
+        /// <summary>The shop nodes (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §1): from which floor a shop may stand on a node, and its chance.</summary>
+        [JsonProperty(Order = 22, Required = Required.Always)]
+        public int ShopMinFloor { get; }
+
+        [JsonProperty(Order = 23, Required = Required.Always)]
+        public int ShopChancePercent { get; }
+
         /// <summary>Whether a node of this floor may be an elite: never on the first floor or the camp floor.</summary>
         public bool EliteCanStandOn(int floor)
         {
@@ -235,6 +251,12 @@ namespace F1.Data
         public bool CampCanStandOn(int floor)
         {
             return CampChancePercent > 0 && floor >= CampMinFloor && floor > 1 && floor <= Floors && (CampFloor == 0 || floor < CampFloor - 1);
+        }
+
+        /// <summary>Whether a node of this floor may be a shop by chance: never on the first floor or the camp floor. It may stand just before the camp floor.</summary>
+        public bool ShopCanStandOn(int floor)
+        {
+            return ShopChancePercent > 0 && floor >= ShopMinFloor && floor > 1 && floor <= Floors && floor != CampFloor;
         }
 
         /// <summary>Grade of reward items offered after winning on a battle floor (1-based).</summary>

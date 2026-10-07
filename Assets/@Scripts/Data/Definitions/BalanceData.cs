@@ -92,7 +92,16 @@ namespace F1.Data
             new KeySpec(nameof(TierGoldPercent), 100, Big),
             new KeySpec(nameof(MapBranchChancePercent), 0, 100),
             new KeySpec(nameof(FinalBossLevel), 2, Big),
+            new KeySpec(nameof(ShopSlots), 1, MaxShopSlots),
+            new KeySpec(nameof(ShopRefreshBase), 0, Big),
+            new KeySpec(nameof(ShopRefreshStep), 0, Big),
+            new KeySpec(nameof(CoinsPerEnemy), 0, Big),
+            new KeySpec(nameof(CoinsPerFloor), 0, Big),
+            new KeySpec(nameof(EliteCoinPercent), 100, Big),
         };
+
+        /// <summary>The most things a shop can offer at once: what its window has room for (Docs/Architecture/12_UI.md "상점").</summary>
+        public const int MaxShopSlots = 4;
 
         readonly Dictionary<string, int> _values = new Dictionary<string, int>(StringComparer.Ordinal);
 
@@ -236,5 +245,21 @@ namespace F1.Data
         public int MapBranchChancePercent => _values[nameof(MapBranchChancePercent)];
         /// <summary>The enemy level reserved for the final boss. No other enemy may use it or a higher one.</summary>
         public int FinalBossLevel => _values[nameof(FinalBossLevel)];
+
+        /// <summary>
+        /// The shop (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5): how many things it offers at once, and what a refresh
+        /// costs the first time and how much more each time after, within one shop.
+        /// </summary>
+        public int ShopSlots => _values[nameof(ShopSlots)];
+        public int ShopRefreshBase => _values[nameof(ShopRefreshBase)];
+        public int ShopRefreshStep => _values[nameof(ShopRefreshStep)];
+
+        /// <summary>
+        /// The region coins a won battle brings: for each enemy of the group, and for each floor below the first; an elite's are
+        /// this percent of that (Docs/Design/03_Dungeon_Structure.md §5).
+        /// </summary>
+        public int CoinsPerEnemy => _values[nameof(CoinsPerEnemy)];
+        public int CoinsPerFloor => _values[nameof(CoinsPerFloor)];
+        public int EliteCoinPercent => _values[nameof(EliteCoinPercent)];
     }
 }

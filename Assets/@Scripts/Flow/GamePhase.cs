@@ -16,6 +16,8 @@ namespace F1.Flow
         Reward,
         /// <summary>On an expedition, at a camp node: choosing what to do there.</summary>
         Camp,
+        /// <summary>On an expedition, at a shop node: buying for the region coins, or leaving (Slice B stage 17).</summary>
+        Shop,
         /// <summary>The expedition ended and its settlement report has not been confirmed.</summary>
         Settlement,
     }

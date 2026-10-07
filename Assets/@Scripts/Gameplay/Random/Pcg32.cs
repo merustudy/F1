@@ -94,6 +94,8 @@ namespace F1.Gameplay
         public const ulong Input = 4UL;
         /// <summary>The breakdown at the fatigue threshold: virtue or affliction, and which one. Separate so that it never changes death rolls.</summary>
         public const ulong Fatigue = 5UL;
+        /// <summary>What a shop offers, and offers again on a refresh (Slice B stage 17). Separate from the rewards.</summary>
+        public const ulong Shop = 6UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

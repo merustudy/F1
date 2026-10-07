@@ -12,6 +12,9 @@ namespace F1.Gameplay
 
         /// <summary>At a camp node: the party chooses what to do there before going on.</summary>
         AtCamp,
+
+        /// <summary>At a shop node: the party buys what it wants for its region coins, then leaves (Slice B stage 17).</summary>
+        AtShop,
     }
 
     public enum ExpeditionResult
@@ -51,6 +54,16 @@ namespace F1.Gameplay
 
         /// <summary>Item tier. Common for a potion.</summary>
         public ItemTier Tier { get; }
+    }
+
+    /// <summary>
+    /// What a shop has for sale while the party is at it (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5): the offers
+    /// in their slots (a sold slot is null) and how many times the stock was refreshed here, which sets the next refresh's cost.
+    /// </summary>
+    public sealed class ShopState
+    {
+        public List<RewardOption> Stock = new List<RewardOption>();
+        public int Refreshes;
     }
 
     /// <summary>A mercenary while on an expedition. HP and items exist only here.</summary>
@@ -128,5 +141,14 @@ namespace F1.Gameplay
 
         /// <summary>Offered while <see cref="Phase"/> is ChoosingReward; empty otherwise.</summary>
         public List<RewardOption> PendingRewards = new List<RewardOption>();
+
+        /// <summary>
+        /// The region coins the expedition has won and not spent (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5). They
+        /// exist only here: the run has no money, and they go when the expedition ends.
+        /// </summary>
+        public int Coins;
+
+        /// <summary>The shop the party is at while <see cref="Phase"/> is AtShop; null otherwise.</summary>
+        public ShopState Shop;
     }
 }

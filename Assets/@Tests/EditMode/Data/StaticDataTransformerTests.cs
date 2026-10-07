@@ -208,7 +208,7 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenIdDuplicated_ReportsId()
         {
-            DataTransformException exception = TransformFails(StaticDataFiles.Potion, TestCsv.Potions + "tonic,강장제 둘,Tonic Two,Heal,10,1,\n");
+            DataTransformException exception = TransformFails(StaticDataFiles.Potion, TestCsv.Potions + "tonic,강장제 둘,Tonic Two,Heal,10,1,,8\n");
 
             StringAssert.Contains("duplicate id 'tonic'", exception.Errors[0]);
         }
@@ -218,12 +218,12 @@ namespace F1.Tests
         {
             DataTransformException exception = TransformFails(
                 StaticDataFiles.Potion,
-                "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon\n" +
-                "Tonic,강장제,Tonic,Heal,50,5,\n" +
-                "salve,,Salve,Heal,50,5,\n" +
-                "brew,양조주,TODO,Heal,50,5,\n" +
-                "tonic,강장제,Tonic,Explode,50,5,\n" +
-                "draught,물약,Draught,Heal,0,5,\n");
+                "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price\n" +
+                "Tonic,강장제,Tonic,Heal,50,5,,8\n" +
+                "salve,,Salve,Heal,50,5,,8\n" +
+                "brew,양조주,TODO,Heal,50,5,,8\n" +
+                "tonic,강장제,Tonic,Explode,50,5,,8\n" +
+                "draught,물약,Draught,Heal,0,5,,8\n");
 
             Assert.AreEqual(5, exception.Errors.Count);
             for (int i = 0; i < 5; i++)
@@ -246,7 +246,7 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenCsvMalformed_ReportsLine()
         {
-            DataTransformException exception = TransformFails(StaticDataFiles.Potion, "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon\ntonic,강장제\n");
+            DataTransformException exception = TransformFails(StaticDataFiles.Potion, "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price\ntonic,강장제\n");
 
             StringAssert.Contains("PotionData.csv(2)", exception.Errors[0]);
         }

@@ -15,6 +15,9 @@ namespace F1.Gameplay
 
         /// <summary>No battle: the party rests (or, later, mends an item) and goes on.</summary>
         Camp,
+
+        /// <summary>No battle: the party buys items for its region coins and goes on (Slice B stage 17).</summary>
+        Shop,
     }
 
     public sealed class MapNode
@@ -39,11 +42,11 @@ namespace F1.Gameplay
 
         public MapNodeKind Kind { get; }
 
-        /// <summary>The group fought there. Null for a camp.</summary>
+        /// <summary>The group fought there. Null for a camp or a shop.</summary>
         public string EnemyGroupId { get; }
 
-        /// <summary>True for the kinds that are fought: a battle, an elite and the boss.</summary>
-        public bool IsFought => Kind != MapNodeKind.Camp;
+        /// <summary>True for the kinds that are fought: a battle, an elite and the boss. A camp and a shop are not.</summary>
+        public bool IsFought => Kind != MapNodeKind.Camp && Kind != MapNodeKind.Shop;
 
         /// <summary>Nodes on the next floor that can be chosen after this one. Empty for the boss.</summary>
         public IReadOnlyList<int> NextNodeIds { get; }
@@ -168,8 +171,8 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// A node's kind: the camp floor is all camps; elsewhere an elite or a camp by chance where the dungeon allows one
-        /// (elite first), otherwise a battle. A chance is drawn only where it can come true.
+        /// A node's kind: the camp floor is all camps; elsewhere an elite, a camp or a shop by chance where the dungeon allows one
+        /// (in that order), otherwise a battle. A chance is drawn only where it can come true.
         /// </summary>
         static MapNodeKind DrawKind(DungeonData dungeon, int floor, Pcg32 rng)
         {
@@ -186,6 +189,11 @@ namespace F1.Gameplay
             if (dungeon.CampCanStandOn(floor) && rng.NextInt(100) < dungeon.CampChancePercent)
             {
                 return MapNodeKind.Camp;
+            }
+
+            if (dungeon.ShopCanStandOn(floor) && rng.NextInt(100) < dungeon.ShopChancePercent)
+            {
+                return MapNodeKind.Shop;
             }
 
             return MapNodeKind.Battle;

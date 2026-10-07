@@ -38,3 +38,9 @@ TierSilverPercent,300
 TierGoldPercent,400
 MapBranchChancePercent,50
 FinalBossLevel,14
+ShopSlots,4
+ShopRefreshBase,3
+ShopRefreshStep,2
+CoinsPerEnemy,1
+CoinsPerFloor,1
+EliteCoinPercent,200

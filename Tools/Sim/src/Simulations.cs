@@ -292,6 +292,14 @@ namespace F1.Sim
             public int SurvivorsAtBreakdown;
             public int SurvivorsAfflicted;
 
+            /// <summary>The shops (Slice B stage 17): shops entered, things bought and refreshes made there, and the region coins won, spent and left at the end.</summary>
+            public int Shops;
+            public int Bought;
+            public int Refreshes;
+            public long CoinsWon;
+            public long CoinsSpent;
+            public long CoinsLeft;
+
             /// <summary>Items merged a tier up, items mended at camps, and the items on the boards at the end by tier.</summary>
             public int Merges;
             public int Mends;
@@ -315,6 +323,8 @@ namespace F1.Sim
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
                 + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, bronze {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
+            Console.WriteLine($"  per expedition: shops {BattleStats.Ratio(stats.Shops, runs)}, bought {BattleStats.Ratio(stats.Bought, runs)}, refreshes {BattleStats.Ratio(stats.Refreshes, runs)}; "
+                + $"coins won {Average(stats.CoinsWon, runs)}, spent {Average(stats.CoinsSpent, runs)}, left at the end {Average(stats.CoinsLeft, runs)}");
             stats.All.Print("all battles");
             foreach (KeyValuePair<int, BattleStats> floor in stats.ByFloor)
             {
@@ -394,11 +404,27 @@ namespace F1.Sim
                         continue;
                     }
 
+                    if (state.Phase == ExpeditionPhase.AtShop)
+                    {
+                        int coinsBefore = state.Coins;
+                        stats.Bought += policy.ShopAt(data, state, out int refreshes);
+                        stats.Refreshes += refreshes;
+                        stats.CoinsSpent += coinsBefore - state.Coins;
+                        continue;
+                    }
+
                     MapNode node = SimPolicy.ChooseNode(ExpeditionRules.AvailableNodes(state));
                     if (node.Kind == MapNodeKind.Camp)
                     {
                         ExpeditionRules.EnterCamp(state, node.Id);
                         stats.Camps++;
+                        continue;
+                    }
+
+                    if (node.Kind == MapNodeKind.Shop)
+                    {
+                        ExpeditionRules.EnterShop(data, state, node.Id);
+                        stats.Shops++;
                         continue;
                     }
 
@@ -421,8 +447,12 @@ namespace F1.Sim
                     }
 
                     floorStats.Add(battle);
+                    int coinsBeforeBattle = state.Coins;
                     ExpeditionRules.CompleteBattle(data, state, battle);
+                    stats.CoinsWon += state.Coins - coinsBeforeBattle;
                 }
+
+                stats.CoinsLeft += state.Coins;
 
                 switch (state.Result)
                 {

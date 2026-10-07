@@ -23,7 +23,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/buckler"
+      "Icon": "item/buckler",
+      "Price": 12
     },
     {
       "Id": "crude_bow",
@@ -47,7 +48,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/crude-bow"
+      "Icon": "item/crude-bow",
+      "Price": 0
     },
     {
       "Id": "dagger",
@@ -71,7 +73,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/dagger"
+      "Icon": "item/dagger",
+      "Price": 10
     },
     {
       "Id": "ember_flask",
@@ -95,7 +98,8 @@
         }
       ],
       "RewardWeight": 8,
-      "Icon": "item/ember-flask"
+      "Icon": "item/ember-flask",
+      "Price": 12
     },
     {
       "Id": "fire_staff",
@@ -119,7 +123,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/fire-staff"
+      "Icon": "item/fire-staff",
+      "Price": 0
     },
     {
       "Id": "greataxe",
@@ -143,7 +148,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/greataxe"
+      "Icon": "item/greataxe",
+      "Price": 0
     },
     {
       "Id": "halberd",
@@ -167,7 +173,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/halberd"
+      "Icon": "item/halberd",
+      "Price": 22
     },
     {
       "Id": "healing_staff",
@@ -191,7 +198,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/healing-staff"
+      "Icon": "item/healing-staff",
+      "Price": 0
     },
     {
       "Id": "herb_pouch",
@@ -215,7 +223,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/herb-pouch"
+      "Icon": "item/herb-pouch",
+      "Price": 10
     },
     {
       "Id": "lantern_staff",
@@ -239,7 +248,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/lantern-staff"
+      "Icon": "item/lantern-staff",
+      "Price": 0
     },
     {
       "Id": "longbow",
@@ -263,7 +273,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/longbow"
+      "Icon": "item/longbow",
+      "Price": 16
     },
     {
       "Id": "longsword",
@@ -287,7 +298,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/longsword"
+      "Icon": "item/longsword",
+      "Price": 0
     },
     {
       "Id": "mace",
@@ -317,7 +329,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/mace"
+      "Icon": "item/mace",
+      "Price": 0
     },
     {
       "Id": "mending_chant",
@@ -341,7 +354,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/mending-chant"
+      "Icon": "item/mending-chant",
+      "Price": 0
     },
     {
       "Id": "overseer_maul",
@@ -365,7 +379,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/overseer-maul"
+      "Icon": "item/overseer-maul",
+      "Price": 0
     },
     {
       "Id": "overseer_roar",
@@ -389,7 +404,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/overseer-roar"
+      "Icon": "item/overseer-roar",
+      "Price": 0
     },
     {
       "Id": "rat_bite",
@@ -413,7 +429,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/rat-bite"
+      "Icon": "item/rat-bite",
+      "Price": 0
     },
     {
       "Id": "rusty_blade",
@@ -437,7 +454,8 @@
         }
       ],
       "RewardWeight": 0,
-      "Icon": "item/rusty-blade"
+      "Icon": "item/rusty-blade",
+      "Price": 0
     },
     {
       "Id": "spear",
@@ -461,7 +479,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/spear"
+      "Icon": "item/spear",
+      "Price": 16
     },
     {
       "Id": "ward_charm",
@@ -485,7 +504,8 @@
         }
       ],
       "RewardWeight": 10,
-      "Icon": "item/ward-charm"
+      "Icon": "item/ward-charm",
+      "Price": 12
     }
   ]
 }

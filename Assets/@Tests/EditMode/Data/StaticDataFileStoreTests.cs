@@ -73,7 +73,7 @@ namespace F1.Tests
             _store.WriteGenerated(Transform());
             Assert.IsEmpty(_store.FindStale(Transform()));
 
-            File.WriteAllText(SourcePath, TestCsv.Potions + "salve,연고,Salve,Shield,20,1,\n");
+            File.WriteAllText(SourcePath, TestCsv.Potions + "salve,연고,Salve,Shield,20,1,,8\n");
             CollectionAssert.AreEqual(new[] { StaticDataFiles.Potion.GeneratedFileName }, _store.FindStale(Transform()), "Only the changed definition is stale.");
 
             CollectionAssert.AreEqual(new[] { StaticDataFiles.Potion.GeneratedFileName }, _store.WriteGenerated(Transform()));
@@ -87,7 +87,7 @@ namespace F1.Tests
             _store.WriteGenerated(Transform());
             byte[] before = File.ReadAllBytes(GeneratedPath);
 
-            File.WriteAllText(SourcePath, TestCsv.Potions + "Broken Id,깨짐,Broken,Heal,1,1,\n");
+            File.WriteAllText(SourcePath, TestCsv.Potions + "Broken Id,깨짐,Broken,Heal,1,1,,8\n");
 
             Assert.Throws<DataTransformException>(() => _store.WriteGenerated(Transform()));
             CollectionAssert.AreEqual(before, File.ReadAllBytes(GeneratedPath));

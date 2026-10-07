@@ -160,7 +160,7 @@ namespace F1.Tests
 
         /// <summary>
         /// Plays with no input until the expedition is over: first available node, fight, close,
-        /// skip rewards. Stops at the settlement report.
+        /// skip rewards, rest at a camp, leave a shop. Stops at the settlement report.
         /// </summary>
         public void PlayExpeditionToTheEnd()
         {
@@ -177,6 +177,12 @@ namespace F1.Tests
                         break;
                     case GamePhase.Reward:
                         Expedition.SkipReward();
+                        break;
+                    case GamePhase.Camp:
+                        Expedition.RestAtCamp();
+                        break;
+                    case GamePhase.Shop:
+                        Expedition.LeaveShop();
                         break;
                     default:
                         throw new InvalidOperationException($"Unexpected phase {Expedition.Phase}.");

@@ -7,6 +7,7 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 8 (Slice B stage 17): the expedition's region Coins and, at a shop, its Shop (the stock and the refreshes).
     /// Version 4 (Slice B): fatigue builds up from 0 (a mercenary's Fatigue was what was left of the
     /// maximum), a member carries its Fatigue on the expedition, and an item says whether it is a base
     /// weapon. Version 3 (boards without empty entries, an Inventory) and version 2 (one entry per slot,
@@ -15,7 +16,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 7;
+        public const int CurrentSchemaVersion = 8;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -77,8 +78,21 @@ namespace F1.Save
         public int BattlesWon;
         public List<RewardRecord> PendingRewards;
 
+        /// <summary>The region coins won and not spent (version 8). A file without them has none.</summary>
+        public int Coins;
+
+        /// <summary>Present only while the party is at a shop (version 8).</summary>
+        public ShopRecord Shop;
+
         /// <summary>Present only while a battle is being fought.</summary>
         public BattleRecord Battle;
+    }
+
+    /// <summary>What a shop has for sale while the party is at it: the offers by slot (a sold slot is null), and how many refreshes were made there.</summary>
+    public sealed class ShopRecord
+    {
+        public List<RewardRecord> Stock;
+        public int Refreshes;
     }
 
     public sealed class MemberRecord

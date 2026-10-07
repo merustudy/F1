@@ -233,6 +233,117 @@ namespace F1.Sim
             return false;
         }
 
+        /// <summary>How many times the policy refreshes a shop's stock at most. A simulator setting, not a rule of the game.</summary>
+        const int MaxRefreshes = 2;
+
+        /// <summary>
+        /// At a shop (Slice B stage 17): without player input, leaves at once. Otherwise buys what is useful while the coins last:
+        /// a potion while fewer than two are held, an item that merges into one on a board (a tier up), an item that fits the free
+        /// cells of a member standing where it works; refreshes the stock, at most <see cref="MaxRefreshes"/> times, while nothing
+        /// on offer is useful and the coins cover the refresh and the cheapest offer; then leaves. Returns how many things it bought.
+        /// </summary>
+        public int ShopAt(StaticData data, ExpeditionState state, out int refreshes)
+        {
+            refreshes = 0;
+            int bought = 0;
+            if (Active)
+            {
+                for (int guard = 0; guard < 50; guard++)
+                {
+                    if (BuyOne(data, state))
+                    {
+                        bought++;
+                        continue;
+                    }
+
+                    if (refreshes >= MaxRefreshes || !ExpeditionRules.CanRefreshShop(data, state)
+                        || state.Coins - ExpeditionRules.RefreshCost(data, state) < CheapestOffer(data, state))
+                    {
+                        break;
+                    }
+
+                    ExpeditionRules.RefreshShop(data, state);
+                    refreshes++;
+                }
+            }
+
+            ExpeditionRules.LeaveShop(state);
+            return bought;
+        }
+
+        /// <summary>Buys the first useful offer the coins cover: a potion, a merge, then an item for a member standing where it works.</summary>
+        static bool BuyOne(StaticData data, ExpeditionState state)
+        {
+            int potionsHeld = 0;
+            foreach (string potion in state.Potions)
+            {
+                if (potion != null)
+                {
+                    potionsHeld++;
+                }
+            }
+
+            IReadOnlyList<RewardOption> stock = state.Shop.Stock;
+            for (int slot = 0; slot < stock.Count; slot++)
+            {
+                if (stock[slot] != null && stock[slot].Kind == RewardKind.Potion && potionsHeld < 2 && ExpeditionRules.CanBuyPotion(data, state, slot))
+                {
+                    ExpeditionRules.BuyPotion(data, state, slot);
+                    return true;
+                }
+            }
+
+            for (int slot = 0; slot < stock.Count; slot++)
+            {
+                RewardOption offer = stock[slot];
+                if (offer == null || offer.Kind != RewardKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
+                {
+                    continue;
+                }
+
+                var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                if (FindMergeTarget(state, item, out int member, out int cell) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, cell))
+                {
+                    ExpeditionRules.BuyToBoard(data, state, slot, member, cell);
+                    return true;
+                }
+            }
+
+            for (int slot = 0; slot < stock.Count; slot++)
+            {
+                RewardOption offer = stock[slot];
+                if (offer == null || offer.Kind != RewardKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
+                {
+                    continue;
+                }
+
+                int member = MemberWithRoomFor(state, data.Items.Get(offer.Id));
+                int cell = member < 0 ? -1 : ItemBoard.UsedCells(state.Members[member].Items);
+                if (member >= 0 && ExpeditionRules.CanBuyToBoard(data, state, slot, member, cell))
+                {
+                    ExpeditionRules.BuyToBoard(data, state, slot, member, cell);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>The lowest price among the offers still on sale, or 0 when nothing is.</summary>
+        static int CheapestOffer(StaticData data, ExpeditionState state)
+        {
+            int cheapest = int.MaxValue;
+            foreach (RewardOption offer in state.Shop.Stock)
+            {
+                if (offer != null)
+                {
+                    cheapest = Math.Min(cheapest, ExpeditionRules.PriceOf(data, offer));
+                }
+            }
+
+            return cheapest == int.MaxValue ? 0 : cheapest;
+        }
+
         /// <summary>Takes the first node offered. The map is random, so this is an unbiased path.</summary>
         public static MapNode ChooseNode(List<MapNode> available)
         {

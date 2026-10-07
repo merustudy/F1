@@ -65,6 +65,12 @@ namespace F1.Tests
                 { "TierGoldPercent", 400 },
                 { "MapBranchChancePercent", 50 },
                 { "FinalBossLevel", 14 },
+                { "ShopSlots", 4 },
+                { "ShopRefreshBase", 3 },
+                { "ShopRefreshStep", 2 },
+                { "CoinsPerEnemy", 2 },
+                { "CoinsPerFloor", 1 },
+                { "EliteCoinPercent", 200 },
             };
             foreach ((string key, int value) in overrides)
             {
@@ -76,6 +82,7 @@ namespace F1.Tests
 
         /// <param name="rows">Where the owner must stand for the item to work. Everywhere when omitted.</param>
         /// <param name="size">Cells the item takes on a board. One when omitted.</param>
+        /// <param name="price">What a shop sells it for at Common; 0 (the default) keeps it out of every shop.</param>
         public static ItemData Item(
             string id,
             int cooldownMs,
@@ -87,7 +94,8 @@ namespace F1.Tests
             int rewardWeight = 0,
             ItemEffect second = null,
             int reach = DefaultReach,
-            int size = 1)
+            int size = 1,
+            int price = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, powerPercent, reach) };
             if (second != null)
@@ -95,7 +103,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, rewardWeight);
+            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, rewardWeight, null, price);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -231,7 +239,7 @@ namespace F1.Tests
 
         /// <summary>
         /// A complete, valid data set: one dungeon of two battle floors and a boss, three jobs,
-        /// four mercenaries and a few reward items. The big items ("pike", "ballista") are never
+        /// four mercenaries and a few reward items (each priced, so a shop can stock it; the tonic too). The big items ("pike", "ballista") are never
         /// offered as rewards; board tests put them on boards directly.
         /// </summary>
         public static StaticDataParts Parts(params (string Key, int Value)[] balanceOverrides)
@@ -250,15 +258,15 @@ namespace F1.Tests
                     Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, category: ItemCategory.Support),
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
-                    Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, rewardWeight: 5),
-                    Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, rewardWeight: 5),
-                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), rewardWeight: 5),
+                    Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, rewardWeight: 5, price: 10),
+                    Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, rewardWeight: 5, price: 10),
+                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), rewardWeight: 5, price: 10),
                     Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, size: 2),
                     Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, size: 3),
                 },
                 Potions = new List<PotionData>
                 {
-                    new PotionData("tonic", Text("tonic"), PotionEffect.Heal, 40, 5),
+                    new PotionData("tonic", Text("tonic"), PotionEffect.Heal, 40, 5, null, 5),
                 },
                 Enemies = new List<EnemyData>
                 {

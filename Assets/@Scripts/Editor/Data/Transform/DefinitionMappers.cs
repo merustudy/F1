@@ -113,7 +113,7 @@ namespace F1.Editor.Data
                 "Category", "Size", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
-                "RewardWeight", RowMapping.Icon));
+                "RewardWeight", RowMapping.Icon, "Price"));
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -133,7 +133,8 @@ namespace F1.Editor.Data
                     row.Rows("Rows"),
                     effects,
                     row.Int("RewardWeight"),
-                    RowMapping.ReadArt(row, RowMapping.Icon));
+                    RowMapping.ReadArt(row, RowMapping.Icon),
+                    row.Int("Price"));
             });
         }
 
@@ -152,14 +153,15 @@ namespace F1.Editor.Data
     {
         public static List<PotionData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "RewardWeight", RowMapping.Icon));
+            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "RewardWeight", RowMapping.Icon, "Price"));
             return RowMapping.MapRows(table, errors, row => new PotionData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Enum<PotionEffect>("Effect"),
                 row.Int("Magnitude"),
                 row.Int("RewardWeight"),
-                RowMapping.ReadArt(row, RowMapping.Icon)));
+                RowMapping.ReadArt(row, RowMapping.Icon),
+                row.Int("Price")));
         }
     }
 
@@ -215,7 +217,7 @@ namespace F1.Editor.Data
                 "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "DurationDays",
                 "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background,
                 "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
-                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "BronzeFloor", "SilverFloor", "GoldFloor"));
+                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "BronzeFloor", "SilverFloor", "GoldFloor", "ShopMinFloor", "ShopChancePercent"));
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -238,7 +240,9 @@ namespace F1.Editor.Data
                 row.Int("EnemyGradePerFloor"),
                 row.Int("BronzeFloor"),
                 row.Int("SilverFloor"),
-                row.Int("GoldFloor")));
+                row.Int("GoldFloor"),
+                row.Int("ShopMinFloor"),
+                row.Int("ShopChancePercent")));
         }
     }
 

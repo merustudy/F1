@@ -77,6 +77,7 @@ namespace F1.Flow
                 {
                     case ExpeditionPhase.ChoosingReward: return GamePhase.Reward;
                     case ExpeditionPhase.AtCamp: return GamePhase.Camp;
+                    case ExpeditionPhase.AtShop: return GamePhase.Shop;
                     default: return GamePhase.NodeMap;
                 }
             }
@@ -149,14 +150,22 @@ namespace F1.Flow
             return Phase == GamePhase.NodeMap ? ExpeditionRules.AvailableNodes(Expedition) : new List<MapNode>();
         }
 
-        /// <summary>Enters a node: a battle starts there, or the party makes camp.</summary>
+        /// <summary>Enters a node: a battle starts there, or the party makes camp, or it goes into the shop.</summary>
         public void EnterNode(int nodeId)
         {
             _run.RequireWritable();
             Require(GamePhase.NodeMap);
-            if (Expedition.Map.Get(nodeId).Kind == MapNodeKind.Camp)
+            MapNodeKind kind = Expedition.Map.Get(nodeId).Kind;
+            if (kind == MapNodeKind.Camp)
             {
                 ExpeditionRules.EnterCamp(Expedition, nodeId);
+                Commit();
+                return;
+            }
+
+            if (kind == MapNodeKind.Shop)
+            {
+                ExpeditionRules.EnterShop(_data.Data, Expedition, nodeId);
                 Commit();
                 return;
             }
@@ -177,6 +186,97 @@ namespace F1.Flow
             ExpeditionRules.RestAtCamp(_data.Data, Expedition);
             Commit();
         }
+
+        // ---- The shop (Slice B stage 17) -----------------------------------------------------
+
+        /// <summary>The shop's offers by slot while the party is at one (a sold slot is null); empty otherwise.</summary>
+        public IReadOnlyList<RewardOption> ShopStock => Phase == GamePhase.Shop ? Expedition.Shop.Stock : new List<RewardOption>();
+
+        /// <summary>What an offer costs in region coins.</summary>
+        public int PriceOf(RewardOption offer)
+        {
+            return ExpeditionRules.PriceOf(_data.Data, offer);
+        }
+
+        /// <summary>What the next refresh costs at the shop the party is at; 0 elsewhere.</summary>
+        public int RefreshCost => Phase == GamePhase.Shop ? ExpeditionRules.RefreshCost(_data.Data, Expedition) : 0;
+
+        /// <summary>True when the coins cover the offer in a slot.</summary>
+        public bool CanAfford(int slot)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanAfford(_data.Data, Expedition, slot);
+        }
+
+        /// <summary>True when the item in a slot could be bought onto that cell now (as a reward would go there).</summary>
+        public bool CanBuyToBoard(int slot, int memberIndex, int cell)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToBoard(_data.Data, Expedition, slot, memberIndex, cell);
+        }
+
+        public void BuyToBoard(int slot, int memberIndex, int cell)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.BuyToBoard(_data.Data, Expedition, slot, memberIndex, cell);
+            Commit();
+        }
+
+        /// <summary>True when the item in a slot could be bought straight into the inventory now.</summary>
+        public bool CanBuyToInventory(int slot)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToInventory(_data.Data, Expedition, slot);
+        }
+
+        public void BuyToInventory(int slot)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.BuyToInventory(_data.Data, Expedition, slot);
+            Commit();
+        }
+
+        /// <summary>True when the potion in a slot could be bought now: the coins cover it and a potion slot is empty.</summary>
+        public bool CanBuyPotion(int slot)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyPotion(_data.Data, Expedition, slot);
+        }
+
+        public void BuyPotion(int slot)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.BuyPotion(_data.Data, Expedition, slot);
+            Commit();
+        }
+
+        /// <summary>Whether buying the item in a slot onto a cell would merge it into the item there.</summary>
+        public bool ShopMergesAt(int slot, int memberIndex, int cell)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.ShopMergesAt(Expedition, slot, memberIndex, cell);
+        }
+
+        /// <summary>True when the stock can be refreshed now: at a shop, with the coins for it.</summary>
+        public bool CanRefreshShop => Phase == GamePhase.Shop && ExpeditionRules.CanRefreshShop(_data.Data, Expedition);
+
+        public void RefreshShop()
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.RefreshShop(_data.Data, Expedition);
+            Commit();
+        }
+
+        /// <summary>Leaves the shop: the party goes on to the next floor.</summary>
+        public void LeaveShop()
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.LeaveShop(Expedition);
+            Commit();
+        }
+
+        /// <summary>The region coins the battle on show brought: those of its node when it was won, 0 otherwise (the boss brings none).</summary>
+        public int BattleCoins => Battle != null && Battle.IsFinished && Battle.Engine.Result == BattleResult.Victory ? ExpeditionRules.CoinsFor(_data.Data, Battle.Node) : 0;
 
         // ---- Tiers ---------------------------------------------------------------------------
 
@@ -405,7 +505,7 @@ namespace F1.Flow
             Report = null;
         }
 
-        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Reward || Phase == GamePhase.Camp;
+        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Reward || Phase == GamePhase.Camp || Phase == GamePhase.Shop;
 
         /// <summary>
         /// Applies an ended battle to the expedition, and an ended expedition to the run, in the
@@ -478,7 +578,7 @@ namespace F1.Flow
         {
             if (!IsBetweenBattles)
             {
-                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map, the reward choice or a camp.");
+                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map, the reward choice, a camp or a shop.");
             }
         }
     }

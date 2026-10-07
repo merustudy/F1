@@ -10,7 +10,8 @@
       "Effect": "Shield",
       "Magnitude": 40,
       "RewardWeight": 4,
-      "Icon": "potion/barrier-potion"
+      "Icon": "potion/barrier-potion",
+      "Price": 8
     },
     {
       "Id": "healing_potion",
@@ -21,7 +22,8 @@
       "Effect": "Heal",
       "Magnitude": 50,
       "RewardWeight": 6,
-      "Icon": "potion/healing-potion"
+      "Icon": "potion/healing-potion",
+      "Price": 8
     }
   ]
 }

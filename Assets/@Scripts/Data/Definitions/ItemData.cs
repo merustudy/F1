@@ -103,7 +103,8 @@ namespace F1.Data
             RowSpan rows,
             IReadOnlyList<ItemEffect> effects,
             int rewardWeight,
-            string icon = null)
+            string icon = null,
+            int price = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -136,12 +137,18 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': RewardWeight cannot be negative.");
             }
 
+            if (price < 0)
+            {
+                throw new DataException($"{DefinitionName} '{id}': Price cannot be negative.");
+            }
+
             Category = category;
             Size = size;
             CooldownMs = cooldownMs;
             Effects = effects;
             RewardWeight = rewardWeight;
             Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
+            Price = price;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -174,6 +181,13 @@ namespace F1.Data
         /// <summary>The logical address of the icon its cell shows. Null when it has no art yet: the cell shows the name.</summary>
         [JsonProperty(Order = 9, Required = Required.AllowNull)]
         public string Icon { get; }
+
+        /// <summary>
+        /// What a shop sells it for at Common, in region coins (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5); a tier
+        /// multiplies it as it does the effects. 0 means the shop never stocks it.
+        /// </summary>
+        [JsonProperty(Order = 10, Required = Required.Always)]
+        public int Price { get; }
 
         /// <param name="row">The row the owner stands in.</param>
         /// <param name="lineLength">How many units of the owner's side are alive.</param>

@@ -28,7 +28,9 @@
       "EnemyGradePerFloor": 0,
       "BronzeFloor": 5,
       "SilverFloor": 10,
-      "GoldFloor": 0
+      "GoldFloor": 0,
+      "ShopMinFloor": 4,
+      "ShopChancePercent": 15
     }
   ]
 }

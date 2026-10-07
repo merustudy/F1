@@ -404,6 +404,34 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Migrate_From7_ReadsWithNoCoinsAndNoShop_AndTheCoinsAreKept()
+        {
+            // Version 7 had no region coins and no shop (stage 17): such a file comes back with 0 coins at no shop.
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 7;
+            save.Expedition.Coins = 0;
+            save.Expedition.Shop = null;
+
+            RunSaveMigrator.Migrate(save, data);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            Assert.AreEqual(0, expedition.Coins);
+            Assert.IsNull(expedition.Shop);
+
+            expedition.Coins = 42;
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.AreEqual(42, again.Expedition.Coins);
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
+            Assert.AreEqual(42, read.Coins);
+
+            again.Expedition.Coins = -1;
+            AssertRefused(again, data);
+            again.Expedition.Coins = 0;
+            again.Expedition.Shop = new ShopRecord { Stock = new List<RewardRecord>(), Refreshes = 0 };
+            AssertRefused(again, data);
+        }
+
+        [Test]
         public void Save_KeepsTheTierOfEveryItemAndReward()
         {
             RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingReward);

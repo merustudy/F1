@@ -56,6 +56,20 @@ namespace F1.Flow
             {
                 From6To7(save);
             }
+
+            if (save.SchemaVersion == 7)
+            {
+                From7To8(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 7 had no region coins and no shop (Slice B stage 17): an expedition of that version has no coins (the DTO's 0)
+        /// and is at no shop (null), and no phase of it is the shop's.
+        /// </summary>
+        static void From7To8(RunSaveData save)
+        {
+            save.SchemaVersion = 8;
         }
 
         /// <summary>

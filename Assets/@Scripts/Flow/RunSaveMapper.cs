@@ -80,6 +80,8 @@ namespace F1.Flow
                 CurrentNodeId = expedition.CurrentNodeId,
                 BattlesWon = expedition.BattlesWon,
                 PendingRewards = new List<RewardRecord>(),
+                Coins = expedition.Coins,
+                Shop = ToRecord(expedition.Shop),
             };
 
             foreach (ExpeditionMember member in expedition.Members)
@@ -123,6 +125,23 @@ namespace F1.Flow
                     Inputs = inputs,
                     LogHash = Text(BattleLog.Hash(battle.Events)),
                 };
+            }
+
+            return record;
+        }
+
+        /// <summary>The shop's stock by slot, a sold slot as null; null when the party is at no shop.</summary>
+        static ShopRecord ToRecord(ShopState shop)
+        {
+            if (shop == null)
+            {
+                return null;
+            }
+
+            var record = new ShopRecord { Stock = new List<RewardRecord>(), Refreshes = shop.Refreshes };
+            foreach (RewardOption offer in shop.Stock)
+            {
+                record.Stock.Add(offer == null ? null : new RewardRecord { Kind = offer.Kind.ToString(), Id = offer.Id, Grade = offer.Grade, Tier = offer.Tier.ToString() });
             }
 
             return record;
@@ -214,6 +233,7 @@ namespace F1.Flow
             Require(data.Dungeons.Contains(record.DungeonId), $"Unknown dungeon '{record.DungeonId}'.");
             Require(record.Members != null && record.Inventory != null && record.Potions != null && record.PendingRewards != null, "A list of the expedition is missing.");
             Require(record.BattlesWon >= 0, "BattlesWon is negative.");
+            Require(record.Coins >= 0, "Coins are negative.");
 
             // The expedition seed is derived from the run, so the two must agree.
             ulong seed = Seed(record.Seed);
@@ -232,6 +252,7 @@ namespace F1.Flow
                 Result = ExpeditionResult.None,
                 CurrentNodeId = record.CurrentNodeId,
                 BattlesWon = record.BattlesWon,
+                Coins = record.Coins,
             };
 
             Require(record.Members.Count >= balance.MinPartySize && record.Members.Count <= balance.PartySize, "The party size is out of range.");
@@ -294,6 +315,7 @@ namespace F1.Flow
 
             ReadPosition(record, state);
             ReadRewards(record, data, state);
+            ReadShop(record, data, state);
             ValidateBattle(record, phase);
             return state;
         }
@@ -360,8 +382,12 @@ namespace F1.Flow
             Require(record.CurrentNodeId < state.Map.Nodes.Count, $"Node {record.CurrentNodeId} is not on the map.");
             MapNode node = state.Map.Get(record.CurrentNodeId);
             Require(state.Phase == ExpeditionPhase.InBattle || node.Kind != MapNodeKind.Boss, "The expedition cannot continue past the boss.");
+
+            // A camp is camped at or left behind; a shop is shopped at or left behind; nothing else happens at either, and neither happens elsewhere.
             Require((state.Phase == ExpeditionPhase.AtCamp) == (node.Kind == MapNodeKind.Camp && state.Phase != ExpeditionPhase.ChoosingNode),
                 "Only a camp node is camped at, and a camp node is either camped at or left behind.");
+            Require((state.Phase == ExpeditionPhase.AtShop) == (node.Kind == MapNodeKind.Shop && state.Phase != ExpeditionPhase.ChoosingNode),
+                "Only a shop node is shopped at, and a shop node is either shopped at or left behind.");
         }
 
         static void ReadRewards(ExpeditionRecord record, StaticData data, ExpeditionState state)
@@ -370,19 +396,45 @@ namespace F1.Flow
             foreach (RewardRecord reward in record.PendingRewards)
             {
                 Require(reward != null, "A reward is missing.");
-                RewardKind kind = Parse<RewardKind>(reward.Kind);
-                ItemTier tier = Parse<ItemTier>(reward.Tier);
-                if (kind == RewardKind.Item)
-                {
-                    Require(data.Items.Contains(reward.Id) && reward.Grade >= 1, $"Reward item '{reward.Id}' is not valid.");
-                }
-                else
-                {
-                    Require(data.Potions.Contains(reward.Id) && reward.Grade == 0 && tier == ItemTier.Common, $"Reward potion '{reward.Id}' is not valid.");
-                }
-
-                state.PendingRewards.Add(new RewardOption(kind, reward.Id, reward.Grade, tier));
+                state.PendingRewards.Add(ReadOption(reward, data));
             }
+        }
+
+        /// <summary>The shop the party is at (version 8): present exactly while the phase is the shop's, its stock within the slots, a sold slot null.</summary>
+        static void ReadShop(ExpeditionRecord record, StaticData data, ExpeditionState state)
+        {
+            Require((record.Shop != null) == (state.Phase == ExpeditionPhase.AtShop), "The shop record does not match the phase.");
+            if (record.Shop == null)
+            {
+                return;
+            }
+
+            Require(record.Shop.Stock != null && record.Shop.Refreshes >= 0, "The shop record is incomplete.");
+            Require(record.Shop.Stock.Count <= data.Balance.ShopSlots, $"The shop offers more than its {data.Balance.ShopSlots} slots.");
+            var shop = new ShopState { Refreshes = record.Shop.Refreshes };
+            foreach (RewardRecord offer in record.Shop.Stock)
+            {
+                shop.Stock.Add(offer == null ? null : ReadOption(offer, data));
+            }
+
+            state.Shop = shop;
+        }
+
+        /// <summary>A reward or an offer of a shop: a known item with a grade, or a known potion at Common with no grade.</summary>
+        static RewardOption ReadOption(RewardRecord record, StaticData data)
+        {
+            RewardKind kind = Parse<RewardKind>(record.Kind);
+            ItemTier tier = Parse<ItemTier>(record.Tier);
+            if (kind == RewardKind.Item)
+            {
+                Require(data.Items.Contains(record.Id) && record.Grade >= 1, $"Reward item '{record.Id}' is not valid.");
+            }
+            else
+            {
+                Require(data.Potions.Contains(record.Id) && record.Grade == 0 && tier == ItemTier.Common, $"Reward potion '{record.Id}' is not valid.");
+            }
+
+            return new RewardOption(kind, record.Id, record.Grade, tier);
         }
 
         static void ValidateBattle(ExpeditionRecord record, ExpeditionPhase phase)
