@@ -15,6 +15,8 @@
 
 # Addressables / streaming build output
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/OSX/
+/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/OSX.meta
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
