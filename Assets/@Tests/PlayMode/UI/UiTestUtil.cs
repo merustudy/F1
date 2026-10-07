@@ -126,7 +126,14 @@ namespace F1.Tests
             Assert.IsTrue(button.gameObject.activeInHierarchy, $"Button '{button.name}' is not shown.");
             Assert.IsTrue(button.interactable, $"Button '{button.name}' is disabled.");
             AssertPointerReaches(button);
+            PointerPress.Simulate();
             button.onClick.Invoke();
+        }
+
+        /// <summary>A press on nothing in particular, the way a click on the background is: what closes an item's card (round 42).</summary>
+        public static void PressTheBackground()
+        {
+            PointerPress.Simulate();
         }
 
         static void AssertPointerReaches(Button button)

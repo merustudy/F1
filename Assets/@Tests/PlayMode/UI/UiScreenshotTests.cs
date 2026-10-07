@@ -351,6 +351,14 @@ namespace F1.Tests
                         if (boss && !capturedBoss)
                         {
                             capturedBoss = true;
+                            // The card of an item in battle (round 42), before the fight has gone anywhere (every enemy still stands): the boss's
+                            // first item, to the right of its board; a press closes it.
+                            BattleBoardView bossBoard = UiTestUtil.Views<BattleBoardView>(battle).First(b => b.Unit.Side == BattleSide.Enemy && b.Items.Count > 0);
+                            UiTestUtil.Click(bossBoard.Items[0].Button);
+                            yield return Capture(prefix + "_40_battle_item_card");
+                            UiTestUtil.PressTheBackground();
+                            yield return null;
+
                             Managers.Expedition.AdvanceBattle(30000);
                             yield return Capture(prefix + "_09_boss_battle");
                         }

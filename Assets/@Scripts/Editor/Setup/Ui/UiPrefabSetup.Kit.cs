@@ -160,6 +160,114 @@ namespace F1.Editor.Setup
             image.pixelsPerUnitMultiplier = 1f / borderScale;
         }
 
+        // ---- The item card (round 42) --------------------------------------------------------------------------------------------
+
+        const float TooltipWidth = 400f;
+        const float TooltipPadding = 16f;
+        const float TooltipStripeRoom = 8f;
+        const float TooltipStripeWidth = 6f;
+        const float TooltipRadius = 4f;
+        const float TooltipLineAlpha = 0.92f;
+        const float TooltipFillAlpha = 0.94f;
+        const float TooltipRuleAlpha = 0.43f;
+        const float TooltipNotch = 16f;
+
+        /// <summary>
+        /// An item's card (round 42, Docs/Architecture/12_UI.md "툴팁"): an ink card with a brass hairline, the tier's stripe down
+        /// its left edge and the item's lines stacked inside, sized to them; notches (two diamonds clipped to what lies outside the
+        /// edge) under its bottom edge for the party side and on its side edges for the battle. Hidden until a click opens it.
+        /// </summary>
+        static ItemTooltipView BuildItemTooltip(Transform frame, string name)
+        {
+            RectTransform card = UiBuild.Rect(name, frame);
+            UiBuild.Box(card, 0f, 0f, TooltipWidth, 100f);
+            VerticalLayoutGroup lines = UiBuild.Vertical(card, 6f);
+            lines.padding = new RectOffset((int)(TooltipPadding + TooltipStripeRoom), (int)TooltipPadding, (int)TooltipPadding, (int)TooltipPadding);
+            lines.childControlWidth = true;
+            lines.childControlHeight = true;
+            lines.childForceExpandWidth = true;
+            card.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            Image line = Rounded(name + "Line", card, Tinted(UiPalette.Brass, TooltipLineAlpha), TooltipRadius);
+            UiBuild.Stretch(OutOfLayout(line.rectTransform));
+            Image fill = Rounded(name + "Fill", card, Tinted(UiPalette.Ink, TooltipFillAlpha), TooltipRadius - 1f);
+            UiBuild.Stretch(OutOfLayout(fill.rectTransform), 1f, 1f, 1f, 1f);
+            Image stripe = UiBuild.Image(name + "Stripe", card, UiPalette.TierBronze);
+            RectTransform stripeRect = OutOfLayout(stripe.rectTransform);
+            stripeRect.anchorMin = Vector2.zero;
+            stripeRect.anchorMax = new Vector2(0f, 1f);
+            stripeRect.pivot = new Vector2(0f, 0.5f);
+            stripeRect.offsetMin = new Vector2(2f, 2f);
+            stripeRect.offsetMax = new Vector2(2f + TooltipStripeWidth, -2f);
+            stripe.enabled = false;
+
+            // The notches (one shows at a time): under the bottom edge for the party side, on a side edge for the battle (mockup 6).
+            RectTransform notch = NotchClip(name + "Notch", card, Vector2.zero, new Vector2(0.5f, 1f), new Vector2(TooltipNotch * 2f, TooltipNotch), new Vector2(0.5f, 1f));
+            RectTransform notchLeft = NotchClip(name + "NotchLeft", card, new Vector2(0f, 1f), new Vector2(1f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(1f, 0.5f));
+            RectTransform notchRight = NotchClip(name + "NotchRight", card, new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(0f, 0.5f));
+
+            TextMeshProUGUI title = UiBuild.Label(name + "Title", card, 24f, UiPalette.Text);
+            Image rule = UiBuild.Image(name + "Rule", card, Tinted(UiPalette.Brass, TooltipRuleAlpha));
+            LayoutElement ruleElement = rule.gameObject.AddComponent<LayoutElement>();
+            ruleElement.minHeight = 1f;
+            ruleElement.preferredHeight = 1f;
+            TextMeshProUGUI facts = UiBuild.Label(name + "Facts", card, 19f, UiPalette.TextDim);
+            TextMeshProUGUI effects = UiBuild.Label(name + "Effects", card, 20f, UiPalette.Text);
+            TextMeshProUGUI fatigue = UiBuild.Label(name + "Fatigue", card, 19f, UiPalette.Text);
+            TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text);
+
+            var view = card.gameObject.AddComponent<ItemTooltipView>();
+            UiBuild.SetReference(view, "_stripe", stripe);
+            UiBuild.SetReference(view, "_notchBottom", notch);
+            UiBuild.SetReference(view, "_notchLeft", notchLeft);
+            UiBuild.SetReference(view, "_notchRight", notchRight);
+            UiBuild.SetReference(view, "_title", title);
+            UiBuild.SetReference(view, "_facts", facts);
+            UiBuild.SetReference(view, "_effects", effects);
+            UiBuild.SetReference(view, "_fatigue", fatigue);
+            UiBuild.SetReference(view, "_merge", merge);
+            card.gameObject.SetActive(false);
+            return view;
+        }
+
+        /// <summary>A part of the card the layout leaves where it is (the frame, the stripe, the notch).</summary>
+        static RectTransform OutOfLayout(RectTransform rect)
+        {
+            rect.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            return rect;
+        }
+
+        /// <summary>
+        /// A notch of the card: a clipping rect anchored to a point of the card, holding two diamonds (brass under ink) centred on
+        /// the card's edge, so that only the point outside the card shows. The view moves it along the edge and turns it on. Off here.
+        /// </summary>
+        static RectTransform NotchClip(string name, RectTransform card, Vector2 anchor, Vector2 pivot, Vector2 size, Vector2 diamondAnchor)
+        {
+            RectTransform clip = OutOfLayout(UiBuild.Rect(name, card));
+            clip.gameObject.AddComponent<RectMask2D>();
+            clip.anchorMin = anchor;
+            clip.anchorMax = anchor;
+            clip.pivot = pivot;
+            clip.sizeDelta = size;
+            clip.anchoredPosition = Vector2.zero;
+            Diamond(name + "Line", clip, Tinted(UiPalette.Brass, TooltipLineAlpha), TooltipNotch + 2f, diamondAnchor);
+            Diamond(name + "Fill", clip, Tinted(UiPalette.Ink, TooltipFillAlpha), TooltipNotch, diamondAnchor);
+            clip.gameObject.SetActive(false);
+            return clip;
+        }
+
+        /// <summary>A square turned 45°, centred on a point of its parent.</summary>
+        static void Diamond(string name, RectTransform parent, Color color, float size, Vector2 anchor)
+        {
+            RectTransform rect = UiBuild.Image(name, parent, color).rectTransform;
+            rect.anchorMin = anchor;
+            rect.anchorMax = anchor;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = new Vector2(size, size);
+            rect.localRotation = Quaternion.Euler(0f, 0f, 45f);
+        }
+
         /// <summary>
         /// The bag behind a board: a leather slab stretched over the cells and a little past them,
         /// so it is as long as the board. It is the first child of the cells' rect and the layout

@@ -1166,6 +1166,139 @@ namespace F1.Tests
         }
 
         [UnityTest]
+        public IEnumerator PartySide_ClickingAnItem_OpensItsCardAboveThePanel_AndTheNextPressClosesOnlyTheCard()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            PartyColumnView row2 = party.ColumnOfRow(2);
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            expedition.Members[row1.Member].Items.Add(new EquippedItem(data.Items.Get("dagger"), 8));
+            expedition.Members[row2.Member].Items.Add(new EquippedItem(data.Items.Get("dagger"), 9));
+            map.Refresh();
+            yield return null;
+            ItemTooltipView card = party.Tooltip;
+            Assert.IsFalse(card.IsShown, "No card before a click.");
+
+            // The row-1 dagger clicked: chosen as before, and its card floats just above the panel, centred on its column, with its words.
+            EquippedItem dagger = expedition.Members[row1.Member].Items[1];
+            string mergeMark = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze));
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            Assert.IsTrue(card.IsShown);
+            Assert.AreSame(dagger, card.Item);
+            Assert.AreEqual(UiText.ItemTitle(dagger), card.Title);
+            UiText.ItemCard(dagger, out string facts, out string effects, out string fatigue);
+            Assert.AreEqual(facts, UiTestUtil.TextAt(card, "ItemTooltipFacts"));
+            Assert.AreEqual(effects, UiTestUtil.TextAt(card, "ItemTooltipEffects"));
+            Assert.AreEqual(fatigue, UiTestUtil.TextAt(card, "ItemTooltipFatigue"));
+            Assert.AreEqual(UiText.MergeHint(dagger), UiTestUtil.TextAt(card, "ItemTooltipMerge"));
+            Assert.AreEqual(mergeMark, row2.Slots[1].MergeMark, "Choosing works as before.");
+            float panelTop = -((RectTransform)UiTestUtil.At(map, "Frame/BoardPanel")).anchoredPosition.y;
+            Assert.AreEqual(panelTop - TooltipPlacement.Gap, card.Placed.yMax, 0.5f, "Just above the board panel.");
+            Assert.AreEqual(card.Anchor.center.x, card.Placed.center.x, 0.5f, "Centred on the cell's column.");
+            Assert.AreEqual(BattleItemView.CellWidth, card.Anchor.width, 0.5f);
+            Assert.AreEqual(ItemTooltipView.Notch.Bottom, card.NotchShown);
+            Assert.AreEqual(card.Anchor.center.x - card.Placed.x, card.NotchAt, 0.5f, "The notch under the cell's middle.");
+            Assert.Greater(card.Placed.height, 100f, "The card grew to its lines.");
+
+            // A press anywhere closes the card and nothing else: the dagger stays chosen and the detail line still tells it.
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(card.IsShown, "A press anywhere closes the card.");
+            Assert.AreEqual(mergeMark, row2.Slots[1].MergeMark, "The dagger stays chosen.");
+            StringAssert.Contains(UiText.MergeHint(dagger), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+
+            // The chosen dagger clicked again: unchosen as before, no card.
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            Assert.IsFalse(card.IsShown);
+            Assert.AreEqual(string.Empty, row2.Slots[1].MergeMark);
+
+            // Chosen once more, its card is up; the click that puts it on row 2's dagger merges them and closes the card with the choice.
+            UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            Assert.IsTrue(card.IsShown);
+            UiTestUtil.Click(row2.Slots[1].Button);
+            yield return null;
+            Assert.IsFalse(card.IsShown, "The press that merges closes the card.");
+            Assert.AreEqual(ItemTier.Bronze, expedition.Members[row2.Member].Items[1].Tier);
+            Assert.IsNull(card.Item);
+        }
+
+        [UnityTest]
+        public IEnumerator Battle_ClickingAnItem_OpensItsCardBesideTheBoard_PartyLeftEnemyRight_NotWhileAPotionIsArmed()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleBoardView[] boards = UiTestUtil.Views<BattleBoardView>(battle);
+            BattleBoardView partyBoard = boards.First(b => b.Unit.Side == BattleSide.Party && b.Items.Count > 0);
+            BattleBoardView enemyBoard = boards.First(b => b.Unit.Side == BattleSide.Enemy && b.Items.Count > 0);
+            ItemTooltipView card = battle.Tooltip;
+            Assert.IsFalse(card.IsShown);
+
+            // An enemy's item: its card to the right of the board at the cell's height, the notch on its left edge at the cell's middle; the battle is not touched.
+            int timeBefore = Managers.Expedition.Battle.Engine.TimeMs;
+            EquippedItem enemyItem = enemyBoard.Unit.Items[0].Equipped;
+            UiTestUtil.Click(enemyBoard.Items[0].Button);
+            yield return null;
+            Assert.IsTrue(card.IsShown);
+            Assert.AreSame(enemyItem, card.Item);
+            Assert.AreEqual(UiText.ItemTitle(enemyItem), card.Title);
+            Assert.AreEqual(card.Anchor.xMax + TooltipPlacement.BesideGap, card.Placed.x, 0.5f, "To the right of the enemy's board.");
+            Assert.AreEqual(card.Anchor.y, card.Placed.y, 0.5f, "At the cell's height.");
+            Assert.AreEqual(ItemTooltipView.Notch.Left, card.NotchShown, "The notch on the edge facing the board.");
+            Assert.AreEqual(card.Anchor.center.y - card.Placed.y, card.NotchAt, 0.5f, "The notch at the cell's middle height.");
+            Assert.IsFalse(UiTestUtil.At(card, "ItemTooltipMerge").gameObject.activeSelf, "No merging in battle.");
+            Assert.IsFalse(UiTestUtil.At(card, "ItemTooltipFatigue").gameObject.activeSelf, "An enemy has no fatigue.");
+            Assert.AreEqual(timeBefore, Managers.Expedition.Battle.Engine.TimeMs, "Paused: the card changed nothing of the battle.");
+
+            // A party member's item: its card takes the enemy's place, to the left of the board when there is room (the rear rows of
+            // a full party have none: then to the right), the notch on the edge facing the board.
+            EquippedItem partyItem = partyBoard.Unit.Items[0].Equipped;
+            UiTestUtil.Click(partyBoard.Items[0].Button);
+            yield return null;
+            Assert.IsTrue(card.IsShown);
+            Assert.AreSame(partyItem, card.Item);
+            bool roomOnTheLeft = card.Anchor.x - TooltipPlacement.BesideGap - card.Placed.width >= TooltipPlacement.ScreenMargin;
+            if (roomOnTheLeft)
+            {
+                Assert.AreEqual(card.Anchor.x - TooltipPlacement.BesideGap, card.Placed.xMax, 0.5f, "To the left of the party's board.");
+                Assert.AreEqual(ItemTooltipView.Notch.Right, card.NotchShown);
+            }
+            else
+            {
+                Assert.AreEqual(card.Anchor.xMax + TooltipPlacement.BesideGap, card.Placed.x, 0.5f, "No room on the left: to the right of the board.");
+                Assert.AreEqual(ItemTooltipView.Notch.Left, card.NotchShown);
+            }
+            UiText.ItemCard(partyItem, out _, out _, out string partyFatigue);
+            Assert.AreEqual(partyFatigue, UiTestUtil.TextAt(card, "ItemTooltipFatigue"), "A member's item tells its fatigue.");
+
+            // A press anywhere closes it.
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(card.IsShown);
+
+            // A potion armed: the cells give their clicks up to the boards (the potion's targets), so no card can open; put down, they take them again.
+            PotionSlotView[] potions = UiTestUtil.Views<PotionSlotView>(battle);
+            Assume.That(potions.Length, Is.GreaterThan(0), "The expedition starts with a potion.");
+            UiTestUtil.Click(potions[0].Button);
+            yield return null;
+            Assert.IsFalse(partyBoard.Items[0].Button.interactable, "No card while a potion waits for a target.");
+            Assert.IsFalse(UiTestUtil.PointerReaches(partyBoard.Items[0].Button), "The click falls through to the board.");
+            UiTestUtil.Click(potions[0].Button);
+            yield return null;
+            Assert.IsTrue(partyBoard.Items[0].Button.interactable);
+            Assert.IsTrue(UiTestUtil.PointerReaches(partyBoard.Items[0].Button));
+        }
+
+        [UnityTest]
         public IEnumerator Reward_ACardShowsItsTier_AndTakenOntoTheSameItem_Merges()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");

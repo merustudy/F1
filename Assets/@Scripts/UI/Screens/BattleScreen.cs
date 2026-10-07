@@ -137,12 +137,15 @@ namespace F1.UI
         [SerializeField] TMP_Text _logPartyFallen;
         [SerializeField] TMP_Text _logEnemyFallen;
         [SerializeField] Button _logClose;
+        [SerializeField] ItemTooltipView _tooltip;
+        [SerializeField] RectTransform _boardPanel;
 
         /// <summary>The speed the player last chose. Kept for the session so every battle starts at it.</summary>
         static int _preferredSpeedPercent = Speeds[0];
 
         /// <summary>The speed the player last chose, for the play log (AppRoot).</summary>
         internal static int PreferredSpeedPercent => _preferredSpeedPercent;
+
         readonly BattleClock _clock = new BattleClock();
         readonly List<BattleUnitView> _partyViews = new List<BattleUnitView>();
         readonly List<BattleUnitView> _enemyViews = new List<BattleUnitView>();
@@ -222,6 +225,9 @@ namespace F1.UI
 
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
         public BattleClock Clock => _clock;
+
+        /// <summary>The card of a clicked item (round 42).</summary>
+        public ItemTooltipView Tooltip => _tooltip;
 
         /// <summary>What the battle shows when something happens. For tests.</summary>
         public BattleFxLayer Fx => _fx;
@@ -651,6 +657,13 @@ namespace F1.UI
                 return;
             }
 
+            // Round 42: the next press anywhere closes an item's card; the press's own click still does what it does.
+            PointerPress.Poll();
+            if (_tooltip.IsShown && PointerPress.PressedSince(_tooltip.ShownFrame))
+            {
+                _tooltip.Hide();
+            }
+
             AdvanceKillMoment(Time.unscaledDeltaTime);
             if (!_battle.IsFinished)
             {
@@ -823,12 +836,29 @@ namespace F1.UI
             return view;
         }
 
+        /// <summary>
+        /// Round 42: a click on an item's cell opens its card beside the board — the party's to the left, the enemy's to the
+        /// right (the candle stands in the middle). Not while a potion waits for a target, and not once the result is up.
+        /// </summary>
+        void OnItemClicked(BattleBoardView board, BattleItemView view, BattleItemState item)
+        {
+            if (_battle == null || _battle.IsFinished || _armedPotion >= 0 || _resultShown)
+            {
+                return;
+            }
+
+            bool party = board.Unit.Side == BattleSide.Party;
+            _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party);
+            Managers.Sound.PlayEffect(SoundEffect.Button);
+        }
+
         /// <summary>The unit's board of the board panel: its cells, in the panel column of its row.</summary>
         BattleBoardView CreateBoard(BattleUnit unit, Transform column)
         {
             BattleBoardView board = Instantiate(_boardTemplate, column);
             board.gameObject.SetActive(true);
             board.Bind(unit, _art);
+            board.ItemClicked += (view, item) => OnItemClicked(board, view, item);
             return board;
         }
 
@@ -888,6 +918,18 @@ namespace F1.UI
             foreach (BattleBoardView board in _enemyBoards)
             {
                 board.Render(engine, false);
+            }
+
+            // Round 42: the cells open their cards while the battle goes on and no potion is armed.
+            bool itemsClickable = ongoing && _armedPotion < 0;
+            foreach (BattleBoardView board in _partyBoards)
+            {
+                board.SetItemsClickable(itemsClickable);
+            }
+
+            foreach (BattleBoardView board in _enemyBoards)
+            {
+                board.SetItemsClickable(itemsClickable);
             }
 
             _pauseFrame.color = _clock.Paused ? UiPalette.Selected : UiPalette.ButtonQuiet;
@@ -1053,6 +1095,7 @@ namespace F1.UI
             _resultShown = true;
             _armedPotion = -1;
             _resultPanel.SetActive(true);
+            _tooltip.Hide();
 
             switch (engine.Result)
             {

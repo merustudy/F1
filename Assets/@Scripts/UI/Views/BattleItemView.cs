@@ -61,6 +61,7 @@ namespace F1.UI
         [SerializeField] Image _outline;
         [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
+        [SerializeField] Button _button;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _flash;
         [SerializeField] Image _tierTag;
@@ -81,6 +82,19 @@ namespace F1.UI
 
         /// <summary>The icon on show, or null while the name stands in for it.</summary>
         public Sprite Icon => _icon.enabled ? _icon.sprite : null;
+
+        /// <summary>The click that opens the item's card (round 42).</summary>
+        public Button Button => _button;
+
+        /// <summary>
+        /// Round 42: whether a click on the cell opens the item's card. Off while a potion waits for a target, so that the click
+        /// falls through to the board, which is the potion's target.
+        /// </summary>
+        public void SetClickable(bool clickable)
+        {
+            _button.interactable = clickable;
+            _button.targetGraphic.raycastTarget = clickable;
+        }
 
         /// <summary>True when the icon is drawn mirrored: an enemy's.</summary>
         public bool Mirrored => _icon.rectTransform.localScale.x < 0f;

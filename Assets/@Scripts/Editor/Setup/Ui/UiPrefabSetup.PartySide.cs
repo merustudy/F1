@@ -107,6 +107,7 @@ namespace F1.Editor.Setup
             BuildScreenVignette(frame);
 
             GameObject popup = BuildInventoryPopup(frame, out TMP_Text inventoryTitle, out GameObject inventoryEmpty, out InventoryEntryView entryTemplate, out RectTransform entryParent);
+            ItemTooltipView tooltip = BuildItemTooltip(frame, "ItemTooltip");
 
             var view = frame.gameObject.AddComponent<PartySideView>();
             UiBuild.SetReference(view, "_field", field);
@@ -120,6 +121,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_inventoryEmpty", inventoryEmpty);
             UiBuild.SetReference(view, "_entryTemplate", entryTemplate);
             UiBuild.SetReference(view, "_entryParent", entryParent);
+            UiBuild.SetReference(view, "_tooltip", tooltip);
+            UiBuild.SetReference(view, "_boardPanel", panel.rectTransform);
             return view;
         }
 

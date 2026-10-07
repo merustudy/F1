@@ -403,6 +403,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_logPartyFallen", logPartyFallen);
             UiBuild.SetReference(screen, "_logEnemyFallen", logEnemyFallen);
             UiBuild.SetReference(screen, "_logClose", logClose.Button);
+            UiBuild.SetReference(screen, "_tooltip", BuildItemTooltip(frame, "ItemTooltip"));
+            UiBuild.SetReference(screen, "_boardPanel", panel.rectTransform);
             return screen;
         }
 
@@ -741,6 +743,12 @@ namespace F1.Editor.Setup
         {
             Image cell = KitFrame("ItemTemplate", parent, UiArt.Slot, raycastTarget: true);
             UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
+
+            // Round 42: a click on the cell opens the item's card. Silent and without tints: the screen sounds the click, and a
+            // cell that may not be clicked (a potion waits for its board) gives up its raycast instead of dimming.
+            Button button = UiBuild.MakeButton(cell);
+            UiBuild.Silence(button);
+            button.transition = Selectable.Transition.None;
             const float rim = BattleItemView.Rim;
 
             // Under the icon: the gold of the charged part, from the left. Nothing has charged yet.
@@ -793,6 +801,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_front", front);
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_flash", flash);
             UiBuild.SetReference(view, "_outline", outline);
             UiBuild.SetReference(view, "_outlineEffect", outlineEffect);

@@ -36,6 +36,8 @@ namespace F1.UI
         [SerializeField] GameObject _inventoryEmpty;
         [SerializeField] InventoryEntryView _entryTemplate;
         [SerializeField] Transform _entryParent;
+        [SerializeField] ItemTooltipView _tooltip;
+        [SerializeField] RectTransform _boardPanel;
 
         readonly List<PotionSlotView> _potions = new List<PotionSlotView>();
         readonly List<InventoryEntryView> _entries = new List<InventoryEntryView>();
@@ -84,6 +86,9 @@ namespace F1.UI
         public Button ToInventory => _toInventory;
         public GameObject InventoryPanel => _inventoryPanel;
 
+        /// <summary>The picked item's card (round 42).</summary>
+        public ItemTooltipView Tooltip => _tooltip;
+
         public PartyColumnView ColumnOfRow(int row)
         {
             return _columns[row - BattleRows.Front];
@@ -116,6 +121,7 @@ namespace F1.UI
 
             _toInventory.onClick.AddListener(OnToInventoryClicked);
             _inventoryPanel.SetActive(false);
+            _tooltip.Hide();
         }
 
         /// <summary>
@@ -153,6 +159,41 @@ namespace F1.UI
             _selectedInventory = -1;
             _selectedPotion = -1;
             _selectedState = -1;
+            _tooltip.Hide();
+        }
+
+        /// <summary>Round 42: the next press anywhere closes the picked item's card; the press's own click still does what it does.</summary>
+        void Update()
+        {
+            PointerPress.Poll();
+            if (_tooltip.IsShown && PointerPress.PressedSince(_tooltip.ShownFrame))
+            {
+                _tooltip.Hide();
+            }
+        }
+
+        /// <summary>Round 42: the picked item's card, above the panel over its cell's column, with what merging it would do.</summary>
+        void ShowTooltip(int member, int cell)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            EquippedItem item = SelectedItem(expedition);
+            ItemSlotView slot = null;
+            foreach (ItemSlotView view in ColumnOfRow(expedition.Members[member].Row).Slots)
+            {
+                if (view.gameObject.activeSelf && view.Index == cell)
+                {
+                    slot = view;
+                    break;
+                }
+            }
+
+            if (item == null || slot == null)
+            {
+                return;
+            }
+
+            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
+            _tooltip.ShowAbove(item, merge, (RectTransform)slot.transform, _boardPanel);
         }
 
         /// <summary>
@@ -391,6 +432,7 @@ namespace F1.UI
             _selectedState = -1;
             ExpeditionManager manager = Managers.Expedition;
             SoundEffect sound = SoundEffect.Button;
+            bool picked = false;
             if (_selectedInventory >= 0)
             {
                 if (manager.CanPlaceFromInventory(_selectedInventory, member, cell))
@@ -407,6 +449,7 @@ namespace F1.UI
                 {
                     _selectedMember = member;
                     _selectedCell = cell;
+                    picked = true;
                 }
             }
             else if (member == _selectedMember && cell == _selectedCell)
@@ -426,6 +469,10 @@ namespace F1.UI
 
             Managers.Sound.PlayEffect(sound);
             Refresh();
+            if (picked)
+            {
+                ShowTooltip(member, cell);
+            }
         }
 
         void OnInventoryClicked(int index)

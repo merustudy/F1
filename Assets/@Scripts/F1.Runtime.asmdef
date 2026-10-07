@@ -6,7 +6,8 @@
         "UnityEngine.UI",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Unity.Localization"
+        "Unity.Localization",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

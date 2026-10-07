@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using F1.Data;
@@ -62,6 +63,9 @@ namespace F1.UI
                 BattleItemView view = Instantiate(_itemTemplate, _cells);
                 view.gameObject.SetActive(true);
                 BindItem(view, item);
+                BattleItemView clicked = view;
+                BattleItemState state = item;
+                view.Button.onClick.AddListener(() => ItemClicked?.Invoke(clicked, state));
                 _items.Add(view);
                 cells += item.Equipped.Item.Size;
             }
@@ -69,6 +73,18 @@ namespace F1.UI
             for (; cells < unit.Setup.ItemSlots; cells++)
             {
                 Instantiate(_emptyCellTemplate, _cells).SetActive(true);
+            }
+        }
+
+        /// <summary>A click on an item's cell (round 42): the screen opens the item's card.</summary>
+        public event Action<BattleItemView, BattleItemState> ItemClicked;
+
+        /// <summary>Round 42: whether the cells take clicks for their cards. Off while a potion waits for this board to be clicked.</summary>
+        public void SetItemsClickable(bool clickable)
+        {
+            foreach (BattleItemView item in _items)
+            {
+                item.SetClickable(clickable);
             }
         }
 

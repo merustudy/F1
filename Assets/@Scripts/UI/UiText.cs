@@ -152,6 +152,19 @@ namespace F1.UI
             return string.Join("\n", lines);
         }
 
+        /// <summary>
+        /// An item's card (round 42): the facts on one line, the effects one per line, and the fatigue line, which is null when
+        /// the item neither costs fatigue nor is a base weapon.
+        /// </summary>
+        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue)
+        {
+            facts = string.Join(FactSeparator, ItemFacts(item));
+            effects = string.Join("\n", ItemEffects(item));
+            var parts = new List<string>();
+            AddFatigue(parts, item);
+            fatigue = parts.Count == 0 ? null : parts[0];
+        }
+
         /// <summary>The same facts and effects as <see cref="ItemDetails"/> on one line, the fatigue last.</summary>
         public static string ItemSummary(EquippedItem item)
         {

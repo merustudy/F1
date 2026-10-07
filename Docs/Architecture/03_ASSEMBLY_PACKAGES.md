@@ -14,6 +14,7 @@ Assets/@Tests/PlayMode/F1.Tests.PlayMode.asmdef                             -> F
 - Layer나 Feature별로 Runtime asmdef를 나누지 않는다. 폴더는 Assembly 경계가 아니다.
 - 금지 방향: Runtime -> Editor, Runtime -> Tests, Editor -> Tests.
 - Package asmdef Reference는 그 Type을 처음 쓸 때 추가한다.
+  `F1.Runtime`의 Package 참조: TextMeshPro, UnityEngine.UI, Addressables, ResourceManager, Localization, InputSystem(2026-10-07 Round 42: 아이템 카드를 닫는 포인터의 누름을 `PointerPress`가 읽는다. EventSystem의 입력 모듈도 Input System이다).
 - Test asmdef는 `overrideReferences`를 켜고 쓰는 Precompiled DLL(`nunit.framework.dll` 등)을 전부 나열한다.
 - Runtime의 `internal`은 `InternalsVisibleTo`로 `F1.Editor`, `F1.Tests.EditMode`, `F1.Tests.PlayMode`에만 연다.
 
