@@ -67,10 +67,10 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   `ItemBoard` 한 곳에 있다. 목록과 칸 수만 받는 순수 함수다.
 - 인벤토리는 `ExpeditionState.Inventory`(목록)다. 보드에서 밀려나거나 빼낸 아이템이 들어가고, 전투 Setup에는 들어가지 않는다.
   칸 수는 `BalanceData.InventoryCells`이고 아이템은 보드처럼 크기만큼 차지한다(`ItemBoard.UsedCells`). 남은 칸은 `ExpeditionRules.FreeInventoryCells`.
-- 명령은 `ExpeditionRules`에 있다: 보상을 보드에 넣기(`TakeItemReward`)와 인벤토리로 받기(`TakeItemRewardToInventory`), 보드 사이 옮기기와
+- 명령은 `ExpeditionRules`에 있다: 전리품을 보드에 넣기(`TakeLoot`)와 인벤토리로 줍기(`TakeLootToInventory`), 보드 사이 옮기기와
   바꾸기(`MoveItem`), 인벤토리로 빼기(`MoveToInventory`), 인벤토리에서 넣기(`PlaceFromInventory`). 각각 `Can...` 질의가 있고,
   화면은 칸마다 물어서 누를 수 있는지 정한다. 자리(칸)는 화면이 고르는 것이고 규칙은 Domain이 계산한다.
-- 인벤토리로 가는 아이템(받는 보상, 빼는 아이템, 찬 자리에 넣어 밀려나는 아이템)은 남은 칸에 들어갈 때만 허용한다. 인벤토리에서 보드의 찬 자리로
+- 인벤토리로 가는 아이템(줍는 전리품, 빼는 아이템, 찬 자리에 넣어 밀려나는 아이템)은 남은 칸에 들어갈 때만 허용한다. 인벤토리에서 보드의 찬 자리로
   넣을 때는 나가는 아이템의 칸을 더해 센다. "칸에 아이템이 있어 집을 수 있는가"(`CanPickItem`)는 어디로 갈 수 있는가와 따로 묻는다:
   보드 사이의 옮기기는 인벤토리가 차도 된다.
 - 전투의 `BattleUnitSetup.Items`는 보드 그대로의 목록(빈 칸 없음)이고 `ItemSlots`는 화면이 빈 칸을 그리기 위한 칸 수다
@@ -83,7 +83,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 셈은 `FatigueRules` 한 곳에 있다: 장비가 피로를 내는지(`CostsFatigue`: 무기 장비나 방어 장비이고 기본 무기가 아님), 아이템 하나와 보드의 비용,
   전투에 들어갈 때의 비용(`BattleEntryCost` = `FatigueBattleEntry` + 장비), 범위 안에 묶는 더하기(`Add`). 화면도 같은 함수로 비용을 보인다.
 - 기본 무기는 아이템 인스턴스의 표시다(`EquippedItem.IsBase`). `ExpeditionRules.Create`가 직업의 무기에만 붙이고, 보드 사이로 옮겨도 남는다.
-  보상과 인벤토리에서 꺼낸 아이템은 기본 무기가 아니다.
+  전리품과 상점의 물건, 인벤토리에서 꺼낸 아이템은 기본 무기가 아니다.
 - 수명: 로스터의 `MercenaryState.Fatigue` → 출발할 때 `PartyMember`로 원정의 `ExpeditionMember.Fatigue`에 → 원정 동안 쌓임 → `RunRules.Settle`이
   살아 돌아온 구성원의 값을 로스터에 쓴다. 원정에 나가지 않은 날(`PassDays`)에는 로스터의 값이 내려간다.
 - 쌓이는 곳(12단계): `ExpeditionRules.BeginBattle`이 전투를 세우기 전에 살아 있는 구성원마다 전투에 들어가는 비용을 더한다. 그래서
@@ -110,6 +110,16 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템 등급 `EnemyGradePerFloor`만큼 올린다.
   보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
 
+## 전리품 (Slice B 18단계)
+
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(등급 `ItemGradeAt`, 단계 `ItemTierAt`: 상점의 물건과 같은 것)에 있다.
+
+- `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
+  `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 등급은 던전의 것, 단계는 층의 것(정예 한 단계 위)이다 — 적이 들었던 등급이 아니다.
+- `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, 칸)`(빈 칸, 찬 칸의 밀어내기, 같은 아이템 위의 합치기: 보상의 것과 같은 규칙), `TakeLootToInventory(자리)`, `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt`.
+  마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
+- 적의 아이템은 용병의 아이템과 같은 척도로 적는다(`Docs/Design/02_Combat_System.md` §4): 계수는 우리 아이템의 자리이고 적의 힘은 등급이 말한다. 그래서 던전의 등급으로 떨어진 것이 상점의 물건과 비슷한 힘이다.
+
 ## 상점과 지역 코인 (Slice B 17단계)
 
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`(`ShopSlots`, `ShopRefreshBase`, `ShopRefreshStep`, `CoinsPerEnemy`, `CoinsPerFloor`, `EliteCoinPercent`),
@@ -117,23 +127,23 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 - 코인은 `ExpeditionState.Coins`(정수)다. 런 상태에는 없다. `ExpeditionRules.CompleteBattle`이 이긴 전투의 코인(`CoinsFor(노드)`: 적마다 + 층마다, 정예는 배, 보스와 싸우지 않는 노드는 0)을 더한다.
   원정이 끝나면 `ExpeditionState`와 함께 버려진다(정산은 코인을 모른다).
-- 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `RewardOption`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
+- 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
-- 물건은 보상과 같은 추첨(`DrawOptions`: 보상 가중치, 겹침 없음, 빈 포션 칸이 있을 때만 포션)에 "값이 있는 것만"을 더한 것이고, 단계·등급은 그 층의 전투 보상과 같다.
-  난수는 `RngStream.Shop`(보상 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열고, 새로고침 k번째의 물건은 같은 스트림을 처음부터 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
+- 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템, 빈 포션 칸이 있을 때만 포션, 겹침 없음). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
+  난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열고, 새로고침 k번째의 물건은 같은 스트림을 처음부터 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
 - 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
-- 사는 명령은 보상의 것과 짝이다: `BuyToBoard`(놓을 자리의 아이템과 합쳐지면 합치고, 아니면 `PutOnBoard`), `BuyToInventory`, `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
+- 사는 명령은 전리품의 것과 짝이다: `BuyToBoard`(놓을 자리의 아이템과 합쳐지면 합치고, 아니면 `PutOnBoard`), `BuyToInventory`, `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
   `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.
 
 ## 단계와 합치기 (Slice B 14단계)
 
 규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`와 `DungeonData`에 있다.
 
-- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 보상 후보(`RewardOption.Tier`)가 갖는다. 등급은 그대로 있다.
+- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 그대로 있다.
 - 효과 크기는 한 곳에서 센다: `EquippedItem.Magnitude(balance, effect)` = `ItemEffect.MagnitudeAt(등급, BalanceData.TierPercent(단계))`(정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
-- 보상의 단계는 `DungeonData.RewardTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 보상 후보에 싣는다.
+- 단계는 `DungeonData.ItemTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 전리품과 상점의 물건에 싣는다.
 - 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드의 칸에 놓는 세 명령
-  (`MoveItem`, `PlaceFromInventory`, `TakeItemReward`)이 놓을 자리의 아이템과 합쳐지면 합친다: 그 자리에 한 단계 위(높은 등급), 놓은 것은 원래 목록에서 빠진다.
+  (`MoveItem`, `PlaceFromInventory`, `TakeLoot`)이 놓을 자리의 아이템과 합쳐지면 합친다: 그 자리에 한 단계 위(높은 등급), 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
 - 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
 
@@ -162,7 +172,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 ```text
 런 시드 -> 원정 시드 = Derive(런 시드, "expedition", 원정 순번)
 원정 시드 -> 맵 난수 = Derive(원정 시드, "map", 0)
-          -> 보상 난수 = Derive(원정 시드, "reward", 노드 id)
+          -> 전리품 난수 = Derive(원정 시드, "loot", 노드 id)
           -> 상점 난수 = Derive(원정 시드, "shop", 노드 id)
           -> 전투 시드 = Derive(원정 시드, "battle", 노드 id)
 ```
@@ -192,8 +202,9 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
   붙이지 않으면 직업의 권장 열 순서로 앞에서부터 세운다.
 - `formations`는 같은 파티를 가능한 모든 순서로 세워 같은 시드로 돌린다. 자리가 결과를 얼마나 바꾸는지 본다.
 - `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
-  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
-  정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13.
+  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 전리품(떨어진 수, 주운 수), 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
+  정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13,
+  전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14.
 
 - 게임과 같은 Generated JSON을 `StaticDataLoader`로 읽고, 같은 Domain 코드를 돌린다.
 - 정책(`SimPolicy`)은 플레이어 입력을 대신한다. 게임 규칙이 아니라 시뮬 도구의 일부이고, 게임과 같은 API(`TryUsePotion`, `TryRetreat`,
@@ -210,7 +221,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
   보드와 인벤토리는 `ItemBoardTests`와 `ExpeditionRulesTests`의 "Rewards and the item board" 묶음이 고정한다.
   피로(장비의 비용, 기본 무기, 전투에 들어갈 때 쌓임, 범위)는 `FatigueRulesTests`, 로스터와 정산은 `RunRulesTests`가 고정한다.
   긴 원정(노드 종류의 배치, 정예 무리, 야영지와 쉬기, 깊은 층의 적, 데이터 검증)은 `LongExpeditionTests`, 야영지의 명령과 저장은 `CampFlowTests`가 고정한다.
-  단계(효과 크기, 보상의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
+  단계(효과 크기, 전리품의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
   전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
   상점과 지역 코인(상점 노드의 배치, 물건과 값, 사기, 새로고침, 나가기, 전투의 코인, 데이터 검증)은 `ShopRulesTests`, 상점의 명령과 저장은 `ShopFlowTests`가 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).

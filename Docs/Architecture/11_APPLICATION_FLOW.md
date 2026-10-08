@@ -25,7 +25,7 @@ Application 계층이 하는 일은 넷이다.
 - 상태 객체(`RunState`, `ExpeditionState`, `BattleEngine`)를 바꾸는 것은 Domain 규칙 코드뿐이다. Application 계층은 규칙 함수를 부르고,
   UI는 상태를 읽기만 한다.
 - UI는 `StaticData`와 규칙 함수를 직접 부르지 않아도 되게, 필요한 질의(`CanDepart`, `CanPlaceInParty`, `AvailableNodes`, `CanMoveToRow`,
-  `CanPlaceReward`, `CanTakeRewardToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory` 등)를 Manager가 내놓는다.
+  `CanTakeLoot`, `CanTakeLootToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory` 등)를 Manager가 내놓는다.
 - Application 계층은 `UnityEngine`의 시간, Scene, GameObject를 모른다. EditMode Test로 루프 전체를 돌린다.
 
 ## 주인
@@ -50,7 +50,7 @@ Application 계층이 하는 일은 넷이다.
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기 |
-| `Reward` | 원정 중이고 보상을 고를 차례 | 보상 받기(보드나 인벤토리로), 넘기기, 아이템 옮기기, 자리 바꾸기 |
+| `Loot` | 원정 중이고 이긴 전투의 전리품이 놓여 있다(`ExpeditionPhase.PickingLoot`, 18단계) | 줍기(`TakeLoot`·`TakeLootToInventory`. 하나마다, 마지막 것을 주우면 `NodeMap`), 두고 가기(`LeaveLoot`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `CanTakeLoot`·`CanTakeLootToInventory`·`LootMergesAt`, 결과 창을 위한 `BattleLoot` |
 | `Settlement` | 확인하지 않은 정산 보고가 있다 | 확인 |
 
 - 런이 없는 상태(`RunManager.HasRun`이 거짓)는 단계가 아니다. 화면이 타이틀을 보인다.
@@ -67,6 +67,7 @@ Application 계층이 하는 일은 넷이다.
   `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, 칸)`이 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
 - 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
   이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
+  이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), 결과 창을 위해 `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전투 화면을 닫으면 전리품 화면이 온다.
 
 ```text
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo

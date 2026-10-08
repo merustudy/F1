@@ -79,7 +79,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   규칙은 `Weapon`인지만 본다(무기 패시브는 무기 장비의 피해에만). 전투 화면은 분류로 주인을 움직인다(`12_UI.md` "연출").
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
-- `ItemData.csv`와 `PotionData.csv`의 `Price`는 상점의 값이다(일반 기준의 정수. 0이면 상점에 나오지 않는다. 17단계). `DungeonData.csv`의 `ShopMinFloor`·`ShopChancePercent`는 정예·야영지의 열과 같은 방식이다.
+- `ItemData.csv`와 `PotionData.csv`의 `Price`는 상점의 값이다(일반 기준의 정수. 0이면 상점에 나오지 않는다. 17단계). `ShopWeight`는 상점에 나올 상대 확률이다(18단계에 `RewardWeight`에서 이름을 바꿨다: 전투는 적이 든 것을 떨어뜨린다). `DungeonData.csv`의 `ShopMinFloor`·`ShopChancePercent`는 정예·야영지의 열과 같은 방식이다.
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 

@@ -41,7 +41,7 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 |---|---|---|---|
 | `App` | `scope-app` | 앱이 떠 있는 동안 | Static Data, 어느 화면에서나 쓰는 UI, 소리(효과음과 배경음. `14_SOUND.md`) |
 | `Lobby` | `scope-lobby` | 로비 화면이 떠 있는 동안 | 로비 UI |
-| `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 보상, 결과 UI, 유닛의 그림, 던전의 배경 |
+| `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 전리품, 결과 UI, 유닛의 그림, 던전의 배경 |
 
 - 기획의 "런"(100일 전체)은 Scope가 아니다. 런의 Static Data는 작아서 `App`에 둔다.
 - 여러 Scope가 쓰는 Asset은 더 긴 수명의 Scope로 올린다.
