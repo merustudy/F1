@@ -6,7 +6,8 @@ namespace F1.UI
     /// <summary>
     /// The frame the pointer was last pressed in (2026-10-07 round 42): the press that closes an item's card. A screen polls
     /// it every frame and closes its card when a press came after the card was shown; the press's own click still does what
-    /// it does. Tests simulate a press, since a batch run has no device.
+    /// it does. Either mouse button counts (round 47: a right click opens a card, and the press that opens the next one closes
+    /// this one). Tests simulate a press, since a batch run has no device.
     /// </summary>
     public static class PointerPress
     {
@@ -18,7 +19,8 @@ namespace F1.UI
         {
             Mouse mouse = Mouse.current;
             Touchscreen touch = Touchscreen.current;
-            if ((mouse != null && mouse.leftButton.wasPressedThisFrame) || (touch != null && touch.primaryTouch.press.wasPressedThisFrame))
+            bool mousePressed = mouse != null && (mouse.leftButton.wasPressedThisFrame || mouse.rightButton.wasPressedThisFrame);
+            if (mousePressed || (touch != null && touch.primaryTouch.press.wasPressedThisFrame))
             {
                 LatestFrame = Time.frameCount;
             }

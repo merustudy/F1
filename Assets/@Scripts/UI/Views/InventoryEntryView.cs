@@ -5,15 +5,17 @@ using UnityEngine.UI;
 
 namespace F1.UI
 {
-    /// <summary>One item of the inventory popup: its title over a one-line summary of its facts.</summary>
+    /// <summary>One item of the inventory popup: its title over a one-line summary of its facts. A right click opens its card (round 47).</summary>
     public sealed class InventoryEntryView : MonoBehaviour
     {
         [SerializeField] Button _button;
+        [SerializeField] RightClick _rightClick;
         [SerializeField] Image _frame;
         [SerializeField] TMP_Text _title;
         [SerializeField] TMP_Text _facts;
 
         public Button Button => _button;
+        public RightClick RightClick => _rightClick;
 
         /// <summary>The item shown.</summary>
         public EquippedItem Item { get; private set; }

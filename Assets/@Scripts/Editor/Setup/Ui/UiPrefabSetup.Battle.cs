@@ -68,6 +68,36 @@ namespace F1.Editor.Setup
         const float BoardColumnsTop = 2f;
         const float BoardColumnsHeight = BoardPanelHeight - 2f * BoardColumnsTop;
 
+        /// <summary>Where the potion strip stands, top left under the header; the party side has it here too (round 46).</summary>
+        const float BattlePotionsX = 30f;
+
+        /// <summary>
+        /// After a win (2026-10-08 round 47, C): the band over the stage with the result (BattleScreen fills it; it grows to its
+        /// lines), the drops of loot lying on the floor where the enemies stood (LootDropView: the word asking for the cell, the
+        /// plate with the title, the icon on its side, the light on the floor; the drop's box stands on the floor line), and on the
+        /// board panel's right half, where the enemies' boards stood, the hint and the buttons.
+        /// </summary>
+        const float BandTop = 100f;
+        const float BandWidth = 800f;
+        const float BandPadX = 32f;
+        const float BandPadY = 14f;
+        const float BandGap = 22f;
+        const float LootDropWidth = 260f;
+        const float LootDropHeight = 200f;
+        const float LootDropWordHeight = 26f;
+        const float LootDropPlateTop = 30f;
+        const float LootDropPlateHeight = 36f;
+        const float LootDropIconWidth = 150f;
+        const float LootDropIconHeight = 70f;
+        const float LootDropIconLift = 12f;
+        const float LootDropIconTilt = -12f;
+        const float LootDropGlowWidth = 220f;
+        const float LootDropGlowHeight = 48f;
+        const float LootHintTop = 226f;
+        const float LootButtonsTop = 370f;
+        const float LootButtonHeight = 64f;
+        static readonly Color LootGlowColor = new Color(1f, 0.86f, 0.59f);
+
         /// <summary>
         /// The middle of the board panel, between the two sides' row 1 columns (FieldLayout.SideGap
         /// wide): the storm candle (2026-10-04 Diablo kit), which burns down as the storm comes, with
@@ -192,9 +222,9 @@ namespace F1.Editor.Setup
             // Potions under the retreat button. While one is chosen, its name and effect and what to do
             // next are written on a small plate next to the strip, as wide as the text; the plate is hidden
             // otherwise. The rest of the space above the field stays empty: the background shows there.
-            PotionSlotView potionTemplate = BuildPotionStrip(frame, 30f, out RectTransform potions);
+            PotionSlotView potionTemplate = BuildPotionStrip(frame, BattlePotionsX, out RectTransform potions);
             Image hintPlate = KitFrame("PotionHintPlate", frame, UiArt.PlateLabel, 0.6f);
-            UiBuild.Box(hintPlate, 30f + PotionStripWidth + 16f, 110f, 300f, 48f);
+            UiBuild.Box(hintPlate, BattlePotionsX + PotionStripWidth + 16f, 110f, 300f, 48f);
             HorizontalLayoutGroup hintLayout = UiBuild.Horizontal(hintPlate.rectTransform, 0f, 0, TextAnchor.MiddleLeft);
             hintLayout.padding = new RectOffset(22, 22, 0, 0);
             hintLayout.childControlWidth = true;
@@ -263,6 +293,17 @@ namespace F1.Editor.Setup
 
             BattleBoardView boardTemplate = BuildBattleBoard(panel.transform);
 
+            // After a win (round 47): each party column holds, hidden until then, the member's board as the node map shows it
+            // (PartyBoardView), so that the drops are put on the same boards the party arranges between battles.
+            var lootBoards = new PartyBoardView[BattleRows.Count];
+            for (int i = 0; i < BattleRows.Count; i++)
+            {
+                lootBoards[i] = BuildPartyBoard(partyBoards[i], "Loot" + (i + 1), i + 1);
+                lootBoards[i].gameObject.SetActive(false);
+            }
+
+            LootDropView lootDropTemplate = BuildLootDrop(field);
+
             // Under the candle: the battle time, then the storm's words with the storm icon.
             TextMeshProUGUI clockTime = UiBuild.SingleLine(UiBuild.Label("ClockTime", panel.transform, 28f, UiPalette.Text, TextAlignmentOptions.Center));
             UiBuild.Box(clockTime, 960f - 100f, ClockTimeTop, 200f, 40f);
@@ -277,6 +318,22 @@ namespace F1.Editor.Setup
             stormIconSize.preferredHeight = 26f;
             TextMeshProUGUI clockLabel = UiBuild.Label("ClockLabel", stormLine, 18f, UiPalette.TextDim);
             clockLabel.textWrappingMode = TextWrappingModes.NoWrap;
+
+            // After a win (round 47), on the panel's right half where the enemies' boards stood: how to pick the loot up, and the
+            // buttons (the picked drop into the inventory, the log, continue). Hidden until then.
+            TextMeshProUGUI lootHint = UiBuild.Label("LootHint", panel.transform, 19f, UiPalette.TextDim, TextAlignmentOptions.TopLeft);
+            UiBuild.Box(lootHint, 1050f, LootHintTop, 830f, 60f);
+            lootHint.gameObject.SetActive(false);
+            ButtonParts lootToInventory = KitLocalizedButton("LootToInventory", panel.transform, UiKeys.Loot.ToInventory, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Silence(lootToInventory.Button);
+            UiBuild.Box(lootToInventory.Rect, 1050f, LootButtonsTop, 240f, LootButtonHeight);
+            lootToInventory.Rect.gameObject.SetActive(false);
+            ButtonParts lootShowLog = KitLocalizedButton("LootShowLog", panel.transform, UiKeys.Battle.ShowLog, UiPalette.ButtonQuiet, 24f);
+            UiBuild.Box(lootShowLog.Rect, 1310f, LootButtonsTop, 180f, LootButtonHeight);
+            lootShowLog.Rect.gameObject.SetActive(false);
+            ButtonParts lootContinue = KitLocalizedButton("LootContinue", panel.transform, UiKeys.Common.Continue, UiPalette.Button, 30f);
+            UiBuild.Box(lootContinue.Rect, 1640f, LootButtonsTop, 240f, LootButtonHeight);
+            lootContinue.Rect.gameObject.SetActive(false);
 
             // The gloom over the whole screen, under the fx and the result.
             BuildScreenVignette(frame);
@@ -326,6 +383,34 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(fxLayer, "_wordGroup", wordGroup);
             UiBuild.SetReference(fxLayer, "_wordText", wordText);
             UiBuild.SetReference(fxLayer, "_wordName", wordName);
+
+            // The band over the stage after a win (round 47): the result in a row (victory, who fell, the coins, how many drops), and
+            // under it, when someone fell, how each death went. It grows to its lines. Hidden until then; the stage stays in view.
+            Image band = KitFrame("VictoryBand", frame, UiArt.PlateLabel);
+            UiBuild.Place(band.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BandTop), new Vector2(BandWidth, 74f));
+            VerticalLayoutGroup bandLayout = UiBuild.Vertical(band.rectTransform, 6f, 0, TextAnchor.UpperCenter);
+            bandLayout.padding = new RectOffset((int)BandPadX, (int)BandPadX, (int)BandPadY, (int)BandPadY);
+            bandLayout.childControlWidth = true;
+            bandLayout.childControlHeight = true;
+            var bandFit = band.gameObject.AddComponent<ContentSizeFitter>();
+            bandFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            bandFit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            RectTransform bandRow = UiBuild.Rect("BandRow", band.transform);
+            HorizontalLayoutGroup rowLayout = UiBuild.Horizontal(bandRow, BandGap, 0, TextAnchor.MiddleLeft);
+            rowLayout.childControlWidth = true;
+            rowLayout.childControlHeight = true;
+            TextMeshProUGUI bandTitle = UiBuild.Label("BandTitle", bandRow, 34f, UiPalette.Good, TextAlignmentOptions.BaselineLeft);
+            TextMeshProUGUI bandFallen = UiBuild.Label("BandFallen", bandRow, 22f, UiPalette.Text, TextAlignmentOptions.BaselineLeft);
+            TextMeshProUGUI bandCoins = UiBuild.Label("BandCoins", bandRow, 22f, UiPalette.Virtue, TextAlignmentOptions.BaselineLeft);
+            TextMeshProUGUI bandLoot = UiBuild.Label("BandLoot", bandRow, 22f, UiPalette.Text, TextAlignmentOptions.BaselineLeft);
+            foreach (TextMeshProUGUI text in new[] { bandTitle, bandFallen, bandCoins, bandLoot })
+            {
+                text.textWrappingMode = TextWrappingModes.NoWrap;
+            }
+
+            TextMeshProUGUI bandDetail = UiBuild.Label("BandDetail", band.transform, 18f, UiPalette.Text, TextAlignmentOptions.TopLeft);
+            bandDetail.gameObject.SetActive(false);
+            band.gameObject.SetActive(false);
 
             // Result: covers the field when the battle has ended.
             Image overlay = UiBuild.Image("ResultPanel", frame, UiPalette.Overlay, raycastTarget: true);
@@ -405,7 +490,75 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_logClose", logClose.Button);
             UiBuild.SetReference(screen, "_tooltip", BuildItemTooltip(frame, "ItemTooltip"));
             UiBuild.SetReference(screen, "_boardPanel", panel.rectTransform);
+            UiBuild.SetReferences(screen, "_lootBoards", lootBoards);
+            UiBuild.SetReference(screen, "_lootDropTemplate", lootDropTemplate);
+            UiBuild.SetReference(screen, "_band", band.gameObject);
+            UiBuild.SetReference(screen, "_bandTitle", bandTitle);
+            UiBuild.SetReference(screen, "_bandFallen", bandFallen);
+            UiBuild.SetReference(screen, "_bandCoins", bandCoins);
+            UiBuild.SetReference(screen, "_bandLoot", bandLoot);
+            UiBuild.SetReference(screen, "_bandDetail", bandDetail);
+            UiBuild.SetReference(screen, "_lootHint", lootHint);
+            UiBuild.SetReference(screen, "_lootToInventory", lootToInventory.Button);
+            UiBuild.SetReference(screen, "_lootShowLog", lootShowLog.Button);
+            UiBuild.SetReference(screen, "_lootContinue", lootContinue.Button);
             return screen;
+        }
+
+        /// <summary>
+        /// A drop of loot on the stage's floor (round 47, C; LootDropView): its box stands on the floor line where an enemy stood
+        /// (the screen puts it at the enemy column's middle). From the top: the word that asks for the cell while the drop is picked,
+        /// the plate with the item's title (an ink plate with a brass hairline, as wide as its words; gold while picked), the icon
+        /// lying on its side, and the soft light on the floor under it. The whole box is the button, silent; a right click opens the card.
+        /// </summary>
+        static LootDropView BuildLootDrop(RectTransform field)
+        {
+            RectTransform root = UiBuild.Rect("LootDropTemplate", field);
+            UiBuild.Place(root, new Vector2(0f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -(BattleFloorY - LootDropHeight)), new Vector2(LootDropWidth, LootDropHeight));
+            Image hit = UiBuild.Image("LootDropHit", root, Color.clear, raycastTarget: true);
+            UiBuild.Stretch(hit.rectTransform);
+            Button button = UiBuild.MakeButton(hit);
+            UiBuild.Silence(button);
+            button.transition = Selectable.Transition.None;
+            var rightClick = hit.gameObject.AddComponent<RightClick>();
+
+            Image glow = UiBuild.Image("LootDropGlow", root, Tinted(LootGlowColor, 0.28f));
+            glow.sprite = UiArt.Load(UiArt.Glow);
+            UiBuild.Place(glow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 4f), new Vector2(LootDropGlowWidth, LootDropGlowHeight));
+
+            Image icon = UiBuild.Image("LootDropIcon", root, Color.white);
+            icon.preserveAspect = true;
+            UiBuild.Place(icon.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, LootDropIconLift), new Vector2(LootDropIconWidth, LootDropIconHeight));
+            icon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, LootDropIconTilt);
+
+            Image plate = Rounded("LootDropPlate", root, Tinted(UiPalette.Brass, TooltipLineAlpha), 5f);
+            UiBuild.Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -LootDropPlateTop), new Vector2(LootDropWidth, LootDropPlateHeight));
+            HorizontalLayoutGroup plateLayout = UiBuild.Horizontal(plate.rectTransform, 0f, 0, TextAnchor.MiddleCenter);
+            plateLayout.padding = new RectOffset(14, 14, 0, 0);
+            plateLayout.childControlWidth = true;
+            plateLayout.childControlHeight = true;
+            var plateFit = plate.gameObject.AddComponent<ContentSizeFitter>();
+            plateFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            Image plateFill = Rounded("LootDropPlateFill", plate.transform, Tinted(UiPalette.Ink, TooltipFillAlpha), 4f);
+            UiBuild.Stretch(plateFill.rectTransform, 1f, 1f, 1f, 1f);
+            plateFill.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            TextMeshProUGUI title = UiBuild.Label("LootDropTitle", plate.transform, 20f, UiPalette.Text, TextAlignmentOptions.Center);
+            title.textWrappingMode = TextWrappingModes.NoWrap;
+
+            TextMeshProUGUI word = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.LocalizedLabel("LootDropWord", root, UiKeys.Loot.Selected, 18f, UiPalette.Virtue, TextAlignmentOptions.Center)));
+            UiBuild.Place(word.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(LootDropWidth, LootDropWordHeight));
+            word.gameObject.SetActive(false);
+
+            var view = root.gameObject.AddComponent<LootDropView>();
+            UiBuild.SetReference(view, "_button", button);
+            UiBuild.SetReference(view, "_rightClick", rightClick);
+            UiBuild.SetReference(view, "_glow", glow);
+            UiBuild.SetReference(view, "_icon", icon);
+            UiBuild.SetReference(view, "_plateLine", plate);
+            UiBuild.SetReference(view, "_title", title);
+            UiBuild.SetReference(view, "_pickedWord", word);
+            root.gameObject.SetActive(false);
+            return view;
         }
 
         /// <summary>
@@ -744,8 +897,9 @@ namespace F1.Editor.Setup
             Image cell = KitFrame("ItemTemplate", parent, UiArt.Slot, raycastTarget: true);
             UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
 
-            // Round 42: a click on the cell opens the item's card. Silent and without tints: the screen sounds the click, and a
-            // cell that may not be clicked (a potion waits for its board) gives up its raycast instead of dimming.
+            // Round 42: the cell takes the click (a right click opens the item's card, round 47). Silent and without tints: the
+            // screen sounds the click, and a cell that may not be clicked (a potion waits for its board) gives up its raycast
+            // instead of dimming.
             Button button = UiBuild.MakeButton(cell);
             UiBuild.Silence(button);
             button.transition = Selectable.Transition.None;
@@ -794,6 +948,7 @@ namespace F1.Editor.Setup
             Image tierTag = BuildTierTag(cell.transform, "ItemTier", out Image[] stars);
 
             var view = cell.gameObject.AddComponent<BattleItemView>();
+            UiBuild.SetReference(view, "_rightClick", cell.gameObject.AddComponent<RightClick>());
             UiBuild.SetReference(view, "_light", light.rectTransform);
             UiBuild.SetReference(view, "_dark", darkFill);
             UiBuild.SetReference(view, "_darkEdge", darkEdge);

@@ -20,29 +20,20 @@ namespace F1.UI
     }
 
     /// <summary>
-    /// One offer of the shop's window (2026-10-07 round 44, A; Docs/Architecture/12_UI.md "상점"): the offer as a board cell
-    /// (an item with its icon and tier marks) or as a potion in its pocket, its name and kind under it, and its price with the
-    /// coin at the bottom; "sold" over an empty tile. The whole tile is the button; the cell inside takes no click. The rim is
-    /// brass while the offer is picked, and the tile is dimmed while the coins do not cover it.
+    /// One offer of the shop's window (2026-10-07 round 44, A; 2026-10-08 round 46, S1; Docs/Architecture/12_UI.md "상점"): the item
+    /// tile (<see cref="ItemTileView"/>: the offer as a board cell, its name and kind, its facts) or a potion in its pocket, with
+    /// its price and the coin at the foot; "sold" over an empty tile. The tile is dimmed while the coins do not cover it.
     /// </summary>
-    public sealed class ShopTileView : MonoBehaviour
+    public sealed class ShopTileView : ItemTileView
     {
         const float UnaffordableAlpha = 0.55f;
         const float SoldAlpha = 0.7f;
 
-        [SerializeField] Button _button;
-        [SerializeField] Image _rim;
-        [SerializeField] CanvasGroup _group;
-        [SerializeField] ItemSlotView _cell;
         [SerializeField] GameObject _potionPocket;
         [SerializeField] Image _potionIcon;
-        [SerializeField] TMP_Text _name;
-        [SerializeField] TMP_Text _sub;
         [SerializeField] GameObject _priceRow;
         [SerializeField] TMP_Text _price;
         [SerializeField] TMP_Text _sold;
-
-        public Button Button => _button;
 
         /// <summary>The slot of the shop's stock the tile shows; the screen sets it when it opens.</summary>
         public int Slot { get; set; }
@@ -56,42 +47,40 @@ namespace F1.UI
         public bool IsSold => State == ShopTileState.Sold;
 
         /// <summary>The name on the tile, or an empty string while it is sold.</summary>
-        public string Name => State == ShopTileState.Sold ? string.Empty : _name.text;
+        public string Name => State == ShopTileState.Sold ? string.Empty : NameText;
 
         /// <summary>The price on the tile, or an empty string while it is sold.</summary>
         public string Price => State == ShopTileState.Sold ? string.Empty : _price.text;
 
-        /// <summary>The cell the item on offer is shown in: its icon and tier marks, as on a board.</summary>
-        public ItemSlotView Cell => _cell;
-
         /// <param name="sub">The line under the name: the item's category and cells.</param>
-        public void ShowItem(ItemOffer offer, EquippedItem item, Sprite icon, string sub, int price, ShopTileState state)
+        /// <param name="facts">The facts under the rule (UiText.ItemTileFacts).</param>
+        public void ShowItem(ItemOffer offer, EquippedItem item, Sprite icon, string sub, string facts, int price, ShopTileState state)
         {
             Begin(offer, state);
-            _cell.gameObject.SetActive(true);
-            _cell.Show(item, icon, selected: false, interactable: true, fatigueCost: 0, merges: false);
+            ShowCell(item, icon);
             _potionPocket.SetActive(false);
-            Words(UiText.ItemTitle(item), sub, price, state);
+            ShowWords(UiText.ItemTitle(item), sub, facts);
+            ShowPrice(price, state);
         }
 
         /// <param name="sub">The line under the name: that it is a potion.</param>
-        public void ShowPotion(ItemOffer offer, PotionData potion, Sprite icon, string sub, int price, ShopTileState state)
+        /// <param name="facts">What the potion does.</param>
+        public void ShowPotion(ItemOffer offer, PotionData potion, Sprite icon, string sub, string facts, int price, ShopTileState state)
         {
             Begin(offer, state);
-            _cell.gameObject.SetActive(false);
+            HideCell();
             _potionPocket.SetActive(true);
             _potionIcon.sprite = icon;
             _potionIcon.enabled = icon != null;
-            Words(UiText.Name(potion.Name), sub, price, state);
+            ShowWords(UiText.Name(potion.Name), sub, facts);
+            ShowPrice(price, state);
         }
 
         public void ShowSold()
         {
             Begin(null, ShopTileState.Sold);
-            _cell.gameObject.SetActive(false);
+            HideBody();
             _potionPocket.SetActive(false);
-            _name.gameObject.SetActive(false);
-            _sub.gameObject.SetActive(false);
             _priceRow.SetActive(false);
             _sold.gameObject.SetActive(true);
         }
@@ -100,19 +89,15 @@ namespace F1.UI
         {
             Offer = offer;
             State = state;
-            _rim.color = state == ShopTileState.Picked ? UiPalette.Selected : UiPalette.Line;
-            _group.alpha = state == ShopTileState.Unaffordable ? UnaffordableAlpha : state == ShopTileState.Sold ? SoldAlpha : 1f;
-            _button.interactable = state == ShopTileState.OnSale || state == ShopTileState.Picked;
+            Look(state == ShopTileState.Picked,
+                state == ShopTileState.Unaffordable ? UnaffordableAlpha : state == ShopTileState.Sold ? SoldAlpha : 1f,
+                state == ShopTileState.OnSale || state == ShopTileState.Picked);
             _sold.gameObject.SetActive(false);
         }
 
-        void Words(string name, string sub, int price, ShopTileState state)
+        void ShowPrice(int price, ShopTileState state)
         {
-            _name.gameObject.SetActive(true);
-            _sub.gameObject.SetActive(true);
             _priceRow.SetActive(true);
-            _name.text = name;
-            _sub.text = sub;
             _price.text = UiStrings.Get(UiKeys.Map.Coins, price);
             _price.color = state == ShopTileState.Unaffordable ? UiPalette.Danger : UiPalette.Virtue;
         }

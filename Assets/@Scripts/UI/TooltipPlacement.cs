@@ -57,19 +57,6 @@ namespace F1.UI
             return new Rect(x, top, size.x, size.y);
         }
 
-        /// <summary>
-        /// The shop (round 44): the card floats under the shop's window, centred on the offer's tile and pushed in from the screen's
-        /// edges, and up when it would run off the screen's bottom. <paramref name="notchX"/> is where, along the card's top edge, the
-        /// notch points up at the tile.
-        /// </summary>
-        public static Rect Below(Rect tile, Vector2 size, float windowBottom, Rect screen, out float notchX)
-        {
-            float left = Mathf.Clamp(tile.center.x - size.x / 2f, screen.xMin + ScreenMargin, screen.xMax - ScreenMargin - size.x);
-            notchX = Mathf.Clamp(tile.center.x - left, NotchInset, size.x - NotchInset);
-            float top = Mathf.Min(windowBottom + Gap, screen.yMax - ScreenMargin - size.y);
-            return new Rect(left, top, size.x, size.y);
-        }
-
         static float SideX(Rect cell, Vector2 size, bool left, Rect screen)
         {
             float x = left ? cell.xMin - BesideGap - size.x : cell.xMax + BesideGap;

@@ -90,6 +90,58 @@ namespace F1.Tests
         }
 
         [UnityTest]
+        public IEnumerator Continue_AfterTheAppWasClosedOverTheLoot_ShowsTheBattleScreenAfterTheWin_WithoutTheBattle()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return NewRunWithParty();
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+
+            // The first battle won: its loot lies there, saved with the win (round 47: the battle record is gone, the loot stays).
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.EndBattle(battle);
+            Assert.IsTrue(battle.AfterWin);
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            Assume.That(expedition.Loot.Count, Is.GreaterThan(0), "The first battle drops something.");
+            string dropId = expedition.Loot[0].Id;
+            int members = expedition.Members.Count(m => m.Alive);
+
+            yield return BootTestUtil.RestartApp();
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/Continue");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+
+            // Back on the battle screen in its after-the-win look: the band says it is the loot (nothing of the battle is known: no fallen,
+            // no coins, no log), the party stands as it does now with no enemy, and the drop lies on the floor as it did.
+            battle = UiTestUtil.Screen<BattleScreen>();
+            Assert.AreEqual(GamePhase.Loot, Managers.Expedition.Phase);
+            Assert.IsNull(Managers.Expedition.Battle);
+            Assert.IsTrue(battle.AfterWin);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Loot.Title), UiTestUtil.TextAt(battle, "Frame/VictoryBand/BandRow/BandTitle"));
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/VictoryBand/BandRow/BandFallen").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/VictoryBand/BandRow/BandCoins").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/BoardPanel/LootShowLog").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/Header/Retreat").gameObject.activeSelf);
+            Assert.AreEqual(members, UiTestUtil.Views<BattleUnitView>(battle).Count(v => v.Unit.Side == BattleSide.Party));
+            Assert.IsFalse(UiTestUtil.Views<BattleUnitView>(battle).Any(v => v.Unit.Side == BattleSide.Enemy), "No enemy stands there.");
+            Assert.AreEqual(dropId, battle.Drops[0].Item.Item.Id);
+            yield return UiTestUtil.WaitForRedraw();
+
+            // The drop taken into the inventory, then continue: the map.
+            UiTestUtil.Click(battle.Drops[0].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            Assert.AreEqual(dropId, Managers.Expedition.Expedition.Inventory.Single().Item.Id);
+        }
+
+        [UnityTest]
         public IEnumerator Continue_AfterTheAppWasClosedMidBattle_ShowsThatBattlePausedAtTheConfirmedTime()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");

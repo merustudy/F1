@@ -28,6 +28,13 @@ namespace F1.UI
     /// and recoil, cells flash, the storm candle between the two sides of the panel burns down
     /// while its light on the stage goes down with it and pulls in, and goes out with the storm,
     /// and the last few events read as captions in the header.
+    ///
+    /// After a win (2026-10-08 round 47, C; Docs/Architecture/12_UI.md "전투 화면"의 "이긴 뒤"), the screen stays: a band over the
+    /// stage says how it went, the loot lies on the floor where the enemies stood, the party's boards turn into the boards of the
+    /// node map (the drops are put there, or straight into the inventory; items move between boards as between battles) and the
+    /// panel's right half holds the hint and the buttons. Continue leaves what still lies there. An app closed meanwhile comes back
+    /// to this look without the battle (the engine is built afresh from the party as it stands; there are no enemies and no log).
+    /// An item's card opens on a right click, in battle and after it.
     /// </summary>
     public sealed class BattleScreen : UIScreen
     {
@@ -139,6 +146,18 @@ namespace F1.UI
         [SerializeField] Button _logClose;
         [SerializeField] ItemTooltipView _tooltip;
         [SerializeField] RectTransform _boardPanel;
+        [SerializeField] PartyBoardView[] _lootBoards;
+        [SerializeField] LootDropView _lootDropTemplate;
+        [SerializeField] GameObject _band;
+        [SerializeField] TMP_Text _bandTitle;
+        [SerializeField] TMP_Text _bandFallen;
+        [SerializeField] TMP_Text _bandCoins;
+        [SerializeField] TMP_Text _bandLoot;
+        [SerializeField] TMP_Text _bandDetail;
+        [SerializeField] TMP_Text _lootHint;
+        [SerializeField] Button _lootToInventory;
+        [SerializeField] Button _lootShowLog;
+        [SerializeField] Button _lootContinue;
 
         /// <summary>The speed the player last chose. Kept for the session so every battle starts at it.</summary>
         static int _preferredSpeedPercent = Speeds[0];
@@ -156,7 +175,21 @@ namespace F1.UI
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
         readonly List<TMP_Text> _logChunks = new List<TMP_Text>();
         readonly List<string> _captionLines = new List<string>();
+        readonly List<LootDropView> _drops = new List<LootDropView>();
+
+        /// <summary>The battle being fought or just ended; null when the screen shows the loot of a battle the app was closed after (round 47).</summary>
         BattleSession _battle;
+
+        /// <summary>The engine drawn: the battle's, or one built afresh from the party for the loot alone.</summary>
+        BattleEngine _engine;
+
+        /// <summary>True from the win on (round 47): the loot lies there, the boards are the node map's, the band is up.</summary>
+        bool _afterWin;
+
+        // After a win: the drop picked up (-1 for none), and the item of a board picked up to move (member and its first cell).
+        int _pickedDrop = -1;
+        int _lootMember = -1;
+        int _lootCell = -1;
         ExpeditionArt _art;
         Sprite _backgroundArt;
         BattlePresenter _presenter;
@@ -226,8 +259,26 @@ namespace F1.UI
         /// <summary>The clock that paces this battle. Tests speed it up.</summary>
         public BattleClock Clock => _clock;
 
-        /// <summary>The card of a clicked item (round 42).</summary>
+        /// <summary>The card of a right-clicked item (round 42, round 47).</summary>
         public ItemTooltipView Tooltip => _tooltip;
+
+        /// <summary>True once the result is up: the band after a win, or the result window.</summary>
+        public bool ResultShown => _resultShown;
+
+        /// <summary>True after a win, while the loot can be picked (round 47).</summary>
+        public bool AfterWin => _afterWin;
+
+        /// <summary>The drops on the floor, one per slot of the loot (hidden where one was taken). For tests.</summary>
+        public IReadOnlyList<LootDropView> Drops => _drops;
+
+        /// <summary>The slot of the drop picked up, or -1.</summary>
+        public int PickedDrop => _pickedDrop;
+
+        /// <summary>After a win: the member's board in the column of a row (the node map's kind), shown while someone stands there.</summary>
+        public PartyBoardView LootBoardOfRow(int row)
+        {
+            return _lootBoards[row - BattleRows.Front];
+        }
 
         /// <summary>What the battle shows when something happens. For tests.</summary>
         public BattleFxLayer Fx => _fx;
@@ -288,7 +339,10 @@ namespace F1.UI
         {
             _battle = Managers.Expedition.Battle;
             _clock.SpeedPercent = _preferredSpeedPercent;
-            BattleEngine engine = _battle.Engine;
+
+            // Round 47: no battle, only its loot (the app was closed while it lay there): the party as it stands now, no enemies.
+            _engine = _battle != null ? _battle.Engine : EngineForTheLootAlone();
+            BattleEngine engine = _engine;
 
             // A battle continued from a save is already under way: let the player look before it moves on.
             _clock.Paused = engine.TimeMs > 0;
@@ -310,10 +364,13 @@ namespace F1.UI
                 board.Button.onClick.AddListener(() => OnPartyUnitClicked(index));
             }
 
-            foreach (BattleUnit unit in engine.Enemies)
+            if (_battle != null)
             {
-                _enemyViews.Add(CreateUnit(unit, _enemyRows[unit.Row - 1]));
-                _enemyBoards.Add(CreateBoard(unit, _enemyBoardColumns[unit.Row - 1]));
+                foreach (BattleUnit unit in engine.Enemies)
+                {
+                    _enemyViews.Add(CreateUnit(unit, _enemyRows[unit.Row - 1]));
+                    _enemyBoards.Add(CreateBoard(unit, _enemyBoardColumns[unit.Row - 1]));
+                }
             }
 
             for (int i = 0; i < engine.Potions.Count; i++)
@@ -336,8 +393,20 @@ namespace F1.UI
             _showLog.onClick.AddListener(OnShowLog);
             _continue.onClick.AddListener(OnContinue);
             _logClose.onClick.AddListener(OnCloseLog);
+            _lootToInventory.onClick.AddListener(OnLootToInventory);
+            _lootShowLog.onClick.AddListener(OnShowLog);
+            _lootContinue.onClick.AddListener(OnLootContinue);
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                PartyBoardView board = LootBoardOfRow(row);
+                int r = row;
+                board.CellClicked += cell => OnLootCellClicked(MemberInRow(r), cell);
+                board.CellRightClicked += cell => OnLootCellRightClicked(MemberInRow(r), cell);
+            }
+
             _resultPanel.SetActive(false);
             _logPanel.SetActive(false);
+            _band.SetActive(false);
 
             // From the layout, not from positions (a fresh screen's are not laid out yet): the stage's front stretches over the
             // frame, the field hangs from its top-left corner and the dark from the field's.
@@ -350,6 +419,19 @@ namespace F1.UI
                 KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect, OnBreakdown);
             RenderCaptions();
             Managers.Sound.PlayMusic(IsBossBattle() ? MusicTrack.Boss : MusicTrack.Dungeon);
+        }
+
+        /// <summary>
+        /// Round 47: the party as it stands, set up against the node's enemies as the battle was, in an engine that never runs: what
+        /// the stage and the boards are drawn from while the loot of a battle the app was closed after is picked. The enemies of
+        /// the setup are not shown (they fell), and nothing of the battle is known (no log, no deaths, no coins).
+        /// </summary>
+        static BattleEngine EngineForTheLootAlone()
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            MapNode node = expedition.Map.Get(expedition.CurrentNodeId);
+            BattleSetup setup = ExpeditionRules.BuildBattleSetup(Managers.Data.Data, expedition, node.EnemyGroupId, SeedDeriver.Derive(expedition.Seed, "battle", node.Id), node.Floor);
+            return new BattleEngine(setup);
         }
 
         /// <summary>True when the battle is the dungeon's boss node: the boss's music plays (Docs/Design/12 §2).</summary>
@@ -647,12 +729,19 @@ namespace F1.UI
                 BuildLog();
             }
 
+            if (_afterWin)
+            {
+                _resultShown = true;
+                FillBand();
+                RefreshLoot();
+            }
+
             Render();
         }
 
         void Update()
         {
-            if (_battle == null)
+            if (_engine == null)
             {
                 return;
             }
@@ -665,7 +754,7 @@ namespace F1.UI
             }
 
             AdvanceKillMoment(Time.unscaledDeltaTime);
-            if (!_battle.IsFinished)
+            if (_battle != null && !_battle.IsFinished)
             {
                 int stepMs = _clock.Step(Time.unscaledDeltaTime);
                 if (stepMs > 0)
@@ -837,10 +926,11 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Round 42: a click on an item's cell opens its card beside the board — the party's to the left, the enemy's to the
-        /// right (the candle stands in the middle). Not while a potion waits for a target, and not once the result is up.
+        /// Round 42 (a right click since round 47): a right click on an item's cell opens its card beside the board — the party's to
+        /// the left, the enemy's to the right (the candle stands in the middle). Not while a potion waits for a target, and not once
+        /// the result is up (after a win the node map's boards take over, with cards of their own).
         /// </summary>
-        void OnItemClicked(BattleBoardView board, BattleItemView view, BattleItemState item)
+        void OnItemRightClicked(BattleBoardView board, BattleItemView view, BattleItemState item)
         {
             if (_battle == null || _battle.IsFinished || _armedPotion >= 0 || _resultShown)
             {
@@ -858,15 +948,20 @@ namespace F1.UI
             BattleBoardView board = Instantiate(_boardTemplate, column);
             board.gameObject.SetActive(true);
             board.Bind(unit, _art);
-            board.ItemClicked += (view, item) => OnItemClicked(board, view, item);
+            board.ItemRightClicked += (view, item) => OnItemRightClicked(board, view, item);
             return board;
         }
 
         void Render()
         {
-            BattleEngine engine = _battle.Engine;
+            if (_engine == null)
+            {
+                return;
+            }
+
+            BattleEngine engine = _engine;
             BalanceData balance = engine.Setup.Balance;
-            bool ongoing = !_battle.IsFinished;
+            bool ongoing = _battle != null && !_battle.IsFinished;
 
             // What happened since the last frame is played before the dead leave the stage, so that a
             // fallen enemy's ghost and a fallen mercenary's grave start where it stood.
@@ -896,7 +991,12 @@ namespace F1.UI
             Place(_partyViews, _partyRows, view => view.Unit, graves, WalkIn);
             Place(_enemyViews, _enemyRows, view => view.Unit, killHold, WalkIn, view => killHold && _moment.Fallen.Contains(view));
             ArrangeColumns();
-            Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, StandIn);
+            if (!_afterWin)
+            {
+                // After a win the party's boards are the node map's (RefreshLoot); the battle's stay away.
+                Place(_partyBoards, _partyBoardColumns, board => board.Unit, graves, StandIn);
+            }
+
             Place(_enemyBoards, _enemyBoardColumns, board => board.Unit, killHold, StandIn);
             RenderKillMoment();
             bool targeting = ongoing && _armedPotion >= 0;
@@ -910,9 +1010,12 @@ namespace F1.UI
                 view.Render(engine, false);
             }
 
-            foreach (BattleBoardView board in _partyBoards)
+            if (!_afterWin)
             {
-                board.Render(engine, targeting);
+                foreach (BattleBoardView board in _partyBoards)
+                {
+                    board.Render(engine, targeting);
+                }
             }
 
             foreach (BattleBoardView board in _enemyBoards)
@@ -920,7 +1023,7 @@ namespace F1.UI
                 board.Render(engine, false);
             }
 
-            // Round 42: the cells open their cards while the battle goes on and no potion is armed.
+            // Round 42: the cells take clicks (their cards) while the battle goes on and no potion is armed.
             bool itemsClickable = ongoing && _armedPotion < 0;
             foreach (BattleBoardView board in _partyBoards)
             {
@@ -1043,7 +1146,7 @@ namespace F1.UI
         /// </summary>
         void BuildLog()
         {
-            BattleEngine engine = _battle.Engine;
+            BattleEngine engine = _engine;
             _logPartyFallen.text = FallenLine(engine.Party, UiKeys.Battle.PartyFallen);
             _logEnemyFallen.text = FallenLine(engine.Enemies, UiKeys.Battle.EnemyFallen);
 
@@ -1094,9 +1197,22 @@ namespace F1.UI
         {
             _resultShown = true;
             _armedPotion = -1;
-            _resultPanel.SetActive(true);
             _tooltip.Hide();
 
+            // Round 47: a win with the expedition going on keeps the stage: the band, the loot on the floor, the node map's boards.
+            // A lost battle, a retreat and the boss's win (the expedition is over) keep the result window.
+            if (_battle == null || (engine.Result == BattleResult.Victory && Managers.Expedition.Expedition != null))
+            {
+                if (_battle != null)
+                {
+                    Managers.Sound.PlayEffect(SoundEffect.Victory);
+                }
+
+                EnterAfterWin();
+                return;
+            }
+
+            _resultPanel.SetActive(true);
             switch (engine.Result)
             {
                 case BattleResult.Victory:
@@ -1132,60 +1248,381 @@ namespace F1.UI
                 _resultDetail.text = string.Join("\n", lines);
             }
 
-            // What the victory dropped (round 45) and the region coins it brought (round 44), under the deaths; nothing for a boss (the
-            // expedition ends) or a loss.
-            IReadOnlyList<ItemOffer> loot = Managers.Expedition.BattleLoot;
-            if (loot.Count > 0)
-            {
-                StaticData data = Managers.Data.Data;
-                var titles = new List<string>();
-                foreach (ItemOffer drop in loot)
-                {
-                    if (drop != null)
-                    {
-                        titles.Add(UiText.ItemTitle(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier)));
-                    }
-                }
-
-                _resultDetail.text += "\n\n" + UiStrings.Get(UiKeys.Battle.Loot, string.Join(", ", titles));
-            }
-
-            int coins = Managers.Expedition.BattleCoins;
-            if (coins > 0)
-            {
-                _resultDetail.text += (loot.Count > 0 ? "\n" : "\n\n") + UiStrings.Get(UiKeys.Battle.Coins, coins);
-            }
-
             RenderControls(engine, engine.Setup.Balance, false);
         }
 
+        // ---- After a win: the loot on the floor, the node map's boards (round 47) ------------------------------------------------
+
+        /// <summary>
+        /// The win keeps the stage: the retreat, pause and speed go from the header, the band comes up over the stage, the battle's
+        /// party boards give way to the node map's in the same columns, a drop lies on the floor at each enemy column, and the
+        /// panel's right half shows the hint and the buttons. Without a battle (the loot alone), the band only says it is the loot
+        /// and there is no log.
+        /// </summary>
+        void EnterAfterWin()
+        {
+            _afterWin = true;
+            _retreat.gameObject.SetActive(false);
+            _pause.gameObject.SetActive(false);
+            foreach (Button speed in _speedButtons)
+            {
+                speed.gameObject.SetActive(false);
+            }
+
+            foreach (BattleBoardView board in _partyBoards)
+            {
+                board.gameObject.SetActive(false);
+            }
+
+            IReadOnlyList<ItemOffer> loot = Managers.Expedition.BattleLoot;
+            for (int slot = 0; slot < loot.Count; slot++)
+            {
+                LootDropView drop = Instantiate(_lootDropTemplate, _field);
+                RectTransform column = _enemyRows[Mathf.Min(slot, _enemyRows.Length - 1)];
+                var rect = (RectTransform)drop.transform;
+                rect.anchoredPosition = new Vector2(column.anchoredPosition.x + column.sizeDelta.x / 2f, rect.anchoredPosition.y);
+                drop.Slot = slot;
+                int s = slot;
+                drop.Button.onClick.AddListener(() => OnDropClicked(s));
+                drop.RightClick.Clicked += () => OnDropRightClicked(s);
+                _drops.Add(drop);
+            }
+
+            _lootHint.gameObject.SetActive(true);
+            _lootToInventory.gameObject.SetActive(true);
+            _lootShowLog.gameObject.SetActive(_battle != null);
+            _lootContinue.gameObject.SetActive(true);
+            _band.SetActive(true);
+            FillBand();
+            RefreshLoot();
+            RenderControls(_engine, _engine.Setup.Balance, false);
+        }
+
+        /// <summary>The band: victory, who fell (or that nobody did), the coins, how many drops; under it, how each death went. The loot alone says only that it is the loot.</summary>
+        void FillBand()
+        {
+            if (_battle == null)
+            {
+                _bandTitle.text = UiStrings.Get(UiKeys.Loot.Title);
+                _bandFallen.gameObject.SetActive(false);
+                _bandCoins.gameObject.SetActive(false);
+                _bandDetail.gameObject.SetActive(false);
+                return;
+            }
+
+            BattleEngine engine = _engine;
+            _bandTitle.text = UiStrings.Get(UiKeys.Battle.Victory);
+            List<DeathCause> deaths = BattleLog.PartyDeaths(engine.Events);
+            _bandFallen.gameObject.SetActive(true);
+            _bandFallen.text = deaths.Count == 0 ? UiStrings.Get(UiKeys.Battle.NoDeaths) : FallenLine(engine.Party, UiKeys.Battle.PartyFallen);
+            int coins = Managers.Expedition.BattleCoins;
+            _bandCoins.gameObject.SetActive(coins > 0);
+            _bandCoins.text = UiStrings.Get(UiKeys.Battle.Coins, coins);
+            var lines = new List<string>();
+            foreach (DeathCause death in deaths)
+            {
+                lines.Add(BattleLogText.Death(death, engine));
+            }
+
+            _bandDetail.gameObject.SetActive(lines.Count > 0);
+            _bandDetail.text = string.Join("\n", lines);
+        }
+
+        /// <summary>
+        /// The loot as it lies and the boards as they stand: each drop on the floor (picked, or not; gone once taken), the board of
+        /// whoever stands in each row with the cells that take a click (those that can take the picked drop; otherwise, as on the node
+        /// map, an item to pick up or a cell the picked item can go to), the merge marks, the hint, the inventory button and the count.
+        /// </summary>
+        void RefreshLoot()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            ExpeditionState expedition = manager.Expedition;
+            StaticData data = Managers.Data.Data;
+            IReadOnlyList<ItemOffer> loot = manager.BattleLoot;
+            if (expedition == null)
+            {
+                return;
+            }
+
+            if (_pickedDrop >= 0 && (_pickedDrop >= loot.Count || loot[_pickedDrop] == null))
+            {
+                _pickedDrop = -1;
+            }
+
+            int remaining = 0;
+            for (int slot = 0; slot < _drops.Count; slot++)
+            {
+                ItemOffer offer = slot < loot.Count ? loot[slot] : null;
+                if (offer == null)
+                {
+                    _drops[slot].Hide();
+                    continue;
+                }
+
+                remaining++;
+                _drops[slot].Show(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), _art.OfItem(offer.Id), slot == _pickedDrop);
+            }
+
+            _bandLoot.gameObject.SetActive(remaining > 0);
+            _bandLoot.text = UiStrings.Get(UiKeys.Battle.LootCount, remaining);
+
+            EquippedItem moving = MovingItem(expedition);
+            int picked = _pickedDrop;
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                PartyBoardView board = LootBoardOfRow(row);
+                int m = MemberInRow(row);
+                if (m < 0 || !_partyBoardColumns[row - 1].gameObject.activeSelf)
+                {
+                    board.Hide();
+                    continue;
+                }
+
+                int member = m;
+                board.Show(
+                    expedition.Members[m],
+                    _art,
+                    m == _lootMember ? _lootCell : -1,
+                    cell => picked >= 0 ? manager.CanTakeLoot(picked, member, cell) : CanClickLootCell(member, cell),
+                    cell => picked >= 0 ? manager.LootMergesAt(picked, member, cell) : moving != null && manager.MergesAt(moving, member, cell));
+            }
+
+            _lootToInventory.interactable = picked >= 0 && manager.CanTakeLootToInventory(picked);
+            if (picked >= 0)
+            {
+                _lootHint.text = UiStrings.Get(UiKeys.Battle.LootPickedHint);
+            }
+            else if (moving != null)
+            {
+                string detail = UiText.ItemTitle(moving) + " — " + UiText.ItemSummary(moving);
+                if (manager.HasMergeTarget(moving))
+                {
+                    detail += "\n" + UiText.MergeHint(moving);
+                }
+
+                _lootHint.text = detail;
+            }
+            else
+            {
+                _lootHint.text = UiStrings.Get(UiKeys.Battle.LootHint);
+            }
+        }
+
+        /// <summary>The living member standing in a row, or -1.</summary>
+        static int MemberInRow(int row)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            if (expedition == null)
+            {
+                return -1;
+            }
+
+            for (int i = 0; i < expedition.Members.Count; i++)
+            {
+                if (expedition.Members[i].Alive && expedition.Members[i].Row == row)
+                {
+                    return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>The item of a board picked up to move, or null.</summary>
+        EquippedItem MovingItem(ExpeditionState expedition)
+        {
+            if (_lootMember < 0 || _lootMember >= expedition.Members.Count)
+            {
+                return null;
+            }
+
+            List<EquippedItem> board = expedition.Members[_lootMember].Items;
+            int index = ItemBoard.IndexAtCell(board, _lootCell);
+            return index < 0 ? null : board[index];
+        }
+
+        /// <summary>As on the node map: with an item picked up, itself or a cell it can go to; otherwise a cell that holds an item.</summary>
+        bool CanClickLootCell(int member, int cell)
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (_lootMember >= 0)
+            {
+                bool itself = member == _lootMember && cell == _lootCell;
+                return itself || manager.CanMoveItem(_lootMember, _lootCell, member, cell);
+            }
+
+            return manager.CanPickItem(member, cell);
+        }
+
+        /// <summary>A drop clicked: picked up, or put down again (a click); whatever was picked up on a board is let go.</summary>
+        void OnDropClicked(int slot)
+        {
+            IReadOnlyList<ItemOffer> loot = Managers.Expedition.BattleLoot;
+            if (slot >= loot.Count || loot[slot] == null)
+            {
+                return;
+            }
+
+            Managers.Sound.PlayEffect(SoundEffect.Button);
+            _pickedDrop = _pickedDrop == slot ? -1 : slot;
+            _lootMember = -1;
+            _lootCell = -1;
+            _tooltip.Hide();
+            RefreshLoot();
+        }
+
+        /// <summary>A drop right-clicked: its card beside it on the stage, with what merging it would do.</summary>
+        void OnDropRightClicked(int slot)
+        {
+            if (slot >= _drops.Count || _drops[slot].Item == null)
+            {
+                return;
+            }
+
+            EquippedItem item = _drops[slot].Item;
+            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
+            _tooltip.ShowBeside(item, _drops[slot].IconRect, true, _field, true, merge);
+        }
+
+        /// <summary>
+        /// A cell of a board clicked: with a drop picked up, the drop goes there when it can (and sounds as put in; a click when it
+        /// cannot); otherwise as on the node map, an item is picked up, put down or moved (the cells are built silent: the click sounds here, once).
+        /// </summary>
+        void OnLootCellClicked(int member, int cell)
+        {
+            if (member < 0)
+            {
+                return;
+            }
+
+            ExpeditionManager manager = Managers.Expedition;
+            SoundEffect sound = SoundEffect.Button;
+            if (_pickedDrop >= 0)
+            {
+                if (manager.CanTakeLoot(_pickedDrop, member, cell))
+                {
+                    manager.TakeLoot(_pickedDrop, member, cell);
+                    sound = SoundEffect.ItemPlace;
+                    _pickedDrop = -1;
+                }
+            }
+            else if (_lootMember < 0)
+            {
+                if (manager.CanPickItem(member, cell))
+                {
+                    _lootMember = member;
+                    _lootCell = cell;
+                }
+            }
+            else if (member == _lootMember && cell == _lootCell)
+            {
+                _lootMember = -1;
+                _lootCell = -1;
+            }
+            else
+            {
+                if (manager.CanMoveItem(_lootMember, _lootCell, member, cell))
+                {
+                    manager.MoveItem(_lootMember, _lootCell, member, cell);
+                    sound = SoundEffect.ItemPlace;
+                }
+
+                _lootMember = -1;
+                _lootCell = -1;
+            }
+
+            Managers.Sound.PlayEffect(sound);
+            RefreshLoot();
+        }
+
+        /// <summary>A cell right-clicked: the card of the item there, above the panel over the cell's column (the node map's place).</summary>
+        void OnLootCellRightClicked(int member, int cell)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            if (member < 0 || expedition == null)
+            {
+                return;
+            }
+
+            List<EquippedItem> board = expedition.Members[member].Items;
+            int index = ItemBoard.IndexAtCell(board, cell);
+            ItemSlotView slot = LootBoardOfRow(expedition.Members[member].Row).SlotAt(cell);
+            if (index < 0 || slot == null)
+            {
+                return;
+            }
+
+            EquippedItem item = board[index];
+            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
+            _tooltip.ShowAbove(item, merge, (RectTransform)slot.transform, _boardPanel);
+        }
+
+        void OnLootToInventory()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (_pickedDrop < 0 || !manager.CanTakeLootToInventory(_pickedDrop))
+            {
+                return;
+            }
+
+            manager.TakeLootToInventory(_pickedDrop);
+            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+            _pickedDrop = -1;
+            RefreshLoot();
+        }
+
+        /// <summary>Continue: whatever still lies there is left, the ended battle is closed, and the next phase's screen comes.</summary>
+        void OnLootContinue()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (manager.LootOpen)
+            {
+                manager.LeaveLoot();
+            }
+
+            if (_battle != null)
+            {
+                manager.CloseBattle();
+            }
+
+            GoToCurrentPhase();
+        }
+
+        /// <summary>True while the battle is being fought (not ended, and not the loot alone).</summary>
+        bool Fighting => _battle != null && !_battle.IsFinished;
+
         void OnPotionClicked(int slot)
         {
+            if (!Fighting)
+            {
+                return;
+            }
+
             _armedPotion = _armedPotion == slot ? -1 : slot;
-            RenderControls(_battle.Engine, _battle.Engine.Setup.Balance, !_battle.IsFinished);
+            RenderControls(_engine, _engine.Setup.Balance, true);
         }
 
         void OnPartyUnitClicked(int partyIndex)
         {
-            if (_armedPotion < 0 || _battle.IsFinished)
+            if (_armedPotion < 0 || !Fighting)
             {
                 return;
             }
 
             Managers.Expedition.TryUsePotion(_armedPotion, partyIndex);
             _armedPotion = -1;
-            RenderControls(_battle.Engine, _battle.Engine.Setup.Balance, !_battle.IsFinished);
+            RenderControls(_engine, _engine.Setup.Balance, Fighting);
         }
 
         void OnRetreat()
         {
-            if (_battle.IsFinished)
+            if (!Fighting)
             {
                 return;
             }
 
             Managers.Expedition.TryRetreat();
-            RenderControls(_battle.Engine, _battle.Engine.Setup.Balance, !_battle.IsFinished);
+            RenderControls(_engine, _engine.Setup.Balance, Fighting);
         }
 
         void OnPause()
@@ -1202,7 +1639,7 @@ namespace F1.UI
 
         void OnShowLog()
         {
-            if (!_battle.IsFinished)
+            if (_battle == null || !_battle.IsFinished)
             {
                 return;
             }
@@ -1222,7 +1659,7 @@ namespace F1.UI
 
         void OnContinue()
         {
-            if (!_battle.IsFinished)
+            if (_battle == null || !_battle.IsFinished)
             {
                 return;
             }

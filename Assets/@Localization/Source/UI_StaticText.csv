@@ -77,7 +77,7 @@ Map.ShopCoinsLabel,In the shop window before the coins the party has.,가진 코
 Map.ShopRefresh,The shop's refresh button; its cost follows.,새로고침,Refresh
 Map.ShopLeave,Leaves the shop and goes on to the next floor.,나가기,Leave
 Map.ShopSold,On the tile of an offer that was bought.,팔림,Sold
-Map.ShopItemSub,Under the name of an item on offer. {0} = category. {1} = cells it takes.,{0} · {1}칸,{0} · {1} cells
+Map.ShopItemSub,Under the name of an item on offer or of a drop of loot. {0} = category. {1} = cells it takes.,{0} · {1}칸,{0} · {1} cells
 Map.ShopBought,On the detail line after a purchase. {0} = what was bought. {1} = coins before. {2} = coins after.,구매: {0} · 코인 {1} → {2},Bought: {0} · coins {1} → {2}
 Map.Coins,A number of region coins beside the coin mark (the header; an offer's price; the refresh cost). {0} = coins.,{0},{0}
 Map.ShopPotion,Under the name of a potion on offer in the shop.,포션,Potion
@@ -155,7 +155,9 @@ Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
 Battle.Retreated,Battle result.,후퇴 성공,Retreated
 Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
 Battle.Coins,On the result window: the region coins the victory brought (round 44). {0} = coins.,지역 코인 +{0},Region coins +{0}
-Battle.Loot,"On the result window: what the won battle dropped (round 45). {0} = the drops, by title, comma-separated.",전리품: {0},Loot: {0}
+Battle.LootCount,"On the band over the stage after a win (round 47): how many drops lie on the floor. {0} = the count.",전리품 {0},Loot {0}
+Battle.LootHint,"On the board panel after a win, while no drop is picked (round 47).",전리품을 누르면 고릅니다. 남은 것은 계속을 누르면 두고 갑니다. 우클릭은 아이템 정보입니다.,Click a drop to pick it. Continue leaves the rest. Right-click for an item's facts.
+Battle.LootPickedHint,"On the board panel after a win, while a drop is picked (round 47).",고른 전리품을 왼쪽 보드의 칸에 놓으세요. 우클릭은 아이템 정보입니다.,Click a cell on the left to put the drop there. Right-click for an item's facts.
 Battle.ShowLog,Opens the log of the finished battle from the result panel.,로그 보기,View log
 Battle.LogTitle,Title of the battle log viewer.,전투 로그,Battle log
 Battle.FigurePlaceholder,Shown in the figure placeholder of a unit until there is art.,전신 이미지 자리,Full-body art here
@@ -191,13 +193,8 @@ Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2
 Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
 Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
-Loot.Title,Header of the loot screen: what the won battle dropped (round 45).,전리품,Loot
-Loot.Hint,How to pick up a drop.,주울 아이템을 고른 뒤 넣을 칸을 누르세요. 찬 칸에 넣으면 원래 아이템은 인벤토리로 갑니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.,"Pick a drop, then click the cell to put it in. An item already there goes to the inventory. Or take it straight into the inventory."
-Loot.Item,Kind of drop (the only kind: an item).,아이템,Item
-Loot.Take,Button on a drop not yet picked.,줍기,Take
-Loot.Selected,Button on the picked drop.,넣을 칸을 누르세요,Click a slot
-Loot.Taken,On the card of a drop already taken.,주움,Taken
-Loot.Leave,Leaves the drops not taken and goes on.,두고 가기,Leave the rest
+Loot.Title,"On the band over the stage when the app comes back to the loot of a won battle (round 47; the loot screen's header before it).",전리품,Loot
+Loot.Selected,Over the picked drop.,넣을 칸을 누르세요,Click a slot
 Loot.ToInventory,Takes the picked drop (or the shop's picked offer) straight into the inventory.,인벤토리에 넣기,Take to inventory
 Settle.Cleared,Expedition result.,던전 클리어,Dungeon cleared
 Settle.Wiped,Expedition result.,파티 전멸,The party was wiped out

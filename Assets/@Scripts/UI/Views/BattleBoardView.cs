@@ -65,7 +65,7 @@ namespace F1.UI
                 BindItem(view, item);
                 BattleItemView clicked = view;
                 BattleItemState state = item;
-                view.Button.onClick.AddListener(() => ItemClicked?.Invoke(clicked, state));
+                view.RightClick.Clicked += () => ItemRightClicked?.Invoke(clicked, state);
                 _items.Add(view);
                 cells += item.Equipped.Item.Size;
             }
@@ -76,8 +76,8 @@ namespace F1.UI
             }
         }
 
-        /// <summary>A click on an item's cell (round 42): the screen opens the item's card.</summary>
-        public event Action<BattleItemView, BattleItemState> ItemClicked;
+        /// <summary>A right click on an item's cell (round 42, right-click since round 47): the screen opens the item's card.</summary>
+        public event Action<BattleItemView, BattleItemState> ItemRightClicked;
 
         /// <summary>Round 42: whether the cells take clicks for their cards. Off while a potion waits for this board to be clicked.</summary>
         public void SetItemsClickable(bool clickable)

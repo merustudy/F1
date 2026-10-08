@@ -316,7 +316,7 @@ namespace F1.Tests
                             yield return Capture(prefix + "_31_map_deep");
 
                             // The shop (round 44), staged like the elite when the map has one (most do): before a shop node with coins
-                            // to spend, the node chosen; its window; an offer picked, with its card under the window.
+                            // to spend, the node chosen; its window; an offer the coins cover picked, its tile brass (round 46: the tile shows the facts, no card).
                             MapNode shopNode = nodes.Nodes.FirstOrDefault(n => n.Kind == MapNodeKind.Shop);
                             if (shopNode != null)
                             {
@@ -330,9 +330,14 @@ namespace F1.Tests
                                 yield return UiTestUtil.WaitForRedraw();
                                 yield return Capture(prefix + "_42_shop");
                                 IReadOnlyList<ItemOffer> stock = Managers.Expedition.ShopStock;
-                                UiTestUtil.Click(map.ShopTiles[Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == OfferKind.Item)].Button);
-                                yield return UiTestUtil.WaitForRedraw();
-                                yield return Capture(prefix + "_43_shop_pick");
+                                int pick = Enumerable.Range(0, stock.Count).Where(i => stock[i].Kind == OfferKind.Item && Managers.Expedition.CanAfford(i)).DefaultIfEmpty(-1).First();
+                                if (pick >= 0)
+                                {
+                                    UiTestUtil.Click(map.ShopTiles[pick].Button);
+                                    yield return UiTestUtil.WaitForRedraw();
+                                    yield return Capture(prefix + "_43_shop_pick");
+                                }
+
                                 UiTestUtil.PressTheBackground();
                                 UiTestUtil.Click(map, UiTestUtil.ShopLeave);
                                 yield return UiTestUtil.WaitForRedraw();
@@ -378,7 +383,7 @@ namespace F1.Tests
                             // The card of an item in battle (round 42), before the fight has gone anywhere (every enemy still stands): the boss's
                             // first item, to the right of its board; a press closes it.
                             BattleBoardView bossBoard = UiTestUtil.Views<BattleBoardView>(battle).First(b => b.Unit.Side == BattleSide.Enemy && b.Items.Count > 0);
-                            UiTestUtil.Click(bossBoard.Items[0].Button);
+                            UiTestUtil.RightClick(bossBoard.Items[0]);
                             yield return Capture(prefix + "_40_battle_item_card");
                             UiTestUtil.PressTheBackground();
                             yield return null;
@@ -393,52 +398,59 @@ namespace F1.Tests
                         }
 
                         yield return UiTestUtil.WaitForResult(battle);
-                        if (boss || !capturedLoot)
-                        {
-                            yield return Capture(prefix + (boss ? "_10_boss_result" : "_06_battle_result"));
-                        }
-
                         if (boss)
                         {
+                            yield return Capture(prefix + "_10_boss_result");
                             UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/ShowLog");
                             yield return Capture(prefix + "_16_battle_log");
                             UiTestUtil.Click(battle, "Frame/LogPanel/LogBox/LogClose");
                             yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");
+                            yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+                            break;
                         }
 
-                        UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");
-                        yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
-                        break;
-
-                    case GamePhase.Loot:
-                    {
-                        // The drops one by one: the first ever goes to the inventory (pictured first), the later ones behind the row-1
-                        // member's weapon while that cell can take them; what cannot go anywhere is left.
-                        LootScreen loot = UiTestUtil.Screen<LootScreen>();
-                        LootCardView[] cards = UiTestUtil.Views<LootCardView>(loot);
-                        int drop = Managers.Expedition.Expedition.Loot.FindIndex(d => d != null);
-                        int front = loot.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Member;
-                        UiTestUtil.Click(cards[drop].Button);
-                        yield return UiTestUtil.WaitForRedraw();
+                        // After the win (round 47): the band, the drops on the floor and the node map's boards on the battle screen. The
+                        // drops one by one: the first ever goes to the inventory (pictured first: the win, then the drop picked), the later
+                        // ones behind the row-1 member's weapon while that cell can take them; what cannot go anywhere is left.
                         if (!capturedLoot)
                         {
-                            capturedLoot = true;
-                            yield return Capture(prefix + "_07_loot");
-                            UiTestUtil.Click(loot, "Frame/BoardPanel/LootToInventory");
-                        }
-                        else if (Managers.Expedition.CanTakeLoot(drop, front, 1))
-                        {
-                            UiTestUtil.Click(loot.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[1].Button);
-                        }
-                        else
-                        {
-                            UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
+                            // The last blows' numbers and the fallen's ghosts fade first, so the picture shows the win as it settles.
+                            yield return new WaitForSecondsRealtime(1.5f);
+                            yield return Capture(prefix + "_06_battle_won");
                         }
 
-                        yield return UiTestUtil.WaitForRedraw();
+                        int rowOne = Managers.Expedition.Expedition.Members.FindIndex(m => m.Alive && m.Row == 1);
+                        for (int drop = 0; drop < battle.Drops.Count; drop++)
+                        {
+                            if (Managers.Expedition.Expedition.Loot[drop] == null)
+                            {
+                                continue;
+                            }
+
+                            UiTestUtil.Click(battle.Drops[drop].Button);
+                            yield return UiTestUtil.WaitForRedraw();
+                            if (!capturedLoot)
+                            {
+                                capturedLoot = true;
+                                yield return Capture(prefix + "_07_loot_picked");
+                                UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
+                            }
+                            else if (Managers.Expedition.CanTakeLoot(drop, rowOne, 1))
+                            {
+                                UiTestUtil.Click(battle.LootBoardOfRow(1).Slots[1].Button);
+                            }
+                            else
+                            {
+                                UiTestUtil.Click(battle.Drops[drop].Button);
+                            }
+
+                            yield return UiTestUtil.WaitForRedraw();
+                        }
+
+                        UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
                         yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
-                    }
                 }
             }
 

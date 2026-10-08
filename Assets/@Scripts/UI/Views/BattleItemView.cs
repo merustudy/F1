@@ -62,6 +62,7 @@ namespace F1.UI
         [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
         [SerializeField] Button _button;
+        [SerializeField] RightClick _rightClick;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _flash;
         [SerializeField] Image _tierTag;
@@ -83,12 +84,15 @@ namespace F1.UI
         /// <summary>The icon on show, or null while the name stands in for it.</summary>
         public Sprite Icon => _icon.enabled ? _icon.sprite : null;
 
-        /// <summary>The click that opens the item's card (round 42).</summary>
+        /// <summary>The cell's button: silent and without a deed of its own, it holds the cell's click off the board while no potion is armed (round 42).</summary>
         public Button Button => _button;
 
+        /// <summary>The right click that opens the item's card (round 47).</summary>
+        public RightClick RightClick => _rightClick;
+
         /// <summary>
-        /// Round 42: whether a click on the cell opens the item's card. Off while a potion waits for a target, so that the click
-        /// falls through to the board, which is the potion's target.
+        /// Round 42: whether the cell takes clicks (a right click opens the item's card). Off while a potion waits for a target, so
+        /// that the click falls through to the board, which is the potion's target.
         /// </summary>
         public void SetClickable(bool clickable)
         {

@@ -21,7 +21,8 @@ namespace F1.UI
     /// it on a board (whatever was there goes to the inventory). The inventory has a fixed number
     /// of cells, so what would not fit there is not offered. Which cells and buttons take a click
     /// is asked of the manager, cell by cell. Clicking the name of a member's state under its feet
-    /// (round 36) explains the state on the detail line. The node map and the loot screen both show it.
+    /// (round 36) explains the state on the detail line. A right click on an item (a cell, an entry of the inventory) opens its
+    /// card (round 47; a left click only picks). The node map shows it.
     /// </summary>
     public sealed class PartySideView : MonoBehaviour
     {
@@ -107,6 +108,7 @@ namespace F1.UI
                 column.Forward.onClick.AddListener(() => OnMoveClicked(column, -1));
                 column.Back.onClick.AddListener(() => OnMoveClicked(column, 1));
                 column.CellClicked += cell => OnCellClicked(column.Member, cell);
+                column.CellRightClicked += cell => ShowTooltip(column.Member, cell);
                 column.StateClicked += () => OnStateClicked(column.Member);
             }
 
@@ -172,11 +174,17 @@ namespace F1.UI
             }
         }
 
-        /// <summary>Round 42: the picked item's card, above the panel over its cell's column, with what merging it would do.</summary>
+        /// <summary>Round 42 (a right click since round 47): the card of the item at a cell, above the panel over its cell's column, with what merging it would do.</summary>
         void ShowTooltip(int member, int cell)
         {
+            if (member < 0)
+            {
+                return;
+            }
+
             ExpeditionState expedition = Managers.Expedition.Expedition;
-            EquippedItem item = SelectedItem(expedition);
+            List<EquippedItem> board = expedition.Members[member].Items;
+            int index = ItemBoard.IndexAtCell(board, cell);
             ItemSlotView slot = null;
             foreach (ItemSlotView view in ColumnOfRow(expedition.Members[member].Row).Slots)
             {
@@ -187,13 +195,28 @@ namespace F1.UI
                 }
             }
 
-            if (item == null || slot == null)
+            if (index < 0 || slot == null)
             {
                 return;
             }
 
+            EquippedItem item = board[index];
             string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
             _tooltip.ShowAbove(item, merge, (RectTransform)slot.transform, _boardPanel);
+        }
+
+        /// <summary>Round 47: the card of an item of the inventory popup, beside its entry inside the popup.</summary>
+        void ShowInventoryTooltip(int index)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            if (index < 0 || index >= expedition.Inventory.Count || index >= _entries.Count)
+            {
+                return;
+            }
+
+            EquippedItem item = expedition.Inventory[index];
+            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
+            _tooltip.ShowBeside(item, (RectTransform)_entries[index].transform, true, (RectTransform)_inventoryPanel.transform, true, merge);
         }
 
         /// <summary>
@@ -290,6 +313,7 @@ namespace F1.UI
                 InventoryEntryView view = Instantiate(_entryTemplate, _entryParent);
                 InventoryEntryView clicked = view;
                 view.Button.onClick.AddListener(() => OnInventoryClicked(clicked.Index));
+                view.RightClick.Clicked += () => ShowInventoryTooltip(clicked.Index);
                 _entries.Add(view);
             }
 
@@ -432,7 +456,6 @@ namespace F1.UI
             _selectedState = -1;
             ExpeditionManager manager = Managers.Expedition;
             SoundEffect sound = SoundEffect.Button;
-            bool picked = false;
             if (_selectedInventory >= 0)
             {
                 if (manager.CanPlaceFromInventory(_selectedInventory, member, cell))
@@ -449,7 +472,6 @@ namespace F1.UI
                 {
                     _selectedMember = member;
                     _selectedCell = cell;
-                    picked = true;
                 }
             }
             else if (member == _selectedMember && cell == _selectedCell)
@@ -469,10 +491,6 @@ namespace F1.UI
 
             Managers.Sound.PlayEffect(sound);
             Refresh();
-            if (picked)
-            {
-                ShowTooltip(member, cell);
-            }
         }
 
         void OnInventoryClicked(int index)

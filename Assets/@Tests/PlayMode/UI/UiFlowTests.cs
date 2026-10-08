@@ -201,18 +201,10 @@ namespace F1.Tests
                             yield return null;
                         }
 
-                        yield return UiTestUtil.WaitForRedraw();
-                        Assert.IsTrue(UiTestUtil.At(battle, "Frame/ResultPanel").gameObject.activeSelf);
-                        UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");
+                        yield return UiTestUtil.WaitForResult(battle);
+                        Assert.IsTrue(battle.ResultShown);
+                        UiTestUtil.ContinueAfterBattle(battle);
                         yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
-                        break;
-                    }
-
-                    case GamePhase.Loot:
-                    {
-                        LootScreen loot = UiTestUtil.Screen<LootScreen>();
-                        UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
-                        yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
                         break;
                     }
                 }
@@ -540,8 +532,8 @@ namespace F1.Tests
             // Row 1 cannot go further forward, the last row not further back.
             PartyColumnView row1 = party.ColumnOfRow(1);
             Assert.AreEqual(front, expedition.Members[row1.Member].MercenaryId);
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardName"));
-            Assert.AreEqual("1", UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardStud/Party1BoardRow"), "The head of a row's board says its row.");
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(row1.Board.transform, "Party1Board/Party1BoardHead/Party1BoardName"));
+            Assert.AreEqual("1", UiTestUtil.TextAt(row1.Board.transform, "Party1Board/Party1BoardHead/Party1BoardStud/Party1BoardRow"), "The head of a row's board says its row.");
             Assert.IsFalse(row1.Forward.interactable);
             Assert.IsTrue(row1.Back.interactable);
             PartyColumnView last = party.ColumnOfRow(partySize);
@@ -553,8 +545,8 @@ namespace F1.Tests
 
             Assert.AreEqual(2, expedition.Members.Single(m => m.MercenaryId == front).Row);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == second).Row);
-            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1.Board.transform, "Party1BoardHead/Party1BoardName"), "A column shows whoever stands in its row now.");
-            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2).Board.transform, "Party2BoardHead/Party2BoardName"));
+            Assert.AreEqual(UiText.Mercenary(second), UiTestUtil.TextAt(row1.Board.transform, "Party1Board/Party1BoardHead/Party1BoardName"), "A column shows whoever stands in its row now.");
+            Assert.AreEqual(UiText.Mercenary(front), UiTestUtil.TextAt(party.ColumnOfRow(2).Board.transform, "Party2Board/Party2BoardHead/Party2BoardName"));
 
             UiTestUtil.Click(party.ColumnOfRow(2).Forward);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
@@ -686,34 +678,32 @@ namespace F1.Tests
             Assert.IsFalse(party.ToInventory.interactable);
             Assert.AreEqual(UiStrings.Get(UiKeys.Board.InventoryShow), UiTestUtil.TextAt(map, "Frame/BoardPanel/InventoryToggle/InventoryToggleLabel"));
 
-            // Win the first battle; one of its drops goes straight into the inventory.
+            // Win the first battle; on the battle screen after the win (round 47) one of its drops goes straight into the inventory.
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
-            yield return UiTestUtil.FinishBattle();
-            LootScreen loot = UiTestUtil.Screen<LootScreen>();
-            Assert.IsFalse(UiTestUtil.ButtonAt(loot, "Frame/BoardPanel/LootToInventory").interactable, "Nothing is picked yet.");
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.EndBattle(battle);
+            Assert.IsTrue(battle.AfterWin);
+            Assert.IsFalse(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootToInventory").interactable, "Nothing is picked yet.");
             int item = expedition.Loot.FindIndex(d => d != null);
             string rewardId = expedition.Loot[item].Id;
             int drops = expedition.Loot.Count;
             Managers.Sound.ForgetEffects();
-            UiTestUtil.Click(UiTestUtil.Views<LootCardView>(loot)[item].Button);
+            UiTestUtil.Click(battle.Drops[item].Button);
             yield return UiTestUtil.WaitForRedraw();
-            UiTestUtil.Click(loot, "Frame/BoardPanel/LootToInventory");
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
             CollectionAssert.AreEqual(new[] { SoundEffect.Button, SoundEffect.ItemPlace }, Managers.Sound.Asked,
-                "Picking the card clicks; putting the item away sounds as put in, without a click as well.");
+                "Picking the drop clicks; putting the item away sounds as put in, without a click as well.");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsFalse(battle.Drops[item].gameObject.activeSelf, "The taken drop is gone from the floor.");
+            Assert.AreSame(battle, UiTestUtil.Screen<BattleScreen>(), "The screen stays after a take, whether drops are left or not.");
             if (drops > 1)
             {
-                // The other drops still lie there: their cards stay, the taken one dimmed, and leaving goes on to the map (round 45).
-                yield return UiTestUtil.WaitForRedraw();
-                Assert.AreEqual(GamePhase.Loot, Managers.Expedition.Phase);
-                LootCardView[] cards = UiTestUtil.Views<LootCardView>(loot);
-                Assert.IsTrue(cards[item].IsTaken);
-                Assert.IsFalse(cards[item].Button.interactable);
-                Assert.AreEqual(UiStrings.Get(UiKeys.Loot.Taken), cards[item].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "CardAction").text);
-                UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
+                Assert.IsTrue(Managers.Expedition.LootOpen, "The other drops still lie there.");
             }
 
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
 
             map = UiTestUtil.Screen<NodeMapScreen>();
@@ -1020,7 +1010,7 @@ namespace F1.Tests
             }
 
             Assert.IsTrue(nodes.OnFloor(nodes.FloorCount - 1).All(node => node.Kind == MapNodeKind.Camp), "The floor before the boss is all camps.");
-            Assert.AreEqual("누가 기다리는지는 들어가 봐야 압니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual("누가 기다리는지는 들어가 봐야 압니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
 
             // An elite chosen (when the map has one; most maps do): its hint says that a strong band waits, not who.
             MapNode elite = nodes.Nodes.FirstOrDefault(node => node.Kind == MapNodeKind.Elite);
@@ -1030,8 +1020,8 @@ namespace F1.Tests
                 map = UiTestUtil.Screen<NodeMapScreen>();
                 UiTestUtil.Click(map.NodeView(elite.Id).Button);
                 yield return null;
-                Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, elite.Floor, "정예"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
-                Assert.AreEqual("강한 적 무리가 기다립니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+                Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, elite.Floor, "정예"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
+                Assert.AreEqual("강한 적 무리가 기다립니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
                 Assert.AreEqual("전투 시작", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
             }
         }
@@ -1052,8 +1042,8 @@ namespace F1.Tests
             Assert.AreEqual(MapNodeKind.Camp, camp.Kind);
             UiTestUtil.Click(map.NodeView(camp.Id).Button);
             yield return null;
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, camp.Floor, "야영지"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
-            Assert.AreEqual("싸움 없이 쉬어 가는 곳입니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, camp.Floor, "야영지"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
+            Assert.AreEqual("싸움 없이 쉬어 가는 곳입니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
             Assert.AreEqual("야영지로", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
 
             // In: the window over the map, the panel pointing at it, and no battle: the node map stays.
@@ -1066,8 +1056,8 @@ namespace F1.Tests
             Assert.AreSame(map, Managers.UI.Current, "A camp is on the node map.");
             Assert.IsTrue(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
             Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
-            Assert.AreEqual("지도 위의 창에서 고릅니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
-            Assert.AreEqual(UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"), UiTestUtil.TextAt(map, "Frame/Map/Camp/CampWindow/CampBox/CampTitle"));
+            Assert.AreEqual("지도 위의 창에서 고릅니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
+            Assert.AreEqual(UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"), UiTestUtil.TextAt(map, "Frame/Map/Camp/CampWindow/CampBox/CampTitle"));
             Assert.AreEqual($"HP {balance.CampHealPercent}% 회복\n피로도 -{balance.CampFatigueRelief}", UiTestUtil.TextAt(map, UiTestUtil.CampRest + "/RestBody"));
             Assert.IsTrue(InView(map, camp), "The map followed the party up to the camp's floor.");
             Assert.IsFalse(UiTestUtil.PointerReaches(map.NodeView(camp.Id).Button), "The window's shade takes the map's clicks.");
@@ -1079,7 +1069,7 @@ namespace F1.Tests
             Assert.AreEqual(1 + hurt.MaxHp * balance.CampHealPercent / 100, hurt.Hp);
             Assert.AreEqual(50 - balance.CampFatigueRelief, hurt.Fatigue);
             Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
             Assert.AreEqual("전투 시작", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
         }
 
@@ -1099,8 +1089,8 @@ namespace F1.Tests
             Managers.Expedition.Expedition.Coins = 100;
             UiTestUtil.Click(map.NodeView(shop.Id).Button);
             yield return null;
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, shop.Floor, "상점"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
-            Assert.AreEqual("지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, shop.Floor, "상점"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
+            Assert.AreEqual("지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
             Assert.AreEqual("상점으로", UiTestUtil.TextAt(map, "Frame/BoardPanel/Enter/EnterLabel"));
             Assert.AreEqual("100", UiTestUtil.TextAt(map, "Frame/Header/Coins"));
 
@@ -1112,7 +1102,7 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.At(map, "Frame/Map/Shop").gameObject.activeSelf);
             Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
             Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/ShopBuy").gameObject.activeSelf);
-            Assert.AreEqual("지도 위의 창에서 삽니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.AreEqual("지도 위의 창에서 삽니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
             IReadOnlyList<ItemOffer> stock = Managers.Expedition.ShopStock;
             Assert.AreEqual(stock.Count, map.ShopTiles.Count(t => t.gameObject.activeSelf));
             Assert.AreEqual("100", UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
@@ -1131,7 +1121,7 @@ namespace F1.Tests
             var cost = UiTestUtil.At(map, UiTestUtil.ShopRefreshCost).GetComponent<TMP_Text>();
             Assert.AreEqual(cost.text.Length, cost.textInfo.characterCount, "The refresh cost is drawn whole.");
 
-            // An item picked: its tile is the brass one, its card opens under the window with the notch up at it, the panel says how to buy.
+            // An item picked: its tile is the brass one and shows its facts itself, so no card opens (round 46, S1); the panel says how to buy.
             int slot = Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == OfferKind.Item);
             ShopTileView tile = map.ShopTiles[slot];
             string bought = stock[slot].Id;
@@ -1142,11 +1132,12 @@ namespace F1.Tests
             Assert.AreEqual(slot, map.PickedOffer);
             Assert.AreEqual(ShopTileState.Picked, tile.State);
             PartySideView party = map.GetComponentInChildren<PartySideView>();
-            Assert.IsTrue(party.Tooltip.IsShown);
-            Assert.AreEqual(ItemTooltipView.Notch.Top, party.Tooltip.NotchShown);
-            Assert.AreEqual(bought, party.Tooltip.Item.Item.Id);
-            Assert.Greater(party.Tooltip.Placed.y, party.Tooltip.Anchor.yMax, "The card hangs under the tile.");
-            Assert.AreEqual("넣을 칸을 누르면 삽니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHint"));
+            Assert.IsFalse(party.Tooltip.IsShown);
+            var offered = new EquippedItem(data.Items.Get(bought), stock[slot].Grade, tier: stock[slot].Tier);
+            Assert.AreEqual(UiText.ItemTileFacts(offered), tile.Facts);
+            StringAssert.Contains(UiText.Effect(offered.Item.Effects[0], offered.Magnitude(data.Balance, offered.Item.Effects[0])), tile.Facts);
+            Assert.AreEqual("지도 위의 창에서 삽니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
+            Assert.AreEqual("넣을 칸을 누르면 삽니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
             Assert.IsTrue(UiTestUtil.ButtonAt(map, "Frame/BoardPanel/ShopBuy").interactable, "It fits the inventory.");
 
             // Bought onto the first free cell of the row-1 board: the coins are paid, the tile is sold, the item is on the board.
@@ -1277,7 +1268,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator PartySide_ClickingAnItem_OpensItsCardAboveThePanel_AndTheNextPressClosesOnlyTheCard()
+        public IEnumerator PartySide_RightClickingAnItem_OpensItsCardAboveThePanel_AndTheNextPressClosesOnlyTheCard()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
@@ -1294,10 +1285,15 @@ namespace F1.Tests
             ItemTooltipView card = party.Tooltip;
             Assert.IsFalse(card.IsShown, "No card before a click.");
 
-            // The row-1 dagger clicked: chosen as before, and its card floats just above the panel, centred on its column, with its words.
+            // The row-1 dagger clicked: chosen, and no card (round 47: a left click only picks). Right-clicked: its card floats just above
+            // the panel, centred on its column, with its words.
             EquippedItem dagger = expedition.Members[row1.Member].Items[1];
             string mergeMark = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze));
             UiTestUtil.Click(row1.Slots[1].Button);
+            yield return null;
+            Assert.IsFalse(card.IsShown, "A left click picks the item; it opens no card.");
+            Assert.AreEqual(mergeMark, row2.Slots[1].MergeMark, "Chosen.");
+            UiTestUtil.RightClick(row1.Slots[1]);
             yield return null;
             Assert.IsTrue(card.IsShown);
             Assert.AreSame(dagger, card.Item);
@@ -1329,8 +1325,20 @@ namespace F1.Tests
             Assert.IsFalse(card.IsShown);
             Assert.AreEqual(string.Empty, row2.Slots[1].MergeMark);
 
-            // Chosen once more, its card is up; the click that puts it on row 2's dagger merges them and closes the card with the choice.
+            // A right click on row 2's dagger (not chosen) shows that one's card; the card of an empty cell does not open.
+            UiTestUtil.RightClick(row2.Slots[1]);
+            yield return null;
+            Assert.IsTrue(card.IsShown);
+            Assert.AreSame(expedition.Members[row2.Member].Items[1], card.Item);
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            UiTestUtil.RightClick(row1.Slots[2]);
+            yield return null;
+            Assert.IsFalse(card.IsShown, "An empty cell has no card.");
+
+            // Chosen once more with its card up; the click that puts it on row 2's dagger merges them and closes the card with the choice.
             UiTestUtil.Click(row1.Slots[1].Button);
+            UiTestUtil.RightClick(row1.Slots[1]);
             yield return null;
             Assert.IsTrue(card.IsShown);
             UiTestUtil.Click(row2.Slots[1].Button);
@@ -1341,7 +1349,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Battle_ClickingAnItem_OpensItsCardBesideTheBoard_PartyLeftEnemyRight_NotWhileAPotionIsArmed()
+        public IEnumerator Battle_RightClickingAnItem_OpensItsCardBesideTheBoard_PartyLeftEnemyRight_NotWhileAPotionIsArmed()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle();
@@ -1354,10 +1362,14 @@ namespace F1.Tests
             ItemTooltipView card = battle.Tooltip;
             Assert.IsFalse(card.IsShown);
 
-            // An enemy's item: its card to the right of the board at the cell's height, the notch on its left edge at the cell's middle; the battle is not touched.
+            // An enemy's item right-clicked (round 47; a left click on a cell does nothing): its card to the right of the board at the
+            // cell's height, the notch on its left edge at the cell's middle; the battle is not touched.
             int timeBefore = Managers.Expedition.Battle.Engine.TimeMs;
             EquippedItem enemyItem = enemyBoard.Unit.Items[0].Equipped;
             UiTestUtil.Click(enemyBoard.Items[0].Button);
+            yield return null;
+            Assert.IsFalse(card.IsShown, "A left click opens no card.");
+            UiTestUtil.RightClick(enemyBoard.Items[0]);
             yield return null;
             Assert.IsTrue(card.IsShown);
             Assert.AreSame(enemyItem, card.Item);
@@ -1373,7 +1385,7 @@ namespace F1.Tests
             // A party member's item: its card takes the enemy's place, to the left of the board when there is room (the rear rows of
             // a full party have none: then to the right), the notch on the edge facing the board.
             EquippedItem partyItem = partyBoard.Unit.Items[0].Equipped;
-            UiTestUtil.Click(partyBoard.Items[0].Button);
+            UiTestUtil.RightClick(partyBoard.Items[0]);
             yield return null;
             Assert.IsTrue(card.IsShown);
             Assert.AreSame(partyItem, card.Item);
@@ -1401,7 +1413,7 @@ namespace F1.Tests
             Assume.That(potions.Length, Is.GreaterThan(0), "The expedition starts with a potion.");
             UiTestUtil.Click(potions[0].Button);
             yield return null;
-            Assert.IsFalse(partyBoard.Items[0].Button.interactable, "No card while a potion waits for a target.");
+            Assert.IsFalse(partyBoard.Items[0].Button.interactable, "The cell gives its clicks up while a potion waits for a target.");
             Assert.IsFalse(UiTestUtil.PointerReaches(partyBoard.Items[0].Button), "The click falls through to the board.");
             UiTestUtil.Click(potions[0].Button);
             yield return null;
@@ -1410,53 +1422,84 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Loot_ACardShowsItsTier_AndTakenOntoTheSameItem_Merges()
+        public IEnumerator Loot_AfterTheWin_TheBandIsUp_ADropLiesOnTheFloor_AndTakenOntoTheSameItem_Merges()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle();
-            yield return UiTestUtil.FinishBattle();
-            LootScreen loot = UiTestUtil.Screen<LootScreen>();
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.EndBattle(battle);
             ExpeditionState expedition = Managers.Expedition.Expedition;
             StaticData data = Managers.Data.Data;
 
-            // Staged: the first drop is Bronze, and row 1 already holds the same item at Bronze.
+            // The win keeps the screen (round 47): no result window, the band over the stage, the header's battle controls gone, the
+            // panel's loot buttons up, and a drop on the floor per slot of the loot.
+            Assert.IsTrue(battle.AfterWin);
+            Assert.AreEqual(GamePhase.Battle, Managers.Expedition.Phase, "The ended battle still shows.");
+            Assert.IsTrue(Managers.Expedition.LootOpen);
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/ResultPanel").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(battle, "Frame/VictoryBand").gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.Victory), UiTestUtil.TextAt(battle, "Frame/VictoryBand/BandRow/BandTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootCount, expedition.Loot.Count), UiTestUtil.TextAt(battle, "Frame/VictoryBand/BandRow/BandLoot"));
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/Header/Retreat").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(battle, "Frame/Header/Pause").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(battle, "Frame/BoardPanel/LootContinue").gameObject.activeSelf);
+            Assert.AreEqual(expedition.Loot.Count, battle.Drops.Count, "A drop per slot.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootHint), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
+
+            // Staged: the first drop is Bronze, and row 1 already holds the same item at Bronze. The battle's boards gave way to the node
+            // map's: the member's board stands in row 1's column with the weapon and the staged item on it.
             int index = 0;
             ItemOffer drop = expedition.Loot[index];
             expedition.Loot[index] = new ItemOffer(OfferKind.Item, drop.Id, drop.Grade, ItemTier.Bronze);
-            PartySideView party = loot.GetComponentInChildren<PartySideView>();
-            PartyColumnView row1 = party.ColumnOfRow(1);
-            ExpeditionMember front = expedition.Members[row1.Member];
-            front.Items.Add(new EquippedItem(data.Items.Get(drop.Id), 8, tier: ItemTier.Bronze));
-            loot.Refresh();
+            PartyBoardView row1 = battle.LootBoardOfRow(1);
+            int front = expedition.Members.FindIndex(m => m.Alive && m.Row == 1);
+            expedition.Members[front].Items.Add(new EquippedItem(data.Items.Get(drop.Id), 8, tier: ItemTier.Bronze));
+            battle.Refresh();
             yield return null;
+            Assert.IsTrue(row1.gameObject.activeSelf);
+            Assert.AreEqual(2, row1.Slots.Count(v => v.gameObject.activeSelf && v.Item != null), "The weapon and the staged item.");
+            Assert.IsFalse(UiTestUtil.Views<BattleBoardView>(battle).Any(b => b.Unit.Side == BattleSide.Party && b.gameObject.activeSelf), "The battle's party boards are away.");
+            LootDropView first = battle.Drops[index];
+            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), first.Title);
+            Assert.IsTrue(first.gameObject.activeSelf);
+            Assert.IsFalse(first.IsPicked);
 
-            LootCardView[] cards = UiTestUtil.Views<LootCardView>(loot);
-            Assert.AreEqual(expedition.Loot.Count, cards.Length, "A card per drop.");
-            Assert.AreEqual(UiPalette.TierBronze, cards[index].Stripe);
-            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), cards[index].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "CardTitle").text);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Loot.Take), cards[index].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "CardAction").text);
+            // A right click on the drop: its card beside it, with the merge hint; a press closes it.
+            UiTestUtil.RightClick(first.Button);
+            yield return null;
+            Assert.IsTrue(battle.Tooltip.IsShown);
+            Assert.AreEqual(drop.Id, battle.Tooltip.Item.Item.Id);
+            Assert.AreEqual(UiText.MergeHint(battle.Tooltip.Item), UiTestUtil.TextAt(battle.Tooltip, "ItemTooltipMerge"));
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(battle.Tooltip.IsShown);
 
-            // The card picked: the cell with the same item is marked with Silver, and a click there merges them.
-            UiTestUtil.Click(cards[index].Button);
+            // The drop picked: its word asks for the cell, the hint says how, the cell with the same item is marked with Silver, and a
+            // click there merges them. The last drop taken keeps the screen until continue.
+            UiTestUtil.Click(first.Button);
             yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(index, battle.PickedDrop);
+            Assert.IsTrue(first.IsPicked);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootPickedHint), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
             Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Silver)), row1.Slots[1].MergeMark);
             Assert.IsTrue(row1.Slots[1].Button.interactable);
             UiTestUtil.Click(row1.Slots[1].Button);
-            if (cards.Length > 1)
-            {
-                yield return UiTestUtil.WaitForRedraw();
-                Assert.AreEqual(GamePhase.Loot, Managers.Expedition.Phase, "The other drops still lie there.");
-                UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
-            }
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(2, expedition.Members[front].Items.Count, "The base weapon and the merge.");
+            Assert.AreEqual(ItemTier.Silver, expedition.Members[front].Items[1].Tier);
+            Assert.AreEqual(drop.Id, expedition.Members[front].Items[1].Item.Id);
+            Assert.IsFalse(first.gameObject.activeSelf, "The taken drop is gone from the floor.");
+            Assert.AreSame(battle, UiTestUtil.Screen<BattleScreen>(), "The screen stays.");
+            Assert.AreEqual(-1, battle.PickedDrop);
 
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
-            Assert.AreEqual(2, front.Items.Count, "The base weapon and the merge.");
-            Assert.AreEqual(ItemTier.Silver, front.Items[1].Tier);
-            Assert.AreEqual(drop.Id, front.Items[1].Item.Id);
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
+            Assert.IsEmpty(expedition.Loot);
         }
 
         [UnityTest]
-        public IEnumerator Loot_TakingOneOfTwoDrops_KeepsTheScreen_MarksTheCardTaken_AndLeavingGoesOn()
+        public IEnumerator Loot_AfterTheWin_ItemsMoveBetweenTheBoards_AndContinuingLeavesTheRest()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle();
@@ -1474,31 +1517,45 @@ namespace F1.Tests
             ItemOffer first = expedition.Loot[0];
             expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Grade, first.Tier));
             yield return UiTestUtil.WaitForResult(battle);
-            UiTestUtil.Click(battle, "Frame/ResultPanel/ResultBox/Continue");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Loot);
+            Assert.AreEqual(2, battle.Drops.Count, "A drop per slot, at the first two enemy columns.");
+            Assert.Less(((RectTransform)battle.Drops[0].transform).anchoredPosition.x, ((RectTransform)battle.Drops[1].transform).anchoredPosition.x);
 
-            // The second drop taken into the inventory: its card stays, dimmed and silent, the first still waits, and the screen is the same one.
-            LootScreen loot = UiTestUtil.Screen<LootScreen>();
-            LootCardView[] cards = UiTestUtil.Views<LootCardView>(loot);
-            Assert.AreEqual(2, cards.Length, "A card per drop.");
-            UiTestUtil.Click(cards[1].Button);
+            // The boards work as on the node map while nothing is picked: row 1's weapon picked up (the hint tells it), put on row 2's
+            // empty cell, moved. A right click on a cell opens its card above the panel.
+            PartyBoardView row1 = battle.LootBoardOfRow(1);
+            PartyBoardView row2 = battle.LootBoardOfRow(2);
+            int front = expedition.Members.FindIndex(m => m.Alive && m.Row == 1);
+            int second = expedition.Members.FindIndex(m => m.Alive && m.Row == 2);
+            EquippedItem weapon = expedition.Members[front].Items[0];
+            UiTestUtil.RightClick(row1.Slots[0]);
+            yield return null;
+            Assert.IsTrue(battle.Tooltip.IsShown);
+            Assert.AreSame(weapon, battle.Tooltip.Item);
+            Assert.AreEqual(ItemTooltipView.Notch.Bottom, battle.Tooltip.NotchShown);
+            UiTestUtil.Click(row1.Slots[0].Button);
             yield return UiTestUtil.WaitForRedraw();
-            UiTestUtil.Click(loot, "Frame/BoardPanel/LootToInventory");
+            Assert.IsFalse(battle.Tooltip.IsShown, "The press closes the card.");
+            StringAssert.Contains(UiText.ItemTitle(weapon), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
+            Assert.IsTrue(row2.Slots[1].Button.interactable, "Row 2's empty cell can take it.");
+            UiTestUtil.Click(row2.Slots[1].Button);
             yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(0, expedition.Members[front].Items.Count);
+            Assert.AreSame(weapon, expedition.Members[second].Items[1]);
 
-            Assert.AreEqual(GamePhase.Loot, Managers.Expedition.Phase, "The first drop still lies there.");
-            Assert.AreSame(loot, UiTestUtil.Screen<LootScreen>(), "The screen stays.");
-            Assert.IsTrue(cards[1].IsTaken);
-            Assert.IsFalse(cards[1].Button.interactable);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Loot.Taken), cards[1].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "CardAction").text);
-            Assert.IsFalse(cards[0].IsTaken);
-            Assert.IsTrue(cards[0].Button.interactable);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Loot.Take), cards[0].GetComponentsInChildren<TMP_Text>().Single(t => t.name == "CardAction").text);
+            // The second drop taken into the inventory: it is gone from the floor, the first still lies there, and continuing leaves it.
+            UiTestUtil.Click(battle.Drops[1].Button);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootToInventory").interactable);
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(Managers.Expedition.LootOpen, "The first drop still lies there.");
+            Assert.IsFalse(battle.Drops[1].gameObject.activeSelf);
+            Assert.IsTrue(battle.Drops[0].gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootCount, 1), UiTestUtil.TextAt(battle, "Frame/VictoryBand/BandRow/BandLoot"));
             Assert.AreEqual(1, expedition.Inventory.Count);
-            Assert.IsFalse(UiTestUtil.ButtonAt(loot, "Frame/BoardPanel/LootToInventory").interactable, "Nothing is picked after a take.");
+            Assert.IsFalse(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootToInventory").interactable, "Nothing is picked after a take.");
 
-            // Leaving the rest goes on to the map with the loot gone.
-            UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
+            UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             Assert.IsEmpty(expedition.Loot);
             Assert.AreEqual(1, expedition.Inventory.Count, "Only what was taken is kept.");
@@ -1573,7 +1630,7 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
             Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/InventoryToggle").gameObject.activeSelf);
             Assert.AreEqual(ItemTier.Bronze, row1.Slots[0].TierShown);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
@@ -1634,7 +1691,7 @@ namespace F1.Tests
 
                 // The board is as high as the member's cells stacked, and the bag behind the cells is stretched over it.
                 Assert.AreEqual(BattleItemView.BoardHeight(member.ItemSlots), column.BoardHeight, 0.01f, member.MercenaryId);
-                Assert.IsTrue(UiTestUtil.At(column.Board.transform, "Party" + member.Row + "Cells/Party" + member.Row + "Bag").GetComponent<Image>().enabled, member.MercenaryId);
+                Assert.IsTrue(UiTestUtil.At(column.Board.transform, "Party" + member.Row + "Board/Party" + member.Row + "Cells/Party" + member.Row + "Bag").GetComponent<Image>().enabled, member.MercenaryId);
                 for (int i = 0; i < member.Items.Count; i++)
                 {
                     EquippedItem item = member.Items[i];

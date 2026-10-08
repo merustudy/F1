@@ -43,27 +43,38 @@ namespace F1.Editor.Setup
         const float MendButtonHeight = 56f;
 
         /// <summary>
-        /// The shop's window (2026-10-07 round 44, A): over the map like the camp's but wider, the offers as tiles side by side under
-        /// the title (BuildShopTile: the offer as a board cell, its name and kind, its price), the refresh and leave buttons below.
-        /// The party's coins stand at the window's top right, and beside the floor count in the header of every expedition screen.
+        /// The shop's window (2026-10-07 round 44, A; taller in round 46, S1): over the map like the camp's but wider, the offers as
+        /// tiles side by side under the title (BuildItemTile: the offer as a board cell at its own size, its name and kind, its facts,
+        /// its price), the refresh and leave buttons below. The party's coins stand at the window's top right, and beside the floor
+        /// count in the header of every expedition screen.
         /// </summary>
-        const float ShopWindowWidth = 820f;
-        const float ShopWindowHeight = 360f;
-        const float ShopTileWidth = 186f;
-        const float ShopTileHeight = 160f;
+        const float ShopWindowWidth = 860f;
         const float ShopTileGap = 10f;
         const float ShopTilesTop = 108f;
-        const float ShopButtonsTop = 296f;
+        const float ShopButtonsTop = ShopTilesTop + ItemTileHeight + 16f;
         const float ShopButtonHeight = 48f;
+        const float ShopWindowHeight = ShopButtonsTop + ShopButtonHeight + 22f;
         const float ShopRefreshWidth = 250f;
         const float ShopLeaveWidth = 190f;
         const float ShopCoinSize = 30f;
         const float ShopCoinsWidth = 70f;
-        const float ShopTileCellTop = 10f;
-        const float ShopTileNameTop = 78f;
-        const float ShopTileSubTop = 104f;
-        const float ShopTilePriceTop = 124f;
         const float ShopTileCoinSize = 22f;
+
+        /// <summary>
+        /// A tile of the shop or of the loot (round 46, S1 and L2), from its top: the cell in the room of two cells (a longer item is
+        /// drawn smaller: ItemTileView.FitCell), the name, the kind and cells, a brass rule, the facts (the cooldown, where it works,
+        /// the effects, the fatigue), and the foot: the price, or the loot's take.
+        /// </summary>
+        const float ItemTileWidth = 194f;
+        const float ItemTileHeight = 372f;
+        const float ItemTileCellTop = 10f;
+        const float ItemTileNameTop = ItemTileCellTop + ItemTileView.CellRoom + 10f;
+        const float ItemTileSubTop = ItemTileNameTop + 26f;
+        const float ItemTileRuleTop = ItemTileSubTop + 28f;
+        const float ItemTileFactsTop = ItemTileRuleTop + 10f;
+        const float ItemTileFootHeight = 28f;
+        const float ItemTileFootBottom = 10f;
+        const float ItemTileFactsMinSize = 12f;
         const float HeaderCoinX = 1560f;
         const float HeaderCoinSize = 26f;
 
@@ -90,7 +101,7 @@ namespace F1.Editor.Setup
             // Map: it starts under the potions and ends above the panel. Nodes and paths are created at runtime inside the
             // area, measured from its bottom-left corner; the area is the scroll's content, standing on the view's bottom,
             // and the screen sets its height.
-            float mapHeight = BoardPanelTop - 16f - PartyRightTop;
+            float mapHeight = PartyRightHeight;
             Image map = KitFrame("Map", frame, UiArt.Tablet);
             UiBuild.Box(map, 980f, PartyRightTop, 920f, mapHeight);
 
@@ -232,7 +243,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(KitIcon("ShopCoinIcon", shopBox.transform, UiArt.Coin), shopCoinX, 31f, ShopCoinSize, ShopCoinSize);
             UiBuild.Box(UiBuild.SingleLine(UiBuild.LocalizedLabel("ShopCoinsLabel", shopBox.transform, UiKeys.Map.ShopCoinsLabel, 19f, UiPalette.TextDim, TextAlignmentOptions.Right)), shopCoinX - 8f - 160f, 34f, 160f, 28f);
 
-            RectTransform tiles = UiBuild.Box(UiBuild.Rect("ShopTiles", shopBox.transform), CampSideMargin, ShopTilesTop, shopInner - 2f * CampSideMargin, ShopTileHeight);
+            RectTransform tiles = UiBuild.Box(UiBuild.Rect("ShopTiles", shopBox.transform), CampSideMargin, ShopTilesTop, shopInner - 2f * CampSideMargin, ItemTileHeight);
             UiBuild.Horizontal(tiles, ShopTileGap, 0, TextAnchor.MiddleCenter);
             var shopTiles = new ShopTileView[BalanceData.MaxShopSlots];
             for (int i = 0; i < shopTiles.Length; i++)
@@ -260,19 +271,18 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(UiBuild.LocalizedLabel("ShopLeaveLabel", leave.transform, UiKeys.Map.ShopLeave, 24f, UiPalette.Text, TextAlignmentOptions.Center).rectTransform);
             shopCover.gameObject.SetActive(false);
 
-            PartySideView party = BuildPartySide(frame, PanelRightX, 200f, out Image panel);
+            PartySideView party = BuildPartySide(frame, PanelRightX, 200f, out RectTransform panel);
 
-            // The chosen node in the panel's right half: its floor and kind, its hint (the enemies stay unknown), then the inventory and the way in.
-            TextMeshProUGUI nodeTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("NodeTitle", panel.transform, 34f, UiPalette.Text), PanelRightX, PanelTitleTop, PanelRightWidth, 48f));
-            TextMeshProUGUI nodeHint = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("NodeHint", panel.transform, 20f, UiPalette.TextDim), PanelRightX, PanelHintTop, PanelRightWidth, 30f));
-            ButtonParts inventoryToggle = KitButton("InventoryToggle", panel.transform, UiPalette.ButtonQuiet, 24f);
+            // The chosen node on the panel's right half: its floor and kind with its hint beside it (the enemies stay unknown), then the inventory and the way in.
+            BuildHeading(panel, out TextMeshProUGUI nodeTitle, out TextMeshProUGUI nodeHint);
+            ButtonParts inventoryToggle = KitButton("InventoryToggle", panel, UiPalette.ButtonQuiet, 24f);
             UiBuild.Box(inventoryToggle.Rect, 1220f, PanelButtonsTop, 236f, PanelButtonHeight);
-            ButtonParts enter = KitButton("Enter", panel.transform, UiPalette.Button, 30f);
+            ButtonParts enter = KitButton("Enter", panel, UiPalette.Button, 30f);
             UiBuild.Silence(enter.Button);
             UiBuild.Box(enter.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
 
             // At a shop (round 44), the way in makes room for buying the picked offer straight into the inventory.
-            ButtonParts buyToInventory = KitLocalizedButton("ShopBuy", panel.transform, UiKeys.Loot.ToInventory, UiPalette.Button, 26f);
+            ButtonParts buyToInventory = KitLocalizedButton("ShopBuy", panel, UiKeys.Loot.ToInventory, UiPalette.Button, 26f);
             UiBuild.Silence(buyToInventory.Button);
             UiBuild.Box(buyToInventory.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
             buyToInventory.Rect.gameObject.SetActive(false);
@@ -330,6 +340,25 @@ namespace F1.Editor.Setup
             return text;
         }
 
+        /// <summary>
+        /// The heading on the panel's right half (round 46): the title, and the hint beside it on the same baseline (the heading's
+        /// middle) in the room the title leaves. The hint asks for no room of its own, so a long one is cut, never the title.
+        /// </summary>
+        static void BuildHeading(RectTransform panel, out TextMeshProUGUI title, out TextMeshProUGUI hint)
+        {
+            RectTransform heading = UiBuild.Box(UiBuild.Rect("NodeHeading", panel), PanelRightX, PanelTitleTop, PanelRightWidth, PanelTitleHeight);
+            HorizontalLayoutGroup row = UiBuild.Horizontal(heading, PanelHeadingGap);
+            row.childControlWidth = true;
+            row.childControlHeight = true;
+            row.childForceExpandHeight = true;
+            title = UiBuild.SingleLine(UiBuild.Label("NodeTitle", heading, 34f, UiPalette.Text, TextAlignmentOptions.BaselineLeft));
+            hint = UiBuild.SingleLine(UiBuild.Label("NodeHint", heading, 20f, UiPalette.TextDim, TextAlignmentOptions.BaselineLeft));
+            var room = hint.gameObject.AddComponent<LayoutElement>();
+            room.minWidth = 0f;
+            room.preferredWidth = 0f;
+            room.flexibleWidth = 1f;
+        }
+
         /// <summary>The party's region coins in the header of an expedition screen (round 44): the coin and, after it, the number the screen writes.</summary>
         static TextMeshProUGUI BuildHeaderCoins(Transform header)
         {
@@ -340,66 +369,118 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One offer of the shop (round 44, A): a tile with a rim (brass while picked) holding the offer as a board cell (an item with
-        /// its icon and tier marks) or as a potion in its pocket, its name and kind under it, and its price with the coin at the
-        /// bottom; "sold" over an empty tile. The whole tile is the button, built silent (the screen sounds what a click did); the
-        /// cell inside takes no click, and a tile the coins do not cover is dimmed by the view, not by the button.
+        /// One offer of the shop (round 44, A; round 46, S1): the item tile (BuildItemTile) holding the offer as a board cell or as a
+        /// potion in its pocket, with its price and the coin at the foot; "sold" over an empty tile. The whole tile is the button,
+        /// built silent (the screen sounds what a click did); a tile the coins do not cover is dimmed by the view, not by the button.
         /// </summary>
         static ShopTileView BuildShopTile(Transform parent, string name)
         {
-            Image rim = Rounded(name, parent, UiPalette.Line, 8f);
-            UiBuild.Size(rim, ShopTileWidth, ShopTileHeight);
-            Button button = UiBuild.MakeButton(rim);
-            UiBuild.Silence(button);
-            ColorBlock colors = button.colors;
-            colors.disabledColor = Color.white;
-            button.colors = colors;
-            var group = rim.gameObject.AddComponent<CanvasGroup>();
-            Image fill = Rounded(name + "Fill", rim.transform, UiPalette.Slot, 6f);
-            UiBuild.Stretch(fill.rectTransform, 2f, 2f, 2f, 2f);
+            ItemTileParts tile = BuildItemTile(parent, name, ItemTileWidth, ItemTileFootHeight);
 
-            ItemSlotView cell = BuildItemSlot(fill.transform, name + "Cell");
-            cell.gameObject.SetActive(true);
-            cell.GetComponent<Image>().raycastTarget = false;
-            UiBuild.Place((RectTransform)cell.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -ShopTileCellTop), new Vector2(BattleItemView.CellWidth, BattleItemView.CellHeight));
-
-            Image pocket = KitFrame(name + "Potion", fill.transform, UiArt.PotionSlot);
-            UiBuild.Place(pocket.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -ShopTileCellTop), new Vector2(BattleItemView.CellHeight, BattleItemView.CellHeight));
+            Image pocket = KitFrame(name + "Potion", tile.Fill, UiArt.PotionSlot);
+            UiBuild.Place(pocket.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(BattleItemView.CellHeight, BattleItemView.CellHeight));
             Image potionIcon = UiBuild.Image(name + "PotionIcon", pocket.transform, Color.white);
             potionIcon.preserveAspect = true;
             UiBuild.Stretch(potionIcon.rectTransform, 7f, 7f, 7f, 7f);
             pocket.gameObject.SetActive(false);
 
-            TextMeshProUGUI tileName = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Name", fill.transform, 19f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
-            UiBuild.Line(tileName, ShopTileNameTop, 26f, 6f, 6f);
-            TextMeshProUGUI sub = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Sub", fill.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Center)), 11f);
-            UiBuild.Line(sub, ShopTileSubTop, 22f, 6f, 6f);
-
-            RectTransform priceRow = UiBuild.Line(UiBuild.Rect(name + "Price", fill.transform), ShopTilePriceTop, 28f);
+            RectTransform priceRow = UiBuild.Rect(name + "Price", tile.Fill);
+            ItemTileFoot(priceRow);
             HorizontalLayoutGroup priceLayout = UiBuild.Horizontal(priceRow, 6f, 0, TextAnchor.MiddleCenter);
             priceLayout.childControlWidth = true;
             Image coin = KitIcon(name + "Coin", priceRow, UiArt.Coin);
             UiBuild.Size(coin, ShopTileCoinSize, ShopTileCoinSize);
             coin.gameObject.AddComponent<LayoutElement>().preferredWidth = ShopTileCoinSize;
-            TextMeshProUGUI price = UiBuild.Size(Numeral(UiBuild.Label(name + "PriceText", priceRow, 24f, UiPalette.Virtue, TextAlignmentOptions.Center)), 60f, 28f);
+            TextMeshProUGUI price = UiBuild.Size(Numeral(UiBuild.Label(name + "PriceText", priceRow, 24f, UiPalette.Virtue, TextAlignmentOptions.Center)), 60f, ItemTileFootHeight);
 
-            TextMeshProUGUI sold = UiBuild.SingleLine(UiBuild.LocalizedLabel(name + "Sold", fill.transform, UiKeys.Map.ShopSold, 22f, UiPalette.TextDim, TextAlignmentOptions.Center));
+            TextMeshProUGUI sold = UiBuild.SingleLine(UiBuild.LocalizedLabel(name + "Sold", tile.Fill, UiKeys.Map.ShopSold, 22f, UiPalette.TextDim, TextAlignmentOptions.Center));
             UiBuild.Stretch(sold.rectTransform);
             sold.gameObject.SetActive(false);
 
-            var view = rim.gameObject.AddComponent<ShopTileView>();
-            UiBuild.SetReference(view, "_button", button);
-            UiBuild.SetReference(view, "_rim", rim);
-            UiBuild.SetReference(view, "_group", group);
-            UiBuild.SetReference(view, "_cell", cell);
+            var view = tile.Rim.gameObject.AddComponent<ShopTileView>();
+            SetItemTile(view, tile);
             UiBuild.SetReference(view, "_potionPocket", pocket.gameObject);
             UiBuild.SetReference(view, "_potionIcon", potionIcon);
-            UiBuild.SetReference(view, "_name", tileName);
-            UiBuild.SetReference(view, "_sub", sub);
             UiBuild.SetReference(view, "_priceRow", priceRow.gameObject);
             UiBuild.SetReference(view, "_price", price);
             UiBuild.SetReference(view, "_sold", sold);
             return view;
+        }
+
+        /// <summary>The parts of an item tile its view needs.</summary>
+        struct ItemTileParts
+        {
+            public Image Rim;
+            public Button Button;
+            public RightClick RightClick;
+            public CanvasGroup Group;
+            public RectTransform Fill;
+            public ItemSlotView Cell;
+            public TextMeshProUGUI Name;
+            public TextMeshProUGUI Sub;
+            public Image Rule;
+            public TextMeshProUGUI Facts;
+        }
+
+        /// <summary>
+        /// The body of a tile of the shop or the loot (round 46): a rim (brass while picked) around a slot-coloured fill holding the
+        /// item as a board cell in the room of two cells (the cell takes no click), its name and its kind with its cells, a brass
+        /// rule and the facts under it, down to the foot of the height given; the caller adds the foot. The whole tile is the button,
+        /// built silent.
+        /// </summary>
+        static ItemTileParts BuildItemTile(Transform parent, string name, float width, float footHeight)
+        {
+            var parts = new ItemTileParts();
+            parts.Rim = Rounded(name, parent, UiPalette.Line, 8f);
+            UiBuild.Size(parts.Rim, width, ItemTileHeight);
+            parts.Button = UiBuild.MakeButton(parts.Rim);
+            parts.RightClick = parts.Rim.gameObject.AddComponent<RightClick>();
+            UiBuild.Silence(parts.Button);
+            ColorBlock colors = parts.Button.colors;
+            colors.disabledColor = Color.white;
+            parts.Button.colors = colors;
+            parts.Group = parts.Rim.gameObject.AddComponent<CanvasGroup>();
+            Image fill = Rounded(name + "Fill", parts.Rim.transform, UiPalette.Slot, 6f);
+            UiBuild.Stretch(fill.rectTransform, 2f, 2f, 2f, 2f);
+            parts.Fill = fill.rectTransform;
+
+            parts.Cell = BuildItemSlot(fill.transform, name + "Cell");
+            parts.Cell.gameObject.SetActive(true);
+            parts.Cell.GetComponent<Image>().raycastTarget = false;
+            UiBuild.Place((RectTransform)parts.Cell.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(BattleItemView.CellWidth, BattleItemView.CellHeight));
+
+            parts.Name = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Name", fill.transform, 19f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
+            UiBuild.Line(parts.Name, ItemTileNameTop, 26f, 6f, 6f);
+            parts.Sub = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Sub", fill.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Center)), 11f);
+            UiBuild.Line(parts.Sub, ItemTileSubTop, 22f, 6f, 6f);
+            parts.Rule = UiBuild.Image(name + "Rule", fill.transform, Tinted(UiPalette.Brass, TooltipRuleAlpha));
+            UiBuild.Line(parts.Rule, ItemTileRuleTop, 1f, 10f, 10f);
+            parts.Facts = UiBuild.ShrinkToFit(UiBuild.Label(name + "Facts", fill.transform, 15f, UiPalette.Text, TextAlignmentOptions.TopLeft), ItemTileFactsMinSize);
+            UiBuild.Line(parts.Facts, ItemTileFactsTop, ItemTileHeight - 4f - ItemTileFactsTop - ItemTileFootBottom - footHeight - 6f, 10f, 10f);
+            return parts;
+        }
+
+        /// <summary>The foot of an item tile: a line across its bottom (the price, or the loot's take).</summary>
+        static void ItemTileFoot(RectTransform foot, float height = ItemTileFootHeight, float side = 0f)
+        {
+            foot.anchorMin = Vector2.zero;
+            foot.anchorMax = new Vector2(1f, 0f);
+            foot.pivot = new Vector2(0.5f, 0f);
+            foot.offsetMin = new Vector2(side, ItemTileFootBottom);
+            foot.offsetMax = new Vector2(-side, ItemTileFootBottom + height);
+        }
+
+        static void SetItemTile(ItemTileView view, ItemTileParts tile)
+        {
+            UiBuild.SetReference(view, "_button", tile.Button);
+            UiBuild.SetReference(view, "_rightClick", tile.RightClick);
+            UiBuild.SetReference(view, "_rim", tile.Rim);
+            UiBuild.SetReference(view, "_group", tile.Group);
+            UiBuild.SetReference(view, "_cell", tile.Cell);
+            UiBuild.SetReference(view, "_name", tile.Name);
+            UiBuild.SetReference(view, "_sub", tile.Sub);
+            UiBuild.SetReference(view, "_rule", tile.Rule);
+            UiBuild.SetReference(view, "_facts", tile.Facts);
         }
 
         /// <summary>A shape with rounded corners of the given radius (Unity's built-in rounded sprite, sliced), in the color.</summary>

@@ -24,6 +24,7 @@ namespace F1.UI
         static readonly string GradeLine = "\n<size=75%><color=#" + ColorUtility.ToHtmlStringRGB(UiPalette.InkTextDim) + ">{0}</color></size>";
 
         [SerializeField] Button _button;
+        [SerializeField] RightClick _rightClick;
         [SerializeField] Image _frame;
         [SerializeField] Sprite _plain;
         [SerializeField] Sprite _selected;
@@ -39,6 +40,9 @@ namespace F1.UI
         [SerializeField] TMP_Text _mergeText;
 
         public Button Button => _button;
+
+        /// <summary>The right click that opens the item's card (round 47).</summary>
+        public RightClick RightClick => _rightClick;
 
         /// <summary>The item shown, or null for an empty cell.</summary>
         public EquippedItem Item { get; private set; }

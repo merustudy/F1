@@ -142,16 +142,6 @@ namespace F1.UI
 
         const string FactSeparator = " / ";
 
-        /// <summary>Category, size, cooldown, where it works and its fatigue on one line, then each effect on its own line.</summary>
-        public static string ItemDetails(EquippedItem item)
-        {
-            List<string> facts = ItemFacts(item);
-            AddFatigue(facts, item);
-            var lines = new List<string> { string.Join(FactSeparator, facts) };
-            lines.AddRange(ItemEffects(item));
-            return string.Join("\n", lines);
-        }
-
         /// <summary>
         /// An item's card (round 42): the facts on one line, the effects one per line, and the fatigue line, which is null when
         /// the item neither costs fatigue nor is a base weapon.
@@ -165,7 +155,25 @@ namespace F1.UI
             fatigue = parts.Count == 0 ? null : parts[0];
         }
 
-        /// <summary>The same facts and effects as <see cref="ItemDetails"/> on one line, the fatigue last.</summary>
+        /// <summary>
+        /// The facts on a tile of the shop or the loot (round 46), under its name and its kind with its cells: the cooldown and where
+        /// it works, dimmed, a line each; the effects, a line each; the fatigue last.
+        /// </summary>
+        public static string ItemTileFacts(EquippedItem item)
+        {
+            ItemData data = item.Item;
+            var lines = new List<string> { Colored(UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)), UiPalette.TextDim) };
+            if (!data.Rows.IsEveryRow)
+            {
+                lines.Add(Colored(Rows(data.Rows), UiPalette.TextDim));
+            }
+
+            lines.AddRange(ItemEffects(item));
+            AddFatigue(lines, item);
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>An item's category, size, cooldown, where it works and its effects on one line, the fatigue last.</summary>
         public static string ItemSummary(EquippedItem item)
         {
             List<string> parts = ItemFacts(item);

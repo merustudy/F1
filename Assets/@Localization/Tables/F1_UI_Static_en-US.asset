@@ -990,42 +990,31 @@ MonoBehaviour:
     m_Localized: Potion
     m_Metadata:
       m_Items: []
-  - m_Id: 2587403205206016
-    m_Localized: 'Loot: {0}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 2587403205206017
     m_Localized: Loot
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2587403205206018
-    m_Localized: Pick a drop, then click the cell to put it in. An item already there
-      goes to the inventory. Or take it straight into the inventory.
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2587403205206019
-    m_Localized: Item
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2587403205206020
-    m_Localized: Take
     m_Metadata:
       m_Items: []
   - m_Id: 2587403205206021
     m_Localized: Click a slot
     m_Metadata:
       m_Items: []
-  - m_Id: 2587403205206022
-    m_Localized: Taken
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2587403205206023
-    m_Localized: Leave the rest
-    m_Metadata:
-      m_Items: []
   - m_Id: 2587403205206024
     m_Localized: Take to inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2894741271207936
+    m_Localized: Loot {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2894741283790848
+    m_Localized: Click a drop to pick it. Continue leaves the rest. Right-click for
+      an item's facts.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2894741283790849
+    m_Localized: Click a cell on the left to put the drop there. Right-click for
+      an item's facts.
     m_Metadata:
       m_Items: []
   references:
@@ -1140,4 +1129,4 @@ MonoBehaviour:
         - id: 2552399930581002
         - id: 2552399930581003
         - id: 2552399930581004
-        - id: 2587403205206016
+        - id: 2894741271207936

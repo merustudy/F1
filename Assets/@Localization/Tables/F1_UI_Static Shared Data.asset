@@ -1090,51 +1090,36 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673277520543744
-  - m_Id: 2587403205206016
-    m_Key: Battle.Loot
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543745
   - m_Id: 2587403205206017
     m_Key: Loot.Title
     m_Metadata:
       m_Items:
       - rid: 8623673277520543746
-  - m_Id: 2587403205206018
-    m_Key: Loot.Hint
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543747
-  - m_Id: 2587403205206019
-    m_Key: Loot.Item
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543748
-  - m_Id: 2587403205206020
-    m_Key: Loot.Take
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543749
   - m_Id: 2587403205206021
     m_Key: Loot.Selected
     m_Metadata:
       m_Items:
       - rid: 8623673277520543750
-  - m_Id: 2587403205206022
-    m_Key: Loot.Taken
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543751
-  - m_Id: 2587403205206023
-    m_Key: Loot.Leave
-    m_Metadata:
-      m_Items:
-      - rid: 8623673277520543752
   - m_Id: 2587403205206024
     m_Key: Loot.ToInventory
     m_Metadata:
       m_Items:
       - rid: 8623673277520543753
+  - m_Id: 2894741271207936
+    m_Key: Battle.LootCount
+    m_Metadata:
+      m_Items:
+      - rid: 8623673296729145344
+  - m_Id: 2894741283790848
+    m_Key: Battle.LootHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673296729145345
+  - m_Id: 2894741283790849
+    m_Key: Battle.LootPickedHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673296729145346
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2042,8 +2027,8 @@ MonoBehaviour:
     - rid: 8623673275332689930
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Under the name of an item on offer. {0} = category. {1} =
-          cells it takes.
+        m_CommentText: Under the name of an item on offer or of a drop of loot. {0}
+          = category. {1} = cells it takes.
     - rid: 8623673275332689931
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2063,42 +2048,32 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Under the name of a potion on offer in the shop.
-    - rid: 8623673277520543745
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'On the result window: what the won battle dropped (round
-          45). {0} = the drops, by title, comma-separated.'
     - rid: 8623673277520543746
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'Header of the loot screen: what the won battle dropped (round
-          45).'
-    - rid: 8623673277520543747
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: How to pick up a drop.
-    - rid: 8623673277520543748
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'Kind of drop (the only kind: an item).'
-    - rid: 8623673277520543749
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Button on a drop not yet picked.
+        m_CommentText: On the band over the stage when the app comes back to the
+          loot of a won battle (round 47; the loot screen's header before it).
     - rid: 8623673277520543750
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Button on the picked drop.
-    - rid: 8623673277520543751
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: On the card of a drop already taken.
-    - rid: 8623673277520543752
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Leaves the drops not taken and goes on.
+        m_CommentText: Over the picked drop.
     - rid: 8623673277520543753
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Takes the picked drop (or the shop's picked offer) straight
           into the inventory.
+    - rid: 8623673296729145344
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the band over the stage after a win (round 47): how many
+          drops lie on the floor. {0} = the count.'
+    - rid: 8623673296729145345
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the board panel after a win, while no drop is picked (round
+          47).
+    - rid: 8623673296729145346
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the board panel after a win, while a drop is picked (round
+          47).

@@ -175,7 +175,7 @@ namespace F1.Editor.Setup
         /// <summary>
         /// An item's card (round 42, Docs/Architecture/12_UI.md "툴팁"): an ink card with a brass hairline, the tier's stripe down
         /// its left edge and the item's lines stacked inside, sized to them; notches (two diamonds clipped to what lies outside the
-        /// edge) under its bottom edge for the party side, on its side edges for the battle and over its top edge for the shop (round 44).
+        /// edge) under its bottom edge for the party side and on its side edges for the battle.
         /// Hidden until a click opens it.
         /// </summary>
         static ItemTooltipView BuildItemTooltip(Transform frame, string name)
@@ -206,7 +206,6 @@ namespace F1.Editor.Setup
             RectTransform notch = NotchClip(name + "Notch", card, Vector2.zero, new Vector2(0.5f, 1f), new Vector2(TooltipNotch * 2f, TooltipNotch), new Vector2(0.5f, 1f));
             RectTransform notchLeft = NotchClip(name + "NotchLeft", card, new Vector2(0f, 1f), new Vector2(1f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(1f, 0.5f));
             RectTransform notchRight = NotchClip(name + "NotchRight", card, new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(0f, 0.5f));
-            RectTransform notchTop = NotchClip(name + "NotchTop", card, new Vector2(0f, 1f), new Vector2(0.5f, 0f), new Vector2(TooltipNotch * 2f, TooltipNotch), new Vector2(0.5f, 0f));
 
             TextMeshProUGUI title = UiBuild.Label(name + "Title", card, 24f, UiPalette.Text);
             Image rule = UiBuild.Image(name + "Rule", card, Tinted(UiPalette.Brass, TooltipRuleAlpha));
@@ -223,7 +222,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_notchBottom", notch);
             UiBuild.SetReference(view, "_notchLeft", notchLeft);
             UiBuild.SetReference(view, "_notchRight", notchRight);
-            UiBuild.SetReference(view, "_notchTop", notchTop);
             UiBuild.SetReference(view, "_title", title);
             UiBuild.SetReference(view, "_facts", facts);
             UiBuild.SetReference(view, "_effects", effects);

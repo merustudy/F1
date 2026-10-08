@@ -64,7 +64,7 @@ namespace F1.Tests
         public static IEnumerator WaitForResult(BattleScreen battle, float timeoutSeconds = DefaultTimeoutSeconds)
         {
             float deadline = Time.realtimeSinceStartup + timeoutSeconds;
-            while (!At(battle, "Frame/ResultPanel").gameObject.activeSelf)
+            while (!battle.ResultShown)
             {
                 if (Time.realtimeSinceStartup > deadline)
                 {
@@ -128,6 +128,16 @@ namespace F1.Tests
             AssertPointerReaches(button);
             PointerPress.Simulate();
             button.onClick.Invoke();
+        }
+
+        /// <summary>A right click on a thing that shows an item (round 47): its card opens. The press that it is closes a card already up.</summary>
+        public static void RightClick(Component thing)
+        {
+            Assert.IsTrue(thing.gameObject.activeInHierarchy, $"'{thing.name}' is not shown.");
+            var rightClick = thing.GetComponent<RightClick>();
+            Assert.IsNotNull(rightClick, $"'{thing.name}' takes no right click.");
+            PointerPress.Simulate();
+            rightClick.Simulate();
         }
 
         /// <summary>A press on nothing in particular, the way a click on the background is: what closes an item's card (round 42).</summary>
@@ -291,12 +301,13 @@ namespace F1.Tests
 
                         Assert.AreEqual(BattleResult.Victory, engine.Result);
                         yield return WaitForResult(battle);
-                        Click(battle, "Frame/ResultPanel/ResultBox/Continue");
+                        ContinueAfterBattle(battle);
                         yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
 
                     case GamePhase.Loot:
-                        Click(Screen<LootScreen>(), "Frame/BoardPanel/Leave");
+                        // Only after an app closed over the loot: the battle screen in its after-the-win look (round 47).
+                        Click(Screen<BattleScreen>(), "Frame/BoardPanel/LootContinue");
                         yield return WaitForScreen(ScreenId.NodeMap);
                         break;
 
@@ -485,6 +496,14 @@ namespace F1.Tests
         public static IEnumerator FinishBattle()
         {
             BattleScreen battle = Screen<BattleScreen>();
+            yield return EndBattle(battle);
+            ContinueAfterBattle(battle);
+            yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+        }
+
+        /// <summary>Runs the battle to its end and waits for its result: the band after a win (the loot lies there), the window otherwise.</summary>
+        public static IEnumerator EndBattle(BattleScreen battle)
+        {
             battle.Clock.Paused = true;
             while (!Managers.Expedition.Battle.IsFinished)
             {
@@ -492,8 +511,12 @@ namespace F1.Tests
             }
 
             yield return WaitForResult(battle);
-            Click(battle, "Frame/ResultPanel/ResultBox/Continue");
-            yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+        }
+
+        /// <summary>Continue from the result: after a win from the panel (the loot still lying there is left, round 47), otherwise from the result window.</summary>
+        public static void ContinueAfterBattle(BattleScreen battle)
+        {
+            Click(battle, battle.AfterWin ? "Frame/BoardPanel/LootContinue" : "Frame/ResultPanel/ResultBox/Continue");
         }
 
         public static T ViewNamed<T>(Component root, string text)

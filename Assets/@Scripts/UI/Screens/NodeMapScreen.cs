@@ -115,6 +115,7 @@ namespace F1.UI
                 int slot = i;
                 _shopTiles[i].Slot = slot;
                 _shopTiles[i].Button.onClick.AddListener(() => OnTileClicked(slot));
+                _shopTiles[i].RightClick.Clicked += () => OnTileRightClicked(slot);
             }
 
             _refresh.onClick.AddListener(OnRefreshShop);
@@ -199,7 +200,7 @@ namespace F1.UI
             _party.ExternalMerges = picking ? (member, cell) => manager.ShopMergesAt(pick, member, cell) : (Func<int, int, bool>)null;
             _party.ExternalSelectedMember = _mending ? _mendMember : -1;
             _party.ExternalSelectedCell = _mending ? _mendCell : -1;
-            _party.DetailOverride = _mending ? UiStrings.Get(UiKeys.Map.MendHint) : picking ? PickedDetail(manager, data) : _shopNote;
+            _party.DetailOverride = _mending ? UiStrings.Get(UiKeys.Map.MendHint) : picking ? UiStrings.Get(UiKeys.Map.ShopBuyHint) : _shopNote;
             if (atShop)
             {
                 RefreshShop(manager, data, expedition, picking);
@@ -259,14 +260,14 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The shop's window (round 44): the title and the party's coins, each offer on its tile (picked, on sale, beyond the coins, or
-        /// sold), what the next refresh costs; and the panel's words.
+        /// The shop's window (round 44): the title and the party's coins, each offer on its tile with its facts (round 46, S1; picked,
+        /// on sale, beyond the coins, or sold), what the next refresh costs; and the panel's words (how to buy, while an offer is picked).
         /// </summary>
         void RefreshShop(ExpeditionManager manager, StaticData data, ExpeditionState expedition, bool picking)
         {
             MapNode shop = expedition.Map.Get(expedition.CurrentNodeId);
             _nodeTitle.text = UiStrings.Get(UiKeys.Map.NodeTitle, shop.Floor, KindText(shop.Kind));
-            _nodeHint.text = UiStrings.Get(picking ? UiKeys.Map.ShopBuyHint : UiKeys.Map.AtShop);
+            _nodeHint.text = UiStrings.Get(UiKeys.Map.AtShop);
             _shopTitle.text = _nodeTitle.text;
             _shopHint.text = UiStrings.Get(UiKeys.Map.ShopChoose);
             _shopCoins.text = UiStrings.Get(UiKeys.Map.Coins, expedition.Coins);
@@ -295,13 +296,13 @@ namespace F1.UI
                     var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
                     ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
                     string sub = UiStrings.Get(UiKeys.Map.ShopItemSub, UiStrings.Get(UiText.CategoryKey(item.Item.Category)), item.Item.Size);
-                    tile.ShowItem(offer, item, _art.OfItem(offer.Id), sub, price, state);
+                    tile.ShowItem(offer, item, _art.OfItem(offer.Id), sub, UiText.ItemTileFacts(item), price, state);
                 }
                 else
                 {
                     PotionData potion = data.Potions.Get(offer.Id);
                     ShopTileState state = manager.CanBuyPotion(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    tile.ShowPotion(offer, potion, _art.OfPotion(offer.Id), UiStrings.Get(UiKeys.Map.ShopPotion), price, state);
+                    tile.ShowPotion(offer, potion, _art.OfPotion(offer.Id), UiStrings.Get(UiKeys.Map.ShopPotion), UiText.PotionDetails(potion), price, state);
                 }
             }
 
@@ -309,14 +310,6 @@ namespace F1.UI
             _refresh.interactable = canRefresh;
             _refreshCost.text = UiStrings.Get(UiKeys.Map.Coins, manager.RefreshCost);
             _refreshCost.color = canRefresh ? UiPalette.Virtue : UiPalette.Danger;
-        }
-
-        /// <summary>The picked offer's facts on the detail line, as a chosen item's.</summary>
-        string PickedDetail(ExpeditionManager manager, StaticData data)
-        {
-            ItemOffer offer = manager.ShopStock[_pick];
-            var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-            return UiText.ItemTitle(item) + " — " + UiText.ItemSummary(item);
         }
 
         static int CurrentFloor(ExpeditionState expedition)
@@ -535,7 +528,7 @@ namespace F1.UI
 
         /// <summary>
         /// A tile of the shop (round 44). The tiles are built silent: a potion is bought with one click and sounds as put in (a click
-        /// when it cannot be); an item is picked, or put down, with a click, and its card opens under the window.
+        /// when it cannot be); an item is picked, or put down, with a click. The tile shows its facts, so no card opens (round 46, S1).
         /// </summary>
         void OnTileClicked(int slot)
         {
@@ -570,18 +563,21 @@ namespace F1.UI
             _shopNote = null;
             _party.ClearSelection();
             Refresh();
-            if (_pick >= 0)
-            {
-                ShowPickedCard(slot, offer);
-            }
         }
 
-        /// <summary>The picked offer's card under the shop's window, with what merging it would do (round 42's card, round 44's place).</summary>
-        void ShowPickedCard(int slot, ItemOffer offer)
+        /// <summary>Round 47: a right click on an item's tile opens its card beside the tile, inside the shop's window, with what merging it would do.</summary>
+        void OnTileRightClicked(int slot)
         {
+            ExpeditionManager manager = Managers.Expedition;
+            ItemOffer offer = slot < manager.ShopStock.Count ? manager.ShopStock[slot] : null;
+            if (offer == null || offer.Kind != OfferKind.Item)
+            {
+                return;
+            }
+
             var item = new EquippedItem(Managers.Data.Data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
-            _party.Tooltip.ShowBelow(item, merge, (RectTransform)_shopTiles[slot].transform, _shopWindow);
+            string merge = manager.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
+            _party.Tooltip.ShowBeside(item, (RectTransform)_shopTiles[slot].transform, false, _shopWindow, true, merge);
         }
 
         /// <summary>With an offer picked, a click on a cell that can take it buys it there (and sounds so; a cell that cannot, as a click).</summary>
