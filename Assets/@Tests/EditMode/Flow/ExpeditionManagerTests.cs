@@ -203,6 +203,32 @@ namespace F1.Tests
         }
 
         [Test]
+        public void TheLoot_IsOpenWhileTheWonBattleStillShows_AndClosingTheBattleAfterwardsGoesOnToTheMap()
+        {
+            // Round 47: the loot is picked on the battle screen, so the loot commands work while the ended battle is still open.
+            FlowTestKit kit = new FlowTestKit().InBattle();
+            kit.FightToTheEnd();
+            ExpeditionState state = kit.Expedition.Expedition;
+            Assert.AreEqual(GamePhase.Battle, kit.Expedition.Phase);
+            Assert.IsTrue(kit.Expedition.LootOpen);
+            Assert.AreEqual(2, kit.Expedition.BattleLoot.Count);
+            Assert.IsTrue(kit.Expedition.CanTakeLoot(0, 0, 1));
+            Assert.IsTrue(kit.Expedition.CanPickItem(0, 0), "The boards work as between battles.");
+
+            kit.Expedition.TakeLoot(0, 0, 1);
+            Assert.AreEqual(GamePhase.Battle, kit.Expedition.Phase, "The battle still shows.");
+            Assert.IsTrue(kit.Expedition.LootOpen, "The other drop still lies there.");
+
+            kit.Expedition.LeaveLoot();
+            Assert.IsFalse(kit.Expedition.LootOpen);
+            Assert.IsEmpty(kit.Expedition.BattleLoot);
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeLootToInventory(1));
+
+            kit.Expedition.CloseBattle();
+            Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
+        }
+
+        [Test]
         public void ADrop_CanGoStraightToTheInventory_AndTheLastOneTakenEndsTheLoot()
         {
             FlowTestKit kit = new FlowTestKit().InBattle();
@@ -218,7 +244,7 @@ namespace F1.Tests
             Assert.AreEqual(drop.Id, state.Inventory.Single().Item.Id);
             Assert.AreEqual(GamePhase.Loot, kit.Expedition.Phase);
             Assert.IsFalse(kit.Expedition.CanTakeLootToInventory(1), "That slot was taken.");
-            Assert.IsEmpty(kit.Expedition.BattleLoot, "The battle was closed: nothing is on show.");
+            Assert.AreEqual(1, kit.Expedition.BattleLoot.Count(d => d != null), "The loot lies there, battle closed or not (round 47).");
 
             kit.Expedition.TakeLootToInventory(0);
 

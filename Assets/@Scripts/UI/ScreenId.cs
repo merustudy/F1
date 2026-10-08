@@ -11,7 +11,6 @@ namespace F1.UI
         Lobby,
         NodeMap,
         Battle,
-        Loot,
         Settlement,
     }
 
@@ -28,7 +27,6 @@ namespace F1.UI
                 case ScreenId.Lobby: return "ui/lobby/lobby-screen";
                 case ScreenId.NodeMap: return "ui/expedition/node-map-screen";
                 case ScreenId.Battle: return "ui/expedition/battle-screen";
-                case ScreenId.Loot: return "ui/expedition/loot-screen";
                 case ScreenId.Settlement: return "ui/expedition/settlement-screen";
                 default: throw new ArgumentOutOfRangeException(nameof(id), id, null);
             }
@@ -44,7 +42,7 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The screen that shows a game phase.</summary>
+        /// <summary>The screen that shows a game phase. The loot of a won battle is picked on the battle screen (round 47); the loot phase alone (an app closed meanwhile) opens it in its after-the-win look.</summary>
         public static ScreenId ForPhase(GamePhase phase)
         {
             switch (phase)
@@ -52,7 +50,7 @@ namespace F1.UI
                 case GamePhase.Lobby: return ScreenId.Lobby;
                 case GamePhase.NodeMap: return ScreenId.NodeMap;
                 case GamePhase.Battle: return ScreenId.Battle;
-                case GamePhase.Loot: return ScreenId.Loot;
+                case GamePhase.Loot: return ScreenId.Battle;
                 case GamePhase.Camp: return ScreenId.NodeMap;
                 case GamePhase.Shop: return ScreenId.NodeMap;
                 case GamePhase.Settlement: return ScreenId.Settlement;

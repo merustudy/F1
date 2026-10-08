@@ -279,7 +279,13 @@ namespace F1.Flow
         /// The loot the battle on show dropped while it still lies there (one entry per drop, null where one was taken); empty for a lost
         /// battle, the boss's, or once the loot is over (Slice B stage 18).
         /// </summary>
-        public IReadOnlyList<ItemOffer> BattleLoot => Battle != null && Battle.IsFinished && Expedition != null && Expedition.Phase == ExpeditionPhase.PickingLoot ? Expedition.Loot : new List<ItemOffer>();
+        public IReadOnlyList<ItemOffer> BattleLoot => LootOpen ? Expedition.Loot : new List<ItemOffer>();
+
+        /// <summary>
+        /// True while the loot of a won battle lies there to be picked: on the battle screen right after the win, while the ended
+        /// battle still shows (round 47), or in the loot phase alone (an app closed meanwhile comes back to it).
+        /// </summary>
+        public bool LootOpen => Expedition != null && Expedition.Phase == ExpeditionPhase.PickingLoot && (Battle == null || Battle.IsFinished);
 
         /// <summary>The region coins the battle on show brought: those of its node when it was won, 0 otherwise (the boss brings none).</summary>
         public int BattleCoins => Battle != null && Battle.IsFinished && Battle.Engine.Result == BattleResult.Victory ? ExpeditionRules.CoinsFor(_data.Data, Battle.Node) : 0;
@@ -295,7 +301,7 @@ namespace F1.Flow
         /// <summary>Whether taking the drop in a slot of the loot onto a cell would merge it into the item there.</summary>
         public bool LootMergesAt(int slot, int memberIndex, int cell)
         {
-            return Phase == GamePhase.Loot && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, cell);
+            return LootOpen && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, cell);
         }
 
         /// <summary>Whether some board holds what the item would merge into.</summary>
@@ -396,13 +402,13 @@ namespace F1.Flow
         /// <summary>True when the drop in a slot of the loot could be put at that cell now: into free cells, in place of the item there, or merged into the same item.</summary>
         public bool CanTakeLoot(int slot, int memberIndex, int cell)
         {
-            return Phase == GamePhase.Loot && ExpeditionRules.CanTakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
+            return LootOpen && ExpeditionRules.CanTakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
         }
 
         public void TakeLoot(int slot, int memberIndex, int cell)
         {
             _run.RequireWritable();
-            Require(GamePhase.Loot);
+            RequireLoot();
             ExpeditionRules.TakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
             Commit();
         }
@@ -410,13 +416,13 @@ namespace F1.Flow
         /// <summary>True when the drop in a slot of the loot fits the inventory's free cells now.</summary>
         public bool CanTakeLootToInventory(int slot)
         {
-            return Phase == GamePhase.Loot && ExpeditionRules.CanTakeLootToInventory(_data.Data, Expedition, slot);
+            return LootOpen && ExpeditionRules.CanTakeLootToInventory(_data.Data, Expedition, slot);
         }
 
         public void TakeLootToInventory(int slot)
         {
             _run.RequireWritable();
-            Require(GamePhase.Loot);
+            RequireLoot();
             ExpeditionRules.TakeLootToInventory(_data.Data, Expedition, slot);
             Commit();
         }
@@ -425,7 +431,7 @@ namespace F1.Flow
         public void LeaveLoot()
         {
             _run.RequireWritable();
-            Require(GamePhase.Loot);
+            RequireLoot();
             ExpeditionRules.LeaveLoot(Expedition);
             Commit();
         }
@@ -501,7 +507,7 @@ namespace F1.Flow
             Report = null;
         }
 
-        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Loot || Phase == GamePhase.Camp || Phase == GamePhase.Shop;
+        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Camp || Phase == GamePhase.Shop || LootOpen;
 
         /// <summary>
         /// Applies an ended battle to the expedition, and an ended expedition to the run, in the
@@ -567,6 +573,14 @@ namespace F1.Flow
             if (Phase != phase)
             {
                 throw new InvalidOperationException($"Not allowed in phase {Phase}; needs {phase}.");
+            }
+        }
+
+        void RequireLoot()
+        {
+            if (!LootOpen)
+            {
+                throw new InvalidOperationException($"Not allowed in phase {Phase}: no loot lies there.");
             }
         }
 
