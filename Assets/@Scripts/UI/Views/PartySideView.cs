@@ -21,7 +21,7 @@ namespace F1.UI
     /// it on a board (whatever was there goes to the inventory). The inventory has a fixed number
     /// of cells, so what would not fit there is not offered. Which cells and buttons take a click
     /// is asked of the manager, cell by cell. Clicking the name of a member's state under its feet
-    /// (round 36) explains the state on the detail line. The node map and the reward screen both show it.
+    /// (round 36) explains the state on the detail line. The node map and the loot screen both show it.
     /// </summary>
     public sealed class PartySideView : MonoBehaviour
     {
@@ -52,7 +52,7 @@ namespace F1.UI
         ExpeditionArt _art;
 
         /// <summary>
-        /// Set by a screen that holds a selection of its own (the reward screen's chosen item): which
+        /// Set by a screen that holds a selection of its own (the loot screen's chosen item): which
         /// cells take it. While it is set, the view's own selection is off, its cells are enabled by
         /// this alone and the inventory popup does not take clicks.
         /// </summary>
@@ -60,11 +60,11 @@ namespace F1.UI
 
         /// <summary>
         /// Lets the owning screen take over a cell click (member index, cell). When it returns true
-        /// the view does nothing; the reward screen uses this to place a chosen item.
+        /// the view does nothing; the loot screen uses this to place a chosen item.
         /// </summary>
         public Func<int, int, bool> CellClickOverride { get; set; }
 
-        /// <summary>With <see cref="ExternalCanPlace"/>: which cells the screen's chosen item would merge into (the reward screen's item). Null for none.</summary>
+        /// <summary>With <see cref="ExternalCanPlace"/>: which cells the screen's chosen item would merge into (the loot screen's item). Null for none.</summary>
         public Func<int, int, bool> ExternalMerges { get; set; }
 
         /// <summary>
@@ -422,7 +422,7 @@ namespace F1.UI
                 return;
             }
 
-            // The screen that overrides the click (a reward put in a cell) makes its own sound.
+            // The screen that overrides the click (a drop put in a cell) makes its own sound.
             if (CellClickOverride != null && CellClickOverride(member, cell))
             {
                 return;

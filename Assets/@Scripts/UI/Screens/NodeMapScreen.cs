@@ -171,7 +171,7 @@ namespace F1.UI
 
             // At a camp or a shop, the panel only points at the window over the map; the window says the rest. While an item is being
             // chosen to mend, the boards serve that choice: the cells that can be mended take the click, the chosen one is the brass cell,
-            // and the inventory stays out of it. While an offer of the shop is picked, the boards serve the purchase as they serve a reward:
+            // and the inventory stays out of it. While an offer of the shop is picked, the boards serve the purchase as they serve a drop of loot:
             // the cells that can take it take the click, and so does buying it straight into the inventory.
             bool atCamp = manager.Phase == GamePhase.Camp;
             bool atShop = manager.Phase == GamePhase.Shop;
@@ -271,7 +271,7 @@ namespace F1.UI
             _shopHint.text = UiStrings.Get(UiKeys.Map.ShopChoose);
             _shopCoins.text = UiStrings.Get(UiKeys.Map.Coins, expedition.Coins);
 
-            IReadOnlyList<RewardOption> stock = manager.ShopStock;
+            IReadOnlyList<ItemOffer> stock = manager.ShopStock;
             for (int i = 0; i < _shopTiles.Length; i++)
             {
                 ShopTileView tile = _shopTiles[i];
@@ -282,7 +282,7 @@ namespace F1.UI
                     continue;
                 }
 
-                RewardOption offer = stock[i];
+                ItemOffer offer = stock[i];
                 if (offer == null)
                 {
                     tile.ShowSold();
@@ -290,7 +290,7 @@ namespace F1.UI
                 }
 
                 int price = manager.PriceOf(offer);
-                if (offer.Kind == RewardKind.Item)
+                if (offer.Kind == OfferKind.Item)
                 {
                     var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
                     ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
@@ -301,7 +301,7 @@ namespace F1.UI
                 {
                     PotionData potion = data.Potions.Get(offer.Id);
                     ShopTileState state = manager.CanBuyPotion(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    tile.ShowPotion(offer, potion, _art.OfPotion(offer.Id), UiStrings.Get(UiKeys.Reward.Potion), price, state);
+                    tile.ShowPotion(offer, potion, _art.OfPotion(offer.Id), UiStrings.Get(UiKeys.Map.ShopPotion), price, state);
                 }
             }
 
@@ -314,7 +314,7 @@ namespace F1.UI
         /// <summary>The picked offer's facts on the detail line, as a chosen item's.</summary>
         string PickedDetail(ExpeditionManager manager, StaticData data)
         {
-            RewardOption offer = manager.ShopStock[_pick];
+            ItemOffer offer = manager.ShopStock[_pick];
             var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
             return UiText.ItemTitle(item) + " — " + UiText.ItemSummary(item);
         }
@@ -540,13 +540,13 @@ namespace F1.UI
         void OnTileClicked(int slot)
         {
             ExpeditionManager manager = Managers.Expedition;
-            RewardOption offer = slot < manager.ShopStock.Count ? manager.ShopStock[slot] : null;
+            ItemOffer offer = slot < manager.ShopStock.Count ? manager.ShopStock[slot] : null;
             if (offer == null)
             {
                 return;
             }
 
-            if (offer.Kind == RewardKind.Potion)
+            if (offer.Kind == OfferKind.Potion)
             {
                 if (manager.CanBuyPotion(slot))
                 {
@@ -577,7 +577,7 @@ namespace F1.UI
         }
 
         /// <summary>The picked offer's card under the shop's window, with what merging it would do (round 42's card, round 44's place).</summary>
-        void ShowPickedCard(int slot, RewardOption offer)
+        void ShowPickedCard(int slot, ItemOffer offer)
         {
             var item = new EquippedItem(Managers.Data.Data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
             string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
@@ -624,7 +624,7 @@ namespace F1.UI
         void Bought(Action buy)
         {
             ExpeditionManager manager = Managers.Expedition;
-            RewardOption offer = manager.ShopStock[_pick];
+            ItemOffer offer = manager.ShopStock[_pick];
             var item = new EquippedItem(Managers.Data.Data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
             int before = manager.Expedition.Coins;
             buy();

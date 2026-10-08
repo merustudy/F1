@@ -48,7 +48,7 @@ namespace F1.UI
         public int Slot { get; set; }
 
         /// <summary>The offer on show, or null for a sold tile.</summary>
-        public RewardOption Offer { get; private set; }
+        public ItemOffer Offer { get; private set; }
 
         public ShopTileState State { get; private set; }
 
@@ -65,7 +65,7 @@ namespace F1.UI
         public ItemSlotView Cell => _cell;
 
         /// <param name="sub">The line under the name: the item's category and cells.</param>
-        public void ShowItem(RewardOption offer, EquippedItem item, Sprite icon, string sub, int price, ShopTileState state)
+        public void ShowItem(ItemOffer offer, EquippedItem item, Sprite icon, string sub, int price, ShopTileState state)
         {
             Begin(offer, state);
             _cell.gameObject.SetActive(true);
@@ -75,7 +75,7 @@ namespace F1.UI
         }
 
         /// <param name="sub">The line under the name: that it is a potion.</param>
-        public void ShowPotion(RewardOption offer, PotionData potion, Sprite icon, string sub, int price, ShopTileState state)
+        public void ShowPotion(ItemOffer offer, PotionData potion, Sprite icon, string sub, int price, ShopTileState state)
         {
             Begin(offer, state);
             _cell.gameObject.SetActive(false);
@@ -96,7 +96,7 @@ namespace F1.UI
             _sold.gameObject.SetActive(true);
         }
 
-        void Begin(RewardOption offer, ShopTileState state)
+        void Begin(ItemOffer offer, ShopTileState state)
         {
             Offer = offer;
             State = state;

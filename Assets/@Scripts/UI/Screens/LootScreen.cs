@@ -11,25 +11,29 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// The reward choice after a won battle. The party stands on the left as in battle; the rewards
-    /// are stacked on the right. An item is picked first and then put at a cell of a board (whatever
-    /// was there goes to the inventory) or taken straight into the inventory; a potion is taken with
-    /// one click; or the reward is skipped. While an item is picked, the boards enable only the
-    /// cells that can take it.
+    /// The loot of a won battle (Slice B stage 18; the reward choice before it). The party stands on the left as in battle; the drops
+    /// are stacked on the right, one card each. A drop is picked first and then put at a cell of a board (whatever was there goes to the
+    /// inventory; the same item merges) or taken straight into the inventory; its card stays as taken and the next drop can be picked.
+    /// The last drop taken ends the loot; "leave" goes on with whatever still lies there. While a drop is picked, the boards enable
+    /// only the cells that can take it.
     /// </summary>
-    public sealed class RewardScreen : UIScreen
+    public sealed class LootScreen : UIScreen
     {
-        [SerializeField] RewardOptionView _optionTemplate;
-        [SerializeField] Transform _optionParent;
-        [SerializeField] Button _skip;
+        [SerializeField] LootCardView _cardTemplate;
+        [SerializeField] Transform _cardParent;
+        [SerializeField] Button _leave;
         [SerializeField] Button _toInventory;
         [SerializeField] Button _inventoryToggle;
         [SerializeField] TMP_Text _inventoryToggleLabel;
         [SerializeField] PartySideView _party;
         [SerializeField] TMP_Text _coins;
 
-        readonly List<RewardOptionView> _options = new List<RewardOptionView>();
-        int _selectedOption = -1;
+        readonly List<LootCardView> _cards = new List<LootCardView>();
+
+        /// <summary>The title each card showed while its drop lay there, so that a taken card can still say what it was.</summary>
+        readonly List<string> _titles = new List<string>();
+
+        int _picked = -1;
 
         ExpeditionArt _art;
 
@@ -42,16 +46,17 @@ namespace F1.UI
         protected override void OnOpen()
         {
             ExpeditionState expedition = Managers.Expedition.Expedition;
-            for (int i = 0; i < expedition.PendingRewards.Count; i++)
+            for (int i = 0; i < expedition.Loot.Count; i++)
             {
-                RewardOptionView view = Instantiate(_optionTemplate, _optionParent);
+                LootCardView view = Instantiate(_cardTemplate, _cardParent);
                 view.gameObject.SetActive(true);
-                _options.Add(view);
-                int option = i;
-                view.Button.onClick.AddListener(() => OnOptionClicked(option));
+                _cards.Add(view);
+                _titles.Add(string.Empty);
+                int slot = i;
+                view.Button.onClick.AddListener(() => OnCardClicked(slot));
             }
 
-            _skip.onClick.AddListener(OnSkip);
+            _leave.onClick.AddListener(OnLeave);
             _toInventory.onClick.AddListener(OnToInventory);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
@@ -63,89 +68,68 @@ namespace F1.UI
         {
             ExpeditionManager manager = Managers.Expedition;
             StaticData data = Managers.Data.Data;
-            List<RewardOption> rewards = manager.Expedition.PendingRewards;
+            List<ItemOffer> loot = manager.Expedition.Loot;
             _coins.text = UiStrings.Get(UiKeys.Map.Coins, manager.Expedition.Coins);
 
-            for (int i = 0; i < _options.Count; i++)
+            for (int i = 0; i < _cards.Count; i++)
             {
-                RewardOption reward = rewards[i];
-                if (reward.Kind == RewardKind.Item)
+                ItemOffer drop = i < loot.Count ? loot[i] : null;
+                if (drop == null)
                 {
-                    var item = new EquippedItem(data.Items.Get(reward.Id), reward.Grade, tier: reward.Tier);
-                    bool selected = i == _selectedOption;
-                    _options[i].Show(
-                        UiStrings.Get(UiKeys.Reward.Item),
-                        UiText.ItemTitle(item),
-                        UiText.ItemDetails(item),
-                        UiStrings.Get(selected ? UiKeys.Reward.Selected : UiKeys.Reward.Select),
-                        selected,
-                        true,
-                        reward.Tier);
+                    _cards[i].ShowTaken(UiStrings.Get(UiKeys.Loot.Item), _titles[i], UiStrings.Get(UiKeys.Loot.Taken));
+                    continue;
                 }
-                else
-                {
-                    PotionData potion = data.Potions.Get(reward.Id);
-                    bool canTake = manager.CanTakePotionReward;
-                    _options[i].Show(
-                        UiStrings.Get(UiKeys.Reward.Potion),
-                        UiText.Name(potion.Name),
-                        UiText.PotionDetails(potion),
-                        UiStrings.Get(canTake ? UiKeys.Reward.TakePotion : UiKeys.Reward.PotionFull),
-                        false,
-                        canTake);
-                }
+
+                var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+                bool selected = i == _picked;
+                _titles[i] = UiText.ItemTitle(item);
+                _cards[i].Show(
+                    UiStrings.Get(UiKeys.Loot.Item),
+                    _titles[i],
+                    UiText.ItemDetails(item),
+                    UiStrings.Get(selected ? UiKeys.Loot.Selected : UiKeys.Loot.Take),
+                    selected,
+                    true,
+                    drop.Tier);
             }
 
-            // With an item picked, the boards show where it can go; otherwise the party side is its usual self.
-            int option = _selectedOption;
-            _party.ExternalCanPlace = option < 0 ? null : (member, cell) => manager.CanPlaceReward(option, member, cell);
-            _party.ExternalMerges = option < 0 ? null : (member, cell) => manager.RewardMergesAt(option, member, cell);
-            _toInventory.interactable = option >= 0 && manager.CanTakeRewardToInventory(option);
+            // With a drop picked, the boards show where it can go; otherwise the party side is its usual self.
+            int picked = _picked;
+            _party.ExternalCanPlace = picked < 0 ? null : (member, cell) => manager.CanTakeLoot(picked, member, cell);
+            _party.ExternalMerges = picked < 0 ? null : (member, cell) => manager.LootMergesAt(picked, member, cell);
+            _toInventory.interactable = picked >= 0 && manager.CanTakeLootToInventory(picked);
             _inventoryToggleLabel.text = UiStrings.Get(_party.InventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
             _party.Refresh();
         }
 
-        /// <summary>The cards are built silent: a potion taken sounds as put in, a card picked or put down as a click.</summary>
-        void OnOptionClicked(int option)
+        /// <summary>The cards are built silent: a card picked or put down clicks; a drop taken sounds as put in.</summary>
+        void OnCardClicked(int slot)
         {
-            ExpeditionManager manager = Managers.Expedition;
-            RewardOption reward = manager.Expedition.PendingRewards[option];
-            if (reward.Kind == RewardKind.Potion)
+            if (Managers.Expedition.Expedition.Loot[slot] == null)
             {
-                if (manager.CanTakePotionReward)
-                {
-                    manager.TakePotionReward(option);
-                    Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
-                    GoToCurrentPhase();
-                }
-                else
-                {
-                    Managers.Sound.PlayEffect(SoundEffect.Button);
-                }
-
                 return;
             }
 
             Managers.Sound.PlayEffect(SoundEffect.Button);
-            _selectedOption = _selectedOption == option ? -1 : option;
+            _picked = _picked == slot ? -1 : slot;
             _party.ClearSelection();
             Refresh();
         }
 
-        /// <summary>With an item reward picked, a click on a cell that can take it puts the item there (and sounds so; a cell that cannot, as a click).</summary>
+        /// <summary>With a drop picked, a click on a cell that can take it puts the drop there (and sounds so; a cell that cannot, as a click).</summary>
         bool PlaceSelectedItem(int member, int cell)
         {
-            if (_selectedOption < 0)
+            if (_picked < 0)
             {
                 return false;
             }
 
             ExpeditionManager manager = Managers.Expedition;
-            if (manager.CanPlaceReward(_selectedOption, member, cell))
+            if (manager.CanTakeLoot(_picked, member, cell))
             {
-                manager.TakeItemReward(_selectedOption, member, cell);
+                manager.TakeLoot(_picked, member, cell);
                 Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
-                GoToCurrentPhase();
+                AfterTaking();
             }
             else
             {
@@ -158,14 +142,29 @@ namespace F1.UI
         void OnToInventory()
         {
             ExpeditionManager manager = Managers.Expedition;
-            if (_selectedOption < 0 || !manager.CanTakeRewardToInventory(_selectedOption))
+            if (_picked < 0 || !manager.CanTakeLootToInventory(_picked))
             {
                 return;
             }
 
-            manager.TakeItemRewardToInventory(_selectedOption);
+            manager.TakeLootToInventory(_picked);
             Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
-            GoToCurrentPhase();
+            AfterTaking();
+        }
+
+        /// <summary>After a drop was taken: the loot goes on with the next drop to pick, or, when it was the last, the node map comes.</summary>
+        void AfterTaking()
+        {
+            _picked = -1;
+            if (Managers.Expedition.Phase == GamePhase.Loot)
+            {
+                _party.ClearSelection();
+                Refresh();
+            }
+            else
+            {
+                GoToCurrentPhase();
+            }
         }
 
         void OnInventoryToggle()
@@ -174,9 +173,9 @@ namespace F1.UI
             Refresh();
         }
 
-        void OnSkip()
+        void OnLeave()
         {
-            Managers.Expedition.SkipReward();
+            Managers.Expedition.LeaveLoot();
             GoToCurrentPhase();
         }
     }

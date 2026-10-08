@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One row of the party side of the node map and the reward screen, in the battle screen's
+    /// One row of the party side of the node map and the loot screen, in the battle screen's
     /// shape: on the stage, the row's column with the figure, the marks (HP, the fatigue as pips, and
     /// the job with the member's state on the state line; round 36) and forward and back under it; in the board panel under the stage, the row's
     /// column with the board's head (the row and the name) and the item board stacked on its bag,

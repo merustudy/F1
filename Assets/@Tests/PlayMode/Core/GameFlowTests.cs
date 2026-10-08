@@ -78,8 +78,8 @@ namespace F1.Tests
                         }
 
                         break;
-                    case GamePhase.Reward:
-                        expedition.SkipReward();
+                    case GamePhase.Loot:
+                        expedition.LeaveLoot();
                         break;
                     case GamePhase.Camp:
                         // The camp floor of the long map (stage 13): the party rests and goes on.

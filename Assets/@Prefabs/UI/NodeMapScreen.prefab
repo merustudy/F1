@@ -24538,7 +24538,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Reward.ToInventory
+  m_text: Loot.ToInventory
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6566f90288a4d41b88e8cd41f442c1d6, type: 2}
   m_sharedMaterial: {fileID: 4984318324771557996, guid: 6566f90288a4d41b88e8cd41f442c1d6, type: 2}
@@ -24627,7 +24627,7 @@ MonoBehaviour:
       m_TableCollectionName: F1_UI_Static
     m_TableEntryReference:
       m_KeyId: 0
-      m_Key: Reward.ToInventory
+      m_Key: Loot.ToInventory
     m_FallbackState: 0
     m_WaitForCompletion: 0
     m_LocalVariables: []

@@ -226,14 +226,14 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Views<PotionSlotView>(battle)[0].Button);
             yield return Capture(prefix + "_05_battle");
 
-            bool capturedReward = false;
+            bool capturedLoot = false;
             bool capturedBoard = false;
             bool capturedLongMap = false;
             bool capturedBoss = false;
             int guard = 0;
             while (Managers.Expedition.Phase != GamePhase.Settlement)
             {
-                Assert.Less(++guard, 100, "The expedition did not end.");
+                Assert.Less(++guard, 200, "The expedition did not end.");
                 switch (Managers.Expedition.Phase)
                 {
                     case GamePhase.NodeMap:
@@ -241,7 +241,7 @@ namespace F1.Tests
                         PartySideView party = map.GetComponentInChildren<PartySideView>();
                         if (!capturedBoard && Managers.Expedition.Expedition.Inventory.Count > 0)
                         {
-                            // The first reward went to the inventory: the weapon of the row-1 member selected, then the popup with its item picked.
+                            // The first drop went to the inventory: the weapon of the row-1 member selected, then the popup with its item picked.
                             capturedBoard = true;
                             ItemSlotView weapon = party.ColumnOfRow(1).Slots[0];
                             UiTestUtil.Click(weapon.Button);
@@ -329,8 +329,8 @@ namespace F1.Tests
                                 UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
                                 yield return UiTestUtil.WaitForRedraw();
                                 yield return Capture(prefix + "_42_shop");
-                                IReadOnlyList<RewardOption> stock = Managers.Expedition.ShopStock;
-                                UiTestUtil.Click(map.ShopTiles[Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == RewardKind.Item)].Button);
+                                IReadOnlyList<ItemOffer> stock = Managers.Expedition.ShopStock;
+                                UiTestUtil.Click(map.ShopTiles[Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == OfferKind.Item)].Button);
                                 yield return UiTestUtil.WaitForRedraw();
                                 yield return Capture(prefix + "_43_shop_pick");
                                 UiTestUtil.PressTheBackground();
@@ -393,7 +393,7 @@ namespace F1.Tests
                         }
 
                         yield return UiTestUtil.WaitForResult(battle);
-                        if (boss || !capturedReward)
+                        if (boss || !capturedLoot)
                         {
                             yield return Capture(prefix + (boss ? "_10_boss_result" : "_06_battle_result"));
                         }
@@ -410,26 +410,35 @@ namespace F1.Tests
                         yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
 
-                    case GamePhase.Reward:
-                        RewardScreen reward = UiTestUtil.Screen<RewardScreen>();
-                        RewardOptionView[] options = UiTestUtil.Views<RewardOptionView>(reward);
-                        int item = Managers.Expedition.Expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-                        UiTestUtil.Click(options[item].Button);
+                    case GamePhase.Loot:
+                    {
+                        // The drops one by one: the first ever goes to the inventory (pictured first), the later ones behind the row-1
+                        // member's weapon while that cell can take them; what cannot go anywhere is left.
+                        LootScreen loot = UiTestUtil.Screen<LootScreen>();
+                        LootCardView[] cards = UiTestUtil.Views<LootCardView>(loot);
+                        int drop = Managers.Expedition.Expedition.Loot.FindIndex(d => d != null);
+                        int front = loot.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Member;
+                        UiTestUtil.Click(cards[drop].Button);
                         yield return UiTestUtil.WaitForRedraw();
-                        if (!capturedReward)
+                        if (!capturedLoot)
                         {
-                            // The first reward goes to the inventory; the later ones behind the row-1 member's weapon.
-                            capturedReward = true;
-                            yield return Capture(prefix + "_07_reward");
-                            UiTestUtil.Click(reward, "Frame/BoardPanel/RewardToInventory");
+                            capturedLoot = true;
+                            yield return Capture(prefix + "_07_loot");
+                            UiTestUtil.Click(loot, "Frame/BoardPanel/LootToInventory");
+                        }
+                        else if (Managers.Expedition.CanTakeLoot(drop, front, 1))
+                        {
+                            UiTestUtil.Click(loot.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[1].Button);
                         }
                         else
                         {
-                            UiTestUtil.Click(reward.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[1].Button);
+                            UiTestUtil.Click(loot, "Frame/BoardPanel/Leave");
                         }
 
-                        yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+                        yield return UiTestUtil.WaitForRedraw();
+                        yield return UiTestUtil.WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
+                    }
                 }
             }
 

@@ -33,12 +33,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 408d32f1c722a41d9b74054dc3e1aa01
-    m_Address: ui/expedition/reward-screen
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 64b543b24d26040e0b80c0c3331bbf56
     m_Address: ui/expedition/battle-screen
     m_ReadOnly: 0
@@ -50,6 +44,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ced448d59a4b04a5ba0f1dadb2eb92c3
+    m_Address: ui/expedition/loot-screen
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d1ad39725429a4a3e8d3102fa64afd0d
     m_Address: ui/expedition/node-map-screen

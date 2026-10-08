@@ -485,51 +485,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909284
-  - m_Id: 9766393864292
-    m_Key: Reward.Title
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909285
-  - m_Id: 9766393864293
-    m_Key: Reward.Hint
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909286
-  - m_Id: 9766393864294
-    m_Key: Reward.Item
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909287
-  - m_Id: 9766393864295
-    m_Key: Reward.Potion
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909288
-  - m_Id: 9766393864296
-    m_Key: Reward.Select
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909289
-  - m_Id: 9766393864297
-    m_Key: Reward.Selected
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909290
-  - m_Id: 9766393864298
-    m_Key: Reward.TakePotion
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909291
-  - m_Id: 9766393864299
-    m_Key: Reward.PotionFull
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909292
-  - m_Id: 9766393864300
-    m_Key: Reward.Skip
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909293
   - m_Id: 9766393864301
     m_Key: Settle.Cleared
     m_Metadata:
@@ -720,11 +675,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673134167883783
-  - m_Id: 293762654789639
-    m_Key: Reward.ToInventory
-    m_Metadata:
-      m_Items:
-      - rid: 8623673134167883784
   - m_Id: 344090062348288
     m_Key: Map.Unknown
     m_Metadata:
@@ -1135,6 +1085,56 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673275332689933
+  - m_Id: 2587403192623104
+    m_Key: Map.ShopPotion
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543744
+  - m_Id: 2587403205206016
+    m_Key: Battle.Loot
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543745
+  - m_Id: 2587403205206017
+    m_Key: Loot.Title
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543746
+  - m_Id: 2587403205206018
+    m_Key: Loot.Hint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543747
+  - m_Id: 2587403205206019
+    m_Key: Loot.Item
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543748
+  - m_Id: 2587403205206020
+    m_Key: Loot.Take
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543749
+  - m_Id: 2587403205206021
+    m_Key: Loot.Selected
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543750
+  - m_Id: 2587403205206022
+    m_Key: Loot.Taken
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543751
+  - m_Id: 2587403205206023
+    m_Key: Loot.Leave
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543752
+  - m_Id: 2587403205206024
+    m_Key: Loot.ToInventory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673277520543753
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1534,42 +1534,6 @@ MonoBehaviour:
       data:
         m_CommentText: Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits
           that broke the grace.
-    - rid: 636489279218909285
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the reward screen.
-    - rid: 636489279218909286
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: How to take an item reward.
-    - rid: 636489279218909287
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Kind of reward.
-    - rid: 636489279218909288
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Kind of reward.
-    - rid: 636489279218909289
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Button on an item reward.
-    - rid: 636489279218909290
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Button on the selected item reward.
-    - rid: 636489279218909291
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Button on a potion reward.
-    - rid: 636489279218909292
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Button on a potion reward when no potion slot is empty.
-    - rid: 636489279218909293
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Takes no reward.
     - rid: 636489279218909294
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1730,10 +1694,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The item only works in the rearmost row.
-    - rid: 8623673134167883784
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Takes the selected item reward straight into the inventory.
     - rid: 8623673137313349632
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2099,3 +2059,46 @@ MonoBehaviour:
       data:
         m_CommentText: 'On the result window: the region coins the victory brought
           (round 44). {0} = coins.'
+    - rid: 8623673277520543744
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the name of a potion on offer in the shop.
+    - rid: 8623673277520543745
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the result window: what the won battle dropped (round
+          45). {0} = the drops, by title, comma-separated.'
+    - rid: 8623673277520543746
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Header of the loot screen: what the won battle dropped (round
+          45).'
+    - rid: 8623673277520543747
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: How to pick up a drop.
+    - rid: 8623673277520543748
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Kind of drop (the only kind: an item).'
+    - rid: 8623673277520543749
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on a drop not yet picked.
+    - rid: 8623673277520543750
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button on the picked drop.
+    - rid: 8623673277520543751
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the card of a drop already taken.
+    - rid: 8623673277520543752
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Leaves the drops not taken and goes on.
+    - rid: 8623673277520543753
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Takes the picked drop (or the shop's picked offer) straight
+          into the inventory.

@@ -11,7 +11,7 @@ namespace F1.UI
         Lobby,
         NodeMap,
         Battle,
-        Reward,
+        Loot,
         Settlement,
     }
 
@@ -28,7 +28,7 @@ namespace F1.UI
                 case ScreenId.Lobby: return "ui/lobby/lobby-screen";
                 case ScreenId.NodeMap: return "ui/expedition/node-map-screen";
                 case ScreenId.Battle: return "ui/expedition/battle-screen";
-                case ScreenId.Reward: return "ui/expedition/reward-screen";
+                case ScreenId.Loot: return "ui/expedition/loot-screen";
                 case ScreenId.Settlement: return "ui/expedition/settlement-screen";
                 default: throw new ArgumentOutOfRangeException(nameof(id), id, null);
             }
@@ -52,7 +52,7 @@ namespace F1.UI
                 case GamePhase.Lobby: return ScreenId.Lobby;
                 case GamePhase.NodeMap: return ScreenId.NodeMap;
                 case GamePhase.Battle: return ScreenId.Battle;
-                case GamePhase.Reward: return ScreenId.Reward;
+                case GamePhase.Loot: return ScreenId.Loot;
                 case GamePhase.Camp: return ScreenId.NodeMap;
                 case GamePhase.Shop: return ScreenId.NodeMap;
                 case GamePhase.Settlement: return ScreenId.Settlement;

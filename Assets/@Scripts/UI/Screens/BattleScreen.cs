@@ -1132,11 +1132,28 @@ namespace F1.UI
                 _resultDetail.text = string.Join("\n", lines);
             }
 
-            // The region coins the victory brought (round 44), under the deaths; nothing for a boss (the expedition ends) or a loss.
+            // What the victory dropped (round 45) and the region coins it brought (round 44), under the deaths; nothing for a boss (the
+            // expedition ends) or a loss.
+            IReadOnlyList<ItemOffer> loot = Managers.Expedition.BattleLoot;
+            if (loot.Count > 0)
+            {
+                StaticData data = Managers.Data.Data;
+                var titles = new List<string>();
+                foreach (ItemOffer drop in loot)
+                {
+                    if (drop != null)
+                    {
+                        titles.Add(UiText.ItemTitle(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier)));
+                    }
+                }
+
+                _resultDetail.text += "\n\n" + UiStrings.Get(UiKeys.Battle.Loot, string.Join(", ", titles));
+            }
+
             int coins = Managers.Expedition.BattleCoins;
             if (coins > 0)
             {
-                _resultDetail.text += "\n\n" + UiStrings.Get(UiKeys.Battle.Coins, coins);
+                _resultDetail.text += (loot.Count > 0 ? "\n" : "\n\n") + UiStrings.Get(UiKeys.Battle.Coins, coins);
             }
 
             RenderControls(engine, engine.Setup.Balance, false);

@@ -516,7 +516,7 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's column of the board panel, under the stage's column of that row: it holds the
-        /// board of the unit standing in the row. The party side of the node map and the reward
+        /// board of the unit standing in the row. The party side of the node map and the loot
         /// screen builds the same columns.
         /// </summary>
         static RectTransform BuildBoardColumn(Transform panel, string name, float x, float width)

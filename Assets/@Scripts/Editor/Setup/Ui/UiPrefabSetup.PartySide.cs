@@ -10,7 +10,7 @@ namespace F1.Editor.Setup
     public static partial class UiPrefabSetup
     {
         /// <summary>
-        /// The party side of the node map and the reward screen, in the battle screen's shape
+        /// The party side of the node map and the loot screen, in the battle screen's shape
         /// (2026-10-03 mockups A and V): on the stage, the battle's party columns, each with the
         /// figure, the marks under its feet and the two buttons that move the member a row; under
         /// the stage, the battle's board panel, with the board of each row (its head with the row and
@@ -28,7 +28,7 @@ namespace F1.Editor.Setup
         /// <summary>Where the potion strip stands: above the right half, under the header.</summary>
         const float PartyPotionsX = 980f;
 
-        /// <summary>The top of what the right half holds under the potions (the map, the rewards, the inventory popup): it ends above the board panel.</summary>
+        /// <summary>The top of what the right half holds under the potions (the map, the loot, the inventory popup): it ends above the board panel.</summary>
         const float PartyRightTop = 190f;
 
         /// <summary>The popup over the right half: under the potions, above the board panel.</summary>

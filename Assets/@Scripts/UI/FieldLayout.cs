@@ -6,7 +6,7 @@ namespace F1.UI
     /// column the same width. A side stands close together and the two sides stand apart: the gap
     /// between the sides is much wider than the gap inside a side (the field's box leaves room at
     /// both ends of the screen as well). The battle screen lays its field out with this when it
-    /// opens, and the party side of the node map and the reward screen puts its columns in the same
+    /// opens, and the party side of the node map and the loot screen puts its columns in the same
     /// places, so the party keeps the battle's shape on every screen whatever the party size is.
     /// Rows are given as indices (0 is row 1) and every x is measured from the field's left edge.
     /// </summary>

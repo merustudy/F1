@@ -80,6 +80,7 @@ Map.ShopSold,On the tile of an offer that was bought.,팔림,Sold
 Map.ShopItemSub,Under the name of an item on offer. {0} = category. {1} = cells it takes.,{0} · {1}칸,{0} · {1} cells
 Map.ShopBought,On the detail line after a purchase. {0} = what was bought. {1} = coins before. {2} = coins after.,구매: {0} · 코인 {1} → {2},Bought: {0} · coins {1} → {2}
 Map.Coins,A number of region coins beside the coin mark (the header; an offer's price; the refresh cost). {0} = coins.,{0},{0}
+Map.ShopPotion,Under the name of a potion on offer in the shop.,포션,Potion
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.EmptySlot,An empty item or potion slot.,빈 칸,Empty
 Board.Grade,{0} = item grade.,등급 {0},Grade {0}
@@ -154,6 +155,7 @@ Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
 Battle.Retreated,Battle result.,후퇴 성공,Retreated
 Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
 Battle.Coins,On the result window: the region coins the victory brought (round 44). {0} = coins.,지역 코인 +{0},Region coins +{0}
+Battle.Loot,"On the result window: what the won battle dropped (round 45). {0} = the drops, by title, comma-separated.",전리품: {0},Loot: {0}
 Battle.ShowLog,Opens the log of the finished battle from the result panel.,로그 보기,View log
 Battle.LogTitle,Title of the battle log viewer.,전투 로그,Battle log
 Battle.FigurePlaceholder,Shown in the figure placeholder of a unit until there is art.,전신 이미지 자리,Full-body art here
@@ -189,16 +191,14 @@ Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2
 Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
 Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
-Reward.Title,Header of the reward screen.,보상을 고르세요,Choose a reward
-Reward.Hint,How to take an item reward.,아이템을 고른 뒤 넣을 칸을 누르세요. 찬 칸에 넣으면 원래 아이템은 인벤토리로 갑니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.,"Pick an item, then click the cell to put it in. An item already there goes to the inventory. Or take it straight into the inventory."
-Reward.Item,Kind of reward.,아이템,Item
-Reward.Potion,Kind of reward.,포션,Potion
-Reward.Select,Button on an item reward.,고르기,Select
-Reward.Selected,Button on the selected item reward.,넣을 칸을 누르세요,Click a slot
-Reward.TakePotion,Button on a potion reward.,받기,Take
-Reward.PotionFull,Button on a potion reward when no potion slot is empty.,포션 칸이 가득 참,Potion slots are full
-Reward.Skip,Takes no reward.,넘기기,Skip
-Reward.ToInventory,Takes the selected item reward straight into the inventory.,인벤토리에 넣기,Take to inventory
+Loot.Title,Header of the loot screen: what the won battle dropped (round 45).,전리품,Loot
+Loot.Hint,How to pick up a drop.,주울 아이템을 고른 뒤 넣을 칸을 누르세요. 찬 칸에 넣으면 원래 아이템은 인벤토리로 갑니다. 인벤토리에 넣기로 바로 받을 수도 있습니다.,"Pick a drop, then click the cell to put it in. An item already there goes to the inventory. Or take it straight into the inventory."
+Loot.Item,Kind of drop (the only kind: an item).,아이템,Item
+Loot.Take,Button on a drop not yet picked.,줍기,Take
+Loot.Selected,Button on the picked drop.,넣을 칸을 누르세요,Click a slot
+Loot.Taken,On the card of a drop already taken.,주움,Taken
+Loot.Leave,Leaves the drops not taken and goes on.,두고 가기,Leave the rest
+Loot.ToInventory,Takes the picked drop (or the shop's picked offer) straight into the inventory.,인벤토리에 넣기,Take to inventory
 Settle.Cleared,Expedition result.,던전 클리어,Dungeon cleared
 Settle.Wiped,Expedition result.,파티 전멸,The party was wiped out
 Settle.Retreated,Expedition result.,후퇴,Retreated

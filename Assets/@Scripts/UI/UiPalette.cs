@@ -83,7 +83,7 @@ namespace F1.UI
 
         /// <summary>
         /// The tiers of an item (2026-10-07 round 41, palette P3): the outline around an icon, the stars on the tier tag, the stripe
-        /// of a reward card and the mark of a cell an item would merge into take the tier's colour — copper, silver and gold for
+        /// of a loot card and the mark of a cell an item would merge into take the tier's colour — copper, silver and gold for
         /// the three tiers above Common, deep enough to read on a bone cell; a tier's name in words takes the lighter tone, which
         /// reads on the dark panels. Common has no mark (a Common cell is the plain cell) and its word is a plain bone tone, used
         /// only where a tier word is needed ("일반 → 동" at the camp).

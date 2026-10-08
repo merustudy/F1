@@ -252,7 +252,7 @@ namespace F1.Tests
 
         /// <summary>
         /// From the title: a new run, a full party with a champion in row 1 (<see cref="StageChampion"/>), every battle on the
-        /// way won and every reward skipped, a rest at every camp, and the boss's battle entered and left paused at its start.
+        /// way won and every loot left, a rest at every camp, and the boss's battle entered and left paused at its start.
         /// </summary>
         public static IEnumerator EnterTheBossBattle()
         {
@@ -295,8 +295,8 @@ namespace F1.Tests
                         yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
                         break;
 
-                    case GamePhase.Reward:
-                        Click(Screen<RewardScreen>(), "Frame/BoardPanel/Skip");
+                    case GamePhase.Loot:
+                        Click(Screen<LootScreen>(), "Frame/BoardPanel/Leave");
                         yield return WaitForScreen(ScreenId.NodeMap);
                         break;
 

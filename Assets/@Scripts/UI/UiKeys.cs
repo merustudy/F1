@@ -101,6 +101,7 @@ namespace F1.UI
             public const string ShopItemSub = "Map.ShopItemSub";
             public const string ShopBought = "Map.ShopBought";
             public const string Coins = "Map.Coins";
+            public const string ShopPotion = "Map.ShopPotion";
         }
 
         public static class Board
@@ -199,6 +200,7 @@ namespace F1.UI
             public const string Retreated = "Battle.Retreated";
             public const string NoDeaths = "Battle.NoDeaths";
             public const string Coins = "Battle.Coins";
+            public const string Loot = "Battle.Loot";
             public const string ShowLog = "Battle.ShowLog";
             public const string LogTitle = "Battle.LogTitle";
             public const string FigurePlaceholder = "Battle.FigurePlaceholder";
@@ -261,18 +263,17 @@ namespace F1.UI
             public const string GraceBroken = "Death.GraceBroken";
         }
 
-        public static class Reward
+        /// <summary>The loot screen (Slice B stage 18): the drops of a won battle, picked up one by one or left.</summary>
+        public static class Loot
         {
-            public const string Title = "Reward.Title";
-            public const string Hint = "Reward.Hint";
-            public const string Item = "Reward.Item";
-            public const string Potion = "Reward.Potion";
-            public const string Select = "Reward.Select";
-            public const string Selected = "Reward.Selected";
-            public const string TakePotion = "Reward.TakePotion";
-            public const string PotionFull = "Reward.PotionFull";
-            public const string Skip = "Reward.Skip";
-            public const string ToInventory = "Reward.ToInventory";
+            public const string Title = "Loot.Title";
+            public const string Hint = "Loot.Hint";
+            public const string Item = "Loot.Item";
+            public const string Take = "Loot.Take";
+            public const string Selected = "Loot.Selected";
+            public const string Taken = "Loot.Taken";
+            public const string Leave = "Loot.Leave";
+            public const string ToInventory = "Loot.ToInventory";
         }
 
         public static class Settle

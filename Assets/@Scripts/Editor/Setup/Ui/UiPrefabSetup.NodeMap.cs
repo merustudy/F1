@@ -272,7 +272,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(enter.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
 
             // At a shop (round 44), the way in makes room for buying the picked offer straight into the inventory.
-            ButtonParts buyToInventory = KitLocalizedButton("ShopBuy", panel.transform, UiKeys.Reward.ToInventory, UiPalette.Button, 26f);
+            ButtonParts buyToInventory = KitLocalizedButton("ShopBuy", panel.transform, UiKeys.Loot.ToInventory, UiPalette.Button, 26f);
             UiBuild.Silence(buyToInventory.Button);
             UiBuild.Box(buyToInventory.Rect, 1644f, PanelButtonsTop, 236f, PanelButtonHeight);
             buyToInventory.Rect.gameObject.SetActive(false);
