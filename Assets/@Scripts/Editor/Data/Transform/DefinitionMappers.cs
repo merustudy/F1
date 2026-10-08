@@ -113,7 +113,7 @@ namespace F1.Editor.Data
                 "Category", "Size", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
-                "RewardWeight", RowMapping.Icon, "Price"));
+                "ShopWeight", RowMapping.Icon, "Price"));
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -132,7 +132,7 @@ namespace F1.Editor.Data
                     row.Int("CooldownMs"),
                     row.Rows("Rows"),
                     effects,
-                    row.Int("RewardWeight"),
+                    row.Int("ShopWeight"),
                     RowMapping.ReadArt(row, RowMapping.Icon),
                     row.Int("Price"));
             });
@@ -153,13 +153,13 @@ namespace F1.Editor.Data
     {
         public static List<PotionData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "RewardWeight", RowMapping.Icon, "Price"));
+            table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "ShopWeight", RowMapping.Icon, "Price"));
             return RowMapping.MapRows(table, errors, row => new PotionData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Enum<PotionEffect>("Effect"),
                 row.Int("Magnitude"),
-                row.Int("RewardWeight"),
+                row.Int("ShopWeight"),
                 RowMapping.ReadArt(row, RowMapping.Icon),
                 row.Int("Price")));
         }

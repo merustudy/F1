@@ -34,8 +34,16 @@
       "Value": 3000
     },
     {
+      "Key": "DropCount",
+      "Value": 1
+    },
+    {
       "Key": "EliteCoinPercent",
       "Value": 200
+    },
+    {
+      "Key": "EliteDropCount",
+      "Value": 2
     },
     {
       "Key": "FatigueBattleEntry",
@@ -67,7 +75,7 @@
     },
     {
       "Key": "FatigueOnKill",
-      "Value": 5
+      "Value": 3
     },
     {
       "Key": "FatigueRecoveryPerDay",
@@ -124,10 +132,6 @@
     {
       "Key": "RetreatCooldownMs",
       "Value": 5000
-    },
-    {
-      "Key": "RewardChoices",
-      "Value": 3
     },
     {
       "Key": "ShopRefreshBase",

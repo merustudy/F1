@@ -1,4 +1,4 @@
-Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,RewardWeight,Icon,Price
+Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,ShopWeight,Icon,Price
 longsword,롱소드,Longsword,Weapon,1,3000,front:2,Damage,EnemyFront,1,110,,,,,0,item/longsword,0
 greataxe,대도끼,Greataxe,Weapon,1,3600,front:1,Damage,EnemyFront,1,190,,,,,0,item/greataxe,0
 mace,메이스,Mace,Weapon,1,3200,front:2,Damage,EnemyFront,1,100,Shield,Self,,40,0,item/mace,0
@@ -12,10 +12,10 @@ buckler,버클러,Buckler,Armor,1,5000,front:1,Shield,Self,,80,,,,,10,item/buckl
 ward_charm,수호 부적,Ward Charm,Support,1,6000,all,Shield,AllyLowestHp,,70,,,,,10,item/ward-charm,12
 herb_pouch,약초 주머니,Herb Pouch,Support,1,5000,all,Heal,Self,,60,,,,,10,item/herb-pouch,10
 ember_flask,불씨 플라스크,Ember Flask,Attack,1,4500,all,Burn,EnemyFront,1,25,,,,,8,item/ember-flask,12
-rat_bite,물어뜯기,Bite,Weapon,1,2000,front:2,Damage,EnemyFront,1,100,,,,,0,item/rat-bite,0
-rusty_blade,녹슨 칼,Rusty Blade,Weapon,1,2800,front:2,Damage,EnemyFront,1,100,,,,,0,item/rusty-blade,0
+rat_bite,쥐 송곳니,Rat Fang,Weapon,1,2000,front:2,Damage,EnemyFront,1,60,,,,,0,item/rat-bite,0
+rusty_blade,녹슨 칼,Rusty Blade,Weapon,1,2800,front:2,Damage,EnemyFront,1,80,,,,,0,item/rusty-blade,0
 crude_bow,조잡한 활,Crude Bow,Weapon,1,3400,back:3,Damage,EnemyBack,1,90,,,,,0,item/crude-bow,0
-lantern_staff,등불 지팡이,Lantern Staff,Weapon,1,3800,back:3,Burn,EnemyFront,1,30,,,,,0,item/lantern-staff,0
-mending_chant,치유 주문,Mending Chant,Support,1,5500,back:3,Heal,AllyLowestHp,,100,,,,,0,item/mending-chant,0
+lantern_staff,등불 지팡이,Lantern Staff,Weapon,1,3800,back:3,Burn,EnemyFront,1,25,,,,,0,item/lantern-staff,0
+mending_chant,치유의 부적,Mending Charm,Support,1,5500,back:3,Heal,AllyLowestHp,,100,,,,,0,item/mending-chant,0
 overseer_maul,감독관의 망치,Overseer's Maul,Weapon,1,4500,front:2,Damage,EnemyFront,1,150,,,,,0,item/overseer-maul,0
 overseer_roar,감독관의 포효,Overseer's Roar,Weapon,1,6000,front:2,Damage,EnemyAll,,60,,,,,0,item/overseer-roar,0

@@ -12,7 +12,7 @@
       "Items": [
         {
           "ItemId": "rat_bite",
-          "Grade": 10
+          "Grade": 17
         }
       ],
       "Figure": "unit/enemy/cave-rat",
@@ -46,7 +46,7 @@
       "Items": [
         {
           "ItemId": "lantern_staff",
-          "Grade": 15
+          "Grade": 18
         },
         {
           "ItemId": "mending_chant",
@@ -67,7 +67,7 @@
       "Items": [
         {
           "ItemId": "rusty_blade",
-          "Grade": 15
+          "Grade": 19
         }
       ],
       "Figure": "unit/enemy/goblin-raider",
@@ -84,7 +84,7 @@
       "Items": [
         {
           "ItemId": "lantern_staff",
-          "Grade": 10
+          "Grade": 12
         },
         {
           "ItemId": "mending_chant",
@@ -105,7 +105,7 @@
       "Items": [
         {
           "ItemId": "rusty_blade",
-          "Grade": 22
+          "Grade": 28
         },
         {
           "ItemId": "buckler",

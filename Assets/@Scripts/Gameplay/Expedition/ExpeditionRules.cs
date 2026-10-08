@@ -5,7 +5,7 @@ using F1.Data;
 namespace F1.Gameplay
 {
     /// <summary>
-    /// The expedition rules (Docs/Design/03_Dungeon_Structure.md): node choice, battles, rewards,
+    /// The expedition rules (Docs/Design/03_Dungeon_Structure.md): node choice, battles, the loot they drop,
     /// the shop and its coins, item boards and the inventory, and how an expedition ends. Pure functions over
     /// <see cref="ExpeditionState"/>. A command that is not allowed in the current state throws;
     /// callers check first with the matching Can... query.
@@ -155,7 +155,7 @@ namespace F1.Gameplay
                 AddPartyRow(data, state, row, party);
             }
 
-            int deeper = group.IsBoss ? 0 : Math.Max(0, floor - 1);
+            int deeper = FloorsBelowTheFirst(group, floor);
             var enemies = new List<BattleUnitSetup>();
             for (int i = 0; i < group.Enemies.Count; i++)
             {
@@ -275,42 +275,85 @@ namespace F1.Gameplay
                 return;
             }
 
-            state.PendingRewards = GenerateRewards(data, state, node);
-            state.Phase = state.PendingRewards.Count > 0 ? ExpeditionPhase.ChoosingReward : ExpeditionPhase.ChoosingNode;
+            state.Loot = DropLoot(data, state, node);
+            state.Phase = state.Loot.Count > 0 ? ExpeditionPhase.PickingLoot : ExpeditionPhase.ChoosingNode;
         }
 
+        // ---- Loot (Slice B stage 18) -----------------------------------------------------------
+
         /// <summary>
-        /// Whether an item reward could be put at a cell of a member's board: into the free cells, or
-        /// in place of the item there, which goes to the inventory and so must fit its free cells
-        /// (Docs/Design/03_Dungeon_Structure.md §5).
+        /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried,
+        /// <c>DropCount</c> are drawn without repetition from the loot stream of the node (<c>EliteDropCount</c> for an elite); all of them
+        /// when they carried fewer. A drop is the item at the dungeon's grade and the floor's tier (an elite's a tier up), as the shop's stock is:
+        /// not at the grade the enemy carried it (that is the enemy's strength, far above a found item's). The boss drops nothing: the
+        /// expedition ends there. Nothing for a node that is not fought.
         /// </summary>
-        public static bool CanPlaceReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int cell)
+        public static List<ItemOffer> DropLoot(StaticData data, ExpeditionState state, MapNode node)
         {
-            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
+            var drops = new List<ItemOffer>();
+            if (!node.IsFought || node.Kind == MapNodeKind.Boss)
             {
-                return false;
+                return drops;
             }
 
-            RewardOption option = state.PendingRewards[optionIndex];
-            return option.Kind == RewardKind.Item
-                && (MergesInto(option.Id, option.Tier, LivingItemAt(state, memberIndex, cell))
-                    || CanPlaceItem(data, state, data.Items.Get(option.Id).Size, memberIndex, cell));
+            DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
+            int grade = dungeon.ItemGradeAt(node.Floor);
+            ItemTier tier = dungeon.ItemTierAt(node.Floor, node.Kind == MapNodeKind.Elite);
+            var carried = new List<ItemOffer>();
+            foreach (string enemyId in data.EnemyGroups.Get(node.EnemyGroupId).Enemies)
+            {
+                foreach (ItemGrant grant in data.Enemies.Get(enemyId).Items)
+                {
+                    carried.Add(new ItemOffer(OfferKind.Item, grant.ItemId, grade, tier));
+                }
+            }
+
+            var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "loot", node.Id), RngStream.Loot);
+            int count = node.Kind == MapNodeKind.Elite ? data.Balance.EliteDropCount : data.Balance.DropCount;
+            while (drops.Count < count && carried.Count > 0)
+            {
+                int index = rng.NextInt(carried.Count);
+                drops.Add(carried[index]);
+                carried.RemoveAt(index);
+            }
+
+            return drops;
+        }
+
+        /// <summary>The drop lying in a slot of the loot, or null: for a slot already taken, no such slot, or no loot to pick.</summary>
+        public static ItemOffer DropAt(ExpeditionState state, int slot)
+        {
+            return state.Phase == ExpeditionPhase.PickingLoot && slot >= 0 && slot < state.Loot.Count ? state.Loot[slot] : null;
         }
 
         /// <summary>
-        /// Takes an item reward onto a cell of a member's board: into the free cells or in place of the item there (which goes to
-        /// the inventory), or, onto the same item at the same tier, merged with it a tier up.
+        /// Whether a drop could be put at a cell of a member's board: into the free cells, or in place of the item there, which goes
+        /// to the inventory and so must fit its free cells (Docs/Design/03_Dungeon_Structure.md §5), or onto the same item at the same
+        /// tier, to merge with it.
         /// </summary>
-        public static void TakeItemReward(StaticData data, ExpeditionState state, int optionIndex, int memberIndex, int cell)
+        public static bool CanTakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
         {
-            RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
+            ItemOffer drop = DropAt(state, slot);
+            return drop != null
+                && (MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, cell))
+                    || CanPlaceItem(data, state, data.Items.Get(drop.Id).Size, memberIndex, cell));
+        }
+
+        /// <summary>
+        /// Takes a drop onto a cell of a member's board: into the free cells or in place of the item there (which goes to the
+        /// inventory), or, onto the same item at the same tier, merged with it a tier up. Its slot is left empty; the last drop
+        /// taken ends the loot.
+        /// </summary>
+        public static void TakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
+        {
+            ItemOffer drop = RequireDrop(state, slot);
             ExpeditionMember member = RequireLivingMember(state, memberIndex);
-            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade, tier: option.Tier);
+            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
             EquippedItem there = LivingItemAt(state, memberIndex, cell);
             if (CanMerge(item, there))
             {
                 Merge(member.Items, item, there, null);
-                EndReward(state);
+                Pick(state, slot);
                 return;
             }
 
@@ -320,52 +363,42 @@ namespace F1.Gameplay
             }
 
             PutOnBoard(state, member, cell, item);
-            EndReward(state);
+            Pick(state, slot);
         }
 
-        /// <summary>Whether an item reward could be taken straight into the inventory: it must fit the inventory's free cells.</summary>
-        public static bool CanTakeRewardToInventory(StaticData data, ExpeditionState state, int optionIndex)
+        /// <summary>Whether a drop could be taken straight into the inventory: it must fit the inventory's free cells.</summary>
+        public static bool CanTakeLootToInventory(StaticData data, ExpeditionState state, int slot)
         {
-            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
-            {
-                return false;
-            }
-
-            RewardOption option = state.PendingRewards[optionIndex];
-            return option.Kind == RewardKind.Item && data.Items.Get(option.Id).Size <= FreeInventoryCells(data, state);
+            ItemOffer drop = DropAt(state, slot);
+            return drop != null && data.Items.Get(drop.Id).Size <= FreeInventoryCells(data, state);
         }
 
-        /// <summary>Takes an item reward straight into the inventory.</summary>
-        public static void TakeItemRewardToInventory(StaticData data, ExpeditionState state, int optionIndex)
+        /// <summary>Takes a drop straight into the inventory.</summary>
+        public static void TakeLootToInventory(StaticData data, ExpeditionState state, int slot)
         {
-            RewardOption option = RequireReward(state, optionIndex, RewardKind.Item);
-            var item = new EquippedItem(data.Items.Get(option.Id), option.Grade, tier: option.Tier);
+            ItemOffer drop = RequireDrop(state, slot);
+            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
             if (item.Item.Size > FreeInventoryCells(data, state))
             {
                 throw new InvalidOperationException($"'{item.Item.Id}' does not fit the inventory's free cells.");
             }
 
             state.Inventory.Add(item);
-            EndReward(state);
+            Pick(state, slot);
         }
 
-        public static void TakePotionReward(ExpeditionState state, int optionIndex)
+        /// <summary>Leaves whatever loot still lies there and goes on to choosing the next node.</summary>
+        public static void LeaveLoot(ExpeditionState state)
         {
-            RewardOption option = RequireReward(state, optionIndex, RewardKind.Potion);
-            int slot = FreePotionSlot(state);
-            if (slot < 0)
-            {
-                throw new InvalidOperationException("There is no empty potion slot.");
-            }
-
-            state.Potions[slot] = option.Id;
-            EndReward(state);
+            RequirePhase(state, ExpeditionPhase.PickingLoot);
+            EndLoot(state);
         }
 
-        public static void SkipReward(ExpeditionState state)
+        /// <summary>Whether taking a drop onto a cell of a living member's board would merge it into the item there.</summary>
+        public static bool LootMergesAt(ExpeditionState state, int slot, int memberIndex, int cell)
         {
-            RequirePhase(state, ExpeditionPhase.ChoosingReward);
-            EndReward(state);
+            ItemOffer drop = DropAt(state, slot);
+            return drop != null && MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, cell));
         }
 
         /// <summary>
@@ -587,28 +620,28 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The stock of a shop after so many refreshes: the shop stream of the node is drawn that many times past the first, and the
-        /// last draw is the stock. Every slot is drawn anew, sold ones too. The offers are the floor's reward items and potions (those with a
-        /// price), at the floor's tier, without repetition.
+        /// last draw is the stock. Every slot is drawn anew, sold ones too. The offers are the items and potions a shop stocks (those with a
+        /// weight and a price), at the floor's grade and tier, without repetition.
         /// </summary>
-        static List<RewardOption> DrawStock(StaticData data, ExpeditionState state, MapNode shop, int refreshes)
+        static List<ItemOffer> DrawStock(StaticData data, ExpeditionState state, MapNode shop, int refreshes)
         {
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "shop", shop.Id), RngStream.Shop);
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
-            int grade = dungeon.RewardGradeAt(shop.Floor);
-            ItemTier tier = dungeon.RewardTierAt(shop.Floor, false);
-            List<RewardOption> stock = null;
+            int grade = dungeon.ItemGradeAt(shop.Floor);
+            ItemTier tier = dungeon.ItemTierAt(shop.Floor, false);
+            List<ItemOffer> stock = null;
             for (int draw = 0; draw <= refreshes; draw++)
             {
-                stock = DrawOptions(data, state, rng, data.Balance.ShopSlots, grade, tier, forShop: true);
+                stock = DrawOffers(data, state, rng, data.Balance.ShopSlots, grade, tier);
             }
 
             return stock;
         }
 
         /// <summary>What an offer costs: an item's price times its tier's percent (as its effects grow), a potion's price as it is.</summary>
-        public static int PriceOf(StaticData data, RewardOption offer)
+        public static int PriceOf(StaticData data, ItemOffer offer)
         {
-            if (offer.Kind == RewardKind.Potion)
+            if (offer.Kind == OfferKind.Potion)
             {
                 return data.Potions.Get(offer.Id).Price;
             }
@@ -624,7 +657,7 @@ namespace F1.Gameplay
         }
 
         /// <summary>The offer in a slot of the shop the party is at, or null: not at a shop, no such slot, or sold.</summary>
-        public static RewardOption OfferAt(ExpeditionState state, int slot)
+        public static ItemOffer OfferAt(ExpeditionState state, int slot)
         {
             if (state.Phase != ExpeditionPhase.AtShop || state.Shop == null || slot < 0 || slot >= state.Shop.Stock.Count)
             {
@@ -637,18 +670,18 @@ namespace F1.Gameplay
         /// <summary>Whether the coins cover the offer in a slot.</summary>
         public static bool CanAfford(StaticData data, ExpeditionState state, int slot)
         {
-            RewardOption offer = OfferAt(state, slot);
+            ItemOffer offer = OfferAt(state, slot);
             return offer != null && state.Coins >= PriceOf(data, offer);
         }
 
         /// <summary>
         /// Whether the item in a slot could be bought onto a cell of a member's board: the coins cover it, and it goes there as a
-        /// reward would (into the free cells, in place of the item there, or merged into the same item at the same tier).
+        /// drop of loot would (into the free cells, in place of the item there, or merged into the same item at the same tier).
         /// </summary>
         public static bool CanBuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
         {
-            RewardOption offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == RewardKind.Item && state.Coins >= PriceOf(data, offer)
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && offer.Kind == OfferKind.Item && state.Coins >= PriceOf(data, offer)
                 && (MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, cell))
                     || CanPlaceItem(data, state, data.Items.Get(offer.Id).Size, memberIndex, cell));
         }
@@ -661,7 +694,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto cell {cell} of member {memberIndex} now.");
             }
 
-            RewardOption offer = state.Shop.Stock[slot];
+            ItemOffer offer = state.Shop.Stock[slot];
             ExpeditionMember member = state.Members[memberIndex];
             var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
             EquippedItem there = LivingItemAt(state, memberIndex, cell);
@@ -680,8 +713,8 @@ namespace F1.Gameplay
         /// <summary>Whether the item in a slot could be bought straight into the inventory: the coins cover it and it fits the free cells.</summary>
         public static bool CanBuyToInventory(StaticData data, ExpeditionState state, int slot)
         {
-            RewardOption offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == RewardKind.Item && state.Coins >= PriceOf(data, offer)
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && offer.Kind == OfferKind.Item && state.Coins >= PriceOf(data, offer)
                 && data.Items.Get(offer.Id).Size <= FreeInventoryCells(data, state);
         }
 
@@ -692,7 +725,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The offer in slot {slot} cannot be bought into the inventory now.");
             }
 
-            RewardOption offer = state.Shop.Stock[slot];
+            ItemOffer offer = state.Shop.Stock[slot];
             state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier));
             Pay(data, state, slot);
         }
@@ -700,8 +733,8 @@ namespace F1.Gameplay
         /// <summary>Whether the potion in a slot could be bought: the coins cover it and a potion slot is empty.</summary>
         public static bool CanBuyPotion(StaticData data, ExpeditionState state, int slot)
         {
-            RewardOption offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == RewardKind.Potion && state.Coins >= PriceOf(data, offer) && FreePotionSlot(state) >= 0;
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && offer.Kind == OfferKind.Potion && state.Coins >= PriceOf(data, offer) && FreePotionSlot(state) >= 0;
         }
 
         public static void BuyPotion(StaticData data, ExpeditionState state, int slot)
@@ -718,8 +751,8 @@ namespace F1.Gameplay
         /// <summary>Whether buying the item in a slot onto a cell of a living member's board would merge it into the item there.</summary>
         public static bool ShopMergesAt(ExpeditionState state, int slot, int memberIndex, int cell)
         {
-            RewardOption offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == RewardKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, cell));
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, cell));
         }
 
         /// <summary>Whether the stock can be refreshed now: at a shop, with the coins to pay the next refresh.</summary>
@@ -772,18 +805,6 @@ namespace F1.Gameplay
             return CanMerge(item, LivingItemAt(state, memberIndex, cell));
         }
 
-        /// <summary>Whether taking an item reward onto a cell of a living member's board would merge it into the item there.</summary>
-        public static bool RewardMergesAt(ExpeditionState state, int optionIndex, int memberIndex, int cell)
-        {
-            if (state.Phase != ExpeditionPhase.ChoosingReward || optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
-            {
-                return false;
-            }
-
-            RewardOption option = state.PendingRewards[optionIndex];
-            return option.Kind == RewardKind.Item && MergesInto(option.Id, option.Tier, LivingItemAt(state, memberIndex, cell));
-        }
-
         /// <summary>Whether some cell of a living member's board holds what the item would merge into.</summary>
         public static bool HasMergeTarget(ExpeditionState state, EquippedItem item)
         {
@@ -815,7 +836,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Merges an item into another on a board: the board's item becomes the merge, a tier up at the better grade of the two,
-        /// and the item merged in leaves the list it came from (null for a reward, which comes from nowhere).
+        /// and the item merged in leaves the list it came from (null for a drop or an offer, which comes from nowhere).
         /// </summary>
         static void Merge(List<EquippedItem> board, EquippedItem item, EquippedItem into, List<EquippedItem> source)
         {
@@ -925,32 +946,19 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Draws the reward choices of a node without repetition, by weight, from the reward stream
-        /// of that node. Potions are offered only while a potion slot is empty.
+        /// Draws what a shop offers without repetition, by shop weight: the items with a weight and a price at the grade and tier given,
+        /// and the potions with a weight and a price while a potion slot is empty.
         /// </summary>
-        static List<RewardOption> GenerateRewards(StaticData data, ExpeditionState state, MapNode node)
+        static List<ItemOffer> DrawOffers(StaticData data, ExpeditionState state, Pcg32 rng, int count, int grade, ItemTier tier)
         {
-            var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "reward", node.Id), RngStream.Reward);
-            DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
-            int grade = dungeon.RewardGradeAt(node.Floor);
-            ItemTier tier = dungeon.RewardTierAt(node.Floor, node.Kind == MapNodeKind.Elite);
-            return DrawOptions(data, state, rng, data.Balance.RewardChoices, grade, tier, forShop: false);
-        }
-
-        /// <summary>
-        /// Draws options without repetition, by reward weight: the items with a weight (for a shop, with a price too) at the grade and
-        /// tier given, and the potions with a weight (and a price) while a potion slot is empty.
-        /// </summary>
-        static List<RewardOption> DrawOptions(StaticData data, ExpeditionState state, Pcg32 rng, int count, int grade, ItemTier tier, bool forShop)
-        {
-            var candidates = new List<RewardOption>();
+            var candidates = new List<ItemOffer>();
             var weights = new List<int>();
             foreach (ItemData item in data.Items.Ordered)
             {
-                if (item.RewardWeight > 0 && (!forShop || item.Price > 0))
+                if (item.ShopWeight > 0 && item.Price > 0)
                 {
-                    candidates.Add(new RewardOption(RewardKind.Item, item.Id, grade, tier));
-                    weights.Add(item.RewardWeight);
+                    candidates.Add(new ItemOffer(OfferKind.Item, item.Id, grade, tier));
+                    weights.Add(item.ShopWeight);
                 }
             }
 
@@ -958,16 +966,16 @@ namespace F1.Gameplay
             {
                 foreach (PotionData potion in data.Potions.Ordered)
                 {
-                    if (potion.RewardWeight > 0 && (!forShop || potion.Price > 0))
+                    if (potion.ShopWeight > 0 && potion.Price > 0)
                     {
-                        candidates.Add(new RewardOption(RewardKind.Potion, potion.Id, 0));
-                        weights.Add(potion.RewardWeight);
+                        candidates.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
+                        weights.Add(potion.ShopWeight);
                     }
                 }
             }
 
-            var options = new List<RewardOption>();
-            while (options.Count < count && candidates.Count > 0)
+            var offers = new List<ItemOffer>();
+            while (offers.Count < count && candidates.Count > 0)
             {
                 int total = 0;
                 foreach (int weight in weights)
@@ -983,12 +991,12 @@ namespace F1.Gameplay
                     index++;
                 }
 
-                options.Add(candidates[index]);
+                offers.Add(candidates[index]);
                 candidates.RemoveAt(index);
                 weights.RemoveAt(index);
             }
 
-            return options;
+            return offers;
         }
 
         static void AddPartyRow(StaticData data, ExpeditionState state, int row, List<BattleUnitSetup> party)
@@ -1015,6 +1023,12 @@ namespace F1.Gameplay
                     FatigueState = member.StateId == null ? null : data.FatigueStates.Get(member.StateId),
                 });
             }
+        }
+
+        /// <summary>How many floors below the first a group stands on a floor: 0 for a boss group, which is as the data says wherever it is.</summary>
+        static int FloorsBelowTheFirst(EnemyGroupData group, int floor)
+        {
+            return group.IsBoss ? 0 : Math.Max(0, floor - 1);
         }
 
         /// <param name="deeper">How many floors below the first the enemy stands: its HP and item grades grow by the dungeon's share for each.</param>
@@ -1093,10 +1107,10 @@ namespace F1.Gameplay
             }
         }
 
-        /// <summary>Choosing a node, a reward, or what to do at a camp or a shop: the boards and the rows can be rearranged.</summary>
+        /// <summary>Choosing a node, picking loot, or what to do at a camp or a shop: the boards and the rows can be rearranged.</summary>
         static bool IsBetweenBattles(ExpeditionState state)
         {
-            return state.Phase == ExpeditionPhase.ChoosingNode || state.Phase == ExpeditionPhase.ChoosingReward
+            return state.Phase == ExpeditionPhase.ChoosingNode || state.Phase == ExpeditionPhase.PickingLoot
                 || state.Phase == ExpeditionPhase.AtCamp || state.Phase == ExpeditionPhase.AtShop;
         }
 
@@ -1109,12 +1123,22 @@ namespace F1.Gameplay
         {
             state.Result = result;
             state.Phase = ExpeditionPhase.Finished;
-            state.PendingRewards.Clear();
+            state.Loot.Clear();
         }
 
-        static void EndReward(ExpeditionState state)
+        /// <summary>Empties the slot of a drop just taken; the last one taken ends the loot.</summary>
+        static void Pick(ExpeditionState state, int slot)
         {
-            state.PendingRewards.Clear();
+            state.Loot[slot] = null;
+            if (state.Loot.TrueForAll(drop => drop == null))
+            {
+                EndLoot(state);
+            }
+        }
+
+        static void EndLoot(ExpeditionState state)
+        {
+            state.Loot.Clear();
             state.Phase = ExpeditionPhase.ChoosingNode;
         }
 
@@ -1126,21 +1150,21 @@ namespace F1.Gameplay
             }
         }
 
-        static RewardOption RequireReward(ExpeditionState state, int optionIndex, RewardKind kind)
+        static ItemOffer RequireDrop(ExpeditionState state, int slot)
         {
-            RequirePhase(state, ExpeditionPhase.ChoosingReward);
-            if (optionIndex < 0 || optionIndex >= state.PendingRewards.Count)
+            RequirePhase(state, ExpeditionPhase.PickingLoot);
+            if (slot < 0 || slot >= state.Loot.Count)
             {
-                throw new ArgumentOutOfRangeException(nameof(optionIndex), optionIndex, "Unknown reward option.");
+                throw new ArgumentOutOfRangeException(nameof(slot), slot, "No such slot of the loot.");
             }
 
-            RewardOption option = state.PendingRewards[optionIndex];
-            if (option.Kind != kind)
+            ItemOffer drop = state.Loot[slot];
+            if (drop == null)
             {
-                throw new InvalidOperationException($"Reward {optionIndex} is a {option.Kind}, not a {kind}.");
+                throw new InvalidOperationException($"The drop in slot {slot} was taken already.");
             }
 
-            return option;
+            return drop;
         }
 
         static ExpeditionMember RequireLivingMember(ExpeditionState state, int memberIndex)

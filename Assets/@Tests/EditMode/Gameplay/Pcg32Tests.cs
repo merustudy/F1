@@ -73,7 +73,7 @@ namespace F1.Tests
         [Test]
         public void NextInt_StaysInRangeAndCoversIt()
         {
-            var rng = new Pcg32(99UL, RngStream.Reward);
+            var rng = new Pcg32(99UL, RngStream.Loot);
             var seen = new HashSet<int>();
 
             for (int i = 0; i < 2000; i++)
@@ -117,7 +117,7 @@ namespace F1.Tests
 
             Assert.AreEqual(SeedDeriver.Derive(seed, "battle", 3), SeedDeriver.Derive(seed, "battle", 3));
             Assert.AreNotEqual(SeedDeriver.Derive(seed, "battle", 3), SeedDeriver.Derive(seed, "battle", 4));
-            Assert.AreNotEqual(SeedDeriver.Derive(seed, "battle", 3), SeedDeriver.Derive(seed, "reward", 3));
+            Assert.AreNotEqual(SeedDeriver.Derive(seed, "battle", 3), SeedDeriver.Derive(seed, "loot", 3));
             Assert.AreNotEqual(SeedDeriver.Derive(seed, "battle", 3), SeedDeriver.Derive(seed + 1, "battle", 3));
         }
 

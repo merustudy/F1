@@ -83,7 +83,8 @@ namespace F1.Data
             new KeySpec(nameof(RetreatCooldownMs), 0, Big),
             new KeySpec(nameof(PostBattleHealPercent), 0, 100),
             new KeySpec(nameof(MinCooldownMs), 50, Big),
-            new KeySpec(nameof(RewardChoices), 1, 5),
+            new KeySpec(nameof(DropCount), 1, MaxLootCards),
+            new KeySpec(nameof(EliteDropCount), 1, MaxLootCards),
             new KeySpec(nameof(InventoryCells), ItemData.MaxSize, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
@@ -102,6 +103,9 @@ namespace F1.Data
 
         /// <summary>The most things a shop can offer at once: what its window has room for (Docs/Architecture/12_UI.md "상점").</summary>
         public const int MaxShopSlots = 4;
+
+        /// <summary>The most drops a battle can leave: what the loot screen has room for (Docs/Architecture/12_UI.md "전리품 화면").</summary>
+        public const int MaxLootCards = 3;
 
         readonly Dictionary<string, int> _values = new Dictionary<string, int>(StringComparer.Ordinal);
 
@@ -219,7 +223,9 @@ namespace F1.Data
         public int RetreatCooldownMs => _values[nameof(RetreatCooldownMs)];
         public int PostBattleHealPercent => _values[nameof(PostBattleHealPercent)];
         public int MinCooldownMs => _values[nameof(MinCooldownMs)];
-        public int RewardChoices => _values[nameof(RewardChoices)];
+        /// <summary>How many of the items the enemies of a won battle carried drop as loot (Slice B stage 18); an elite group drops <see cref="EliteDropCount"/>.</summary>
+        public int DropCount => _values[nameof(DropCount)];
+        public int EliteDropCount => _values[nameof(EliteDropCount)];
         /// <summary>Cells of the expedition inventory. An item takes its size there as on a board, so it holds at least the biggest item.</summary>
         public int InventoryCells => _values[nameof(InventoryCells)];
         /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>

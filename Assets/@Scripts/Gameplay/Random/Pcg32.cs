@@ -87,14 +87,15 @@ namespace F1.Gameplay
     public static class RngStream
     {
         public const ulong Map = 1UL;
-        public const ulong Reward = 2UL;
+        /// <summary>Which of the items the beaten enemies carried drop (Slice B stage 18; the battle rewards before it).</summary>
+        public const ulong Loot = 2UL;
         /// <summary>Death rolls.</summary>
         public const ulong Battle = 3UL;
         /// <summary>Retreat rolls. Separate so that retreat attempts never change death rolls.</summary>
         public const ulong Input = 4UL;
         /// <summary>The breakdown at the fatigue threshold: virtue or affliction, and which one. Separate so that it never changes death rolls.</summary>
         public const ulong Fatigue = 5UL;
-        /// <summary>What a shop offers, and offers again on a refresh (Slice B stage 17). Separate from the rewards.</summary>
+        /// <summary>What a shop offers, and offers again on a refresh (Slice B stage 17). Separate from the loot.</summary>
         public const ulong Shop = 6UL;
     }
 

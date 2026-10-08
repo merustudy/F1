@@ -164,9 +164,9 @@ namespace F1.Tests
 
             MapNode chosen = first[0];
             Fight(data, state, chosen.Id);
-            if (state.Phase == ExpeditionPhase.ChoosingReward)
+            if (state.Phase == ExpeditionPhase.PickingLoot)
             {
-                ExpeditionRules.SkipReward(state);
+                ExpeditionRules.LeaveLoot(state);
             }
 
             CollectionAssert.AreEqual(chosen.NextNodeIds, ExpeditionRules.AvailableNodes(state).Select(n => n.Id));
@@ -228,7 +228,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void CompleteBattle_OnVictory_CarriesHpOver_HealsABit_AndOffersRewards()
+        public void CompleteBattle_OnVictory_CarriesHpOver_HealsABit_AndDropsLoot()
         {
             StaticData data = TestData.Data(("PostBattleHealPercent", 10));
             ExpeditionState state = Create(data);
@@ -237,12 +237,12 @@ namespace F1.Tests
 
             Assert.AreEqual(BattleResult.Victory, battle.Result);
             Assert.AreEqual(1, state.BattlesWon);
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase);
             BattleUnit tankUnit = battle.Party.Single(u => u.Setup.SourceId == "anna");
             Assert.Less(tankUnit.Hp, 100, "The tank was hit.");
             Assert.AreEqual(Math.Min(100, tankUnit.Hp + 10), state.Members[0].Hp, "HP carries over plus 10% of max HP.");
-            Assert.AreEqual(data.Balance.RewardChoices, state.PendingRewards.Count);
-            Assert.AreEqual(state.PendingRewards.Count, state.PendingRewards.Select(r => r.Id).Distinct().Count(), "No repeated reward.");
+            Assert.AreEqual(data.Balance.DropCount, state.Loot.Count, "Two grunts carried two claws: as many as drop.");
+            Assert.IsTrue(state.Loot.All(d => d != null && d.Kind == OfferKind.Item), "Every drop lies there, and only items drop.");
         }
 
         [Test]
@@ -314,9 +314,9 @@ namespace F1.Tests
 
             while (state.Phase != ExpeditionPhase.Finished)
             {
-                if (state.Phase == ExpeditionPhase.ChoosingReward)
+                if (state.Phase == ExpeditionPhase.PickingLoot)
                 {
-                    ExpeditionRules.SkipReward(state);
+                    ExpeditionRules.LeaveLoot(state);
                 }
                 else
                 {
@@ -326,46 +326,54 @@ namespace F1.Tests
 
             Assert.AreEqual(ExpeditionResult.Cleared, state.Result);
             Assert.AreEqual(3, state.BattlesWon, "Two battle floors and the boss.");
-            Assert.IsEmpty(state.PendingRewards);
+            Assert.IsEmpty(state.Loot);
         }
 
-        // ---- Rewards and the item board ------------------------------------------------------
+        // ---- The loot and the item board ---------------------------------------------------
 
-        ExpeditionState AtReward(StaticData data, ulong seed = 1)
+        /// <summary>Wins the first battle (two grunts, two claws) and stands at its loot: two drops lying there.</summary>
+        ExpeditionState AtLoot(StaticData data, ulong seed = 1)
         {
             ExpeditionState state = Create(data, seed);
             Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase);
             return state;
         }
 
         [Test]
-        public void Rewards_AreTheSameForTheSameSeed_AndItemGradeFollowsTheFloor()
+        public void Loot_IsWhatTheEnemiesCarried_AtTheFloorsGradeAndTier_AndTheSameForTheSameSeed()
         {
             StaticData data = TestData.Data();
 
-            ExpeditionState first = AtReward(data, 9);
-            ExpeditionState second = AtReward(data, 9);
+            ExpeditionState first = AtLoot(data, 9);
+            ExpeditionState second = AtLoot(data, 9);
 
-            CollectionAssert.AreEqual(first.PendingRewards.Select(r => (r.Kind, r.Id, r.Grade)), second.PendingRewards.Select(r => (r.Kind, r.Id, r.Grade)));
-            foreach (RewardOption option in first.PendingRewards.Where(r => r.Kind == RewardKind.Item))
-            {
-                Assert.AreEqual(8, option.Grade, "ItemGradeBase on floor 1.");
-                Assert.Greater(data.Items.Get(option.Id).RewardWeight, 0);
-            }
+            CollectionAssert.AreEqual(first.Loot.Select(d => (d.Id, d.Grade, d.Tier)), second.Loot.Select(d => (d.Id, d.Grade, d.Tier)));
+            Assert.IsTrue(first.Loot.All(d => d.Id == "claw"), "The grunts carry claws and nothing else.");
+            Assert.IsTrue(first.Loot.All(d => d.Grade == 8 && d.Tier == ItemTier.Common), "ItemGradeBase on floor 1, at Common: not the grade 5 the grunt carried it at.");
         }
 
         [Test]
-        public void Rewards_DoNotOfferPotions_WhenEveryPotionSlotIsFull()
+        public void Loot_IsAsManyAsTheDropCount_OrAllOfFewerItems()
         {
-            StaticData data = TestData.Data(("PotionSlots", 1), ("RewardChoices", 4));
+            ExpeditionState one = AtLoot(TestData.Data(("DropCount", 1)));
+            Assert.AreEqual(1, one.Loot.Count);
 
-            for (ulong seed = 1; seed <= 20; seed++)
-            {
-                ExpeditionState state = AtReward(data, seed);
-                Assert.IsTrue(state.PendingRewards.All(r => r.Kind == RewardKind.Item), "The only potion slot holds the starting potion.");
-                Assert.AreEqual(3, state.PendingRewards.Count, "Only three items can be offered.");
-            }
+            ExpeditionState three = AtLoot(TestData.Data(("DropCount", 3)));
+            Assert.AreEqual(2, three.Loot.Count, "Two grunts carried two claws: fewer than three.");
+        }
+
+        [Test]
+        public void DropLoot_AnEliteDropsMoreATierUp_TheBossAndACampNothing()
+        {
+            StaticData data = TestData.Data(("DropCount", 1), ("EliteDropCount", 2));
+            ExpeditionState state = Create(data);
+
+            List<ItemOffer> elite = ExpeditionRules.DropLoot(data, state, new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0]));
+            Assert.AreEqual(2, elite.Count);
+            Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Bronze && d.Grade == 10), "A tier up for an elite, at the second floor's grade (8 + 2).");
+            Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(98, 3, 0, MapNodeKind.Boss, "lair", new int[0])), "The boss ends the expedition.");
+            Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(97, 2, 0, MapNodeKind.Camp, null, new int[0])), "Nobody is fought at a camp.");
         }
 
         static string Board(ExpeditionMember member)
@@ -384,71 +392,76 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TakeItemReward_IntoAnEmptyCell_PutsTheItemAtTheEndOfTheBoard()
+        public void TakeLoot_IntoAnEmptyCell_PutsTheItemAtTheEndOfTheBoard_AndTheLastDropTakenEndsTheLoot()
         {
             StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
-            int optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            RewardOption option = state.PendingRewards[optionIndex];
-            Assert.IsTrue(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 0, 2), "The last of three cells is empty.");
+            ExpeditionState state = AtLoot(data);
+            ItemOffer drop = state.Loot[0];
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 2), "The last of three cells is empty.");
 
-            ExpeditionRules.TakeItemReward(data, state, optionIndex, 0, 2);
+            ExpeditionRules.TakeLoot(data, state, 0, 0, 2);
 
-            Assert.AreEqual("blade " + option.Id, Board(state.Members[0]), "Behind the weapon, whichever empty cell was chosen.");
-            Assert.AreEqual(option.Grade, state.Members[0].Items[1].Grade);
+            Assert.AreEqual("blade " + drop.Id, Board(state.Members[0]), "Behind the weapon, whichever empty cell was chosen.");
+            Assert.AreEqual(drop.Grade, state.Members[0].Items[1].Grade);
             Assert.IsEmpty(state.Inventory);
-            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
-            Assert.IsEmpty(state.PendingRewards);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "One drop still lies there.");
+            Assert.IsNull(state.Loot[0], "The slot of the taken drop is empty.");
+            Assert.IsNotNull(state.Loot[1]);
+
+            ExpeditionRules.TakeLoot(data, state, 1, 1, 2);
+
+            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase, "The last drop taken ends the loot.");
+            Assert.IsEmpty(state.Loot);
         }
 
         [Test]
-        public void TakeItemReward_OntoAnItem_SendsThatItemToTheInventory()
+        public void TakeLoot_OntoAnItem_SendsThatItemToTheInventory()
         {
             StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
-            int optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            RewardOption option = state.PendingRewards[optionIndex];
+            ExpeditionState state = AtLoot(data);
+            ItemOffer drop = state.Loot[0];
 
-            ExpeditionRules.TakeItemReward(data, state, optionIndex, 0, 0);
+            ExpeditionRules.TakeLoot(data, state, 0, 0, 0);
 
-            Assert.AreEqual(option.Id, Board(state.Members[0]), "The newcomer stands where the weapon was.");
+            Assert.AreEqual(drop.Id, Board(state.Members[0]), "The newcomer stands where the weapon was.");
             Assert.AreEqual("blade", Inventory(state), "The weapon is not lost.");
         }
 
         [Test]
-        public void TakeItemReward_WhereItDoesNotFit_IsRefused()
+        public void TakeLoot_WhereItDoesNotFit_IsRefused()
         {
             StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
-            int optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            ExpeditionState state = AtLoot(data);
             ExpeditionMember striker = state.Members[2];
             striker.Items.Add(Big(data, "knife"));
             Assert.AreEqual(0, ItemBoard.FreeCells(striker.Items, striker.ItemSlots), "Two cells, two items.");
 
-            Assert.IsTrue(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 2, 1), "A one-cell reward in place of the knife.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 2, 2), "Beyond the board.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 9, 0), "No such member.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state,2, 2, 1), "A two-cell item in place of the knife: 1 + 2 is more than 2.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state,3, 0, 1), "A three-cell item behind the tank's weapon: only 2 free.");
-            Assert.IsTrue(ExpeditionRules.CanPlaceItem(data, state,3, 0, 0), "A three-cell item in place of the tank's weapon.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeItemReward(data, state, optionIndex, 2, 2));
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase, "Nothing was taken.");
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 2, 1), "A one-cell drop in place of the knife.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 2, 2), "Beyond the board.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 9, 0), "No such member.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, 2, 2, 1), "A two-cell item in place of the knife: 1 + 2 is more than 2.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, 3, 0, 1), "A three-cell item behind the tank's weapon: only 2 free.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceItem(data, state, 3, 0, 0), "A three-cell item in place of the tank's weapon.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 2, 2));
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "Nothing was taken.");
+            Assert.IsNotNull(state.Loot[0]);
         }
 
         [Test]
-        public void TakeItemRewardToInventory_KeepsTheItemOffTheBoards()
+        public void TakeLootToInventory_KeepsTheItemOffTheBoards()
         {
             StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
-            int optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            RewardOption option = state.PendingRewards[optionIndex];
+            ExpeditionState state = AtLoot(data);
+            ItemOffer drop = state.Loot[1];
 
-            ExpeditionRules.TakeItemRewardToInventory(data, state, optionIndex);
+            ExpeditionRules.TakeLootToInventory(data, state, 1);
 
-            Assert.AreEqual(option.Id, Inventory(state));
-            Assert.AreEqual(option.Grade, state.Inventory[0].Grade);
+            Assert.AreEqual(drop.Id, Inventory(state));
+            Assert.AreEqual(drop.Grade, state.Inventory[0].Grade);
             Assert.IsTrue(state.Members.All(m => m.Items.Count == 1), "Every board still holds only its weapon.");
-            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "The other drop still lies there.");
+            Assert.IsNull(state.Loot[1]);
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, 1), "A taken slot cannot be taken again.");
         }
 
         [Test]
@@ -471,52 +484,41 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TakePotionReward_FillsTheFirstEmptySlot()
+        public void LeaveLoot_ReturnsToNodeChoice_AndWhatLayThereIsGone()
         {
-            StaticData data = TestData.Data(("RewardChoices", 4));
-            ExpeditionState state = null;
-            int optionIndex = -1;
-            for (ulong seed = 1; optionIndex < 0; seed++)
-            {
-                state = AtReward(data, seed);
-                optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Potion);
-            }
+            StaticData data = TestData.Data();
+            ExpeditionState state = AtLoot(data);
+            ExpeditionRules.TakeLootToInventory(data, state, 0);
 
-            ExpeditionRules.TakePotionReward(state, optionIndex);
+            ExpeditionRules.LeaveLoot(state);
 
-            CollectionAssert.AreEqual(new[] { "tonic", "tonic", null }, state.Potions);
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
+            Assert.IsEmpty(state.Loot);
+            Assert.AreEqual(1, state.Inventory.Count, "Only what was taken is kept.");
         }
 
         [Test]
-        public void SkipReward_ReturnsToNodeChoice()
+        public void LootCommands_RejectTakenSlotsWrongPhaseAndBadIndexes()
         {
             StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
+            ExpeditionState state = AtLoot(data);
 
-            ExpeditionRules.SkipReward(state);
+            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 99, 0, 0));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 0, 9), "No such cell.");
+            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 0, 9, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLootToInventory(data, state, 99));
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 99, 0, 0));
+            Assert.IsNull(ExpeditionRules.DropAt(state, 99));
 
-            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
-            Assert.IsEmpty(state.PendingRewards);
-        }
+            ExpeditionRules.TakeLootToInventory(data, state, 0);
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, 0), "The drop in slot 0 was taken already.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 1));
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0));
 
-        [Test]
-        public void RewardCommands_RejectWrongKindWrongPhaseAndBadIndexes()
-        {
-            StaticData data = TestData.Data();
-            ExpeditionState state = AtReward(data);
-            int itemIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakePotionReward(state, itemIndex), "An item is not a potion.");
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeItemReward(data, state, 99, 0, 0));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeItemReward(data, state, itemIndex, 0, 9), "No such cell.");
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeItemReward(data, state, itemIndex, 9, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeItemRewardToInventory(data, state, 99));
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, 99, 0, 0));
-
-            ExpeditionRules.SkipReward(state);
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.SkipReward(state), "No reward is pending any more.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, 0, 0, 0), "No reward is pending any more.");
+            ExpeditionRules.LeaveLoot(state);
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.LeaveLoot(state), "No loot lies there any more.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, 1), "No loot lies there any more.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 1, 0, 1), "No loot lies there any more.");
         }
 
         [Test]
@@ -643,17 +645,17 @@ namespace F1.Tests
         public void OntoAnItem_OnlyWhileWhatItDisplacesFitsTheInventory()
         {
             StaticData data = TestData.Data(("InventoryCells", 3));
-            ExpeditionState state = AtReward(data);
-            int optionIndex = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            ExpeditionState state = AtLoot(data);
+            int optionIndex = 0;
             state.Inventory.Add(Big(data, "ballista"));
             Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, state));
 
-            Assert.IsTrue(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 0, 1), "An empty cell displaces nothing.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 0, 0), "The weapon there would have nowhere to go.");
-            Assert.IsFalse(ExpeditionRules.CanTakeRewardToInventory(data, state, optionIndex));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeItemReward(data, state, optionIndex, 0, 0));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeItemRewardToInventory(data, state, optionIndex));
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase, "Nothing was taken.");
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 1), "An empty cell displaces nothing.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 0), "The weapon there would have nowhere to go.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, optionIndex));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, optionIndex, 0, 0));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, optionIndex));
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "Nothing was taken.");
 
             // The cells an inventory item leaves are free for whatever it displaces.
             Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, 0), "The ballista in place of the weapon: the weapon takes one of the three cells it leaves.");
@@ -661,10 +663,10 @@ namespace F1.Tests
             Assert.AreEqual("ballista", Board(state.Members[0]));
             Assert.AreEqual("blade", Inventory(state));
             Assert.AreEqual(2, ExpeditionRules.FreeInventoryCells(data, state));
-            Assert.IsFalse(ExpeditionRules.CanPlaceReward(data, state, optionIndex, 0, 0), "The ballista would need three free cells; two are free.");
-            Assert.IsTrue(ExpeditionRules.CanTakeRewardToInventory(data, state, optionIndex), "A one-cell reward fits.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 0), "The ballista would need three free cells; two are free.");
+            Assert.IsTrue(ExpeditionRules.CanTakeLootToInventory(data, state, optionIndex), "A one-cell drop fits.");
 
-            ExpeditionRules.TakeItemRewardToInventory(data, state, optionIndex);
+            ExpeditionRules.TakeLootToInventory(data, state, optionIndex);
 
             Assert.AreEqual(1, ExpeditionRules.FreeInventoryCells(data, state));
         }
@@ -780,9 +782,9 @@ namespace F1.Tests
             Assert.AreEqual(2, ExpeditionRules.LivingCount(state));
             Assert.IsNull(Formation.Problem(ExpeditionRules.LivingRows(state, out _)));
 
-            if (state.Phase == ExpeditionPhase.ChoosingReward)
+            if (state.Phase == ExpeditionPhase.PickingLoot)
             {
-                ExpeditionRules.SkipReward(state);
+                ExpeditionRules.LeaveLoot(state);
             }
 
             BattleSetup next = ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
@@ -801,10 +803,10 @@ namespace F1.Tests
                 var trace = new List<string>();
                 while (state.Phase != ExpeditionPhase.Finished)
                 {
-                    if (state.Phase == ExpeditionPhase.ChoosingReward)
+                    if (state.Phase == ExpeditionPhase.PickingLoot)
                     {
-                        trace.Add(string.Join(",", state.PendingRewards.Select(r => r.Id)));
-                        ExpeditionRules.SkipReward(state);
+                        trace.Add(string.Join(",", state.Loot.Select(r => r.Id)));
+                        ExpeditionRules.LeaveLoot(state);
                         continue;
                     }
 

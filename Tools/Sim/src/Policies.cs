@@ -283,10 +283,10 @@ namespace F1.Sim
                 }
             }
 
-            IReadOnlyList<RewardOption> stock = state.Shop.Stock;
+            IReadOnlyList<ItemOffer> stock = state.Shop.Stock;
             for (int slot = 0; slot < stock.Count; slot++)
             {
-                if (stock[slot] != null && stock[slot].Kind == RewardKind.Potion && potionsHeld < 2 && ExpeditionRules.CanBuyPotion(data, state, slot))
+                if (stock[slot] != null && stock[slot].Kind == OfferKind.Potion && potionsHeld < 2 && ExpeditionRules.CanBuyPotion(data, state, slot))
                 {
                     ExpeditionRules.BuyPotion(data, state, slot);
                     return true;
@@ -295,8 +295,8 @@ namespace F1.Sim
 
             for (int slot = 0; slot < stock.Count; slot++)
             {
-                RewardOption offer = stock[slot];
-                if (offer == null || offer.Kind != RewardKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
+                ItemOffer offer = stock[slot];
+                if (offer == null || offer.Kind != OfferKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
                 {
                     continue;
                 }
@@ -311,8 +311,8 @@ namespace F1.Sim
 
             for (int slot = 0; slot < stock.Count; slot++)
             {
-                RewardOption offer = stock[slot];
-                if (offer == null || offer.Kind != RewardKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
+                ItemOffer offer = stock[slot];
+                if (offer == null || offer.Kind != OfferKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
                 {
                     continue;
                 }
@@ -333,7 +333,7 @@ namespace F1.Sim
         static int CheapestOffer(StaticData data, ExpeditionState state)
         {
             int cheapest = int.MaxValue;
-            foreach (RewardOption offer in state.Shop.Stock)
+            foreach (ItemOffer offer in state.Shop.Stock)
             {
                 if (offer != null)
                 {
@@ -351,76 +351,55 @@ namespace F1.Sim
         }
 
         /// <summary>
-        /// Takes a potion while a slot is free and fewer than two are held, otherwise an item that merges into one on a board
-        /// (a tier up), otherwise the first item that fits the free cells of a mercenary standing where the item works,
-        /// otherwise the first item that fits the inventory, otherwise skips. Then merges what can merge and equips from the
-        /// inventory whatever fits someone. Returns how many merges it made.
+        /// Picks up the loot a won battle dropped (Slice B stage 18), a drop at a time: one that merges into an item on a board (a tier
+        /// up), else one that fits the free cells of a mercenary standing where it works, else one that fits the inventory; the rest is
+        /// left. Without player input there is no merging, only what fits a board or the inventory. Then merges what can merge and equips
+        /// from the inventory whatever fits someone. Returns how many merges it made; <paramref name="taken"/> is how many drops it took.
         /// </summary>
-        public int ChooseReward(StaticData data, ExpeditionState state)
+        public int PickLoot(StaticData data, ExpeditionState state, out int taken)
         {
-            int potionsHeld = 0;
-            foreach (string potion in state.Potions)
+            taken = 0;
+            for (int slot = 0; slot < state.Loot.Count && state.Phase == ExpeditionPhase.PickingLoot; slot++)
             {
-                if (potion != null)
-                {
-                    potionsHeld++;
-                }
-            }
-
-            for (int i = 0; i < state.PendingRewards.Count; i++)
-            {
-                if (state.PendingRewards[i].Kind == RewardKind.Potion && Active && potionsHeld < 2 && ExpeditionRules.FreePotionSlot(state) >= 0)
-                {
-                    ExpeditionRules.TakePotionReward(state, i);
-                    return 0;
-                }
-            }
-
-            for (int i = 0; i < state.PendingRewards.Count; i++)
-            {
-                RewardOption option = state.PendingRewards[i];
-                if (option.Kind == RewardKind.Item && Active)
-                {
-                    var offered = new EquippedItem(data.Items.Get(option.Id), option.Grade, tier: option.Tier);
-                    if (FindMergeTarget(state, offered, out int targetMember, out int targetCell))
-                    {
-                        ExpeditionRules.TakeItemReward(data, state, i, targetMember, targetCell);
-                        return 1 + Tidy(data, state);
-                    }
-                }
-            }
-
-            for (int i = 0; i < state.PendingRewards.Count; i++)
-            {
-                RewardOption option = state.PendingRewards[i];
-                if (option.Kind != RewardKind.Item)
+                ItemOffer drop = state.Loot[slot];
+                if (drop == null)
                 {
                     continue;
                 }
 
-                int member = MemberWithRoomFor(state, data.Items.Get(option.Id));
-                if (member >= 0)
+                var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+                if (Active && FindMergeTarget(state, item, out int member, out int cell) && ExpeditionRules.CanTakeLoot(data, state, slot, member, cell))
                 {
-                    ExpeditionRules.TakeItemReward(data, state, i, member, ItemBoard.UsedCells(state.Members[member].Items));
-                    return Tidy(data, state);
+                    ExpeditionRules.TakeLoot(data, state, slot, member, cell);
+                    taken++;
+                    continue;
+                }
+
+                int room = MemberWithRoomFor(state, item.Item);
+                if (room >= 0)
+                {
+                    ExpeditionRules.TakeLoot(data, state, slot, room, ItemBoard.UsedCells(state.Members[room].Items));
+                    taken++;
+                    continue;
+                }
+
+                if (ExpeditionRules.CanTakeLootToInventory(data, state, slot))
+                {
+                    ExpeditionRules.TakeLootToInventory(data, state, slot);
+                    taken++;
                 }
             }
 
-            for (int i = 0; i < state.PendingRewards.Count; i++)
+            if (state.Phase == ExpeditionPhase.PickingLoot)
             {
-                if (ExpeditionRules.CanTakeRewardToInventory(data, state, i))
-                {
-                    ExpeditionRules.TakeItemRewardToInventory(data, state, i);
-                    return Tidy(data, state);
-                }
+                ExpeditionRules.LeaveLoot(state);
             }
 
-            ExpeditionRules.SkipReward(state);
-            return 0;
+            return taken > 0 ? Tidy(data, state) : 0;
         }
 
         /// <summary>
-        /// After a reward: merges what can merge (an inventory item into the same one on a board, then an item on a board into
+        /// After the loot: merges what can merge (an inventory item into the same one on a board, then an item on a board into
         /// the next same one found on the boards), then equips from the inventory. Without player input only the equipping.
         /// Returns how many merges it made.
         /// </summary>

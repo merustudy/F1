@@ -80,7 +80,7 @@ namespace F1.Tests
             Assert.AreEqual(40, mace.Effects[1].PowerPercent);
             Assert.AreEqual(TargetMode.EnemyBack, data.Items.Get("claw").Effects[0].Target);
             Assert.AreEqual(1, data.Items.Get("claw").Effects[0].Reach);
-            Assert.AreEqual(10, mace.RewardWeight);
+            Assert.AreEqual(10, mace.ShopWeight);
             Assert.AreEqual(1, data.Items.Get("sword").Effects.Count);
 
             PotionData tonic = data.Potions.Get("tonic");
@@ -109,7 +109,7 @@ namespace F1.Tests
             Assert.AreEqual("swift", mine.AffinityId);
             Assert.AreEqual(2, mine.Floors);
             Assert.AreEqual(2, mine.DurationDays);
-            Assert.AreEqual(10, mine.RewardGradeAt(2));
+            Assert.AreEqual(10, mine.ItemGradeAt(2));
             CollectionAssert.AreEqual(new[] { "tonic" }, mine.StartingPotions);
             Assert.AreEqual("background/dungeon/mine", mine.Background);
             Assert.AreEqual(2, mine.EliteMinFloor);
@@ -122,9 +122,9 @@ namespace F1.Tests
             Assert.AreEqual(2, mine.BronzeFloor);
             Assert.AreEqual(0, mine.SilverFloor);
             Assert.AreEqual(0, mine.GoldFloor);
-            Assert.AreEqual(ItemTier.Common, mine.RewardTierAt(1, elite: false));
-            Assert.AreEqual(ItemTier.Bronze, mine.RewardTierAt(2, elite: false));
-            Assert.AreEqual(ItemTier.Silver, mine.RewardTierAt(2, elite: true), "An elite rewards a tier up.");
+            Assert.AreEqual(ItemTier.Common, mine.ItemTierAt(1, elite: false));
+            Assert.AreEqual(ItemTier.Bronze, mine.ItemTierAt(2, elite: false));
+            Assert.AreEqual(ItemTier.Silver, mine.ItemTierAt(2, elite: true), "An elite's loot is a tier up.");
             Assert.AreEqual(300, data.Balance.TierPercent(ItemTier.Silver));
 
             Assert.AreEqual("knight", data.Mercenaries.Get("rowan").JobId);
@@ -218,7 +218,7 @@ namespace F1.Tests
         {
             DataTransformException exception = TransformFails(
                 StaticDataFiles.Potion,
-                "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price\n" +
+                "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price\n" +
                 "Tonic,강장제,Tonic,Heal,50,5,,8\n" +
                 "salve,,Salve,Heal,50,5,,8\n" +
                 "brew,양조주,TODO,Heal,50,5,,8\n" +
@@ -246,7 +246,7 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenCsvMalformed_ReportsLine()
         {
-            DataTransformException exception = TransformFails(StaticDataFiles.Potion, "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price\ntonic,강장제\n");
+            DataTransformException exception = TransformFails(StaticDataFiles.Potion, "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price\ntonic,강장제\n");
 
             StringAssert.Contains("PotionData.csv(2)", exception.Errors[0]);
         }

@@ -56,7 +56,8 @@ namespace F1.Tests
                 { "RetreatCooldownMs", 5000 },
                 { "PostBattleHealPercent", 10 },
                 { "MinCooldownMs", 200 },
-                { "RewardChoices", 3 },
+                { "DropCount", 2 },
+                { "EliteDropCount", 3 },
                 { "InventoryCells", 10 },
                 { "CampHealPercent", 30 },
                 { "CampFatigueRelief", 20 },
@@ -91,7 +92,7 @@ namespace F1.Tests
             int powerPercent = 100,
             ItemCategory category = ItemCategory.Weapon,
             RowSpan rows = null,
-            int rewardWeight = 0,
+            int shopWeight = 0,
             ItemEffect second = null,
             int reach = DefaultReach,
             int size = 1,
@@ -103,7 +104,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, rewardWeight, null, price);
+            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -239,8 +240,8 @@ namespace F1.Tests
 
         /// <summary>
         /// A complete, valid data set: one dungeon of two battle floors and a boss, three jobs,
-        /// four mercenaries and a few reward items (each priced, so a shop can stock it; the tonic too). The big items ("pike", "ballista") are never
-        /// offered as rewards; board tests put them on boards directly.
+        /// four mercenaries and a few shop items (each priced and weighted; the tonic too). The grunts carry claws, which is what drops. The big items ("pike",
+        /// "ballista") are never dropped or stocked; board tests put them on boards directly.
         /// </summary>
         public static StaticDataParts Parts(params (string Key, int Value)[] balanceOverrides)
         {
@@ -258,9 +259,9 @@ namespace F1.Tests
                     Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, category: ItemCategory.Support),
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
-                    Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, rewardWeight: 5, price: 10),
-                    Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, rewardWeight: 5, price: 10),
-                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), rewardWeight: 5, price: 10),
+                    Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, shopWeight: 5, price: 10),
+                    Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, shopWeight: 5, price: 10),
+                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), shopWeight: 5, price: 10),
                     Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, size: 2),
                     Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, size: 3),
                 },

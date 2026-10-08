@@ -8,7 +8,7 @@ namespace F1.Data
         public const string DefinitionName = "Potion";
 
         [JsonConstructor]
-        public PotionData(string id, LocalizedText name, PotionEffect effect, int magnitude, int rewardWeight, string icon = null, int price = 0)
+        public PotionData(string id, LocalizedText name, PotionEffect effect, int magnitude, int shopWeight, string icon = null, int price = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -17,9 +17,9 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': Magnitude must be at least 1.");
             }
 
-            if (rewardWeight < 0)
+            if (shopWeight < 0)
             {
-                throw new DataException($"{DefinitionName} '{id}': RewardWeight cannot be negative.");
+                throw new DataException($"{DefinitionName} '{id}': ShopWeight cannot be negative.");
             }
 
             if (price < 0)
@@ -29,7 +29,7 @@ namespace F1.Data
 
             Effect = effect;
             Magnitude = magnitude;
-            RewardWeight = rewardWeight;
+            ShopWeight = shopWeight;
             Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
             Price = price;
         }
@@ -47,7 +47,7 @@ namespace F1.Data
         public int Magnitude { get; }
 
         [JsonProperty(Order = 5, Required = Required.Always)]
-        public int RewardWeight { get; }
+        public int ShopWeight { get; }
 
         /// <summary>The logical address of the potion's bottle icon. Null when it has no art yet.</summary>
         [JsonProperty(Order = 6, Required = Required.AllowNull)]

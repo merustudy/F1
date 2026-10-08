@@ -127,7 +127,7 @@ namespace F1.Data
 
                 if (tierFloor < 1 || tierFloor > floors || tierFloor <= lastTierFloor)
                 {
-                    throw new DataException($"{DefinitionName} '{id}': the floors where Bronze, Silver and Gold rewards start are 0 (never) or map floors, each deeper than the one before.");
+                    throw new DataException($"{DefinitionName} '{id}': the floors where Bronze, Silver and Gold items start are 0 (never) or map floors, each deeper than the one before.");
                 }
 
                 lastTierFloor = tierFloor;
@@ -135,7 +135,7 @@ namespace F1.Data
 
             if ((silverFloor != 0 && bronzeFloor == 0) || (goldFloor != 0 && silverFloor == 0))
             {
-                throw new DataException($"{DefinitionName} '{id}': a tier's rewards cannot start where the tier under it never does.");
+                throw new DataException($"{DefinitionName} '{id}': a tier cannot start where the tier under it never does.");
             }
 
             Floors = floors;
@@ -221,7 +221,7 @@ namespace F1.Data
         [JsonProperty(Order = 18, Required = Required.Always)]
         public int EnemyGradePerFloor { get; }
 
-        /// <summary>The first floor whose battles reward Bronze, Silver and Gold items; 0 for never. An elite rewards one tier up.</summary>
+        /// <summary>The first floor from which the loot of battles and the stock of shops are Bronze, Silver and Gold items; 0 for never. An elite's loot is a tier up.</summary>
         [JsonProperty(Order = 19, Required = Required.Always)]
         public int BronzeFloor { get; }
 
@@ -259,14 +259,14 @@ namespace F1.Data
             return ShopChancePercent > 0 && floor >= ShopMinFloor && floor > 1 && floor <= Floors && floor != CampFloor;
         }
 
-        /// <summary>Grade of reward items offered after winning on a battle floor (1-based).</summary>
-        public int RewardGradeAt(int floor)
+        /// <summary>Grade of the items found on a floor (1-based): a battle's loot and a shop's stock.</summary>
+        public int ItemGradeAt(int floor)
         {
             return ItemGradeBase + (floor - 1) * ItemGradePerFloor;
         }
 
-        /// <summary>Tier of reward items offered after winning on a floor: the deepest tier started by then, one more for an elite (Gold at most).</summary>
-        public ItemTier RewardTierAt(int floor, bool elite)
+        /// <summary>Tier of the items found on a floor: the deepest tier started by then, one more for an elite's loot (Gold at most).</summary>
+        public ItemTier ItemTierAt(int floor, bool elite)
         {
             ItemTier tier = ItemTier.Common;
             if (BronzeFloor != 0 && floor >= BronzeFloor)

@@ -115,17 +115,17 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AReward_IsNeverABaseWeapon()
+        public void ADrop_IsNeverABaseWeapon()
         {
             StaticData data = FlowTestKit.StrongParty();
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
             var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id));
             battle.RunToEnd();
             ExpeditionRules.CompleteBattle(data, state, battle);
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase, "The strong party wins.");
-            int option = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "The strong party wins.");
+            int option = 0;
 
-            ExpeditionRules.TakeItemRewardToInventory(data, state, option);
+            ExpeditionRules.TakeLootToInventory(data, state, option);
 
             Assert.IsFalse(state.Inventory.Single().IsBase);
         }

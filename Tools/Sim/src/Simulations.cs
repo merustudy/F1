@@ -300,6 +300,10 @@ namespace F1.Sim
             public long CoinsSpent;
             public long CoinsLeft;
 
+            /// <summary>The loot (Slice B stage 18): drops the won battles left, and how many of them were picked up.</summary>
+            public int Drops;
+            public int DropsTaken;
+
             /// <summary>Items merged a tier up, items mended at camps, and the items on the boards at the end by tier.</summary>
             public int Merges;
             public int Mends;
@@ -308,7 +312,7 @@ namespace F1.Sim
             public readonly SortedDictionary<int, BattleStats> ByFloor = new SortedDictionary<int, BattleStats>();
         }
 
-        /// <summary>Whole expeditions: node choices, battles, rewards, until cleared, wiped or retreated.</summary>
+        /// <summary>Whole expeditions: node choices, battles, loot, camps and shops, until cleared, wiped or retreated.</summary>
         public static void Expedition(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
         {
             ExpeditionStats stats = RunExpeditions(data, dungeonId, party, policy, runs, baseSeed);
@@ -321,6 +325,7 @@ namespace F1.Sim
             Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
+            Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
                 + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, bronze {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             Console.WriteLine($"  per expedition: shops {BattleStats.Ratio(stats.Shops, runs)}, bought {BattleStats.Ratio(stats.Bought, runs)}, refreshes {BattleStats.Ratio(stats.Refreshes, runs)}; "
@@ -392,9 +397,11 @@ namespace F1.Sim
                 bool brokeDown = false;
                 while (state.Phase != ExpeditionPhase.Finished)
                 {
-                    if (state.Phase == ExpeditionPhase.ChoosingReward)
+                    if (state.Phase == ExpeditionPhase.PickingLoot)
                     {
-                        stats.Merges += policy.ChooseReward(data, state);
+                        stats.Drops += state.Loot.Count;
+                        stats.Merges += policy.PickLoot(data, state, out int taken);
+                        stats.DropsTaken += taken;
                         continue;
                     }
 

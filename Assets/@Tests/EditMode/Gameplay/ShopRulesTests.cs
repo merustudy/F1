@@ -29,7 +29,7 @@ namespace F1.Tests
         static StaticData ShopCave(int shopPercent = 40, params (string Key, int Value)[] balance)
         {
             StaticDataParts parts = TestData.Parts(balance);
-            parts.Items = parts.Items.Concat(new[] { TestData.Item("trinket", 3000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Other, rewardWeight: 5) }).ToList();
+            parts.Items = parts.Items.Concat(new[] { TestData.Item("trinket", 3000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Other, shopWeight: 5) }).ToList();
             parts.Dungeons = new List<DungeonData>
             {
                 new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, 8, 1, new List<string> { "tonic" }, null,
@@ -80,7 +80,7 @@ namespace F1.Tests
             return state;
         }
 
-        static int SlotOf(ExpeditionState state, RewardKind kind, string id = null)
+        static int SlotOf(ExpeditionState state, OfferKind kind, string id = null)
         {
             return state.Shop.Stock.FindIndex(o => o != null && o.Kind == kind && (id == null || o.Id == id));
         }
@@ -144,11 +144,11 @@ namespace F1.Tests
             Assert.AreEqual(shop.Id, state.CurrentNodeId);
             Assert.IsEmpty(ExpeditionRules.AvailableNodes(state), "The party stays until it leaves.");
             Assert.AreEqual(0, state.Shop.Refreshes);
-            List<RewardOption> stock = state.Shop.Stock;
+            List<ItemOffer> stock = state.Shop.Stock;
             Assert.AreEqual(data.Balance.ShopSlots, stock.Count, "Three priced items and the tonic fill the four slots.");
             CollectionAssert.AreEquivalent(new[] { "charm", "knife", "bow", "tonic" }, stock.Select(o => o.Id), "Every priced item and the potion, once each; never the unpriced trinket.");
-            ItemTier tier = data.Dungeons.Get("cave").RewardTierAt(shop.Floor, false);
-            Assert.IsTrue(stock.Where(o => o.Kind == RewardKind.Item).All(o => o.Tier == tier && o.Grade == data.Dungeons.Get("cave").RewardGradeAt(shop.Floor)), "The floor's tier and grade, as a reward's.");
+            ItemTier tier = data.Dungeons.Get("cave").ItemTierAt(shop.Floor, false);
+            Assert.IsTrue(stock.Where(o => o.Kind == OfferKind.Item).All(o => o.Tier == tier && o.Grade == data.Dungeons.Get("cave").ItemGradeAt(shop.Floor)), "The floor's tier and grade, as a reward's.");
 
             // The same seed draws the same stock in the same order.
             ExpeditionState again = InAShop(data, out MapNode _);
@@ -162,7 +162,7 @@ namespace F1.Tests
             }
 
             ExpeditionRules.EnterShop(data, full, shopNode.Id);
-            Assert.IsTrue(full.Shop.Stock.All(o => o.Kind == RewardKind.Item));
+            Assert.IsTrue(full.Shop.Stock.All(o => o.Kind == OfferKind.Item));
             Assert.AreEqual(3, full.Shop.Stock.Count);
         }
 
@@ -170,10 +170,10 @@ namespace F1.Tests
         public void Prices_FollowTheTier_AndAPotionsIsItsOwn()
         {
             StaticData data = ShopCave();
-            Assert.AreEqual(10, ExpeditionRules.PriceOf(data, new RewardOption(RewardKind.Item, "knife", 8)));
-            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Bronze)), "Bronze: twice, as its effects.");
-            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Gold)));
-            Assert.AreEqual(5, ExpeditionRules.PriceOf(data, new RewardOption(RewardKind.Potion, "tonic", 0)));
+            Assert.AreEqual(10, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8)));
+            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Bronze)), "Bronze: twice, as its effects.");
+            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Gold)));
+            Assert.AreEqual(5, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Potion, "tonic", 0)));
         }
 
         // ---- Buying --------------------------------------------------------------------------
@@ -183,8 +183,8 @@ namespace F1.Tests
         {
             StaticData data = ShopCave();
             ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
-            int slot = SlotOf(state, RewardKind.Item, "knife");
-            RewardOption knife = state.Shop.Stock[slot];
+            int slot = SlotOf(state, OfferKind.Item, "knife");
+            ItemOffer knife = state.Shop.Stock[slot];
             int price = ExpeditionRules.PriceOf(data, knife);
             ExpeditionMember anna = state.Members[0];
 
@@ -203,7 +203,7 @@ namespace F1.Tests
 
             // The same knife on offer again (a refresh draws it anew) merges into the one on the board, a tier up, when bought onto it.
             ExpeditionRules.RefreshShop(data, state);
-            int again = SlotOf(state, RewardKind.Item, "knife");
+            int again = SlotOf(state, OfferKind.Item, "knife");
             Assume.That(again, Is.GreaterThanOrEqualTo(0), "The knife is on offer again.");
             Assert.IsTrue(ExpeditionRules.ShopMergesAt(state, again, 0, 1));
             Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, again, 0, 1));
@@ -219,14 +219,14 @@ namespace F1.Tests
         {
             StaticData data = ShopCave();
             ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
-            int bow = SlotOf(state, RewardKind.Item, "bow");
-            int tonic = SlotOf(state, RewardKind.Potion);
+            int bow = SlotOf(state, OfferKind.Item, "bow");
+            int tonic = SlotOf(state, OfferKind.Potion);
             int coins = state.Coins;
 
             Assert.IsTrue(ExpeditionRules.CanBuyToInventory(data, state, bow));
             ExpeditionRules.BuyToInventory(data, state, bow);
             Assert.AreEqual("bow", state.Inventory.Single().Item.Id);
-            Assert.AreEqual(coins - ExpeditionRules.PriceOf(data, new RewardOption(RewardKind.Item, "bow", 8, state.Inventory[0].Tier)), state.Coins);
+            Assert.AreEqual(coins - ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "bow", 8, state.Inventory[0].Tier)), state.Coins);
             Assert.IsNull(state.Shop.Stock[bow]);
 
             coins = state.Coins;
@@ -249,7 +249,7 @@ namespace F1.Tests
             }
 
             ExpeditionRules.EnterShop(data, cramped, crampedShop.Id);
-            Assert.IsTrue(cramped.Shop.Stock.All(o => o.Kind == RewardKind.Item), "Drawn with the potion slots full.");
+            Assert.IsTrue(cramped.Shop.Stock.All(o => o.Kind == OfferKind.Item), "Drawn with the potion slots full.");
             Assert.IsFalse(ExpeditionRules.CanBuyToInventory(data, cramped, 0));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyToInventory(data, cramped, 0));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyPotion(data, cramped, 0), "Not a potion.");
@@ -260,12 +260,12 @@ namespace F1.Tests
         {
             StaticData data = ShopCave();
             ExpeditionState poor = InAShop(data, out MapNode _, coins: 4);
-            int slot = SlotOf(poor, RewardKind.Item);
+            int slot = SlotOf(poor, OfferKind.Item);
             Assert.IsFalse(ExpeditionRules.CanAfford(data, poor, slot));
             Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, poor, slot, 0, 1));
             Assert.IsFalse(ExpeditionRules.CanBuyToInventory(data, poor, slot));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyToBoard(data, poor, slot, 0, 1));
-            Assert.IsFalse(ExpeditionRules.CanBuyPotion(data, poor, SlotOf(poor, RewardKind.Potion)), "A coin short of a tonic.");
+            Assert.IsFalse(ExpeditionRules.CanBuyPotion(data, poor, SlotOf(poor, OfferKind.Potion)), "A coin short of a tonic.");
             Assert.IsTrue(ExpeditionRules.CanRefreshShop(data, poor), "Four coins cover a first refresh of three.");
             ExpeditionRules.RefreshShop(data, poor);
             Assert.AreEqual(1, poor.Coins);
@@ -289,7 +289,7 @@ namespace F1.Tests
             StaticData data = ShopCave();
             ExpeditionState state = InAShop(data, out MapNode _, coins: 18);
             BalanceData balance = data.Balance;
-            ExpeditionRules.BuyPotion(data, state, SlotOf(state, RewardKind.Potion));
+            ExpeditionRules.BuyPotion(data, state, SlotOf(state, OfferKind.Potion));
             Assert.AreEqual(13, state.Coins);
             Assert.AreEqual(balance.ShopRefreshBase, ExpeditionRules.RefreshCost(data, state));
 
@@ -309,7 +309,7 @@ namespace F1.Tests
 
             // The same shop refreshed the same number of times from the same seed shows the same stock.
             ExpeditionState twin = InAShop(data, out MapNode _, coins: 18);
-            ExpeditionRules.BuyPotion(data, twin, SlotOf(twin, RewardKind.Potion));
+            ExpeditionRules.BuyPotion(data, twin, SlotOf(twin, OfferKind.Potion));
             ExpeditionRules.RefreshShop(data, twin);
             ExpeditionRules.RefreshShop(data, twin);
             CollectionAssert.AreEqual(state.Shop.Stock.Select(o => o.Id), twin.Shop.Stock.Select(o => o.Id));

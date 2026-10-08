@@ -79,7 +79,7 @@ namespace F1.Flow
                 Phase = expedition.Phase.ToString(),
                 CurrentNodeId = expedition.CurrentNodeId,
                 BattlesWon = expedition.BattlesWon,
-                PendingRewards = new List<RewardRecord>(),
+                Loot = new List<OfferRecord>(),
                 Coins = expedition.Coins,
                 Shop = ToRecord(expedition.Shop),
             };
@@ -100,9 +100,9 @@ namespace F1.Flow
                 });
             }
 
-            foreach (RewardOption reward in expedition.PendingRewards)
+            foreach (ItemOffer drop in expedition.Loot)
             {
-                record.PendingRewards.Add(new RewardRecord { Kind = reward.Kind.ToString(), Id = reward.Id, Grade = reward.Grade, Tier = reward.Tier.ToString() });
+                record.Loot.Add(drop == null ? null : new OfferRecord { Kind = drop.Kind.ToString(), Id = drop.Id, Grade = drop.Grade, Tier = drop.Tier.ToString() });
             }
 
             if (battle != null)
@@ -138,10 +138,10 @@ namespace F1.Flow
                 return null;
             }
 
-            var record = new ShopRecord { Stock = new List<RewardRecord>(), Refreshes = shop.Refreshes };
-            foreach (RewardOption offer in shop.Stock)
+            var record = new ShopRecord { Stock = new List<OfferRecord>(), Refreshes = shop.Refreshes };
+            foreach (ItemOffer offer in shop.Stock)
             {
-                record.Stock.Add(offer == null ? null : new RewardRecord { Kind = offer.Kind.ToString(), Id = offer.Id, Grade = offer.Grade, Tier = offer.Tier.ToString() });
+                record.Stock.Add(offer == null ? null : new OfferRecord { Kind = offer.Kind.ToString(), Id = offer.Id, Grade = offer.Grade, Tier = offer.Tier.ToString() });
             }
 
             return record;
@@ -231,7 +231,7 @@ namespace F1.Flow
         {
             Require(record != null, "Expedition is missing.");
             Require(data.Dungeons.Contains(record.DungeonId), $"Unknown dungeon '{record.DungeonId}'.");
-            Require(record.Members != null && record.Inventory != null && record.Potions != null && record.PendingRewards != null, "A list of the expedition is missing.");
+            Require(record.Members != null && record.Inventory != null && record.Potions != null && record.Loot != null, "A list of the expedition is missing.");
             Require(record.BattlesWon >= 0, "BattlesWon is negative.");
             Require(record.Coins >= 0, "Coins are negative.");
 
@@ -314,7 +314,7 @@ namespace F1.Flow
             }
 
             ReadPosition(record, state);
-            ReadRewards(record, data, state);
+            ReadLoot(record, data, state);
             ReadShop(record, data, state);
             ValidateBattle(record, phase);
             return state;
@@ -390,14 +390,24 @@ namespace F1.Flow
                 "Only a shop node is shopped at, and a shop node is either shopped at or left behind.");
         }
 
-        static void ReadRewards(ExpeditionRecord record, StaticData data, ExpeditionState state)
+        /// <summary>
+        /// The loot (version 9): present exactly while the phase is picking it, no more drops than the screen has cards for, every drop a
+        /// known item (a potion never drops), a taken slot null, and at least one drop still lying there (the last one taken ends the loot).
+        /// </summary>
+        static void ReadLoot(ExpeditionRecord record, StaticData data, ExpeditionState state)
         {
-            Require((record.PendingRewards.Count > 0) == (state.Phase == ExpeditionPhase.ChoosingReward), "Pending rewards do not match the phase.");
-            foreach (RewardRecord reward in record.PendingRewards)
+            Require((record.Loot.Count > 0) == (state.Phase == ExpeditionPhase.PickingLoot), "The loot does not match the phase.");
+            Require(record.Loot.Count <= BalanceData.MaxLootCards, $"The loot holds more than {BalanceData.MaxLootCards} drops.");
+            bool lying = false;
+            foreach (OfferRecord drop in record.Loot)
             {
-                Require(reward != null, "A reward is missing.");
-                state.PendingRewards.Add(ReadOption(reward, data));
+                ItemOffer offer = drop == null ? null : ReadOption(drop, data);
+                Require(offer == null || offer.Kind == OfferKind.Item, "A potion never drops.");
+                lying |= offer != null;
+                state.Loot.Add(offer);
             }
+
+            Require(record.Loot.Count == 0 || lying, "Every drop of the loot was taken, so the loot would be over.");
         }
 
         /// <summary>The shop the party is at (version 8): present exactly while the phase is the shop's, its stock within the slots, a sold slot null.</summary>
@@ -412,7 +422,7 @@ namespace F1.Flow
             Require(record.Shop.Stock != null && record.Shop.Refreshes >= 0, "The shop record is incomplete.");
             Require(record.Shop.Stock.Count <= data.Balance.ShopSlots, $"The shop offers more than its {data.Balance.ShopSlots} slots.");
             var shop = new ShopState { Refreshes = record.Shop.Refreshes };
-            foreach (RewardRecord offer in record.Shop.Stock)
+            foreach (OfferRecord offer in record.Shop.Stock)
             {
                 shop.Stock.Add(offer == null ? null : ReadOption(offer, data));
             }
@@ -420,21 +430,21 @@ namespace F1.Flow
             state.Shop = shop;
         }
 
-        /// <summary>A reward or an offer of a shop: a known item with a grade, or a known potion at Common with no grade.</summary>
-        static RewardOption ReadOption(RewardRecord record, StaticData data)
+        /// <summary>A drop of loot or an offer of a shop: a known item with a grade, or a known potion at Common with no grade.</summary>
+        static ItemOffer ReadOption(OfferRecord record, StaticData data)
         {
-            RewardKind kind = Parse<RewardKind>(record.Kind);
+            OfferKind kind = Parse<OfferKind>(record.Kind);
             ItemTier tier = Parse<ItemTier>(record.Tier);
-            if (kind == RewardKind.Item)
+            if (kind == OfferKind.Item)
             {
-                Require(data.Items.Contains(record.Id) && record.Grade >= 1, $"Reward item '{record.Id}' is not valid.");
+                Require(data.Items.Contains(record.Id) && record.Grade >= 1, $"Offer item '{record.Id}' is not valid.");
             }
             else
             {
-                Require(data.Potions.Contains(record.Id) && record.Grade == 0 && tier == ItemTier.Common, $"Reward potion '{record.Id}' is not valid.");
+                Require(data.Potions.Contains(record.Id) && record.Grade == 0 && tier == ItemTier.Common, $"Offer potion '{record.Id}' is not valid.");
             }
 
-            return new RewardOption(kind, record.Id, record.Grade, tier);
+            return new ItemOffer(kind, record.Id, record.Grade, tier);
         }
 
         static void ValidateBattle(ExpeditionRecord record, ExpeditionPhase phase)

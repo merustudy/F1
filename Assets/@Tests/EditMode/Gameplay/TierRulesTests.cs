@@ -102,28 +102,28 @@ namespace F1.Tests
             Assert.AreEqual(21, FirstHit(ItemTier.Silver));
         }
 
-        // ---- Rewards -------------------------------------------------------------------------
+        // ---- The loot ------------------------------------------------------------------------
 
         [Test]
-        public void RewardTier_IsTheDeepestTierStartedByTheFloor_OneUpAtAnElite()
+        public void ItemTier_IsTheDeepestTierStartedByTheFloor_OneUpForAnElitesLoot()
         {
             var potions = new List<string>();
             var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 12, 2, 3, 2, 8, 0, potions, bronzeFloor: 4, silverFloor: 8, goldFloor: 12);
 
-            Assert.AreEqual(ItemTier.Common, dungeon.RewardTierAt(3, elite: false));
-            Assert.AreEqual(ItemTier.Bronze, dungeon.RewardTierAt(3, elite: true));
-            Assert.AreEqual(ItemTier.Bronze, dungeon.RewardTierAt(4, elite: false));
-            Assert.AreEqual(ItemTier.Silver, dungeon.RewardTierAt(8, elite: false));
-            Assert.AreEqual(ItemTier.Gold, dungeon.RewardTierAt(11, elite: true));
-            Assert.AreEqual(ItemTier.Gold, dungeon.RewardTierAt(12, elite: true), "Gold is the last.");
+            Assert.AreEqual(ItemTier.Common, dungeon.ItemTierAt(3, elite: false));
+            Assert.AreEqual(ItemTier.Bronze, dungeon.ItemTierAt(3, elite: true));
+            Assert.AreEqual(ItemTier.Bronze, dungeon.ItemTierAt(4, elite: false));
+            Assert.AreEqual(ItemTier.Silver, dungeon.ItemTierAt(8, elite: false));
+            Assert.AreEqual(ItemTier.Gold, dungeon.ItemTierAt(11, elite: true));
+            Assert.AreEqual(ItemTier.Gold, dungeon.ItemTierAt(12, elite: true), "Gold is the last.");
 
             var bronze = new DungeonData("e", TestData.Text("e"), "swift", 12, 2, 3, 2, 8, 0, potions);
-            Assert.AreEqual(ItemTier.Common, bronze.RewardTierAt(12, elite: false), "No tier floors: Common everywhere.");
-            Assert.AreEqual(ItemTier.Bronze, bronze.RewardTierAt(12, elite: true));
+            Assert.AreEqual(ItemTier.Common, bronze.ItemTierAt(12, elite: false), "No tier floors: Common everywhere.");
+            Assert.AreEqual(ItemTier.Bronze, bronze.ItemTierAt(12, elite: true));
         }
 
         [Test]
-        public void TheRewardsOfABattle_AreOfItsFloorsTier_AndAreTakenAtIt()
+        public void TheLootOfABattle_IsOfItsFloorsTier_AndIsTakenAtIt()
         {
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
@@ -135,11 +135,10 @@ namespace F1.Tests
             var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id));
             battle.RunToEnd();
             ExpeditionRules.CompleteBattle(data, state, battle);
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, state.Phase);
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase);
 
-            int index = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            Assert.IsTrue(state.PendingRewards.Where(r => r.Kind == RewardKind.Item).All(r => r.Tier == ItemTier.Bronze), "Bronze from floor 1.");
-            ExpeditionRules.TakeItemRewardToInventory(data, state, index);
+            Assert.IsTrue(state.Loot.All(d => d.Tier == ItemTier.Bronze), "Bronze from floor 1.");
+            ExpeditionRules.TakeLootToInventory(data, state, 0);
             Assert.AreEqual(ItemTier.Bronze, state.Inventory.Single().Tier);
         }
 
@@ -165,7 +164,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Merging_WorksOnOneBoard_FromTheInventory_AndFromAReward_EvenWhereNothingHasRoom()
+        public void Merging_WorksOnOneBoard_FromTheInventory_AndFromTheLoot_EvenWhereNothingHasRoom()
         {
             StaticData data = TestData.Data(("InventoryCells", 4));
             ExpeditionState state = Expedition(data);
@@ -187,14 +186,14 @@ namespace F1.Tests
             Assert.AreEqual("blade:Common knife:Silver charm:Common", Board(anna));
             Assert.AreEqual("ballista", state.Inventory.Single().Item.Id);
 
-            // From a reward.
-            state.Phase = ExpeditionPhase.ChoosingReward;
-            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Silver));
-            Assert.IsTrue(ExpeditionRules.CanPlaceReward(data, state, 0, 0, 1));
-            ExpeditionRules.TakeItemReward(data, state, 0, 0, 1);
+            // From the loot: one drop lying there, so taking it ends the loot.
+            state.Phase = ExpeditionPhase.PickingLoot;
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Silver));
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 1));
+            ExpeditionRules.TakeLoot(data, state, 0, 0, 1);
             Assert.AreEqual("blade:Common knife:Gold charm:Common", Board(anna));
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
-            Assert.IsEmpty(state.PendingRewards);
+            Assert.IsEmpty(state.Loot);
         }
 
         [Test]
@@ -257,13 +256,13 @@ namespace F1.Tests
             Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, silverKnife));
             Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, ben.Items[1]), "Not into itself.");
 
-            state.Phase = ExpeditionPhase.ChoosingReward;
-            state.PendingRewards.Add(new RewardOption(RewardKind.Item, "knife", 8, ItemTier.Common));
-            state.PendingRewards.Add(new RewardOption(RewardKind.Potion, "tonic", 0));
-            Assert.IsTrue(ExpeditionRules.RewardMergesAt(state, 0, 1, 1));
-            Assert.IsFalse(ExpeditionRules.RewardMergesAt(state, 1, 1, 1), "A potion.");
-            Assert.IsFalse(ExpeditionRules.RewardMergesAt(state, 0, 0, 0), "The blade.");
-            Assert.IsFalse(ExpeditionRules.RewardMergesAt(state, 5, 1, 1), "No such reward.");
+            state.Phase = ExpeditionPhase.PickingLoot;
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Common));
+            state.Loot.Add(new ItemOffer(OfferKind.Potion, "tonic", 0));
+            Assert.IsTrue(ExpeditionRules.LootMergesAt(state, 0, 1, 1));
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 1, 1, 1), "A potion.");
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0), "The blade.");
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 5, 1, 1), "No such drop.");
         }
 
         // ---- The camp's upkeep ---------------------------------------------------------------

@@ -75,7 +75,7 @@ namespace F1.Flow
 
                 switch (Expedition.Phase)
                 {
-                    case ExpeditionPhase.ChoosingReward: return GamePhase.Reward;
+                    case ExpeditionPhase.PickingLoot: return GamePhase.Loot;
                     case ExpeditionPhase.AtCamp: return GamePhase.Camp;
                     case ExpeditionPhase.AtShop: return GamePhase.Shop;
                     default: return GamePhase.NodeMap;
@@ -190,10 +190,10 @@ namespace F1.Flow
         // ---- The shop (Slice B stage 17) -----------------------------------------------------
 
         /// <summary>The shop's offers by slot while the party is at one (a sold slot is null); empty otherwise.</summary>
-        public IReadOnlyList<RewardOption> ShopStock => Phase == GamePhase.Shop ? Expedition.Shop.Stock : new List<RewardOption>();
+        public IReadOnlyList<ItemOffer> ShopStock => Phase == GamePhase.Shop ? Expedition.Shop.Stock : new List<ItemOffer>();
 
         /// <summary>What an offer costs in region coins.</summary>
-        public int PriceOf(RewardOption offer)
+        public int PriceOf(ItemOffer offer)
         {
             return ExpeditionRules.PriceOf(_data.Data, offer);
         }
@@ -207,7 +207,7 @@ namespace F1.Flow
             return Phase == GamePhase.Shop && ExpeditionRules.CanAfford(_data.Data, Expedition, slot);
         }
 
-        /// <summary>True when the item in a slot could be bought onto that cell now (as a reward would go there).</summary>
+        /// <summary>True when the item in a slot could be bought onto that cell now (as a drop of loot would go there).</summary>
         public bool CanBuyToBoard(int slot, int memberIndex, int cell)
         {
             return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToBoard(_data.Data, Expedition, slot, memberIndex, cell);
@@ -275,6 +275,12 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>
+        /// The loot the battle on show dropped while it still lies there (one entry per drop, null where one was taken); empty for a lost
+        /// battle, the boss's, or once the loot is over (Slice B stage 18).
+        /// </summary>
+        public IReadOnlyList<ItemOffer> BattleLoot => Battle != null && Battle.IsFinished && Expedition != null && Expedition.Phase == ExpeditionPhase.PickingLoot ? Expedition.Loot : new List<ItemOffer>();
+
         /// <summary>The region coins the battle on show brought: those of its node when it was won, 0 otherwise (the boss brings none).</summary>
         public int BattleCoins => Battle != null && Battle.IsFinished && Battle.Engine.Result == BattleResult.Victory ? ExpeditionRules.CoinsFor(_data.Data, Battle.Node) : 0;
 
@@ -286,10 +292,10 @@ namespace F1.Flow
             return IsBetweenBattles && ExpeditionRules.MergesAt(Expedition, item, memberIndex, cell);
         }
 
-        /// <summary>Whether taking an item reward onto a cell would merge it into the item there.</summary>
-        public bool RewardMergesAt(int optionIndex, int memberIndex, int cell)
+        /// <summary>Whether taking the drop in a slot of the loot onto a cell would merge it into the item there.</summary>
+        public bool LootMergesAt(int slot, int memberIndex, int cell)
         {
-            return Phase == GamePhase.Reward && ExpeditionRules.RewardMergesAt(Expedition, optionIndex, memberIndex, cell);
+            return Phase == GamePhase.Loot && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, cell);
         }
 
         /// <summary>Whether some board holds what the item would merge into.</summary>
@@ -385,52 +391,42 @@ namespace F1.Flow
             Battle = null;
         }
 
-        // ---- Rewards, the item boards and the inventory --------------------------------------
+        // ---- The loot, the item boards and the inventory --------------------------------------
 
-        /// <summary>True when the item reward could be put at that cell now: into free cells, or in place of the item there.</summary>
-        public bool CanPlaceReward(int optionIndex, int memberIndex, int cell)
+        /// <summary>True when the drop in a slot of the loot could be put at that cell now: into free cells, in place of the item there, or merged into the same item.</summary>
+        public bool CanTakeLoot(int slot, int memberIndex, int cell)
         {
-            return Phase == GamePhase.Reward && ExpeditionRules.CanPlaceReward(_data.Data, Expedition, optionIndex, memberIndex, cell);
+            return Phase == GamePhase.Loot && ExpeditionRules.CanTakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
         }
 
-        public void TakeItemReward(int optionIndex, int memberIndex, int cell)
+        public void TakeLoot(int slot, int memberIndex, int cell)
         {
             _run.RequireWritable();
-            Require(GamePhase.Reward);
-            ExpeditionRules.TakeItemReward(_data.Data, Expedition, optionIndex, memberIndex, cell);
+            Require(GamePhase.Loot);
+            ExpeditionRules.TakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
             Commit();
         }
 
-        /// <summary>True when the item reward fits the inventory's free cells now.</summary>
-        public bool CanTakeRewardToInventory(int optionIndex)
+        /// <summary>True when the drop in a slot of the loot fits the inventory's free cells now.</summary>
+        public bool CanTakeLootToInventory(int slot)
         {
-            return Phase == GamePhase.Reward && ExpeditionRules.CanTakeRewardToInventory(_data.Data, Expedition, optionIndex);
+            return Phase == GamePhase.Loot && ExpeditionRules.CanTakeLootToInventory(_data.Data, Expedition, slot);
         }
 
-        public void TakeItemRewardToInventory(int optionIndex)
+        public void TakeLootToInventory(int slot)
         {
             _run.RequireWritable();
-            Require(GamePhase.Reward);
-            ExpeditionRules.TakeItemRewardToInventory(_data.Data, Expedition, optionIndex);
+            Require(GamePhase.Loot);
+            ExpeditionRules.TakeLootToInventory(_data.Data, Expedition, slot);
             Commit();
         }
 
-        /// <summary>False when every potion slot is full, so a potion reward cannot be taken.</summary>
-        public bool CanTakePotionReward => Phase == GamePhase.Reward && ExpeditionRules.FreePotionSlot(Expedition) >= 0;
-
-        public void TakePotionReward(int optionIndex)
+        /// <summary>Leaves whatever loot still lies there and goes on to the node map.</summary>
+        public void LeaveLoot()
         {
             _run.RequireWritable();
-            Require(GamePhase.Reward);
-            ExpeditionRules.TakePotionReward(Expedition, optionIndex);
-            Commit();
-        }
-
-        public void SkipReward()
-        {
-            _run.RequireWritable();
-            Require(GamePhase.Reward);
-            ExpeditionRules.SkipReward(Expedition);
+            Require(GamePhase.Loot);
+            ExpeditionRules.LeaveLoot(Expedition);
             Commit();
         }
 
@@ -505,7 +501,7 @@ namespace F1.Flow
             Report = null;
         }
 
-        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Reward || Phase == GamePhase.Camp || Phase == GamePhase.Shop;
+        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Loot || Phase == GamePhase.Camp || Phase == GamePhase.Shop;
 
         /// <summary>
         /// Applies an ended battle to the expedition, and an ended expedition to the run, in the
@@ -578,7 +574,7 @@ namespace F1.Flow
         {
             if (!IsBetweenBattles)
             {
-                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map, the reward choice, a camp or a shop.");
+                throw new InvalidOperationException($"Not allowed in phase {Phase}; needs the node map, the loot, a camp or a shop.");
             }
         }
     }

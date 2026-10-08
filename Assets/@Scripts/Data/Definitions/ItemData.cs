@@ -102,7 +102,7 @@ namespace F1.Data
             int cooldownMs,
             RowSpan rows,
             IReadOnlyList<ItemEffect> effects,
-            int rewardWeight,
+            int shopWeight,
             string icon = null,
             int price = 0)
         {
@@ -132,9 +132,9 @@ namespace F1.Data
                 }
             }
 
-            if (rewardWeight < 0)
+            if (shopWeight < 0)
             {
-                throw new DataException($"{DefinitionName} '{id}': RewardWeight cannot be negative.");
+                throw new DataException($"{DefinitionName} '{id}': ShopWeight cannot be negative.");
             }
 
             if (price < 0)
@@ -146,7 +146,7 @@ namespace F1.Data
             Size = size;
             CooldownMs = cooldownMs;
             Effects = effects;
-            RewardWeight = rewardWeight;
+            ShopWeight = shopWeight;
             Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
             Price = price;
         }
@@ -174,9 +174,9 @@ namespace F1.Data
         [JsonProperty(Order = 7, Required = Required.Always)]
         public IReadOnlyList<ItemEffect> Effects { get; }
 
-        /// <summary>Relative chance to be offered as a battle reward. 0 means it is never offered.</summary>
+        /// <summary>Relative chance to be stocked by a shop (Slice B stage 17). 0 means no shop stocks it. Battles drop what the enemies carried (stage 18), whatever this is.</summary>
         [JsonProperty(Order = 8, Required = Required.Always)]
-        public int RewardWeight { get; }
+        public int ShopWeight { get; }
 
         /// <summary>The logical address of the icon its cell shows. Null when it has no art yet: the cell shows the name.</summary>
         [JsonProperty(Order = 9, Required = Required.AllowNull)]

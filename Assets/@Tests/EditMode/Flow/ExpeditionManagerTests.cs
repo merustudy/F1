@@ -105,7 +105,7 @@ namespace F1.Tests
 
             Assert.AreEqual(BattleResult.Victory, kit.Expedition.Battle.Engine.Result);
             Assert.AreEqual(GamePhase.Battle, kit.Expedition.Phase, "The screen still shows the ended battle.");
-            Assert.AreEqual(ExpeditionPhase.ChoosingReward, kit.Expedition.Expedition.Phase, "The expedition already moved on.");
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, kit.Expedition.Expedition.Phase, "The expedition already moved on.");
             Assert.AreEqual(1, kit.Expedition.Expedition.BattlesWon);
 
             int endTime = kit.Expedition.Battle.Engine.TimeMs;
@@ -115,7 +115,7 @@ namespace F1.Tests
             kit.Expedition.CloseBattle();
 
             Assert.IsNull(kit.Expedition.Battle);
-            Assert.AreEqual(GamePhase.Reward, kit.Expedition.Phase);
+            Assert.AreEqual(GamePhase.Loot, kit.Expedition.Phase);
         }
 
         [Test]
@@ -176,41 +176,54 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Rewards_CanBeTakenOrSkipped_ThenTheNodeMapReturns()
+        public void Loot_IsTakenADropAtATime_OrLeft_ThenTheNodeMapReturns()
         {
             FlowTestKit kit = new FlowTestKit().InBattle();
             kit.FightToTheEnd();
             kit.Expedition.CloseBattle();
             ExpeditionState state = kit.Expedition.Expedition;
-            int itemOption = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            RewardOption option = state.PendingRewards[itemOption];
+            Assert.AreEqual(GamePhase.Loot, kit.Expedition.Phase);
+            Assert.AreEqual(2, state.Loot.Count, "Two grunts dropped two claws.");
+            ItemOffer drop = state.Loot[0];
 
-            Assert.IsTrue(kit.Expedition.CanPlaceReward(itemOption, 0, 1), "An empty cell behind the weapon.");
-            Assert.IsFalse(kit.Expedition.CanPlaceReward(itemOption, 0, 9));
-            kit.Expedition.TakeItemReward(itemOption, 0, 1);
+            Assert.IsTrue(kit.Expedition.CanTakeLoot(0, 0, 1), "An empty cell behind the weapon.");
+            Assert.IsFalse(kit.Expedition.CanTakeLoot(0, 0, 9));
+            kit.Expedition.TakeLoot(0, 0, 1);
 
-            Assert.AreEqual(option.Id, state.Members[0].Items[1].Item.Id);
+            Assert.AreEqual(drop.Id, state.Members[0].Items[1].Item.Id);
+            Assert.AreEqual(GamePhase.Loot, kit.Expedition.Phase, "The other drop still lies there.");
+            Assert.IsFalse(kit.Expedition.CanTakeLoot(0, 0, 2), "The first slot was taken.");
+            Assert.IsTrue(kit.Expedition.CanTakeLoot(1, 0, 2));
+
+            kit.Expedition.LeaveLoot();
+
             Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
-            Assert.IsFalse(kit.Expedition.CanPlaceReward(itemOption, 0, 2), "No reward is pending any more.");
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.SkipReward(), "There is no reward to skip any more.");
+            Assert.IsFalse(kit.Expedition.CanTakeLoot(1, 0, 2), "No loot lies there any more.");
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.LeaveLoot(), "There is no loot to leave any more.");
         }
 
         [Test]
-        public void AnItemReward_CanGoStraightToTheInventory()
+        public void ADrop_CanGoStraightToTheInventory_AndTheLastOneTakenEndsTheLoot()
         {
             FlowTestKit kit = new FlowTestKit().InBattle();
             kit.FightToTheEnd();
+            Assert.AreEqual(2, kit.Expedition.BattleLoot.Count, "The ended battle shows its loot while it is open.");
             kit.Expedition.CloseBattle();
             ExpeditionState state = kit.Expedition.Expedition;
-            int itemOption = state.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            RewardOption option = state.PendingRewards[itemOption];
-            Assert.IsTrue(kit.Expedition.CanTakeRewardToInventory(itemOption), "The inventory is empty.");
+            ItemOffer drop = state.Loot[1];
+            Assert.IsTrue(kit.Expedition.CanTakeLootToInventory(1), "The inventory is empty.");
 
-            kit.Expedition.TakeItemRewardToInventory(itemOption);
+            kit.Expedition.TakeLootToInventory(1);
 
-            Assert.AreEqual(option.Id, state.Inventory.Single().Item.Id);
-            Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
-            Assert.IsFalse(kit.Expedition.CanTakeRewardToInventory(itemOption), "No reward is pending any more.");
+            Assert.AreEqual(drop.Id, state.Inventory.Single().Item.Id);
+            Assert.AreEqual(GamePhase.Loot, kit.Expedition.Phase);
+            Assert.IsFalse(kit.Expedition.CanTakeLootToInventory(1), "That slot was taken.");
+            Assert.IsEmpty(kit.Expedition.BattleLoot, "The battle was closed: nothing is on show.");
+
+            kit.Expedition.TakeLootToInventory(0);
+
+            Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase, "The last drop taken ends the loot.");
+            Assert.AreEqual(2, state.Inventory.Count);
         }
 
         [Test]
@@ -307,16 +320,14 @@ namespace F1.Tests
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.TryRetreat());
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.TryUsePotion(0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.CloseBattle());
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.SkipReward());
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakePotionReward(0));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeItemReward(0, 0, 0));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeItemRewardToInventory(0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.LeaveLoot());
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeLoot(0, 0, 0));
+            Assert.Throws<InvalidOperationException>(() => kit.Expedition.TakeLootToInventory(0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveItem(0, 0, 1, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToInventory(0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.PlaceFromInventory(0, 0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.AcknowledgeReport());
-            Assert.IsFalse(kit.Expedition.CanTakePotionReward);
-            Assert.IsFalse(kit.Expedition.CanPlaceReward(0, 0, 0));
+            Assert.IsFalse(kit.Expedition.CanTakeLoot(0, 0, 0));
             Assert.IsFalse(kit.Expedition.CanMoveItem(0, 0, 1, 0));
             Assert.IsFalse(kit.Expedition.CanMoveToInventory(0, 0));
             Assert.IsFalse(kit.Expedition.CanPlaceFromInventory(0, 0, 0));

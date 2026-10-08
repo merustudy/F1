@@ -244,9 +244,9 @@ namespace F1.Data
                 problems.Add($"{FatigueStateData.DefinitionName}: at least one affliction and one virtue are required.");
             }
 
-            if (!Items.Ordered.Any(item => item.RewardWeight > 0) && !Potions.Ordered.Any(potion => potion.RewardWeight > 0))
+            if (!Items.Ordered.Any(item => item.ShopWeight > 0) && !Potions.Ordered.Any(potion => potion.ShopWeight > 0))
             {
-                problems.Add("No item or potion has a RewardWeight above 0, so battles could offer no reward.");
+                problems.Add("No item or potion has a ShopWeight above 0, so no shop could stock anything.");
             }
         }
 

@@ -7,7 +7,9 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 8 (Slice B stage 17): the expedition's region Coins and, at a shop, its Shop (the stock and the refreshes).
+    /// Version 9 (Slice B stage 18): the expedition's Loot (the drops of the last won battle, null where one was taken) replaces
+    /// PendingRewards (the reward choice, which is not read any more). Version 8 (stage 17): the expedition's region Coins and, at a
+    /// shop, its Shop (the stock and the refreshes).
     /// Version 4 (Slice B): fatigue builds up from 0 (a mercenary's Fatigue was what was left of the
     /// maximum), a member carries its Fatigue on the expedition, and an item says whether it is a base
     /// weapon. Version 3 (boards without empty entries, an Inventory) and version 2 (one entry per slot,
@@ -16,7 +18,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 8;
+        public const int CurrentSchemaVersion = 9;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -76,7 +78,8 @@ namespace F1.Save
         public string Phase;
         public int CurrentNodeId;
         public int BattlesWon;
-        public List<RewardRecord> PendingRewards;
+        /// <summary>The drops of the last won battle still being picked up (version 9): one entry per drop, null where it was taken. Empty when none is.</summary>
+        public List<OfferRecord> Loot;
 
         /// <summary>The region coins won and not spent (version 8). A file without them has none.</summary>
         public int Coins;
@@ -91,7 +94,7 @@ namespace F1.Save
     /// <summary>What a shop has for sale while the party is at it: the offers by slot (a sold slot is null), and how many refreshes were made there.</summary>
     public sealed class ShopRecord
     {
-        public List<RewardRecord> Stock;
+        public List<OfferRecord> Stock;
         public int Refreshes;
     }
 
@@ -126,13 +129,13 @@ namespace F1.Save
         public string Tier = "Common";
     }
 
-    public sealed class RewardRecord
+    public sealed class OfferRecord
     {
         public string Kind;
         public string Id;
         public int Grade;
 
-        /// <summary>The tier's name of an item reward; Common for a potion (version 7, as above). An entry that does not name one is Common.</summary>
+        /// <summary>The tier's name of an item on offer; Common for a potion (version 7, as above). An entry that does not name one is Common.</summary>
         public string Tier = "Common";
     }
 

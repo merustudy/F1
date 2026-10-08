@@ -327,12 +327,12 @@ namespace F1.Tests
         }
 
         [Test]
-        public void DungeonData_RewardGradeGrowsByFloor()
+        public void DungeonData_ItemGradeGrowsByFloor()
         {
             var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 3, 2, 3, 2, 8, 2, new List<string>());
 
-            Assert.AreEqual(8, dungeon.RewardGradeAt(1));
-            Assert.AreEqual(12, dungeon.RewardGradeAt(3));
+            Assert.AreEqual(8, dungeon.ItemGradeAt(1));
+            Assert.AreEqual(12, dungeon.ItemGradeAt(3));
         }
 
         [Test]

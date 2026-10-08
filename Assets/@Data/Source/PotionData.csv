@@ -1,3 +1,3 @@
-Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price
+Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price
 healing_potion,치유 포션,Healing Potion,Heal,50,6,potion/healing-potion,8
 barrier_potion,방벽 포션,Barrier Potion,Shield,40,4,potion/barrier-potion,8

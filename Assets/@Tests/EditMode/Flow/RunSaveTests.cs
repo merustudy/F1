@@ -144,7 +144,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Restart_AtTheRewardChoice_OffersTheSameRewards_AndTakingOneIsSaved()
+        public void Restart_AtTheLoot_ShowsTheSameDrops_AndEachOneTakenIsSaved()
         {
             FlowTestKit kit = new FlowTestKit().InBattle();
             kit.FightToTheEnd();
@@ -152,17 +152,23 @@ namespace F1.Tests
 
             FlowTestKit restarted = kit.Restart();
 
-            Assert.AreEqual(GamePhase.Reward, restarted.Expedition.Phase);
+            Assert.AreEqual(GamePhase.Loot, restarted.Expedition.Phase);
             Assert.IsNull(restarted.Expedition.Battle, "An ended battle is not brought back.");
             Assert.AreEqual(Snapshot(kit), Snapshot(restarted));
 
-            int item = restarted.Expedition.Expedition.PendingRewards.FindIndex(r => r.Kind == RewardKind.Item);
-            string itemId = restarted.Expedition.Expedition.PendingRewards[item].Id;
-            restarted.Expedition.TakeItemReward(item, 1, 2);
+            string itemId = restarted.Expedition.Expedition.Loot[0].Id;
+            restarted.Expedition.TakeLoot(0, 1, 2);
             FlowTestKit again = restarted.Restart();
 
-            Assert.AreEqual(GamePhase.NodeMap, again.Expedition.Phase);
+            Assert.AreEqual(GamePhase.Loot, again.Expedition.Phase, "The other drop still lies there.");
+            Assert.IsNull(again.Expedition.Expedition.Loot[0], "The taken slot is saved empty.");
+            Assert.IsNotNull(again.Expedition.Expedition.Loot[1]);
             Assert.AreEqual(itemId, again.Expedition.Expedition.Members[1].Items[1].Item.Id, "Behind the weapon on the board.");
+
+            again.Expedition.LeaveLoot();
+            FlowTestKit left = again.Restart();
+
+            Assert.AreEqual(GamePhase.NodeMap, left.Expedition.Phase);
         }
 
         [Test]
@@ -317,8 +323,8 @@ namespace F1.Tests
                         stepped.FightToTheEnd();
                         stepped.Expedition.CloseBattle();
                         break;
-                    case GamePhase.Reward:
-                        stepped.Expedition.SkipReward();
+                    case GamePhase.Loot:
+                        stepped.Expedition.LeaveLoot();
                         break;
                 }
             }

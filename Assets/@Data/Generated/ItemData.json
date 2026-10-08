@@ -22,7 +22,7 @@
           "PowerPercent": 80
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/buckler",
       "Price": 12
     },
@@ -47,7 +47,7 @@
           "PowerPercent": 90
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/crude-bow",
       "Price": 0
     },
@@ -72,7 +72,7 @@
           "PowerPercent": 45
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/dagger",
       "Price": 10
     },
@@ -97,7 +97,7 @@
           "PowerPercent": 25
         }
       ],
-      "RewardWeight": 8,
+      "ShopWeight": 8,
       "Icon": "item/ember-flask",
       "Price": 12
     },
@@ -122,7 +122,7 @@
           "PowerPercent": 110
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/fire-staff",
       "Price": 0
     },
@@ -147,7 +147,7 @@
           "PowerPercent": 190
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/greataxe",
       "Price": 0
     },
@@ -172,7 +172,7 @@
           "PowerPercent": 80
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/halberd",
       "Price": 22
     },
@@ -197,7 +197,7 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/healing-staff",
       "Price": 0
     },
@@ -222,7 +222,7 @@
           "PowerPercent": 60
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/herb-pouch",
       "Price": 10
     },
@@ -244,10 +244,10 @@
           "Kind": "Burn",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 30
+          "PowerPercent": 25
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/lantern-staff",
       "Price": 0
     },
@@ -272,7 +272,7 @@
           "PowerPercent": 85
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/longbow",
       "Price": 16
     },
@@ -297,7 +297,7 @@
           "PowerPercent": 110
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/longsword",
       "Price": 0
     },
@@ -328,15 +328,15 @@
           "PowerPercent": 40
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/mace",
       "Price": 0
     },
     {
       "Id": "mending_chant",
       "Name": {
-        "en-US": "Mending Chant",
-        "ko-KR": "치유 주문"
+        "en-US": "Mending Charm",
+        "ko-KR": "치유의 부적"
       },
       "Category": "Support",
       "Size": 1,
@@ -353,7 +353,7 @@
           "PowerPercent": 100
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/mending-chant",
       "Price": 0
     },
@@ -378,7 +378,7 @@
           "PowerPercent": 150
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/overseer-maul",
       "Price": 0
     },
@@ -403,15 +403,15 @@
           "PowerPercent": 60
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/overseer-roar",
       "Price": 0
     },
     {
       "Id": "rat_bite",
       "Name": {
-        "en-US": "Bite",
-        "ko-KR": "물어뜯기"
+        "en-US": "Rat Fang",
+        "ko-KR": "쥐 송곳니"
       },
       "Category": "Weapon",
       "Size": 1,
@@ -425,10 +425,10 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 100
+          "PowerPercent": 60
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/rat-bite",
       "Price": 0
     },
@@ -450,10 +450,10 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 100
+          "PowerPercent": 80
         }
       ],
-      "RewardWeight": 0,
+      "ShopWeight": 0,
       "Icon": "item/rusty-blade",
       "Price": 0
     },
@@ -478,7 +478,7 @@
           "PowerPercent": 85
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/spear",
       "Price": 16
     },
@@ -503,7 +503,7 @@
           "PowerPercent": 70
         }
       ],
-      "RewardWeight": 10,
+      "ShopWeight": 10,
       "Icon": "item/ward-charm",
       "Price": 12
     }

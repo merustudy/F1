@@ -7,7 +7,9 @@ namespace F1.Gameplay
     {
         ChoosingNode,
         InBattle,
-        ChoosingReward,
+
+        /// <summary>Picking up the loot a won battle dropped (Slice B stage 18): a drop at a time, until all are taken or the rest is left.</summary>
+        PickingLoot,
         Finished,
 
         /// <summary>At a camp node: the party chooses what to do there before going on.</summary>
@@ -27,16 +29,17 @@ namespace F1.Gameplay
         Retreated,
     }
 
-    public enum RewardKind
+    /// <summary>What an <see cref="ItemOffer"/> is.</summary>
+    public enum OfferKind
     {
         Item,
         Potion,
     }
 
-    /// <summary>One of the choices offered after a won battle.</summary>
-    public sealed class RewardOption
+    /// <summary>An item or a potion not yet owned: a drop of a won battle's loot (Slice B stage 18; a potion never drops), or what a shop sells (stage 17).</summary>
+    public sealed class ItemOffer
     {
-        public RewardOption(RewardKind kind, string id, int grade, ItemTier tier = ItemTier.Common)
+        public ItemOffer(OfferKind kind, string id, int grade, ItemTier tier = ItemTier.Common)
         {
             Kind = kind;
             Id = id;
@@ -44,7 +47,7 @@ namespace F1.Gameplay
             Tier = tier;
         }
 
-        public RewardKind Kind { get; }
+        public OfferKind Kind { get; }
 
         /// <summary>Item id or potion id.</summary>
         public string Id { get; }
@@ -62,7 +65,7 @@ namespace F1.Gameplay
     /// </summary>
     public sealed class ShopState
     {
-        public List<RewardOption> Stock = new List<RewardOption>();
+        public List<ItemOffer> Stock = new List<ItemOffer>();
         public int Refreshes;
     }
 
@@ -139,8 +142,11 @@ namespace F1.Gameplay
 
         public int BattlesWon;
 
-        /// <summary>Offered while <see cref="Phase"/> is ChoosingReward; empty otherwise.</summary>
-        public List<RewardOption> PendingRewards = new List<RewardOption>();
+        /// <summary>
+        /// The loot of the last won battle while <see cref="Phase"/> is PickingLoot: one entry per drop, null where it was taken; empty
+        /// otherwise (Slice B stage 18, Docs/Design/03_Dungeon_Structure.md §5).
+        /// </summary>
+        public List<ItemOffer> Loot = new List<ItemOffer>();
 
         /// <summary>
         /// The region coins the expedition has won and not spent (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5). They

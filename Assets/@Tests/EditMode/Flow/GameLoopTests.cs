@@ -106,7 +106,7 @@ namespace F1.Tests
                         kit.Expedition.CloseBattle();
                         break;
                     default:
-                        kit.Expedition.SkipReward();
+                        kit.Expedition.LeaveLoot();
                         break;
                 }
             }

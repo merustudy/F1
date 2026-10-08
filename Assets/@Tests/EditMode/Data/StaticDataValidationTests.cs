@@ -105,7 +105,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void SomethingMustBeRewardable()
+        public void SomethingMustBeStockable()
         {
             string problem = ProblemOf(p =>
             {
@@ -113,7 +113,7 @@ namespace F1.Tests
                 p.Potions = p.Potions.Select(x => new PotionData(x.Id, x.Name, x.Effect, x.Magnitude, 0)).ToList();
             });
 
-            StringAssert.Contains("RewardWeight", problem);
+            StringAssert.Contains("ShopWeight", problem);
         }
 
         [Test]

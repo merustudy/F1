@@ -34,14 +34,14 @@ namespace F1.Tests
             return new StaticData(parts);
         }
 
-        /// <summary>Wins the first floor's battle, skips its reward and makes camp on the second floor.</summary>
+        /// <summary>Wins the first floor's battle, leaves its loot and makes camp on the second floor.</summary>
         static FlowTestKit AtTheCamp()
         {
             FlowTestKit kit = new FlowTestKit(CaveWithACamp()).OnNodeMap();
             kit.Expedition.EnterNode(kit.Expedition.AvailableNodes()[0].Id);
             kit.FightToTheEnd();
             kit.Expedition.CloseBattle();
-            kit.Expedition.SkipReward();
+            kit.Expedition.LeaveLoot();
             MapNode camp = kit.Expedition.AvailableNodes().First();
             Assert.AreEqual(MapNodeKind.Camp, camp.Kind, "The second floor is all camps.");
             kit.Expedition.EnterNode(camp.Id);
@@ -103,7 +103,7 @@ namespace F1.Tests
             Assert.IsTrue(kit.Expedition.CanMoveToRow(0, 2));
             kit.Expedition.MoveToRow(0, 2);
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.AdvanceBattle(100));
-            Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.SkipReward());
+            Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.LeaveLoot());
         }
     }
 }

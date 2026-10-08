@@ -12,8 +12,8 @@ namespace F1.Flow
         NodeMap,
         /// <summary>A battle session exists. It stays here after the battle ended, until the screen closes it.</summary>
         Battle,
-        /// <summary>On an expedition, choosing a reward.</summary>
-        Reward,
+        /// <summary>On an expedition, picking up the loot a won battle dropped (Slice B stage 18).</summary>
+        Loot,
         /// <summary>On an expedition, at a camp node: choosing what to do there.</summary>
         Camp,
         /// <summary>On an expedition, at a shop node: buying for the region coins, or leaving (Slice B stage 17).</summary>

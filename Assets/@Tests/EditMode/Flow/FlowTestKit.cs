@@ -160,7 +160,7 @@ namespace F1.Tests
 
         /// <summary>
         /// Plays with no input until the expedition is over: first available node, fight, close,
-        /// skip rewards, rest at a camp, leave a shop. Stops at the settlement report.
+        /// leave the loot, rest at a camp, leave a shop. Stops at the settlement report.
         /// </summary>
         public void PlayExpeditionToTheEnd()
         {
@@ -175,8 +175,8 @@ namespace F1.Tests
                         FightToTheEnd();
                         Expedition.CloseBattle();
                         break;
-                    case GamePhase.Reward:
-                        Expedition.SkipReward();
+                    case GamePhase.Loot:
+                        Expedition.LeaveLoot();
                         break;
                     case GamePhase.Camp:
                         Expedition.RestAtCamp();

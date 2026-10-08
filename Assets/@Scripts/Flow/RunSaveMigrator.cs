@@ -61,6 +61,31 @@ namespace F1.Flow
             {
                 From7To8(save);
             }
+
+            if (save.SchemaVersion == 8)
+            {
+                From8To9(save);
+            }
+        }
+
+        /// <summary>
+        /// Up to version 8 a won battle offered a reward to choose (PendingRewards); from version 9 it drops loot to pick up (Slice B
+        /// stage 18). The old choices are not read any more: a file in the middle of one goes on to choosing the next node with no
+        /// loot, so that one reward is left behind.
+        /// </summary>
+        static void From8To9(RunSaveData save)
+        {
+            if (save.Expedition != null)
+            {
+                if (save.Expedition.Phase == "ChoosingReward")
+                {
+                    save.Expedition.Phase = "ChoosingNode";
+                }
+
+                save.Expedition.Loot = new List<OfferRecord>();
+            }
+
+            save.SchemaVersion = 9;
         }
 
         /// <summary>
@@ -147,7 +172,7 @@ namespace F1.Flow
         /// <summary>The name version 5 gave the tier every item had before tiers (From6To7 renames it to Common).</summary>
         const string Version5Bronze = "Bronze";
 
-        /// <summary>Version 4 had no item tiers (Slice B stage 14): every item and every reward was what version 5 called Bronze, now Common.</summary>
+        /// <summary>Version 4 had no item tiers (Slice B stage 14): every item was what version 5 called Bronze, now Common. (Its reward choices are left behind by From8To9.)</summary>
         static void From4To5(RunSaveData save)
         {
             if (save.Expedition != null)
@@ -161,16 +186,6 @@ namespace F1.Flow
                 }
 
                 MarkBronze(save.Expedition.Inventory);
-                if (save.Expedition.PendingRewards != null)
-                {
-                    foreach (RewardRecord reward in save.Expedition.PendingRewards)
-                    {
-                        if (reward != null)
-                        {
-                            reward.Tier = Version5Bronze;
-                        }
-                    }
-                }
             }
 
             save.SchemaVersion = 5;
@@ -200,16 +215,6 @@ namespace F1.Flow
                 }
 
                 RenameTiers(save.Expedition.Inventory);
-                if (save.Expedition.PendingRewards != null)
-                {
-                    foreach (RewardRecord reward in save.Expedition.PendingRewards)
-                    {
-                        if (reward != null)
-                        {
-                            reward.Tier = Version7Name(reward.Tier);
-                        }
-                    }
-                }
             }
 
             save.SchemaVersion = 7;

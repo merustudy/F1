@@ -34,7 +34,7 @@ namespace F1.Tests
             return new StaticData(parts);
         }
 
-        /// <summary>Wins the first floor's battle, skips its reward and goes into the shop on the second floor.</summary>
+        /// <summary>Wins the first floor's battle, leaves its loot and goes into the shop on the second floor.</summary>
         static FlowTestKit AtTheShop(out int coinsWon)
         {
             FlowTestKit kit = new FlowTestKit(CaveWithAShop()).OnNodeMap();
@@ -46,7 +46,7 @@ namespace F1.Tests
             Assert.AreEqual(kit.Expedition.BattleCoins, coinsWon, "The victory's coins are in the expedition at once.");
             kit.Expedition.CloseBattle();
             Assert.AreEqual(0, kit.Expedition.BattleCoins, "No battle on show.");
-            kit.Expedition.SkipReward();
+            kit.Expedition.LeaveLoot();
             MapNode shop = kit.Expedition.AvailableNodes().First();
             Assert.AreEqual(MapNodeKind.Shop, shop.Kind, "The second floor is all shops.");
             kit.Expedition.EnterNode(shop.Id);
@@ -80,8 +80,8 @@ namespace F1.Tests
         {
             FlowTestKit kit = AtTheShop(out int _);
             kit.Expedition.Expedition.Coins = 100;
-            IReadOnlyList<RewardOption> stock = kit.Expedition.ShopStock;
-            int item = Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == RewardKind.Item);
+            IReadOnlyList<ItemOffer> stock = kit.Expedition.ShopStock;
+            int item = Enumerable.Range(0, stock.Count).First(i => stock[i].Kind == OfferKind.Item);
             int price = kit.Expedition.PriceOf(stock[item]);
 
             Assert.IsTrue(kit.Expedition.CanAfford(item));
@@ -107,7 +107,7 @@ namespace F1.Tests
             Assert.AreEqual(kit.Data.Balance.ShopRefreshBase + kit.Data.Balance.ShopRefreshStep, restarted.Expedition.RefreshCost, "The climbed cost comes back.");
             CollectionAssert.AreEqual(kit.Expedition.ShopStock.Select(o => o.Id), restarted.Expedition.ShopStock.Select(o => o.Id));
 
-            int potion = restarted.Expedition.ShopStock.ToList().FindIndex(o => o != null && o.Kind == RewardKind.Potion);
+            int potion = restarted.Expedition.ShopStock.ToList().FindIndex(o => o != null && o.Kind == OfferKind.Potion);
             if (potion >= 0)
             {
                 Assert.IsTrue(restarted.Expedition.CanBuyPotion(potion));
@@ -115,7 +115,7 @@ namespace F1.Tests
                 Assert.AreEqual(2, restarted.Expedition.Expedition.Potions.Count(p => p != null));
             }
 
-            int inventory = restarted.Expedition.ShopStock.ToList().FindIndex(o => o != null && o.Kind == RewardKind.Item);
+            int inventory = restarted.Expedition.ShopStock.ToList().FindIndex(o => o != null && o.Kind == OfferKind.Item);
             Assert.IsTrue(restarted.Expedition.CanBuyToInventory(inventory));
             restarted.Expedition.BuyToInventory(inventory);
             Assert.AreEqual(1, restarted.Expedition.Expedition.Inventory.Count);
@@ -173,11 +173,11 @@ namespace F1.Tests
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "At a shop without a shop record.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            broken.Expedition.Shop.Stock.Add(new RewardRecord { Kind = "Item", Id = "knife", Grade = 8, Tier = "Common" });
+            broken.Expedition.Shop.Stock.Add(new OfferRecord { Kind = "Item", Id = "knife", Grade = 8, Tier = "Common" });
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "More offers than slots.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            broken.Expedition.Shop.Stock[0] = new RewardRecord { Kind = "Item", Id = "nothing", Grade = 8, Tier = "Common" };
+            broken.Expedition.Shop.Stock[0] = new OfferRecord { Kind = "Item", Id = "nothing", Grade = 8, Tier = "Common" };
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "An unknown item on offer.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;

@@ -11,7 +11,7 @@ FatigueOnHit,2
 FatigueOnDog,5
 FatigueOnAllyDog,3
 FatigueOnAllyDeath,10
-FatigueOnKill,5
+FatigueOnKill,3
 VirtueChancePercent,25
 VirtueFatigue,40
 RestDays,1
@@ -29,7 +29,8 @@ RetreatChancePercent,60
 RetreatCooldownMs,5000
 PostBattleHealPercent,10
 MinCooldownMs,200
-RewardChoices,3
+DropCount,1
+EliteDropCount,2
 InventoryCells,10
 CampHealPercent,30
 CampFatigueRelief,20

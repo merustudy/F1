@@ -13,7 +13,7 @@ namespace F1.Tests
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,2\nStormGrowth,2\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
-            "PostBattleHealPercent,10\nMinCooldownMs,200\nRewardChoices,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
+            "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n";
 
         public const string Jobs =
@@ -22,14 +22,14 @@ namespace F1.Tests
             "bishop,주교,Bishop,90,3,staff,10,3,,,,,,,,,\n";
 
         public const string Items =
-            "Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,RewardWeight,Icon,Price\n" +
+            "Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,ShopWeight,Icon,Price\n" +
             "sword,소드,Sword,Weapon,1,2500,front:2,Damage,EnemyFront,1,100,,,,,0,item/sword,0\n" +
             "staff,지팡이,Staff,Support,1,4000,back:2,Heal,AllyLowestHp,,100,,,,,0,,0\n" +
             "mace,메이스,Mace,Weapon,2,3200,front:1,Damage,EnemyFront,2,100,Shield,Self,,40,10,item/mace,16\n" +
             "claw,발톱,Claw,Weapon,1,2000,all,Damage,EnemyBack,1,100,,,,,0,,0\n";
 
         public const string Potions =
-            "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,RewardWeight,Icon,Price\n" +
+            "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price\n" +
             "tonic,강장제,Tonic,Heal,50,5,potion/tonic,8\n";
 
         public const string Enemies =

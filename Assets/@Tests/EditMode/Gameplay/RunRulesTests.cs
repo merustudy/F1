@@ -334,9 +334,9 @@ namespace F1.Tests
                 ExpeditionState expedition = RunRules.BeginExpedition(data, run, "cave");
                 while (expedition.Phase != ExpeditionPhase.Finished)
                 {
-                    if (expedition.Phase == ExpeditionPhase.ChoosingReward)
+                    if (expedition.Phase == ExpeditionPhase.PickingLoot)
                     {
-                        ExpeditionRules.SkipReward(expedition);
+                        ExpeditionRules.LeaveLoot(expedition);
                         continue;
                     }
 
