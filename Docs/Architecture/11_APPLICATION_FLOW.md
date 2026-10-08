@@ -49,8 +49,8 @@ Application 계층이 하는 일은 넷이다.
 | `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
-| `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기 |
-| `Loot` | 원정 중이고 이긴 전투의 전리품이 놓여 있다(`ExpeditionPhase.PickingLoot`, 18단계) | 줍기(`TakeLoot`·`TakeLootToInventory`. 하나마다, 마지막 것을 주우면 `NodeMap`), 두고 가기(`LeaveLoot`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `CanTakeLoot`·`CanTakeLootToInventory`·`LootMergesAt`, 결과 창을 위한 `BattleLoot` |
+| `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기. **이긴 뒤**(`LootOpen`: 끝난 전투가 열려 있고 원정이 `PickingLoot`. Round 47)에는 `Loot`의 명령도 모두 된다(전리품은 전투 화면에서 줍는다) |
+| `Loot` | 원정 중이고 이긴 전투의 전리품이 놓여 있는데 전투 세션은 없다(`ExpeditionPhase.PickingLoot`. 앱을 닫았다 연 경우뿐이다) | 줍기(`TakeLoot`·`TakeLootToInventory`. 하나마다, 마지막 것을 주우면 `NodeMap`), 두고 가기(`LeaveLoot`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `CanTakeLoot`·`CanTakeLootToInventory`·`LootMergesAt`, 놓인 것은 `BattleLoot`. 화면은 전투 화면의 "이긴 뒤" 모습(`12_UI.md`) |
 | `Settlement` | 확인하지 않은 정산 보고가 있다 | 확인 |
 
 - 런이 없는 상태(`RunManager.HasRun`이 거짓)는 단계가 아니다. 화면이 타이틀을 보인다.
@@ -67,7 +67,8 @@ Application 계층이 하는 일은 넷이다.
   `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, 칸)`이 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
 - 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
   이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
-  이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), 결과 창을 위해 `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전투 화면을 닫으면 전리품 화면이 온다.
+  이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전리품은 **그 전투 화면에서** 줍는다(Round 47):
+  `LootOpen`인 동안 전리품의 명령이 되고, 화면의 [계속]은 남은 것을 두고(`LeaveLoot`) 전투를 닫는다(`CloseBattle`). 마지막 것을 주우면 원정은 노드 고르기로 가지만 화면은 [계속]까지 머문다.
 
 ```text
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo
