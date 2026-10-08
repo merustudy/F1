@@ -15,6 +15,9 @@ Architecture/09 "Slice B" Acceptance 10이 참이다: 보스가 아닌 전투에
 - 2026-10-08 세션 정리: 주제별 다섯 커밋(Architecture와 기획 / 규칙과 데이터·저장·Application·시뮬과 EditMode Test / 화면과 문구·Prefab·PlayMode Test / 그림: Round 45의 기록 / Roadmap과 Handoff)을 `origin/feature/slice-a`에 푸시했다.
 - 16단계의 맞추기 수치를 이 데이터로 다시 잡았다(처치 `FatigueOnKill` 5 → 3: `b16-tuning.md`). 플레이 기록은 아직 없다.
 
+- 2026-10-08 **Round 47**(사용자 "전리품을 전투 후 전투 화면에서 선택하는 것으로 변경. 관련 UI 후보 제시(아이템 정보는 마우스 우클릭 툴팁)"): 목업 아홉(`ArtPipeline/Archive/47-loot-in-battle/`: 안 A 결과 창 안 / **B 적의 보드 자리(권장)** / C 무대 바닥, B의 흐름 넷)과 판정할 것 여덟(우클릭은 모든 화면, 결과 창 대신 무대 위 띠, [계속] 하나, 이어하기는 전투 화면의 "이긴 뒤" 모습·저장 형식 그대로, 전리품 화면 삭제). 호출 없음.
+  판정: 사용자 **"C안으로 가보자. 나머지에 따라 네 권장안으로 구현"** → 구현했다(README 47 "구현"·"검증"): 전투 화면이 이긴 뒤에 남아 띠·바닥의 전리품·노드 맵의 보드·[계속]을 보이고(`BattleScreen.EnterAfterWin`, `LootDropView`, `PartyBoardView`), `ExpeditionManager.LootOpen`으로 끝난 전투가 열린 동안 전리품의 명령이 되며, 우클릭이 모든 화면의 아이템 카드이고(`RightClick`), 앱을 닫았다 열면 전투 화면의 "이긴 뒤" 모습이다. `LootScreen`과 Prefab, `ScreenId.Loot`을 지웠다. 체인 OK(EditMode 752/752, PlayMode 78/87, 9 skipped), 스크린샷 `20261008-r47b` 9/9. 커밋 안 함.
+
 ## Done
 
 - 기획: Design/02 §4(적 아이템의 이름·척도, 획득은 전리품과 상점)·§10(포션은 상점에서만), 03 §1(정예)·§5(전리품의 규칙), 07 §4(열 이름), 09 §5(전리품 스트림), 00 "Slice B" 표와 권장안 세부, 08 §14.
@@ -24,7 +27,7 @@ Architecture/09 "Slice B" Acceptance 10이 참이다: 보스가 아닌 전투에
 - 저장: `RunSaveData` 9(`Loot`·`OfferRecord`), `RunSaveMigrator.From8To9`(보상 선택 중이던 파일은 노드 고르기로, 전리품은 비움; 4→5·6→7의 보상 처리는 뺌), `RunSaveMapper.ReadLoot`(단계·카드 수·아이템만·하나는 놓여 있음). Architecture/07.
 - Application: `GamePhase.Loot`, `ExpeditionManager`의 `CanTakeLoot`·`TakeLoot`·`CanTakeLootToInventory`·`TakeLootToInventory`·`LeaveLoot`·`LootMergesAt`·`BattleLoot`(포션 보상 명령은 뺌). Architecture/11.
 - 시뮬: `SimPolicy.PickLoot`(합쳐지는 것·자리 맞는 칸·인벤토리의 차례, 나머지는 둠, 그 뒤 Tidy), `Simulations`의 드랍 줄(떨어진 수, 주운 수). 보고 Design/08 §14.
-- 화면: `LootScreen`(보상 화면을 고쳐 씀: 카드마다 줍기, 주운 카드는 남음, 마지막 것을 주우면 지도, 두고 가기), `LootCardView.ShowTaken`·`IsTaken`, `UiPrefabSetup.Loot.cs`(`LootScreen`, `Cards`/`CardTemplate`, `LootHint`, `LootToInventory`, `Leave`), `ScreenId.Loot`(`ui/expedition/loot-screen`),
+- 화면(2026-10-08 Round 47에 바뀜: 전투 화면의 "이긴 뒤". 아래는 그 전의 것): `LootScreen`(보상 화면을 고쳐 씀: 카드마다 줍기, 주운 카드는 남음, 마지막 것을 주우면 지도, 두고 가기), `LootCardView.ShowTaken`·`IsTaken`, `UiPrefabSetup.Loot.cs`(`LootScreen`, `Cards`/`CardTemplate`, `LootHint`, `LootToInventory`, `Leave`), `ScreenId.Loot`(`ui/expedition/loot-screen`),
   문구 `Loot.Title`·`Hint`·`Item`·`Take`·`Selected`·`Taken`·`Leave`·`ToInventory`, `Battle.Loot`, `Map.ShopPotion`(`Reward.*` 삭제), `BattleScreen.ShowResult`의 전리품 줄, `NodeMapScreen`의 라벨 키. 옛 `RewardScreen.prefab`은 지웠다(setup이 `LootScreen.prefab`을 만들고 Addressables의 묵은 항목을 지운다). Architecture/12·14.
 - Test: EditMode `ExpeditionRulesTests`(전리품 아홉), `TierRulesTests`, `FatigueRulesTests`, `ExpeditionManagerTests`(둘), `RunSaveTests`, `RunSaveMapperTests`(거부 사례, `Migrate_From8…`, `Save_Refuses…`, `Save_KeepsTheTierOfEveryItemAndDrop`), `StaticDataValidationTests`, `DefinitionTests`, `TestData`·`TestCsv`;
   PlayMode `UiTestUtil`, `UiFlowTests`(루프, 인벤토리 팝업, `Loot_ACardShowsItsTier_…`, 새 `Loot_TakingOneOfTwoDrops_KeepsTheScreen_MarksTheCardTaken_AndLeavingGoesOn`: 둘째 드랍을 꾸며 "주움" 카드와 두고 가기), `UiScreenshotTests`(`_07_loot`, 드랍마다), `GameFlowTests`.
@@ -50,4 +53,5 @@ Architecture/09 "Slice B" Acceptance 10이 참이다: 보스가 아닌 전투에
 ## Next Action (제안)
 
 - 사용자: 직접 플레이(x1, 원정 하나를 끝까지) → `python3 Tools/playlog.py`의 출력과 체크리스트(`b16-tuning.md`)의 메모를 세션에.
-- 세션: 플레이 기록과 메모가 오면 16단계의 맞추기와 마감(17·18단계의 수치도 함께). 사후 검토의 답(척도, 드랍 수, 처치 3, 보스전, 글 카드)이 오면 그것부터.
+- 세션: 플레이 기록과 메모가 오면 16단계의 맞추기와 마감(17·18단계의 수치도 함께). 사후 검토의 답(척도, 드랍 수, 처치 3, 보스전, Round 47의 세부: 드랍 자리·주운 것이 사라짐·우클릭)이 오면 그것부터.
+- 2026-10-08 세션 정리: Round 46·47을 다섯 커밋(Architecture와 기획 / Application / 화면 / 그림: 기록 / Roadmap과 Handoff)으로 `origin/feature/slice-a`에 푸시했다.
