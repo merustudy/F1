@@ -25,10 +25,16 @@ namespace F1.Tests
         /// The test data with an eight-floor cave: shops by chance from floor 3, every node of floor 8 a camp, Bronze rewards from
         /// floor 4, the boss on floor 9; groups "pair" (floors 1..8), "trio" (2..8), the elite "guard" (3..8) and the boss "lair".
         /// The reward items and the tonic are priced (TestData); "trinket" is a reward item without a price, which no shop stocks.
+        /// The test pouch (a bag, Slice B stage 19) is on sale only when asked for, so that the other tests know the stock.
         /// </summary>
-        static StaticData ShopCave(int shopPercent = 40, params (string Key, int Value)[] balance)
+        static StaticData ShopCave(int shopPercent = 40, bool bagsOnSale = false, params (string Key, int Value)[] balance)
         {
             StaticDataParts parts = TestData.Parts(balance);
+            if (!bagsOnSale)
+            {
+                parts.Bags = parts.Bags.Select(b => new BagData(b.Id, b.Name, b.Width, b.Height, b.Start, b.Price, 0, b.LootWeight)).ToList();
+            }
+
             parts.Items = parts.Items.Concat(new[] { TestData.Item("trinket", 3000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Other, shopWeight: 5) }).ToList();
             parts.Dungeons = new List<DungeonData>
             {
@@ -189,28 +195,30 @@ namespace F1.Tests
             ExpeditionMember anna = state.Members[0];
 
             Assert.IsTrue(ExpeditionRules.CanAfford(data, state, slot));
-            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, 1), "Onto the free cell behind the blade.");
-            ExpeditionRules.BuyToBoard(data, state, slot, 0, 1);
+            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(2, 0)), "Onto the free square behind the blade.");
+            ExpeditionRules.BuyToBoard(data, state, slot, 0, TestBoards.At(2, 0));
 
             Assert.AreEqual(100 - price, state.Coins);
             Assert.IsNull(state.Shop.Stock[slot], "Sold.");
-            Assert.AreEqual(2, anna.Items.Count);
-            Assert.AreEqual("knife", anna.Items[1].Item.Id);
-            Assert.AreEqual(knife.Tier, anna.Items[1].Tier);
-            Assert.IsFalse(anna.Items[1].IsBase);
-            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, 2), "A sold slot cannot be bought again.");
+            Assert.AreEqual(2, anna.Board.Items.Count);
+            EquippedItem bought = TestBoards.ItemAt(anna, 2, 0);
+            Assert.AreEqual("knife", bought.Item.Id);
+            Assert.AreEqual(knife.Tier, bought.Tier);
+            Assert.IsFalse(bought.IsBase);
+            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(0, 1)), "A sold slot cannot be bought again.");
             Assert.IsNull(ExpeditionRules.OfferAt(state, slot));
 
             // The same knife on offer again (a refresh draws it anew) merges into the one on the board, a tier up, when bought onto it.
             ExpeditionRules.RefreshShop(data, state);
             int again = SlotOf(state, OfferKind.Item, "knife");
             Assume.That(again, Is.GreaterThanOrEqualTo(0), "The knife is on offer again.");
-            Assert.IsTrue(ExpeditionRules.ShopMergesAt(state, again, 0, 1));
-            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, again, 0, 1));
+            Assert.IsTrue(ExpeditionRules.ShopMergesAt(state, again, 0, 2, 0));
+            Assert.IsFalse(ExpeditionRules.ShopMergesAt(state, again, 0, 0, 0), "The blade.");
+            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, again, 0, TestBoards.At(2, 0)));
             int before = state.Coins;
-            ExpeditionRules.BuyToBoard(data, state, again, 0, 1);
-            Assert.AreEqual(2, anna.Items.Count, "Merged: still one knife.");
-            Assert.AreEqual(knife.Tier + 1, anna.Items[1].Tier);
+            ExpeditionRules.BuyToBoard(data, state, again, 0, TestBoards.At(2, 0));
+            Assert.AreEqual(2, anna.Board.Items.Count, "Merged: still one knife.");
+            Assert.AreEqual(knife.Tier + 1, TestBoards.ItemAt(anna, 2, 0).Tier);
             Assert.AreEqual(before - price, state.Coins);
         }
 
@@ -243,7 +251,7 @@ namespace F1.Tests
                 cramped.Potions[i] = "tonic";
             }
 
-            while (ExpeditionRules.FreeInventoryCells(data, cramped) > 0)
+            while (cramped.Inventory.HasRoomFor(data.Items.Get("knife")))
             {
                 cramped.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8));
             }
@@ -262,9 +270,9 @@ namespace F1.Tests
             ExpeditionState poor = InAShop(data, out MapNode _, coins: 4);
             int slot = SlotOf(poor, OfferKind.Item);
             Assert.IsFalse(ExpeditionRules.CanAfford(data, poor, slot));
-            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, poor, slot, 0, 1));
+            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, poor, slot, 0, TestBoards.At(2, 0)));
             Assert.IsFalse(ExpeditionRules.CanBuyToInventory(data, poor, slot));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyToBoard(data, poor, slot, 0, 1));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyToBoard(data, poor, slot, 0, TestBoards.At(2, 0)));
             Assert.IsFalse(ExpeditionRules.CanBuyPotion(data, poor, SlotOf(poor, OfferKind.Potion)), "A coin short of a tonic.");
             Assert.IsTrue(ExpeditionRules.CanRefreshShop(data, poor), "Four coins cover a first refresh of three.");
             ExpeditionRules.RefreshShop(data, poor);
@@ -274,11 +282,45 @@ namespace F1.Tests
             ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
             ExpeditionRules.LeaveShop(state);
             Assert.IsNull(ExpeditionRules.OfferAt(state, 0));
-            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, 0, 0, 1));
+            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, 0, 0, TestBoards.At(2, 0)));
             Assert.IsFalse(ExpeditionRules.CanRefreshShop(data, state));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.RefreshShop(data, state));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.LeaveShop(state), "Once.");
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.RefreshCost(data, state));
+        }
+
+        [Test]
+        public void ABag_IsOnSale_AndIsBoughtIntoTheFrameOverNoBag_NeverIntoTheInventory()
+        {
+            StaticData data = ShopCave(bagsOnSale: true);
+            ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
+            int slot = SlotOf(state, OfferKind.Bag, "pouch");
+            for (int guard = 0; slot < 0 && guard < 10; guard++)
+            {
+                state.Coins = 100;
+                ExpeditionRules.RefreshShop(data, state);
+                slot = SlotOf(state, OfferKind.Bag, "pouch");
+            }
+
+            Assert.GreaterOrEqual(slot, 0, "The pouch comes on offer.");
+            Assert.AreEqual(0, state.Shop.Stock[slot].Grade);
+            Assert.AreEqual(6, ExpeditionRules.PriceOf(data, state.Shop.Stock[slot]), "A bag's own price.");
+            ExpeditionMember anna = state.Members[0];
+            int coins = state.Coins;
+
+            Assert.IsFalse(ExpeditionRules.CanBuyToInventory(data, state, slot), "A bag never goes to the inventory.");
+            Assert.IsFalse(ExpeditionRules.ShopMergesAt(state, slot, 0, 0, 0));
+            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(0, 1)), "Over the start bag.");
+            Assert.IsFalse(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(0, BoardFrame.Height - 1, 1)), "Standing out of the frame.");
+            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(0, 5, 1)), "Stood up in the frame.");
+            Assert.IsTrue(ExpeditionRules.CanBuyToBoard(data, state, slot, 0, TestBoards.At(0, 2)));
+            ExpeditionRules.BuyToBoard(data, state, slot, 0, TestBoards.At(0, 2));
+
+            Assert.AreEqual(coins - 6, state.Coins);
+            Assert.IsNull(state.Shop.Stock[slot], "Sold.");
+            Assert.AreEqual(2, anna.Board.Bags.Count);
+            Assert.AreEqual("pouch", anna.Board.BagAt(1, 2).Bag.Id);
+            Assert.IsTrue(anna.Board.OnBags(0, 2, 3, 1), "Its squares now take items.");
         }
 
         // ---- The refresh and leaving ---------------------------------------------------------
@@ -362,7 +404,7 @@ namespace F1.Tests
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.EnterCamp(state, shop.Id), "Nor is it a camp.");
             ExpeditionRules.EnterShop(data, state, shop.Id);
             Assert.IsTrue(ExpeditionRules.CanMoveToRow(state, 0, 2));
-            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0));
+            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0, 0));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.EnterShop(data, state, shop.Id), "Once.");
 
             MapNode battle = ExpeditionRules.AvailableNodes(ExpeditionRules.Create(data, "cave", 1, Party))[0];
@@ -387,7 +429,8 @@ namespace F1.Tests
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
             foreach (ExpeditionMember member in state.Members)
             {
-                member.Items[0] = new EquippedItem(member.Items[0].Item, 999, isBase: true);
+                BoardItem weapon = member.Board.Items[0];
+                weapon.Item = new EquippedItem(weapon.Item.Item, 999, isBase: true);
             }
 
             MapNode first = ExpeditionRules.AvailableNodes(state)[0];

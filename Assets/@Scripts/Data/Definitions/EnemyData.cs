@@ -49,9 +49,9 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': MaxHp must be at least 1.");
             }
 
-            if (items == null || items.Count < 1 || items.Count > JobData.MaxItemSlots)
+            if (items == null || items.Count < 1 || items.Count > BoardFrame.Height)
             {
-                throw new DataException($"{DefinitionName} '{id}': an enemy carries 1..{JobData.MaxItemSlots} items.");
+                throw new DataException($"{DefinitionName} '{id}': an enemy carries 1..{BoardFrame.Height} items.");
             }
 
             if (figureScale < MinFigureScale || figureScale > MaxFigureScale)

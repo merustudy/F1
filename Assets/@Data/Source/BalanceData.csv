@@ -31,7 +31,9 @@ PostBattleHealPercent,10
 MinCooldownMs,200
 DropCount,1
 EliteDropCount,2
-InventoryCells,10
+InventoryWidth,10
+InventoryHeight,3
+EliteBagPercent,50
 CampHealPercent,30
 CampFatigueRelief,20
 TierBronzePercent,200

@@ -25,7 +25,10 @@ Application 계층이 하는 일은 넷이다.
 - 상태 객체(`RunState`, `ExpeditionState`, `BattleEngine`)를 바꾸는 것은 Domain 규칙 코드뿐이다. Application 계층은 규칙 함수를 부르고,
   UI는 상태를 읽기만 한다.
 - UI는 `StaticData`와 규칙 함수를 직접 부르지 않아도 되게, 필요한 질의(`CanDepart`, `CanPlaceInParty`, `AvailableNodes`, `CanMoveToRow`,
-  `CanTakeLoot`, `CanTakeLootToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory` 등)를 Manager가 내놓는다.
+  `CanTakeLoot`, `CanTakeLootToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory`, `CanPickBag`, `CanMoveBag`, `MergesAt` 등)를 Manager가 내놓는다.
+- 보드의 명령과 질의(19단계, 격자)는 아이템을 그 아이템이 덮은 칸(구성원, X, Y)으로 가리키고 놓을 자리를 `Placement`(왼쪽 위 칸과 돌린 횟수)로 받는다:
+  `MoveItem(구성원, X, Y, 구성원, Placement)`, `MoveToInventory(구성원, X, Y)`, `PlaceFromInventory(번호, 구성원, Placement)`, `TakeLoot(자리, 구성원, Placement)`, `BuyToBoard(자리, 구성원, Placement)`, `MoveBag(구성원, X, Y, 구성원, Placement)`,
+  `UpgradeAtCamp(구성원, X, Y)`. 합침의 질의는 왼쪽 위 칸(`MergesAt`·`LootMergesAt`·`ShopMergesAt`(…, 구성원, X, Y)). 돌리기와 그림자는 화면의 일이고 Manager는 놓인 자리만 받는다.
 - Application 계층은 `UnityEngine`의 시간, Scene, GameObject를 모른다. EditMode Test로 루프 전체를 돌린다.
 
 ## 주인
@@ -46,8 +49,8 @@ Application 계층이 하는 일은 넷이다.
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
 | `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
-| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템 옮기기(보드 사이, 보드와 인벤토리 사이), 자리 바꾸기 |
-| `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기 |
+| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
+| `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기. **이긴 뒤**(`LootOpen`: 끝난 전투가 열려 있고 원정이 `PickingLoot`. Round 47)에는 `Loot`의 명령도 모두 된다(전리품은 전투 화면에서 줍는다) |
 | `Loot` | 원정 중이고 이긴 전투의 전리품이 놓여 있는데 전투 세션은 없다(`ExpeditionPhase.PickingLoot`. 앱을 닫았다 연 경우뿐이다) | 줍기(`TakeLoot`·`TakeLootToInventory`. 하나마다, 마지막 것을 주우면 `NodeMap`), 두고 가기(`LeaveLoot`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `CanTakeLoot`·`CanTakeLootToInventory`·`LootMergesAt`, 놓인 것은 `BattleLoot`. 화면은 전투 화면의 "이긴 뒤" 모습(`12_UI.md`) |
@@ -64,7 +67,7 @@ Application 계층이 하는 일은 넷이다.
 - 노드에 들어가는 명령(`EnterNode`)은 그 호출 안에서 살아 있는 구성원의 피로를 올리고(전투에 들어가는 비용, `08_GAMEPLAY_DOMAIN.md` "피로")
   전투를 세운 뒤 한 번에 저장한다. 이어하기는 저장된 피로로 같은 전투를 다시 만들 뿐 다시 더하지 않는다.
 - 야영지 노드면 `EnterNode`는 전투를 세우지 않고 야영지에 들어가(`ExpeditionRules.EnterCamp`) 저장한다. 피로는 오르지 않는다.
-  `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, 칸)`이 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
+  `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, X, Y)`가 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
 - 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
   이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
   이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전리품은 **그 전투 화면에서** 줍는다(Round 47):

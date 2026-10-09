@@ -59,6 +59,8 @@ namespace F1.Editor.Setup
         const float ShopCoinSize = 30f;
         const float ShopCoinsWidth = 70f;
         const float ShopTileCoinSize = 22f;
+        const float ShopHeldWidth = 84f;
+        const float ShopHeldHeight = 22f;
 
         /// <summary>
         /// A tile of the shop or of the loot (round 46, S1 and L2), from its top: the cell in the room of two cells (a longer item is
@@ -68,6 +70,9 @@ namespace F1.Editor.Setup
         const float ItemTileWidth = 194f;
         const float ItemTileHeight = 372f;
         const float ItemTileCellTop = 10f;
+
+        /// <summary>The potion's pocket on a tile: as big as one of the old board cells was tall.</summary>
+        const float ItemTilePocketSize = 60f;
         const float ItemTileNameTop = ItemTileCellTop + ItemTileView.CellRoom + 10f;
         const float ItemTileSubTop = ItemTileNameTop + 26f;
         const float ItemTileRuleTop = ItemTileSubTop + 28f;
@@ -225,20 +230,21 @@ namespace F1.Editor.Setup
             mendStep.gameObject.SetActive(false);
             campCover.gameObject.SetActive(false);
 
-            // The shop's window (round 44), over the map like the camp's: the coin stack, the title and the hint at its top with the
-            // party's coins at the right, the offers as tiles under them, and the refresh (with its cost) and leave buttons below.
+            // The shop's window (round 44; Diablo II's stone since round 49), over the map like the camp's: the coin stack, the title and the
+            // hint at its top with the party's coins at the right, the offers as tiles under them, and the refresh (with its cost) and leave
+            // buttons below.
             Image shopCover = UiBuild.Image("Shop", map.transform, new Color(0f, 0f, 0f, CampShadeAlpha), raycastTarget: true);
             UiBuild.Stretch(shopCover.rectTransform, MapViewInset, MapViewInset, MapViewInset, MapViewInset);
-            Image shopWindow = Rounded("ShopWindow", shopCover.transform, UiPalette.Brass, 10f);
+            Image shopWindow = UiBuild.Image("ShopWindow", shopCover.transform, UiPalette.StonePlate);
             UiBuild.Place(shopWindow.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(ShopWindowWidth, ShopWindowHeight));
-            Image shopBox = Rounded("ShopBox", shopWindow.transform, UiPalette.Panel, 10f - CampRim);
+            Image shopBox = KitFrame("ShopBox", shopWindow.transform, UiArt.Table);
             UiBuild.Stretch(shopBox.rectTransform, CampRim, CampRim, CampRim, CampRim);
             UiBuild.Box(KitIcon("ShopIcon", shopBox.transform, UiArt.NodeShop), 21f, 19f, 80f, 80f);
-            TextMeshProUGUI shopTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ShopTitle", shopBox.transform, 32f, UiPalette.Text), 121f, 21f, 430f, 44f));
+            TextMeshProUGUI shopTitle = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ShopTitle", shopBox.transform, 32f, UiPalette.DiabloGold), 121f, 21f, 430f, 44f));
             TextMeshProUGUI shopHint = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ShopHint", shopBox.transform, 19f, UiPalette.TextDim), 121f, 69f, 560f, 28f));
             float shopInner = ShopWindowWidth - 2f * CampRim;
             float coinsRight = shopInner - CampSideMargin;
-            TextMeshProUGUI shopCoins = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ShopCoins", shopBox.transform, 30f, UiPalette.Text, TextAlignmentOptions.Right), coinsRight - ShopCoinsWidth, 26f, ShopCoinsWidth, 40f));
+            TextMeshProUGUI shopCoins = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ShopCoins", shopBox.transform, 30f, UiPalette.DiabloGold, TextAlignmentOptions.Right), coinsRight - ShopCoinsWidth, 26f, ShopCoinsWidth, 40f));
             float shopCoinX = coinsRight - ShopCoinsWidth - 8f - ShopCoinSize;
             UiBuild.Box(KitIcon("ShopCoinIcon", shopBox.transform, UiArt.Coin), shopCoinX, 31f, ShopCoinSize, ShopCoinSize);
             UiBuild.Box(UiBuild.SingleLine(UiBuild.LocalizedLabel("ShopCoinsLabel", shopBox.transform, UiKeys.Map.ShopCoinsLabel, 19f, UiPalette.TextDim, TextAlignmentOptions.Right)), shopCoinX - 8f - 160f, 34f, 160f, 28f);
@@ -378,7 +384,7 @@ namespace F1.Editor.Setup
             ItemTileParts tile = BuildItemTile(parent, name, ItemTileWidth, ItemTileFootHeight);
 
             Image pocket = KitFrame(name + "Potion", tile.Fill, UiArt.PotionSlot);
-            UiBuild.Place(pocket.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(BattleItemView.CellHeight, BattleItemView.CellHeight));
+            UiBuild.Place(pocket.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(ItemTilePocketSize, ItemTilePocketSize));
             Image potionIcon = UiBuild.Image(name + "PotionIcon", pocket.transform, Color.white);
             potionIcon.preserveAspect = true;
             UiBuild.Stretch(potionIcon.rectTransform, 7f, 7f, 7f, 7f);
@@ -397,6 +403,14 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(sold.rectTransform);
             sold.gameObject.SetActive(false);
 
+            // Round 49: on the picked tile, Diablo's small label at its top that the hand holds it.
+            Image held = UiBuild.Image(name + "Held", tile.Fill, UiPalette.LabelBox);
+            AddLine(held, UiPalette.LabelLine, 1f);
+            UiBuild.Place(held.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -6f), new Vector2(ShopHeldWidth, ShopHeldHeight));
+            TextMeshProUGUI heldWord = UiBuild.SingleLine(UiBuild.LocalizedLabel(name + "HeldWord", held.transform, UiKeys.Map.ShopHeld, 14f, UiPalette.DiabloGold, TextAlignmentOptions.Center));
+            UiBuild.Stretch(heldWord.rectTransform);
+            held.gameObject.SetActive(false);
+
             var view = tile.Rim.gameObject.AddComponent<ShopTileView>();
             SetItemTile(view, tile);
             UiBuild.SetReference(view, "_potionPocket", pocket.gameObject);
@@ -404,6 +418,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_priceRow", priceRow.gameObject);
             UiBuild.SetReference(view, "_price", price);
             UiBuild.SetReference(view, "_sold", sold);
+            UiBuild.SetReference(view, "_held", held.gameObject);
             return view;
         }
 
@@ -440,22 +455,23 @@ namespace F1.Editor.Setup
             colors.disabledColor = Color.white;
             parts.Button.colors = colors;
             parts.Group = parts.Rim.gameObject.AddComponent<CanvasGroup>();
-            Image fill = Rounded(name + "Fill", parts.Rim.transform, UiPalette.Slot, 6f);
+            // Round 49: a slot sunk in the stone, as Diablo's vendor shows its goods.
+            Image fill = Rounded(name + "Fill", parts.Rim.transform, UiPalette.StonePlate, 6f);
             UiBuild.Stretch(fill.rectTransform, 2f, 2f, 2f, 2f);
             parts.Fill = fill.rectTransform;
 
             parts.Cell = BuildItemSlot(fill.transform, name + "Cell");
             parts.Cell.gameObject.SetActive(true);
             parts.Cell.GetComponent<Image>().raycastTarget = false;
-            UiBuild.Place((RectTransform)parts.Cell.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(BattleItemView.CellWidth, BattleItemView.CellHeight));
+            UiBuild.Place((RectTransform)parts.Cell.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(GridGeometry.Square, GridGeometry.Square));
 
             parts.Name = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Name", fill.transform, 19f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
             UiBuild.Line(parts.Name, ItemTileNameTop, 26f, 6f, 6f);
             parts.Sub = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Sub", fill.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Center)), 11f);
             UiBuild.Line(parts.Sub, ItemTileSubTop, 22f, 6f, 6f);
-            parts.Rule = UiBuild.Image(name + "Rule", fill.transform, Tinted(UiPalette.Brass, TooltipRuleAlpha));
+            parts.Rule = UiBuild.Image(name + "Rule", fill.transform, UiPalette.TooltipLine);
             UiBuild.Line(parts.Rule, ItemTileRuleTop, 1f, 10f, 10f);
-            parts.Facts = UiBuild.ShrinkToFit(UiBuild.Label(name + "Facts", fill.transform, 15f, UiPalette.Text, TextAlignmentOptions.TopLeft), ItemTileFactsMinSize);
+            parts.Facts = UiBuild.ShrinkToFit(UiBuild.Label(name + "Facts", fill.transform, 15f, UiPalette.Text, TextAlignmentOptions.Top), ItemTileFactsMinSize);
             UiBuild.Line(parts.Facts, ItemTileFactsTop, ItemTileHeight - 4f - ItemTileFactsTop - ItemTileFootBottom - footHeight - 6f, 10f, 10f);
             return parts;
         }

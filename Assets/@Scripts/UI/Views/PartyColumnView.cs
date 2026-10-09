@@ -47,11 +47,11 @@ namespace F1.UI
         /// <summary>The row's column of the board panel, under the stage column: the cells. Shown and hidden with the column, and placed under it by the party side.</summary>
         public GameObject Board => _board;
 
-        /// <summary>The cell views in board order: one per item, then one per empty cell. The rest are hidden.</summary>
-        public IReadOnlyList<ItemSlotView> Slots => _boardView.Slots;
+        /// <summary>The member's board in the panel: its head and its grid (Slice B stage 19).</summary>
+        public PartyBoardView BoardView => _boardView;
 
-        /// <summary>The height of the board on show: the member's cells stacked. The bag behind them is as long.</summary>
-        public float BoardHeight => _boardView.BoardHeight;
+        /// <summary>The pieces on show, one per item.</summary>
+        public IEnumerable<ItemSlotView> Pieces => _boardView.Pieces;
 
         /// <summary>The words on the head's fatigue tag, or an empty string while it is hidden.</summary>
         public string FatigueTotal => _boardView.FatigueTotal;
@@ -65,18 +65,32 @@ namespace F1.UI
         /// <summary>The click on the state line. Live only while the member is in a state.</summary>
         public Button StateButton => _state;
 
-        /// <summary>A cell of the board was clicked: the first cell of an item, or an empty cell.</summary>
-        public event Action<int> CellClicked
+        /// <summary>A square of the board was clicked.</summary>
+        public event Action<int, int> SquareClicked
         {
-            add => _boardView.CellClicked += value;
-            remove => _boardView.CellClicked -= value;
+            add => _boardView.SquareClicked += value;
+            remove => _boardView.SquareClicked -= value;
         }
 
-        /// <summary>A cell of the board was right-clicked (round 47): the item's card.</summary>
-        public event Action<int> CellRightClicked
+        /// <summary>A square of the board was right-clicked (round 47): the item's card, or a turn while something is held.</summary>
+        public event Action<int, int> SquareRightClicked
         {
-            add => _boardView.CellRightClicked += value;
-            remove => _boardView.CellRightClicked -= value;
+            add => _boardView.SquareRightClicked += value;
+            remove => _boardView.SquareRightClicked -= value;
+        }
+
+        /// <summary>The pointer came over a square of the board.</summary>
+        public event Action<int, int> SquareEntered
+        {
+            add => _boardView.SquareEntered += value;
+            remove => _boardView.SquareEntered -= value;
+        }
+
+        /// <summary>The pointer left a square of the board.</summary>
+        public event Action<int, int> SquareExited
+        {
+            add => _boardView.SquareExited += value;
+            remove => _boardView.SquareExited -= value;
         }
 
         /// <summary>The state's name on the state line was clicked.</summary>
@@ -97,10 +111,13 @@ namespace F1.UI
         }
 
         /// <param name="art">Where the figure of the member's job and the icons of its items come from.</param>
-        /// <param name="selectedCell">The first cell of the highlighted item, or -1.</param>
-        /// <param name="canClickCell">Whether a cell (the first of an item, or an empty one) takes a click now.</param>
-        /// <param name="mergesCell">Whether the chosen item would merge into the item at a cell (round 35): the cell is marked.</param>
-        public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, int selectedCell, Func<int, bool> canClickCell, Func<int, bool> mergesCell)
+        /// <param name="picked">The member's board item held now, or null.</param>
+        /// <param name="pickedBag">The member's bag held now, or null.</param>
+        /// <param name="merges">Whether the held item would merge into an item of the board (round 35): its piece is marked. Null for none.</param>
+        /// <param name="ghost">The held thing's ghost on this board, or null.</param>
+        /// <param name="showFrame">Whether the frame shows outside the bags: while a bag is held.</param>
+        public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, BoardItem picked, BoardBag pickedBag,
+            Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame)
         {
             Member = memberIndex;
             _figure.SetActive(true);
@@ -120,7 +137,7 @@ namespace F1.UI
             _state.interactable = state != null;
 
             _board.SetActive(true);
-            _boardView.Show(member, art, selectedCell, canClickCell, mergesCell);
+            _boardView.Show(member, art, picked, pickedBag, merges, ghost, showFrame);
         }
     }
 }

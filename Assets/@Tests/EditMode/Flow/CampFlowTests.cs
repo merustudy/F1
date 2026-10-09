@@ -23,9 +23,9 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, 3, "blade", 200, 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, 3, "staff", 10, 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, 2, "blade", 200, 3, null),
+                new JobData("tank", TestData.Text("tank"), 100, "blade", 200, 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, "staff", 10, 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, "blade", 200, 3, null),
             };
             parts.Dungeons = new List<DungeonData>
             {
@@ -83,16 +83,16 @@ namespace F1.Tests
         public void TheCampsUpkeep_RaisesTheItemATier_AndGoesOnToTheNextFloor_AndIsSaved()
         {
             FlowTestKit kit = AtTheCamp();
-            Assert.IsTrue(kit.Expedition.CanUpgradeAtCamp(0, 0));
+            Assert.IsTrue(kit.Expedition.CanUpgradeAtCamp(0, 0, 0));
 
-            kit.Expedition.UpgradeAtCamp(0, 0);
+            kit.Expedition.UpgradeAtCamp(0, 0, 0);
 
             Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
-            Assert.AreEqual(ItemTier.Bronze, kit.Expedition.Expedition.Members[0].Items[0].Tier);
+            Assert.AreEqual(ItemTier.Bronze, TestBoards.ItemAt(kit.Expedition.Expedition.Members[0], 0, 0).Tier);
             Assert.AreEqual(MapNodeKind.Boss, kit.Expedition.AvailableNodes().Single().Kind);
             ExpeditionRecord saved = kit.Save.Load<RunSaveData>(RunManager.FileName).Value.Expedition;
             Assert.AreEqual("Bronze", saved.Members[0].Items[0].Tier, "The upkeep is saved.");
-            Assert.IsFalse(kit.Expedition.CanUpgradeAtCamp(0, 0), "Not on the map.");
+            Assert.IsFalse(kit.Expedition.CanUpgradeAtCamp(0, 0, 0), "Not on the map.");
         }
 
         [Test]

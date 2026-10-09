@@ -33,6 +33,7 @@ namespace F1.Data
         public static readonly Entry Balance = new Entry(BalanceData.DefinitionName, "balance");
         public static readonly Entry Job = new Entry(JobData.DefinitionName, "job");
         public static readonly Entry Item = new Entry(ItemData.DefinitionName, "item");
+        public static readonly Entry Bag = new Entry(BagData.DefinitionName, "bag");
         public static readonly Entry Potion = new Entry(PotionData.DefinitionName, "potion");
         public static readonly Entry Enemy = new Entry(EnemyData.DefinitionName, "enemy");
         public static readonly Entry EnemyGroup = new Entry(EnemyGroupData.DefinitionName, "enemy-group");
@@ -46,6 +47,7 @@ namespace F1.Data
             Balance,
             Job,
             Item,
+            Bag,
             Potion,
             Enemy,
             EnemyGroup,

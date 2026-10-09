@@ -58,23 +58,27 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 공격 범위는 효과의 타깃(`EnemyFront`, `EnemyBack`)과 깊이(`Reach`)다. 살아 있는 유닛은 늘 1열부터 빈 열 없이 서 있으므로
   "앞에서 N번째까지"는 1~N열, "뒤에서 N번째까지"는 맨 뒤에서 N열이다. 그 안의 살아 있는 유닛만 고르니 빈 열을 치는 일이 없다.
 
-## 아이템 보드와 인벤토리
+## 아이템 보드와 인벤토리 (격자: Slice B 19단계)
 
-규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §5가 소유한다.
+규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §5가 소유한다. 틀의 크기는 구조 상수 `BoardFrame`(3×8, `F1.Data`)이고 가방과 아이템의 모양은 Static Data(`BagData`, `ItemData.Width`·`Height`)다.
 
-- 보드는 아이템(`EquippedItem`)의 순서 있는 목록과 칸 수(`ExpeditionMember.ItemSlots`, 직업에서 온다)다. 아이템은 크기(`ItemData.Size`)만큼
-  칸을 앞에서부터 빈 칸 없이 차지한다. 칸과 목록 사이의 계산(차지한 칸 수, 어느 칸에 어느 아이템이 있는지, 넣을 수 있는지, 넣기)은
-  `ItemBoard` 한 곳에 있다. 목록과 칸 수만 받는 순수 함수다.
-- 인벤토리는 `ExpeditionState.Inventory`(목록)다. 보드에서 밀려나거나 빼낸 아이템이 들어가고, 전투 Setup에는 들어가지 않는다.
-  칸 수는 `BalanceData.InventoryCells`이고 아이템은 보드처럼 크기만큼 차지한다(`ItemBoard.UsedCells`). 남은 칸은 `ExpeditionRules.FreeInventoryCells`.
-- 명령은 `ExpeditionRules`에 있다: 전리품을 보드에 넣기(`TakeLoot`)와 인벤토리로 줍기(`TakeLootToInventory`), 보드 사이 옮기기와
-  바꾸기(`MoveItem`), 인벤토리로 빼기(`MoveToInventory`), 인벤토리에서 넣기(`PlaceFromInventory`). 각각 `Can...` 질의가 있고,
-  화면은 칸마다 물어서 누를 수 있는지 정한다. 자리(칸)는 화면이 고르는 것이고 규칙은 Domain이 계산한다.
-- 인벤토리로 가는 아이템(줍는 전리품, 빼는 아이템, 찬 자리에 넣어 밀려나는 아이템)은 남은 칸에 들어갈 때만 허용한다. 인벤토리에서 보드의 찬 자리로
-  넣을 때는 나가는 아이템의 칸을 더해 센다. "칸에 아이템이 있어 집을 수 있는가"(`CanPickItem`)는 어디로 갈 수 있는가와 따로 묻는다:
-  보드 사이의 옮기기는 인벤토리가 차도 된다.
-- 전투의 `BattleUnitSetup.Items`는 보드 그대로의 목록(빈 칸 없음)이고 `ItemSlots`는 화면이 빈 칸을 그리기 위한 칸 수다
-  (적은 가진 아이템의 크기 합). `BattleItemState.SlotIndex`는 보드의 순서이고 발동 순서다.
+- 자리는 `Placement`(왼쪽 위 칸 X·Y와 시계 방향으로 돌린 횟수 Turns 0~3)다. 돌린 횟수가 홀수면 가로와 세로가 바뀐다(`WidthOf`·`HeightOf`).
+- 구성원의 보드는 `ExpeditionMember.Board`(`ItemBoard`)이고 가방(`BoardBag`: `BagData`와 자리)과 아이템(`BoardItem`: `EquippedItem`과 자리)의 목록이다. 첫 가방은 시작 가방이고 (0,0)에 돌리지 않은 채로 있다.
+  칸의 계산은 `ItemBoard` 한 곳에 있다: 그 칸의 아이템·가방(`ItemAt`·`BagAt`), 모두 가방의 칸인지(`OnBags`), 겹치는 아이템(`ItemsUnder`), 가방이 틀 안에 다른 가방 없이 놓이는지(`FreeOfBags`),
+  가방 안에 온전히 든 아이템(`ItemsIn`)과 걸친 아이템(`HasItemAcross`), 읽는 순서(`InReadingOrder`: 왼쪽 위 칸의 Y, 그다음 X), 첫 빈 자리(`FindRoom`: 읽는 순서로, 돌리지 않은 모양 먼저 · `FindBagRoom`). `Starting`이 시작 보드를 만든다.
+- 인벤토리는 `ExpeditionState.Inventory`(`InventoryGrid`, Round 49: 디아블로 2의 격자)다. 크기는 `BalanceData.InventoryWidth`·`InventoryHeight`(10×3)이고, 아이템은 보드처럼 자리(`BoardItem`: `Placement`)를 갖고 서로 겹치지 않는다.
+  칸의 계산은 `InventoryGrid` 한 곳에 있다: 그 칸의 아이템(`ItemAt`), 격자 안에 다른 아이템 없이 놓이는지(`IsFree`, 하나를 빼고 셀 수 있다), 첫 빈 자리(`FindRoom`: 돌리지 않은 모양으로 읽는 순서의 첫 자리, 없으면 돌린 모양으로),
+  자리가 있는지(`HasRoomFor`), 쓴 칸(`UsedSquares`). 목록으로 읽으면 들어온 차례의 `EquippedItem`이고(인벤토리 번호 = `Items`의 번호), `Add(아이템)`은 첫 빈 자리에 놓는다. 가방은 들어가지 않는다.
+- 명령은 `ExpeditionRules`에 있고 자리를 받는다: 전리품을 보드에 넣기(`TakeLoot(자리, 구성원, Placement)`)와 인벤토리로 줍기(`TakeLootToInventory`), 옮기기(`MoveItem(구성원, X, Y, 구성원, Placement)`: 같은 보드 안, 보드 사이),
+  인벤토리로 빼기(`MoveToInventory(구성원, X, Y)`: 첫 빈 자리로; `MoveToInventoryAt(구성원, X, Y, Placement)`: 고른 빈 자리로), 인벤토리 안에서 옮기기(`MoveInInventory(번호, Placement)`: 빈 칸에만, 바꾸기 없음),
+  인벤토리에서 넣기(`PlaceFromInventory(번호, 구성원, Placement)`), 가방 옮기기(`MoveBag(구성원, X, Y, 구성원, Placement)`). 각각 `Can...` 질의가 있고 화면은 그림자를 그리려고 묻는다.
+  버튼과 밀려남으로 인벤토리에 들어가는 길(전리품·상점의 "인벤토리에 넣기", "인벤토리로", 밀려난 아이템)은 모두 `FindRoom`의 자리에 놓고, 자리가 없으면 막힌다.
+  아이템은 그 아이템이 덮은 어느 칸으로도 가리킨다. 가방은 그 가방의 칸으로 가리킨다: 집는 것(`CanPickBag`)은 아이템이 없는 칸으로만(아이템이 있는 칸은 그 아이템을 집는다), 옮기는 것(`CanMoveBag`·`MoveBag`)은 어느 칸으로도. 둘 다 시작 가방이 아니고 걸친 아이템이 없어야 한다.
+- 놓기는 한 곳(`CanPut`·`Put`)이다: 자리가 모두 가방의 칸이고, 겹치는 아이템이 없거나 **하나**면 놓인다. 하나면 그것이 인벤토리의 첫 빈 자리로 간다(자리가 있을 때. 인벤토리에서 넣을 때는 나가는 아이템의 자리를 빈 것으로 친다). 둘 이상이면 안 된다.
+  옮기는 아이템 자신은 겹침에서 빠진다. 같은 아이템의 왼쪽 위 칸에 왼쪽 위를 맞추면(`MergesAt`) 놓는 대신 합친다(아래 "단계와 합치기").
+- 가방을 옮기면 그 안에 온전히 든 아이템이 가방 안의 자리를 지키며 함께 가고, 돌리면 함께 돈다(가방의 상자 안에서 시계 방향으로: (x, y) → (높이 − y − h, x)). 가방은 틀 안의 다른 가방이 없는 자리에만 놓인다. 시작 가방은 옮기지 않는다.
+- 전투의 `BattleUnitSetup.Items`는 보드의 아이템을 **읽는 순서**로 늘어놓은 목록이고 `BattleItemState.SlotIndex`는 그 순서(발동 순서)다. `BattleUnitSetup.Layout`(`BoardLayout`)은 화면이 그리려는 자리(아이템마다의 `Placement`와 가방)이고 규칙은 쓰지 않는다.
+  적은 가방 없이 아이템을 한 줄씩 아래로 놓은 `BoardLayout.Stacked`다.
 
 ## 피로
 
@@ -116,7 +120,8 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
   `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 등급은 던전의 것, 단계는 층의 것(정예 한 단계 위)이다 — 적이 들었던 등급이 아니다.
-- `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, 칸)`(빈 칸, 찬 칸의 밀어내기, 같은 아이템 위의 합치기: 보상의 것과 같은 규칙), `TakeLootToInventory(자리)`, `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt`.
+- `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
+- 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
   마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
 - 적의 아이템은 용병의 아이템과 같은 척도로 적는다(`Docs/Design/02_Combat_System.md` §4): 계수는 우리 아이템의 자리이고 적의 힘은 등급이 말한다. 그래서 던전의 등급으로 떨어진 것이 상점의 물건과 비슷한 힘이다.
 
@@ -129,10 +134,10 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   원정이 끝나면 `ExpeditionState`와 함께 버려진다(정산은 코인을 모른다).
 - 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
-- 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템, 빈 포션 칸이 있을 때만 포션, 겹침 없음). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
+- 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 빈 포션 칸이 있을 때만 포션, 겹침 없음). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
   난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열고, 새로고침 k번째의 물건은 같은 스트림을 처음부터 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
-- 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
-- 사는 명령은 전리품의 것과 짝이다: `BuyToBoard`(놓을 자리의 아이템과 합쳐지면 합치고, 아니면 `PutOnBoard`), `BuyToInventory`, `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
+- 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션과 가방은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
+- 사는 명령은 전리품의 것과 짝이다: `BuyToBoard(자리, 구성원, Placement)`(합쳐지면 합치고, 아니면 놓기. 가방은 틀에), `BuyToInventory`(아이템만), `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
   `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.
 
 ## 단계와 합치기 (Slice B 14단계)
@@ -142,10 +147,10 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 그대로 있다.
 - 효과 크기는 한 곳에서 센다: `EquippedItem.Magnitude(balance, effect)` = `ItemEffect.MagnitudeAt(등급, BalanceData.TierPercent(단계))`(정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
 - 단계는 `DungeonData.ItemTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 전리품과 상점의 물건에 싣는다.
-- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드의 칸에 놓는 세 명령
-  (`MoveItem`, `PlaceFromInventory`, `TakeLoot`)이 놓을 자리의 아이템과 합쳐지면 합친다: 그 자리에 한 단계 위(높은 등급), 놓은 것은 원래 목록에서 빠진다.
+- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드에 놓는 명령
+  (`MoveItem`, `PlaceFromInventory`, `TakeLoot`, `BuyToBoard`)은 놓을 자리의 왼쪽 위 칸이 합쳐질 아이템의 왼쪽 위 칸이면 합친다(`MergesAt`): 그 아이템이 그 자리·방향 그대로 한 단계 위(높은 등급)가 되고, 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
-- 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
+- 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp(구성원, X, Y)`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나(덮은 칸 어디로든)를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
 
 ## 전투: 결정론
 
@@ -204,7 +209,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 - `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
   합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 전리품(떨어진 수, 주운 수), 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
   정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13,
-  전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14.
+  전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14, 격자의 자리(`ItemBoard.FindRoom`, 가방은 가방 칸이 가장 적은 용병에게. 밀어내기·가방 옮기기는 하지 않는다)와 가방의 수는 §15.
 
 - 게임과 같은 Generated JSON을 `StaticDataLoader`로 읽고, 같은 Domain 코드를 돌린다.
 - 정책(`SimPolicy`)은 플레이어 입력을 대신한다. 게임 규칙이 아니라 시뮬 도구의 일부이고, 게임과 같은 API(`TryUsePotion`, `TryRetreat`,
@@ -218,7 +223,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 - 규칙 하나에 Test 하나를 둔다. 기획문서의 규칙을 바꾸면 그 Test를 같이 바꾼다.
 - 결정론 Test: 같은 Setup과 입력의 반복 실행, 진행 간격과 무관함, `Replay`와 실제 진행의 일치. 전진이 일어나는 전투도 포함한다.
 - 자리 규칙은 `FormationTests`가, 전투 중의 전진과 아이템이 켜지는 것은 `BattleEngineTests`의 "Advancing" 묶음이 고정한다.
-  보드와 인벤토리는 `ItemBoardTests`와 `ExpeditionRulesTests`의 "Rewards and the item board" 묶음이 고정한다.
+  격자 보드(자리, 겹침, 읽는 순서, 빈 자리 찾기, 화면용 `BoardLayout`)는 `ItemBoardTests`, 놓기·밀어내기·돌리기·합치기 자리·가방의 명령과 인벤토리는 `ExpeditionRulesTests`의 격자 묶음이 고정한다(Test의 보드 도우미는 `TestBoards`).
   피로(장비의 비용, 기본 무기, 전투에 들어갈 때 쌓임, 범위)는 `FatigueRulesTests`, 로스터와 정산은 `RunRulesTests`가 고정한다.
   긴 원정(노드 종류의 배치, 정예 무리, 야영지와 쉬기, 깊은 층의 적, 데이터 검증)은 `LongExpeditionTests`, 야영지의 명령과 저장은 `CampFlowTests`가 고정한다.
   단계(효과 크기, 전리품의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
@@ -232,7 +237,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 - 새 규칙이 `Docs/Design`에서 【확정】이고 Test가 있는가?
 - 새 상수가 `BalanceData`나 Definition에 있는가? 코드에 숫자로 들어가지 않았는가?
 - 자리를 바꾸는 새 코드가 `Formation`을 거치는가? 빈 열을 사이에 둔 줄이 상태에 남지 않는가?
-- 보드를 바꾸는 새 코드가 `ItemBoard`를 거치는가? 칸 수를 넘는 보드가 상태에 남지 않는가?
+- 보드를 바꾸는 새 코드가 `ExpeditionRules`의 놓기(`CanPut`·`Put`)와 `ItemBoard`의 계산을 거치는가? 가방 밖이나 겹친 아이템, 틀 밖이나 겹친 가방이 상태에 남지 않는가?
 - 피로를 바꾸는 새 코드가 `FatigueRules.Add`를 거치는가? 0~`MaxFatigue` 밖의 값이 상태에 남지 않는가?
 - 결과에 영향을 주는 새 난수 사용이 시드에서 파생한 `Pcg32`인가?
 

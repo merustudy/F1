@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using F1.Data;
+using F1.Gameplay;
 using F1.Save;
 
 namespace F1.Flow
@@ -66,6 +67,95 @@ namespace F1.Flow
             {
                 From8To9(save);
             }
+
+            if (save.SchemaVersion == 9)
+            {
+                From9To10(save, data);
+            }
+        }
+
+        /// <summary>
+        /// Up to version 9 a board was an ordered list of items on the job's cells, an item taking its size in cells; from version 10 it
+        /// is a grid of squares with bags (Slice B stage 19). Every member gets the start bag at the top-left, and its items lie unturned at
+        /// the left edge one row after another in their old order, so the reading order is the old activation order (an item of the old
+        /// size N is N rows tall now). The rows below the start bag that are needed get a bag of one row across the frame each. The
+        /// inventory, a list counted by area, becomes a grid (round 49): its items in their old order, each at its first room. Unknown
+        /// items are left for the validation; a file whose board needs a row bag the data does not have, or whose inventory does not fit
+        /// the grid, cannot be read.
+        /// </summary>
+        static void From9To10(RunSaveData save, StaticData data)
+        {
+            if (save.Expedition?.Members != null)
+            {
+                BagData start = data.StartBag;
+                BagData row = null;
+                foreach (BagData bag in data.Bags.Ordered)
+                {
+                    if (!bag.Start && bag.Width == BoardFrame.Width && bag.Height == 1)
+                    {
+                        row = bag;
+                        break;
+                    }
+                }
+
+                foreach (MemberRecord member in save.Expedition.Members)
+                {
+                    if (member == null)
+                    {
+                        continue;
+                    }
+
+                    member.Bags = new List<BagRecord> { new BagRecord { BagId = start.Id, X = 0, Y = 0, Turns = 0 } };
+                    int y = 0;
+                    foreach (ItemRecord item in member.Items ?? new List<ItemRecord>())
+                    {
+                        if (item == null)
+                        {
+                            continue;
+                        }
+
+                        item.X = 0;
+                        item.Y = y;
+                        item.Turns = 0;
+                        y += data.Items.Contains(item.ItemId) ? data.Items.Get(item.ItemId).Height : 1;
+                    }
+
+                    for (int bagRow = start.Height; bagRow < y; bagRow++)
+                    {
+                        if (row == null || bagRow >= BoardFrame.Height)
+                        {
+                            throw new RunSaveException($"The board of '{member.MercenaryId}' cannot be laid out as a grid.");
+                        }
+
+                        member.Bags.Add(new BagRecord { BagId = row.Id, X = 0, Y = bagRow, Turns = 0 });
+                    }
+                }
+            }
+
+            if (save.Expedition?.Inventory != null)
+            {
+                var grid = new InventoryGrid(data.Balance.InventoryWidth, data.Balance.InventoryHeight);
+                foreach (ItemRecord item in save.Expedition.Inventory)
+                {
+                    if (item == null || !data.Items.Contains(item.ItemId))
+                    {
+                        continue;
+                    }
+
+                    ItemData shape = data.Items.Get(item.ItemId);
+                    if (!grid.FindRoom(shape.Width, shape.Height, null, out Placement at))
+                    {
+                        throw new RunSaveException("The inventory cannot be laid out as a grid.");
+                    }
+
+                    item.X = at.X;
+                    item.Y = at.Y;
+                    item.Turns = at.Turns;
+                    grid.Items.Add(new BoardItem(new EquippedItem(shape, 1), at));
+                }
+            }
+
+            save.SchemaVersion = 10;
         }
 
         /// <summary>

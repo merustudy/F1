@@ -13,20 +13,20 @@ namespace F1.Tests
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,2\nStormGrowth,2\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
-            "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryCells,10\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
+            "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,MaxHp,ItemSlots,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
-            "knight,기사,Knight,140,3,sword,10,1,BattleStart,InRows,front:1,Shield,Self,20,보호막 {0},Shield {0},unit/job/knight\n" +
-            "bishop,주교,Bishop,90,3,staff,10,3,,,,,,,,,\n";
+            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
+            "knight,기사,Knight,140,sword,10,1,BattleStart,InRows,front:1,Shield,Self,20,보호막 {0},Shield {0},unit/job/knight\n" +
+            "bishop,주교,Bishop,90,staff,10,3,,,,,,,,,\n";
 
         public const string Items =
-            "Id,Name.ko-KR,Name.en-US,Category,Size,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,ShopWeight,Icon,Price\n" +
-            "sword,소드,Sword,Weapon,1,2500,front:2,Damage,EnemyFront,1,100,,,,,0,item/sword,0\n" +
-            "staff,지팡이,Staff,Support,1,4000,back:2,Heal,AllyLowestHp,,100,,,,,0,,0\n" +
-            "mace,메이스,Mace,Weapon,2,3200,front:1,Damage,EnemyFront,2,100,Shield,Self,,40,10,item/mace,16\n" +
-            "claw,발톱,Claw,Weapon,1,2000,all,Damage,EnemyBack,1,100,,,,,0,,0\n";
+            "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,ShopWeight,Icon,Price\n" +
+            "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,100,,,,,0,item/sword,0\n" +
+            "staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,100,,,,,0,,0\n" +
+            "mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,100,Shield,Self,,40,10,item/mace,16\n" +
+            "claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,100,,,,,0,,0\n";
 
         public const string Potions =
             "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price\n" +
@@ -57,6 +57,11 @@ namespace F1.Tests
             "rowan,로언,Rowan,knight\n" +
             "ella,엘라,Ella,bishop\n";
 
+        public const string Bags =
+            "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +
+            "pack,배낭,Pack,3,2,true,0,0,0\n" +
+            "pouch,주머니,Pouch,3,1,false,6,5,1\n";
+
         public const string FatigueStates =
             "Id,Name.ko-KR,Name.en-US,Kind,CooldownPercent,HealTakenPercent,DeathChanceDelta,Description.ko-KR,Description.en-US\n" +
             "fearful,공포,Fearful,Affliction,25,0,0,느리다,Slower\n" +
@@ -70,6 +75,7 @@ namespace F1.Tests
                 { StaticDataFiles.Balance.SourceFileName, Balance },
                 { StaticDataFiles.Job.SourceFileName, Jobs },
                 { StaticDataFiles.Item.SourceFileName, Items },
+                { StaticDataFiles.Bag.SourceFileName, Bags },
                 { StaticDataFiles.Potion.SourceFileName, Potions },
                 { StaticDataFiles.Enemy.SourceFileName, Enemies },
                 { StaticDataFiles.EnemyGroup.SourceFileName, EnemyGroups },

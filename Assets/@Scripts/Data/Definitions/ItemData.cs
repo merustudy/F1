@@ -90,15 +90,14 @@ namespace F1.Data
         public const int MaxEffects = 2;
         public const int MinCooldownMs = 100;
 
-        /// <summary>The biggest item: small, medium and large take 1, 2 and 3 cells of a board.</summary>
-        public const int MaxSize = 3;
 
         [JsonConstructor]
         public ItemData(
             string id,
             LocalizedText name,
             ItemCategory category,
-            int size,
+            int width,
+            int height,
             int cooldownMs,
             RowSpan rows,
             IReadOnlyList<ItemEffect> effects,
@@ -108,9 +107,9 @@ namespace F1.Data
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
-            if (size < 1 || size > MaxSize)
+            if (width < 1 || width > BoardFrame.MaxSide || height < 1 || height > BoardFrame.MaxSide)
             {
-                throw new DataException($"{DefinitionName} '{id}': Size must be 1..{MaxSize}.");
+                throw new DataException($"{DefinitionName} '{id}': Width and Height must be 1..{BoardFrame.MaxSide}.");
             }
 
             if (cooldownMs < MinCooldownMs)
@@ -143,7 +142,8 @@ namespace F1.Data
             }
 
             Category = category;
-            Size = size;
+            Width = width;
+            Height = height;
             CooldownMs = cooldownMs;
             Effects = effects;
             ShopWeight = shopWeight;
@@ -160,34 +160,45 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public ItemCategory Category { get; }
 
-        /// <summary>How many cells of a board the item takes.</summary>
+        /// <summary>
+        /// The squares of the item's shape across, unturned (Slice B stage 19, Docs/Design/02_Combat_System.md §4). An item lies on a
+        /// board as a Width x Height rectangle, or Height x Width when turned a quarter.
+        /// </summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
-        public int Size { get; }
+        public int Width { get; }
 
+        /// <summary>The squares of the item's shape down, unturned.</summary>
         [JsonProperty(Order = 5, Required = Required.Always)]
+        public int Height { get; }
+
+        [JsonProperty(Order = 6, Required = Required.Always)]
         public int CooldownMs { get; }
 
         /// <summary>Where in its line the owner must stand for the item to work, counted from the front or the back.</summary>
-        [JsonProperty(Order = 6, Required = Required.Always)]
+        [JsonProperty(Order = 7, Required = Required.Always)]
         public RowSpan Rows { get; }
 
-        [JsonProperty(Order = 7, Required = Required.Always)]
+        [JsonProperty(Order = 8, Required = Required.Always)]
         public IReadOnlyList<ItemEffect> Effects { get; }
 
         /// <summary>Relative chance to be stocked by a shop (Slice B stage 17). 0 means no shop stocks it. Battles drop what the enemies carried (stage 18), whatever this is.</summary>
-        [JsonProperty(Order = 8, Required = Required.Always)]
+        [JsonProperty(Order = 9, Required = Required.Always)]
         public int ShopWeight { get; }
 
         /// <summary>The logical address of the icon its cell shows. Null when it has no art yet: the cell shows the name.</summary>
-        [JsonProperty(Order = 9, Required = Required.AllowNull)]
+        [JsonProperty(Order = 10, Required = Required.AllowNull)]
         public string Icon { get; }
 
         /// <summary>
         /// What a shop sells it for at Common, in region coins (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5); a tier
         /// multiplies it as it does the effects. 0 means the shop never stocks it.
         /// </summary>
-        [JsonProperty(Order = 10, Required = Required.Always)]
+        [JsonProperty(Order = 11, Required = Required.Always)]
         public int Price { get; }
+
+        /// <summary>The squares the item takes: on a board, and in the inventory, which counts squares (Slice B stage 19).</summary>
+        [JsonIgnore]
+        public int Area => Width * Height;
 
         /// <param name="row">The row the owner stands in.</param>
         /// <param name="lineLength">How many units of the owner's side are alive.</param>

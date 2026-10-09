@@ -1,0 +1,44 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "belt_pouch",
+      "Name": {
+        "en-US": "Belt Pouch",
+        "ko-KR": "허리 주머니"
+      },
+      "Width": 2,
+      "Height": 1,
+      "Start": false,
+      "Price": 8,
+      "ShopWeight": 6,
+      "LootWeight": 3
+    },
+    {
+      "Id": "leather_pack",
+      "Name": {
+        "en-US": "Leather Pack",
+        "ko-KR": "가죽 배낭"
+      },
+      "Width": 3,
+      "Height": 3,
+      "Start": true,
+      "Price": 0,
+      "ShopWeight": 0,
+      "LootWeight": 0
+    },
+    {
+      "Id": "leather_pouch",
+      "Name": {
+        "en-US": "Leather Pouch",
+        "ko-KR": "가죽 주머니"
+      },
+      "Width": 3,
+      "Height": 1,
+      "Start": false,
+      "Price": 12,
+      "ShopWeight": 6,
+      "LootWeight": 2
+    }
+  ]
+}

@@ -40,7 +40,6 @@ namespace F1.Tests
 
             JobData knight = data.Jobs.Get("knight");
             Assert.AreEqual(140, knight.MaxHp);
-            Assert.AreEqual(3, knight.ItemSlots);
             Assert.AreEqual("sword", knight.WeaponItemId);
             Assert.AreEqual(10, knight.WeaponGrade);
             Assert.AreEqual(1, knight.RecommendedRow);
@@ -62,8 +61,12 @@ namespace F1.Tests
 
             ItemData mace = data.Items.Get("mace");
             Assert.AreEqual(ItemCategory.Weapon, mace.Category);
-            Assert.AreEqual(2, mace.Size);
-            Assert.AreEqual(1, data.Items.Get("sword").Size);
+            Assert.AreEqual(3, mace.Width, "Slice B stage 19: an item is a shape of squares.");
+            Assert.AreEqual(2, mace.Height);
+            Assert.AreEqual(2, data.Items.Get("sword").Width);
+            Assert.AreEqual(1, data.Items.Get("sword").Height);
+            Assert.AreEqual("pack", data.StartBag.Id, "The bags come from their own table.");
+            Assert.AreEqual(3, data.Bags.Get("pouch").Width);
             Assert.AreEqual("item/sword", data.Items.Get("sword").Icon);
             Assert.IsNull(data.Items.Get("staff").Icon, "An empty Icon cell means the item has no art.");
             Assert.AreEqual(3200, mace.CooldownMs);
@@ -297,7 +300,7 @@ namespace F1.Tests
         [TestCase("1,2")]
         public void Transform_WhenItemRowsAreNotASpan_Reports(string rows)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,front:2,", "sword,소드,Sword,Weapon,1,2500," + (rows.Contains(",") ? "\"" + rows + "\"" : rows) + ",");
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,", "sword,소드,Sword,Weapon,2,1,2500," + (rows.Contains(",") ? "\"" + rows + "\"" : rows) + ",");
             StringAssert.DoesNotContain("2500,front:2,", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
@@ -309,10 +312,10 @@ namespace F1.Tests
         [TestCase("0")]
         [TestCase("4")]
         [TestCase("x")]
-        public void Transform_WhenItemSizeIsNotOneToThree_Reports(string size)
+        public void Transform_WhenItemWidthIsNotOneToThree_Reports(string size)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,", "sword,소드,Sword,Weapon," + size + ",2500,");
-            StringAssert.DoesNotContain("Weapon,1,2500,front:2", items);
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2,1,2500,", "sword,소드,Sword,Weapon," + size + ",1,2500,");
+            StringAssert.DoesNotContain("Weapon,2,1,2500,front:2", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);
 
@@ -341,7 +344,7 @@ namespace F1.Tests
         [TestCase("EnemyAll,2,100", Description = "All enemies: no reach to give.")]
         public void Transform_WhenTheReachDoesNotFitTheTarget_Reports(string targetReachPower)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,1,2500,front:2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,1,2500,front:2,Damage," + targetReachPower + ",");
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage," + targetReachPower + ",");
             StringAssert.Contains("Damage," + targetReachPower + ",", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);

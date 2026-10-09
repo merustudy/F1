@@ -91,9 +91,9 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts(balanceOverrides);
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, 3, "blade", 200, 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, 3, "staff", 10, 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, 2, "blade", 200, 3, null),
+                new JobData("tank", TestData.Text("tank"), 100, "blade", 200, 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, "staff", 10, 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, "blade", 200, 3, null),
             };
             return new StaticData(parts);
         }

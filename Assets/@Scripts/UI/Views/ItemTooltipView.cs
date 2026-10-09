@@ -7,7 +7,8 @@ namespace F1.UI
 {
     /// <summary>
     /// An item's card (2026-10-07 round 42, Docs/Architecture/12_UI.md "툴팁"): its title, facts, effects, fatigue and, on the
-    /// party side, what merging it does, on an ink card with a brass hairline and the tier's stripe. The party side floats it
+    /// party side, what merging it does, in Diablo II's tooltip since round 49 (a black see-through card with a grey hairline, the lines
+    /// centred, the title in the item's rarity colour, the effects in the magic blue; no stripe). The party side floats it
     /// above the board panel over the cell's column with a notch down towards the cell; the battle stands it beside the board
     /// with a notch on the edge facing the cell (mockup 6). The shop's tiles show their facts themselves (round 46, S1). It takes no clicks: the screen closes it on the next press anywhere (<see cref="PointerPress"/>).
     /// </summary>
@@ -96,9 +97,8 @@ namespace F1.UI
             Set(_effects, effects);
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
-            Color stripe = UiPalette.TierMark(item.Tier);
-            _stripe.enabled = stripe.a > 0f;
-            _stripe.color = stripe;
+            _title.color = UiPalette.Rarity(item.Tier);
+            _stripe.enabled = false;
 
             gameObject.SetActive(true);
             transform.SetAsLastSibling();

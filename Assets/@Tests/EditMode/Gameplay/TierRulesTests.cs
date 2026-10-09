@@ -34,7 +34,7 @@ namespace F1.Tests
         /// <summary>A board as "blade:Common knife:Bronze".</summary>
         static string Board(ExpeditionMember member)
         {
-            return string.Join(" ", member.Items.Select(i => $"{i.Item.Id}:{i.Tier}"));
+            return string.Join(" ", TestBoards.Items(member).Select(i => $"{i.Item.Id}:{i.Tier}"));
         }
 
         // ---- Data ----------------------------------------------------------------------------
@@ -142,7 +142,12 @@ namespace F1.Tests
             Assert.AreEqual(ItemTier.Bronze, state.Inventory.Single().Tier);
         }
 
-        // ---- Merging -------------------------------------------------------------------------
+        // ---- Merging (on the grid boards of Slice B stage 19: an item merges into the same item at its placement's top-left square) --
+
+        static Placement At(int x, int y, int turns = 0)
+        {
+            return new Placement(x, y, turns);
+        }
 
         [Test]
         public void TwoOfTheSameItemAtTheSameTier_MergeIntoOneATierUp_WhenOneIsPutOnTheOther()
@@ -151,47 +156,53 @@ namespace F1.Tests
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
             ExpeditionMember ben = state.Members[1];
-            anna.Items.Add(Item(data, "knife", ItemTier.Bronze, grade: 8));
-            ben.Items.Add(Item(data, "knife", ItemTier.Bronze, grade: 9));
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Bronze, grade: 8), 2, 0);
+            TestBoards.Put(ben, Item(data, "knife", ItemTier.Bronze, grade: 9), 0, 1);
 
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 1, 1, 1));
-            ExpeditionRules.MoveItem(state, 0, 1, 1, 1);
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 2, 0, 1, At(0, 1)));
+            ExpeditionRules.MoveItem(data, state, 0, 2, 0, 1, At(0, 1));
 
             Assert.AreEqual("blade:Common", Board(anna), "The knife left anna's board.");
             Assert.AreEqual("staff:Common knife:Silver", Board(ben), "Ben's knife is a tier up, where it was.");
-            Assert.AreEqual(9, ben.Items[1].Grade, "At the better grade of the two.");
-            Assert.IsFalse(ben.Items[1].IsBase);
+            EquippedItem merged = TestBoards.ItemAt(ben, 0, 1);
+            Assert.AreEqual(9, merged.Grade, "At the better grade of the two.");
+            Assert.IsFalse(merged.IsBase);
+            Assert.IsEmpty(state.Inventory);
         }
 
         [Test]
         public void Merging_WorksOnOneBoard_FromTheInventory_AndFromTheLoot_EvenWhereNothingHasRoom()
         {
-            StaticData data = TestData.Data(("InventoryCells", 4));
+            StaticData data = TestData.Data(("InventoryWidth", 4), ("InventoryHeight", 3));
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
-            anna.Items.Add(Item(data, "knife", ItemTier.Common));
-            anna.Items.Add(Item(data, "knife", ItemTier.Common));
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Common), 2, 0);
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Common), 0, 1);
 
             // On one board: the second knife onto the first.
-            ExpeditionRules.MoveItem(state, 0, 2, 0, 1);
+            ExpeditionRules.MoveItem(data, state, 0, 0, 1, 0, At(2, 0));
             Assert.AreEqual("blade:Common knife:Bronze", Board(anna));
 
             // From a full inventory onto a full board.
-            anna.Items.Add(Item(data, "charm", ItemTier.Common));
-            state.Inventory.Add(new EquippedItem(data.Items.Get("ballista"), 8));
-            state.Inventory.Add(Item(data, "knife", ItemTier.Bronze));
-            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, state));
-            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 1, 0, 1));
-            ExpeditionRules.PlaceFromInventory(data, state, 1, 0, 1);
-            Assert.AreEqual("blade:Common knife:Silver charm:Common", Board(anna));
-            Assert.AreEqual("ballista", state.Inventory.Single().Item.Id);
+            TestBoards.Put(anna, Item(data, "charm", ItemTier.Common), 0, 1);
+            TestBoards.Put(anna, Item(data, "claw", ItemTier.Common), 1, 1);
+            TestBoards.Put(anna, Item(data, "claw", ItemTier.Common), 2, 1);
+            state.Inventory.Add(new EquippedItem(data.Items.Get("ballista"), 8), At(0, 0));
+            state.Inventory.Add(Item(data, "knife", ItemTier.Bronze), At(3, 0));
+            state.Inventory.Add(Item(data, "charm", ItemTier.Common), At(3, 1));
+            state.Inventory.Add(Item(data, "charm", ItemTier.Common), At(3, 2));
+            Assert.AreEqual(12, state.Inventory.UsedSquares, "Full.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 1, 0, At(2, 0)));
+            ExpeditionRules.PlaceFromInventory(data, state, 1, 0, At(2, 0));
+            Assert.AreEqual("blade:Common knife:Silver charm:Common claw:Common claw:Common", Board(anna));
+            Assert.AreEqual("ballista charm charm", string.Join(" ", state.Inventory.Select(i => i.Item.Id)));
 
             // From the loot: one drop lying there, so taking it ends the loot.
             state.Phase = ExpeditionPhase.PickingLoot;
             state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Silver));
-            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 1));
-            ExpeditionRules.TakeLoot(data, state, 0, 0, 1);
-            Assert.AreEqual("blade:Common knife:Gold charm:Common", Board(anna));
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(2, 0)));
+            ExpeditionRules.TakeLoot(data, state, 0, 0, At(2, 0));
+            Assert.AreEqual("blade:Common knife:Gold charm:Common claw:Common claw:Common", Board(anna));
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
             Assert.IsEmpty(state.Loot);
         }
@@ -203,20 +214,21 @@ namespace F1.Tests
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
             ExpeditionMember ben = state.Members[1];
-            anna.Items.Add(Item(data, "knife", ItemTier.Common));
-            ben.Items.Add(Item(data, "knife", ItemTier.Bronze));
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Common), 2, 0);
+            TestBoards.Put(ben, Item(data, "knife", ItemTier.Bronze), 0, 1);
 
-            Assert.IsFalse(ExpeditionRules.CanMerge(anna.Items[1], ben.Items[1]), "Different tiers.");
-            ExpeditionRules.MoveItem(state, 0, 1, 1, 1);
-            Assert.AreEqual("blade:Common knife:Bronze", Board(anna), "They trade places instead.");
-            Assert.AreEqual("staff:Common knife:Common", Board(ben));
+            Assert.IsFalse(ExpeditionRules.CanMerge(TestBoards.ItemAt(anna, 2, 0), TestBoards.ItemAt(ben, 0, 1)), "Different tiers.");
+            ExpeditionRules.MoveItem(data, state, 0, 2, 0, 1, At(0, 1));
+            Assert.AreEqual("blade:Common", Board(anna));
+            Assert.AreEqual("staff:Common knife:Common", Board(ben), "It lies over the other knife instead...");
+            Assert.AreEqual(ItemTier.Bronze, state.Inventory.Single().Tier, "...which went to the inventory.");
 
             Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Common), Item(data, "charm", ItemTier.Common)), "Different items.");
             Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Gold), Item(data, "knife", ItemTier.Gold)), "Gold is the last.");
 
             // Anna (tank) and cora (striker) both left with a blade.
-            EquippedItem annas = anna.Items[0];
-            EquippedItem coras = state.Members[2].Items[0];
+            EquippedItem annas = TestBoards.ItemAt(anna, 0, 0);
+            EquippedItem coras = TestBoards.ItemAt(state.Members[2], 0, 0);
             Assert.IsTrue(annas.IsBase && coras.IsBase && annas.Tier == coras.Tier);
             coras = new EquippedItem(coras.Item, annas.Grade, isBase: true);
             Assert.IsFalse(ExpeditionRules.CanMerge(coras, annas), "Base weapons do not merge.");
@@ -229,40 +241,40 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
-            anna.Items.Add(Item(data, "knife", ItemTier.Common));
-            anna.Items.Add(Item(data, "knife", ItemTier.Common));
-            Assert.AreEqual(2 * data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, anna.Items));
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Common), 2, 0);
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Common), 0, 1);
+            Assert.AreEqual(2 * data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, TestBoards.Items(anna)));
 
-            ExpeditionRules.MoveItem(state, 0, 2, 0, 1);
+            ExpeditionRules.MoveItem(data, state, 0, 0, 1, 0, At(2, 0));
 
-            Assert.AreEqual(data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, anna.Items));
+            Assert.AreEqual(data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, TestBoards.Items(anna)));
         }
 
         [Test]
-        public void WhereAnItemWouldMerge_IsAskedPerCell_AndWhetherAnyBoardHoldsATarget()
+        public void WhereAnItemWouldMerge_IsAskedPerSquare_AndWhetherAnyBoardHoldsATarget()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
             ExpeditionMember ben = state.Members[1];
-            ben.Items.Add(Item(data, "knife", ItemTier.Common));
+            TestBoards.Put(ben, Item(data, "knife", ItemTier.Common), 0, 1);
             EquippedItem knife = Item(data, "knife", ItemTier.Common);
             EquippedItem silverKnife = Item(data, "knife", ItemTier.Bronze);
 
-            Assert.IsTrue(ExpeditionRules.MergesAt(state, knife, 1, 1));
-            Assert.IsFalse(ExpeditionRules.MergesAt(state, knife, 1, 0), "The staff.");
-            Assert.IsFalse(ExpeditionRules.MergesAt(state, knife, 1, 2), "Nothing there.");
-            Assert.IsFalse(ExpeditionRules.MergesAt(state, silverKnife, 1, 1), "Another tier.");
+            Assert.IsTrue(ExpeditionRules.MergesAt(state, knife, 1, 0, 1));
+            Assert.IsFalse(ExpeditionRules.MergesAt(state, knife, 1, 0, 0), "The staff.");
+            Assert.IsFalse(ExpeditionRules.MergesAt(state, knife, 1, 2, 1), "Nothing there.");
+            Assert.IsFalse(ExpeditionRules.MergesAt(state, silverKnife, 1, 0, 1), "Another tier.");
             Assert.IsTrue(ExpeditionRules.HasMergeTarget(state, knife));
             Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, silverKnife));
-            Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, ben.Items[1]), "Not into itself.");
+            Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, TestBoards.ItemAt(ben, 0, 1)), "Not into itself.");
 
             state.Phase = ExpeditionPhase.PickingLoot;
             state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Common));
             state.Loot.Add(new ItemOffer(OfferKind.Potion, "tonic", 0));
-            Assert.IsTrue(ExpeditionRules.LootMergesAt(state, 0, 1, 1));
-            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 1, 1, 1), "A potion.");
-            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0), "The blade.");
-            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 5, 1, 1), "No such drop.");
+            Assert.IsTrue(ExpeditionRules.LootMergesAt(state, 0, 1, 0, 1));
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 1, 1, 0, 1), "A potion.");
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0, 0), "The blade.");
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 5, 1, 0, 1), "No such drop.");
         }
 
         // ---- The camp's upkeep ---------------------------------------------------------------
@@ -294,30 +306,32 @@ namespace F1.Tests
             ExpeditionState state = AtTheCamp(data);
             ExpeditionMember anna = state.Members[0];
 
-            Assert.IsTrue(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0));
-            ExpeditionRules.UpgradeAtCamp(state, 0, 0);
+            Assert.IsTrue(ExpeditionRules.CanUpgradeAtCamp(state, 0, 1, 0), "By any square of the item.");
+            ExpeditionRules.UpgradeAtCamp(state, 0, 1, 0);
 
-            Assert.AreEqual(ItemTier.Bronze, anna.Items[0].Tier);
-            Assert.IsTrue(anna.Items[0].IsBase, "A base weapon stays one.");
-            Assert.AreEqual(10, anna.Items[0].Grade);
+            EquippedItem blade = TestBoards.ItemAt(anna, 0, 0);
+            Assert.AreEqual(ItemTier.Bronze, blade.Tier);
+            Assert.IsTrue(blade.IsBase, "A base weapon stays one.");
+            Assert.AreEqual(10, blade.Grade);
+            Assert.AreEqual(new Placement(0, 0), anna.Board.Items[0].At, "Where it lay.");
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0), "Once per camp: the party has gone on.");
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0, 0), "Once per camp: the party has gone on.");
         }
 
         [Test]
-        public void TheCampsUpkeep_RefusesAGold_AnEmptyCell_TheDead_AndAnywhereButACamp()
+        public void TheCampsUpkeep_RefusesAGold_AnEmptySquare_TheDead_AndAnywhereButACamp()
         {
             StaticData data = CaveWithACamp();
             ExpeditionState state = AtTheCamp(data);
-            state.Members[0].Items.Add(Item(data, "knife", ItemTier.Gold));
+            TestBoards.Put(state.Members[0], Item(data, "knife", ItemTier.Gold), 2, 0);
             state.Members[1].Alive = false;
             state.Members[1].Hp = 0;
 
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 1), "Gold is the last.");
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 2), "Nothing there.");
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 1, 0), "The dead.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.UpgradeAtCamp(state, 0, 1));
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(Expedition(data), 0, 0), "Only at a camp.");
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 2, 0), "Gold is the last.");
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0, 1), "Nothing there.");
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 1, 0, 0), "The dead.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.UpgradeAtCamp(state, 0, 2, 0));
+            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(Expedition(data), 0, 0, 0), "Only at a camp.");
         }
     }
 }

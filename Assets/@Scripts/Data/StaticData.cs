@@ -10,6 +10,7 @@ namespace F1.Data
         public IEnumerable<BalanceEntry> Balance;
         public IEnumerable<JobData> Jobs;
         public IEnumerable<ItemData> Items;
+        public IEnumerable<BagData> Bags;
         public IEnumerable<PotionData> Potions;
         public IEnumerable<EnemyData> Enemies;
         public IEnumerable<EnemyGroupData> EnemyGroups;
@@ -83,6 +84,7 @@ namespace F1.Data
 
             Jobs = Index(parts.Jobs, x => x.Id, JobData.DefinitionName, problems);
             Items = Index(parts.Items, x => x.Id, ItemData.DefinitionName, problems);
+            Bags = Index(parts.Bags, x => x.Id, BagData.DefinitionName, problems);
             Potions = Index(parts.Potions, x => x.Id, PotionData.DefinitionName, problems);
             Enemies = Index(parts.Enemies, x => x.Id, EnemyData.DefinitionName, problems);
             EnemyGroups = Index(parts.EnemyGroups, x => x.Id, EnemyGroupData.DefinitionName, problems);
@@ -105,6 +107,12 @@ namespace F1.Data
         public BalanceData Balance { get; }
         public DataTable<JobData> Jobs { get; }
         public DataTable<ItemData> Items { get; }
+
+        /// <summary>The bags (Slice B stage 19). Exactly one is the start bag (<see cref="StartBag"/>).</summary>
+        public DataTable<BagData> Bags { get; }
+
+        /// <summary>The bag every mercenary leaves on an expedition with.</summary>
+        public BagData StartBag => Bags.Ordered.First(bag => bag.Start);
         public DataTable<PotionData> Potions { get; }
         public DataTable<EnemyData> Enemies { get; }
         public DataTable<EnemyGroupData> EnemyGroups { get; }
@@ -143,33 +151,45 @@ namespace F1.Data
 
         void CheckReferences(List<string> problems)
         {
+            int startBags = Bags.Ordered.Count(bag => bag.Start);
+            if (startBags != 1)
+            {
+                problems.Add($"{BagData.DefinitionName}: exactly one bag is the start bag, not {startBags}.");
+            }
+
             foreach (JobData job in Jobs.Ordered)
             {
                 string what = $"{JobData.DefinitionName} '{job.Id}'";
                 Require(Items, job.WeaponItemId, what + " WeaponItemId", problems);
-                if (Items.Contains(job.WeaponItemId) && Items.Get(job.WeaponItemId).Size > job.ItemSlots)
+
+                // The weapon lies unturned at the top-left of the start bag when the expedition leaves.
+                if (startBags == 1 && Items.Contains(job.WeaponItemId))
                 {
-                    problems.Add($"{what}: the weapon '{job.WeaponItemId}' takes {Items.Get(job.WeaponItemId).Size} cells but the board has {job.ItemSlots}.");
+                    ItemData weapon = Items.Get(job.WeaponItemId);
+                    if (weapon.Width > StartBag.Width || weapon.Height > StartBag.Height)
+                    {
+                        problems.Add($"{what}: the weapon '{weapon.Id}' ({weapon.Width}x{weapon.Height}) does not fit the start bag '{StartBag.Id}' ({StartBag.Width}x{StartBag.Height}).");
+                    }
                 }
             }
 
             foreach (EnemyData enemy in Enemies.Ordered)
             {
                 string what = $"{EnemyData.DefinitionName} '{enemy.Id}'";
-                int cells = 0;
+                int rows = 0;
                 foreach (ItemGrant grant in enemy.Items)
                 {
                     Require(Items, grant.ItemId, what + " Items", problems);
                     if (Items.Contains(grant.ItemId))
                     {
-                        cells += Items.Get(grant.ItemId).Size;
+                        rows += Items.Get(grant.ItemId).Height;
                     }
                 }
 
-                // A unit's line of the board panel holds at most MaxItemSlots cells side by side.
-                if (cells > JobData.MaxItemSlots)
+                // An enemy's board shows its items one under another, unturned, in the frame's column (Slice B stage 19).
+                if (rows > BoardFrame.Height)
                 {
-                    problems.Add($"{what}: its items take {cells} cells, more than a board can have ({JobData.MaxItemSlots}).");
+                    problems.Add($"{what}: its items stand {rows} squares tall, more than a board frame ({BoardFrame.Height}).");
                 }
 
                 if (enemy.Level >= Balance.FinalBossLevel)

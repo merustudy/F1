@@ -215,16 +215,13 @@ namespace F1.Sim
                 foreach (int m in order)
                 {
                     ExpeditionMember member = state.Members[m];
-                    int cell = 0;
-                    foreach (EquippedItem item in member.Items)
+                    foreach (BoardItem placed in member.Board.PlacedInReadingOrder())
                     {
-                        if (item.Item.UsableIn(member.Row, living) && ExpeditionRules.CanUpgradeAtCamp(state, m, cell))
+                        if (placed.Item.Item.UsableIn(member.Row, living) && ExpeditionRules.CanUpgradeAtCamp(state, m, placed.At.X, placed.At.Y))
                         {
-                            ExpeditionRules.UpgradeAtCamp(state, m, cell);
+                            ExpeditionRules.UpgradeAtCamp(state, m, placed.At.X, placed.At.Y);
                             return true;
                         }
-
-                        cell += item.Item.Size;
                     }
                 }
             }
@@ -238,8 +235,8 @@ namespace F1.Sim
 
         /// <summary>
         /// At a shop (Slice B stage 17): without player input, leaves at once. Otherwise buys what is useful while the coins last:
-        /// a potion while fewer than two are held, an item that merges into one on a board (a tier up), an item that fits the free
-        /// cells of a member standing where it works; refreshes the stock, at most <see cref="MaxRefreshes"/> times, while nothing
+        /// a potion while fewer than two are held, an item that merges into one on a board (a tier up), an item that has room on the
+        /// bags of a member standing where it works, a bag that has room in a member's frame (Slice B stage 19); refreshes the stock, at most <see cref="MaxRefreshes"/> times, while nothing
         /// on offer is useful and the coins cover the refresh and the cheapest offer; then leaves. Returns how many things it bought.
         /// </summary>
         public int ShopAt(StaticData data, ExpeditionState state, out int refreshes)
@@ -271,7 +268,7 @@ namespace F1.Sim
             return bought;
         }
 
-        /// <summary>Buys the first useful offer the coins cover: a potion, a merge, then an item for a member standing where it works.</summary>
+        /// <summary>Buys the first useful offer the coins cover: a potion, a merge, an item for a member standing where it works, then a bag.</summary>
         static bool BuyOne(StaticData data, ExpeditionState state)
         {
             int potionsHeld = 0;
@@ -302,9 +299,9 @@ namespace F1.Sim
                 }
 
                 var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-                if (FindMergeTarget(state, item, out int member, out int cell) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, cell))
+                if (FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
-                    ExpeditionRules.BuyToBoard(data, state, slot, member, cell);
+                    ExpeditionRules.BuyToBoard(data, state, slot, member, at);
                     return true;
                 }
             }
@@ -317,11 +314,26 @@ namespace F1.Sim
                     continue;
                 }
 
-                int member = MemberWithRoomFor(state, data.Items.Get(offer.Id));
-                int cell = member < 0 ? -1 : ItemBoard.UsedCells(state.Members[member].Items);
-                if (member >= 0 && ExpeditionRules.CanBuyToBoard(data, state, slot, member, cell))
+                int member = MemberWithRoomFor(state, data.Items.Get(offer.Id), out Placement at);
+                if (member >= 0 && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
-                    ExpeditionRules.BuyToBoard(data, state, slot, member, cell);
+                    ExpeditionRules.BuyToBoard(data, state, slot, member, at);
+                    return true;
+                }
+            }
+
+            for (int slot = 0; slot < stock.Count; slot++)
+            {
+                ItemOffer offer = stock[slot];
+                if (offer == null || offer.Kind != OfferKind.Bag || !ExpeditionRules.CanAfford(data, state, slot))
+                {
+                    continue;
+                }
+
+                int member = MemberWithBagRoomFor(state, data.Bags.Get(offer.Id), out Placement at);
+                if (member >= 0 && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
+                {
+                    ExpeditionRules.BuyToBoard(data, state, slot, member, at);
                     return true;
                 }
             }
@@ -352,9 +364,10 @@ namespace F1.Sim
 
         /// <summary>
         /// Picks up the loot a won battle dropped (Slice B stage 18), a drop at a time: one that merges into an item on a board (a tier
-        /// up), else one that fits the free cells of a mercenary standing where it works, else one that fits the inventory; the rest is
-        /// left. Without player input there is no merging, only what fits a board or the inventory. Then merges what can merge and equips
-        /// from the inventory whatever fits someone. Returns how many merges it made; <paramref name="taken"/> is how many drops it took.
+        /// up), else one that has room on the bags of a mercenary standing where it works, else one that fits the inventory; a bag goes
+        /// where a frame has room for it (stage 19); the rest is left. Without player input there is no merging, only what has room on a
+        /// board or fits the inventory. Then merges what can merge and equips from the inventory whatever has room. Returns how many
+        /// merges it made; <paramref name="taken"/> is how many drops it took.
         /// </summary>
         public int PickLoot(StaticData data, ExpeditionState state, out int taken)
         {
@@ -367,18 +380,30 @@ namespace F1.Sim
                     continue;
                 }
 
-                var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
-                if (Active && FindMergeTarget(state, item, out int member, out int cell) && ExpeditionRules.CanTakeLoot(data, state, slot, member, cell))
+                if (drop.Kind == OfferKind.Bag)
                 {
-                    ExpeditionRules.TakeLoot(data, state, slot, member, cell);
+                    int holder = MemberWithBagRoomFor(state, data.Bags.Get(drop.Id), out Placement spot);
+                    if (holder >= 0)
+                    {
+                        ExpeditionRules.TakeLoot(data, state, slot, holder, spot);
+                        taken++;
+                    }
+
+                    continue;
+                }
+
+                var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+                if (Active && FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanTakeLoot(data, state, slot, member, at))
+                {
+                    ExpeditionRules.TakeLoot(data, state, slot, member, at);
                     taken++;
                     continue;
                 }
 
-                int room = MemberWithRoomFor(state, item.Item);
+                int room = MemberWithRoomFor(state, item.Item, out Placement free);
                 if (room >= 0)
                 {
-                    ExpeditionRules.TakeLoot(data, state, slot, room, ItemBoard.UsedCells(state.Members[room].Items));
+                    ExpeditionRules.TakeLoot(data, state, slot, room, free);
                     taken++;
                     continue;
                 }
@@ -412,9 +437,9 @@ namespace F1.Sim
                 merged = false;
                 for (int i = 0; i < state.Inventory.Count && !merged; i++)
                 {
-                    if (FindMergeTarget(state, state.Inventory[i], out int member, out int cell))
+                    if (FindMergeTarget(state, state.Inventory[i], out int member, out Placement at))
                     {
-                        ExpeditionRules.PlaceFromInventory(data, state, i, member, cell);
+                        ExpeditionRules.PlaceFromInventory(data, state, i, member, at);
                         merged = true;
                     }
                 }
@@ -426,17 +451,14 @@ namespace F1.Sim
                         continue;
                     }
 
-                    int cell = 0;
-                    foreach (EquippedItem item in state.Members[m].Items)
+                    foreach (BoardItem placed in state.Members[m].Board.PlacedInReadingOrder())
                     {
-                        if (FindMergeTarget(state, item, out int member, out int targetCell) && (member != m || targetCell != cell))
+                        if (FindMergeTarget(state, placed.Item, out int member, out Placement at) && (member != m || !at.Equals(placed.At)))
                         {
-                            ExpeditionRules.MoveItem(state, m, cell, member, targetCell);
+                            ExpeditionRules.MoveItem(data, state, m, placed.At.X, placed.At.Y, member, at);
                             merged = true;
                             break;
                         }
-
-                        cell += item.Item.Size;
                     }
                 }
 
@@ -447,8 +469,8 @@ namespace F1.Sim
             return merges;
         }
 
-        /// <summary>The first item on a living member's board (from the first member, in board order) that the given item merges into.</summary>
-        static bool FindMergeTarget(ExpeditionState state, EquippedItem item, out int member, out int cell)
+        /// <summary>The first item on a living member's board (from the first member, in reading order) that the given item merges into, and where it lies.</summary>
+        static bool FindMergeTarget(ExpeditionState state, EquippedItem item, out int member, out Placement at)
         {
             for (member = 0; member < state.Members.Count; member++)
             {
@@ -457,51 +479,81 @@ namespace F1.Sim
                     continue;
                 }
 
-                cell = 0;
-                foreach (EquippedItem there in state.Members[member].Items)
+                foreach (BoardItem there in state.Members[member].Board.PlacedInReadingOrder())
                 {
-                    if (ExpeditionRules.CanMerge(item, there))
+                    if (ExpeditionRules.CanMerge(item, there.Item))
                     {
+                        at = there.At;
                         return true;
                     }
-
-                    cell += there.Item.Size;
                 }
             }
 
-            cell = -1;
+            at = default;
             return false;
         }
 
-        /// <summary>The first living member standing where the item works with free cells for it, or -1.</summary>
-        static int MemberWithRoomFor(ExpeditionState state, ItemData item)
+        /// <summary>The first living member standing where the item works whose bags have room for it, and the first such room; or -1.</summary>
+        static int MemberWithRoomFor(ExpeditionState state, ItemData item, out Placement at)
         {
             int living = ExpeditionRules.LivingCount(state);
             for (int m = 0; m < state.Members.Count; m++)
             {
                 ExpeditionMember member = state.Members[m];
-                if (member.Alive && item.UsableIn(member.Row, living) && ItemBoard.FreeCells(member.Items, member.ItemSlots) >= item.Size)
+                if (member.Alive && item.UsableIn(member.Row, living) && member.Board.FindRoom(item.Width, item.Height, out at))
                 {
                     return m;
                 }
             }
 
+            at = default;
             return -1;
         }
 
-        /// <summary>Puts every inventory item that fits someone's free cells on that board, in inventory order.</summary>
+        /// <summary>The living member with the fewest bag squares whose frame has room for a bag, and the first such room; or -1.</summary>
+        static int MemberWithBagRoomFor(ExpeditionState state, BagData bag, out Placement at)
+        {
+            int best = -1;
+            int fewest = int.MaxValue;
+            at = default;
+            for (int m = 0; m < state.Members.Count; m++)
+            {
+                ExpeditionMember member = state.Members[m];
+                if (!member.Alive || !member.Board.FindBagRoom(bag.Width, bag.Height, out Placement spot))
+                {
+                    continue;
+                }
+
+                int squares = 0;
+                foreach (BoardBag held in member.Board.Bags)
+                {
+                    squares += held.Bag.Area;
+                }
+
+                if (squares < fewest)
+                {
+                    fewest = squares;
+                    best = m;
+                    at = spot;
+                }
+            }
+
+            return best;
+        }
+
+        /// <summary>Puts every inventory item that has room on someone's bags on that board, in inventory order.</summary>
         static void EquipFromInventory(StaticData data, ExpeditionState state)
         {
             for (int i = 0; i < state.Inventory.Count;)
             {
-                int member = MemberWithRoomFor(state, state.Inventory[i].Item);
+                int member = MemberWithRoomFor(state, state.Inventory[i].Item, out Placement at);
                 if (member < 0)
                 {
                     i++;
                     continue;
                 }
 
-                ExpeditionRules.PlaceFromInventory(data, state, i, member, ItemBoard.UsedCells(state.Members[member].Items));
+                ExpeditionRules.PlaceFromInventory(data, state, i, member, at);
             }
         }
     }

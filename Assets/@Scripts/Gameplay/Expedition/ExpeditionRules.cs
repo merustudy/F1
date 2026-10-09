@@ -26,6 +26,7 @@ namespace F1.Gameplay
                 DungeonId = dungeon.Id,
                 Seed = seed,
                 Potions = new string[balance.PotionSlots],
+                Inventory = new InventoryGrid(balance.InventoryWidth, balance.InventoryHeight),
                 Phase = ExpeditionPhase.ChoosingNode,
                 Result = ExpeditionResult.None,
             };
@@ -52,8 +53,7 @@ namespace F1.Gameplay
                     MaxHp = job.MaxHp,
                     Hp = job.MaxHp,
                     Alive = true,
-                    Items = new List<EquippedItem> { new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade, isBase: true) },
-                    ItemSlots = job.ItemSlots,
+                    Board = ItemBoard.Starting(data.StartBag, new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade, isBase: true)),
                     Fatigue = member.Fatigue,
                     StateId = member.AfflictionId,
                 });
@@ -120,7 +120,7 @@ namespace F1.Gameplay
             {
                 if (member.Alive)
                 {
-                    member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, FatigueRules.BattleEntryCost(data.Balance, member.Items));
+                    member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()));
                 }
             }
 
@@ -285,7 +285,8 @@ namespace F1.Gameplay
         /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried,
         /// <c>DropCount</c> are drawn without repetition from the loot stream of the node (<c>EliteDropCount</c> for an elite); all of them
         /// when they carried fewer. A drop is the item at the dungeon's grade and the floor's tier (an elite's a tier up), as the shop's stock is:
-        /// not at the grade the enemy carried it (that is the enemy's strength, far above a found item's). The boss drops nothing: the
+        /// not at the grade the enemy carried it (that is the enemy's strength, far above a found item's). An elite's loot holds a bag with the
+        /// chance <c>EliteBagPercent</c> (Slice B stage 19): its last drop is a bag drawn by loot weight instead. The boss drops nothing: the
         /// expedition ends there. Nothing for a node that is not fought.
         /// </summary>
         public static List<ItemOffer> DropLoot(StaticData data, ExpeditionState state, MapNode node)
@@ -317,7 +318,52 @@ namespace F1.Gameplay
                 carried.RemoveAt(index);
             }
 
+            if (node.Kind == MapNodeKind.Elite && rng.NextInt(100) < data.Balance.EliteBagPercent)
+            {
+                BagData bag = DrawBag(data, rng);
+                if (bag != null)
+                {
+                    var offer = new ItemOffer(OfferKind.Bag, bag.Id, 0);
+                    if (drops.Count > 0)
+                    {
+                        drops[drops.Count - 1] = offer;
+                    }
+                    else
+                    {
+                        drops.Add(offer);
+                    }
+                }
+            }
+
             return drops;
+        }
+
+        /// <summary>A bag drawn by loot weight, or null when no bag drops.</summary>
+        static BagData DrawBag(StaticData data, Pcg32 rng)
+        {
+            int total = 0;
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                total += bag.LootWeight;
+            }
+
+            if (total <= 0)
+            {
+                return null;
+            }
+
+            int pick = rng.NextInt(total);
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                if (pick < bag.LootWeight)
+                {
+                    return bag;
+                }
+
+                pick -= bag.LootWeight;
+            }
+
+            return null;
         }
 
         /// <summary>The drop lying in a slot of the loot, or null: for a slot already taken, no such slot, or no loot to pick.</summary>
@@ -327,63 +373,79 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Whether a drop could be put at a cell of a member's board: into the free cells, or in place of the item there, which goes
-        /// to the inventory and so must fit its free cells (Docs/Design/03_Dungeon_Structure.md §5), or onto the same item at the same
-        /// tier, to merge with it.
+        /// Whether a drop could be put on a member's board at a placement: an item as <see cref="CanPlaceItem"/> says (over nothing, or over
+        /// one item, which goes to the inventory and so must fit its free squares), or onto the same item at the same tier at the
+        /// placement's top-left square, to merge with it; a bag in the frame over no bag (<see cref="CanPlaceBag"/>).
         /// </summary>
-        public static bool CanTakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
+        public static bool CanTakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
             ItemOffer drop = DropAt(state, slot);
-            return drop != null
-                && (MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, cell))
-                    || CanPlaceItem(data, state, data.Items.Get(drop.Id).Size, memberIndex, cell));
+            if (drop == null)
+            {
+                return false;
+            }
+
+            if (drop.Kind == OfferKind.Bag)
+            {
+                return CanPlaceBag(state, memberIndex, data.Bags.Get(drop.Id), at);
+            }
+
+            return MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
+                || CanPlaceItem(data, state, data.Items.Get(drop.Id), memberIndex, at);
         }
 
         /// <summary>
-        /// Takes a drop onto a cell of a member's board: into the free cells or in place of the item there (which goes to the
-        /// inventory), or, onto the same item at the same tier, merged with it a tier up. Its slot is left empty; the last drop
+        /// Takes a drop onto a member's board at a placement: an item over nothing or over one item (which goes to the inventory), or,
+        /// onto the same item at the same tier, merged with it a tier up; a bag into the frame. Its slot is left empty; the last drop
         /// taken ends the loot.
         /// </summary>
-        public static void TakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
+        public static void TakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
             ItemOffer drop = RequireDrop(state, slot);
             ExpeditionMember member = RequireLivingMember(state, memberIndex);
-            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
-            EquippedItem there = LivingItemAt(state, memberIndex, cell);
-            if (CanMerge(item, there))
+            if (!CanTakeLoot(data, state, slot, memberIndex, at))
             {
-                Merge(member.Items, item, there, null);
+                throw new InvalidOperationException($"The drop in slot {slot} cannot go at {at} of '{member.MercenaryId}' now.");
+            }
+
+            if (drop.Kind == OfferKind.Bag)
+            {
+                member.Board.Bags.Add(new BoardBag(data.Bags.Get(drop.Id), at));
                 Pick(state, slot);
                 return;
             }
 
-            if (!CanPlaceItem(data, state, item.Item.Size, memberIndex, cell))
+            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
+            if (CanMerge(item, there?.Item))
             {
-                throw new InvalidOperationException($"'{item.Item.Id}' cannot go at cell {cell} of '{member.MercenaryId}': it does not fit there, or what is there would not fit the inventory.");
+                MergeInto(item, there);
+            }
+            else
+            {
+                Put(state, member.Board, item, at, null);
             }
 
-            PutOnBoard(state, member, cell, item);
             Pick(state, slot);
         }
 
-        /// <summary>Whether a drop could be taken straight into the inventory: it must fit the inventory's free cells.</summary>
+        /// <summary>Whether a drop could be taken straight into the inventory: an item (bags are never kept there) that has room on its grid.</summary>
         public static bool CanTakeLootToInventory(StaticData data, ExpeditionState state, int slot)
         {
             ItemOffer drop = DropAt(state, slot);
-            return drop != null && data.Items.Get(drop.Id).Size <= FreeInventoryCells(data, state);
+            return drop != null && drop.Kind == OfferKind.Item && state.Inventory.HasRoomFor(data.Items.Get(drop.Id));
         }
 
-        /// <summary>Takes a drop straight into the inventory.</summary>
+        /// <summary>Takes a drop straight into the inventory, at its first room (<see cref="InventoryGrid.FindRoom"/>).</summary>
         public static void TakeLootToInventory(StaticData data, ExpeditionState state, int slot)
         {
-            ItemOffer drop = RequireDrop(state, slot);
-            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
-            if (item.Item.Size > FreeInventoryCells(data, state))
+            if (!CanTakeLootToInventory(data, state, slot))
             {
-                throw new InvalidOperationException($"'{item.Item.Id}' does not fit the inventory's free cells.");
+                throw new InvalidOperationException($"The drop in slot {slot} cannot go to the inventory now.");
             }
 
-            state.Inventory.Add(item);
+            ItemOffer drop = state.Loot[slot];
+            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier));
             Pick(state, slot);
         }
 
@@ -394,145 +456,150 @@ namespace F1.Gameplay
             EndLoot(state);
         }
 
-        /// <summary>Whether taking a drop onto a cell of a living member's board would merge it into the item there.</summary>
-        public static bool LootMergesAt(ExpeditionState state, int slot, int memberIndex, int cell)
+        /// <summary>Whether taking a drop with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        public static bool LootMergesAt(ExpeditionState state, int slot, int memberIndex, int x, int y)
         {
             ItemOffer drop = DropAt(state, slot);
-            return drop != null && MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, cell));
+            return drop != null && drop.Kind == OfferKind.Item && MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
         }
+
+        // ---- The boards (Slice B stage 19: a grid of squares, bags, turning) ---------------------
 
         /// <summary>
-        /// Whether an item of a size could be put at a cell of a member's board now: between battles,
-        /// a living member, into the free cells or in place of the item there, which must then fit
-        /// the inventory's free cells.
+        /// Whether an item could be put on a member's board now at a placement (Docs/Design/03_Dungeon_Structure.md §5): between battles,
+        /// a living member, every square inside the frame and on a bag, over no item or over exactly one, which goes to the inventory and
+        /// so must have room on its grid. Over two or more it cannot go.
         /// </summary>
-        public static bool CanPlaceItem(StaticData data, ExpeditionState state, int size, int memberIndex, int cell)
+        public static bool CanPlaceItem(StaticData data, ExpeditionState state, ItemData item, int memberIndex, Placement at)
         {
-            return CanPlaceItem(state, size, memberIndex, cell, FreeInventoryCells(data, state));
+            return CanPut(state, memberIndex, item, at, null, null);
         }
 
-        /// <param name="inventoryRoom">The inventory cells free for whatever the item displaces.</param>
-        static bool CanPlaceItem(ExpeditionState state, int size, int memberIndex, int cell, int inventoryRoom)
+        /// <param name="moving">The item being moved itself, which is not in its own way (null for an item coming from elsewhere).</param>
+        /// <param name="leavingInventory">The inventory's item being placed, whose squares count as free for what it displaces (or null).</param>
+        static bool CanPut(ExpeditionState state, int memberIndex, ItemData item, Placement at, BoardItem moving, BoardItem leavingInventory)
         {
             if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
             {
                 return false;
             }
 
-            ExpeditionMember member = state.Members[memberIndex];
-            return ItemBoard.CanPut(member.Items, member.ItemSlots, cell, size) && SizeAt(member, cell) <= inventoryRoom;
+            ItemBoard board = state.Members[memberIndex].Board;
+            int width = at.WidthOf(item.Width, item.Height);
+            int height = at.HeightOf(item.Width, item.Height);
+            if (!board.OnBags(at.X, at.Y, width, height))
+            {
+                return false;
+            }
+
+            List<BoardItem> under = board.ItemsUnder(at.X, at.Y, width, height, moving);
+            return under.Count == 0
+                || (under.Count == 1 && state.Inventory.FindRoom(under[0].Item.Item.Width, under[0].Item.Item.Height, leavingInventory, out _));
         }
 
         /// <summary>
-        /// Whether the item at a cell of one board can go to a cell of a board (the same or another
-        /// member's): into the free cells, or trading places with the item there. Both boards must
-        /// hold what they end up with. Allowed between battles.
+        /// Puts an item on a board at a placement. The one item it lies over, if any, goes to the inventory at its first room: the caller
+        /// checked it has one (and took out of the inventory whatever left it).
         /// </summary>
-        public static bool CanMoveItem(ExpeditionState state, int fromMember, int fromCell, int toMember, int toCell)
+        static void Put(ExpeditionState state, ItemBoard board, EquippedItem item, Placement at, BoardItem moving)
         {
-            if (!IsBetweenBattles(state) || !IsLivingMember(state, fromMember) || !IsLivingMember(state, toMember))
+            int width = at.WidthOf(item.Item.Width, item.Item.Height);
+            int height = at.HeightOf(item.Item.Width, item.Item.Height);
+            foreach (BoardItem under in board.ItemsUnder(at.X, at.Y, width, height, moving))
+            {
+                board.Items.Remove(under);
+                state.Inventory.Add(under.Item);
+            }
+
+            board.Items.Add(new BoardItem(item, at));
+        }
+
+        /// <summary>
+        /// Whether the item covering a square of one board can go to a placement on a board (the same or another member's): onto the same
+        /// item at the same tier at the placement's top-left square, to merge; or there as <see cref="CanPlaceItem"/> says, the one item it
+        /// lies over going to the inventory. Not to where it lies already. Allowed between battles.
+        /// </summary>
+        public static bool CanMoveItem(StaticData data, ExpeditionState state, int fromMember, int fromX, int fromY, int toMember, Placement to)
+        {
+            if (!CanPickItem(state, fromMember, fromX, fromY) || !IsLivingMember(state, toMember))
             {
                 return false;
             }
 
-            ExpeditionMember from = state.Members[fromMember];
-            ExpeditionMember to = state.Members[toMember];
-            int fromIndex = ItemBoard.IndexAtCell(from.Items, fromCell);
-            if (fromIndex < 0 || toCell < 0 || toCell >= to.ItemSlots)
+            BoardItem moving = state.Members[fromMember].Board.ItemAt(fromX, fromY);
+            if (fromMember == toMember && moving.At.Equals(to))
             {
                 return false;
             }
 
-            int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
-            if (toIndex >= 0 && CanMerge(from.Items[fromIndex], to.Items[toIndex]))
+            if (CanMerge(moving.Item, LivingItemAt(state, toMember, to.X, to.Y)?.Item))
             {
                 return true;
             }
 
-            if (from == to)
-            {
-                // Within one board the item only changes place: to the end (unless it is there
-                // already), or trading with another.
-                return toIndex < 0 ? fromIndex != from.Items.Count - 1 : toIndex != fromIndex;
-            }
-
-            int size = from.Items[fromIndex].Item.Size;
-            if (toIndex < 0)
-            {
-                return ItemBoard.FreeCells(to.Items, to.ItemSlots) >= size;
-            }
-
-            int other = to.Items[toIndex].Item.Size;
-            return ItemBoard.UsedCells(to.Items) - other + size <= to.ItemSlots
-                && ItemBoard.UsedCells(from.Items) - size + other <= from.ItemSlots;
+            return CanPut(state, toMember, moving.Item.Item, to, fromMember == toMember ? moving : null, null);
         }
 
-        public static void MoveItem(ExpeditionState state, int fromMember, int fromCell, int toMember, int toCell)
+        public static void MoveItem(StaticData data, ExpeditionState state, int fromMember, int fromX, int fromY, int toMember, Placement to)
         {
-            if (!CanMoveItem(state, fromMember, fromCell, toMember, toCell))
+            if (!CanMoveItem(data, state, fromMember, fromX, fromY, toMember, to))
             {
-                throw new InvalidOperationException($"The item at cell {fromCell} of member {fromMember} cannot go to cell {toCell} of member {toMember}.");
+                throw new InvalidOperationException($"The item at ({fromX},{fromY}) of member {fromMember} cannot go to {to} of member {toMember}.");
             }
 
-            ExpeditionMember from = state.Members[fromMember];
-            ExpeditionMember to = state.Members[toMember];
-            int fromIndex = ItemBoard.IndexAtCell(from.Items, fromCell);
-            int toIndex = ItemBoard.IndexAtCell(to.Items, toCell);
-            EquippedItem moved = from.Items[fromIndex];
-            if (toIndex >= 0 && CanMerge(moved, to.Items[toIndex]))
+            ItemBoard from = state.Members[fromMember].Board;
+            ItemBoard target = state.Members[toMember].Board;
+            BoardItem moving = from.ItemAt(fromX, fromY);
+            BoardItem there = LivingItemAt(state, toMember, to.X, to.Y);
+            from.Items.Remove(moving);
+            if (CanMerge(moving.Item, there?.Item))
             {
-                Merge(to.Items, moved, to.Items[toIndex], from.Items);
+                MergeInto(moving.Item, there);
+                return;
             }
-            else if (toIndex < 0)
-            {
-                from.Items.RemoveAt(fromIndex);
-                to.Items.Add(moved);
-            }
-            else
-            {
-                from.Items[fromIndex] = to.Items[toIndex];
-                to.Items[toIndex] = moved;
-            }
+
+            Put(state, target, moving.Item, to, null);
         }
 
         /// <summary>
-        /// Whether the item at a cell of a member's board can be picked up now: between battles, a
-        /// living member, a cell that holds an item. Where it may go is asked separately
-        /// (<see cref="CanMoveItem"/>, <see cref="CanMoveToInventory"/>).
+        /// Whether the item covering a square of a member's board can be picked up now: between battles, a living member, a square that
+        /// holds an item. Where it may go is asked separately (<see cref="CanMoveItem"/>, <see cref="CanMoveToInventory"/>).
         /// </summary>
-        public static bool CanPickItem(ExpeditionState state, int memberIndex, int cell)
+        public static bool CanPickItem(ExpeditionState state, int memberIndex, int x, int y)
         {
-            return IsBetweenBattles(state)
-                && IsLivingMember(state, memberIndex)
-                && ItemBoard.IndexAtCell(state.Members[memberIndex].Items, cell) >= 0;
+            return LivingItemAt(state, memberIndex, x, y) != null;
         }
 
-        /// <summary>Whether a cell of a member's board holds an item that can go to the inventory now: it must fit the inventory's free cells.</summary>
-        public static bool CanMoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int cell)
+        /// <summary>Whether a square of a member's board holds an item that can go to the inventory now: it must have room on the inventory's grid.</summary>
+        public static bool CanMoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int x, int y)
         {
-            return CanPickItem(state, memberIndex, cell)
-                && SizeAt(state.Members[memberIndex], cell) <= FreeInventoryCells(data, state);
-        }
-
-        /// <summary>Takes the item at a cell off the board into the inventory. The items behind it close up.</summary>
-        public static void MoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int cell)
-        {
-            if (!CanMoveToInventory(data, state, memberIndex, cell))
-            {
-                throw new InvalidOperationException($"Cell {cell} of member {memberIndex} holds nothing that can go to the inventory now.");
-            }
-
-            ExpeditionMember member = state.Members[memberIndex];
-            int index = ItemBoard.IndexAtCell(member.Items, cell);
-            state.Inventory.Add(member.Items[index]);
-            member.Items.RemoveAt(index);
+            BoardItem item = LivingItemAt(state, memberIndex, x, y);
+            return item != null && state.Inventory.HasRoomFor(item.Item.Item);
         }
 
         /// <summary>
-        /// Whether an item of the inventory could go at a cell of a member's board now. The cells it
-        /// leaves in the inventory are free for whatever it displaces there.
+        /// Takes the item covering a square off the board into the inventory, at its first room (<see cref="InventoryGrid.FindRoom"/>).
+        /// Its squares on the board are left empty (nothing moves up).
         /// </summary>
-        public static bool CanPlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, int cell)
+        public static void MoveToInventory(StaticData data, ExpeditionState state, int memberIndex, int x, int y)
+        {
+            if (!CanMoveToInventory(data, state, memberIndex, x, y))
+            {
+                throw new InvalidOperationException($"Square ({x},{y}) of member {memberIndex} holds nothing that can go to the inventory now.");
+            }
+
+            ItemBoard board = state.Members[memberIndex].Board;
+            BoardItem item = board.ItemAt(x, y);
+            board.Items.Remove(item);
+            state.Inventory.Add(item.Item);
+        }
+
+        /// <summary>
+        /// Whether an item of the inventory could go to a placement on a member's board now: onto the same item at the same tier at its
+        /// top-left square, to merge; or there as <see cref="CanPlaceItem"/> says, the squares it leaves in the inventory free for whatever
+        /// it displaces.
+        /// </summary>
+        public static bool CanPlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, Placement at)
         {
             if (inventoryIndex < 0 || inventoryIndex >= state.Inventory.Count)
             {
@@ -540,34 +607,196 @@ namespace F1.Gameplay
             }
 
             EquippedItem item = state.Inventory[inventoryIndex];
-            if (CanMerge(item, LivingItemAt(state, memberIndex, cell)))
+            if (CanMerge(item, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item))
             {
                 return true;
             }
 
-            int size = item.Item.Size;
-            return CanPlaceItem(state, size, memberIndex, cell, FreeInventoryCells(data, state) + size);
+            return CanPut(state, memberIndex, item.Item, at, null, state.Inventory.Items[inventoryIndex]);
         }
 
-        /// <summary>Puts an item of the inventory at a cell of a member's board. An item displaced there goes to the inventory.</summary>
-        public static void PlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, int cell)
+        /// <summary>Puts an item of the inventory on a member's board at a placement. An item displaced there goes to the inventory.</summary>
+        public static void PlaceFromInventory(StaticData data, ExpeditionState state, int inventoryIndex, int memberIndex, Placement at)
         {
-            if (!CanPlaceFromInventory(data, state, inventoryIndex, memberIndex, cell))
+            if (!CanPlaceFromInventory(data, state, inventoryIndex, memberIndex, at))
             {
-                throw new InvalidOperationException($"Inventory item {inventoryIndex} cannot go to cell {cell} of member {memberIndex} now.");
+                throw new InvalidOperationException($"Inventory item {inventoryIndex} cannot go to {at} of member {memberIndex} now.");
             }
 
             EquippedItem item = state.Inventory[inventoryIndex];
             ExpeditionMember member = state.Members[memberIndex];
-            EquippedItem there = LivingItemAt(state, memberIndex, cell);
-            if (CanMerge(item, there))
+            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
+            state.Inventory.RemoveAt(inventoryIndex);
+            if (CanMerge(item, there?.Item))
             {
-                Merge(member.Items, item, there, state.Inventory);
+                MergeInto(item, there);
                 return;
             }
 
-            state.Inventory.RemoveAt(inventoryIndex);
-            PutOnBoard(state, member, cell, item);
+            Put(state, member.Board, item, at, null);
+        }
+
+        /// <summary>
+        /// Whether an item of the inventory could be laid elsewhere on the inventory's grid now (round 49, Docs/Design/03_Dungeon_Structure.md
+        /// §5): between battles, inside the grid over no other item (Diablo II's swap is not made: the hand holds one thing), and not
+        /// where and as it lies already.
+        /// </summary>
+        public static bool CanMoveInInventory(ExpeditionState state, int inventoryIndex, Placement to)
+        {
+            if (!IsBetweenBattles(state) || inventoryIndex < 0 || inventoryIndex >= state.Inventory.Count)
+            {
+                return false;
+            }
+
+            BoardItem moving = state.Inventory.Items[inventoryIndex];
+            ItemData item = moving.Item.Item;
+            return !moving.At.Equals(to) && state.Inventory.IsFree(to.X, to.Y, to.WidthOf(item.Width, item.Height), to.HeightOf(item.Width, item.Height), moving);
+        }
+
+        public static void MoveInInventory(ExpeditionState state, int inventoryIndex, Placement to)
+        {
+            if (!CanMoveInInventory(state, inventoryIndex, to))
+            {
+                throw new InvalidOperationException($"Inventory item {inventoryIndex} cannot go to {to} of the inventory now.");
+            }
+
+            state.Inventory.Items[inventoryIndex].At = to;
+        }
+
+        /// <summary>
+        /// Whether the item covering a square of a member's board could be laid at a placement of the inventory's grid now (round 49): it
+        /// can be picked, and the placement is inside the grid over no item.
+        /// </summary>
+        public static bool CanMoveToInventoryAt(ExpeditionState state, int memberIndex, int x, int y, Placement to)
+        {
+            BoardItem item = LivingItemAt(state, memberIndex, x, y);
+            if (item == null)
+            {
+                return false;
+            }
+
+            ItemData data = item.Item.Item;
+            return state.Inventory.IsFree(to.X, to.Y, to.WidthOf(data.Width, data.Height), to.HeightOf(data.Width, data.Height), null);
+        }
+
+        /// <summary>Takes the item covering a square off the board onto a placement of the inventory. Its squares on the board are left empty.</summary>
+        public static void MoveToInventoryAt(ExpeditionState state, int memberIndex, int x, int y, Placement to)
+        {
+            if (!CanMoveToInventoryAt(state, memberIndex, x, y, to))
+            {
+                throw new InvalidOperationException($"Square ({x},{y}) of member {memberIndex} holds nothing that can go to {to} of the inventory now.");
+            }
+
+            ItemBoard board = state.Members[memberIndex].Board;
+            BoardItem item = board.ItemAt(x, y);
+            board.Items.Remove(item);
+            state.Inventory.Add(item.Item, to);
+        }
+
+        // ---- Bags (Slice B stage 19) ----------------------------------------------------------
+
+        /// <summary>
+        /// Whether a bag could be put in a member's frame now at a placement: between battles, a living member, inside the frame over no
+        /// bag (a bag comes from a shop or a loot and is laid where nothing is).
+        /// </summary>
+        public static bool CanPlaceBag(ExpeditionState state, int memberIndex, BagData bag, Placement at)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
+            {
+                return false;
+            }
+
+            return state.Members[memberIndex].Board.FreeOfBags(at.X, at.Y, at.WidthOf(bag.Width, bag.Height), at.HeightOf(bag.Width, bag.Height), null);
+        }
+
+        /// <summary>
+        /// Whether the bag at a square of a member's board can be picked up now: between battles, a living member, a square of a bag that
+        /// is not the start bag and holds no item, and no item lying across that bag and another (the player moves that item first).
+        /// </summary>
+        public static bool CanPickBag(ExpeditionState state, int memberIndex, int x, int y)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
+            {
+                return false;
+            }
+
+            return state.Members[memberIndex].Board.ItemAt(x, y) == null && MovableBagAt(state, memberIndex, x, y) != null;
+        }
+
+        /// <summary>The bag covering a square of a living member's board between battles if it can move (not the start bag, no item across it and another), or null.</summary>
+        static BoardBag MovableBagAt(ExpeditionState state, int memberIndex, int x, int y)
+        {
+            if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
+            {
+                return null;
+            }
+
+            ItemBoard board = state.Members[memberIndex].Board;
+            BoardBag bag = board.BagAt(x, y);
+            return bag != null && !bag.Bag.Start && !board.HasItemAcross(bag) ? bag : null;
+        }
+
+        /// <summary>
+        /// Whether the bag covering a square (any square of it: the one it was picked up by need not be empty any more) can go to a placement
+        /// in a member's frame (the same or another member's): inside the frame over no other bag, not where it lies already. The items in it
+        /// go with it, turned with it (Backpack Battles' turning).
+        /// </summary>
+        public static bool CanMoveBag(ExpeditionState state, int fromMember, int fromX, int fromY, int toMember, Placement to)
+        {
+            BoardBag bag = MovableBagAt(state, fromMember, fromX, fromY);
+            if (bag == null || !IsLivingMember(state, toMember))
+            {
+                return false;
+            }
+
+            if (fromMember == toMember && bag.At.Equals(to))
+            {
+                return false;
+            }
+
+            return state.Members[toMember].Board.FreeOfBags(
+                to.X, to.Y, to.WidthOf(bag.Bag.Width, bag.Bag.Height), to.HeightOf(bag.Bag.Width, bag.Bag.Height), fromMember == toMember ? bag : null);
+        }
+
+        /// <summary>Moves a bag and the items lying in it to a placement: the items keep their place in the bag, turned as the bag turns.</summary>
+        public static void MoveBag(ExpeditionState state, int fromMember, int fromX, int fromY, int toMember, Placement to)
+        {
+            if (!CanMoveBag(state, fromMember, fromX, fromY, toMember, to))
+            {
+                throw new InvalidOperationException($"The bag at ({fromX},{fromY}) of member {fromMember} cannot go to {to} of member {toMember}.");
+            }
+
+            ItemBoard from = state.Members[fromMember].Board;
+            ItemBoard target = state.Members[toMember].Board;
+            BoardBag bag = from.BagAt(fromX, fromY);
+            List<BoardItem> carried = from.ItemsIn(bag);
+            int turns = ((to.Turns - bag.At.Turns) % 4 + 4) % 4;
+            foreach (BoardItem item in carried)
+            {
+                // The item's place in the bag, turned a quarter clockwise at a time inside the bag's box.
+                int x = item.At.X - bag.At.X;
+                int y = item.At.Y - bag.At.Y;
+                int width = item.Width;
+                int height = item.Height;
+                int boxWidth = bag.Width;
+                int boxHeight = bag.Height;
+                for (int turn = 0; turn < turns; turn++)
+                {
+                    int turnedX = boxHeight - y - height;
+                    y = x;
+                    x = turnedX;
+                    (width, height) = (height, width);
+                    (boxWidth, boxHeight) = (boxHeight, boxWidth);
+                }
+
+                from.Items.Remove(item);
+                item.At = new Placement(to.X + x, to.Y + y, item.At.Turns + turns);
+                target.Items.Add(item);
+            }
+
+            from.Bags.Remove(bag);
+            bag.At = to;
+            target.Bags.Add(bag);
         }
 
         // ---- The shop and the region coins (Slice B stage 17) ----------------------------------
@@ -638,12 +867,17 @@ namespace F1.Gameplay
             return stock;
         }
 
-        /// <summary>What an offer costs: an item's price times its tier's percent (as its effects grow), a potion's price as it is.</summary>
+        /// <summary>What an offer costs: an item's price times its tier's percent (as its effects grow), a potion's or a bag's price as it is.</summary>
         public static int PriceOf(StaticData data, ItemOffer offer)
         {
             if (offer.Kind == OfferKind.Potion)
             {
                 return data.Potions.Get(offer.Id).Price;
+            }
+
+            if (offer.Kind == OfferKind.Bag)
+            {
+                return data.Bags.Get(offer.Id).Price;
             }
 
             return (int)Math.Min(int.MaxValue, (long)data.Items.Get(offer.Id).Price * data.Balance.TierPercent(offer.Tier) / 100);
@@ -675,47 +909,64 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Whether the item in a slot could be bought onto a cell of a member's board: the coins cover it, and it goes there as a
-        /// drop of loot would (into the free cells, in place of the item there, or merged into the same item at the same tier).
+        /// Whether the item or bag in a slot could be bought onto a member's board at a placement: the coins cover it, and it goes there as
+        /// a drop of loot would (an item over nothing, over one item that goes to the inventory, or merged into the same item at the same
+        /// tier at the placement's top-left square; a bag into the frame over no bag).
         /// </summary>
-        public static bool CanBuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
+        public static bool CanBuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
             ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Item && state.Coins >= PriceOf(data, offer)
-                && (MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, cell))
-                    || CanPlaceItem(data, state, data.Items.Get(offer.Id).Size, memberIndex, cell));
+            if (offer == null || offer.Kind == OfferKind.Potion || state.Coins < PriceOf(data, offer))
+            {
+                return false;
+            }
+
+            if (offer.Kind == OfferKind.Bag)
+            {
+                return CanPlaceBag(state, memberIndex, data.Bags.Get(offer.Id), at);
+            }
+
+            return MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
+                || CanPlaceItem(data, state, data.Items.Get(offer.Id), memberIndex, at);
         }
 
-        /// <summary>Buys the item in a slot onto a cell of a member's board: the coins are paid as it is put there, and the slot is sold.</summary>
-        public static void BuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, int cell)
+        /// <summary>Buys the item or bag in a slot onto a member's board at a placement: the coins are paid as it is put there, and the slot is sold.</summary>
+        public static void BuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
-            if (!CanBuyToBoard(data, state, slot, memberIndex, cell))
+            if (!CanBuyToBoard(data, state, slot, memberIndex, at))
             {
-                throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto cell {cell} of member {memberIndex} now.");
+                throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto {at} of member {memberIndex} now.");
             }
 
             ItemOffer offer = state.Shop.Stock[slot];
             ExpeditionMember member = state.Members[memberIndex];
-            var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-            EquippedItem there = LivingItemAt(state, memberIndex, cell);
-            if (CanMerge(item, there))
+            if (offer.Kind == OfferKind.Bag)
             {
-                Merge(member.Items, item, there, null);
+                member.Board.Bags.Add(new BoardBag(data.Bags.Get(offer.Id), at));
+                Pay(data, state, slot);
+                return;
+            }
+
+            var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
+            if (CanMerge(item, there?.Item))
+            {
+                MergeInto(item, there);
             }
             else
             {
-                PutOnBoard(state, member, cell, item);
+                Put(state, member.Board, item, at, null);
             }
 
             Pay(data, state, slot);
         }
 
-        /// <summary>Whether the item in a slot could be bought straight into the inventory: the coins cover it and it fits the free cells.</summary>
+        /// <summary>Whether the item in a slot could be bought straight into the inventory: the coins cover it and it has room on the grid (a bag never goes there).</summary>
         public static bool CanBuyToInventory(StaticData data, ExpeditionState state, int slot)
         {
             ItemOffer offer = OfferAt(state, slot);
             return offer != null && offer.Kind == OfferKind.Item && state.Coins >= PriceOf(data, offer)
-                && data.Items.Get(offer.Id).Size <= FreeInventoryCells(data, state);
+                && state.Inventory.HasRoomFor(data.Items.Get(offer.Id));
         }
 
         public static void BuyToInventory(StaticData data, ExpeditionState state, int slot)
@@ -748,11 +999,11 @@ namespace F1.Gameplay
             Pay(data, state, slot);
         }
 
-        /// <summary>Whether buying the item in a slot onto a cell of a living member's board would merge it into the item there.</summary>
-        public static bool ShopMergesAt(ExpeditionState state, int slot, int memberIndex, int cell)
+        /// <summary>Whether buying the item in a slot with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        public static bool ShopMergesAt(ExpeditionState state, int slot, int memberIndex, int x, int y)
         {
             ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, cell));
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
         }
 
         /// <summary>Whether the stock can be refreshed now: at a shop, with the coins to pay the next refresh.</summary>
@@ -799,26 +1050,25 @@ namespace F1.Gameplay
             return item != null && !ReferenceEquals(item, into) && !item.IsBase && MergesInto(item.Item.Id, item.Tier, into);
         }
 
-        /// <summary>Whether putting an item (of a board or the inventory) on a cell of a living member's board would merge it into the item there.</summary>
-        public static bool MergesAt(ExpeditionState state, EquippedItem item, int memberIndex, int cell)
+        /// <summary>Whether putting an item (of a board or the inventory) with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        public static bool MergesAt(ExpeditionState state, EquippedItem item, int memberIndex, int x, int y)
         {
-            return CanMerge(item, LivingItemAt(state, memberIndex, cell));
+            return CanMerge(item, LivingItemAt(state, memberIndex, x, y)?.Item);
         }
 
-        /// <summary>Whether some cell of a living member's board holds what the item would merge into.</summary>
+        /// <summary>Whether some living member's board holds what the item would merge into.</summary>
         public static bool HasMergeTarget(ExpeditionState state, EquippedItem item)
         {
-            for (int m = 0; m < state.Members.Count; m++)
+            foreach (ExpeditionMember member in state.Members)
             {
-                ExpeditionMember member = state.Members[m];
                 if (!member.Alive)
                 {
                     continue;
                 }
 
-                foreach (EquippedItem there in member.Items)
+                foreach (BoardItem there in member.Board.Items)
                 {
-                    if (CanMerge(item, there))
+                    if (CanMerge(item, there.Item))
                     {
                         return true;
                     }
@@ -835,57 +1085,43 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Merges an item into another on a board: the board's item becomes the merge, a tier up at the better grade of the two,
-        /// and the item merged in leaves the list it came from (null for a drop or an offer, which comes from nowhere).
+        /// Merges an item into another lying on a board: the board's item becomes the merge, a tier up at the better grade of the two, where
+        /// it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer).
         /// </summary>
-        static void Merge(List<EquippedItem> board, EquippedItem item, EquippedItem into, List<EquippedItem> source)
+        static void MergeInto(EquippedItem item, BoardItem into)
         {
-            int index = board.IndexOf(into);
-            board[index] = new EquippedItem(into.Item, Math.Max(item.Grade, into.Grade), tier: into.Tier + 1);
-            source?.Remove(item);
+            into.Item = new EquippedItem(into.Item.Item, Math.Max(item.Grade, into.Item.Grade), tier: into.Item.Tier + 1);
         }
 
-        /// <summary>The item at a cell of a living member's board between battles, or null.</summary>
-        static EquippedItem LivingItemAt(ExpeditionState state, int memberIndex, int cell)
+        /// <summary>The item covering a square of a living member's board between battles, or null.</summary>
+        static BoardItem LivingItemAt(ExpeditionState state, int memberIndex, int x, int y)
         {
             if (!IsBetweenBattles(state) || !IsLivingMember(state, memberIndex))
             {
                 return null;
             }
 
-            List<EquippedItem> items = state.Members[memberIndex].Items;
-            int index = ItemBoard.IndexAtCell(items, cell);
-            return index < 0 ? null : items[index];
+            return state.Members[memberIndex].Board.ItemAt(x, y);
         }
 
-        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (the camp's upkeep): any item below Gold, a base weapon too.</summary>
-        public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int cell)
+        /// <summary>Whether the item covering a square of a member's board can go a tier up at the camp (the camp's upkeep): any item below Gold, a base weapon too.</summary>
+        public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int x, int y)
         {
-            EquippedItem item = LivingItemAt(state, memberIndex, cell);
-            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Tier < ItemTier.Gold;
+            BoardItem item = LivingItemAt(state, memberIndex, x, y);
+            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Item.Tier < ItemTier.Gold;
         }
 
-        /// <summary>The camp's upkeep: the item at a cell goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>
-        public static void UpgradeAtCamp(ExpeditionState state, int memberIndex, int cell)
+        /// <summary>The camp's upkeep: the item covering a square goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>
+        public static void UpgradeAtCamp(ExpeditionState state, int memberIndex, int x, int y)
         {
-            if (!CanUpgradeAtCamp(state, memberIndex, cell))
+            if (!CanUpgradeAtCamp(state, memberIndex, x, y))
             {
-                throw new InvalidOperationException($"Nothing at cell {cell} of member {memberIndex} can go a tier up now.");
+                throw new InvalidOperationException($"Nothing at ({x},{y}) of member {memberIndex} can go a tier up now.");
             }
 
-            List<EquippedItem> items = state.Members[memberIndex].Items;
-            int index = ItemBoard.IndexAtCell(items, cell);
-            items[index] = items[index].TierUp();
+            BoardItem item = state.Members[memberIndex].Board.ItemAt(x, y);
+            item.Item = item.Item.TierUp();
             state.Phase = ExpeditionPhase.ChoosingNode;
-        }
-
-        /// <summary>
-        /// The inventory's free cells. It has <c>BalanceData.InventoryCells</c> and an item takes its
-        /// size there as on a board (Docs/Design/03_Dungeon_Structure.md §5).
-        /// </summary>
-        public static int FreeInventoryCells(StaticData data, ExpeditionState state)
-        {
-            return data.Balance.InventoryCells - ItemBoard.UsedCells(state.Inventory);
         }
 
         /// <summary>How many members are alive. They stand in rows 1..n, which is what a span of the line is counted on.</summary>
@@ -947,7 +1183,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Draws what a shop offers without repetition, by shop weight: the items with a weight and a price at the grade and tier given,
-        /// and the potions with a weight and a price while a potion slot is empty.
+        /// the bags with a weight and a price (Slice B stage 19), and the potions with a weight and a price while a potion slot is empty.
         /// </summary>
         static List<ItemOffer> DrawOffers(StaticData data, ExpeditionState state, Pcg32 rng, int count, int grade, ItemTier tier)
         {
@@ -959,6 +1195,15 @@ namespace F1.Gameplay
                 {
                     candidates.Add(new ItemOffer(OfferKind.Item, item.Id, grade, tier));
                     weights.Add(item.ShopWeight);
+                }
+            }
+
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                if (bag.ShopWeight > 0 && bag.Price > 0)
+                {
+                    candidates.Add(new ItemOffer(OfferKind.Bag, bag.Id, 0));
+                    weights.Add(bag.ShopWeight);
                 }
             }
 
@@ -1015,8 +1260,8 @@ namespace F1.Gameplay
                     Row = row,
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
-                    Items = new List<EquippedItem>(member.Items),
-                    ItemSlots = member.ItemSlots,
+                    Items = member.Board.InReadingOrder(),
+                    Layout = BoardLayout.Of(member.Board),
                     Passive = data.Jobs.Get(member.JobId).Passive,
                     HasDog = true,
                     Fatigue = member.Fatigue,
@@ -1040,7 +1285,7 @@ namespace F1.Gameplay
                 items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade + deeper * dungeon.EnemyGradePerFloor));
             }
 
-            // An enemy's board is exactly what it carries: there are no empty cells to show.
+            // An enemy's board is exactly what it carries, one item under another: it has no bags and no empty squares to show.
             int maxHp = (int)((long)enemy.MaxHp * (100 + deeper * dungeon.EnemyHpPerFloorPercent) / 100);
             return new BattleUnitSetup
             {
@@ -1050,7 +1295,7 @@ namespace F1.Gameplay
                 MaxHp = maxHp,
                 Hp = maxHp,
                 Items = items,
-                ItemSlots = ItemBoard.UsedCells(items),
+                Layout = BoardLayout.Stacked(items),
                 Passive = null,
                 HasDog = false,
             };
@@ -1088,23 +1333,6 @@ namespace F1.Gameplay
             }
 
             throw new InvalidOperationException($"Mercenary '{mercenaryId}' is not on this expedition.");
-        }
-
-        /// <summary>The cells the item at a cell of a board takes; 0 for an empty cell.</summary>
-        static int SizeAt(ExpeditionMember member, int cell)
-        {
-            int index = ItemBoard.IndexAtCell(member.Items, cell);
-            return index < 0 ? 0 : member.Items[index].Item.Size;
-        }
-
-        /// <summary>Puts an item at a cell of a member's board; whatever it displaces goes to the inventory, which the caller has checked has room.</summary>
-        static void PutOnBoard(ExpeditionState state, ExpeditionMember member, int cell, EquippedItem item)
-        {
-            EquippedItem left = ItemBoard.Put(member.Items, member.ItemSlots, cell, item);
-            if (left != null)
-            {
-                state.Inventory.Add(left);
-            }
         }
 
         /// <summary>Choosing a node, picking loot, or what to do at a camp or a shop: the boards and the rows can be rearranged.</summary>

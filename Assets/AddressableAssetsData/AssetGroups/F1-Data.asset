@@ -21,6 +21,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-app
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 372551c6002e74787a8dad908ff16cca
+    m_Address: data/app/bag
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 49ff3dae55fb74c83b126a7dc6deb3f6
     m_Address: data/app/enemy-group
     m_ReadOnly: 0

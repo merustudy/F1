@@ -38,6 +38,10 @@
       "Value": 1
     },
     {
+      "Key": "EliteBagPercent",
+      "Value": 50
+    },
+    {
       "Key": "EliteCoinPercent",
       "Value": 200
     },
@@ -86,7 +90,11 @@
       "Value": 14
     },
     {
-      "Key": "InventoryCells",
+      "Key": "InventoryHeight",
+      "Value": 3
+    },
+    {
+      "Key": "InventoryWidth",
       "Value": 10
     },
     {

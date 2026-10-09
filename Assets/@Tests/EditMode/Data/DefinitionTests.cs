@@ -166,16 +166,18 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             RowSpan rows = RowSpan.All;
 
-            Assert.DoesNotThrow(() => new ItemData("x", name, ItemCategory.Weapon, ItemData.MaxSize, 1000, rows, new[] { effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 0, 1000, rows, new[] { effect }, 0), "No size.");
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, ItemData.MaxSize + 1, 1000, rows, new[] { effect }, 0), "Too big.");
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 99, rows, new[] { effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, null, new[] { effect }, 0), "Rows missing.");
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new ItemEffect[0], 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect, effect, effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, -1));
-            Assert.Throws<DataException>(() => new ItemData("x", null, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0));
-            Assert.Throws<DataException>(() => new ItemData("Bad Id", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0));
+            Assert.DoesNotThrow(() => new ItemData("x", name, ItemCategory.Weapon, BoardFrame.MaxSide, BoardFrame.MaxSide, 1000, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 0, 1, 1000, rows, new[] { effect }, 0), "No width.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 0, 1000, rows, new[] { effect }, 0), "No height.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, BoardFrame.MaxSide + 1, 1, 1000, rows, new[] { effect }, 0), "Too wide for the frame.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, BoardFrame.MaxSide + 1, 1000, rows, new[] { effect }, 0), "Too tall to turn in the frame.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 99, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, null, new[] { effect }, 0), "Rows missing.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new ItemEffect[0], 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect, effect, effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, -1));
+            Assert.Throws<DataException>(() => new ItemData("x", null, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0));
+            Assert.Throws<DataException>(() => new ItemData("Bad Id", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0));
         }
 
         [Test]
@@ -197,13 +199,12 @@ namespace F1.Tests
         {
             LocalizedText name = TestData.Text("x");
 
-            Assert.Throws<DataException>(() => new JobData("x", name, 0, 3, "sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 0, "sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, JobData.MaxItemSlots + 1, "sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 0, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "Sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 0, null), "Recommended row below 1.");
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, BattleRows.Count + 1, null), "Recommended row beyond the last row.");
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 0, "sword", 10, 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 0, 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "Sword", 10, 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 0, null), "Recommended row below 1.");
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, BattleRows.Count + 1, null), "Recommended row beyond the last row.");
         }
 
         [Test]
@@ -212,10 +213,10 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.InRows, RowSpan.Front(1), PassiveEffect.Shield, PassiveTarget.Self, 20);
 
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, 1, null));
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, 3, "sword", 10, 1, passive, TestData.Text("Shield {0}")));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, passive));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, null, TestData.Text("Shield {0}")));
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, null));
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, passive, TestData.Text("Shield {0}")));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, passive));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, TestData.Text("Shield {0}")));
         }
 
         [Test]
@@ -224,13 +225,13 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
 
-            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).Figure, "No figure by default.");
-            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x").Figure);
+            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).Figure, "No figure by default.");
+            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x").Figure);
             Assert.AreEqual("unit/enemy/x", new EnemyData("x", name, 1, 10, items, "unit/enemy/x").Figure);
             Assert.IsNull(new EnemyData("x", name, 1, 10, items).Figure);
 
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, null, null, ""));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x "));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, null, ""));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x "));
             Assert.Throws<DataException>(() => new EnemyData("x", name, 1, 10, items, "unit/ enemy/x"));
         }
 
@@ -238,12 +239,12 @@ namespace F1.Tests
         public void Poses_AreTheFigureAddressUnderPose_WithThePose_OrNullWithoutAFigure()
         {
             LocalizedText name = TestData.Text("x");
-            var job = new JobData("x", name, 100, 3, "sword", 10, 1, null, null, "unit/job/x");
+            var job = new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x");
 
             Assert.AreEqual("pose/job/x-attack", job.AttackPose);
             Assert.AreEqual("pose/job/x-hit", job.HitPose);
-            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).AttackPose, "No pose without a figure.");
-            Assert.IsNull(new JobData("x", name, 100, 3, "sword", 10, 1, null).HitPose);
+            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).AttackPose, "No pose without a figure.");
+            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).HitPose);
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
             var enemy = new EnemyData("goblin_raider", name, 1, 10, items, "unit/enemy/goblin-raider");
             Assert.AreEqual("pose/enemy/goblin-raider-attack", enemy.AttackPose, "A monster has its poses too (Docs/Design/10 §5).");
@@ -318,11 +319,11 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             RowSpan rows = RowSpan.All;
 
-            Assert.IsNull(new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0).Icon, "No icon by default.");
-            Assert.AreEqual("item/x", new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, "item/x").Icon);
+            Assert.IsNull(new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0).Icon, "No icon by default.");
+            Assert.AreEqual("item/x", new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, "item/x").Icon);
 
-            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, ""));
-            DataException error = Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1000, rows, new[] { effect }, 0, "item/ x"));
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, ""));
+            DataException error = Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, "item/ x"));
             StringAssert.Contains("Icon", error.Message, "The error names the column.");
         }
 
@@ -344,10 +345,27 @@ namespace F1.Tests
         }
 
         [Test]
-        public void BalanceData_InventoryCells_HoldAtLeastTheBiggestItem()
+        public void BalanceData_TheInventoryGrid_HoldsAtLeastTheBiggestItem()
         {
-            Assert.Throws<DataException>(() => TestData.Balance(("InventoryCells", ItemData.MaxSize - 1)));
-            Assert.DoesNotThrow(() => TestData.Balance(("InventoryCells", ItemData.MaxSize)));
+            // Round 49: the inventory is a grid; the biggest item is MaxSide x MaxSide, so each side is at least MaxSide.
+            Assert.Throws<DataException>(() => TestData.Balance(("InventoryWidth", BoardFrame.MaxSide - 1)));
+            Assert.Throws<DataException>(() => TestData.Balance(("InventoryHeight", BoardFrame.MaxSide - 1)));
+            Assert.DoesNotThrow(() => TestData.Balance(("InventoryWidth", BoardFrame.MaxSide), ("InventoryHeight", BoardFrame.MaxSide)));
+        }
+
+        [Test]
+        public void BagData_RejectsBadShapesPricesAndAStartBagOnSale()
+        {
+            LocalizedText name = TestData.Text("x");
+
+            Assert.DoesNotThrow(() => new BagData("x", name, BoardFrame.MaxSide, BoardFrame.MaxSide, false, 10, 5, 1));
+            Assert.Throws<DataException>(() => new BagData("x", name, 0, 1, false, 10, 5, 1), "No width.");
+            Assert.Throws<DataException>(() => new BagData("x", name, 1, BoardFrame.MaxSide + 1, false, 10, 5, 1), "Too tall to turn in the frame.");
+            Assert.Throws<DataException>(() => new BagData("x", name, 1, 1, false, -1, 5, 1), "A price below 0.");
+            Assert.Throws<DataException>(() => new BagData("x", name, 1, 1, false, 1, -1, 1), "A weight below 0.");
+            Assert.Throws<DataException>(() => new BagData("x", name, 3, 3, true, 0, 5, 0), "The start bag is never sold.");
+            Assert.Throws<DataException>(() => new BagData("x", name, 3, 3, true, 0, 0, 1), "Nor dropped.");
+            Assert.Throws<DataException>(() => new BagData("Bad Id", name, 1, 1, false, 1, 1, 1));
         }
 
         [Test]

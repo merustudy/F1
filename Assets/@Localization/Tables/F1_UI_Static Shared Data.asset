@@ -200,11 +200,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909217
-  - m_Id: 9766393864225
-    m_Key: Board.EmptySlot
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909218
   - m_Id: 9766393864226
     m_Key: Board.Grade
     m_Metadata:
@@ -640,11 +635,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673131002232832
-  - m_Id: 293762654789632
-    m_Key: Board.InventoryEmpty
-    m_Metadata:
-      m_Items:
-      - rid: 8623673134167883777
   - m_Id: 293762654789633
     m_Key: Board.ToInventory
     m_Metadata:
@@ -1120,11 +1110,46 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673296729145346
-  - m_Id: 3121959998054400
+  - m_Id: 2976244533551104
+    m_Key: Map.ShopBagSub
+    m_Metadata:
+      m_Items:
+      - rid: 8623673301822865408
+  - m_Id: 2976244546134016
+    m_Key: Map.BagFacts
+    m_Metadata:
+      m_Items:
+      - rid: 8623673301822865409
+  - m_Id: 2976244546134017
+    m_Key: Board.GhostToInventory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673301822865410
+  - m_Id: 2976244546134018
+    m_Key: Board.GhostBag
+    m_Metadata:
+      m_Items:
+      - rid: 8623673301822865411
+  - m_Id: 3219372016394240
+    m_Key: Board.InventoryHeading
+    m_Metadata:
+      m_Items:
+      - rid: 8623673317018566656
+  - m_Id: 3219372028977152
+    m_Key: Board.TurnHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673317018566657
+  - m_Id: 3222362102161408
+    m_Key: Map.ShopHeld
+    m_Metadata:
+      m_Items:
+      - rid: 8623673317205213184
+  - m_Id: 3246693813313536
     m_Key: Death.Collapsed
     m_Metadata:
       m_Items:
-      - rid: 8623673310930010112
+      - rid: 8623673318725910528
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1286,10 +1311,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: On the HP bar under a unit's feet. {0} = HP. {1} = max HP.
-    - rid: 636489279218909218
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: An empty item or potion slot.
     - rid: 636489279218909219
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1297,7 +1318,7 @@ MonoBehaviour:
     - rid: 636489279218909222
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: How to use the boards on the party side.
+        m_CommentText: How to use the boards on the party side (Slice B stage 19).
     - rid: 636489279218909223
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1654,10 +1675,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Shown in the figure placeholder of a unit until there is art.
-    - rid: 8623673134167883777
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Shown in the inventory popup when it holds nothing.
     - rid: 8623673134167883778
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1665,7 +1682,8 @@ MonoBehaviour:
     - rid: 8623673134167883779
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = cells the item takes on a board.'
+        m_CommentText: '{0} x {1} = the squares the item takes across and down on
+          a board (Slice B stage 19).'
     - rid: 8623673134167883780
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1700,12 +1718,12 @@ MonoBehaviour:
     - rid: 8623673137313349635
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Title of the inventory popup. {0} = cells in use. {1} = all
-          its cells.
+        m_CommentText: The inventory popup's squares in use, beside its heading (round
+          49). {0} = squares in use. {1} = all its squares.
     - rid: 8623673137313349636
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: How to use the inventory popup.
+        m_CommentText: How to use the inventory popup's grid (round 49).
     - rid: 8623673182117429248
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2033,7 +2051,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Under the name of an item on offer or of a drop of loot. {0}
-          = category. {1} = cells it takes.
+          = category. {1} x {2} = its squares across and down.
     - rid: 8623673275332689931
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2081,8 +2099,42 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: On the board panel after a win, while a drop is picked (round
-          47).
-    - rid: 8623673310930010112
+          47, stage 19).
+    - rid: 8623673301822865408
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the name of a bag on offer or dropped (Slice B stage
+          19). {0} x {1} = its squares across and down.
+    - rid: 8623673301822865409
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The facts of a bag on a tile (Slice B stage 19). {0} = the
+          squares it adds.
+    - rid: 8623673301822865410
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Over a held item's ghost where it would push one item out
+          (Slice B stage 19). {0} = that item's name.
+    - rid: 8623673301822865411
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Over a held bag's ghost where it can be laid (Slice B stage
+          19).
+    - rid: 8623673317018566656
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The heading of the inventory popup (round 49).
+    - rid: 8623673317018566657
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under a held item''s tooltip in the inventory popup (round
+          49): how to turn it and let go.'
+    - rid: 8623673317205213184
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the top of the picked tile of the shop, while the hand
+          holds its offer (round 49).
+    - rid: 8623673318725910528
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'Why a mercenary died when the fatigue collapse killed it
