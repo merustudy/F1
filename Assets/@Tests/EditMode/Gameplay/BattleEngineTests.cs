@@ -1366,12 +1366,8 @@ namespace F1.Tests
                 () => Battle(balance, TestData.Units(TestData.Mercenary("a", 1, 150).WithMaxHp(100)), enemies),
                 "HP above max.");
 
-            BattleUnitSetup overloaded = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 1), TestData.Attack(1000, 1, "b"));
-            overloaded.ItemSlots = 1;
-            Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(overloaded), enemies), "More items than the board holds.");
-
+            // Where the items lie is the expedition's rule (Slice B stage 19: the grid board); the battle only refuses an empty entry.
             BattleUnitSetup gap = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 1), null);
-            gap.ItemSlots = 2;
             Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(gap), enemies), "An empty entry on the board.");
         }
     }

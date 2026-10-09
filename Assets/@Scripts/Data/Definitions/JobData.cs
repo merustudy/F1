@@ -93,15 +93,11 @@ namespace F1.Data
     {
         public const string DefinitionName = "Job";
 
-        /// <summary>The most cells any board has. A unit's column of the board panel is built to hold this many cells stacked (8 until the 2026-10-04 mockup B made it 7).</summary>
-        public const int MaxItemSlots = 7;
-
         [JsonConstructor]
         public JobData(
             string id,
             LocalizedText name,
             int maxHp,
-            int itemSlots,
             string weaponItemId,
             int weaponGrade,
             int recommendedRow,
@@ -116,11 +112,6 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': MaxHp must be at least 1.");
             }
 
-            if (itemSlots < 1 || itemSlots > MaxItemSlots)
-            {
-                throw new DataException($"{DefinitionName} '{id}': ItemSlots must be 1..{MaxItemSlots}.");
-            }
-
             if (weaponGrade < 1)
             {
                 throw new DataException($"{DefinitionName} '{id}': WeaponGrade must be at least 1.");
@@ -132,7 +123,6 @@ namespace F1.Data
             }
 
             MaxHp = maxHp;
-            ItemSlots = itemSlots;
             WeaponItemId = DataId.Require(weaponItemId, $"{DefinitionName} '{id}' WeaponItemId");
             WeaponGrade = weaponGrade;
             if ((passive == null) != (passiveText == null))
@@ -155,37 +145,33 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public int MaxHp { get; }
 
-        /// <summary>Cells of the item board. Items take their size in cells.</summary>
-        [JsonProperty(Order = 4, Required = Required.Always)]
-        public int ItemSlots { get; }
-
         /// <summary>The item every mercenary of this job starts an expedition with.</summary>
-        [JsonProperty(Order = 5, Required = Required.Always)]
+        [JsonProperty(Order = 4, Required = Required.Always)]
         public string WeaponItemId { get; }
 
-        [JsonProperty(Order = 6, Required = Required.Always)]
+        [JsonProperty(Order = 5, Required = Required.Always)]
         public int WeaponGrade { get; }
 
         /// <summary>Where the job usually stands. The simulator lines a party up by it; rules always use the actual row.</summary>
-        [JsonProperty(Order = 7, Required = Required.Always)]
+        [JsonProperty(Order = 6, Required = Required.Always)]
         public int RecommendedRow { get; }
 
         /// <summary>Null when the job has no passive.</summary>
-        [JsonProperty(Order = 8, Required = Required.AllowNull)]
+        [JsonProperty(Order = 7, Required = Required.AllowNull)]
         public PassiveSpec Passive { get; }
 
         /// <summary>
         /// What the passive does, for the player. "{0}" stands for the passive's magnitude, so the
         /// number is written in one place only. Null when the job has no passive.
         /// </summary>
-        [JsonProperty(Order = 9, Required = Required.AllowNull)]
+        [JsonProperty(Order = 8, Required = Required.AllowNull)]
         public LocalizedText PassiveText { get; }
 
         /// <summary>
         /// The logical address of the full-body art of the job's mercenaries. Null when the job
         /// has no art yet: the screen then shows a placeholder.
         /// </summary>
-        [JsonProperty(Order = 10, Required = Required.AllowNull)]
+        [JsonProperty(Order = 9, Required = Required.AllowNull)]
         public string Figure { get; }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the job has no figure.</summary>

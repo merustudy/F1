@@ -1,0 +1,4 @@
+Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight
+belt_pouch,허리 주머니,Belt Pouch,2,1,false,8,6,3
+leather_pack,가죽 배낭,Leather Pack,3,3,true,0,0,0
+leather_pouch,가죽 주머니,Leather Pouch,3,1,false,12,6,2

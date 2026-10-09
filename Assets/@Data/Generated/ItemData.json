@@ -8,7 +8,8 @@
         "ko-KR": "버클러"
       },
       "Category": "Armor",
-      "Size": 1,
+      "Width": 1,
+      "Height": 1,
       "CooldownMs": 5000,
       "Rows": {
         "From": "Front",
@@ -33,7 +34,8 @@
         "ko-KR": "조잡한 활"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3400,
       "Rows": {
         "From": "Back",
@@ -58,7 +60,8 @@
         "ko-KR": "단검"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 2,
+      "Height": 1,
       "CooldownMs": 1500,
       "Rows": {
         "From": "Front",
@@ -83,7 +86,8 @@
         "ko-KR": "불씨 플라스크"
       },
       "Category": "Attack",
-      "Size": 1,
+      "Width": 2,
+      "Height": 1,
       "CooldownMs": 4500,
       "Rows": {
         "From": "Front",
@@ -108,7 +112,8 @@
         "ko-KR": "화염 지팡이"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3500,
       "Rows": {
         "From": "Back",
@@ -133,7 +138,8 @@
         "ko-KR": "대도끼"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3600,
       "Rows": {
         "From": "Front",
@@ -158,7 +164,8 @@
         "ko-KR": "미늘창"
       },
       "Category": "Weapon",
-      "Size": 3,
+      "Width": 3,
+      "Height": 3,
       "CooldownMs": 3600,
       "Rows": {
         "From": "Front",
@@ -183,7 +190,8 @@
         "ko-KR": "치유의 지팡이"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 4000,
       "Rows": {
         "From": "Back",
@@ -208,7 +216,8 @@
         "ko-KR": "약초 주머니"
       },
       "Category": "Support",
-      "Size": 1,
+      "Width": 2,
+      "Height": 1,
       "CooldownMs": 5000,
       "Rows": {
         "From": "Front",
@@ -233,7 +242,8 @@
         "ko-KR": "등불 지팡이"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3800,
       "Rows": {
         "From": "Back",
@@ -258,7 +268,8 @@
         "ko-KR": "장궁"
       },
       "Category": "Weapon",
-      "Size": 2,
+      "Width": 3,
+      "Height": 2,
       "CooldownMs": 3000,
       "Rows": {
         "From": "Back",
@@ -283,7 +294,8 @@
         "ko-KR": "롱소드"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3000,
       "Rows": {
         "From": "Front",
@@ -308,7 +320,8 @@
         "ko-KR": "메이스"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 3200,
       "Rows": {
         "From": "Front",
@@ -339,7 +352,8 @@
         "ko-KR": "치유의 부적"
       },
       "Category": "Support",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 5500,
       "Rows": {
         "From": "Back",
@@ -364,7 +378,8 @@
         "ko-KR": "감독관의 망치"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 4500,
       "Rows": {
         "From": "Front",
@@ -389,7 +404,8 @@
         "ko-KR": "감독관의 포효"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 2,
+      "Height": 1,
       "CooldownMs": 6000,
       "Rows": {
         "From": "Front",
@@ -414,7 +430,8 @@
         "ko-KR": "쥐 송곳니"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 1,
+      "Height": 1,
       "CooldownMs": 2000,
       "Rows": {
         "From": "Front",
@@ -439,7 +456,8 @@
         "ko-KR": "녹슨 칼"
       },
       "Category": "Weapon",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 2800,
       "Rows": {
         "From": "Front",
@@ -464,7 +482,8 @@
         "ko-KR": "창"
       },
       "Category": "Weapon",
-      "Size": 2,
+      "Width": 3,
+      "Height": 2,
       "CooldownMs": 3200,
       "Rows": {
         "From": "Front",
@@ -489,7 +508,8 @@
         "ko-KR": "수호 부적"
       },
       "Category": "Support",
-      "Size": 1,
+      "Width": 3,
+      "Height": 1,
       "CooldownMs": 6000,
       "Rows": {
         "From": "Front",

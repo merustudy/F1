@@ -273,6 +273,11 @@ namespace F1.Sim
             public int ItemsOnBoards;
             public int ItemsInInventory;
 
+            /// <summary>The bag squares and the bags added to the start bag, summed over every member at the end (Slice B stage 19).</summary>
+            public long BagSquares;
+            public int BagsAdded;
+            public int MembersAtEnd;
+
             /// <summary>Fatigue the survivors came back with, and how many came back.</summary>
             public long SurvivorFatigue;
             public int Survivors;
@@ -321,6 +326,7 @@ namespace F1.Sim
             Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
+            Console.WriteLine($"  bags per member at the end: added {BattleStats.Ratio(stats.BagsAdded, stats.MembersAtEnd)}, bag squares {Average(stats.BagSquares, stats.MembersAtEnd)}");
             Console.WriteLine($"  fatigue of the survivors at the end: avg {Average(stats.SurvivorFatigue, stats.Survivors)}, highest {stats.HighestFatigue}; equipment fatigue per member per battle {Average(stats.EquipmentFatigue, stats.MemberBattles)}");
             Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
@@ -438,7 +444,7 @@ namespace F1.Sim
                     stats.Elites += node.Kind == MapNodeKind.Elite ? 1 : 0;
                     foreach (ExpeditionMember member in state.Members.Where(m => m.Alive))
                     {
-                        stats.EquipmentFatigue += FatigueRules.EquipmentCost(data.Balance, member.Items);
+                        stats.EquipmentFatigue += FatigueRules.EquipmentCost(data.Balance, member.Board.InReadingOrder());
                         stats.MemberBattles++;
                     }
 
@@ -476,10 +482,17 @@ namespace F1.Sim
                 }
 
                 stats.BattlesWon += state.BattlesWon;
-                stats.ItemsOnBoards += state.Members.Sum(m => m.Items.Count);
-                foreach (EquippedItem item in state.Members.SelectMany(m => m.Items))
+                stats.ItemsOnBoards += state.Members.Sum(m => m.Board.Items.Count);
+                foreach (BoardItem placed in state.Members.SelectMany(m => m.Board.Items))
                 {
-                    stats.TiersAtEnd[(int)item.Tier]++;
+                    stats.TiersAtEnd[(int)placed.Item.Tier]++;
+                }
+
+                foreach (ExpeditionMember member in state.Members)
+                {
+                    stats.BagSquares += member.Board.Bags.Sum(bag => bag.Bag.Area);
+                    stats.BagsAdded += member.Board.Bags.Count(bag => !bag.Bag.Start);
+                    stats.MembersAtEnd++;
                 }
                 stats.ItemsInInventory += state.Inventory.Count;
                 stats.ExpeditionsWithBreakdown += brokeDown ? 1 : 0;

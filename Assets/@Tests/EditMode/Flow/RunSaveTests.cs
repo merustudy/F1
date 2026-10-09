@@ -127,8 +127,8 @@ namespace F1.Tests
         public void Restart_OnTheNodeMap_ComesBackToTheSameExpedition()
         {
             FlowTestKit kit = new FlowTestKit().OnNodeMap();
-            kit.Expedition.MoveItem(0, 0, 1, 2);
-            kit.Expedition.MoveToInventory(1, 0);
+            kit.Expedition.MoveItem(0, 0, 0, 1, new Placement(0, 1));
+            kit.Expedition.MoveToInventory(1, 0, 0);
             kit.Expedition.MoveToRow(1, 1);
 
             FlowTestKit restarted = kit.Restart();
@@ -157,13 +157,13 @@ namespace F1.Tests
             Assert.AreEqual(Snapshot(kit), Snapshot(restarted));
 
             string itemId = restarted.Expedition.Expedition.Loot[0].Id;
-            restarted.Expedition.TakeLoot(0, 1, 2);
+            restarted.Expedition.TakeLoot(0, 1, new Placement(0, 1));
             FlowTestKit again = restarted.Restart();
 
             Assert.AreEqual(GamePhase.Loot, again.Expedition.Phase, "The other drop still lies there.");
             Assert.IsNull(again.Expedition.Expedition.Loot[0], "The taken slot is saved empty.");
             Assert.IsNotNull(again.Expedition.Expedition.Loot[1]);
-            Assert.AreEqual(itemId, again.Expedition.Expedition.Members[1].Items[1].Item.Id, "Behind the weapon on the board.");
+            Assert.AreEqual(itemId, TestBoards.ItemAt(again.Expedition.Expedition.Members[1], 0, 1).Item.Id, "Under the weapon on the board, where it was put.");
 
             again.Expedition.LeaveLoot();
             FlowTestKit left = again.Restart();

@@ -162,7 +162,7 @@ namespace F1.Tests
             Assert.AreEqual(camp.Id, state.CurrentNodeId);
             Assert.IsEmpty(ExpeditionRules.AvailableNodes(state), "The party stays until it chooses what to do.");
             Assert.IsTrue(ExpeditionRules.CanMoveToRow(state, 0, 2), "Rows can be changed at a camp.");
-            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0), "So can the boards.");
+            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0, 0), "So can the boards.");
         }
 
         [Test]

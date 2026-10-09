@@ -59,7 +59,7 @@ namespace F1.Editor.Data
         public static List<JobData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "MaxHp", "ItemSlots", "WeaponItemId", "WeaponGrade", "RecommendedRow",
+                "MaxHp", "WeaponItemId", "WeaponGrade", "RecommendedRow",
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
                 RowMapping.Figure)
                 .Concat(CsvRow.LocalizedHeaders(PassiveText)));
@@ -68,7 +68,6 @@ namespace F1.Editor.Data
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Int("MaxHp"),
-                row.Int("ItemSlots"),
                 row.Id("WeaponItemId"),
                 row.Int("WeaponGrade"),
                 row.Int("RecommendedRow"),
@@ -110,7 +109,7 @@ namespace F1.Editor.Data
         public static List<ItemData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "Category", "Size", "CooldownMs", "Rows",
+                "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
                 "ShopWeight", RowMapping.Icon, "Price"));
@@ -128,7 +127,8 @@ namespace F1.Editor.Data
                     row.Id(RowMapping.Id),
                     row.Localized(RowMapping.Name),
                     row.Enum<ItemCategory>("Category"),
-                    row.Int("Size"),
+                    row.Int("Width"),
+                    row.Int("Height"),
                     row.Int("CooldownMs"),
                     row.Rows("Rows"),
                     effects,
@@ -146,6 +146,23 @@ namespace F1.Editor.Data
                 row.Enum<TargetMode>(prefix + "Target"),
                 row.OptionalInt(prefix + "Reach", 0),
                 row.Int(prefix + "Power"));
+        }
+    }
+
+    internal static class BagMapper
+    {
+        public static List<BagData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(RowMapping.Headers("Width", "Height", "Start", "Price", "ShopWeight", "LootWeight"));
+            return RowMapping.MapRows(table, errors, row => new BagData(
+                row.Id(RowMapping.Id),
+                row.Localized(RowMapping.Name),
+                row.Int("Width"),
+                row.Int("Height"),
+                row.Bool("Start"),
+                row.Int("Price"),
+                row.Int("ShopWeight"),
+                row.Int("LootWeight")));
         }
     }
 

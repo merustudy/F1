@@ -74,7 +74,7 @@ namespace F1.Flow
                 DungeonId = expedition.DungeonId,
                 Seed = Text(expedition.Seed),
                 Members = new List<MemberRecord>(),
-                Inventory = ToRecords(expedition.Inventory),
+                Inventory = ToRecords(expedition.Inventory.Items),
                 Potions = new List<string>(expedition.Potions),
                 Phase = expedition.Phase.ToString(),
                 CurrentNodeId = expedition.CurrentNodeId,
@@ -94,7 +94,8 @@ namespace F1.Flow
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
                     Alive = member.Alive,
-                    Items = ToRecords(member.Items),
+                    Items = ToRecords(member.Board.Items),
+                    Bags = ToRecords(member.Board.Bags),
                     Fatigue = member.Fatigue,
                     State = member.StateId,
                 });
@@ -147,12 +148,38 @@ namespace F1.Flow
             return record;
         }
 
-        static List<ItemRecord> ToRecords(IReadOnlyList<EquippedItem> items)
+        /// <summary>The items on a board or in the inventory with where they lie (version 10; the inventory's since round 49).</summary>
+        static List<ItemRecord> ToRecords(IReadOnlyList<BoardItem> items)
         {
             var records = new List<ItemRecord>();
-            foreach (EquippedItem item in items)
+            foreach (BoardItem placed in items)
             {
-                records.Add(new ItemRecord { ItemId = item.Item.Id, Grade = item.Grade, Base = item.IsBase, Tier = item.Tier.ToString() });
+                records.Add(ToRecord(placed.Item, placed.At));
+            }
+
+            return records;
+        }
+
+        static ItemRecord ToRecord(EquippedItem item, Placement at)
+        {
+            return new ItemRecord
+            {
+                ItemId = item.Item.Id,
+                Grade = item.Grade,
+                Base = item.IsBase,
+                Tier = item.Tier.ToString(),
+                X = at.X,
+                Y = at.Y,
+                Turns = at.Turns,
+            };
+        }
+
+        static List<BagRecord> ToRecords(IReadOnlyList<BoardBag> bags)
+        {
+            var records = new List<BagRecord>();
+            foreach (BoardBag bag in bags)
+            {
+                records.Add(new BagRecord { BagId = bag.Bag.Id, X = bag.At.X, Y = bag.At.Y, Turns = bag.At.Turns });
             }
 
             return records;
@@ -271,10 +298,7 @@ namespace F1.Flow
                 Require(member.Fatigue >= 0 && member.Fatigue <= balance.MaxFatigue, $"Fatigue of member '{member.MercenaryId}' is out of range.");
                 RequireState(data, member.State, member.Fatigue, $"member '{member.MercenaryId}'", atHome: false);
 
-                // The board's cells come from the job; the items must still fit them.
-                int cells = data.Jobs.Get(member.JobId).ItemSlots;
-                List<EquippedItem> items = ToItems(member.Items, data, $"The board of '{member.MercenaryId}'");
-                Require(ItemBoard.UsedCells(items) <= cells, $"The board of '{member.MercenaryId}' holds more than its {cells} cells.");
+                ItemBoard board = ToBoard(member, data);
 
                 if (member.Alive)
                 {
@@ -289,16 +313,14 @@ namespace F1.Flow
                     MaxHp = member.MaxHp,
                     Hp = member.Hp,
                     Alive = member.Alive,
-                    Items = items,
-                    ItemSlots = cells,
+                    Board = board,
                     Fatigue = member.Fatigue,
                     StateId = member.State,
                 });
             }
 
             Require(alive >= 1, "Nobody on the expedition is alive.");
-            state.Inventory = ToItems(record.Inventory, data, "The inventory");
-            Require(ItemBoard.UsedCells(state.Inventory) <= balance.InventoryCells, $"The inventory holds more than its {balance.InventoryCells} cells.");
+            state.Inventory = ToInventory(record.Inventory, data, balance);
 
             // The living stand one per row from the front, with no empty row between them.
             string formationProblem = Formation.Problem(ExpeditionRules.LivingRows(state, out _));
@@ -338,6 +360,64 @@ namespace F1.Flow
             }
 
             return items;
+        }
+
+        /// <summary>
+        /// A member's board (version 10): the start bag first, unturned at the top-left (it never moves), then the bags added, each a
+        /// known bag inside the frame over no other bag; every item a valid item lying inside the frame on bags over no other item.
+        /// </summary>
+        static ItemBoard ToBoard(MemberRecord member, StaticData data)
+        {
+            string what = $"The board of '{member.MercenaryId}'";
+            Require(member.Bags != null && member.Bags.Count >= 1, $"{what} has no bags.");
+            var board = new ItemBoard();
+            for (int i = 0; i < member.Bags.Count; i++)
+            {
+                BagRecord record = member.Bags[i];
+                Require(record != null && data.Bags.Contains(record.BagId), $"{what} has an unknown bag.");
+                BagData bag = data.Bags.Get(record.BagId);
+                Require(bag.Start == (i == 0), $"{what} must have the start bag first and only once.");
+                Require(record.Turns >= 0 && record.Turns <= 3, $"{what}: a bag is turned {record.Turns} times.");
+                var at = new Placement(record.X, record.Y, record.Turns);
+                Require(!bag.Start || (at.X == 0 && at.Y == 0 && at.Turns == 0), $"{what}: the start bag has moved.");
+                Require(board.FreeOfBags(at.X, at.Y, at.WidthOf(bag.Width, bag.Height), at.HeightOf(bag.Width, bag.Height), null), $"{what}: bag '{bag.Id}' lies outside the frame or over another bag.");
+                board.Bags.Add(new BoardBag(bag, at));
+            }
+
+            List<EquippedItem> items = ToItems(member.Items, data, what);
+            for (int i = 0; i < items.Count; i++)
+            {
+                ItemRecord record = member.Items[i];
+                Require(record.Turns >= 0 && record.Turns <= 3, $"{what}: '{record.ItemId}' is turned {record.Turns} times.");
+                var at = new Placement(record.X, record.Y, record.Turns);
+                int width = at.WidthOf(items[i].Item.Width, items[i].Item.Height);
+                int height = at.HeightOf(items[i].Item.Width, items[i].Item.Height);
+                Require(board.OnBags(at.X, at.Y, width, height), $"{what}: '{record.ItemId}' does not lie on its bags.");
+                Require(board.ItemsUnder(at.X, at.Y, width, height, null).Count == 0, $"{what}: '{record.ItemId}' lies over another item.");
+                board.Items.Add(new BoardItem(items[i], at));
+            }
+
+            return board;
+        }
+
+        /// <summary>The inventory (round 49): a grid of the balance data's size, every item a valid item lying inside it over no other item.</summary>
+        static InventoryGrid ToInventory(List<ItemRecord> records, StaticData data, BalanceData balance)
+        {
+            const string what = "The inventory";
+            var grid = new InventoryGrid(balance.InventoryWidth, balance.InventoryHeight);
+            List<EquippedItem> items = ToItems(records, data, what);
+            for (int i = 0; i < items.Count; i++)
+            {
+                ItemRecord record = records[i];
+                Require(record.Turns >= 0 && record.Turns <= 3, $"{what}: '{record.ItemId}' is turned {record.Turns} times.");
+                var at = new Placement(record.X, record.Y, record.Turns);
+                int width = at.WidthOf(items[i].Item.Width, items[i].Item.Height);
+                int height = at.HeightOf(items[i].Item.Width, items[i].Item.Height);
+                Require(grid.IsFree(at.X, at.Y, width, height, null), $"{what}: '{record.ItemId}' lies outside its grid or over another item.");
+                grid.Items.Add(new BoardItem(items[i], at));
+            }
+
+            return grid;
         }
 
         static bool IsJobWeapon(StaticData data, string itemId)
@@ -402,7 +482,7 @@ namespace F1.Flow
             foreach (OfferRecord drop in record.Loot)
             {
                 ItemOffer offer = drop == null ? null : ReadOption(drop, data);
-                Require(offer == null || offer.Kind == OfferKind.Item, "A potion never drops.");
+                Require(offer == null || offer.Kind != OfferKind.Potion, "A potion never drops.");
                 lying |= offer != null;
                 state.Loot.Add(offer);
             }
@@ -430,7 +510,7 @@ namespace F1.Flow
             state.Shop = shop;
         }
 
-        /// <summary>A drop of loot or an offer of a shop: a known item with a grade, or a known potion at Common with no grade.</summary>
+        /// <summary>A drop of loot or an offer of a shop: a known item with a grade, or a known potion or bag (not the start bag) at Common with no grade.</summary>
         static ItemOffer ReadOption(OfferRecord record, StaticData data)
         {
             OfferKind kind = Parse<OfferKind>(record.Kind);
@@ -438,6 +518,10 @@ namespace F1.Flow
             if (kind == OfferKind.Item)
             {
                 Require(data.Items.Contains(record.Id) && record.Grade >= 1, $"Offer item '{record.Id}' is not valid.");
+            }
+            else if (kind == OfferKind.Bag)
+            {
+                Require(data.Bags.Contains(record.Id) && !data.Bags.Get(record.Id).Start && record.Grade == 0 && tier == ItemTier.Common, $"Offer bag '{record.Id}' is not valid.");
             }
             else
             {

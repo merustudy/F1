@@ -139,14 +139,19 @@ namespace F1.Tests
                 return new TestCaseData(breakIt, phase).SetName("Read_Refuses_Expedition_" + name);
             }
 
-            ItemRecord Ballista()
-            {
-                return new ItemRecord { ItemId = "ballista", Grade = 8 };
-            }
-
             OfferRecord Claw()
             {
                 return new OfferRecord { Kind = "Item", Id = "claw", Grade = 8 };
+            }
+
+            ItemRecord Knife(int x, int y, int turns = 0)
+            {
+                return new ItemRecord { ItemId = "knife", Grade = 8, X = x, Y = y, Turns = turns };
+            }
+
+            BagRecord Bag(string id, int x, int y, int turns = 0)
+            {
+                return new BagRecord { BagId = id, X = x, Y = y, Turns = turns };
             }
 
             yield return Case("UnknownDungeon", e => e.DungeonId = "nowhere");
@@ -172,11 +177,28 @@ namespace F1.Tests
             yield return Case("MemberStateUnknown", e => e.Members[0].State = "sleepy");
             yield return Case("MemberAfflictedUnderTheBreakdown", e => { e.Members[0].State = "fearful"; e.Members[0].Fatigue = 50; });
             yield return Case("FoundItemMarkedAsABaseWeapon", e => e.Inventory.Add(new ItemRecord { ItemId = "ballista", Grade = 8, Base = true }));
-            yield return Case("BoardOverItsCells", e => e.Members[0].Items.Add(new ItemRecord { ItemId = "ballista", Grade = 8 }), ExpeditionPhase.ChoosingNode);
+            yield return Case("ItemOverAnotherItem", e => e.Members[0].Items.Add(Knife(1, 0)));
+            yield return Case("ItemOffTheBags", e => e.Members[0].Items.Add(Knife(0, 2)));
+            yield return Case("ItemOutsideTheFrame", e => e.Members[0].Items.Add(Knife(BoardFrame.Width, 0)));
+            yield return Case("ItemHangingOffItsBag", e => e.Members[0].Items.Add(new ItemRecord { ItemId = "pike", Grade = 8, X = 0, Y = 1 }));
+            yield return Case("ItemTurnedFourTimes", e => e.Members[0].Items[0].Turns = 4);
+            yield return Case("BagsMissing", e => e.Members[0].Bags = null);
+            yield return Case("NoBags", e => e.Members[0].Bags.Clear());
+            yield return Case("EmptyBagEntry", e => e.Members[0].Bags.Add(null));
+            yield return Case("UnknownBag", e => e.Members[0].Bags.Add(Bag("sack", 0, 2)));
+            yield return Case("StartBagNotFirst", e => e.Members[0].Bags.Insert(0, Bag("pouch", 0, 2)));
+            yield return Case("StartBagTwice", e => e.Members[0].Bags.Add(Bag("pack", 0, 2)));
+            yield return Case("StartBagMoved", e => e.Members[0].Bags[0].Y = 1);
+            yield return Case("StartBagTurned", e => e.Members[0].Bags[0].Turns = 2);
+            yield return Case("BagOverAnotherBag", e => e.Members[0].Bags.Add(Bag("pouch", 0, 1)));
+            yield return Case("BagOutsideTheFrame", e => e.Members[0].Bags.Add(Bag("pouch", 0, BoardFrame.Height - 1, 1)));
+            yield return Case("BagTurnedFourTimes", e => e.Members[0].Bags.Add(Bag("pouch", 0, 2, 4)));
             yield return Case("InventoryMissing", e => e.Inventory = null);
             yield return Case("InventoryUnknownItem", e => e.Inventory.Add(new ItemRecord { ItemId = "excalibur", Grade = 8 }));
             yield return Case("InventoryEmptyEntry", e => e.Inventory.Add(null));
-            yield return Case("InventoryOverItsCells", e => e.Inventory.AddRange(new[] { Ballista(), Ballista(), Ballista(), Ballista() }));
+            yield return Case("InventoryItemsOverlap", e => e.Inventory.AddRange(new[] { Inv("knife", 1, 0), Inv("blade", 0, 0) }));
+            yield return Case("InventoryItemOutsideTheGrid", e => e.Inventory.Add(Inv("blade", 9, 0)));
+            yield return Case("InventoryItemTurnedFourTimes", e => e.Inventory.Add(Inv("knife", 0, 0, 4)));
             yield return Case("EveryoneDead", e => e.Members.ForEach(m => { m.Alive = false; m.Hp = 0; }));
             yield return Case("RowZero", e => e.Members[0].Row = 0);
             yield return Case("RowBeyondTheLast", e => e.Members[2].Row = BattleRows.Count + 1);
@@ -194,6 +216,9 @@ namespace F1.Tests
             yield return Case("DropKindUnknown", e => e.Loot[0].Kind = "Silver", ExpeditionPhase.PickingLoot);
             yield return Case("DropItemUnknown", e => e.Loot[0] = new OfferRecord { Kind = "Item", Id = "excalibur", Grade = 8 }, ExpeditionPhase.PickingLoot);
             yield return Case("DropIsAPotion", e => e.Loot[0] = new OfferRecord { Kind = "Potion", Id = "tonic", Grade = 0 }, ExpeditionPhase.PickingLoot);
+            yield return Case("DropIsTheStartBag", e => e.Loot[0] = new OfferRecord { Kind = "Bag", Id = "pack", Grade = 0 }, ExpeditionPhase.PickingLoot);
+            yield return Case("DropBagUnknown", e => e.Loot[0] = new OfferRecord { Kind = "Bag", Id = "sack", Grade = 0 }, ExpeditionPhase.PickingLoot);
+            yield return Case("DropBagWithAGrade", e => e.Loot[0] = new OfferRecord { Kind = "Bag", Id = "pouch", Grade = 8 }, ExpeditionPhase.PickingLoot);
             yield return Case("DropTierUnknown", e => e.Loot[0].Tier = "Copper", ExpeditionPhase.PickingLoot);
             yield return Case("NoBattleRecordInABattle", e => e.Battle = null, ExpeditionPhase.InBattle);
             yield return Case("ConfirmedTimeNegative", e => e.Battle.ConfirmedTimeMs = -1, ExpeditionPhase.InBattle);
@@ -237,31 +262,35 @@ namespace F1.Tests
         {
             RunSaveData save = ValidSave(out StaticData data);
             save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "pike", Grade = 9 });
+            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "pike", Grade = 9, X = 1 });
             save.Expedition.Members[0].Items.Clear();
 
             RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
 
-            CollectionAssert.AreEqual(new[] { "knife", "pike" }, expedition.Inventory.ConvertAll(i => i.Item.Id));
+            CollectionAssert.AreEqual(new[] { "knife", "pike" }, expedition.Inventory.Select(i => i.Item.Id));
             Assert.AreEqual(9, expedition.Inventory[1].Grade);
-            Assert.IsEmpty(expedition.Members[0].Items);
-            Assert.AreEqual(3, expedition.Members[0].ItemSlots, "The cells come from the job.");
+            Assert.IsEmpty(expedition.Members[0].Board.Items);
+            Assert.AreEqual("pack", expedition.Members[0].Board.Bags.Single().Bag.Id, "The start bag stays.");
         }
 
         [Test]
-        public void Read_AcceptsAnInventoryFilledToItsCells()
+        public void Read_AcceptsAFullInventory_AndKeepsWhereEachItemLies()
         {
             RunSaveData save = ValidSave(out StaticData data);
-            for (int i = 0; i < 3; i++)
+            for (int x = 0; x < 9; x += 3)
             {
-                save.Expedition.Inventory.Add(new ItemRecord { ItemId = "ballista", Grade = 8 });
+                save.Expedition.Inventory.Add(Inv("ballista", x, 0));
             }
 
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
+            save.Expedition.Inventory.Add(Inv("staff", 9, 0, 1));
 
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
 
-            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, expedition), "Ten cells: three ballistas and a knife.");
+            Assert.AreEqual(30, expedition.Inventory.UsedSquares, "Ten by three, full.");
+            Assert.AreEqual(new Placement(9, 0, 1), expedition.Inventory.Items[3].At, "The staff stands in the last column.");
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            CollectionAssert.AreEqual(new[] { 0, 3, 6, 9 }, again.Expedition.Inventory.ConvertAll(i => i.X));
+            Assert.AreEqual(1, again.Expedition.Inventory[3].Turns);
         }
 
         [Test]
@@ -463,7 +492,8 @@ namespace F1.Tests
             RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.PickingLoot);
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
             ExpeditionMember first = expedition.Members[0];
-            first.Items[0] = new EquippedItem(first.Items[0].Item, first.Items[0].Grade, isBase: true, tier: ItemTier.Silver);
+            BoardItem weapon = first.Board.Items[0];
+            weapon.Item = new EquippedItem(weapon.Item.Item, weapon.Item.Grade, isBase: true, tier: ItemTier.Silver);
             expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8, tier: ItemTier.Bronze));
             ItemOffer drop = expedition.Loot.First(d => d != null);
             expedition.Loot[expedition.Loot.IndexOf(drop)] = new ItemOffer(OfferKind.Item, drop.Id, drop.Grade, ItemTier.Gold);
@@ -471,8 +501,8 @@ namespace F1.Tests
             RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
 
-            Assert.AreEqual(ItemTier.Silver, read.Members[0].Items[0].Tier);
-            Assert.IsTrue(read.Members[0].Items[0].IsBase);
+            Assert.AreEqual(ItemTier.Silver, read.Members[0].Board.Items[0].Item.Tier);
+            Assert.IsTrue(read.Members[0].Board.Items[0].Item.IsBase);
             Assert.AreEqual(ItemTier.Bronze, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
             Assert.AreEqual(ItemTier.Gold, read.Loot.First(d => d != null).Tier);
             Assert.IsNull(read.Loot[1], "The taken slot stays empty.");
@@ -487,8 +517,108 @@ namespace F1.Tests
             RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
 
             Assert.IsTrue(expedition.Members.TrueForAll(m => m.Fatigue == 0 + data.Balance.FatigueBattleEntry), "One battle was entered with only the base weapons.");
-            Assert.IsTrue(expedition.Members.TrueForAll(m => m.Items[0].IsBase), "Everyone left with their base weapon.");
+            Assert.IsTrue(expedition.Members.TrueForAll(m => m.Board.Items[0].Item.IsBase), "Everyone left with their base weapon.");
             Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items[0].Base));
+        }
+
+        [Test]
+        public void Save_KeepsWhereEveryBagAndItemLies_AndHowTheyAreTurned()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            ItemBoard board = expedition.Members[0].Board;
+            board.Bags.Add(new BoardBag(data.Bags.Get("pouch"), new Placement(0, 2)));
+            board.Bags.Add(new BoardBag(data.Bags.Get("strap"), new Placement(2, 3, 1)));
+            board.Items.Add(new BoardItem(new EquippedItem(data.Items.Get("bow"), 8), new Placement(2, 1, 1)));
+            board.Items.Add(new BoardItem(new EquippedItem(data.Items.Get("knife"), 8), new Placement(2, 4)));
+
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            MemberRecord record = again.Expedition.Members[0];
+            CollectionAssert.AreEqual(new[] { "pack", "pouch", "strap" }, record.Bags.ConvertAll(b => b.BagId));
+            Assert.AreEqual(1, record.Bags[2].Turns, "The strap stands up.");
+            Assert.AreEqual(1, record.Items.Find(i => i.ItemId == "bow").Turns);
+
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
+            ItemBoard readBoard = read.Members[0].Board;
+            CollectionAssert.AreEqual(board.Bags.Select(b => b.At), readBoard.Bags.Select(b => b.At));
+            CollectionAssert.AreEqual(board.Items.Select(i => i.At), readBoard.Items.Select(i => i.At));
+            Assert.AreEqual("bow", readBoard.ItemAt(2, 2).Item.Item.Id, "The bow stands across the pack and the pouch.");
+        }
+
+        [Test]
+        public void Migrate_From9_LaysEachOldBoardDownTheLeftEdge_InItsOrder_AddingRowBagsAsItNeeds()
+        {
+            // Version 9 kept a board as a list of items with no squares; the grid lays them one under another, so the order stays.
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 9;
+            foreach (MemberRecord member in save.Expedition.Members)
+            {
+                member.Bags = null;
+            }
+
+            MemberRecord anna = save.Expedition.Members[0];
+            anna.Items.Add(new ItemRecord { ItemId = "pike", Grade = 8 });
+            anna.Items.Add(new ItemRecord { ItemId = "knife", Grade = 8 });
+            anna.Items.Add(new ItemRecord { ItemId = "claw", Grade = 8 });
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            CollectionAssert.AreEqual(new[] { "pack", "pouch", "pouch", "pouch" }, anna.Bags.ConvertAll(b => b.BagId), "The start bag holds two rows; a row bag for each row past it.");
+            CollectionAssert.AreEqual(new[] { 0, 2, 3, 4 }, anna.Bags.ConvertAll(b => b.Y));
+            CollectionAssert.AreEqual(new[] { 0, 1, 3, 4 }, anna.Items.ConvertAll(i => i.Y), "The blade, the pike two rows tall, the knife, the claw.");
+            Assert.IsTrue(anna.Items.TrueForAll(i => i.X == 0 && i.Turns == 0));
+            CollectionAssert.AreEqual(new[] { "pack" }, save.Expedition.Members[1].Bags.ConvertAll(b => b.BagId), "One weapon fits the start bag.");
+
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+            CollectionAssert.AreEqual(new[] { "blade", "pike", "knife", "claw" }, TestBoards.Ids(expedition.Members[0]), "The battle order is the old order.");
+
+            // A board taller than the frame cannot be laid down: the file is refused.
+            RunSaveData tall = ValidSave(out StaticData _);
+            tall.SchemaVersion = 9;
+            tall.Expedition.Members.ForEach(m => m.Bags = null);
+            for (int i = 0; i < 3; i++)
+            {
+                tall.Expedition.Members[0].Items.Add(new ItemRecord { ItemId = "ballista", Grade = 8 });
+            }
+
+            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(tall, data));
+        }
+
+        [Test]
+        public void Migrate_From9_LaysTheInventoryOnItsGrid_InItsOrder_EachAtItsFirstRoom()
+        {
+            // Up to round 49 the inventory was a list counted by area; the grid takes its items in order, each at its first room.
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 9;
+            save.Expedition.Members.ForEach(m => m.Bags = null);
+            foreach (string id in new[] { "staff", "ballista", "knife", "pike" })
+            {
+                save.Expedition.Inventory.Add(new ItemRecord { ItemId = id, Grade = 8 });
+            }
+
+            RunSaveMigrator.Migrate(save, data);
+
+            CollectionAssert.AreEqual(new[] { 0, 3, 6, 7 }, save.Expedition.Inventory.ConvertAll(i => i.X), "The pike fits the top row's end, unturned.");
+            CollectionAssert.AreEqual(new[] { 0, 0, 0, 0 }, save.Expedition.Inventory.ConvertAll(i => i.Y));
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
+            Assert.AreEqual(4, expedition.Inventory.Count);
+
+            // More than the grid can hold cannot be laid down: the file is refused.
+            RunSaveData full = ValidSave(out StaticData _);
+            full.SchemaVersion = 9;
+            full.Expedition.Members.ForEach(m => m.Bags = null);
+            for (int i = 0; i < 4; i++)
+            {
+                full.Expedition.Inventory.Add(new ItemRecord { ItemId = "ballista", Grade = 8 });
+            }
+
+            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(full, data));
+        }
+
+        static ItemRecord Inv(string id, int x, int y, int turns = 0)
+        {
+            return new ItemRecord { ItemId = id, Grade = 8, X = x, Y = y, Turns = turns };
         }
     }
 }

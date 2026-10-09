@@ -34,9 +34,12 @@ namespace F1.Gameplay
     {
         Item,
         Potion,
+
+        /// <summary>A bag (Slice B stage 19): sold by a shop, or the last drop of an elite's loot.</summary>
+        Bag,
     }
 
-    /// <summary>An item or a potion not yet owned: a drop of a won battle's loot (Slice B stage 18; a potion never drops), or what a shop sells (stage 17).</summary>
+    /// <summary>An item, a potion or a bag not yet owned: a drop of a won battle's loot (Slice B stage 18; a potion never drops), or what a shop sells (stage 17).</summary>
     public sealed class ItemOffer
     {
         public ItemOffer(OfferKind kind, string id, int grade, ItemTier tier = ItemTier.Common)
@@ -49,13 +52,13 @@ namespace F1.Gameplay
 
         public OfferKind Kind { get; }
 
-        /// <summary>Item id or potion id.</summary>
+        /// <summary>Item id, potion id or bag id.</summary>
         public string Id { get; }
 
-        /// <summary>Item grade. 0 for a potion.</summary>
+        /// <summary>Item grade. 0 for a potion or a bag.</summary>
         public int Grade { get; }
 
-        /// <summary>Item tier. Common for a potion.</summary>
+        /// <summary>Item tier. Common for a potion or a bag.</summary>
         public ItemTier Tier { get; }
     }
 
@@ -81,11 +84,8 @@ namespace F1.Gameplay
         public int Hp;
         public bool Alive;
 
-        /// <summary>The item board: items in order, each taking its size in cells (see <see cref="ItemBoard"/>). No null entries.</summary>
-        public List<EquippedItem> Items;
-
-        /// <summary>Cells of the board, from the job.</summary>
-        public int ItemSlots;
+        /// <summary>The item board: bags in the frame and items on the bags (Slice B stage 19, see <see cref="ItemBoard"/>).</summary>
+        public ItemBoard Board;
 
         /// <summary>Fatigue (0 = fresh, see <see cref="FatigueRules"/>). It came from the roster and goes back to it at the settlement.</summary>
         public int Fatigue;
@@ -131,8 +131,11 @@ namespace F1.Gameplay
         /// <summary>Potion ids per slot. A null entry is empty.</summary>
         public string[] Potions;
 
-        /// <summary>Items kept outside the boards. They do nothing in battle and are gone with the expedition.</summary>
-        public List<EquippedItem> Inventory = new List<EquippedItem>();
+        /// <summary>
+        /// Items kept outside the boards, on a grid of their own (round 49). They do nothing in battle and are gone with the expedition.
+        /// Bags are never kept here (Slice B stage 19). Made with the expedition: its size is the balance data's.
+        /// </summary>
+        public InventoryGrid Inventory;
 
         public ExpeditionPhase Phase;
         public ExpeditionResult Result;

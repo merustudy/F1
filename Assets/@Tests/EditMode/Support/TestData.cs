@@ -58,7 +58,9 @@ namespace F1.Tests
                 { "MinCooldownMs", 200 },
                 { "DropCount", 2 },
                 { "EliteDropCount", 3 },
-                { "InventoryCells", 10 },
+                { "InventoryWidth", 10 },
+                { "InventoryHeight", 3 },
+                { "EliteBagPercent", 0 },
                 { "CampHealPercent", 30 },
                 { "CampFatigueRelief", 20 },
                 { "TierBronzePercent", 200 },
@@ -82,7 +84,8 @@ namespace F1.Tests
         }
 
         /// <param name="rows">Where the owner must stand for the item to work. Everywhere when omitted.</param>
-        /// <param name="size">Cells the item takes on a board. One when omitted.</param>
+        /// <param name="width">Squares the item takes across on a board, unturned (Slice B stage 19). One when omitted.</param>
+        /// <param name="height">Squares it takes down. One when omitted.</param>
         /// <param name="price">What a shop sells it for at Common; 0 (the default) keeps it out of every shop.</param>
         public static ItemData Item(
             string id,
@@ -95,7 +98,8 @@ namespace F1.Tests
             int shopWeight = 0,
             ItemEffect second = null,
             int reach = DefaultReach,
-            int size = 1,
+            int width = 1,
+            int height = 1,
             int price = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, powerPercent, reach) };
@@ -104,7 +108,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, size, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price);
+            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -127,7 +131,7 @@ namespace F1.Tests
             return new EquippedItem(Item(id, cooldownMs, EffectKind.Damage, TargetMode.EnemyFront), damage);
         }
 
-        /// <summary>A mercenary whose board is exactly its items: no empty cells.</summary>
+        /// <summary>A mercenary carrying exactly these items, in this order (no layout: a screen would stack them).</summary>
         public static BattleUnitSetup Mercenary(string id, int row, int hp, params EquippedItem[] items)
         {
             return new BattleUnitSetup
@@ -138,7 +142,6 @@ namespace F1.Tests
                 MaxHp = hp,
                 Hp = hp,
                 Items = items,
-                ItemSlots = Cells(items),
                 Passive = null,
                 HasDog = true,
             };
@@ -154,16 +157,9 @@ namespace F1.Tests
                 MaxHp = hp,
                 Hp = hp,
                 Items = items,
-                ItemSlots = Cells(items),
                 Passive = null,
                 HasDog = false,
             };
-        }
-
-        /// <summary>The cells the items take. A null entry (which only a test of the setup validation passes) takes none.</summary>
-        static int Cells(EquippedItem[] items)
-        {
-            return items.Where(item => item != null).Sum(item => item.Item.Size);
         }
 
         /// <param name="rows">Where the unit must stand for an InRows condition; null for the other conditions.</param>
@@ -241,7 +237,9 @@ namespace F1.Tests
         /// <summary>
         /// A complete, valid data set: one dungeon of two battle floors and a boss, three jobs,
         /// four mercenaries and a few shop items (each priced and weighted; the tonic too). The grunts carry claws, which is what drops. The big items ("pike",
-        /// "ballista") are never dropped or stocked; board tests put them on boards directly.
+        /// "ballista") are never dropped or stocked; board tests put them on boards directly. Shapes (Slice B stage 19): blade and bow 2x1,
+        /// staff 3x1, claw, charm and knife 1x1, pike 3x2, ballista 3x3. The bags: the start "pack" 3x2, a "pouch" 3x1 a shop sells (and an
+        /// elite may drop), a "strap" 2x1 only an elite drops.
         /// </summary>
         public static StaticDataParts Parts(params (string Key, int Value)[] balanceOverrides)
         {
@@ -250,20 +248,26 @@ namespace F1.Tests
                 Balance = BalanceEntries(balanceOverrides),
                 Jobs = new List<JobData>
                 {
-                    new JobData("tank", Text("tank"), 100, 3, "blade", 10, 1, null),
-                    new JobData("healer", Text("healer"), 60, 3, "staff", 10, 2, null),
-                    new JobData("striker", Text("striker"), 80, 2, "blade", 12, 3, null),
+                    new JobData("tank", Text("tank"), 100, "blade", 10, 1, null),
+                    new JobData("healer", Text("healer"), 60, "staff", 10, 2, null),
+                    new JobData("striker", Text("striker"), 80, "blade", 12, 3, null),
                 },
                 Items = new List<ItemData>
                 {
-                    Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront),
-                    Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, category: ItemCategory.Support),
+                    Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, width: 2),
+                    Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, category: ItemCategory.Support, width: 3),
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, shopWeight: 5, price: 10),
                     Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, shopWeight: 5, price: 10),
-                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), shopWeight: 5, price: 10),
-                    Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, size: 2),
-                    Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, size: 3),
+                    Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), shopWeight: 5, width: 2, price: 10),
+                    Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, width: 3, height: 2),
+                    Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, width: 3, height: 3),
+                },
+                Bags = new List<BagData>
+                {
+                    new BagData("pack", Text("pack"), 3, 2, true, 0, 0, 0),
+                    new BagData("pouch", Text("pouch"), 3, 1, false, 6, 5, 1),
+                    new BagData("strap", Text("strap"), 2, 1, false, 0, 0, 1),
                 },
                 Potions = new List<PotionData>
                 {

@@ -19,6 +19,25 @@ namespace F1.Data
     }
 
     /// <summary>
+    /// The frame of a mercenary's item board (Slice B stage 19, Docs/Design/02_Combat_System.md §4): squares in columns and rows,
+    /// where bags lie and items lie on the bags. It is structure, not balance: the board panel's column holds this many squares
+    /// (user 2026-10-08 "틀은 3x8"). How many of them are usable is what the bags make.
+    /// </summary>
+    public static class BoardFrame
+    {
+        public const int Width = 3;
+        public const int Height = 8;
+
+        /// <summary>The longest side an item or a bag may have: it must fit the frame's width when turned.</summary>
+        public const int MaxSide = Width;
+
+        public static bool Contains(int x, int y)
+        {
+            return x >= 0 && x < Width && y >= 0 && y < Height;
+        }
+    }
+
+    /// <summary>
     /// What an item is (Docs/Design/02_Combat_System.md §4). The rules ask only whether it is a weapon; the battle screen
     /// moves the owner by it (Docs/Design/10_Art_Direction.md §5).
     /// </summary>

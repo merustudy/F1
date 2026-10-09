@@ -207,17 +207,17 @@ namespace F1.Flow
             return Phase == GamePhase.Shop && ExpeditionRules.CanAfford(_data.Data, Expedition, slot);
         }
 
-        /// <summary>True when the item in a slot could be bought onto that cell now (as a drop of loot would go there).</summary>
-        public bool CanBuyToBoard(int slot, int memberIndex, int cell)
+        /// <summary>True when the item or bag in a slot could be bought onto that placement now (as a drop of loot would go there).</summary>
+        public bool CanBuyToBoard(int slot, int memberIndex, Placement at)
         {
-            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToBoard(_data.Data, Expedition, slot, memberIndex, cell);
+            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToBoard(_data.Data, Expedition, slot, memberIndex, at);
         }
 
-        public void BuyToBoard(int slot, int memberIndex, int cell)
+        public void BuyToBoard(int slot, int memberIndex, Placement at)
         {
             _run.RequireWritable();
             Require(GamePhase.Shop);
-            ExpeditionRules.BuyToBoard(_data.Data, Expedition, slot, memberIndex, cell);
+            ExpeditionRules.BuyToBoard(_data.Data, Expedition, slot, memberIndex, at);
             Commit();
         }
 
@@ -249,10 +249,10 @@ namespace F1.Flow
             Commit();
         }
 
-        /// <summary>Whether buying the item in a slot onto a cell would merge it into the item there.</summary>
-        public bool ShopMergesAt(int slot, int memberIndex, int cell)
+        /// <summary>Whether buying the item in a slot with its top-left on a square would merge it into the item there.</summary>
+        public bool ShopMergesAt(int slot, int memberIndex, int x, int y)
         {
-            return Phase == GamePhase.Shop && ExpeditionRules.ShopMergesAt(Expedition, slot, memberIndex, cell);
+            return Phase == GamePhase.Shop && ExpeditionRules.ShopMergesAt(Expedition, slot, memberIndex, x, y);
         }
 
         /// <summary>True when the stock can be refreshed now: at a shop, with the coins for it.</summary>
@@ -292,16 +292,16 @@ namespace F1.Flow
 
         // ---- Tiers ---------------------------------------------------------------------------
 
-        /// <summary>Whether putting an item of a board or the inventory on a cell would merge it into the item there (a tier up).</summary>
-        public bool MergesAt(EquippedItem item, int memberIndex, int cell)
+        /// <summary>Whether putting an item of a board or the inventory with its top-left on a square would merge it into the item there (a tier up).</summary>
+        public bool MergesAt(EquippedItem item, int memberIndex, int x, int y)
         {
-            return IsBetweenBattles && ExpeditionRules.MergesAt(Expedition, item, memberIndex, cell);
+            return IsBetweenBattles && ExpeditionRules.MergesAt(Expedition, item, memberIndex, x, y);
         }
 
-        /// <summary>Whether taking the drop in a slot of the loot onto a cell would merge it into the item there.</summary>
-        public bool LootMergesAt(int slot, int memberIndex, int cell)
+        /// <summary>Whether taking the drop in a slot of the loot with its top-left on a square would merge it into the item there.</summary>
+        public bool LootMergesAt(int slot, int memberIndex, int x, int y)
         {
-            return LootOpen && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, cell);
+            return LootOpen && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, x, y);
         }
 
         /// <summary>Whether some board holds what the item would merge into.</summary>
@@ -310,18 +310,18 @@ namespace F1.Flow
             return IsBetweenBattles && ExpeditionRules.HasMergeTarget(Expedition, item);
         }
 
-        /// <summary>Whether the item at a cell of a member's board can go a tier up at the camp (its upkeep).</summary>
-        public bool CanUpgradeAtCamp(int memberIndex, int cell)
+        /// <summary>Whether the item covering a square of a member's board can go a tier up at the camp (its upkeep).</summary>
+        public bool CanUpgradeAtCamp(int memberIndex, int x, int y)
         {
-            return Phase == GamePhase.Camp && ExpeditionRules.CanUpgradeAtCamp(Expedition, memberIndex, cell);
+            return Phase == GamePhase.Camp && ExpeditionRules.CanUpgradeAtCamp(Expedition, memberIndex, x, y);
         }
 
-        /// <summary>The camp's upkeep: the item at a cell goes a tier up, and the party goes on.</summary>
-        public void UpgradeAtCamp(int memberIndex, int cell)
+        /// <summary>The camp's upkeep: the item covering a square goes a tier up, and the party goes on.</summary>
+        public void UpgradeAtCamp(int memberIndex, int x, int y)
         {
             _run.RequireWritable();
             Require(GamePhase.Camp);
-            ExpeditionRules.UpgradeAtCamp(Expedition, memberIndex, cell);
+            ExpeditionRules.UpgradeAtCamp(Expedition, memberIndex, x, y);
             Commit();
         }
 
@@ -399,17 +399,17 @@ namespace F1.Flow
 
         // ---- The loot, the item boards and the inventory --------------------------------------
 
-        /// <summary>True when the drop in a slot of the loot could be put at that cell now: into free cells, in place of the item there, or merged into the same item.</summary>
-        public bool CanTakeLoot(int slot, int memberIndex, int cell)
+        /// <summary>True when the drop in a slot of the loot could be put at that placement now: on bags over nothing or over one item, merged into the same item, or a bag into the frame.</summary>
+        public bool CanTakeLoot(int slot, int memberIndex, Placement at)
         {
-            return LootOpen && ExpeditionRules.CanTakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
+            return LootOpen && ExpeditionRules.CanTakeLoot(_data.Data, Expedition, slot, memberIndex, at);
         }
 
-        public void TakeLoot(int slot, int memberIndex, int cell)
+        public void TakeLoot(int slot, int memberIndex, Placement at)
         {
             _run.RequireWritable();
             RequireLoot();
-            ExpeditionRules.TakeLoot(_data.Data, Expedition, slot, memberIndex, cell);
+            ExpeditionRules.TakeLoot(_data.Data, Expedition, slot, memberIndex, at);
             Commit();
         }
 
@@ -436,50 +436,98 @@ namespace F1.Flow
             Commit();
         }
 
-        /// <summary>True when the item at a cell can go to a cell of a board now (free cells, or trading places with the item there).</summary>
-        public bool CanMoveItem(int fromMember, int fromCell, int toMember, int toCell)
+        /// <summary>True when the item covering a square can go to a placement on a board now (over nothing, over one item that goes to the inventory, or merged).</summary>
+        public bool CanMoveItem(int fromMember, int fromX, int fromY, int toMember, Placement to)
         {
-            return IsBetweenBattles && ExpeditionRules.CanMoveItem(Expedition, fromMember, fromCell, toMember, toCell);
+            return IsBetweenBattles && ExpeditionRules.CanMoveItem(_data.Data, Expedition, fromMember, fromX, fromY, toMember, to);
         }
 
-        public void MoveItem(int fromMember, int fromCell, int toMember, int toCell)
+        public void MoveItem(int fromMember, int fromX, int fromY, int toMember, Placement to)
         {
             _run.RequireWritable();
             RequireBetweenBattles();
-            ExpeditionRules.MoveItem(Expedition, fromMember, fromCell, toMember, toCell);
+            ExpeditionRules.MoveItem(_data.Data, Expedition, fromMember, fromX, fromY, toMember, to);
             Commit();
         }
 
-        /// <summary>True when a cell holds an item that can be picked up now; where it may go is asked with the other Can... queries.</summary>
-        public bool CanPickItem(int memberIndex, int cell)
+        /// <summary>True when a square holds an item that can be picked up now; where it may go is asked with the other Can... queries.</summary>
+        public bool CanPickItem(int memberIndex, int x, int y)
         {
-            return IsBetweenBattles && ExpeditionRules.CanPickItem(Expedition, memberIndex, cell);
+            return IsBetweenBattles && ExpeditionRules.CanPickItem(Expedition, memberIndex, x, y);
         }
 
-        /// <summary>True when the item at a cell can go to the inventory now: it must fit the inventory's free cells.</summary>
-        public bool CanMoveToInventory(int memberIndex, int cell)
+        /// <summary>True when the item covering a square can go to the inventory now (at its first room): the inventory's grid must have one.</summary>
+        public bool CanMoveToInventory(int memberIndex, int x, int y)
         {
-            return IsBetweenBattles && ExpeditionRules.CanMoveToInventory(_data.Data, Expedition, memberIndex, cell);
+            return IsBetweenBattles && ExpeditionRules.CanMoveToInventory(_data.Data, Expedition, memberIndex, x, y);
         }
 
-        public void MoveToInventory(int memberIndex, int cell)
+        public void MoveToInventory(int memberIndex, int x, int y)
         {
             _run.RequireWritable();
             RequireBetweenBattles();
-            ExpeditionRules.MoveToInventory(_data.Data, Expedition, memberIndex, cell);
+            ExpeditionRules.MoveToInventory(_data.Data, Expedition, memberIndex, x, y);
             Commit();
         }
 
-        public bool CanPlaceFromInventory(int inventoryIndex, int memberIndex, int cell)
+        public bool CanPlaceFromInventory(int inventoryIndex, int memberIndex, Placement at)
         {
-            return IsBetweenBattles && ExpeditionRules.CanPlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, cell);
+            return IsBetweenBattles && ExpeditionRules.CanPlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, at);
         }
 
-        public void PlaceFromInventory(int inventoryIndex, int memberIndex, int cell)
+        public void PlaceFromInventory(int inventoryIndex, int memberIndex, Placement at)
         {
             _run.RequireWritable();
             RequireBetweenBattles();
-            ExpeditionRules.PlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, cell);
+            ExpeditionRules.PlaceFromInventory(_data.Data, Expedition, inventoryIndex, memberIndex, at);
+            Commit();
+        }
+
+        /// <summary>True when the item covering a square can be laid at a placement of the inventory's grid now (round 49): there it lies over no item.</summary>
+        public bool CanMoveToInventoryAt(int memberIndex, int x, int y, Placement to)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanMoveToInventoryAt(Expedition, memberIndex, x, y, to);
+        }
+
+        public void MoveToInventoryAt(int memberIndex, int x, int y, Placement to)
+        {
+            _run.RequireWritable();
+            RequireBetweenBattles();
+            ExpeditionRules.MoveToInventoryAt(Expedition, memberIndex, x, y, to);
+            Commit();
+        }
+
+        /// <summary>True when an inventory item can be laid elsewhere on the inventory's grid now (round 49): over no other item.</summary>
+        public bool CanMoveInInventory(int inventoryIndex, Placement to)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanMoveInInventory(Expedition, inventoryIndex, to);
+        }
+
+        public void MoveInInventory(int inventoryIndex, Placement to)
+        {
+            _run.RequireWritable();
+            RequireBetweenBattles();
+            ExpeditionRules.MoveInInventory(Expedition, inventoryIndex, to);
+            Commit();
+        }
+
+        /// <summary>True when the square holds a bag that can be picked up now (Slice B stage 19): not the start bag, the square empty, no item lying across it and another bag.</summary>
+        public bool CanPickBag(int memberIndex, int x, int y)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanPickBag(Expedition, memberIndex, x, y);
+        }
+
+        /// <summary>True when the bag at a square can go to a placement in a frame now, carrying its items.</summary>
+        public bool CanMoveBag(int fromMember, int fromX, int fromY, int toMember, Placement to)
+        {
+            return IsBetweenBattles && ExpeditionRules.CanMoveBag(Expedition, fromMember, fromX, fromY, toMember, to);
+        }
+
+        public void MoveBag(int fromMember, int fromX, int fromY, int toMember, Placement to)
+        {
+            _run.RequireWritable();
+            RequireBetweenBattles();
+            ExpeditionRules.MoveBag(Expedition, fromMember, fromX, fromY, toMember, to);
             Commit();
         }
 

@@ -23,9 +23,9 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, 3, "blade", 200, 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, 3, "staff", 10, 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, 2, "blade", 200, 3, null),
+                new JobData("tank", TestData.Text("tank"), 100, "blade", 200, 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, "staff", 10, 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, "blade", 200, 3, null),
             };
             parts.Dungeons = new List<DungeonData>
             {
@@ -85,10 +85,10 @@ namespace F1.Tests
             int price = kit.Expedition.PriceOf(stock[item]);
 
             Assert.IsTrue(kit.Expedition.CanAfford(item));
-            Assert.IsTrue(kit.Expedition.CanBuyToBoard(item, 0, 1));
-            kit.Expedition.BuyToBoard(item, 0, 1);
+            Assert.IsTrue(kit.Expedition.CanBuyToBoard(item, 0, new Placement(0, 1)), "The start bag's second row is free.");
+            kit.Expedition.BuyToBoard(item, 0, new Placement(0, 1));
             Assert.AreEqual(100 - price, kit.Expedition.Expedition.Coins);
-            Assert.AreEqual(2, kit.Expedition.Expedition.Members[0].Items.Count);
+            Assert.AreEqual(2, kit.Expedition.Expedition.Members[0].Board.Items.Count);
             Assert.IsNull(kit.Expedition.ShopStock[item], "Sold.");
             ExpeditionRecord saved = kit.Save.Load<RunSaveData>(RunManager.FileName).Value.Expedition;
             Assert.AreEqual(100 - price, saved.Coins, "The purchase is saved.");
@@ -147,7 +147,7 @@ namespace F1.Tests
             FlowTestKit kit = AtTheShop(out int _);
             Assert.IsTrue(kit.Expedition.CanMoveToRow(0, 2));
             kit.Expedition.MoveToRow(0, 2);
-            Assert.IsTrue(kit.Expedition.CanPickItem(0, 0));
+            Assert.IsTrue(kit.Expedition.CanPickItem(0, 0, 0));
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.AdvanceBattle(100));
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.RestAtCamp());
 
@@ -155,7 +155,7 @@ namespace F1.Tests
             Assert.IsEmpty(kit.Expedition.ShopStock);
             Assert.AreEqual(0, kit.Expedition.RefreshCost);
             Assert.IsFalse(kit.Expedition.CanRefreshShop);
-            Assert.IsFalse(kit.Expedition.CanBuyToBoard(0, 0, 1));
+            Assert.IsFalse(kit.Expedition.CanBuyToBoard(0, 0, new Placement(0, 1)));
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.RefreshShop());
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.LeaveShop());
             Assert.Throws<System.InvalidOperationException>(() => kit.Expedition.BuyToInventory(0));

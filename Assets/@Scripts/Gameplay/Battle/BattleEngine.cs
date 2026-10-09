@@ -314,11 +314,6 @@ namespace F1.Gameplay
                     bool active = equipped.Item.UsableIn(setup.Row, lineLength);
                     items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille)));
                 }
-
-                if (ItemBoard.UsedCells(setup.Items) > setup.ItemSlots)
-                {
-                    throw new ArgumentException($"Unit '{setup.SourceId}' carries more than its board of {setup.ItemSlots} cells holds.");
-                }
             }
 
             var unit = new BattleUnit(side, index, setup, items);

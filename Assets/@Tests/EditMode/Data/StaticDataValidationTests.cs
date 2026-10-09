@@ -38,7 +38,7 @@ namespace F1.Tests
         public void MissingReferences_AreReportedWithTheReferringDefinition()
         {
             StringAssert.Contains("Job 'tank' WeaponItemId: 'axe' does not exist", ProblemOf(p =>
-                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, 3, "axe", 10, 1, null))));
+                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, "axe", 10, 1, null))));
 
             StringAssert.Contains("Enemy 'grunt' Items: 'fang' does not exist", ProblemOf(p =>
                 p.Enemies = Replace(p.Enemies, e => e.Id == "grunt", new EnemyData("grunt", TestData.Text("grunt"), 2, 30, new List<ItemGrant> { new ItemGrant("fang", 5) }))));
@@ -109,7 +109,7 @@ namespace F1.Tests
         {
             string problem = ProblemOf(p =>
             {
-                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.Size, i.CooldownMs, i.Rows, i.Effects, 0)).ToList();
+                p.Items = p.Items.Select(i => new ItemData(i.Id, i.Name, i.Category, i.Width, i.Height, i.CooldownMs, i.Rows, i.Effects, 0)).ToList();
                 p.Potions = p.Potions.Select(x => new PotionData(x.Id, x.Name, x.Effect, x.Magnitude, 0)).ToList();
             });
 
@@ -117,18 +117,27 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AJobsWeapon_MustFitItsBoard()
+        public void AJobsWeapon_MustFitTheStartBag()
         {
-            // The striker has two cells; a three-cell weapon cannot even be carried.
+            // Slice B stage 19: the weapon lies unturned at the top-left of the start bag (the test pack is 3x2; the ballista is 3x3).
             string problem = ProblemOf(p =>
-                p.Jobs = Replace(p.Jobs, j => j.Id == "striker", new JobData("striker", TestData.Text("striker"), 80, 2, "ballista", 12, 3, null)));
+                p.Jobs = Replace(p.Jobs, j => j.Id == "striker", new JobData("striker", TestData.Text("striker"), 80, "ballista", 12, 3, null)));
 
             StringAssert.Contains("Job 'striker'", problem);
-            StringAssert.Contains("'ballista' takes 3 cells but the board has 2", problem);
+            StringAssert.Contains("'ballista' (3x3) does not fit the start bag 'pack' (3x2)", problem);
         }
 
         [Test]
-        public void AnEnemysItems_CannotTakeMoreCellsThanABoardCanHave()
+        public void ExactlyOneBag_IsTheStartBag()
+        {
+            StringAssert.Contains("exactly one bag is the start bag, not 0", ProblemOf(p =>
+                p.Bags = p.Bags.Where(bag => !bag.Start).ToList()));
+            StringAssert.Contains("exactly one bag is the start bag, not 2", ProblemOf(p =>
+                p.Bags = p.Bags.Concat(new[] { new BagData("pack_two", TestData.Text("pack_two"), 3, 3, true, 0, 0, 0) }).ToList()));
+        }
+
+        [Test]
+        public void AnEnemysItems_CannotStandTallerThanTheFrame()
         {
             string problem = ProblemOf(p =>
                 p.Enemies = Replace(p.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 9, 120, new List<ItemGrant>
@@ -139,14 +148,14 @@ namespace F1.Tests
                 })));
 
             StringAssert.Contains("Enemy 'chief'", problem);
-            StringAssert.Contains("take 9 cells", problem);
+            StringAssert.Contains("stand 9 squares tall, more than a board frame (8)", problem);
         }
 
         [Test]
         public void DuplicateIds_AndMissingDefinitions_AreAllReported()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, 3, "blade", 10, 1, null) }).ToList();
+            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, "blade", 10, 1, null) }).ToList();
             parts.Affinities = null;
 
             var exception = Assert.Throws<DataValidationException>(() => new StaticData(parts));

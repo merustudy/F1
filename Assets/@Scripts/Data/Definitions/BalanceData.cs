@@ -85,7 +85,9 @@ namespace F1.Data
             new KeySpec(nameof(MinCooldownMs), 50, Big),
             new KeySpec(nameof(DropCount), 1, MaxLootCards),
             new KeySpec(nameof(EliteDropCount), 1, MaxLootCards),
-            new KeySpec(nameof(InventoryCells), ItemData.MaxSize, 100),
+            new KeySpec(nameof(InventoryWidth), BoardFrame.MaxSide, 30),
+            new KeySpec(nameof(InventoryHeight), BoardFrame.MaxSide, 30),
+            new KeySpec(nameof(EliteBagPercent), 0, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
             new KeySpec(nameof(TierBronzePercent), 100, Big),
@@ -226,8 +228,18 @@ namespace F1.Data
         /// <summary>How many of the items the enemies of a won battle carried drop as loot (Slice B stage 18); an elite group drops <see cref="EliteDropCount"/>.</summary>
         public int DropCount => _values[nameof(DropCount)];
         public int EliteDropCount => _values[nameof(EliteDropCount)];
-        /// <summary>Cells of the expedition inventory. An item takes its size there as on a board, so it holds at least the biggest item.</summary>
-        public int InventoryCells => _values[nameof(InventoryCells)];
+        /// <summary>
+        /// The expedition inventory's grid (round 49, Docs/Design/03_Dungeon_Structure.md §5: Diablo II's inventory): its width and height in
+        /// squares. Each is at least the longest side an item can have, so any item fits an empty inventory.
+        /// </summary>
+        public int InventoryWidth => _values[nameof(InventoryWidth)];
+        public int InventoryHeight => _values[nameof(InventoryHeight)];
+
+        /// <summary>
+        /// The chance, in percent, that an elite's loot holds a bag (Slice B stage 19, Docs/Design/03_Dungeon_Structure.md §5): its last drop is
+        /// a bag drawn by <see cref="BagData.LootWeight"/> instead of an item. The number of drops stays.
+        /// </summary>
+        public int EliteBagPercent => _values[nameof(EliteBagPercent)];
         /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>
         public int CampHealPercent => _values[nameof(CampHealPercent)];
         public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];

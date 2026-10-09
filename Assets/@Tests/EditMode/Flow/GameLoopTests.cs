@@ -45,8 +45,8 @@ namespace F1.Tests
             Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
             Assert.AreEqual(2, run.ExpeditionCount);
             Assert.IsTrue(
-                kit.Expedition.Expedition.Members.All(m => m.Hp == m.MaxHp && m.Items.Count == 1),
-                "Every expedition starts at full HP with only the job weapon: items do not survive the return.");
+                kit.Expedition.Expedition.Members.All(m => m.Hp == m.MaxHp && m.Board.Items.Count == 1 && m.Board.Bags.Count == 1),
+                "Every expedition starts at full HP with only the job weapon in the start bag: items and bags do not survive the return.");
             Assert.IsEmpty(kit.Expedition.Expedition.Inventory, "Neither does the inventory.");
         }
 

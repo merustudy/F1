@@ -49,6 +49,7 @@ namespace F1.Editor.Data
                 Balance = Map(StaticDataFiles.Balance, readSource, BalanceMapper.Map, errors),
                 Jobs = Map(StaticDataFiles.Job, readSource, JobMapper.Map, errors),
                 Items = Map(StaticDataFiles.Item, readSource, ItemMapper.Map, errors),
+                Bags = Map(StaticDataFiles.Bag, readSource, BagMapper.Map, errors),
                 Potions = Map(StaticDataFiles.Potion, readSource, PotionMapper.Map, errors),
                 Enemies = Map(StaticDataFiles.Enemy, readSource, EnemyMapper.Map, errors),
                 EnemyGroups = Map(StaticDataFiles.EnemyGroup, readSource, EnemyGroupMapper.Map, errors),

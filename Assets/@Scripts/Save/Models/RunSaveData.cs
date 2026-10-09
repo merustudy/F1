@@ -7,7 +7,8 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 9 (Slice B stage 18): the expedition's Loot (the drops of the last won battle, null where one was taken) replaces
+    /// Version 10 (Slice B stage 19): a member's board is a grid: its Bags (the start bag and those added, each where it lies and how it is
+    /// turned) and its Items, each where it lies and how it is turned; an offer can be a Bag. Version 9 (Slice B stage 18): the expedition's Loot (the drops of the last won battle, null where one was taken) replaces
     /// PendingRewards (the reward choice, which is not read any more). Version 8 (stage 17): the expedition's region Coins and, at a
     /// shop, its Shop (the stock and the refreshes).
     /// Version 4 (Slice B): fatigue builds up from 0 (a mercenary's Fatigue was what was left of the
@@ -18,7 +19,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 9;
+        public const int CurrentSchemaVersion = 10;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -107,8 +108,11 @@ namespace F1.Save
         public int Hp;
         public bool Alive;
 
-        /// <summary>The item board in order. No null entries; the cells come from the job.</summary>
+        /// <summary>The items on the board, each with where it lies (version 10). No null entries. Version 9 kept them in board order, without places.</summary>
         public List<ItemRecord> Items;
+
+        /// <summary>The bags in the board's frame (version 10): the start bag at the top-left first, then those added.</summary>
+        public List<BagRecord> Bags;
 
         /// <summary>The fatigue the member carries on the expedition. It goes to the roster at the settlement.</summary>
         public int Fatigue;
@@ -127,15 +131,30 @@ namespace F1.Save
 
         /// <summary>The tier's name: Common, Bronze, Silver or Gold (version 7; version 5 named them Bronze, Silver, Gold, Diamond). An entry that does not name one is Common, as every item was before.</summary>
         public string Tier = "Common";
+
+        /// <summary>On a board (version 10): the top-left square the item lies from and its quarter turns clockwise. 0 in the inventory.</summary>
+        public int X;
+        public int Y;
+        public int Turns;
+    }
+
+    /// <summary>A bag in a board's frame (version 10): the bag id, the top-left square it lies from and its quarter turns clockwise.</summary>
+    public sealed class BagRecord
+    {
+        public string BagId;
+        public int X;
+        public int Y;
+        public int Turns;
     }
 
     public sealed class OfferRecord
     {
+        /// <summary>Item, Potion or Bag (version 10).</summary>
         public string Kind;
         public string Id;
         public int Grade;
 
-        /// <summary>The tier's name of an item on offer; Common for a potion (version 7, as above). An entry that does not name one is Common.</summary>
+        /// <summary>The tier's name of an item on offer; Common for a potion or a bag (version 7, as above). An entry that does not name one is Common.</summary>
         public string Tier = "Common";
     }
 

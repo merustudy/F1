@@ -110,11 +110,13 @@ namespace F1.Tests
             ExpeditionMember tank = state.Members[0];
             Assert.AreEqual(100, tank.Hp);
             Assert.AreEqual(100, tank.MaxHp);
-            Assert.AreEqual(3, tank.ItemSlots, "Cells come from the job.");
-            Assert.AreEqual(1, tank.Items.Count, "Only the weapon.");
-            Assert.AreEqual("blade", tank.Items[0].Item.Id);
-            Assert.AreEqual(10, tank.Items[0].Grade);
-            Assert.AreEqual(2, state.Members[2].ItemSlots);
+            Assert.AreEqual(1, tank.Board.Bags.Count, "Only the start bag (Slice B stage 19)...");
+            Assert.AreEqual(new Placement(0, 0), tank.Board.Bags[0].At, "...at the top-left of the frame.");
+            Assert.AreEqual("pack", tank.Board.Bags[0].Bag.Id);
+            Assert.AreEqual(1, tank.Board.Items.Count, "Only the weapon.");
+            Assert.AreEqual("blade", tank.Board.Items[0].Item.Item.Id);
+            Assert.AreEqual(new Placement(0, 0), tank.Board.Items[0].At, "Unturned at the bag's top-left.");
+            Assert.AreEqual(10, tank.Board.Items[0].Item.Grade);
             Assert.IsEmpty(state.Inventory);
             CollectionAssert.AreEqual(new[] { "tonic", null, null }, state.Potions);
         }
@@ -199,8 +201,8 @@ namespace F1.Tests
             Assert.IsTrue(setup.Enemies.All(u => !u.HasDog && u.Hp == u.MaxHp));
             Assert.AreEqual(-80, setup.EnemyCooldownPermille);
             Assert.AreEqual("tonic", setup.Potions[0].Id);
-            CollectionAssert.AreEqual(new[] { 3, 3, 2 }, setup.Party.Select(u => u.ItemSlots), "A member's board keeps its cells.");
-            Assert.IsTrue(setup.Enemies.All(u => u.ItemSlots == ItemBoard.UsedCells(u.Items)), "An enemy's board is exactly what it carries.");
+            Assert.IsTrue(setup.Party.All(u => u.Layout != null && u.Layout.Bags.Count == 1 && u.Layout.Items.Count == u.Items.Count), "A member's board goes in with its bags and where its items lie.");
+            Assert.IsTrue(setup.Enemies.All(u => u.Layout != null && u.Layout.Bags.Count == 0), "An enemy's items stand one under another, without bags.");
 
             BattleSetup rebuilt = ExpeditionRules.BuildBattleSetup(data, state);
             Assert.AreEqual(setup.Seed, rebuilt.Seed);
@@ -262,7 +264,7 @@ namespace F1.Tests
             ExpeditionState state = Create(data);
             foreach (ExpeditionMember member in state.Members)
             {
-                member.Items.Clear();
+                member.Board.Items.Clear();
             }
 
             Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
@@ -309,7 +311,7 @@ namespace F1.Tests
             ExpeditionState state = Create(data);
             foreach (ExpeditionMember member in state.Members)
             {
-                member.Items[0] = new EquippedItem(data.Items.Get("blade"), 200);
+                member.Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), 200);
             }
 
             while (state.Phase != ExpeditionPhase.Finished)
@@ -376,9 +378,29 @@ namespace F1.Tests
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(97, 2, 0, MapNodeKind.Camp, null, new int[0])), "Nobody is fought at a camp.");
         }
 
+        [Test]
+        public void DropLoot_AnEliteMayDropABag_InPlaceOfItsLastItem_AndNothingElseDoes()
+        {
+            StaticData data = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("EliteBagPercent", 100));
+            ExpeditionState state = Create(data);
+
+            List<ItemOffer> elite = ExpeditionRules.DropLoot(data, state, new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0]));
+            Assert.AreEqual(2, elite.Count, "The number of drops stays.");
+            Assert.AreEqual(OfferKind.Item, elite[0].Kind);
+            Assert.AreEqual(OfferKind.Bag, elite[1].Kind, "Its last drop is a bag (Slice B stage 19).");
+            Assert.IsTrue(elite[1].Id == "pouch" || elite[1].Id == "strap", "A bag with a loot weight: never the start bag.");
+            Assert.AreEqual(0, elite[1].Grade);
+
+            List<ItemOffer> battle = ExpeditionRules.DropLoot(data, state, new MapNode(98, 2, 0, MapNodeKind.Battle, "trio", new int[0]));
+            Assert.IsTrue(battle.All(d => d.Kind == OfferKind.Item), "Only an elite drops a bag.");
+
+            StaticData never = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("EliteBagPercent", 0));
+            Assert.IsTrue(ExpeditionRules.DropLoot(never, Create(never), new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0])).All(d => d.Kind == OfferKind.Item));
+        }
+
         static string Board(ExpeditionMember member)
         {
-            return string.Join(" ", member.Items.Select(i => i.Item.Id));
+            return string.Join(" ", TestBoards.Ids(member));
         }
 
         static string Inventory(ExpeditionState state)
@@ -391,60 +413,89 @@ namespace F1.Tests
             return new EquippedItem(data.Items.Get(id), 9);
         }
 
+        static Placement At(int x, int y, int turns = 0)
+        {
+            return new Placement(x, y, turns);
+        }
+
+        // ---- The grid boards (Slice B stage 19) ----------------------------------------------
+        // The test members start with the pack (3x2) at the top-left and their weapon unturned at its top-left: the tank's and the
+        // striker's blade (2x1), the healer's staff (3x1). The grunts drop claws (1x1).
+
         [Test]
-        public void TakeLoot_IntoAnEmptyCell_PutsTheItemAtTheEndOfTheBoard_AndTheLastDropTakenEndsTheLoot()
+        public void TakeLoot_OntoEmptySquares_LaysItThere_AndTheLastDropTakenEndsTheLoot()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = AtLoot(data);
             ItemOffer drop = state.Loot[0];
-            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 2), "The last of three cells is empty.");
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(2, 0)), "The pack's square beside the blade is empty.");
 
-            ExpeditionRules.TakeLoot(data, state, 0, 0, 2);
+            ExpeditionRules.TakeLoot(data, state, 0, 0, At(2, 0));
 
-            Assert.AreEqual("blade " + drop.Id, Board(state.Members[0]), "Behind the weapon, whichever empty cell was chosen.");
-            Assert.AreEqual(drop.Grade, state.Members[0].Items[1].Grade);
+            Assert.AreEqual("blade " + drop.Id, Board(state.Members[0]));
+            Assert.AreEqual(drop.Grade, TestBoards.ItemAt(state.Members[0], 2, 0).Grade);
             Assert.IsEmpty(state.Inventory);
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "One drop still lies there.");
             Assert.IsNull(state.Loot[0], "The slot of the taken drop is empty.");
             Assert.IsNotNull(state.Loot[1]);
 
-            ExpeditionRules.TakeLoot(data, state, 1, 1, 2);
+            ExpeditionRules.TakeLoot(data, state, 1, 1, At(1, 1));
 
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase, "The last drop taken ends the loot.");
             Assert.IsEmpty(state.Loot);
         }
 
         [Test]
-        public void TakeLoot_OntoAnItem_SendsThatItemToTheInventory()
+        public void TakeLoot_OverOneItem_SendsThatItemToTheInventory()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = AtLoot(data);
             ItemOffer drop = state.Loot[0];
 
-            ExpeditionRules.TakeLoot(data, state, 0, 0, 0);
+            ExpeditionRules.TakeLoot(data, state, 0, 0, At(1, 0));
 
-            Assert.AreEqual(drop.Id, Board(state.Members[0]), "The newcomer stands where the weapon was.");
+            Assert.AreEqual(drop.Id, Board(state.Members[0]), "The claw lies over the blade's second square: the blade leaves the board.");
             Assert.AreEqual("blade", Inventory(state), "The weapon is not lost.");
+            Assert.IsNull(TestBoards.ItemAt(state.Members[0], 0, 0), "The blade's other square is left empty.");
         }
 
         [Test]
-        public void TakeLoot_WhereItDoesNotFit_IsRefused()
+        public void AnItem_GoesOnlyOnBags_InsideTheFrame_AndNeverOverTwoItems()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = AtLoot(data);
-            ExpeditionMember striker = state.Members[2];
-            striker.Items.Add(Big(data, "knife"));
-            Assert.AreEqual(0, ItemBoard.FreeCells(striker.Items, striker.ItemSlots), "Two cells, two items.");
+            ExpeditionMember tank = state.Members[0];
+            TestBoards.Put(tank, Big(data, "knife"), 2, 1);
+            ItemData pike = data.Items.Get("pike");
 
-            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 2, 1), "A one-cell drop in place of the knife.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 2, 2), "Beyond the board.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 9, 0), "No such member.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, 2, 2, 1), "A two-cell item in place of the knife: 1 + 2 is more than 2.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, 3, 0, 1), "A three-cell item behind the tank's weapon: only 2 free.");
-            Assert.IsTrue(ExpeditionRules.CanPlaceItem(data, state, 3, 0, 0), "A three-cell item in place of the tank's weapon.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 2, 2));
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(0, 2)), "The third row has no bag.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 9, At(2, 0)), "No such member.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, pike, 0, At(0, 0)), "The pike (3x2) would lie over the blade and the knife.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceItem(data, state, pike, 0, At(1, 0)), "Past the frame's right edge.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceItem(data, state, pike, 1, At(0, 0)), "Over the healer's staff alone: the staff would go to the inventory.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 0, At(0, 2)));
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "Nothing was taken.");
             Assert.IsNotNull(state.Loot[0]);
+        }
+
+        [Test]
+        public void AnItem_TurnsAQuarterAtATime_AndLiesTurned()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            state.Inventory.Add(Big(data, "bow"));
+
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(2, 0)), "Unturned (2x1), the bow would pass the frame's edge.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(2, 0, 1)), "Turned a quarter (1x2), it stands in the pack's last column.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(2, 0, 3)), "Three quarters lies the same way.");
+
+            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(2, 0, 1));
+
+            BoardItem bow = state.Members[0].Board.ItemAt(2, 1);
+            Assert.AreEqual("bow", bow.Item.Item.Id);
+            Assert.AreEqual(At(2, 0, 1), bow.At);
+            Assert.AreEqual(1, bow.Width);
+            Assert.AreEqual(2, bow.Height);
         }
 
         [Test]
@@ -458,28 +509,28 @@ namespace F1.Tests
 
             Assert.AreEqual(drop.Id, Inventory(state));
             Assert.AreEqual(drop.Grade, state.Inventory[0].Grade);
-            Assert.IsTrue(state.Members.All(m => m.Items.Count == 1), "Every board still holds only its weapon.");
+            Assert.IsTrue(state.Members.All(m => m.Board.Items.Count == 1), "Every board still holds only its weapon.");
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "The other drop still lies there.");
             Assert.IsNull(state.Loot[1]);
             Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, 1), "A taken slot cannot be taken again.");
         }
 
         [Test]
-        public void ABigItem_TakesSeveralCells_AndFitsOnlyWhereThatManyAreFree()
+        public void ABigItem_NeedsBagsUnderEverySquare_ABagAddedMakesTheRoom()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
             state.Inventory.Add(Big(data, "ballista"));
             ExpeditionMember tank = state.Members[0];
 
-            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state,0, 0, 1), "Three cells, one taken: two free.");
-            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state,0, 0, 0), "In place of the weapon: all three.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state,0, 2, 0), "The striker's board has two cells.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(0, 0)), "The ballista (3x3) needs three rows; the pack has two.");
+            TestBoards.AddBag(data, tank, "pouch", 0, 2);
+            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(0, 0)), "Across the pack and the pouch, over the blade alone.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 2, At(0, 0)), "The striker has only the pack.");
 
-            ExpeditionRules.PlaceFromInventory(data, state,0, 0, 0);
+            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(0, 0));
 
             Assert.AreEqual("ballista", Board(tank));
-            Assert.AreEqual(3, ItemBoard.UsedCells(tank.Items));
             Assert.AreEqual("blade", Inventory(state));
         }
 
@@ -503,172 +554,229 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             ExpeditionState state = AtLoot(data);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 99, 0, 0));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 0, 9), "No such cell.");
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 0, 9, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLootToInventory(data, state, 99));
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 99, 0, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 99, 0, At(2, 0)));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, 0, 0, At(0, 7)), "No bag there.");
+            Assert.Throws<ArgumentOutOfRangeException>(() => ExpeditionRules.TakeLoot(data, state, 0, 9, At(2, 0)));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, 99));
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 99, 0, At(2, 0)));
             Assert.IsNull(ExpeditionRules.DropAt(state, 99));
 
             ExpeditionRules.TakeLootToInventory(data, state, 0);
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, 0), "The drop in slot 0 was taken already.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, 1));
-            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0));
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(2, 0)));
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0, 0));
 
             ExpeditionRules.LeaveLoot(state);
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.LeaveLoot(state), "No loot lies there any more.");
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, 1), "No loot lies there any more.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 1, 0, 1), "No loot lies there any more.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 1, 0, At(2, 0)), "No loot lies there any more.");
         }
 
         [Test]
-        public void MoveItem_ToFreeCells_OfAnotherBoard_TakesItAlong()
+        public void MoveItem_ToEmptySquaresOfAnotherBoard_TakesItAlong()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
-            EquippedItem tankWeapon = state.Members[0].Items[0];
+            EquippedItem tankWeapon = TestBoards.ItemAt(state.Members[0], 0, 0);
 
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 1, 2));
-            ExpeditionRules.MoveItem(state, 0, 0, 1, 2);
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 1, 0, 1, At(0, 1)), "Picked by its second square, to the healer's empty row.");
+            ExpeditionRules.MoveItem(data, state, 0, 1, 0, 1, At(0, 1));
 
-            Assert.IsEmpty(state.Members[0].Items);
+            Assert.IsEmpty(state.Members[0].Board.Items);
             Assert.AreEqual("staff blade", Board(state.Members[1]));
-            Assert.AreSame(tankWeapon, state.Members[1].Items[1]);
+            Assert.AreSame(tankWeapon, TestBoards.ItemAt(state.Members[1], 1, 1));
+            Assert.IsEmpty(state.Inventory);
         }
 
         [Test]
-        public void MoveItem_OntoAnItem_TradesPlaces_WhenBothBoardsStillHoldTheirItems()
+        public void MoveItem_OverOneItem_SendsItToTheInventory_AndOverTwoIsRefused()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember healer = state.Members[1];
+            TestBoards.Put(healer, Big(data, "knife"), 0, 1);
+            TestBoards.Put(healer, Big(data, "charm"), 1, 1);
+
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 1, At(0, 1)), "The blade (2x1) would lie over the knife and the charm.");
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 1, At(1, 1)), "Over the charm alone (and the empty square beside it).");
+
+            ExpeditionRules.MoveItem(data, state, 0, 0, 0, 1, At(1, 1));
+
+            Assert.AreEqual("staff knife blade", Board(healer));
+            Assert.AreEqual("charm", Inventory(state), "What it lay over is not lost.");
+            Assert.IsEmpty(state.Members[0].Board.Items);
+        }
+
+        [Test]
+        public void MoveItem_WithinOneBoard_ToAnotherSpotOrTurned_NotWhereItLies()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
             ExpeditionMember tank = state.Members[0];
-            ExpeditionMember striker = state.Members[2];
-            tank.Items.Add(Big(data, "pike"));
-            Assert.AreEqual("blade pike", Board(tank));
 
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 2, 0), "Blade for blade.");
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 1, 2, 0), "The pike (2) for the striker's blade (1): the striker's two cells hold the pike alone.");
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 2, 2, 1), "The striker's second cell is empty, but one free cell does not hold the pike.");
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 1, 2, 2), "Beyond the striker's board.");
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 0, At(0, 0)), "Where it lies already.");
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 0, At(1, 0)), "One square to the right: it is not in its own way.");
 
-            ExpeditionRules.MoveItem(state, 0, 1, 1, 0);
+            ExpeditionRules.MoveItem(data, state, 0, 0, 0, 0, At(0, 0, 1));
 
-            Assert.AreEqual("blade staff", Board(tank), "The healer's staff came in the pike's place.");
-            Assert.AreEqual("pike", Board(state.Members[1]));
+            BoardItem blade = tank.Board.ItemAt(0, 1);
+            Assert.AreEqual(At(0, 0, 1), blade.At, "Turned in place: it stands in the first column.");
+            Assert.IsNull(tank.Board.ItemAt(1, 0));
+            Assert.IsEmpty(state.Inventory);
         }
 
         [Test]
-        public void MoveItem_WithinOneBoard_ReordersIt()
+        public void MoveToInventory_TakesTheItemOff_AndLeavesItsSquaresEmpty()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
             ExpeditionMember tank = state.Members[0];
-            tank.Items.Add(Big(data, "knife"));
-            tank.Items.Add(Big(data, "charm"));
-            Assert.AreEqual("blade knife charm", Board(tank));
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 0, 0, 0), "The same cell.");
+            TestBoards.Put(tank, Big(data, "knife"), 2, 0);
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 0, 0, 1), "An empty square.");
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 9, 0, 0));
 
-            ExpeditionRules.MoveItem(state, 0, 0, 0, 2);
-            Assert.AreEqual("charm knife blade", Board(tank), "Trading places with the item there.");
-
-            ExpeditionRules.MoveToInventory(data, state,0, 1);
-            Assert.AreEqual("charm blade", Board(tank));
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 0, 2), "An empty cell behind the items.");
-            ExpeditionRules.MoveItem(state, 0, 0, 0, 2);
-            Assert.AreEqual("blade charm", Board(tank), "To the end of the board.");
-
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 1, 0, 2), "The last item is at the end already: nothing would change.");
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 0, 2), "The first item can still go to the end.");
-        }
-
-        [Test]
-        public void MoveToInventory_TakesTheItemOff_AndTheItemsBehindCloseUp()
-        {
-            StaticData data = TestData.Data();
-            ExpeditionState state = Create(data);
-            ExpeditionMember tank = state.Members[0];
-            tank.Items.Add(Big(data, "knife"));
-            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state,0, 2), "An empty cell.");
-            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state,9, 0));
-
-            Assert.IsTrue(ExpeditionRules.CanMoveToInventory(data, state,0, 0));
-            ExpeditionRules.MoveToInventory(data, state,0, 0);
+            Assert.IsTrue(ExpeditionRules.CanMoveToInventory(data, state, 0, 1, 0), "By any of its squares.");
+            ExpeditionRules.MoveToInventory(data, state, 0, 1, 0);
 
             Assert.AreEqual("knife", Board(tank));
-            Assert.AreEqual(0, ItemBoard.FirstCellOf(tank.Items, 0), "The knife moved to the first cell.");
+            Assert.AreEqual(At(2, 0), tank.Board.ItemAt(2, 0).At, "Nothing moves up: the knife stays where it lies.");
             Assert.AreEqual("blade", Inventory(state));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state,0, 2));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state, 0, 0, 0));
         }
 
         [Test]
-        public void PlaceFromInventory_OntoAnItem_SwapsThemThroughTheInventory()
+        public void PlaceFromInventory_OverAnItem_SwapsThemThroughTheInventory()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
             state.Inventory.Add(Big(data, "knife"));
             state.Inventory.Add(Big(data, "charm"));
 
-            ExpeditionRules.PlaceFromInventory(data, state,1, 0, 0);
+            ExpeditionRules.PlaceFromInventory(data, state, 1, 0, At(0, 0));
 
             Assert.AreEqual("charm", Board(state.Members[0]));
             Assert.AreEqual("knife blade", Inventory(state), "The displaced weapon goes to the end of the inventory.");
-            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state,5, 0, 1), "No such inventory item.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.PlaceFromInventory(data, state,5, 0, 1));
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 5, 0, At(2, 0)), "No such inventory item.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.PlaceFromInventory(data, state, 5, 0, At(2, 0)));
         }
 
         [Test]
-        public void TheInventory_HasCells_AndAnItemTakesItsSizeThere()
+        public void TheInventory_IsAGrid_AnItemNeedsARoomOfItsShape_NotJustSquares()
         {
-            StaticData data = TestData.Data(("InventoryCells", 4));
+            StaticData data = TestData.Data(("InventoryWidth", 4), ("InventoryHeight", 3));
             ExpeditionState state = Create(data);
-            state.Inventory.Add(Big(data, "ballista"));
+            state.Inventory.Add(Big(data, "ballista"), At(0, 0));
+            state.Inventory.Add(Big(data, "knife"), At(3, 1));
             ExpeditionMember tank = state.Members[0];
-            tank.Items.Add(Big(data, "pike"));
-            Assert.AreEqual(1, ExpeditionRules.FreeInventoryCells(data, state), "Four cells, three taken.");
+            TestBoards.Put(tank, Big(data, "knife"), 2, 0);
+            Assert.AreEqual(10, state.Inventory.UsedSquares, "Twelve squares, two free: (3,0) and (3,2), apart.");
 
-            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 1), "The pike can be picked up...");
-            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 0, 1), "...but its two cells do not fit the one free cell.");
-            Assert.IsTrue(ExpeditionRules.CanMoveToInventory(data, state, 0, 0), "The one-cell weapon fits.");
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state, 0, 1));
+            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0, 0), "The blade can be picked up...");
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 0, 0, 0), "...but two squares apart are no room for it, turned or not.");
+            Assert.IsTrue(ExpeditionRules.CanMoveToInventory(data, state, 0, 2, 0), "The one-square knife has a room.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state, 0, 0, 0));
 
-            ExpeditionRules.MoveToInventory(data, state, 0, 0);
+            ExpeditionRules.MoveToInventory(data, state, 0, 2, 0);
 
-            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, state));
-            Assert.AreEqual("pike", Board(tank));
-            Assert.IsTrue(ExpeditionRules.CanPickItem(state, 0, 0), "A full inventory does not stop an item being picked up...");
-            Assert.IsTrue(ExpeditionRules.CanMoveItem(state, 0, 0, 1, 1), "...and moved to another board: boards trade directly.");
-            Assert.IsFalse(ExpeditionRules.CanPickItem(state, 0, 2), "An empty cell.");
-            Assert.IsFalse(ExpeditionRules.CanPickItem(state, 9, 0));
+            Assert.AreEqual(new Placement(3, 0), state.Inventory.Items[2].At, "The first room in reading order.");
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 1, At(0, 1)), "A full inventory does not stop a move to empty squares.");
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 1, At(0, 0)), "Over the staff, which would have nowhere to go.");
+            Assert.IsFalse(ExpeditionRules.CanPickItem(state, 0, 2, 1), "An empty square.");
+            Assert.IsFalse(ExpeditionRules.CanPickItem(state, 9, 0, 0));
         }
 
         [Test]
-        public void OntoAnItem_OnlyWhileWhatItDisplacesFitsTheInventory()
+        public void OverAnItem_OnlyWhileWhatItDisplacesHasARoomInTheInventory()
         {
-            StaticData data = TestData.Data(("InventoryCells", 3));
+            StaticData data = TestData.Data(("InventoryWidth", 3), ("InventoryHeight", 3));
             ExpeditionState state = AtLoot(data);
-            int optionIndex = 0;
+            int drop = 0;
             state.Inventory.Add(Big(data, "ballista"));
-            Assert.AreEqual(0, ExpeditionRules.FreeInventoryCells(data, state));
+            Assert.IsFalse(state.Inventory.HasRoomFor(data.Items.Get("knife")), "The ballista fills the three by three.");
 
-            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 1), "An empty cell displaces nothing.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 0), "The weapon there would have nowhere to go.");
-            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, optionIndex));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, optionIndex, 0, 0));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, optionIndex));
+            Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, drop, 0, At(2, 0)), "An empty square displaces nothing.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, drop, 0, At(0, 0)), "The blade there would have nowhere to go.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, drop));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLoot(data, state, drop, 0, At(0, 0)));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventory(data, state, drop));
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "Nothing was taken.");
 
-            // The cells an inventory item leaves are free for whatever it displaces.
-            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, 0), "The ballista in place of the weapon: the weapon takes one of the three cells it leaves.");
-            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, 0);
+            // The squares an inventory item leaves are free for whatever it displaces.
+            TestBoards.AddBag(data, state.Members[0], "pouch", 0, 2);
+            Assert.IsTrue(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(0, 0)), "The ballista over the blade: the blade takes two of the nine squares it leaves.");
+            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(0, 0));
             Assert.AreEqual("ballista", Board(state.Members[0]));
             Assert.AreEqual("blade", Inventory(state));
-            Assert.AreEqual(2, ExpeditionRules.FreeInventoryCells(data, state));
-            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, optionIndex, 0, 0), "The ballista would need three free cells; two are free.");
-            Assert.IsTrue(ExpeditionRules.CanTakeLootToInventory(data, state, optionIndex), "A one-cell drop fits.");
+            Assert.AreEqual(new Placement(0, 0), state.Inventory.Items[0].At, "The blade lies where the ballista lay.");
+            Assert.IsTrue(ExpeditionRules.CanTakeLootToInventory(data, state, drop), "A one-square drop has a room.");
 
-            ExpeditionRules.TakeLootToInventory(data, state, optionIndex);
+            ExpeditionRules.TakeLootToInventory(data, state, drop);
 
-            Assert.AreEqual(1, ExpeditionRules.FreeInventoryCells(data, state));
+            Assert.AreEqual(new Placement(2, 0), state.Inventory.Items[1].At, "After the blade in reading order.");
+        }
+
+        [Test]
+        public void TheInventory_TakesAShapeAtItsFirstRoom_InReadingOrder_UnturnedBeforeTurned()
+        {
+            var grid = new InventoryGrid(4, 3);
+            StaticData data = TestData.Data();
+            grid.Add(Big(data, "staff"));
+            grid.Add(Big(data, "staff"));
+            grid.Add(Big(data, "staff"));
+
+            Assert.AreEqual(new[] { new Placement(0, 0), new Placement(0, 1), new Placement(0, 2) }, grid.Items.Select(i => i.At).ToArray());
+            Assert.IsTrue(grid.FindRoom(3, 1, null, out Placement turned), "Only turned does the staff fit the last column.");
+            Assert.AreEqual(new Placement(3, 0, 1), turned);
+            Assert.IsFalse(grid.FindRoom(3, 3, grid.Items[0], out Placement _), "Leaving one staff out frees one row, not three.");
+            Assert.Throws<InvalidOperationException>(() => grid.Add(Big(data, "staff"), new Placement(1, 1)), "Over another staff.");
+            Assert.Throws<InvalidOperationException>(() => grid.Add(Big(data, "knife"), new Placement(4, 0)), "Outside the grid.");
+        }
+
+        [Test]
+        public void AnInventoryItem_MovesOnTheGrid_ToFreeSquaresOnly_TurnedAsHeld()
+        {
+            StaticData data = TestData.Data(("InventoryWidth", 4), ("InventoryHeight", 3));
+            ExpeditionState state = Create(data);
+            state.Inventory.Add(Big(data, "staff"), At(0, 0));
+            state.Inventory.Add(Big(data, "knife"), At(0, 1));
+
+            Assert.IsTrue(ExpeditionRules.CanMoveInInventory(state, 0, At(3, 0, 1)), "Turned, down the last column.");
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 0, At(0, 1)), "Over the knife: no swap.");
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 0, At(2, 0)), "Hanging out of the grid.");
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 0, At(0, 0)), "Where and as it lies.");
+            Assert.IsTrue(ExpeditionRules.CanMoveInInventory(state, 0, At(1, 0)), "Over its own squares is fine.");
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 5, At(1, 0)), "No such item.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveInInventory(state, 0, At(0, 1)));
+
+            ExpeditionRules.MoveInInventory(state, 0, At(3, 0, 1));
+
+            Assert.AreEqual(At(3, 0, 1), state.Inventory.Items[0].At);
+            Assert.AreEqual(1, state.Inventory.Items[0].Width);
+            Assert.AreEqual(3, state.Inventory.Items[0].Height);
+        }
+
+        [Test]
+        public void ABoardItem_GoesToAChosenPlaceOfTheInventory_IfItIsFree()
+        {
+            StaticData data = TestData.Data(("InventoryWidth", 4), ("InventoryHeight", 3));
+            ExpeditionState state = Create(data);
+            state.Inventory.Add(Big(data, "knife"), At(0, 0));
+            ExpeditionMember tank = state.Members[0];
+
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventoryAt(state, 0, 0, 0, At(0, 0)), "The blade over the knife.");
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventoryAt(state, 0, 0, 0, At(3, 0)), "Hanging out of the grid unturned.");
+            Assert.IsTrue(ExpeditionRules.CanMoveToInventoryAt(state, 0, 0, 0, At(3, 0, 1)), "Turned, down the last column.");
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventoryAt(state, 0, 2, 0, At(1, 1)), "An empty square of the board.");
+
+            ExpeditionRules.MoveToInventoryAt(state, 0, 0, 0, At(3, 0, 1));
+
+            Assert.IsEmpty(tank.Board.Items);
+            Assert.AreEqual("knife blade", Inventory(state));
+            Assert.AreEqual(At(3, 0, 1), state.Inventory.Items[1].At);
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventoryAt(state, 0, 0, 0, At(1, 1)));
+
+            ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 0, At(1, 1)), "Not during a battle.");
         }
 
         [Test]
@@ -679,12 +787,13 @@ namespace F1.Tests
             state.Inventory.Add(Big(data, "knife"));
             ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
 
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 0, 1, 1));
-            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state,0, 0));
-            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state,0, 0, 1));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveItem(state, 0, 0, 1, 1));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state,0, 0));
-            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.PlaceFromInventory(data, state,0, 0, 1));
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 1, At(0, 1)));
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 0, 0, 0));
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 0, At(2, 0)));
+            Assert.IsFalse(ExpeditionRules.CanPlaceBag(state, 0, data.Bags.Get("pouch"), At(0, 2)));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveItem(data, state, 0, 0, 0, 1, At(0, 1)));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.MoveToInventory(data, state, 0, 0, 0));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(2, 0)));
         }
 
         [Test]
@@ -696,10 +805,11 @@ namespace F1.Tests
             state.Members[2].Hp = 0;
             state.Inventory.Add(Big(data, "knife"));
 
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 0, 0, 2, 1));
-            Assert.IsFalse(ExpeditionRules.CanMoveItem(state, 2, 0, 0, 1));
-            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state,2, 0));
-            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state,0, 2, 1));
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 0, 0, 0, 2, At(2, 0)));
+            Assert.IsFalse(ExpeditionRules.CanMoveItem(data, state, 2, 0, 0, 0, At(0, 1)));
+            Assert.IsFalse(ExpeditionRules.CanMoveToInventory(data, state, 2, 0, 0));
+            Assert.IsFalse(ExpeditionRules.CanPlaceFromInventory(data, state, 0, 2, At(2, 0)));
+            Assert.IsFalse(ExpeditionRules.CanPlaceBag(state, 2, data.Bags.Get("pouch"), At(0, 2)));
         }
 
         [Test]
@@ -712,6 +822,121 @@ namespace F1.Tests
             BattleSetup setup = ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
 
             Assert.IsTrue(setup.Party.All(u => u.Items.Count == 1), "Only what is on the boards fights.");
+        }
+
+        [Test]
+        public void TheBattle_ReadsABoardInReadingOrder_AndCarriesWhereEachItemLies()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember tank = state.Members[0];
+            TestBoards.Put(tank, Big(data, "charm"), 0, 1);
+            TestBoards.Put(tank, Big(data, "knife"), 2, 0, 1);
+
+            BattleSetup setup = ExpeditionRules.BeginBattle(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
+            BattleUnitSetup unit = setup.Party.Single(u => u.SourceId == tank.MercenaryId);
+
+            CollectionAssert.AreEqual(new[] { "blade", "knife", "charm" }, unit.Items.Select(i => i.Item.Id), "Row by row, left to right: the battle's order (Docs/Design/02 §4).");
+            CollectionAssert.AreEqual(new[] { At(0, 0), At(2, 0, 1), At(0, 1) }, unit.Layout.Items, "Where each lies, for the screen.");
+            Assert.AreEqual(1, unit.Layout.Bags.Count);
+            BattleUnitSetup enemy = setup.Enemies[0];
+            CollectionAssert.IsEmpty(enemy.Layout.Bags, "An enemy has no bags.");
+            Assert.AreEqual(At(0, 0), enemy.Layout.Items[0]);
+        }
+
+        // ---- Bags (Slice B stage 19) ---------------------------------------------------------
+
+        [Test]
+        public void ABag_LiesInTheFrameOverNoBag_TurnedToo()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            BagData pouch = data.Bags.Get("pouch");
+
+            Assert.IsTrue(ExpeditionRules.CanPlaceBag(state, 0, pouch, At(0, 2)));
+            Assert.IsFalse(ExpeditionRules.CanPlaceBag(state, 0, pouch, At(0, 1)), "Over the pack.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceBag(state, 0, pouch, At(1, 7)), "Past the frame's right edge.");
+            Assert.IsTrue(ExpeditionRules.CanPlaceBag(state, 0, pouch, At(2, 5, 1)), "Turned, it stands at the frame's right edge: rows 5 to 7.");
+            Assert.IsFalse(ExpeditionRules.CanPlaceBag(state, 0, pouch, At(2, 6, 1)), "Past the frame's bottom.");
+        }
+
+        [Test]
+        public void TheStartBag_StaysPut_AndABagIsPickedByAnEmptySquare_WithNothingAcrossIt()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember tank = state.Members[0];
+            TestBoards.AddBag(data, tank, "pouch", 0, 2);
+
+            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 2, 0), "The start bag never moves.");
+            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 1, 2), "An empty square of the pouch.");
+            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 1, 4), "No bag there.");
+
+            TestBoards.Put(tank, Big(data, "knife"), 0, 2);
+            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 0, 2), "A square holding an item picks the item.");
+            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 2, 2));
+
+            tank.Board.Items.Add(new BoardItem(Big(data, "bow"), At(2, 1, 1)));
+            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 2, 2), "The bow lies across the pack and the pouch: move it first.");
+        }
+
+        [Test]
+        public void ABagPickedUp_MovesByAnyOfItsSquares_EvenOneUnderAnItem()
+        {
+            // The screen holds a picked bag by its top-left square, which may hold an item: the bag still moves (a bug found in stage 19).
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember tank = state.Members[0];
+            TestBoards.AddBag(data, tank, "pouch", 0, 2);
+            TestBoards.Put(tank, Big(data, "knife"), 0, 2);
+            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 2, 2), "Picked by its empty square.");
+
+            Assert.IsTrue(ExpeditionRules.CanMoveBag(state, 0, 0, 2, 0, At(0, 4)), "Then held by its top-left square, under the knife.");
+            ExpeditionRules.MoveBag(state, 0, 0, 2, 0, At(0, 4));
+            Assert.AreEqual("knife", TestBoards.ItemAt(tank, 0, 4).Item.Id);
+            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 0, 0, At(0, 5)), "The start bag never moves, by any square.");
+        }
+
+        [Test]
+        public void MoveBag_CarriesItsItems_TurnsThemWithIt_AndGoesToAnotherBoard()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember tank = state.Members[0];
+            TestBoards.AddBag(data, tank, "pouch", 0, 2);
+            TestBoards.Put(tank, Big(data, "knife"), 2, 2);
+
+            ExpeditionRules.MoveBag(state, 0, 0, 2, 0, At(0, 4));
+            Assert.AreEqual(At(0, 4), tank.Board.BagAt(0, 4).At);
+            Assert.AreEqual("knife", TestBoards.ItemAt(tank, 2, 4).Item.Id, "The knife kept its place in the pouch.");
+
+            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 4, 0, At(0, 4)), "Where it lies already.");
+            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 4, 0, At(0, 1)), "Over the pack.");
+
+            ExpeditionRules.MoveBag(state, 0, 0, 4, 0, At(2, 3, 1));
+            BoardItem knife = tank.Board.ItemAt(2, 5);
+            Assert.IsNotNull(knife, "Turned a quarter clockwise, the pouch's last square is its bottom one.");
+            Assert.AreEqual(1, knife.At.Turns, "The knife turned with it.");
+
+            ExpeditionRules.MoveBag(state, 0, 2, 3, 1, At(0, 2));
+            Assert.AreEqual(1, tank.Board.Bags.Count, "The pouch left the tank...");
+            Assert.AreEqual("staff knife", Board(state.Members[1]), "...and the knife went with it to the healer.");
+        }
+
+        [Test]
+        public void ABagDrop_LiesInTheFrame_AndNeverGoesToTheInventory()
+        {
+            StaticData data = TestData.Data(("EliteBagPercent", 100));
+            ExpeditionState state = AtLoot(data);
+            state.Loot[0] = new ItemOffer(OfferKind.Bag, "pouch", 0);
+
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, 0), "Bags are never kept in the inventory.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(0, 1)), "Over the pack.");
+            Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0, 0), "A bag merges into nothing.");
+            ExpeditionRules.TakeLoot(data, state, 0, 0, At(0, 2));
+
+            Assert.AreEqual(2, state.Members[0].Board.Bags.Count);
+            Assert.AreEqual("pouch", state.Members[0].Board.BagAt(1, 2).Bag.Id);
         }
 
         [Test]
@@ -773,7 +998,7 @@ namespace F1.Tests
             StaticData data = TestData.Data(("DogGraceMs", 0), ("DogDeathChancePercent", 100));
             ExpeditionState state = Create(data);
             state.Members[0].Hp = 0;
-            state.Members[2].Items[0] = new EquippedItem(data.Items.Get("blade"), 200);
+            state.Members[2].Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), 200);
 
             BattleEngine battle = Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
 

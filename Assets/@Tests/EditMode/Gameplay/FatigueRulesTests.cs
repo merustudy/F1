@@ -21,7 +21,7 @@ namespace F1.Tests
             ItemData item = data.Items.Get(id);
             if (category.HasValue)
             {
-                item = TestData.Item(id, item.CooldownMs, item.Effects[0].Kind, item.Effects[0].Target, category: category.Value, size: item.Size);
+                item = TestData.Item(id, item.CooldownMs, item.Effects[0].Kind, item.Effects[0].Target, category: category.Value, width: item.Width, height: item.Height);
             }
 
             return new EquippedItem(item, 8);
@@ -76,7 +76,7 @@ namespace F1.Tests
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
 
             CollectionAssert.AreEqual(new[] { 10, 0, 195 }, state.Members.Select(m => m.Fatigue));
-            Assert.IsTrue(state.Members.All(m => m.Items.Single().IsBase));
+            Assert.IsTrue(state.Members.All(m => TestBoards.Items(m).Single().IsBase));
             Assert.Throws<System.ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[] { new PartyMember("anna", "tank", 1, 201) }));
             Assert.Throws<System.ArgumentException>(() => ExpeditionRules.Create(data, "cave", 1, new[] { new PartyMember("anna", "tank", 1, -1) }));
         }
@@ -86,7 +86,7 @@ namespace F1.Tests
         {
             StaticData data = TestData.Data(("FatigueBattleEntry", 5), ("FatigueEquipment", 1), ("MaxFatigue", 200));
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
-            state.Members[0].Items.Add(Found(data, "knife"));
+            TestBoards.Put(state.Members[0], Found(data, "knife"), 2, 0);
             state.Members[1].Alive = false;
             state.Members[1].Hp = 0;
             state.Members[2].Row = 2;
@@ -103,15 +103,15 @@ namespace F1.Tests
         {
             StaticData data = TestData.Data(("FatigueEquipment", 1));
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
-            state.Members[0].Items.Add(Found(data, "knife"));
+            TestBoards.Put(state.Members[0], Found(data, "knife"), 2, 0);
 
-            ExpeditionRules.MoveItem(state, 0, 0, 2, 1);
+            ExpeditionRules.MoveItem(data, state, 0, 0, 0, 2, TestBoards.At(0, 1));
 
-            EquippedItem moved = state.Members[2].Items[1];
+            EquippedItem moved = TestBoards.ItemAt(state.Members[2], 0, 1);
             Assert.AreEqual("blade", moved.Item.Id);
             Assert.IsTrue(moved.IsBase, "Anna's base weapon on Cora's board.");
-            Assert.AreEqual(0, FatigueRules.EquipmentCost(data.Balance, state.Members[2].Items), "Two base weapons cost nothing.");
-            Assert.AreEqual(1, FatigueRules.EquipmentCost(data.Balance, state.Members[0].Items), "The knife Anna found.");
+            Assert.AreEqual(0, FatigueRules.EquipmentCost(data.Balance, TestBoards.Items(state.Members[2])), "Two base weapons cost nothing.");
+            Assert.AreEqual(1, FatigueRules.EquipmentCost(data.Balance, TestBoards.Items(state.Members[0])), "The knife Anna found.");
         }
 
         [Test]
