@@ -156,6 +156,23 @@ namespace F1.UI
         }
 
         /// <summary>
+        /// An item's lines in Diablo II's tooltip (round 49, the inventory popup's box): the title in its rarity colour, each fact on a
+        /// line, the effects in the magic blue, the fatigue last in its own colour. Whoever shows them centres them.
+        /// </summary>
+        public static string TooltipLines(EquippedItem item)
+        {
+            var lines = new List<string> { Colored(ItemTitle(item), UiPalette.Rarity(item.Tier)) };
+            lines.AddRange(ItemFacts(item));
+            foreach (string effect in ItemEffects(item))
+            {
+                lines.Add(Colored(effect, UiPalette.TooltipEffect));
+            }
+
+            AddFatigue(lines, item);
+            return string.Join("\n", lines);
+        }
+
+        /// <summary>
         /// The facts on a tile of the shop or the loot (round 46), under its name and its kind with its cells: the cooldown and where
         /// it works, dimmed, a line each; the effects, a line each; the fatigue last.
         /// </summary>
@@ -199,7 +216,7 @@ namespace F1.UI
             }
         }
 
-        static string Colored(string text, Color color)
+        public static string Colored(string text, Color color)
         {
             return "<color=#" + ColorUtility.ToHtmlStringRGB(color) + ">" + text + "</color>";
         }
@@ -218,13 +235,19 @@ namespace F1.UI
             }
         }
 
+        /// <summary>A bag's line (Slice B stage 19): its name, its squares, and what it adds.</summary>
+        public static string BagDetail(BagData bag)
+        {
+            return Name(bag.Name) + " — " + UiStrings.Get(UiKeys.Map.ShopBagSub, bag.Width, bag.Height) + " / " + UiStrings.Get(UiKeys.Map.BagFacts, bag.Area);
+        }
+
         static List<string> ItemFacts(EquippedItem item)
         {
             ItemData data = item.Item;
             var facts = new List<string>
             {
                 UiStrings.Get(CategoryKey(data.Category)),
-                UiStrings.Get(UiKeys.Item.Size, data.Size),
+                UiStrings.Get(UiKeys.Item.Size, data.Width, data.Height),
                 UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)),
             };
 

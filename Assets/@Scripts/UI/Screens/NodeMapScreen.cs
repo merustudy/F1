@@ -77,7 +77,8 @@ namespace F1.UI
         // The camp's mend step (round 35): choosing on the boards the item to raise a tier, then confirming it in the window.
         bool _mending;
         int _mendMember = -1;
-        int _mendCell = -1;
+        int _mendX;
+        int _mendY;
 
         /// <summary>The scroll of the map, for tests: where it shows and how far it goes.</summary>
         public ScrollRect MapScroll => _mapScroll;
@@ -123,6 +124,11 @@ namespace F1.UI
             _buyToInventory.onClick.AddListener(OnBuyToInventory);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
+            _party.HandReleased += () =>
+            {
+                _pick = -1;
+                Refresh();
+            };
             Managers.Sound.PlayMusic(MusicTrack.Dungeon);
             SelectTheOnlyWay();
             ScrollToCurrentFloor();
@@ -194,12 +200,20 @@ namespace F1.UI
             _buyToInventory.interactable = picking && manager.CanBuyToInventory(pick);
             _inventoryToggle.gameObject.SetActive(!_mending);
             _party.ToInventory.gameObject.SetActive(!_mending);
-            _party.ExternalCanPlace = _mending ? (member, cell) => manager.CanUpgradeAtCamp(member, cell)
-                : picking ? (member, cell) => manager.CanBuyToBoard(pick, member, cell) : (Func<int, int, bool>)null;
-            _party.CellClickOverride = _mending ? ChooseMendItem : picking ? BuyPicked : (Func<int, int, bool>)null;
-            _party.ExternalMerges = picking ? (member, cell) => manager.ShopMergesAt(pick, member, cell) : (Func<int, int, bool>)null;
+            // The picked offer is in the party's hand (stage 19): it is aimed at the boards' squares and bought where it is put.
+            if (picking && !(_party.Hand.Outside is ShopHand held && held.Slot == pick))
+            {
+                _party.Hand.HoldOutside(new ShopHand(this, pick));
+            }
+            else if (!picking && _party.Hand.Outside is ShopHand)
+            {
+                _party.Hand.Clear();
+            }
+
+            _party.SquareClickOverride = _mending ? ChooseMendItem : (Func<int, int, int, bool>)null;
             _party.ExternalSelectedMember = _mending ? _mendMember : -1;
-            _party.ExternalSelectedCell = _mending ? _mendCell : -1;
+            _party.ExternalSelectedX = _mendX;
+            _party.ExternalSelectedY = _mendY;
             _party.DetailOverride = _mending ? UiStrings.Get(UiKeys.Map.MendHint) : picking ? UiStrings.Get(UiKeys.Map.ShopBuyHint) : _shopNote;
             if (atShop)
             {
@@ -236,7 +250,7 @@ namespace F1.UI
         /// <summary>The chosen item's change on the mend plate: its tier before and after, and each effect's size before and after.</summary>
         void RefreshMendPlate(ExpeditionManager manager, BalanceData balance)
         {
-            bool chosen = _mending && _mendMember >= 0 && manager.CanUpgradeAtCamp(_mendMember, _mendCell);
+            bool chosen = _mending && _mendMember >= 0 && manager.CanUpgradeAtCamp(_mendMember, _mendX, _mendY);
             _mendPlate.SetActive(chosen);
             _mendConfirm.interactable = chosen;
             if (!chosen)
@@ -244,8 +258,7 @@ namespace F1.UI
                 return;
             }
 
-            List<EquippedItem> board = manager.Expedition.Members[_mendMember].Items;
-            EquippedItem item = board[ItemBoard.IndexAtCell(board, _mendCell)];
+            EquippedItem item = manager.Expedition.Members[_mendMember].Board.ItemAt(_mendX, _mendY).Item;
             EquippedItem mended = item.TierUp();
             _mendIcon.sprite = _art.OfItem(item.Item.Id);
             _mendIcon.enabled = _mendIcon.sprite != null;
@@ -295,8 +308,14 @@ namespace F1.UI
                 {
                     var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
                     ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    string sub = UiStrings.Get(UiKeys.Map.ShopItemSub, UiStrings.Get(UiText.CategoryKey(item.Item.Category)), item.Item.Size);
+                    string sub = UiStrings.Get(UiKeys.Map.ShopItemSub, UiStrings.Get(UiText.CategoryKey(item.Item.Category)), item.Item.Width, item.Item.Height);
                     tile.ShowItem(offer, item, _art.OfItem(offer.Id), sub, UiText.ItemTileFacts(item), price, state);
+                }
+                else if (offer.Kind == OfferKind.Bag)
+                {
+                    BagData bag = data.Bags.Get(offer.Id);
+                    ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
+                    tile.ShowBag(offer, bag, UiStrings.Get(UiKeys.Map.ShopBagSub, bag.Width, bag.Height), UiStrings.Get(UiKeys.Map.BagFacts, bag.Area), price, state);
                 }
                 else
                 {
@@ -494,7 +513,6 @@ namespace F1.UI
         {
             _mending = true;
             _mendMember = -1;
-            _mendCell = -1;
             if (_party.InventoryOpen)
             {
                 _party.ToggleInventory();
@@ -508,17 +526,17 @@ namespace F1.UI
         {
             _mending = false;
             _mendMember = -1;
-            _mendCell = -1;
             Refresh();
         }
 
-        /// <summary>A click on a board cell while mending chooses the item there, if it can be mended; the click sounds here.</summary>
-        bool ChooseMendItem(int member, int cell)
+        /// <summary>A click on a board square while mending chooses the item there, if it can be mended; the click sounds here.</summary>
+        bool ChooseMendItem(int member, int x, int y)
         {
-            if (Managers.Expedition.CanUpgradeAtCamp(member, cell))
+            if (Managers.Expedition.CanUpgradeAtCamp(member, x, y))
             {
                 _mendMember = member;
-                _mendCell = cell;
+                _mendX = x;
+                _mendY = y;
             }
 
             Managers.Sound.PlayEffect(SoundEffect.Button);
@@ -580,27 +598,44 @@ namespace F1.UI
             _party.Tooltip.ShowBeside(item, (RectTransform)_shopTiles[slot].transform, false, _shopWindow, true, merge);
         }
 
-        /// <summary>With an offer picked, a click on a cell that can take it buys it there (and sounds so; a cell that cannot, as a click).</summary>
-        bool BuyPicked(int member, int cell)
+        /// <summary>
+        /// The picked offer of the shop in the party's hand (Slice B stage 19): it can go where the manager says it can be bought onto a
+        /// board, merges as a purchase would, and is bought where it is put (the hand sounds it).
+        /// </summary>
+        sealed class ShopHand : IOutsideHand
         {
-            if (_pick < 0)
+            readonly NodeMapScreen _screen;
+
+            public ShopHand(NodeMapScreen screen, int slot)
             {
-                return false;
+                _screen = screen;
+                Slot = slot;
+                ItemOffer offer = Managers.Expedition.ShopStock[slot];
+                StaticData data = Managers.Data.Data;
+                Item = offer.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier) : null;
+                Bag = offer.Kind == OfferKind.Bag ? data.Bags.Get(offer.Id) : null;
             }
 
-            ExpeditionManager manager = Managers.Expedition;
-            if (manager.CanBuyToBoard(_pick, member, cell))
+            public int Slot { get; }
+            public EquippedItem Item { get; }
+            public BagData Bag { get; }
+
+            public bool CanPlace(int member, Placement at)
             {
-                int slot = _pick;
-                Bought(() => manager.BuyToBoard(slot, member, cell));
-            }
-            else
-            {
-                Managers.Sound.PlayEffect(SoundEffect.Button);
+                return Managers.Expedition.CanBuyToBoard(Slot, member, at);
             }
 
-            Refresh();
-            return true;
+            public bool MergesAt(int member, int x, int y)
+            {
+                return Managers.Expedition.ShopMergesAt(Slot, member, x, y);
+            }
+
+            public void Place(int member, Placement at)
+            {
+                int slot = Slot;
+                _screen.Bought(() => Managers.Expedition.BuyToBoard(slot, member, at), sound: false);
+                _screen.Refresh();
+            }
         }
 
         void OnBuyToInventory()
@@ -616,16 +651,23 @@ namespace F1.UI
             Refresh();
         }
 
-        /// <summary>Buys the picked item by the command given: the detail line's note, the sound of an item put in, and the pick is spent.</summary>
-        void Bought(Action buy)
+        /// <summary>Buys the picked item or bag by the command given: the detail line's note, the sound of an item put in (unless the hand sounds it), and the pick is spent.</summary>
+        void Bought(Action buy, bool sound = true)
         {
             ExpeditionManager manager = Managers.Expedition;
             ItemOffer offer = manager.ShopStock[_pick];
-            var item = new EquippedItem(Managers.Data.Data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+            StaticData data = Managers.Data.Data;
+            string what = offer.Kind == OfferKind.Bag
+                ? UiText.Name(data.Bags.Get(offer.Id).Name)
+                : UiText.ItemTitle(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier));
             int before = manager.Expedition.Coins;
             buy();
-            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
-            _shopNote = BoughtNote(UiText.ItemTitle(item), before);
+            if (sound)
+            {
+                Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+            }
+
+            _shopNote = BoughtNote(what, before);
             _pick = -1;
         }
 
@@ -665,16 +707,15 @@ namespace F1.UI
         void OnMendConfirm()
         {
             ExpeditionManager manager = Managers.Expedition;
-            if (!_mending || !manager.CanUpgradeAtCamp(_mendMember, _mendCell))
+            if (!_mending || !manager.CanUpgradeAtCamp(_mendMember, _mendX, _mendY))
             {
                 return;
             }
 
-            manager.UpgradeAtCamp(_mendMember, _mendCell);
+            manager.UpgradeAtCamp(_mendMember, _mendX, _mendY);
             Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
             _mending = false;
             _mendMember = -1;
-            _mendCell = -1;
             SelectTheOnlyWay();
             Refresh();
         }

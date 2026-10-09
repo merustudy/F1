@@ -34,6 +34,10 @@ namespace F1.UI
         [SerializeField] GameObject _priceRow;
         [SerializeField] TMP_Text _price;
         [SerializeField] TMP_Text _sold;
+        [SerializeField] GameObject _held;
+
+        /// <summary>Whether the tile shows the small "held" label (round 49): while its offer is picked.</summary>
+        public bool ShowsHeld => _held.activeSelf;
 
         /// <summary>The slot of the shop's stock the tile shows; the screen sets it when it opens.</summary>
         public int Slot { get; set; }
@@ -59,7 +63,18 @@ namespace F1.UI
             Begin(offer, state);
             ShowCell(item, icon);
             _potionPocket.SetActive(false);
-            ShowWords(UiText.ItemTitle(item), sub, facts);
+            ShowWords(UiText.ItemTitle(item), sub, facts, UiPalette.Rarity(item.Tier));
+            ShowPrice(price, state);
+        }
+
+        /// <param name="sub">The line under the name: that it is a bag and its squares (Slice B stage 19).</param>
+        /// <param name="facts">What the bag adds.</param>
+        public void ShowBag(ItemOffer offer, BagData bag, string sub, string facts, int price, ShopTileState state)
+        {
+            Begin(offer, state);
+            ShowBagCell(bag);
+            _potionPocket.SetActive(false);
+            ShowWords(UiText.Name(bag.Name), sub, facts, UiPalette.BagName);
             ShowPrice(price, state);
         }
 
@@ -72,7 +87,7 @@ namespace F1.UI
             _potionPocket.SetActive(true);
             _potionIcon.sprite = icon;
             _potionIcon.enabled = icon != null;
-            ShowWords(UiText.Name(potion.Name), sub, facts);
+            ShowWords(UiText.Name(potion.Name), sub, facts, UiPalette.Text);
             ShowPrice(price, state);
         }
 
@@ -93,6 +108,7 @@ namespace F1.UI
                 state == ShopTileState.Unaffordable ? UnaffordableAlpha : state == ShopTileState.Sold ? SoldAlpha : 1f,
                 state == ShopTileState.OnSale || state == ShopTileState.Picked);
             _sold.gameObject.SetActive(false);
+            _held.SetActive(state == ShopTileState.Picked);
         }
 
         void ShowPrice(int price, ShopTileState state)

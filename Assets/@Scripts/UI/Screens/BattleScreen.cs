@@ -186,10 +186,9 @@ namespace F1.UI
         /// <summary>True from the win on (round 47): the loot lies there, the boards are the node map's, the band is up.</summary>
         bool _afterWin;
 
-        // After a win: the drop picked up (-1 for none), and the item of a board picked up to move (member and its first cell).
+        // After a win: the drop picked up (-1 for none; it is in the hand), and the hand over the boards (Slice B stage 19).
         int _pickedDrop = -1;
-        int _lootMember = -1;
-        int _lootCell = -1;
+        readonly BoardHand _lootHand = new BoardHand();
         ExpeditionArt _art;
         Sprite _backgroundArt;
         BattlePresenter _presenter;
@@ -273,6 +272,9 @@ namespace F1.UI
 
         /// <summary>The slot of the drop picked up, or -1.</summary>
         public int PickedDrop => _pickedDrop;
+
+        /// <summary>After a win: the hand over the boards (Slice B stage 19).</summary>
+        public BoardHand LootHand => _lootHand;
 
         /// <summary>After a win: the member's board in the column of a row (the node map's kind), shown while someone stands there.</summary>
         public PartyBoardView LootBoardOfRow(int row)
@@ -400,8 +402,10 @@ namespace F1.UI
             {
                 PartyBoardView board = LootBoardOfRow(row);
                 int r = row;
-                board.CellClicked += cell => OnLootCellClicked(MemberInRow(r), cell);
-                board.CellRightClicked += cell => OnLootCellRightClicked(MemberInRow(r), cell);
+                board.SquareClicked += (x, y) => OnLootSquareClicked(MemberInRow(r), x, y);
+                board.SquareRightClicked += (x, y) => OnLootSquareRightClicked(MemberInRow(r), x, y);
+                board.SquareEntered += (x, y) => OnLootSquareEntered(MemberInRow(r), x, y);
+                board.SquareExited += (x, y) => OnLootSquareExited(MemberInRow(r), x, y);
             }
 
             _resultPanel.SetActive(false);
@@ -751,6 +755,22 @@ namespace F1.UI
             if (_tooltip.IsShown && PointerPress.PressedSince(_tooltip.ShownFrame))
             {
                 _tooltip.Hide();
+            }
+
+            // Stage 19: after a win, while the hand holds something, the right button, the wheel or R turns it and Escape lets go.
+            if (_afterWin && _lootHand.Holding)
+            {
+                int step = TurnInput.Poll(out bool cancel);
+                if (cancel)
+                {
+                    _lootHand.Clear();
+                    _pickedDrop = -1;
+                    RefreshLoot();
+                }
+                else if (step != 0)
+                {
+                    TurnHeld(step);
+                }
             }
 
             AdvanceKillMoment(Time.unscaledDeltaTime);
@@ -1329,9 +1349,9 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The loot as it lies and the boards as they stand: each drop on the floor (picked, or not; gone once taken), the board of
-        /// whoever stands in each row with the cells that take a click (those that can take the picked drop; otherwise, as on the node
-        /// map, an item to pick up or a cell the picked item can go to), the merge marks, the hint, the inventory button and the count.
+        /// The loot as it lies and the boards as they stand: each drop on the floor (picked, or not; gone once taken; a bag in its
+        /// leather), the board of whoever stands in each row as a grid (Slice B stage 19) with the hand's ghost (a picked drop is in the
+        /// hand), the merge marks, the hint, the inventory button and the count.
         /// </summary>
         void RefreshLoot()
         {
@@ -1349,6 +1369,16 @@ namespace F1.UI
                 _pickedDrop = -1;
             }
 
+            // The picked drop is in the hand: it is aimed at the boards' squares and taken where it is put.
+            if (_pickedDrop >= 0 && !(_lootHand.Outside is DropInHand inHand && inHand.Slot == _pickedDrop))
+            {
+                _lootHand.HoldOutside(new DropInHand(this, _pickedDrop));
+            }
+            else if (_pickedDrop < 0 && _lootHand.Outside is DropInHand)
+            {
+                _lootHand.Clear();
+            }
+
             int remaining = 0;
             for (int slot = 0; slot < _drops.Count; slot++)
             {
@@ -1360,14 +1390,21 @@ namespace F1.UI
                 }
 
                 remaining++;
-                _drops[slot].Show(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), _art.OfItem(offer.Id), slot == _pickedDrop);
+                if (offer.Kind == OfferKind.Bag)
+                {
+                    _drops[slot].ShowBag(data.Bags.Get(offer.Id), slot == _pickedDrop);
+                }
+                else
+                {
+                    _drops[slot].Show(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), _art.OfItem(offer.Id), slot == _pickedDrop);
+                }
             }
 
             _bandLoot.gameObject.SetActive(remaining > 0);
             _bandLoot.text = UiStrings.Get(UiKeys.Battle.LootCount, remaining);
 
-            EquippedItem moving = MovingItem(expedition);
-            int picked = _pickedDrop;
+            EquippedItem held = _lootHand.HeldItem(expedition);
+            bool bagHeld = _lootHand.BagMember >= 0 || _lootHand.Outside?.Bag != null;
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
                 PartyBoardView board = LootBoardOfRow(row);
@@ -1379,25 +1416,42 @@ namespace F1.UI
                 }
 
                 int member = m;
+                Func<BoardItem, bool> merges = null;
+                if (_lootHand.Outside != null && _lootHand.Outside.Item != null)
+                {
+                    merges = item => _lootHand.Outside.MergesAt(member, item.At.X, item.At.Y);
+                }
+                else if (held != null)
+                {
+                    merges = item => manager.MergesAt(held, member, item.At.X, item.At.Y);
+                }
+
                 board.Show(
                     expedition.Members[m],
                     _art,
-                    m == _lootMember ? _lootCell : -1,
-                    cell => picked >= 0 ? manager.CanTakeLoot(picked, member, cell) : CanClickLootCell(member, cell),
-                    cell => picked >= 0 ? manager.LootMergesAt(picked, member, cell) : moving != null && manager.MergesAt(moving, member, cell));
+                    m == _lootHand.ItemMember ? _lootHand.HeldBoardItem(expedition) : null,
+                    m == _lootHand.BagMember ? _lootHand.HeldBag(expedition) : null,
+                    merges,
+                    _lootHand.GhostFor(m, manager, _art),
+                    bagHeld);
             }
 
-            _lootToInventory.interactable = picked >= 0 && manager.CanTakeLootToInventory(picked);
-            if (picked >= 0)
+            _lootToInventory.interactable = _pickedDrop >= 0 && manager.CanTakeLootToInventory(_pickedDrop);
+            BagData heldBag = _lootHand.BagMember >= 0 ? _lootHand.HeldBag(expedition)?.Bag : null;
+            if (_pickedDrop >= 0)
             {
                 _lootHint.text = UiStrings.Get(UiKeys.Battle.LootPickedHint);
             }
-            else if (moving != null)
+            else if (heldBag != null)
             {
-                string detail = UiText.ItemTitle(moving) + " — " + UiText.ItemSummary(moving);
-                if (manager.HasMergeTarget(moving))
+                _lootHint.text = UiText.BagDetail(heldBag);
+            }
+            else if (held != null)
+            {
+                string detail = UiText.ItemTitle(held) + " — " + UiText.ItemSummary(held);
+                if (manager.HasMergeTarget(held))
                 {
-                    detail += "\n" + UiText.MergeHint(moving);
+                    detail += "\n" + UiText.MergeHint(held);
                 }
 
                 _lootHint.text = detail;
@@ -1405,6 +1459,42 @@ namespace F1.UI
             else
             {
                 _lootHint.text = UiStrings.Get(UiKeys.Battle.LootHint);
+            }
+        }
+
+        /// <summary>A drop of the loot in the hand (Slice B stage 19): it goes where the manager says it can be taken, and is taken where it is put.</summary>
+        sealed class DropInHand : IOutsideHand
+        {
+            readonly BattleScreen _screen;
+
+            public DropInHand(BattleScreen screen, int slot)
+            {
+                _screen = screen;
+                Slot = slot;
+                ItemOffer drop = Managers.Expedition.BattleLoot[slot];
+                StaticData data = Managers.Data.Data;
+                Item = drop.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier) : null;
+                Bag = drop.Kind == OfferKind.Bag ? data.Bags.Get(drop.Id) : null;
+            }
+
+            public int Slot { get; }
+            public EquippedItem Item { get; }
+            public BagData Bag { get; }
+
+            public bool CanPlace(int member, Placement at)
+            {
+                return Managers.Expedition.CanTakeLoot(Slot, member, at);
+            }
+
+            public bool MergesAt(int member, int x, int y)
+            {
+                return Managers.Expedition.LootMergesAt(Slot, member, x, y);
+            }
+
+            public void Place(int member, Placement at)
+            {
+                Managers.Expedition.TakeLoot(Slot, member, at);
+                _screen._pickedDrop = -1;
             }
         }
 
@@ -1428,33 +1518,7 @@ namespace F1.UI
             return -1;
         }
 
-        /// <summary>The item of a board picked up to move, or null.</summary>
-        EquippedItem MovingItem(ExpeditionState expedition)
-        {
-            if (_lootMember < 0 || _lootMember >= expedition.Members.Count)
-            {
-                return null;
-            }
-
-            List<EquippedItem> board = expedition.Members[_lootMember].Items;
-            int index = ItemBoard.IndexAtCell(board, _lootCell);
-            return index < 0 ? null : board[index];
-        }
-
-        /// <summary>As on the node map: with an item picked up, itself or a cell it can go to; otherwise a cell that holds an item.</summary>
-        bool CanClickLootCell(int member, int cell)
-        {
-            ExpeditionManager manager = Managers.Expedition;
-            if (_lootMember >= 0)
-            {
-                bool itself = member == _lootMember && cell == _lootCell;
-                return itself || manager.CanMoveItem(_lootMember, _lootCell, member, cell);
-            }
-
-            return manager.CanPickItem(member, cell);
-        }
-
-        /// <summary>A drop clicked: picked up, or put down again (a click); whatever was picked up on a board is let go.</summary>
+        /// <summary>A drop clicked: picked up, or put down again (a click); whatever was held on a board is let go.</summary>
         void OnDropClicked(int slot)
         {
             IReadOnlyList<ItemOffer> loot = Managers.Expedition.BattleLoot;
@@ -1465,13 +1529,12 @@ namespace F1.UI
 
             Managers.Sound.PlayEffect(SoundEffect.Button);
             _pickedDrop = _pickedDrop == slot ? -1 : slot;
-            _lootMember = -1;
-            _lootCell = -1;
+            _lootHand.Clear();
             _tooltip.Hide();
             RefreshLoot();
         }
 
-        /// <summary>A drop right-clicked: its card beside it on the stage, with what merging it would do.</summary>
+        /// <summary>A drop right-clicked: the card of its item beside it on the stage, with what merging it would do (a bag has no card).</summary>
         void OnDropRightClicked(int slot)
         {
             if (slot >= _drops.Count || _drops[slot].Item == null)
@@ -1484,77 +1547,72 @@ namespace F1.UI
             _tooltip.ShowBeside(item, _drops[slot].IconRect, true, _field, true, merge);
         }
 
-        /// <summary>
-        /// A cell of a board clicked: with a drop picked up, the drop goes there when it can (and sounds as put in; a click when it
-        /// cannot); otherwise as on the node map, an item is picked up, put down or moved (the cells are built silent: the click sounds here, once).
-        /// </summary>
-        void OnLootCellClicked(int member, int cell)
+        /// <summary>A square of a board clicked: the hand picks up, puts down or moves (a picked drop is taken where it is put). The squares are silent: the click sounds here, once.</summary>
+        void OnLootSquareClicked(int member, int x, int y)
+        {
+            if (member < 0 || !_afterWin)
+            {
+                return;
+            }
+
+            _tooltip.Hide();
+            Managers.Sound.PlayEffect(_lootHand.Click(member, x, y, Managers.Expedition));
+            RefreshLoot();
+        }
+
+        /// <summary>A square right-clicked with nothing held: the card of the item there, above the panel over its piece (the node map's place).</summary>
+        void OnLootSquareRightClicked(int member, int x, int y)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            if (member < 0 || expedition == null || _lootHand.Holding)
+            {
+                return;
+            }
+
+            BoardItem item = expedition.Members[member].Board.ItemAt(x, y);
+            ItemSlotView piece = LootBoardOfRow(expedition.Members[member].Row).PieceAt(x, y);
+            if (item == null || piece == null)
+            {
+                return;
+            }
+
+            string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel);
+        }
+
+        void OnLootSquareEntered(int member, int x, int y)
         {
             if (member < 0)
             {
                 return;
             }
 
-            ExpeditionManager manager = Managers.Expedition;
-            SoundEffect sound = SoundEffect.Button;
-            if (_pickedDrop >= 0)
+            _lootHand.Hover(member, x, y);
+            if (_lootHand.Holding)
             {
-                if (manager.CanTakeLoot(_pickedDrop, member, cell))
-                {
-                    manager.TakeLoot(_pickedDrop, member, cell);
-                    sound = SoundEffect.ItemPlace;
-                    _pickedDrop = -1;
-                }
+                RefreshLoot();
             }
-            else if (_lootMember < 0)
-            {
-                if (manager.CanPickItem(member, cell))
-                {
-                    _lootMember = member;
-                    _lootCell = cell;
-                }
-            }
-            else if (member == _lootMember && cell == _lootCell)
-            {
-                _lootMember = -1;
-                _lootCell = -1;
-            }
-            else
-            {
-                if (manager.CanMoveItem(_lootMember, _lootCell, member, cell))
-                {
-                    manager.MoveItem(_lootMember, _lootCell, member, cell);
-                    sound = SoundEffect.ItemPlace;
-                }
-
-                _lootMember = -1;
-                _lootCell = -1;
-            }
-
-            Managers.Sound.PlayEffect(sound);
-            RefreshLoot();
         }
 
-        /// <summary>A cell right-clicked: the card of the item there, above the panel over the cell's column (the node map's place).</summary>
-        void OnLootCellRightClicked(int member, int cell)
+        void OnLootSquareExited(int member, int x, int y)
         {
-            ExpeditionState expedition = Managers.Expedition.Expedition;
-            if (member < 0 || expedition == null)
+            _lootHand.Unhover(member, x, y);
+            if (_lootHand.Holding && _lootHand.HoverMember < 0)
+            {
+                RefreshLoot();
+            }
+        }
+
+        /// <summary>Turns what the hand holds after a win a quarter clockwise (1) or anticlockwise (-1). Tests call it in place of the keys.</summary>
+        public void TurnHeld(int step)
+        {
+            if (!_afterWin || !_lootHand.Holding)
             {
                 return;
             }
 
-            List<EquippedItem> board = expedition.Members[member].Items;
-            int index = ItemBoard.IndexAtCell(board, cell);
-            ItemSlotView slot = LootBoardOfRow(expedition.Members[member].Row).SlotAt(cell);
-            if (index < 0 || slot == null)
-            {
-                return;
-            }
-
-            EquippedItem item = board[index];
-            string merge = Managers.Expedition.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
-            _tooltip.ShowAbove(item, merge, (RectTransform)slot.transform, _boardPanel);
+            _lootHand.Turn(step);
+            RefreshLoot();
         }
 
         void OnLootToInventory()

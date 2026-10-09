@@ -59,9 +59,8 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The board panel under the stage: its box, and the room above and below its columns. A
-        /// column holds a board's head and the cells under it, stacked. (Before the head, the room of 14
-        /// above and below fitted the most cells a board can have, JobData.MaxItemSlots; now the bag of
-        /// seven cells would reach 8 past the panel's bottom. Every job has five.)
+        /// column holds a board's head and the grid under it (Slice B stage 19: the frame's eight rows of 50, which end 16 above
+        /// the panel's bottom).
         /// </summary>
         const float BoardPanelTop = 620f;
         const float BoardPanelHeight = 460f;
@@ -531,7 +530,17 @@ namespace F1.Editor.Setup
             UiBuild.Place(icon.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, LootDropIconLift), new Vector2(LootDropIconWidth, LootDropIconHeight));
             icon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, LootDropIconTilt);
 
-            Image plate = Rounded("LootDropPlate", root, Tinted(UiPalette.Brass, TooltipLineAlpha), 5f);
+            // A bag lying there (round 49): Diablo's well, its rim being the icon tinted, the grey and the black squares inside it.
+            Image bagWell = UiBuild.Image("LootDropBagWell", icon.transform, UiPalette.GridSquareLine);
+            UiBuild.Stretch(bagWell.rectTransform, GridGeometry.BagRim, GridGeometry.BagRim, GridGeometry.BagRim, GridGeometry.BagRim);
+            RectTransform bagSquaresRect = UiBuild.Rect("LootDropBagSquares", bagWell.transform);
+            UiBuild.Stretch(bagSquaresRect);
+            var bagSquares = bagSquaresRect.gameObject.AddComponent<SquareGrid>();
+            bagSquares.color = UiPalette.GridSquare;
+            bagWell.gameObject.SetActive(false);
+
+            // Diablo's label on the ground: a black box with a grey line (gold while picked), the name in its colour.
+            Image plate = Rounded("LootDropPlate", root, UiPalette.LabelLine, 5f);
             UiBuild.Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -LootDropPlateTop), new Vector2(LootDropWidth, LootDropPlateHeight));
             HorizontalLayoutGroup plateLayout = UiBuild.Horizontal(plate.rectTransform, 0f, 0, TextAnchor.MiddleCenter);
             plateLayout.padding = new RectOffset(14, 14, 0, 0);
@@ -539,7 +548,7 @@ namespace F1.Editor.Setup
             plateLayout.childControlHeight = true;
             var plateFit = plate.gameObject.AddComponent<ContentSizeFitter>();
             plateFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
-            Image plateFill = Rounded("LootDropPlateFill", plate.transform, Tinted(UiPalette.Ink, TooltipFillAlpha), 4f);
+            Image plateFill = Rounded("LootDropPlateFill", plate.transform, UiPalette.LabelBox, 4f);
             UiBuild.Stretch(plateFill.rectTransform, 1f, 1f, 1f, 1f);
             plateFill.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
             TextMeshProUGUI title = UiBuild.Label("LootDropTitle", plate.transform, 20f, UiPalette.Text, TextAlignmentOptions.Center);
@@ -557,6 +566,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_plateLine", plate);
             UiBuild.SetReference(view, "_title", title);
             UiBuild.SetReference(view, "_pickedWord", word);
+            UiBuild.SetReference(view, "_bagWell", bagWell.gameObject);
+            UiBuild.SetReference(view, "_bagSquares", bagSquares);
             root.gameObject.SetActive(false);
             return view;
         }
@@ -745,11 +756,10 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One unit's board of the board panel: the head with its row and name, and under it its cells
-        /// stacked top to bottom on their bag, in the middle of whichever column of the panel the board
-        /// is put in. The view sizes the board to the unit's cells (the bag follows), makes the cells in
-        /// it and writes the head. The whole board is the button a potion is aimed at; the bag is the
-        /// graphic the button tints.
+        /// One unit's board of the board panel: the head with its row and name, and under it the board's grid (Slice B stage 19) in the
+        /// middle of whichever column of the panel the board is put in. The view lays the bags, the empty squares and the items' pieces in
+        /// it from the templates and writes the head. The whole board is the button a potion is aimed at; a clear graphic over the grid's
+        /// rect is what the button takes the click with.
         /// </summary>
         static BattleBoardView BuildBattleBoard(Transform parent)
         {
@@ -757,15 +767,15 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(root);
 
             RectTransform cells = UiBuild.Rect("BoardCells", root);
-            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BoardCellsTop), new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
-            UiBuild.Vertical(cells, BattleItemView.CellGapY, 0, TextAnchor.UpperCenter);
-            Image bag = BuildBoardBag(cells, "BoardBag");
-            bag.raycastTarget = true;
+            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BoardCellsTop), new Vector2(GridGeometry.Width, GridGeometry.Height));
+            Image target = UiBuild.Image("BoardTarget", cells, Color.clear, raycastTarget: true);
+            UiBuild.Stretch(target.rectTransform);
+            Image bagTemplate = BuildBagLeather(cells, "BagTemplate");
+            Image squareTemplate = BuildBattleSquare(cells);
             BattleItemView itemTemplate = BuildBattleItem(cells);
-            GameObject emptyCell = BuildEmptyCell(cells);
             BuildBoardHead(root, "Board", out TextMeshProUGUI row, out TextMeshProUGUI name);
 
-            Button button = PotionTargetButton(root, bag);
+            Button button = PotionTargetButton(root, target);
 
             var view = root.gameObject.AddComponent<BattleBoardView>();
             UiBuild.SetReference(view, "_button", button);
@@ -773,7 +783,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_cells", cells);
             UiBuild.SetReference(view, "_itemTemplate", itemTemplate);
-            UiBuild.SetReference(view, "_emptyCellTemplate", emptyCell);
+            UiBuild.SetReference(view, "_bagTemplate", bagTemplate);
+            UiBuild.SetReference(view, "_squareTemplate", squareTemplate);
 
             root.gameObject.SetActive(false);
             return view;
@@ -884,90 +895,6 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One item in battle: a cell of the kit that shows its own cooldown as light (2026-10-04
-        /// round 18). Inside the cell's rim lie, in the order they are drawn: the candle's gold on the
-        /// charged part, the name (for an item without an icon) and the icon in the icon's place (the
-        /// cell less the margin the icons are drawn for), the dark over the part not charged yet with
-        /// its soft left end, the glow and the line at the front of the charge, and the flash when the
-        /// item fires. Before any charge the dark covers the whole cell. A big item is made taller at
-        /// runtime: its cells are stacked.
-        /// </summary>
-        static BattleItemView BuildBattleItem(Transform parent)
-        {
-            Image cell = KitFrame("ItemTemplate", parent, UiArt.Slot, raycastTarget: true);
-            UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
-
-            // Round 42: the cell takes the click (a right click opens the item's card, round 47). Silent and without tints: the
-            // screen sounds the click, and a cell that may not be clicked (a potion waits for its board) gives up its raycast
-            // instead of dimming.
-            Button button = UiBuild.MakeButton(cell);
-            UiBuild.Silence(button);
-            button.transition = Selectable.Transition.None;
-            const float rim = BattleItemView.Rim;
-
-            // Under the icon: the gold of the charged part, from the left. Nothing has charged yet.
-            RectTransform under = UiBuild.Rect("ItemUnder", cell.transform);
-            UiBuild.Stretch(under, rim, rim, rim, rim);
-            Image light = UiBuild.Image("ItemLight", under, Tinted(UiPalette.ChargeLight, ChargeTint));
-            UiBuild.Stretch(light.rectTransform);
-            light.rectTransform.anchorMax = new Vector2(0f, 1f);
-
-            // Behind the icon, the silhouette that becomes the tier's outline (round 41). The dark lies over both.
-            Image outline = BuildOutline(cell.transform, "ItemOutline", out SilhouetteOutline outlineEffect);
-
-            TextMeshProUGUI name = UiBuild.ShrinkToFit(
-                UiBuild.SingleLine(UiBuild.Label("ItemName", cell.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
-            UiBuild.Stretch(name.rectTransform, 10f, 0f, 10f, 0f);
-
-            Image icon = UiBuild.Image("ItemIcon", cell.transform, Color.white);
-            icon.preserveAspect = true;
-            UiBuild.Stretch(icon.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
-
-            // Over the icon: the dark of the part not charged yet (the whole cell at first), its soft left end
-            // (the ramp, clear on its left), and the front of the charge: a glow (the ramp again) and a line.
-            RectTransform over = UiBuild.Rect("ItemOver", cell.transform);
-            UiBuild.Stretch(over, rim, rim, rim, rim);
-            Color dark = Tinted(UiPalette.ChargeDark, BattleItemView.ChargeShade);
-            Image darkFill = UiBuild.Image("ItemDark", over, dark);
-            UiBuild.Stretch(darkFill.rectTransform);
-            Image darkEdge = UiBuild.Image("ItemDarkEdge", over, dark);
-            darkEdge.sprite = UiArt.Load(UiArt.ChargeRamp);
-            darkEdge.enabled = false;
-            Image glow = UiBuild.Image("ItemGlow", over, Tinted(UiPalette.ChargeEdge, FrontGlowAlpha));
-            glow.sprite = UiArt.Load(UiArt.ChargeRamp);
-            glow.enabled = false;
-            Image front = UiBuild.Image("ItemFront", over, Tinted(UiPalette.ChargeEdge, FrontLineAlpha));
-            front.enabled = false;
-
-            // The flash over the whole cell inside its rim when the item fires. Off until then.
-            Image flash = UiBuild.Image("ItemFlash", cell.transform, new Color(1f, 1f, 1f, 0f));
-            UiBuild.Stretch(flash.rectTransform, rim, rim, rim, rim);
-            flash.enabled = false;
-
-            // Over everything, the tier tag with the stars (round 41): the view shows it for a tier above Common. It stays above the dark.
-            Image tierTag = BuildTierTag(cell.transform, "ItemTier", out Image[] stars);
-
-            var view = cell.gameObject.AddComponent<BattleItemView>();
-            UiBuild.SetReference(view, "_rightClick", cell.gameObject.AddComponent<RightClick>());
-            UiBuild.SetReference(view, "_light", light.rectTransform);
-            UiBuild.SetReference(view, "_dark", darkFill);
-            UiBuild.SetReference(view, "_darkEdge", darkEdge);
-            UiBuild.SetReference(view, "_glow", glow);
-            UiBuild.SetReference(view, "_front", front);
-            UiBuild.SetReference(view, "_icon", icon);
-            UiBuild.SetReference(view, "_name", name);
-            UiBuild.SetReference(view, "_button", button);
-            UiBuild.SetReference(view, "_flash", flash);
-            UiBuild.SetReference(view, "_outline", outline);
-            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
-            UiBuild.SetReference(view, "_tierTag", tierTag);
-            UiBuild.SetReferences(view, "_stars", stars);
-
-            cell.gameObject.SetActive(false);
-            return view;
-        }
-
-        /// <summary>
         /// A text that rises from a unit: the colored text in front and a dark copy a little behind
         /// it. The fx layer makes one per text in flight from this template.
         /// </summary>
@@ -987,22 +914,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_shadow", shadow);
             root.gameObject.SetActive(false);
             return view;
-        }
-
-        /// <summary>
-        /// An empty item slot of a battle board: a faint cell as dark inside its rim as an item's before
-        /// it charges (2026-10-04 round 18), so that the player sees how many slots the unit has and only
-        /// what charges lights up.
-        /// </summary>
-        static GameObject BuildEmptyCell(Transform parent)
-        {
-            Image cell = KitFrame("EmptyCellTemplate", parent, UiArt.Slot, raycastTarget: true);
-            cell.color = new Color(1f, 1f, 1f, EmptyCellAlpha);
-            UiBuild.Size(cell, BattleItemView.CellWidth, BattleItemView.CellHeight);
-            Image dark = UiBuild.Image("EmptyCellDark", cell.transform, Tinted(UiPalette.ChargeDark, BattleItemView.ChargeShade));
-            UiBuild.Stretch(dark.rectTransform, BattleItemView.Rim, BattleItemView.Rim, BattleItemView.Rim, BattleItemView.Rim);
-            cell.gameObject.SetActive(false);
-            return cell.gameObject;
         }
     }
 }

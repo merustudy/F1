@@ -180,19 +180,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864225
-    m_Localized: Empty
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864226
     m_Localized: Grade {0}
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864229
-    m_Localized: Click an item, then another cell, to move or swap it. To inventory
-      sends it away; Show inventory brings it back. Forward and Back swap with the
-      next row.
+    m_Localized: 'Click an item to pick it up, then a square to put it down (one
+      item in the way goes to the inventory). While holding: right-click, wheel or
+      R turns it. Click an empty square of a bag to pick the bag. Forward and Back
+      swap with the next row.'
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864230
@@ -588,16 +585,12 @@ MonoBehaviour:
     m_Localized: Full-body art here
     m_Metadata:
       m_Items: []
-  - m_Id: 293762654789632
-    m_Localized: Empty
-    m_Metadata:
-      m_Items: []
   - m_Id: 293762654789633
     m_Localized: To inventory
     m_Metadata:
       m_Items: []
   - m_Id: 293762654789634
-    m_Localized: Size {0}
+    m_Localized: "Size {0}\xD7{1}"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -632,13 +625,13 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 344090074931202
-    m_Localized: Inventory ({0}/{1} cells)
+    m_Localized: '{0} / {1} squares'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 344090074931203
-    m_Localized: Click an item, then a cell of a board on the left, to put it there.
-      An item already there comes to the inventory.
+    m_Localized: "Click an item to hold it \xB7 click a free square of a board or
+      of this grid to put it there"
     m_Metadata:
       m_Items: []
   - m_Id: 1060957030703104
@@ -946,8 +939,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580996
-    m_Localized: Click the cell to put it in to buy it. Or take it straight into
-      the inventory.
+    m_Localized: 'Click a square to put it there and buy it. While holding: right-click,
+      wheel or R turns it. Or take it straight into the inventory.'
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580997
@@ -967,7 +960,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930581001
-    m_Localized: "{0} \xB7 {1} cells"
+    m_Localized: "{0} \xB7 {1}\xD7{2}"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1013,8 +1006,40 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2894741283790849
-    m_Localized: Click a cell on the left to put the drop there. Right-click for
-      an item's facts.
+    m_Localized: 'Click a square on the left to put the drop there. While holding:
+      right-click, wheel or R turns it.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2976244533551104
+    m_Localized: "Bag \xB7 {0}\xD7{1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2976244546134016
+    m_Localized: +{0} squares. Lay it in an empty part of the frame; it moves with
+      what lies in it.
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2976244546134017
+    m_Localized: "{0} \u2192 inventory"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 2976244546134018
+    m_Localized: Lay the bag
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3219372016394240
+    m_Localized: Inventory
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3219372028977152
+    m_Localized: "R \xB7 right-click \xB7 wheel: turn   Esc: let go"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3222362102161408
+    m_Localized: Held
     m_Metadata:
       m_Items: []
   references:
@@ -1130,3 +1155,6 @@ MonoBehaviour:
         - id: 2552399930581003
         - id: 2552399930581004
         - id: 2894741271207936
+        - id: 2976244533551104
+        - id: 2976244546134016
+        - id: 2976244546134017

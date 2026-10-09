@@ -184,6 +184,55 @@ namespace F1.Tests
             Click(ButtonAt(root, path));
         }
 
+        /// <summary>
+        /// Clicks a square of a board's grid (Slice B stage 19) the way a player does: the pointer comes over it (what is held shows its
+        /// ghost there), then the click. Fails when a click there would land on something other than the square (the pieces and the
+        /// ghost take no pointer, so a click on an item is a click on one of its squares).
+        /// </summary>
+        public static void ClickSquare(PartyBoardView board, int x, int y)
+        {
+            GridSquareView square = SquareReached(board, x, y);
+            PointerPress.Simulate();
+            square.Hover();
+            square.Click();
+        }
+
+        /// <summary>A right click on a square of a board's grid: the card of the item there, or a turn of what is held.</summary>
+        public static void RightClickSquare(PartyBoardView board, int x, int y)
+        {
+            GridSquareView square = SquareReached(board, x, y);
+            PointerPress.Simulate();
+            square.RightClickNow();
+        }
+
+        /// <summary>The pointer comes over a square of a board's grid: what is held shows its ghost there.</summary>
+        public static void HoverSquare(PartyBoardView board, int x, int y)
+        {
+            SquareReached(board, x, y).Hover();
+        }
+
+        static GridSquareView SquareReached(PartyBoardView board, int x, int y)
+        {
+            GridSquareView square = board.Grid.SquareAt(x, y);
+            Assert.IsTrue(square.gameObject.activeInHierarchy, $"Square ({x},{y}) of '{board.name}' is not shown.");
+            Transform top = TopmostUnder((RectTransform)square.transform);
+            Assert.IsNotNull(top, $"A click on square ({x},{y}) of '{board.name}' hits nothing.");
+            Assert.IsTrue(top == square.transform || top.IsChildOf(square.transform), $"'{top.name}' covers square ({x},{y}) of '{board.name}'.");
+            return square;
+        }
+
+        /// <summary>Puts an item on a member's board as it is (no rule checked): staging.</summary>
+        public static void Put(ExpeditionMember member, EquippedItem item, int x, int y, int turns = 0)
+        {
+            member.Board.Items.Add(new BoardItem(item, new Placement(x, y, turns)));
+        }
+
+        /// <summary>The item lying on a square of a member's board, or null.</summary>
+        public static EquippedItem ItemAt(ExpeditionMember member, int x, int y)
+        {
+            return member.Board.ItemAt(x, y)?.Item;
+        }
+
         /// <summary>The shown clones of a template, in display order.</summary>
         public static T[] Views<T>(Component root)
             where T : Component
@@ -325,9 +374,16 @@ namespace F1.Tests
         public static void StageChampion()
         {
             ExpeditionMember champion = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
-            champion.Items[0] = new EquippedItem(champion.Items[0].Item, 999);
+            Regrade(champion, 999);
             champion.MaxHp = 100000;
             champion.Hp = champion.MaxHp;
+        }
+
+        /// <summary>The member's first item (the job weapon) at another grade, where it lies.</summary>
+        public static void Regrade(ExpeditionMember member, int grade)
+        {
+            BoardItem weapon = member.Board.Items[0];
+            weapon.Item = new EquippedItem(weapon.Item.Item, grade);
         }
 
         /// <summary>
@@ -347,7 +403,7 @@ namespace F1.Tests
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
                 member.Hp = 1;
-                member.Items[0] = new EquippedItem(member.Items[0].Item, 1);
+                Regrade(member, 1);
             }
 
             NodeMapScreen map = Screen<NodeMapScreen>();
@@ -386,10 +442,10 @@ namespace F1.Tests
             IReadOnlyList<ExpeditionMember> members = Managers.Expedition.Expedition.Members;
             foreach (ExpeditionMember member in members)
             {
-                member.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, member.Items) - 6 * balance.FatigueOnHit;
+                member.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, member.Board.InReadingOrder()) - 6 * balance.FatigueOnHit;
                 member.MaxHp = 100000;
                 member.Hp = member.MaxHp;
-                member.Items[0] = new EquippedItem(member.Items[0].Item, 1);
+                Regrade(member, 1);
             }
 
             // The valkyrie stands in row 1, where the hits land: hers are the state poses drawn so far (round 38).
@@ -439,7 +495,7 @@ namespace F1.Tests
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
-                member.Items.Clear();
+                member.Board.Items.Clear();
                 member.MaxHp = 100000;
                 member.Hp = member.MaxHp;
             }
@@ -466,7 +522,7 @@ namespace F1.Tests
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
-                member.Items.Clear();
+                member.Board.Items.Clear();
                 if (member.Row != BattleRows.Front)
                 {
                     member.MaxHp = 100000;

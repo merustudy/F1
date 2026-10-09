@@ -221,7 +221,10 @@ namespace F1.Editor.Setup
             return problems;
         }
 
-        /// <summary>Every serialized object reference of a UI script must be set: the builder forgot it otherwise.</summary>
+        /// <summary>
+        /// Every serialized object reference of a UI script must be set: the builder forgot it otherwise. Only the script's own fields
+        /// (named "_..."): the fields a Unity base class brings (named "m_...", such as a Graphic's material) keep Unity's defaults.
+        /// </summary>
         static void AddMissingReferences(MonoBehaviour behaviour, string where, List<string> problems)
         {
             var serialized = new SerializedObject(behaviour);
@@ -230,8 +233,9 @@ namespace F1.Editor.Setup
             while (property.NextVisible(enterChildren))
             {
                 enterChildren = true;
-                if (property.name == "m_Script")
+                if (property.name.StartsWith("m_", System.StringComparison.Ordinal))
                 {
+                    enterChildren = false;
                     continue;
                 }
 

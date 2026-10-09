@@ -130,7 +130,7 @@ namespace F1.Editor.Setup
             // The gloom over the whole screen, under the popup.
             BuildScreenVignette(frame);
 
-            GameObject popup = BuildInventoryPopup(frame, out TMP_Text inventoryTitle, out GameObject inventoryEmpty, out InventoryEntryView entryTemplate, out RectTransform entryParent);
+            InventoryPopupParts popup = BuildInventoryPopup(frame);
             ItemTooltipView tooltip = BuildItemTooltip(frame, "ItemTooltip");
 
             var view = frame.gameObject.AddComponent<PartySideView>();
@@ -140,11 +140,12 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_potionParent", potions);
             UiBuild.SetReference(view, "_detail", detail);
             UiBuild.SetReference(view, "_toInventory", toInventory.Button);
-            UiBuild.SetReference(view, "_inventoryPanel", popup);
-            UiBuild.SetReference(view, "_inventoryTitle", inventoryTitle);
-            UiBuild.SetReference(view, "_inventoryEmpty", inventoryEmpty);
-            UiBuild.SetReference(view, "_entryTemplate", entryTemplate);
-            UiBuild.SetReference(view, "_entryParent", entryParent);
+            UiBuild.SetReference(view, "_inventoryPanel", popup.Cover);
+            UiBuild.SetReference(view, "_inventoryTitle", popup.Title);
+            UiBuild.SetReference(view, "_inventoryGrid", popup.Grid);
+            UiBuild.SetReference(view, "_inventoryCoins", popup.Coins);
+            UiBuild.SetReference(view, "_inventoryInfoBox", popup.InfoBox);
+            UiBuild.SetReference(view, "_inventoryInfo", popup.Info);
             UiBuild.SetReference(view, "_tooltip", tooltip);
             UiBuild.SetReference(view, "_boardPanel", panel);
             return view;
@@ -210,20 +211,15 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// A member's board in a column of the board panel, as in battle (PartyBoardView; round 47): the head with the row and
-        /// the name, and under it the cells stacked on their bag in the middle of the column, on a rect of their own over the
-        /// column so that the battle screen can show and hide the board apart from its own. The view sizes the board to the
-        /// member's cells at runtime (the bag follows) and makes the cells. Every object is named after the prefix.
+        /// A member's board in a column of the board panel, as in battle (PartyBoardView; round 47): the head with the row and the name,
+        /// and under it the board as a grid (Slice B stage 19, BuildGridBoard), on a rect of their own over the column so that the battle
+        /// screen can show and hide the board apart from its own. Every object is named after the prefix.
         /// </summary>
         static PartyBoardView BuildPartyBoard(RectTransform column, string p, int row)
         {
             RectTransform board = UiBuild.Rect(p + "Board", column);
             UiBuild.Stretch(board);
-            RectTransform cells = UiBuild.Rect(p + "Cells", board);
-            UiBuild.Place(cells, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -BoardCellsTop), new Vector2(BattleItemView.CellWidth, BattleItemView.BoardHeight(JobData.MaxItemSlots)));
-            UiBuild.Vertical(cells, BattleItemView.CellGapY, 0, TextAnchor.UpperCenter);
-            BuildBoardBag(cells, p + "Bag");
-            ItemSlotView slotTemplate = BuildItemSlot(cells, p + "CellTemplate");
+            GridBoardView grid = BuildGridBoard(board, p);
 
             // The head: the column is its row, so the stud never changes; the view writes whoever stands in it.
             Image head = BuildBoardHead(board, p + "Board", out TextMeshProUGUI rowText, out TextMeshProUGUI name);
@@ -236,8 +232,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_fatigueTotal", fatigue);
             UiBuild.SetReference(view, "_fatigueTotalText", fatigueText);
-            UiBuild.SetReference(view, "_slotTemplate", slotTemplate);
-            UiBuild.SetReference(view, "_slotParent", cells);
+            UiBuild.SetReference(view, "_grid", grid);
             return view;
         }
 
@@ -246,73 +241,6 @@ namespace F1.Editor.Setup
         {
             UiBuild.Stretch(label.rectTransform, 6f, 4f, 6f, 6f);
             UiBuild.ShrinkToFit(UiBuild.SingleLine(label), 14f);
-        }
-
-        /// <summary>
-        /// One cell of a board, in a slot of the kit: the icon over the silhouette of its tier's outline, the name with the grade
-        /// under it in one text for an item without an icon (the view writes the two lines; they never wrap, a long name shrinks),
-        /// the fatigue tag, the merge mark and the tier tag. It is as wide as a cell; its height is set at runtime, the cells its item takes, stacked.
-        /// </summary>
-        static ItemSlotView BuildItemSlot(Transform parent, string name)
-        {
-            Image frame = KitFrame(name, parent, UiArt.Slot);
-            UiBuild.Size(frame, BattleItemView.CellWidth, BattleItemView.CellHeight);
-            Button button = UiBuild.MakeButton(frame);
-            var rightClick = frame.gameObject.AddComponent<RightClick>();
-
-            // Silent: the side sounds a click as what it did, an item put in or a click (PartySideView).
-            UiBuild.Silence(button);
-            ColorBlock colors = button.colors;
-            colors.disabledColor = new Color(QuietCellTint, QuietCellTint, QuietCellTint, 1f);
-            button.colors = colors;
-
-            // Words: the empty cell, or the name and grade of an item without an icon.
-            TextMeshProUGUI text = UiBuild.Label(name + "Text", frame.transform, 19f, UiPalette.InkText);
-            UiBuild.Stretch(text.rectTransform, 14f, 4f, 12f, 4f);
-            text.textWrappingMode = TextWrappingModes.NoWrap;
-            UiBuild.ShrinkToFit(text, 13f);
-
-            // Behind the icon, the silhouette that becomes the tier's outline (round 41); then the icon in the place the battle's cell gives it.
-            Image outline = BuildOutline(frame.transform, name + "Outline", out SilhouetteOutline outlineEffect);
-            Image icon = UiBuild.Image(name + "Icon", frame.transform, Color.white);
-            icon.preserveAspect = true;
-            UiBuild.Stretch(icon.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
-
-            // The fatigue tag at the top-right corner: "+1" on equipment that costs fatigue when a battle starts (round 32, B1).
-            TextMeshProUGUI fatigueText = BuildFatigueTag(frame.transform, name + "Fatigue", Vector2.one, new Vector2(-FatigueTagInset, -FatigueTagInset), out GameObject fatigue);
-
-            // The mark of a cell the chosen item would merge into (round 35): a veil over the cell with the words of the tier the
-            // merge makes, lifted off the tier tag; the view shows that tier's outline and stars with it.
-            RectTransform merge = UiBuild.Rect(name + "Merge", frame.transform);
-            UiBuild.Stretch(merge);
-            Image veil = UiBuild.Image(name + "MergeVeil", merge, new Color(0.08f, 0.09f, 0.12f, MergeVeilAlpha));
-            UiBuild.Stretch(veil.rectTransform, MergeVeilInset, MergeVeilInset, MergeVeilInset, MergeVeilInset);
-            TextMeshProUGUI mergeText = UiBuild.SingleLine(UiBuild.Label(name + "MergeText", merge, MergeMarkFontSize, UiPalette.Text, TextAlignmentOptions.Center));
-            UiBuild.Stretch(mergeText.rectTransform, 0f, 0f, 0f, MergeMarkLift);
-            merge.gameObject.SetActive(false);
-
-            // Over everything, the tier tag with the stars (round 41): the view shows it for a tier above Common or a merge.
-            Image tierTag = BuildTierTag(frame.transform, name + "Tier", out Image[] stars);
-
-            var view = frame.gameObject.AddComponent<ItemSlotView>();
-            UiBuild.SetReference(view, "_button", button);
-            UiBuild.SetReference(view, "_rightClick", rightClick);
-            UiBuild.SetReference(view, "_frame", frame);
-            UiBuild.SetReference(view, "_plain", UiArt.Load(UiArt.Slot));
-            UiBuild.SetReference(view, "_selected", UiArt.Load(UiArt.SlotSelected));
-            UiBuild.SetReference(view, "_outline", outline);
-            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
-            UiBuild.SetReference(view, "_icon", icon);
-            UiBuild.SetReference(view, "_text", text);
-            UiBuild.SetReference(view, "_fatigue", fatigue);
-            UiBuild.SetReference(view, "_fatigueText", fatigueText);
-            UiBuild.SetReference(view, "_tierTag", tierTag);
-            UiBuild.SetReferences(view, "_stars", stars);
-            UiBuild.SetReference(view, "_merge", merge.gameObject);
-            UiBuild.SetReference(view, "_mergeText", mergeText);
-
-            frame.gameObject.SetActive(false);
-            return view;
         }
 
         /// <summary>
@@ -331,51 +259,136 @@ namespace F1.Editor.Setup
             return words;
         }
 
-        /// <summary>
-        /// The inventory popup: a dimmed cover over the right half of the screen under the potions
-        /// and above the board panel, with a box that lists the items top to bottom. The screen's toggle button opens
-        /// and closes it; the view fills it.
-        /// </summary>
-        static GameObject BuildInventoryPopup(Transform frame, out TMP_Text title, out GameObject empty, out InventoryEntryView entryTemplate, out RectTransform entryParent)
-        {
-            Image cover = UiBuild.Image("InventoryPanel", frame, UiPalette.Overlay, raycastTarget: true);
-            UiBuild.Box(cover, 970f, InventoryPopupTop, 940f, InventoryPopupHeight);
-            Image box = UiBuild.Panel("InventoryBox", cover.transform, UiPalette.Panel);
-            UiBuild.Box(box, 10f, 10f, 920f, InventoryPopupHeight - 20f);
-            title = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("InventoryTitle", box.transform, 32f, UiPalette.Text), 24f, 20f, 600f, 44f));
-            UiBuild.Box(UiBuild.LocalizedLabel("InventoryHint", box.transform, UiKeys.Board.InventoryHint, 20f, UiPalette.TextDim), 24f, 70f, 872f, 30f);
-            ScrollRect scroll = UiBuild.VerticalScroll("InventoryList", box.transform, 16f, out entryParent);
-            UiBuild.Box((RectTransform)scroll.transform, 24f, 110f, 872f, InventoryPopupHeight - 20f - 130f);
-            entryTemplate = BuildInventoryEntry(entryParent);
-            empty = UiBuild.Box(UiBuild.LocalizedLabel("InventoryEmpty", box.transform, UiKeys.Board.InventoryEmpty, 22f, UiPalette.TextDim), 40f, 122f, 400f, 32f).gameObject;
+        // ---- The inventory popup (round 49: Diablo II's inventory window) ---------------------------------------------------------
 
-            cover.gameObject.SetActive(false);
-            return cover.gameObject;
+        const float InventoryBoxInset = 10f;
+        const float InventoryPlateWidth = 300f;
+        const float InventoryPlateTop = 16f;
+        const float InventoryPlateHeight = 42f;
+        const float InventoryGridTop = 92f;
+        const float InventoryRimWidth = InventoryGridView.Rim;
+        const float InventoryCoinsGap = 14f;
+        const float InventoryCoinsWidth = 150f;
+        const float InventoryCoinsHeight = 32f;
+        const float InventoryInfoWidth = 520f;
+        const float InventoryInfoBottom = 70f;
+        const float InventoryHintBottom = 22f;
+
+        /// <summary>The parts of the inventory popup the view fills.</summary>
+        struct InventoryPopupParts
+        {
+            public GameObject Cover;
+            public TMP_Text Title;
+            public InventoryGridView Grid;
+            public TMP_Text Coins;
+            public GameObject InfoBox;
+            public TMP_Text Info;
         }
 
-        /// <summary>One line of the inventory popup: the item's title over a summary of its facts.</summary>
-        static InventoryEntryView BuildInventoryEntry(Transform parent)
+        /// <summary>
+        /// The inventory popup: a dimmed cover over the right half of the screen under the potions and above the board panel, with Diablo
+        /// II's window in it (round 49): a stone box, the heading on a dark plate at the top and the squares used at the right, the grid of
+        /// the inventory sunk in the stone under it with the coins on a plate below its left corner, the held item's tooltip in a black box
+        /// near the bottom and how to use the grid at the bottom. The screen's toggle button opens and closes it; the view fills it.
+        /// </summary>
+        static InventoryPopupParts BuildInventoryPopup(Transform frame)
         {
-            Image frame = UiBuild.Image("InventoryEntryTemplate", parent, UiPalette.Slot);
-            UiBuild.Size(frame, 800f, 76f);
-            var element = frame.gameObject.AddComponent<LayoutElement>();
-            element.minHeight = 76f;
-            element.preferredHeight = 76f;
-            Button button = UiBuild.MakeButton(frame);
+            var parts = new InventoryPopupParts();
+            Image cover = UiBuild.Image("InventoryPanel", frame, UiPalette.Overlay, raycastTarget: true);
+            UiBuild.Box(cover, 970f, InventoryPopupTop, 940f, InventoryPopupHeight);
+            Image box = KitFrame("InventoryBox", cover.transform, UiArt.Table);
+            UiBuild.Box(box, InventoryBoxInset, InventoryBoxInset, 940f - 2f * InventoryBoxInset, InventoryPopupHeight - 2f * InventoryBoxInset);
 
-            TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Label("InventoryEntryTitle", frame.transform, 24f, UiPalette.Text));
-            UiBuild.Stretch(title.rectTransform, 16f, 6f, 16f, 36f);
-            TextMeshProUGUI facts = UiBuild.SingleLine(UiBuild.Label("InventoryEntryFacts", frame.transform, 18f, UiPalette.TextDim));
-            UiBuild.Stretch(facts.rectTransform, 16f, 40f, 16f, 8f);
+            Image plate = UiBuild.Image("InventoryHeadingPlate", box.transform, UiPalette.StonePlate);
+            UiBuild.Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -InventoryPlateTop), new Vector2(InventoryPlateWidth, InventoryPlateHeight));
+            AddSunkBevel(plate.rectTransform, "InventoryHeadingPlate");
+            TextMeshProUGUI heading = UiBuild.SingleLine(UiBuild.LocalizedLabel("InventoryHeading", plate.transform, UiKeys.Board.InventoryHeading, 25f, UiPalette.DiabloGold, TextAlignmentOptions.Center));
+            UiBuild.Stretch(heading.rectTransform);
 
-            var view = frame.gameObject.AddComponent<InventoryEntryView>();
-            UiBuild.SetReference(view, "_button", button);
-            UiBuild.SetReference(view, "_rightClick", frame.gameObject.AddComponent<RightClick>());
-            UiBuild.SetReference(view, "_frame", frame);
-            UiBuild.SetReference(view, "_title", title);
-            UiBuild.SetReference(view, "_facts", facts);
+            parts.Title = UiBuild.SingleLine(UiBuild.Label("InventoryTitle", box.transform, 18f, UiPalette.Bone, TextAlignmentOptions.Right));
+            UiBuild.Place(parts.Title.rectTransform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -InventoryPlateTop), new Vector2(240f, InventoryPlateHeight));
 
-            frame.gameObject.SetActive(false);
+            parts.Grid = BuildInventoryGrid(box.transform, out RectTransform rim);
+
+            Image coins = UiBuild.Image("InventoryCoins", rim, UiPalette.StonePlate);
+            coins.rectTransform.anchorMin = Vector2.zero;
+            coins.rectTransform.anchorMax = Vector2.zero;
+            coins.rectTransform.pivot = new Vector2(0f, 1f);
+            coins.rectTransform.anchoredPosition = new Vector2(0f, -InventoryCoinsGap);
+            coins.rectTransform.sizeDelta = new Vector2(InventoryCoinsWidth, InventoryCoinsHeight);
+            AddSunkBevel(coins.rectTransform, "InventoryCoins");
+            UiBuild.Place(KitIcon("InventoryCoinIcon", coins.transform, UiArt.Coin).rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(8f, 0f), new Vector2(22f, 22f));
+            parts.Coins = UiBuild.SingleLine(UiBuild.Label("InventoryCoinCount", coins.transform, 20f, UiPalette.DiabloGold, TextAlignmentOptions.Right));
+            UiBuild.Stretch(parts.Coins.rectTransform, 36f, 0f, 10f, 0f);
+
+            // The held item's tooltip: Diablo's black box with a grey line, the lines centred; it grows up from above the hint.
+            Image info = UiBuild.Image("InventoryInfo", box.transform, UiPalette.TooltipFill);
+            AddLine(info, UiPalette.TooltipLine, 1f);
+            info.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            info.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            info.rectTransform.pivot = new Vector2(0.5f, 0f);
+            info.rectTransform.anchoredPosition = new Vector2(0f, InventoryInfoBottom);
+            info.rectTransform.sizeDelta = new Vector2(InventoryInfoWidth, 100f);
+            VerticalLayoutGroup infoLines = UiBuild.Vertical(info.rectTransform, 0f);
+            infoLines.padding = new RectOffset(18, 18, 14, 14);
+            infoLines.childControlWidth = true;
+            infoLines.childControlHeight = true;
+            infoLines.childForceExpandWidth = true;
+            info.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            parts.Info = UiBuild.Label("InventoryInfoText", info.transform, 18f, UiPalette.Text, TextAlignmentOptions.Center);
+            parts.Info.lineSpacing = 12f;
+            parts.InfoBox = info.gameObject;
+            info.gameObject.SetActive(false);
+
+            TextMeshProUGUI hint = UiBuild.SingleLine(UiBuild.LocalizedLabel("InventoryHint", box.transform, UiKeys.Board.InventoryHint, 17f, UiPalette.TextDim, TextAlignmentOptions.Center));
+            hint.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            hint.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+            hint.rectTransform.pivot = new Vector2(0.5f, 0f);
+            hint.rectTransform.anchoredPosition = new Vector2(0f, InventoryHintBottom);
+            hint.rectTransform.sizeDelta = new Vector2(880f, 26f);
+
+            cover.gameObject.SetActive(false);
+            parts.Cover = cover.gameObject;
+            return parts;
+        }
+
+        /// <summary>
+        /// The inventory's grid (InventoryGridView, round 49): its rim of stone sunk in the box at the top centre (the view sizes it to the
+        /// inventory), the grey that the gaps between the squares show, and over that, in the order they are drawn, the squares (which
+        /// take the pointer), the pieces and the ghost. The view makes the squares and the pieces from the templates at runtime.
+        /// </summary>
+        static InventoryGridView BuildInventoryGrid(Transform box, out RectTransform rim)
+        {
+            Image stone = UiBuild.Image("InventoryGrid", box, UiPalette.InventoryRim);
+            rim = stone.rectTransform;
+            Vector2 size = InventoryGridView.Size(10, 3) + 2f * InventoryRimWidth * Vector2.one;
+            UiBuild.Place(rim, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -InventoryGridTop), size);
+            AddSunkBevel(rim, "InventoryGrid");
+            Image well = UiBuild.Image("InventoryWell", rim, UiPalette.GridSquareLine);
+            UiBuild.Stretch(well.rectTransform, InventoryRimWidth, InventoryRimWidth, InventoryRimWidth, InventoryRimWidth);
+
+            RectTransform squares = Layer(well.rectTransform, "InventorySquares");
+            RectTransform pieces = Layer(well.rectTransform, "InventoryPieces");
+            RectTransform ghosts = Layer(well.rectTransform, "InventoryGhost");
+            GridSquareView squareTemplate = BuildGridSquare(squares, "InventorySquareTemplate");
+            ItemSlotView pieceTemplate = BuildItemSlot(pieces, "InventoryPieceTemplate");
+            Image ghostSquare = UiBuild.Image("InventoryGhostSquareTemplate", ghosts, Color.white);
+            ghostSquare.gameObject.SetActive(false);
+            RectTransform ghostArt = UiBuild.Rect("InventoryGhostArt", ghosts);
+            Image ghostIcon = UiBuild.Image("InventoryGhostIcon", ghostArt, Color.white);
+            ghostIcon.preserveAspect = true;
+            UiBuild.Stretch(ghostIcon.rectTransform);
+            ghostArt.gameObject.SetActive(false);
+
+            var view = stone.gameObject.AddComponent<InventoryGridView>();
+            UiBuild.SetReference(view, "_squareLayer", squares);
+            UiBuild.SetReference(view, "_pieceLayer", pieces);
+            UiBuild.SetReference(view, "_ghostLayer", ghosts);
+            UiBuild.SetReference(view, "_squareTemplate", squareTemplate);
+            UiBuild.SetReference(view, "_pieceTemplate", pieceTemplate);
+            UiBuild.SetReference(view, "_ghostSquareTemplate", ghostSquare);
+            UiBuild.SetReference(view, "_ghostArt", ghostArt);
+            UiBuild.SetReference(view, "_ghostIcon", ghostIcon);
             return view;
         }
     }

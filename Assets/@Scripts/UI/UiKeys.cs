@@ -98,31 +98,40 @@ namespace F1.UI
             public const string ShopRefresh = "Map.ShopRefresh";
             public const string ShopLeave = "Map.ShopLeave";
             public const string ShopSold = "Map.ShopSold";
+            public const string ShopHeld = "Map.ShopHeld";
             public const string ShopItemSub = "Map.ShopItemSub";
             public const string ShopBought = "Map.ShopBought";
             public const string Coins = "Map.Coins";
             public const string ShopPotion = "Map.ShopPotion";
+
+            /// <summary>Under the name of a bag on offer or of a bag dropped (Slice B stage 19). {0} x {1} = its squares, {2} = how many.</summary>
+            public const string ShopBagSub = "Map.ShopBagSub";
+            public const string BagFacts = "Map.BagFacts";
         }
 
         public static class Board
         {
             public const string Hp = "Board.Hp";
-            public const string EmptySlot = "Board.EmptySlot";
             public const string Grade = "Board.Grade";
             public const string Forward = "Board.Forward";
             public const string Back = "Board.Back";
             public const string Hint = "Board.Hint";
             public const string InventoryShow = "Board.InventoryShow";
             public const string InventoryHide = "Board.InventoryHide";
+            public const string InventoryHeading = "Board.InventoryHeading";
             public const string InventoryTitle = "Board.InventoryTitle";
             public const string InventoryHint = "Board.InventoryHint";
-            public const string InventoryEmpty = "Board.InventoryEmpty";
+            public const string TurnHint = "Board.TurnHint";
             public const string ToInventory = "Board.ToInventory";
             public const string FatigueTag = "Board.FatigueTag";
             public const string MergeInto = "Board.MergeInto";
             public const string FatigueTotal = "Board.FatigueTotal";
             public const string JobState = "Board.JobState";
             public const string StateDetail = "Board.StateDetail";
+
+            /// <summary>The words over a held thing's ghost (Slice B stage 19): the item it lies over goes to the inventory; a bag is laid.</summary>
+            public const string GhostToInventory = "Board.GhostToInventory";
+            public const string GhostBag = "Board.GhostBag";
         }
 
         public static class Item

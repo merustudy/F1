@@ -167,16 +167,13 @@ namespace F1.Editor.Setup
         const float TooltipStripeRoom = 8f;
         const float TooltipStripeWidth = 6f;
         const float TooltipRadius = 4f;
-        const float TooltipLineAlpha = 0.92f;
-        const float TooltipFillAlpha = 0.94f;
-        const float TooltipRuleAlpha = 0.43f;
         const float TooltipNotch = 16f;
 
         /// <summary>
-        /// An item's card (round 42, Docs/Architecture/12_UI.md "툴팁"): an ink card with a brass hairline, the tier's stripe down
-        /// its left edge and the item's lines stacked inside, sized to them; notches (two diamonds clipped to what lies outside the
-        /// edge) under its bottom edge for the party side and on its side edges for the battle.
-        /// Hidden until a click opens it.
+        /// An item's card (round 42, Docs/Architecture/12_UI.md "툴팁"; Diablo II's tooltip since round 49): a black see-through card
+        /// with a grey hairline and the item's lines stacked inside and centred, sized to them (the name in its rarity colour, the effects
+        /// in the magic blue); notches (two diamonds clipped to what lies outside the edge) under its bottom edge for the party side and
+        /// on its side edges for the battle. Hidden until a click opens it.
         /// </summary>
         static ItemTooltipView BuildItemTooltip(Transform frame, string name)
         {
@@ -189,9 +186,9 @@ namespace F1.Editor.Setup
             lines.childForceExpandWidth = true;
             card.gameObject.AddComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            Image line = Rounded(name + "Line", card, Tinted(UiPalette.Brass, TooltipLineAlpha), TooltipRadius);
+            Image line = Rounded(name + "Line", card, UiPalette.TooltipLine, TooltipRadius);
             UiBuild.Stretch(OutOfLayout(line.rectTransform));
-            Image fill = Rounded(name + "Fill", card, Tinted(UiPalette.Ink, TooltipFillAlpha), TooltipRadius - 1f);
+            Image fill = Rounded(name + "Fill", card, UiPalette.TooltipFill, TooltipRadius - 1f);
             UiBuild.Stretch(OutOfLayout(fill.rectTransform), 1f, 1f, 1f, 1f);
             Image stripe = UiBuild.Image(name + "Stripe", card, UiPalette.TierBronze);
             RectTransform stripeRect = OutOfLayout(stripe.rectTransform);
@@ -207,15 +204,15 @@ namespace F1.Editor.Setup
             RectTransform notchLeft = NotchClip(name + "NotchLeft", card, new Vector2(0f, 1f), new Vector2(1f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(1f, 0.5f));
             RectTransform notchRight = NotchClip(name + "NotchRight", card, new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(0f, 0.5f));
 
-            TextMeshProUGUI title = UiBuild.Label(name + "Title", card, 24f, UiPalette.Text);
-            Image rule = UiBuild.Image(name + "Rule", card, Tinted(UiPalette.Brass, TooltipRuleAlpha));
+            TextMeshProUGUI title = UiBuild.Label(name + "Title", card, 24f, UiPalette.Text, TextAlignmentOptions.Center);
+            Image rule = UiBuild.Image(name + "Rule", card, UiPalette.TooltipLine);
             LayoutElement ruleElement = rule.gameObject.AddComponent<LayoutElement>();
             ruleElement.minHeight = 1f;
             ruleElement.preferredHeight = 1f;
-            TextMeshProUGUI facts = UiBuild.Label(name + "Facts", card, 19f, UiPalette.TextDim);
-            TextMeshProUGUI effects = UiBuild.Label(name + "Effects", card, 20f, UiPalette.Text);
-            TextMeshProUGUI fatigue = UiBuild.Label(name + "Fatigue", card, 19f, UiPalette.Text);
-            TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text);
+            TextMeshProUGUI facts = UiBuild.Label(name + "Facts", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
+            TextMeshProUGUI effects = UiBuild.Label(name + "Effects", card, 20f, UiPalette.TooltipEffect, TextAlignmentOptions.Center);
+            TextMeshProUGUI fatigue = UiBuild.Label(name + "Fatigue", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
+            TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
 
             var view = card.gameObject.AddComponent<ItemTooltipView>();
             UiBuild.SetReference(view, "_stripe", stripe);
@@ -251,8 +248,8 @@ namespace F1.Editor.Setup
             clip.pivot = pivot;
             clip.sizeDelta = size;
             clip.anchoredPosition = Vector2.zero;
-            Diamond(name + "Line", clip, Tinted(UiPalette.Brass, TooltipLineAlpha), TooltipNotch + 2f, diamondAnchor);
-            Diamond(name + "Fill", clip, Tinted(UiPalette.Ink, TooltipFillAlpha), TooltipNotch, diamondAnchor);
+            Diamond(name + "Line", clip, UiPalette.TooltipLine, TooltipNotch + 2f, diamondAnchor);
+            Diamond(name + "Fill", clip, UiPalette.TooltipFill, TooltipNotch, diamondAnchor);
             clip.gameObject.SetActive(false);
             return clip;
         }
@@ -369,6 +366,10 @@ namespace F1.Editor.Setup
             for (int i = 0; i < stars.Length; i++)
             {
                 stars[i] = KitIcon(name + "Star" + (i + 1), pill.transform, UiArt.Star);
+                // Round 49: the pill is see-through in Diablo's look, so each star has a dark edge to stand on any ground.
+                var edge = stars[i].gameObject.AddComponent<Outline>();
+                edge.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                edge.effectDistance = new Vector2(1f, -1f);
                 UiBuild.Place(stars[i].rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(TierStyle.TagPad + i * TierStyle.StarPitch, 0f), new Vector2(TierStyle.StarSize, TierStyle.StarSize));
             }
 

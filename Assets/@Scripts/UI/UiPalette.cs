@@ -130,6 +130,93 @@ namespace F1.UI
         /// <summary>Multiplied into an icon that is shown but cannot be used now, as TextDim is for a name.</summary>
         public static readonly Color IconDim = Rgb(0x6E, 0x6E, 0x74);
 
+        // ---- The grid board in Diablo II's look (round 49, Docs/Design/10_Art_Direction.md §5; Docs/Architecture/12_UI.md "격자 보드") ----
+
+        /// <summary>An empty square of a bag or of the inventory: Diablo's black. The gaps between squares show <see cref="GridSquareLine"/>.</summary>
+        public static readonly Color GridSquare = Rgb(0x09, 0x09, 0x0B);
+        public static readonly Color GridSquareLine = Rgb(0x38, 0x38, 0x3C);
+
+        /// <summary>The frame's squares outside every bag, drawn only while a bag is held: sunk stone with a dashed line (round 48's cue).</summary>
+        public static readonly Color GridFrameFill = Rgb(0x24, 0x23, 0x21);
+        public static readonly Color GridFrameLine = Rgb(0x78, 0x6C, 0x5C);
+
+        /// <summary>
+        /// An item's squares as one piece between battles: Diablo's dark blue (round 49); the held one a lighter blue; the one a held item
+        /// would push out a dark gold. In battle a piece has no ground (the user: "전투 화면에서는 아이템 뒤 파란색 배경 없음").
+        /// </summary>
+        public static readonly Color GridPiece = new Color(0x16 / 255f, 0x20 / 255f, 0x58 / 255f, 0.82f);
+        public static readonly Color GridPiecePicked = new Color(0x36 / 255f, 0x48 / 255f, 0x9C / 255f, 0.86f);
+        public static readonly Color GridPieceDisplaced = new Color(0x60 / 255f, 0x52 / 255f, 0x1C / 255f, 0.86f);
+
+        /// <summary>The held item's squares while it is picked: no colour of its own any more (the piece's blue says it).</summary>
+        public static readonly Color GridPicked = Color.clear;
+
+        /// <summary>The ghost of a held thing: the squares green where it fits (pushing one out or merging too), red where it cannot go; nothing else (round 49, "빨강 칠만").</summary>
+        public static readonly Color GhostFits = Rgb(0x1A, 0x96, 0x30);
+        public static readonly Color GhostRefused = Rgb(0xB0, 0x1E, 0x1E);
+
+        /// <summary>The words over a ghost and other small labels: Diablo's black box with a grey line, white words (red where it cannot go).</summary>
+        public static readonly Color LabelBox = new Color(0f, 0f, 0f, 0.88f);
+        public static readonly Color LabelLine = Rgb(0x46, 0x46, 0x46);
+
+        /// <summary>A bag's rim round its squares: the stone with the bag's leather a little in it, sunk (dark top and left, light bottom and right).</summary>
+        public static readonly Color BevelDark = Rgb(0x0A, 0x0A, 0x0A);
+        public static readonly Color BevelLight = Rgb(0x70, 0x6A, 0x62);
+        static readonly Color RimStone = Rgb(0x22, 0x21, 0x1F);
+
+        /// <summary>The inventory's rim round its squares, and the dark of a small plate (a heading, the coins): Diablo's stone.</summary>
+        public static readonly Color InventoryRim = RimStone;
+        public static readonly Color StonePlate = Rgb(0x0E, 0x0D, 0x0C);
+
+        /// <summary>Diablo's words on stone: bone for plain words, gold for a heading.</summary>
+        public static readonly Color Bone = Rgb(0xCD, 0xC0, 0xA0);
+        public static readonly Color DiabloGold = Rgb(0xC7, 0xB3, 0x77);
+
+        /// <summary>Diablo II's rarity colours for the tiers (round 49): Common white, Bronze magic blue, Silver rare yellow, Gold unique gold.</summary>
+        public static Color Rarity(ItemTier tier)
+        {
+            switch (tier)
+            {
+                case ItemTier.Bronze: return Rgb(0x70, 0x70, 0xFF);
+                case ItemTier.Silver: return Rgb(0xFF, 0xFF, 0x6E);
+                case ItemTier.Gold: return Rgb(0xC7, 0xB3, 0x77);
+                default: return Rgb(0xEE, 0xEE, 0xEE);
+            }
+        }
+
+        /// <summary>Diablo's tooltip: a black box, a grey line, effects in the magic blue; a bag's name in gold.</summary>
+        public static readonly Color TooltipFill = new Color(0f, 0f, 0f, 0.86f);
+        public static readonly Color TooltipLine = Rgb(0x40, 0x40, 0x40);
+        public static readonly Color TooltipEffect = Rgb(0x70, 0x70, 0xFF);
+        public static readonly Color BagName = Rgb(0xC7, 0xB3, 0x77);
+
+        /// <summary>An item that cannot be used where its owner stands, in battle: grey (it has no ground there).</summary>
+        public static readonly Color GridPieceUnusable = Color.clear;
+
+        /// <summary>Battle (round 48, the fifth ask's 안 2): the item's dark before it charges, and how much brighter it flashes as it fires.</summary>
+        public const float CooldownDark = 0.4f;
+        public const float FireBrighten = 0.3f;
+
+        /// <summary>The leather of a bag, by bag id (the round 48 mockups' colours); any other bag is the pack's brown.</summary>
+        public static Color Bag(string bagId)
+        {
+            switch (bagId)
+            {
+                case "leather_pouch": return Rgb(0x46, 0x52, 0x3A);
+                case "belt_pouch": return Rgb(0x6E, 0x36, 0x2A);
+                default: return Rgb(0x60, 0x40, 0x26);
+            }
+        }
+
+        /// <summary>The rim of an enemy item's well in battle (an enemy has no bags): the stone a little red.</summary>
+        public static readonly Color EnemyRim = Color.Lerp(RimStone, Rgb(0x6E, 0x28, 0x20), 0.45f);
+
+        /// <summary>A bag's rim (round 49, "처음 디아블로 안의 돌 테"): the stone with 45% of the bag's leather in it.</summary>
+        public static Color BagRim(string bagId)
+        {
+            return Color.Lerp(RimStone, Bag(bagId), 0.45f);
+        }
+
         static Color Rgb(int r, int g, int b)
         {
             return new Color(r / 255f, g / 255f, b / 255f, 1f);

@@ -241,47 +241,81 @@ namespace F1.Tests
                         PartySideView party = map.GetComponentInChildren<PartySideView>();
                         if (!capturedBoard && Managers.Expedition.Expedition.Inventory.Count > 0)
                         {
-                            // The first drop went to the inventory: the weapon of the row-1 member selected, then the popup with its item picked.
+                            // The first drop went to the inventory: the weapon of the row-1 member held with its ghost on the row under it,
+                            // then the popup with its item picked.
                             capturedBoard = true;
-                            ItemSlotView weapon = party.ColumnOfRow(1).Slots[0];
-                            UiTestUtil.Click(weapon.Button);
+                            PartyBoardView board1 = party.ColumnOfRow(1).BoardView;
+                            UiTestUtil.ClickSquare(board1, 0, 0);
+                            UiTestUtil.HoverSquare(board1, 0, 1);
                             yield return Capture(prefix + "_08_map_item_selected");
-                            UiTestUtil.Click(weapon.Button);
+                            UiTestUtil.ClickSquare(board1, 0, 0);
                             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
-                            UiTestUtil.Click(party.InventoryEntries[0].Button);
+                            // Round 49: the item picked from the inventory's grid, its tooltip in the popup and its ghost on the row under the weapon.
+                            BoardItem kept = Managers.Expedition.Expedition.Inventory.Items[0];
+                            party.InventoryGrid.SquareAt(kept.At.X, kept.At.Y).Click();
+                            UiTestUtil.HoverSquare(board1, 0, 1);
                             yield return Capture(prefix + "_17_map_inventory_selected");
+                            party.InventoryGrid.SquareAt(kept.At.X, kept.At.Y).Click();
                             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
 
                             // Equipment found on the way costs fatigue (round 32, B1): staged on the row-1 member's board for one picture,
-                            // a weapon, an armor and a support item, then taken away again so the rest of the run is the same.
+                            // a weapon, an armor and a support item under the job weapon, then the board as it was, so the rest of the run is the same.
+                            StaticData shotData = Managers.Data.Data;
                             ExpeditionMember front = Managers.Expedition.Expedition.Members[party.ColumnOfRow(1).Member];
-                            int carried = front.Items.Count;
-                            foreach (string found in new[] { "dagger", "buckler", "herb_pouch" })
-                            {
-                                front.Items.Add(new EquippedItem(Managers.Data.Data.Items.Get(found), 8));
-                            }
-
+                            var frontKept = new List<BoardItem>(front.Board.Items);
+                            BoardItem jobWeapon = front.Board.ItemAt(0, 0);
+                            front.Board.Items.Clear();
+                            front.Board.Items.Add(jobWeapon);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("dagger"), 8), 0, 1);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("buckler"), 8), 2, 1);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("herb_pouch"), 8), 0, 2);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
-                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+                            UiTestUtil.ClickSquare(board1, 0, 1);
+                            UiTestUtil.HoverSquare(board1, 0, 1);
                             yield return Capture(prefix + "_30_map_fatigue");
-                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
 
-                            // Tiers (round 35): the buckler Silver and the herb pouch Gold on their cells, a second Common dagger on row 2's
-                            // board, and the row-1 dagger chosen, which marks the cell it would merge into.
-                            front.Items[carried + 1] = new EquippedItem(front.Items[carried + 1].Item, 8, tier: ItemTier.Silver);
-                            front.Items[carried + 2] = new EquippedItem(front.Items[carried + 2].Item, 8, tier: ItemTier.Gold);
+                            // Turning (Slice B stage 19): the held dagger turned a quarter, its ghost standing in the last column.
+                            party.TurnHeld(1);
+                            UiTestUtil.HoverSquare(board1, 2, 1);
+                            yield return Capture(prefix + "_44_map_turned");
+                            party.TurnHeld(-1);
+                            UiTestUtil.ClickSquare(board1, 0, 1);
+
+                            // Tiers (round 35): the buckler Silver and the herb pouch Gold on their pieces, a second Common dagger on row 2's
+                            // board, and the row-1 dagger held over it, which marks the piece it would merge into and shows the merge.
+                            front.Board.ItemAt(2, 1).Item = new EquippedItem(shotData.Items.Get("buckler"), 8, tier: ItemTier.Silver);
+                            front.Board.ItemAt(0, 2).Item = new EquippedItem(shotData.Items.Get("herb_pouch"), 8, tier: ItemTier.Gold);
                             ExpeditionMember second = Managers.Expedition.Expedition.Members[party.ColumnOfRow(2).Member];
-                            second.Items.Add(new EquippedItem(Managers.Data.Data.Items.Get("dagger"), 9));
+                            var secondKept = new List<BoardItem>(second.Board.Items);
+                            second.Board.Items.RemoveAll(placed => placed.At.Y > 0);
+                            UiTestUtil.Put(second, new EquippedItem(shotData.Items.Get("dagger"), 9), 0, 1);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
-                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
+                            UiTestUtil.ClickSquare(board1, 0, 1);
+                            UiTestUtil.HoverSquare(party.ColumnOfRow(2).BoardView, 0, 1);
                             yield return Capture(prefix + "_35_map_tiers");
-                            UiTestUtil.Click(party.ColumnOfRow(1).Slots[carried].Button);
-                            second.Items.RemoveAt(second.Items.Count - 1);
-                            front.Items.RemoveRange(carried, front.Items.Count - carried);
+                            UiTestUtil.ClickSquare(board1, 0, 1);
+
+                            // A bag (Slice B stage 19): a pouch staged under the start bag, picked up by its empty square, held over the
+                            // frame, which shows its squares while a bag is held.
+                            front.Board.Bags.Add(new BoardBag(shotData.Bags.Get("leather_pouch"), new Placement(0, 3)));
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.ClickSquare(board1, 1, 3);
+                            UiTestUtil.HoverSquare(board1, 0, 5);
+                            yield return Capture(prefix + "_45_map_bag_held");
+                            UiTestUtil.ClickSquare(board1, 0, 3);
+                            front.Board.Bags.RemoveAt(front.Board.Bags.Count - 1);
+
+                            second.Board.Items.Clear();
+                            second.Board.Items.AddRange(secondKept);
+                            front.Board.Items.Clear();
+                            front.Board.Items.AddRange(frontKept);
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
 
                             // Fatigue and a state under the feet (round 36): the row-1 member tired and fearful, its state clicked, so
                             // that the detail line explains it; then as before, so the rest of the run is the same.
@@ -356,7 +390,7 @@ namespace F1.Tests
                             // The mend step (round 35) with the row-1 weapon chosen, then back to the two cards and the rest.
                             UiTestUtil.Click(map, UiTestUtil.CampMend);
                             yield return UiTestUtil.WaitForRedraw();
-                            UiTestUtil.Click(map.GetComponentInChildren<PartySideView>().ColumnOfRow(1).Slots[0].Button);
+                            UiTestUtil.ClickSquare(map.GetComponentInChildren<PartySideView>().ColumnOfRow(1).BoardView, 0, 0);
                             yield return UiTestUtil.WaitForRedraw();
                             yield return Capture(prefix + "_34_camp_mend");
                             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
@@ -367,7 +401,8 @@ namespace F1.Tests
                             // The tiers in battle (round 41): the rearmost member's weapon as if mended once (Bronze), so that the boss
                             // battle shows a cell's outline under the charge's dark and the tier tag above it (the rear survives the longest).
                             ExpeditionMember rear = Managers.Expedition.Expedition.Members.OrderByDescending(m => m.Row).First(m => m.Alive);
-                            rear.Items[0] = new EquippedItem(rear.Items[0].Item, rear.Items[0].Grade, isBase: true, tier: ItemTier.Bronze);
+                            BoardItem rearWeapon = rear.Board.ItemAt(0, 0);
+                            rearWeapon.Item = new EquippedItem(rearWeapon.Item.Item, rearWeapon.Item.Grade, isBase: true, tier: ItemTier.Bronze);
                         }
 
                         yield return UiTestUtil.GoIntoTheFirstNode();
@@ -436,9 +471,9 @@ namespace F1.Tests
                                 yield return Capture(prefix + "_07_loot_picked");
                                 UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
                             }
-                            else if (Managers.Expedition.CanTakeLoot(drop, rowOne, 1))
+                            else if (Managers.Expedition.CanTakeLoot(drop, rowOne, new Placement(0, 1)))
                             {
-                                UiTestUtil.Click(battle.LootBoardOfRow(1).Slots[1].Button);
+                                UiTestUtil.ClickSquare(battle.LootBoardOfRow(1), 0, 1);
                             }
                             else
                             {
