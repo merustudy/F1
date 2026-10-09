@@ -80,6 +80,9 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
 - `ItemData.csv`와 `PotionData.csv`의 `Price`는 상점의 값이다(일반 기준의 정수. 0이면 상점에 나오지 않는다. 17단계). `ShopWeight`는 상점에 나올 상대 확률이다(18단계에 `RewardWeight`에서 이름을 바꿨다: 전투는 적이 든 것을 떨어뜨린다). `DungeonData.csv`의 `ShopMinFloor`·`ShopChancePercent`는 정예·야영지의 열과 같은 방식이다.
+- `ItemData.csv`의 `Width`·`Height`는 격자에서 아이템이 차지하는 가로·세로 칸이다(19단계. 한 변 1..`BoardFrame.MaxSide` 3. 그 전의 `Size`를 대신했다). `JobData.csv`에는 칸 수가 없다(보드는 가방이 만든다).
+- `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률).
+  틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 
