@@ -80,7 +80,7 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 
 - **Round 46 오른쪽 열**(2026-10-08 사용자: "물약칸은 전투 위치로, 지도·상점·보상의 고르는 칸을 세로로 넓게, 설명·인벤 버튼 패널을 절반으로"): 목업 여섯과 비교 둘(`ArtPipeline/Archive/46-right-column/`). 권장 A(보드 판은 보드 아래만) + S1(상점 타일에 효과까지, 카드 없음) + L2(전리품을 상점 타일로). "아이템 선택하는 칸"은 오른쪽 위의 판으로 읽었다. 호출 없음.
   판정: 사용자 **"일단 지금 새로만든 화면 반영"** → 권장안 구현(README 46 "구현"·"검증", Architecture/12, Roadmap "Round 46의 권장안 세부"). 체인 OK(EditMode 751/751, PlayMode 77/86, 9 skipped), 스크린샷 `20261008-r46c` 9/9. 커밋 안 함.
-  체인 중 한 번 `OneLap_…`이 기존 버그로 실패했다(맞지 않고 죽은 용병의 사망 문장이 `Potion ''`을 찾음, `BattleLogText.Source`). 따로 고칠 작업으로 남겼다. 직접 플레이의 체크리스트에 더한다: 높아진 지도(일곱 층 반)가 길 고르기에 도움이 되나, 절반 패널의 두 줄이 모자라지 않나, 상점·전리품 타일의 사실이 읽히나.
+  체인 중 한 번 `OneLap_…`이 기존 버그로 실패했다(맞지 않고 죽은 용병의 사망 문장이 `Potion ''`을 찾음, `BattleLogText.Source`). 따로 고칠 작업으로 남겼다 → **2026-10-09 고쳤다**(브랜치 `claude/objective-poincare-e25ee1`, 워크트리): 원인은 HP 0으로 들어온 용병이 맞지 않은 채 동료의 빈사·사망 피로로 200에 닿아 쓰러져 죽는 것(`Damaged` 없음 → `LastHitCause` null). 쓰러짐을 Domain이 읽고(`DeathCause.Collapsed`) 제 문장 `Death.Collapsed`를 쓴다(피격·굴림 없음. 전에는 맞은 기록이 있어도 쓰러짐 사망에 0이나 이전 굴림이 찍혔다). Test `BattleEngineTests.PartyDeaths_WhenTheCollapseKilledAMercenaryNobodyHit_…`·`…WhenTheCollapseOnlySentItToDeathsDoor_…`, `BattleLogTextTests`. 권장안의 세부는 Roadmap "사후 검토 대기"의 "쓰러짐 사망의 문장". 체인은 아래 Verification. 직접 플레이의 체크리스트에 더한다: 높아진 지도(일곱 층 반)가 길 고르기에 도움이 되나, 절반 패널의 두 줄이 모자라지 않나, 상점·전리품 타일의 사실이 읽히나.
 - Round 42 목업 7(사용자 "안 3 방향으로 재검토": 단계별 명패): 비교 목업 셋을 보인 뒤 사용자 **"지금 유지하자"** → 안 1 그대로. 기록은 README 42 "목업 7"·"판정 3".
 - 목업 7의 명패 스타일은 **유니크 아이템**(사용자 2026-10-07: 금 아이템 조합으로 만들고 전투당 하나만 소유)의 툴팁에 쓰기로 하고 보관했다: Design/02 §4 【검토】, Architecture/09 Deferred·12 "툴팁" 보관, README 42 "보관". 규칙은 Slice C에서 정한다.
 - **Round 44 상점 노드와 지역 코인**: 2026-10-07 사용자 **"권장안 구현"** → 17단계를 열어 구현했다(`b17-shop.md`). 판정할 것 여섯과 권장안, 구현의 기록은 `ArtPipeline/Archive/44-shop-node/README.md`.
@@ -106,6 +106,7 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
   여섯 파티(J): 70.0 / 60.0 / 41.3 / 23.1 / 2.1 / 0.0%(15단계 70.3 / 62.7 / 42.3 / 23.3 / 1.6 / 0.0). 전체 표와 스윕은 Design/08 §12.
 - `Tools/playlog.py`를 견본 로그로 돌려 집계를 확인했다. 플레이 기록의 배선은 PlayMode의 모든 Boot가 지난다(임시 루트 안의 `Logs/`).
 - `git diff --check` 깨끗. 데이터 변경은 `BalanceData.csv`의 두 줄(`FatigueOnHit` 2, `FatigueOnKill` 5)과 Generated뿐.
+- 쓰러짐 사망의 문장 버그 수정(2026-10-09, 워크트리 브랜치 `claude/objective-poincare-e25ee1`, `feature/slice-a`의 `cdab8f0` 위)의 체인(`20261009-094930`, 전체): setup OK(String Table에 `Death.Collapsed`. 새 글자가 없어 Font Atlas는 그대로), sim OK, EditMode **756/756**(새 Test 넷: `PartyDeaths_WhenTheCollapse…` 둘, `BattleLogTextTests` 둘), PlayMode **78/87**(9 skipped. `OneLap_…` 통과). `Assets/InitTestScene*` 없음, `git diff --check` 깨끗. Unity가 고쳐 쓴 `.vscode/settings.json`(워크트리의 솔루션 이름)은 되돌렸다. 변경은 코드 셋·Test 둘(새 파일 `BattleLogTextTests.cs`와 .meta)·CSV와 Table 셋·문서 셋뿐이다. 커밋 안 함.
 
 ## Next Action (제안)
 

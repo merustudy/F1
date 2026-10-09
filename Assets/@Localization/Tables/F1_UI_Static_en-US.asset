@@ -1017,6 +1017,12 @@ MonoBehaviour:
       an item's facts.
     m_Metadata:
       m_Items: []
+  - m_Id: 3121959998054400
+    m_Localized: "{0} \u2014 at death's door at {1}s \u2192 collapsed from fatigue
+      \u2192 died at {2}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1130,3 +1136,4 @@ MonoBehaviour:
         - id: 2552399930581003
         - id: 2552399930581004
         - id: 2894741271207936
+        - id: 3121959998054400

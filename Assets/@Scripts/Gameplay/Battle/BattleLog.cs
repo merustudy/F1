@@ -26,6 +26,12 @@ namespace F1.Gameplay
 
         /// <summary>Hits that broke the grace. 0 when it was not broken.</summary>
         public int GraceHits;
+
+        /// <summary>
+        /// True when the fatigue collapse at death's door killed it (the Collapsed event right before Died, C = 1): no hit and no
+        /// death roll did. A mercenary who entered the battle at 0 HP may never have been hit, so LastHitCause can be null.
+        /// </summary>
+        public bool Collapsed;
     }
 
     public static class BattleLog
@@ -67,6 +73,10 @@ namespace F1.Gameplay
                     case BattleEventKind.DeathRolled:
                         cause.DeathChancePercent = e.A;
                         cause.DeathRoll = e.B;
+                        break;
+                    case BattleEventKind.Collapsed:
+                        // The collapse sends the unit to death's door (C = 0, DogEntered follows) or kills it there (C = 1, Died follows).
+                        cause.Collapsed = e.C == 1;
                         break;
                     case BattleEventKind.Died:
                         cause.DiedMs = e.TimeMs;

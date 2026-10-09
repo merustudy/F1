@@ -263,6 +263,7 @@ namespace F1.UI
         {
             public const string AfterGrace = "Death.AfterGrace";
             public const string GraceBroken = "Death.GraceBroken";
+            public const string Collapsed = "Death.Collapsed";
         }
 
         /// <summary>The loot of a won battle (Slice B stage 18), picked on the battle screen (round 47).</summary>

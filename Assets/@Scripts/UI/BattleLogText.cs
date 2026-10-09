@@ -45,14 +45,37 @@ namespace F1.UI
                 : UiStrings.Get(UiKeys.Log.SourceItem, unit, UiText.Name(data.Items.Get(cause).Name));
         }
 
-        /// <summary>One sentence that explains a death: when the mercenary fell, what broke the grace and the final roll.</summary>
+        /// <summary>Which sentence explains a death: the collapse's (it names no hit and no roll), or the one for how the grace ended.</summary>
+        public static string DeathKey(DeathCause death)
+        {
+            if (death.Collapsed)
+            {
+                return UiKeys.Death.Collapsed;
+            }
+
+            return death.GraceWasBroken ? UiKeys.Death.GraceBroken : UiKeys.Death.AfterGrace;
+        }
+
+        /// <summary>
+        /// One sentence that explains a death: when the mercenary fell and, unless the fatigue collapse killed it, what broke the grace
+        /// and the final roll. The collapse's sentence names no hit: a mercenary who entered at 0 HP may never have been hit.
+        /// </summary>
         public static string Death(DeathCause death, BattleEngine engine)
         {
+            string key = DeathKey(death);
+            string name = UnitName(engine, death.Unit);
+            string fell = UiText.Seconds(death.DogEnteredMs);
+            string died = UiText.Seconds(death.DiedMs);
+            if (death.Collapsed)
+            {
+                return UiStrings.Get(key, name, fell, died);
+            }
+
             return UiStrings.Get(
-                death.GraceWasBroken ? UiKeys.Death.GraceBroken : UiKeys.Death.AfterGrace,
-                UnitName(engine, death.Unit),
-                UiText.Seconds(death.DogEnteredMs),
-                UiText.Seconds(death.DiedMs),
+                key,
+                name,
+                fell,
+                died,
                 Source(engine, death.LastHitSource, death.LastHitCause),
                 death.DeathChancePercent,
                 death.DeathRoll,

@@ -1120,6 +1120,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673296729145346
+  - m_Id: 3121959998054400
+    m_Key: Death.Collapsed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673310930010112
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2077,3 +2082,10 @@ MonoBehaviour:
       data:
         m_CommentText: On the board panel after a win, while a drop is picked (round
           47).
+    - rid: 8623673310930010112
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Why a mercenary died when the fatigue collapse killed it
+          at death''s door: no last hit and no death roll (it may never have been
+          hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle
+          there). {2} = time of death.'

@@ -1051,6 +1051,12 @@ MonoBehaviour:
       \uC815\uBCF4\uC785\uB2C8\uB2E4."
     m_Metadata:
       m_Items: []
+  - m_Id: 3121959998054400
+    m_Localized: "{0} \u2014 {1}\uCD08\uC5D0 \uBE48\uC0AC \u2192 \uD53C\uB85C\uAC00
+      \uAC00\uB4DD \uCC28 \uC4F0\uB7EC\uC9D0 \u2192 {2}\uCD08\uC5D0 \uC0AC\uB9DD"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
   references:
     version: 2
     RefIds:
@@ -1164,3 +1170,4 @@ MonoBehaviour:
         - id: 2552399930581003
         - id: 2552399930581004
         - id: 2894741271207936
+        - id: 3121959998054400

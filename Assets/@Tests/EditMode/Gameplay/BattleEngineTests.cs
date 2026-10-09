@@ -1111,6 +1111,52 @@ namespace F1.Tests
         }
 
         [Test]
+        public void PartyDeaths_WhenTheCollapseKilledAMercenaryNobodyHit_SayItCollapsed_AndNameNoHit()
+        {
+            // b enters at 0 HP (at death's door; never hit, the enemy reaches row 1 only) with its fatigue 5 under the maximum.
+            // At 1000 the hit sends a to death's door, which tires b to the maximum: b collapses there and dies without a hit or a roll.
+            BattleEngine battle = Battle(
+                TestData.Balance(("FatigueOnAllyDog", 5)),
+                TestData.Units(
+                    TestData.Mercenary("a", 1, 100),
+                    TestData.Mercenary("b", 2, 0).WithMaxHp(100).WithFatigue(195, TestData.FatigueStates().Single(s => s.Id == "fearful"))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 100, "claw"))));
+
+            battle.AdvanceTo(1000);
+            DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
+
+            Assert.AreEqual(new UnitRef(BattleSide.Party, 1), death.Unit);
+            Assert.IsTrue(death.Collapsed);
+            Assert.IsNull(death.LastHitCause, "Nobody hit b.");
+            Assert.IsTrue(death.LastHitSource.IsNone);
+            Assert.AreEqual(0, death.DogEnteredMs, "It entered the battle at death's door.");
+            Assert.AreEqual(1000, death.DiedMs);
+            Assert.IsEmpty(Of(battle, BattleEventKind.Damaged).Where(e => e.Target.Equals(death.Unit)).ToList(), "The log has no hit on b at all.");
+            Assert.IsEmpty(Of(battle, BattleEventKind.DeathRolled).Where(e => e.Target.Equals(death.Unit)).ToList(), "And no death roll.");
+            Assert.AreEqual(1, Of(battle, BattleEventKind.Collapsed).Single().C, "The collapse killed.");
+        }
+
+        [Test]
+        public void PartyDeaths_WhenTheCollapseOnlySentItToDeathsDoor_AndAHitKilledIt_NameTheHit()
+        {
+            // a's fatigue reaches the maximum on the hit at 1000: the collapse sends it to death's door. The hit at 2000 breaks the grace and rolls.
+            BattleEngine battle = Battle(
+                TestData.Balance(("FatigueOnHit", 5), ("DogGraceBreakHits", 1), ("DogDeathChancePercent", 100)),
+                TestData.Units(TestData.Mercenary("a", 1, 100).WithFatigue(195, TestData.FatigueStates().Single(s => s.Id == "fearful"))),
+                TestData.Units(TestData.Enemy("e", 1, 1000, TestData.Attack(1000, 1, "claw"))));
+
+            battle.RunToEnd();
+            DeathCause death = BattleLog.PartyDeaths(battle.Events).Single();
+
+            Assert.AreEqual(0, Of(battle, BattleEventKind.Collapsed).Single().C, "The collapse only sent it to death's door.");
+            Assert.IsFalse(death.Collapsed);
+            Assert.AreEqual("claw", death.LastHitCause);
+            Assert.AreEqual(1000, death.DogEnteredMs);
+            Assert.AreEqual(2000, death.DiedMs);
+            Assert.IsTrue(death.GraceWasBroken);
+        }
+
+        [Test]
         public void PartyDeaths_ListOnlyMercenariesWhoDied()
         {
             BattleEngine battle = Battle(
