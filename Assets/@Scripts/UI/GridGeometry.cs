@@ -44,15 +44,53 @@ namespace F1.UI
             rect.sizeDelta = new Vector2(Span(width), Span(height));
         }
 
-        /// <summary>The top-left square a held shape lies from when the pointer is over a square: that square, pulled in so it fits the frame.</summary>
-        public static Placement Anchor(int pointerX, int pointerY, int width, int height, int turns)
+        /// <summary>
+        /// The top-left square a held shape lies from with the pointer at a point of a grid (round 54, Diablo II: the held thing's centre on
+        /// the pointer): the squares nearest under the shape centred there, pulled in so it fits a grid of so many squares. The point is in
+        /// squares from the grid's top-left, a square's centre at its index + 0.5 (<see cref="PointIn"/>); a tie (an even side's centre on a
+        /// square's centre) goes right and down.
+        /// </summary>
+        public static Placement Anchor(Vector2 point, int width, int height, int turns, int gridWidth, int gridHeight)
         {
             var turned = new Placement(0, 0, turns);
             int w = turned.WidthOf(width, height);
             int h = turned.HeightOf(width, height);
-            int x = Mathf.Clamp(pointerX, 0, Mathf.Max(0, BoardFrame.Width - w));
-            int y = Mathf.Clamp(pointerY, 0, Mathf.Max(0, BoardFrame.Height - h));
+            int x = Mathf.FloorToInt(point.x - w / 2f + 0.5f);
+            int y = Mathf.FloorToInt(point.y - h / 2f + 0.5f);
+            x = Mathf.Clamp(x, 0, Mathf.Max(0, gridWidth - w));
+            y = Mathf.Clamp(y, 0, Mathf.Max(0, gridHeight - h));
             return new Placement(x, y, turns);
+        }
+
+        /// <summary>The point at the centre of a square (round 54): where a square's own events aim, as the pointer there would.</summary>
+        public static Vector2 Centre(int x, int y)
+        {
+            return new Vector2(x + 0.5f, y + 0.5f);
+        }
+
+        /// <summary>
+        /// The point of a grid under a screen position (round 54): in squares from the top-left of the grid's squares (<paramref name="area"/>,
+        /// the rect they are laid in), each square with half the gap on either side of it, so that a square's centre is its index + 0.5.
+        /// False when the position is more than <paramref name="margin"/> pixels outside the squares.
+        /// </summary>
+        public static bool PointIn(RectTransform area, Vector2 screen, Camera camera, float margin, out Vector2 point)
+        {
+            point = default;
+            if (area == null || !RectTransformUtility.ScreenPointToLocalPointInRectangle(area, screen, camera, out Vector2 local))
+            {
+                return false;
+            }
+
+            Rect rect = area.rect;
+            float x = local.x - rect.xMin;
+            float y = rect.yMax - local.y;
+            if (x < -margin || y < -margin || x > rect.width + margin || y > rect.height + margin)
+            {
+                return false;
+            }
+
+            point = new Vector2((x + Gap / 2f) / (Square + Gap), (y + Gap / 2f) / (Square + Gap));
+            return true;
         }
 
         /// <summary>

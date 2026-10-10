@@ -55,12 +55,14 @@ namespace F1.UI
         public float NotchAt { get; private set; }
 
         /// <summary>The party side: above the panel, over the cell's column, the notch pointing down at the cell.</summary>
-        public void ShowAbove(EquippedItem item, string mergeHint, RectTransform cell, RectTransform panel)
+        /// <param name="starLine">What the stars on the board say of the item (stage 20, <see cref="UiText.StarLine"/>), or null.</param>
+        /// <param name="starDamage">What they add to its weapon damage, which its damage line counts (<see cref="StarRules.DamageOn"/>).</param>
+        public void ShowAbove(EquippedItem item, string mergeHint, RectTransform cell, RectTransform panel, string starLine = null, int starDamage = 0)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, true);
-            Rect anchor = LocalRect(cell, parent);
-            Rect placed = TooltipPlacement.Above(anchor, size, LocalRect(panel, parent).yMin, Screen(parent), out float notchX);
+            Vector2 size = Fill(item, mergeHint, true, starLine, starDamage);
+            Rect anchor = TooltipPlacement.In(cell, parent);
+            Rect placed = TooltipPlacement.Above(anchor, size, TooltipPlacement.In(panel, parent).yMin, Screen(parent), out float notchX);
             ShowNotch(Notch.Bottom, notchX);
             Place(placed, anchor);
         }
@@ -70,12 +72,13 @@ namespace F1.UI
         /// no room), the notch on the edge facing the cell. An enemy's card has no fatigue line (<paramref name="withFatigue"/>
         /// false): the enemy has no fatigue.
         /// </summary>
-        public void ShowBeside(EquippedItem item, RectTransform cell, bool left, RectTransform panel, bool withFatigue, string mergeHint = null)
+        public void ShowBeside(EquippedItem item, RectTransform cell, bool left, RectTransform panel, bool withFatigue, string mergeHint = null,
+            string starLine = null, int starDamage = 0)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, withFatigue);
-            Rect anchor = LocalRect(cell, parent);
-            Rect placed = TooltipPlacement.Beside(anchor, size, left, LocalRect(panel, parent), Screen(parent), out float notchY, out bool cardIsLeftOfCell);
+            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage);
+            Rect anchor = TooltipPlacement.In(cell, parent);
+            Rect placed = TooltipPlacement.Beside(anchor, size, left, TooltipPlacement.In(panel, parent), Screen(parent), out float notchY, out bool cardIsLeftOfCell);
             ShowNotch(cardIsLeftOfCell ? Notch.Right : Notch.Left, notchY);
             Place(placed, anchor);
         }
@@ -88,13 +91,13 @@ namespace F1.UI
         }
 
         /// <summary>Writes the card and measures it. The card is active and on top afterwards: the layout needs it active.</summary>
-        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue)
+        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage)
         {
             Item = item;
             _title.text = UiText.ItemTitle(item);
-            UiText.ItemCard(item, out string facts, out string effects, out string fatigue);
+            UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage);
             Set(_facts, facts);
-            Set(_effects, effects);
+            Set(_effects, string.IsNullOrEmpty(starLine) ? effects : string.IsNullOrEmpty(effects) ? starLine : effects + "\n" + starLine);
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
             _title.color = UiPalette.Rarity(item.Tier);
@@ -137,17 +140,6 @@ namespace F1.UI
             Placed = placed;
             Anchor = anchor;
             ShownFrame = Time.frameCount;
-        }
-
-        /// <summary>A rect in the parent's top-left pixel space: x from the parent's left edge, y down from its top.</summary>
-        static Rect LocalRect(RectTransform rect, RectTransform parent)
-        {
-            var corners = new Vector3[4];
-            rect.GetWorldCorners(corners);
-            Vector3 min = parent.InverseTransformPoint(corners[0]);
-            Vector3 max = parent.InverseTransformPoint(corners[2]);
-            Rect p = parent.rect;
-            return new Rect(min.x - p.xMin, p.yMax - max.y, max.x - min.x, max.y - min.y);
         }
 
         static Rect Screen(RectTransform parent)

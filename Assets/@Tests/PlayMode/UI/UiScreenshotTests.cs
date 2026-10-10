@@ -246,7 +246,7 @@ namespace F1.Tests
                             capturedBoard = true;
                             PartyBoardView board1 = party.ColumnOfRow(1).BoardView;
                             UiTestUtil.ClickSquare(board1, 0, 0);
-                            UiTestUtil.HoverSquare(board1, 0, 1);
+                            UiTestUtil.HoverSquare(board1, 1, 1);
                             yield return Capture(prefix + "_08_map_item_selected");
                             UiTestUtil.ClickSquare(board1, 0, 0);
                             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
@@ -257,6 +257,14 @@ namespace F1.Tests
                             UiTestUtil.HoverSquare(board1, 0, 1);
                             yield return Capture(prefix + "_17_map_inventory_selected");
                             party.InventoryGrid.SquareAt(kept.At.X, kept.At.Y).Click();
+                            // Round 53: nothing held, the inventory's piece in the boards' blue with the grid's line through it; then the
+                            // row-1 member's weapon held over the inventory, its ghost one block.
+                            UiTestUtil.HoverSquare(board1, 2, 2);
+                            yield return Capture(prefix + "_49_map_inventory_open");
+                            UiTestUtil.ClickSquare(board1, 0, 0);
+                            UiTestUtil.HoverSquare(party.InventoryGrid, 1, 1);
+                            yield return Capture(prefix + "_50_map_inventory_ghost");
+                            UiTestUtil.ClickSquare(board1, 0, 0);
                             UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
                             yield return UiTestUtil.WaitForRedraw();
 
@@ -305,10 +313,24 @@ namespace F1.Tests
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.ClickSquare(board1, 1, 3);
-                            UiTestUtil.HoverSquare(board1, 0, 5);
+                            UiTestUtil.HoverSquare(board1, 1, 5);
                             yield return Capture(prefix + "_45_map_bag_held");
                             UiTestUtil.ClickSquare(board1, 0, 3);
                             front.Board.Bags.RemoveAt(front.Board.Bags.Count - 1);
+
+                            // The whetstone's stars (Slice B stage 20, Backpack Battles' way): in the buckler's square, under the job weapon's
+                            // right end and over an empty square. Pointed at, its stars show, lit on the weapon and hollow on the empty square;
+                            // then the weapon's card says what the star adds.
+                            front.Board.Items.Remove(front.Board.ItemAt(2, 1));
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("whetstone"), 8), 2, 1);
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.HoverSquare(board1, 2, 1);
+                            yield return Capture(prefix + "_46_map_whetstone_stars");
+                            UiTestUtil.RightClickSquare(board1, 0, 0);
+                            yield return Capture(prefix + "_47_map_star_card");
+                            party.Tooltip.Hide();
+                            UiTestUtil.HoverSquare(board1, 0, 2);
 
                             second.Board.Items.Clear();
                             second.Board.Items.AddRange(secondKept);
@@ -350,7 +372,8 @@ namespace F1.Tests
                             yield return Capture(prefix + "_31_map_deep");
 
                             // The shop (round 44), staged like the elite when the map has one (most do): before a shop node with coins
-                            // to spend, the node chosen; its window; an offer the coins cover picked, its tile brass (round 46: the tile shows the facts, no card).
+                            // to spend, the node chosen; its window with the pointer over an offer the coins cover (round 57: its tooltip over it); that
+                            // offer picked (it rides the pointer).
                             MapNode shopNode = nodes.Nodes.FirstOrDefault(n => n.Kind == MapNodeKind.Shop);
                             if (shopNode != null)
                             {
@@ -362,14 +385,25 @@ namespace F1.Tests
                                 yield return Capture(prefix + "_41_map_shop");
                                 UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
                                 yield return UiTestUtil.WaitForRedraw();
-                                yield return Capture(prefix + "_42_shop");
                                 IReadOnlyList<ItemOffer> stock = Managers.Expedition.ShopStock;
                                 int pick = Enumerable.Range(0, stock.Count).Where(i => stock[i].Kind == OfferKind.Item && Managers.Expedition.CanAfford(i)).DefaultIfEmpty(-1).First();
+                                // Round 57: the pointer over that item: Diablo's tooltip over it.
                                 if (pick >= 0)
                                 {
-                                    UiTestUtil.Click(map.ShopTiles[pick].Button);
+                                    UiTestUtil.HoverGood(map.Merchant, pick);
+                                    yield return UiTestUtil.WaitForRedraw();
+                                }
+
+                                yield return Capture(prefix + "_42_shop");
+                                if (pick >= 0)
+                                {
+                                    UiTestUtil.ClickGood(map.Merchant, pick);
                                     yield return UiTestUtil.WaitForRedraw();
                                     yield return Capture(prefix + "_43_shop_pick");
+
+                                    // Round 54: the picked offer rides the pointer; a press elsewhere (its tile again) sends it back first.
+                                    UiTestUtil.ClickGood(map.Merchant, pick);
+                                    yield return UiTestUtil.WaitForRedraw();
                                 }
 
                                 UiTestUtil.PressTheBackground();
@@ -470,6 +504,18 @@ namespace F1.Tests
                                 capturedLoot = true;
                                 yield return Capture(prefix + "_07_loot_picked");
                                 UiTestUtil.Click(battle, "Frame/BoardPanel/LootToInventory");
+                                yield return UiTestUtil.WaitForRedraw();
+
+                                // Round 52: the inventory window over the party's side of the stage (I), the drop just taken picked from its
+                                // grid with its tooltip beside it and its ghost on row 1's board.
+                                battle.PressInventoryKey();
+                                yield return UiTestUtil.WaitForRedraw();
+                                BoardItem taken = Managers.Expedition.Expedition.Inventory.Items[0];
+                                battle.InventoryWindow.Grid.SquareAt(taken.At.X, taken.At.Y).Click();
+                                UiTestUtil.HoverSquare(battle.LootBoardOfRow(1), 0, 1);
+                                yield return Capture(prefix + "_48_battle_won_inventory");
+                                battle.InventoryWindow.Grid.SquareAt(taken.At.X, taken.At.Y).Click();
+                                battle.PressInventoryKey();
                             }
                             else if (Managers.Expedition.CanTakeLoot(drop, rowOne, new Placement(0, 1)))
                             {

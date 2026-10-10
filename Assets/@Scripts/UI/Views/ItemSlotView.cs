@@ -8,7 +8,8 @@ namespace F1.UI
 {
     /// <summary>
     /// An item's piece on a board grid (Slice B stage 19; round 49's Diablo II look, Docs/Architecture/12_UI.md "격자 보드"): the item's
-    /// squares as one piece of dark blue (the held one a lighter blue, the one a held item would push out a dark gold), its icon turned as
+    /// squares dark blue one by one with the grid's grey line between them (round 53; the held one a lighter blue, the one a held item would
+    /// push out a dark gold), its icon over the lines turned as
     /// the item lies, and over it the tier's stars in Diablo's rarity colours at the bottom-left, the violet "+1" of fatigue at the top-right
     /// for equipment that costs fatigue when a battle starts (round 32; a dot on a piece of one square), and the merge mark with the tier a
     /// merge would make (round 35). An item without an icon shows its name. A piece takes no pointer: the squares under it do. A shop's or
@@ -25,6 +26,7 @@ namespace F1.UI
 
         [SerializeField] Image _frame;
         [SerializeField] Outline _frameLine;
+        [SerializeField] SquareGrid _ground;
         [SerializeField] Image _picked;
         [SerializeField] RectTransform _art;
         [SerializeField] Image _outline;
@@ -57,8 +59,14 @@ namespace F1.UI
         /// <summary>Whether the piece shows that a held item would push it out (its dark gold).</summary>
         public bool IsDisplaced { get; private set; }
 
-        /// <summary>The piece's ground colour on show.</summary>
-        public Color Ground => _frame.color;
+        /// <summary>Whether a merchant's good shows as one that cannot be bought now (<see cref="ShowUnaffordable"/>).</summary>
+        public bool IsUnaffordable { get; private set; }
+
+        /// <summary>The piece's ground colour on show: its squares' for an item, the rim's for a bag.</summary>
+        public Color Ground => _ground.enabled ? _ground.color : _frame.color;
+
+        /// <summary>The ground's squares across and down (an item's as it lies; round 53: the grid's line between them).</summary>
+        public Vector2Int GroundSquares => new Vector2Int(_ground.Columns, _ground.Rows);
 
         /// <summary>The icon on show, or null while words stand in for it.</summary>
         public Sprite Icon => _icon.enabled ? _icon.sprite : null;
@@ -114,7 +122,10 @@ namespace F1.UI
             Bag = null;
             At = at;
             _bagWell.SetActive(false);
-            _frame.color = picked ? UiPalette.GridPiecePicked : displaced ? UiPalette.GridPieceDisplaced : UiPalette.GridPiece;
+            _frame.color = UiPalette.GridSquareLine;
+            _ground.enabled = true;
+            _ground.color = picked ? UiPalette.GridPiecePicked : displaced ? UiPalette.GridPieceDisplaced : UiPalette.GridPiece;
+            _ground.Shape(at.WidthOf(item.Item.Width, item.Item.Height), at.HeightOf(item.Item.Width, item.Item.Height), GridGeometry.Gap);
             _frameLine.enabled = false;
             _picked.enabled = picked;
             IsDisplaced = displaced;
@@ -131,6 +142,7 @@ namespace F1.UI
             LayArt(at.Turns);
             _icon.sprite = icon;
             _icon.enabled = pictured;
+            _icon.color = Color.white;
             ShowTier(TierShown, pictured);
 
             _text.enabled = !pictured;
@@ -140,17 +152,23 @@ namespace F1.UI
             ShowFatigue(fatigueCost);
         }
 
-        /// <summary>A bag on a tile: Diablo's well (round 49), its stone rim tinted by its leather round its black squares, nothing on them.</summary>
-        public void ShowBag(BagData bag)
+        /// <summary>
+        /// A bag on a tile: Diablo's well (round 49), its stone rim tinted by its leather round its black squares, nothing on them. A bag
+        /// the hand holds from the merchant (stage 21) has the gold line round it.
+        /// </summary>
+        public void ShowBag(BagData bag, bool picked = false)
         {
             Item = null;
             Bag = bag;
             At = default;
             IsDisplaced = false;
             _frame.color = UiPalette.BagRim(bag.Id);
+            _ground.enabled = false;
             _bagWell.SetActive(true);
             _bagSquares.Shape(bag.Width, bag.Height, GridGeometry.Gap);
-            _frameLine.enabled = false;
+            _frameLine.enabled = picked;
+            _frameLine.effectColor = UiPalette.Virtue;
+            _icon.color = Color.white;
             _picked.enabled = false;
             _merge.SetActive(false);
             _icon.enabled = false;
@@ -160,6 +178,55 @@ namespace F1.UI
             Stars = 0;
             _tierTag.gameObject.SetActive(false);
             _fatigue.SetActive(false);
+        }
+
+        /// <summary>A potion among the merchant's goods (stage 21): one square of the boards' blue with its icon, no tier, no fatigue.</summary>
+        public void ShowPotion(Sprite icon)
+        {
+            Item = null;
+            Bag = null;
+            At = default;
+            IsDisplaced = false;
+            _bagWell.SetActive(false);
+            _frame.color = UiPalette.GridSquareLine;
+            _ground.enabled = true;
+            _ground.color = UiPalette.GridPiece;
+            _ground.Shape(1, 1, GridGeometry.Gap);
+            _frameLine.enabled = false;
+            _picked.enabled = false;
+            _merge.SetActive(false);
+            LayArt(0);
+            _icon.sprite = icon;
+            _icon.enabled = icon != null;
+            _icon.color = Color.white;
+            _text.enabled = false;
+            TierShown = null;
+            Stars = 0;
+            _outline.enabled = false;
+            _tierTag.gameObject.SetActive(false);
+            _fatigue.SetActive(false);
+        }
+
+        /// <summary>
+        /// A merchant's good the party cannot buy now (stage 21: beyond its coins, a potion without an empty slot): since round 57 its squares
+        /// (a bag: its rim) a dark red. Called after the good is shown.
+        /// </summary>
+        public void ShowUnaffordable(bool unaffordable)
+        {
+            IsUnaffordable = unaffordable;
+            if (!unaffordable)
+            {
+                return;
+            }
+
+            if (Bag != null)
+            {
+                _frame.color = UiPalette.GridPieceUnaffordable;
+            }
+            else
+            {
+                _ground.color = UiPalette.GridPieceUnaffordable;
+            }
         }
 
         /// <summary>The icon's box inside the piece, turned as the item lies: drawn for the unturned item, so its box swaps sides on an odd turn.</summary>

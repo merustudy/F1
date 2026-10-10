@@ -1150,6 +1150,46 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673318725910528
+  - m_Id: 3473104335527936
+    m_Key: Item.Melee
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705792
+  - m_Id: 3473104343916544
+    m_Key: Item.NoActivation
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705793
+  - m_Id: 3473104343916545
+    m_Key: Item.StarDamage
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705794
+  - m_Id: 3473104343916546
+    m_Key: Item.StarBonus
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705795
+  - m_Id: 3473104343916547
+    m_Key: Item.StarLit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705796
+  - m_Id: 3473104343916548
+    m_Key: Item.StarLitNone
+    m_Metadata:
+      m_Items:
+      - rid: 8623673332876705797
+  - m_Id: 3628853393088512
+    m_Key: Map.OfferPrice
+    m_Metadata:
+      m_Items:
+      - rid: 8623673342610898944
+  - m_Id: 3665380550631424
+    m_Key: Item.TooltipTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673344893911040
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1710,11 +1750,11 @@ MonoBehaviour:
     - rid: 8623673137313349633
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Opens the inventory popup.
+        m_CommentText: Opens the inventory window; I does too (round 52).
     - rid: 8623673137313349634
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Closes the inventory popup.
+        m_CommentText: Closes the inventory window; I does too (round 52).
     - rid: 8623673137313349635
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1723,7 +1763,9 @@ MonoBehaviour:
     - rid: 8623673137313349636
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: How to use the inventory popup's grid (round 49).
+        m_CommentText: 'How to use the inventory window''s grid (round 49; round
+          52: the window lies over the stage, the boards below it, and I opens and
+          closes it).'
     - rid: 8623673182117429248
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2141,3 +2183,45 @@ MonoBehaviour:
           at death''s door: no last hit and no death roll (it may never have been
           hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle
           there). {2} = time of death.'
+    - rid: 8623673332876705792
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In an item''s facts: a melee weapon, which the stars of a
+          whetstone strengthen (Slice B stage 20).'
+    - rid: 8623673332876705793
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In an item''s facts in place of its cooldown: an item that
+          never activates and works by its stars (stage 20).'
+    - rid: 8623673332876705794
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The effect line of a star item (stage 20): a melee weapon
+          on one of its stars deals more. {0} = how much.'
+    - rid: 8623673332876705795
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On a melee weapon''s card under its effects (stage 20), which
+          already count it: what the stars on it add. {0} = the star items'' names.
+          {1} = the damage they add.'
+    - rid: 8623673332876705796
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On a star item''s card (stage 20): how many of its stars
+          a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons''
+          names.'
+    - rid: 8623673332876705797
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On a star item's card when no melee weapon lies on its stars
+          (stage 20). {0} = its stars.
+    - rid: 8623673342610898944
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The price line of a good in the merchant's tooltip (Slice
+          B stage 21). {0} = the coins.
+    - rid: 8623673344893911040
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The title in Diablo's tooltip without the grade (round 57).
+          {0} = item name. {1} = tier. A Common item shows its name alone.

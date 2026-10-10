@@ -83,6 +83,17 @@ namespace F1.UI
                 : UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), TierWord(item.Tier), item.Grade);
         }
 
+        /// <summary>
+        /// The title in Diablo's tooltip (round 57, the user: "인벤 창에 등급 점수는 삭제"): the name and, above Common, the tier word — no
+        /// grade. The inventory window's box and the merchant's tooltip show it; cards and other lines keep <see cref="ItemTitle"/>.
+        /// </summary>
+        public static string TooltipTitle(EquippedItem item)
+        {
+            return item.Tier == ItemTier.Common
+                ? Name(item.Item.Name)
+                : UiStrings.Get(UiKeys.Item.TooltipTitle, Name(item.Item.Name), TierWord(item.Tier));
+        }
+
         /// <summary>The name of a tier (Docs/Design/02_Combat_System.md §4).</summary>
         public static string TierName(ItemTier tier)
         {
@@ -146,10 +157,11 @@ namespace F1.UI
         /// An item's card (round 42): the facts on one line, the effects one per line, and the fatigue line, which is null when
         /// the item neither costs fatigue nor is a base weapon.
         /// </summary>
-        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue)
+        /// <param name="starDamage">What the stars on the item's board add to a weapon's damage (stage 20): its damage line counts it.</param>
+        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0)
         {
             facts = string.Join(FactSeparator, ItemFacts(item));
-            effects = string.Join("\n", ItemEffects(item));
+            effects = string.Join("\n", ItemEffects(item, starDamage));
             var parts = new List<string>();
             AddFatigue(parts, item);
             fatigue = parts.Count == 0 ? null : parts[0];
@@ -161,7 +173,7 @@ namespace F1.UI
         /// </summary>
         public static string TooltipLines(EquippedItem item)
         {
-            var lines = new List<string> { Colored(ItemTitle(item), UiPalette.Rarity(item.Tier)) };
+            var lines = new List<string> { Colored(TooltipTitle(item), UiPalette.Rarity(item.Tier)) };
             lines.AddRange(ItemFacts(item));
             foreach (string effect in ItemEffects(item))
             {
@@ -179,7 +191,7 @@ namespace F1.UI
         public static string ItemTileFacts(EquippedItem item)
         {
             ItemData data = item.Item;
-            var lines = new List<string> { Colored(UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)), UiPalette.TextDim) };
+            var lines = new List<string> { Colored(CooldownFact(data), UiPalette.TextDim) };
             if (!data.Rows.IsEveryRow)
             {
                 lines.Add(Colored(Rows(data.Rows), UiPalette.TextDim));
@@ -248,8 +260,15 @@ namespace F1.UI
             {
                 UiStrings.Get(CategoryKey(data.Category)),
                 UiStrings.Get(UiKeys.Item.Size, data.Width, data.Height),
-                UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs)),
             };
+
+            // A melee weapon says so: the stars of a whetstone strengthen only those (stage 20).
+            if (data.Melee)
+            {
+                facts.Add(UiStrings.Get(UiKeys.Item.Melee));
+            }
+
+            facts.Add(CooldownFact(data));
 
             // An item that works anywhere in the line needs no fact about where.
             if (!data.Rows.IsEveryRow)
@@ -260,16 +279,70 @@ namespace F1.UI
             return facts;
         }
 
-        static List<string> ItemEffects(EquippedItem item)
+        /// <summary>The cooldown, or "never activates" for an item without effects (stage 20).</summary>
+        static string CooldownFact(ItemData data)
+        {
+            return data.IsPassive ? UiStrings.Get(UiKeys.Item.NoActivation) : UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs));
+        }
+
+        /// <param name="starDamage">What stars add to the item's weapon damage on its board (stage 20, as the battle adds it), or 0.</param>
+        static List<string> ItemEffects(EquippedItem item, int starDamage = 0)
         {
             var effects = new List<string>();
             BalanceData balance = Managers.Data.Data.Balance;
             foreach (ItemEffect effect in item.Item.Effects)
             {
-                effects.Add(Effect(effect, item.Magnitude(balance, effect)));
+                bool weaponDamage = effect.Kind == EffectKind.Damage && item.Item.Category == ItemCategory.Weapon;
+                effects.Add(Effect(effect, item.Magnitude(balance, effect) + (weaponDamage ? starDamage : 0)));
+            }
+
+            // A star item's work (stage 20): what a melee weapon on one of its stars deals more, at its tier.
+            if (item.Item.Stars.Count > 0)
+            {
+                effects.Add(UiStrings.Get(UiKeys.Item.StarDamage, item.StarDamage));
             }
 
             return effects;
+        }
+
+        /// <summary>
+        /// What the stars on a board say of an item there (Slice B stage 20; Docs/Architecture/12_UI.md "격자 보드"), for its card: on a melee
+        /// weapon, the star items that strengthen it and by how much in gold ("★ 숫돌 +1"); on a star item, the stars a melee weapon lies on
+        /// and which ("걸린 ★ 1/2 — 롱소드"). Null for anything else, and for a weapon no star reaches.
+        /// </summary>
+        public static string StarLine(ItemBoard board, BoardItem placed)
+        {
+            if (board == null || placed == null)
+            {
+                return null;
+            }
+
+            if (placed.Item.Item.Stars.Count > 0)
+            {
+                List<BoardItem> lit = StarRules.Lit(board, placed);
+                int stars = placed.Item.Item.Stars.Count;
+                return lit.Count == 0
+                    ? UiStrings.Get(UiKeys.Item.StarLitNone, stars)
+                    : UiStrings.Get(UiKeys.Item.StarLit, lit.Count, stars, string.Join(", ", lit.ConvertAll(weapon => Name(weapon.Item.Item.Name))));
+            }
+
+            List<BoardItem> sources = StarRules.Sources(board, placed);
+            if (sources.Count == 0)
+            {
+                return null;
+            }
+
+            var names = new List<string>();
+            foreach (BoardItem source in sources)
+            {
+                string name = Name(source.Item.Item.Name);
+                if (!names.Contains(name))
+                {
+                    names.Add(name);
+                }
+            }
+
+            return Colored(UiStrings.Get(UiKeys.Item.StarBonus, string.Join("·", names), StarRules.DamageOn(board, placed)), UiPalette.StarLit);
         }
 
         /// <summary>Where in its line the owner must stand: "only in the front row", "only within the rear 3 rows".</summary>

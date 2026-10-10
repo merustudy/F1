@@ -57,6 +57,33 @@ namespace F1.UI
             return new Rect(x, top, size.x, size.y);
         }
 
+        /// <summary>
+        /// The merchant (round 57, Diablo II's tooltip): over the good the pointer is on, centred on it, or under it when there is no room
+        /// above; pushed in from the screen's edges.
+        /// </summary>
+        public static Rect Over(Rect good, Vector2 size, Rect screen)
+        {
+            float left = Mathf.Clamp(good.center.x - size.x / 2f, screen.xMin + ScreenMargin, screen.xMax - ScreenMargin - size.x);
+            float top = good.yMin - Gap - size.y;
+            if (top < screen.yMin + ScreenMargin)
+            {
+                top = Mathf.Min(good.yMax + Gap, screen.yMax - ScreenMargin - size.y);
+            }
+
+            return new Rect(left, top, size.x, size.y);
+        }
+
+        /// <summary>A rect in the parent's top-left pixel space: x from the parent's left edge, y down from its top.</summary>
+        public static Rect In(RectTransform rect, RectTransform parent)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            Vector3 min = parent.InverseTransformPoint(corners[0]);
+            Vector3 max = parent.InverseTransformPoint(corners[2]);
+            Rect p = parent.rect;
+            return new Rect(min.x - p.xMin, p.yMax - max.y, max.x - min.x, max.y - min.y);
+        }
+
         static float SideX(Rect cell, Vector2 size, bool left, Rect screen)
         {
             float x = left ? cell.xMin - BesideGap - size.x : cell.xMax + BesideGap;

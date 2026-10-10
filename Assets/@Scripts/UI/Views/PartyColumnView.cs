@@ -117,7 +117,7 @@ namespace F1.UI
         /// <param name="ghost">The held thing's ghost on this board, or null.</param>
         /// <param name="showFrame">Whether the frame shows outside the bags: while a bag is held.</param>
         public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, BoardItem picked, BoardBag pickedBag,
-            Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame)
+            Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame, IReadOnlyList<StarMark> stars = null, bool lifted = false)
         {
             Member = memberIndex;
             _figure.SetActive(true);
@@ -137,7 +137,7 @@ namespace F1.UI
             _state.interactable = state != null;
 
             _board.SetActive(true);
-            _boardView.Show(member, art, picked, pickedBag, merges, ghost, showFrame);
+            _boardView.Show(member, art, picked, pickedBag, merges, ghost, showFrame, stars, lifted);
         }
     }
 }

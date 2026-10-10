@@ -319,22 +319,26 @@ namespace F1.Editor.Setup
             clockLabel.textWrappingMode = TextWrappingModes.NoWrap;
 
             // After a win (round 47), on the panel's right half where the enemies' boards stood: how to pick the loot up, and the
-            // buttons (the picked drop into the inventory, the log, continue). Hidden until then.
+            // buttons (the picked drop into the inventory, the inventory window (round 52), the log, continue). Hidden until then.
             TextMeshProUGUI lootHint = UiBuild.Label("LootHint", panel.transform, 19f, UiPalette.TextDim, TextAlignmentOptions.TopLeft);
             UiBuild.Box(lootHint, 1050f, LootHintTop, 830f, 60f);
             lootHint.gameObject.SetActive(false);
-            ButtonParts lootToInventory = KitLocalizedButton("LootToInventory", panel.transform, UiKeys.Loot.ToInventory, UiPalette.ButtonQuiet, 24f);
+            ButtonParts lootToInventory = KitLocalizedButton("LootToInventory", panel.transform, UiKeys.Loot.ToInventory, UiPalette.ButtonQuiet, 22f);
             UiBuild.Silence(lootToInventory.Button);
-            UiBuild.Box(lootToInventory.Rect, 1050f, LootButtonsTop, 240f, LootButtonHeight);
+            UiBuild.Box(lootToInventory.Rect, 1050f, LootButtonsTop, 210f, LootButtonHeight);
             lootToInventory.Rect.gameObject.SetActive(false);
-            ButtonParts lootShowLog = KitLocalizedButton("LootShowLog", panel.transform, UiKeys.Battle.ShowLog, UiPalette.ButtonQuiet, 24f);
-            UiBuild.Box(lootShowLog.Rect, 1310f, LootButtonsTop, 180f, LootButtonHeight);
+            ButtonParts lootInventoryToggle = KitButton("LootInventoryToggle", panel.transform, UiPalette.ButtonQuiet, 22f);
+            UiBuild.ShrinkToFit(lootInventoryToggle.Label, 16f);
+            UiBuild.Box(lootInventoryToggle.Rect, 1273f, LootButtonsTop, 230f, LootButtonHeight);
+            lootInventoryToggle.Rect.gameObject.SetActive(false);
+            ButtonParts lootShowLog = KitLocalizedButton("LootShowLog", panel.transform, UiKeys.Battle.ShowLog, UiPalette.ButtonQuiet, 22f);
+            UiBuild.Box(lootShowLog.Rect, 1516f, LootButtonsTop, 150f, LootButtonHeight);
             lootShowLog.Rect.gameObject.SetActive(false);
             ButtonParts lootContinue = KitLocalizedButton("LootContinue", panel.transform, UiKeys.Common.Continue, UiPalette.Button, 30f);
-            UiBuild.Box(lootContinue.Rect, 1640f, LootButtonsTop, 240f, LootButtonHeight);
+            UiBuild.Box(lootContinue.Rect, 1680f, LootButtonsTop, 200f, LootButtonHeight);
             lootContinue.Rect.gameObject.SetActive(false);
 
-            // The gloom over the whole screen, under the fx and the result.
+            // The gloom over the whole screen, under the inventory window, the fx and the result.
             BuildScreenVignette(frame);
 
             // The fx layer over the stage and the panel: the red of death's door and the lightning over the
@@ -410,6 +414,10 @@ namespace F1.Editor.Setup
             TextMeshProUGUI bandDetail = UiBuild.Label("BandDetail", band.transform, 18f, UiPalette.Text, TextAlignmentOptions.TopLeft);
             bandDetail.gameObject.SetActive(false);
             band.gameObject.SetActive(false);
+
+            // After a win, the inventory window over the party's side of the stage (round 52), as on the node map: over the band's
+            // left end (the mockup), under the result, the log and the card.
+            InventoryWindowView inventory = BuildInventoryPopup(frame);
 
             // Result: covers the field when the battle has ended.
             Image overlay = UiBuild.Image("ResultPanel", frame, UiPalette.Overlay, raycastTarget: true);
@@ -501,6 +509,12 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_lootToInventory", lootToInventory.Button);
             UiBuild.SetReference(screen, "_lootShowLog", lootShowLog.Button);
             UiBuild.SetReference(screen, "_lootContinue", lootContinue.Button);
+            UiBuild.SetReference(screen, "_lootInventoryToggle", lootInventoryToggle.Button);
+            UiBuild.SetReference(screen, "_lootInventoryToggleLabel", lootInventoryToggle.Label);
+            UiBuild.SetReference(screen, "_inventory", inventory);
+
+            // Round 54: what is held after a win, on the pointer, over everything.
+            UiBuild.SetReference(screen, "_heldPointer", BuildHeldPointer(frame));
             return screen;
         }
 
@@ -568,6 +582,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_pickedWord", word);
             UiBuild.SetReference(view, "_bagWell", bagWell.gameObject);
             UiBuild.SetReference(view, "_bagSquares", bagSquares);
+            UiBuild.SetReference(view, "_group", root.gameObject.AddComponent<CanvasGroup>());
             root.gameObject.SetActive(false);
             return view;
         }

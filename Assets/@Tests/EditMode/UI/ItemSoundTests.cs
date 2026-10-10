@@ -20,13 +20,15 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheOtherCategory_HasNoSound_AndNoShippedItemIsOfIt()
+        public void TheOtherCategory_HasNoSound_AndOnlyItemsThatNeverFireAreOfIt()
         {
             Assert.IsNull(BattlePresenter.EffectOf(ItemCategory.Other));
             StaticDataFileStore store = DataTransformMenu.CreateStore();
             StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
-            Assert.IsTrue(data.Items.Ordered.All(item => BattlePresenter.EffectOf(item.Category).HasValue),
-                "Every shipped item makes a sound when it fires.");
+            Assert.IsTrue(data.Items.Ordered.Where(item => !item.IsPassive).All(item => BattlePresenter.EffectOf(item.Category).HasValue),
+                "Every shipped item that fires makes a sound when it does.");
+            Assert.IsTrue(data.Items.Ordered.Where(item => item.Category == ItemCategory.Other).All(item => item.IsPassive),
+                "An Other item (the whetstone, Slice B stage 20) never fires, so it needs no sound.");
         }
     }
 }

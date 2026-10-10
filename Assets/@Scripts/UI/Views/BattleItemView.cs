@@ -45,6 +45,9 @@ namespace F1.UI
 
         BattleItemState _item;
         bool _shownActive;
+
+        /// <summary>Whether the item never activates (stage 20): always shown all lit.</summary>
+        bool _passive;
         float _mirror = 1f;
         float _pulseAge = -1f;
         float _charge;
@@ -123,13 +126,20 @@ namespace F1.UI
             LayArt(_litArt, at.Turns, true);
             ScaleArt(1f);
             ShowTier(item.Equipped.Tier, icon);
+            _passive = item.Equipped.Item.IsPassive;
             ShowActive(item.Active);
             _pulseAge = -1f;
-            ShowCharge(0f);
+            ShowCharge(_passive ? 1f : 0f);
         }
 
         public void Render(int timeMs, bool ownerAlive)
         {
+            // An item that never activates (stage 20) is always all lit: it has no cooldown and does not fire.
+            if (_passive)
+            {
+                return;
+            }
+
             // An item starts or stops working when its owner advances to another row.
             if (_item.Active != _shownActive)
             {
@@ -256,9 +266,13 @@ namespace F1.UI
             }
         }
 
-        /// <summary>An item that cannot be used in the owner's row is grey, its piece too, and its icon stays dark.</summary>
+        /// <summary>
+        /// An item that cannot be used in the owner's row is grey, its piece too, and its icon stays dark. An item that never activates
+        /// (stage 20) is shown as one that works, all lit, though the battle never makes it active.
+        /// </summary>
         void ShowActive(bool active)
         {
+            active |= _passive;
             _shownActive = active;
             float dark = UiPalette.CooldownDark;
             Color tier = TierShown.HasValue ? UiPalette.TierMark(TierShown.Value) : Color.white;

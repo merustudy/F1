@@ -158,6 +158,13 @@ namespace F1.UI
         [SerializeField] Button _lootToInventory;
         [SerializeField] Button _lootShowLog;
         [SerializeField] Button _lootContinue;
+        [SerializeField] Button _lootInventoryToggle;
+        [SerializeField] TMP_Text _lootInventoryToggleLabel;
+        [SerializeField] InventoryWindowView _inventory;
+        [SerializeField] HeldPointerView _heldPointer;
+
+        /// <summary>How far outside a grid's squares the pointer still aims at it after a win (round 54), as on the node map.</summary>
+        const float AimMargin = 16f;
 
         /// <summary>The speed the player last chose. Kept for the session so every battle starts at it.</summary>
         static int _preferredSpeedPercent = Speeds[0];
@@ -189,6 +196,12 @@ namespace F1.UI
         // After a win: the drop picked up (-1 for none; it is in the hand), and the hand over the boards (Slice B stage 19).
         int _pickedDrop = -1;
         readonly BoardHand _lootHand = new BoardHand();
+
+        /// <summary>The star item whose stars the boards after a win show for the pointer (stage 20), or null.</summary>
+        BoardItem _lootStarsShownFor;
+
+        /// <summary>Whether the inventory window is open after a win (round 52).</summary>
+        bool _inventoryOpen;
         ExpeditionArt _art;
         Sprite _backgroundArt;
         BattlePresenter _presenter;
@@ -398,6 +411,14 @@ namespace F1.UI
             _lootToInventory.onClick.AddListener(OnLootToInventory);
             _lootShowLog.onClick.AddListener(OnShowLog);
             _lootContinue.onClick.AddListener(OnLootContinue);
+            _lootInventoryToggle.onClick.AddListener(OnLootInventoryToggle);
+            _inventory.Grid.SquareClicked += OnLootInventorySquareClicked;
+            _inventory.Grid.SquareRightClicked += OnLootInventorySquareRightClicked;
+            _inventory.Grid.SquareEntered += OnLootInventorySquareEntered;
+            _inventory.Grid.SquareExited += OnLootInventorySquareExited;
+            _inventory.SetOpen(false);
+            _heldPointer.Pressed += OnHeldPressed;
+            _heldPointer.Hide();
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
                 PartyBoardView board = LootBoardOfRow(row);
@@ -757,6 +778,12 @@ namespace F1.UI
                 _tooltip.Hide();
             }
 
+            // Round 52: after a win, I opens and closes the inventory window as its button does.
+            if (_afterWin && InventoryKey.Pressed())
+            {
+                PressInventoryKey();
+            }
+
             // Stage 19: after a win, while the hand holds something, the right button, the wheel or R turns it and Escape lets go.
             if (_afterWin && _lootHand.Holding)
             {
@@ -767,9 +794,22 @@ namespace F1.UI
                     _pickedDrop = -1;
                     RefreshLoot();
                 }
-                else if (step != 0)
+                else
                 {
-                    TurnHeld(step);
+                    if (step != 0)
+                    {
+                        TurnHeld(step);
+                    }
+
+                    // Round 54: the pointer aims what is held wherever it moves; the boards redraw only when where it would land changes.
+                    if (_heldPointer.PointerMoved(out Vector2 screen))
+                    {
+                        AimFrom(screen);
+                        if (_lootHand.AimChanged(Managers.Expedition.Expedition))
+                        {
+                            RefreshLoot();
+                        }
+                    }
                 }
             }
 
@@ -958,8 +998,26 @@ namespace F1.UI
             }
 
             bool party = board.Unit.Side == BattleSide.Party;
-            _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party);
+            _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party,
+                starLine: party ? BattleStarLine(board.Unit, item) : null, starDamage: item.StarDamage);
             Managers.Sound.PlayEffect(SoundEffect.Button);
+        }
+
+        /// <summary>
+        /// What the stars say of a party item in battle (stage 20): the battle's items are the member's board in reading order, unchanged
+        /// while it lasts, so the item is that board's item at its slot.
+        /// </summary>
+        static string BattleStarLine(BattleUnit unit, BattleItemState item)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            ExpeditionMember member = expedition?.Members.Find(m => m.MercenaryId == unit.Setup.SourceId);
+            if (member == null)
+            {
+                return null;
+            }
+
+            List<BoardItem> placed = member.Board.PlacedInReadingOrder();
+            return item.SlotIndex < placed.Count && placed[item.SlotIndex].Item == item.Equipped ? UiText.StarLine(member.Board, placed[item.SlotIndex]) : null;
         }
 
         /// <summary>The unit's board of the board panel: its cells, in the panel column of its row.</summary>
@@ -1310,6 +1368,8 @@ namespace F1.UI
 
             _lootHint.gameObject.SetActive(true);
             _lootToInventory.gameObject.SetActive(true);
+            _lootInventoryToggle.gameObject.SetActive(true);
+            _inventoryOpen = false;
             _lootShowLog.gameObject.SetActive(_battle != null);
             _lootContinue.gameObject.SetActive(true);
             _band.SetActive(true);
@@ -1433,10 +1493,21 @@ namespace F1.UI
                     m == _lootHand.BagMember ? _lootHand.HeldBag(expedition) : null,
                     merges,
                     _lootHand.GhostFor(m, manager, _art),
-                    bagHeld);
+                    bagHeld,
+                    _lootHand.StarsFor(m, manager),
+                    true);
             }
 
+            _heldPointer.ShowHand(_afterWin ? _lootHand : null, expedition, _art);
+
             _lootToInventory.interactable = _pickedDrop >= 0 && manager.CanTakeLootToInventory(_pickedDrop);
+            _inventory.SetOpen(_inventoryOpen);
+            if (_inventoryOpen)
+            {
+                _inventory.Show(expedition, _art, _lootHand);
+            }
+
+            _lootInventoryToggleLabel.text = UiStrings.Get(_inventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
             BagData heldBag = _lootHand.BagMember >= 0 ? _lootHand.HeldBag(expedition)?.Bag : null;
             if (_pickedDrop >= 0)
             {
@@ -1494,6 +1565,17 @@ namespace F1.UI
             public void Place(int member, Placement at)
             {
                 Managers.Expedition.TakeLoot(Slot, member, at);
+                _screen._pickedDrop = -1;
+            }
+
+            public bool CanPlaceInInventory(Placement at)
+            {
+                return Managers.Expedition.CanTakeLootToInventoryAt(Slot, at);
+            }
+
+            public void PlaceInInventory(Placement at)
+            {
+                Managers.Expedition.TakeLootToInventoryAt(Slot, at);
                 _screen._pickedDrop = -1;
             }
         }
@@ -1577,7 +1659,8 @@ namespace F1.UI
             }
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
-            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel);
+            ItemBoard board = expedition.Members[member].Board;
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item));
         }
 
         void OnLootSquareEntered(int member, int x, int y)
@@ -1588,7 +1671,7 @@ namespace F1.UI
             }
 
             _lootHand.Hover(member, x, y);
-            if (_lootHand.Holding)
+            if (_lootHand.Holding || LootStarsMoved())
             {
                 RefreshLoot();
             }
@@ -1596,11 +1679,30 @@ namespace F1.UI
 
         void OnLootSquareExited(int member, int x, int y)
         {
+            // Round 54: while something is held the layer over the screen takes the pointer, and the pointer's moves aim it (Update).
+            if (_lootHand.Holding)
+            {
+                return;
+            }
+
             _lootHand.Unhover(member, x, y);
-            if (_lootHand.Holding && _lootHand.HoverMember < 0)
+            if (LootStarsMoved())
             {
                 RefreshLoot();
             }
+        }
+
+        /// <summary>Whether the star item under the pointer changed since the boards after the win were drawn (stage 20).</summary>
+        bool LootStarsMoved()
+        {
+            BoardItem pointed = _lootHand.HoveredStarItem(Managers.Expedition.Expedition);
+            if (pointed == _lootStarsShownFor)
+            {
+                return false;
+            }
+
+            _lootStarsShownFor = pointed;
+            return true;
         }
 
         /// <summary>Turns what the hand holds after a win a quarter clockwise (1) or anticlockwise (-1). Tests call it in place of the keys.</summary>
@@ -1625,6 +1727,147 @@ namespace F1.UI
 
             manager.TakeLootToInventory(_pickedDrop);
             Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+            _pickedDrop = -1;
+            RefreshLoot();
+        }
+
+        /// <summary>The inventory window after a win (round 52), as the node map's: opens or closes it; closing lets go of an inventory item held.</summary>
+        void OnLootInventoryToggle()
+        {
+            _inventoryOpen = !_inventoryOpen;
+            if (_lootHand.InventoryIndex >= 0)
+            {
+                _lootHand.Clear();
+            }
+
+            _tooltip.Hide();
+            RefreshLoot();
+        }
+
+        /// <summary>What the I key does after a win: what the inventory button does. Tests call it in place of the key.</summary>
+        public void PressInventoryKey()
+        {
+            if (_afterWin && _lootInventoryToggle.gameObject.activeInHierarchy && _lootInventoryToggle.interactable)
+            {
+                Managers.Sound.PlayEffect(SoundEffect.Button);
+                OnLootInventoryToggle();
+            }
+        }
+
+        /// <summary>Whether the inventory window is open after a win.</summary>
+        public bool InventoryOpen => _inventoryOpen;
+
+        /// <summary>The inventory window after a win (round 52).</summary>
+        public InventoryWindowView InventoryWindow => _inventory;
+
+        /// <summary>What is held after a win, on the pointer (round 54).</summary>
+        public HeldPointerView HeldPointer => _heldPointer;
+
+        /// <summary>
+        /// A square of the inventory's grid clicked after a win: picks up the item there, or lays what is held there (the hand decides): an
+        /// item of a board or of the inventory, or since round 55 a picked drop, taken onto free squares there.
+        /// </summary>
+        void OnLootInventorySquareClicked(int x, int y)
+        {
+            if (!_afterWin)
+            {
+                return;
+            }
+
+            _tooltip.Hide();
+            Managers.Sound.PlayEffect(_lootHand.ClickInventory(x, y, Managers.Expedition));
+            RefreshLoot();
+        }
+
+        /// <summary>The card of the inventory's item on a square, beside its piece inside the window, while nothing is held.</summary>
+        void OnLootInventorySquareRightClicked(int x, int y)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            BoardItem item = expedition?.Inventory.ItemAt(x, y);
+            ItemSlotView piece = _inventory.Grid.PieceAt(x, y);
+            if (item == null || piece == null || _lootHand.Holding)
+            {
+                return;
+            }
+
+            string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
+            _tooltip.ShowBeside(item.Item, piece.Rect, true, _inventory.Rect, true, merge);
+        }
+
+        void OnLootInventorySquareEntered(int x, int y)
+        {
+            _lootHand.HoverInventory(x, y);
+            if (_lootHand.Holding)
+            {
+                RefreshLoot();
+            }
+        }
+
+        void OnLootInventorySquareExited(int x, int y)
+        {
+            if (!_lootHand.Holding)
+            {
+                _lootHand.UnhoverInventory(x, y);
+            }
+        }
+
+        /// <summary>Aims the hand after a win where a screen position is: at a board, at the inventory's grid while it is open, or at neither (round 54).</summary>
+        void AimFrom(Vector2 screen)
+        {
+            Camera camera = _heldPointer.EventCamera;
+            if (_inventoryOpen && GridGeometry.PointIn(_inventory.Grid.SquareArea, screen, camera, AimMargin, out Vector2 inInventory))
+            {
+                _lootHand.AimInventory(inInventory);
+                return;
+            }
+
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                int m = MemberInRow(row);
+                if (m >= 0 && _partyBoardColumns[row - 1].gameObject.activeSelf
+                    && GridGeometry.PointIn(LootBoardOfRow(row).Grid.SquareArea, screen, camera, AimMargin, out Vector2 onBoard))
+                {
+                    _lootHand.AimBoard(m, onBoard);
+                    return;
+                }
+            }
+
+            _lootHand.AimNowhere();
+        }
+
+        /// <summary>
+        /// A press while something is held after a win (round 54), as on the node map: on "to inventory" or the inventory's button, that
+        /// button; over a board or the inventory's grid, the hand puts it there (a drop goes to the inventory by its button only, so the
+        /// grid keeps it held); anywhere else the hand lets go, the drop lies on the floor again, and the press does nothing more.
+        /// </summary>
+        void OnHeldPressed(Vector2 screen)
+        {
+            if (!_afterWin || !_lootHand.Holding)
+            {
+                return;
+            }
+
+            foreach (Button button in new[] { _lootToInventory, _lootInventoryToggle })
+            {
+                if (button.isActiveAndEnabled && button.interactable
+                    && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)button.transform, screen, _heldPointer.EventCamera))
+                {
+                    button.onClick.Invoke();
+                    return;
+                }
+            }
+
+            _tooltip.Hide();
+            AimFrom(screen);
+            if (_lootHand.HoverMember >= 0 || _lootHand.OverInventory)
+            {
+                Managers.Sound.PlayEffect(_lootHand.Commit(Managers.Expedition));
+                RefreshLoot();
+                return;
+            }
+
+            Managers.Sound.PlayEffect(SoundEffect.Button);
+            _lootHand.Clear();
             _pickedDrop = -1;
             RefreshLoot();
         }

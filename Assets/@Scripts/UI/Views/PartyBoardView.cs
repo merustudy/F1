@@ -47,7 +47,9 @@ namespace F1.UI
         /// <param name="merges">Whether the held item would merge into an item of the board (round 35): its piece is marked. Null for none.</param>
         /// <param name="ghost">The held thing's ghost on this board, or null.</param>
         /// <param name="showFrame">Whether the frame shows outside the bags: while a bag is held.</param>
-        public void Show(ExpeditionMember member, ExpeditionArt art, BoardItem picked, BoardBag pickedBag, Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame)
+        /// <param name="lifted">Whether the picked item or bag is in the hand (round 54): lifted off the board.</param>
+        public void Show(ExpeditionMember member, ExpeditionArt art, BoardItem picked, BoardBag pickedBag, Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame,
+            IReadOnlyList<StarMark> stars = null, bool lifted = false)
         {
             Wire();
             gameObject.SetActive(true);
@@ -64,7 +66,7 @@ namespace F1.UI
                 tag.sizeDelta = new Vector2(Mathf.Ceil(_fatigueTotalText.GetPreferredValues(_fatigueTotalText.text).x) + 2f * FatigueTotalPad, tag.sizeDelta.y);
             }
 
-            _grid.Show(member.Board, art, picked, pickedBag, item => FatigueRules.ItemCost(balance, item), merges, ghost, showFrame);
+            _grid.Show(member.Board, art, picked, pickedBag, item => FatigueRules.ItemCost(balance, item), merges, ghost, showFrame, stars, lifted);
         }
 
         public void Hide()

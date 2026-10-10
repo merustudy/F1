@@ -15,11 +15,13 @@ namespace F1.UI
     /// (row 1 on the right) with the figure, the marks and the move buttons under it, placed where
     /// the battle screen places its party columns (<see cref="FieldLayout"/>); in the board panel
     /// under the stage, each row's board as a grid (Slice B stage 19) in the panel column under its figure, as in
-    /// battle; the potions in the strip above; and the inventory as a popup over the other half of the screen, above the panel.
+    /// battle; the potions in the strip above; and the inventory as a window over the stage, above the boards (round 52; round 49's popup lay over the other half).
     /// The boards are used with a hand (<see cref="BoardHand"/>): a click on an item picks it up and a click on a square puts it
     /// where its ghost shows (one item in the way goes to the inventory); a click on an empty square of a bag picks the bag up with
     /// what lies in it; while something is held, the right button, the wheel or R turns it (Backpack Battles' turning) and Escape lets
-    /// go. "To inventory" takes the held board item off its board to the inventory's first room. The inventory is a grid of its own in the
+    /// go. Since round 54 (Diablo II) what is held leaves its place and rides the pointer (<see cref="HeldPointerView"/>), aimed with its
+    /// centre where the pointer is; every press goes to it first: on a board or the inventory it is put there, on a button that works on
+    /// it ("to inventory", the inventory's button) that button works, anywhere else it goes back where it was. "To inventory" takes the held board item off its board to the inventory's first room. The inventory is a grid of its own in the
     /// popup (round 49, Diablo II's): an item there is picked by a click and put on a board, or elsewhere on the grid, the same way, and a
     /// board item held can be laid on free squares of the grid; what would have no room there is not offered. While an item is held, the
     /// popup shows it in Diablo's tooltip. Which squares take what is asked of the manager.
@@ -34,17 +36,20 @@ namespace F1.UI
         [SerializeField] Transform _potionParent;
         [SerializeField] TMP_Text _detail;
         [SerializeField] Button _toInventory;
-        [SerializeField] GameObject _inventoryPanel;
-        [SerializeField] TMP_Text _inventoryTitle;
-        [SerializeField] InventoryGridView _inventoryGrid;
-        [SerializeField] TMP_Text _inventoryCoins;
-        [SerializeField] GameObject _inventoryInfoBox;
-        [SerializeField] TMP_Text _inventoryInfo;
+        [SerializeField] InventoryWindowView _inventory;
         [SerializeField] ItemTooltipView _tooltip;
         [SerializeField] RectTransform _boardPanel;
+        [SerializeField] HeldPointerView _heldPointer;
+
+        /// <summary>How far outside a grid's squares the pointer still aims at it (round 54): a near miss is pulled in, not a press elsewhere.</summary>
+        const float AimMargin = 16f;
 
         readonly List<PotionSlotView> _potions = new List<PotionSlotView>();
+        readonly List<Button> _heldButtons = new List<Button>();
         readonly BoardHand _hand = new BoardHand();
+
+        /// <summary>The star item whose stars the boards show for the pointer (stage 20), or null.</summary>
+        BoardItem _starsShownFor;
 
         // Besides the hand, at most one of these is chosen: a potion (whose words then show on the detail line; the potions cannot be
         // used here) or a member's state (the same).
@@ -79,16 +84,31 @@ namespace F1.UI
         public bool InventoryOpen { get; private set; }
 
         /// <summary>The inventory popup's grid (round 49).</summary>
-        public InventoryGridView InventoryGrid => _inventoryGrid;
+        public InventoryGridView InventoryGrid => _inventory.Grid;
 
         /// <summary>The held item's tooltip in the popup: its lines, or an empty string while it is hidden.</summary>
-        public string InventoryInfo => _inventoryInfoBox.activeSelf ? _inventoryInfo.text : string.Empty;
+        public string InventoryInfo => _inventory.Info;
 
         public Button ToInventory => _toInventory;
-        public GameObject InventoryPanel => _inventoryPanel;
+        public GameObject InventoryPanel => _inventory.gameObject;
+
+        /// <summary>The inventory window (round 52: over the stage).</summary>
+        public InventoryWindowView InventoryWindow => _inventory;
 
         /// <summary>The picked item's card (round 42).</summary>
         public ItemTooltipView Tooltip => _tooltip;
+
+        /// <summary>What is held, on the pointer (round 54).</summary>
+        public HeldPointerView HeldPointer => _heldPointer;
+
+        /// <summary>A button that still works while something is held (round 54): a press on it is not a press elsewhere.</summary>
+        public void LetThroughWhileHeld(Button button)
+        {
+            if (button != null && !_heldButtons.Contains(button))
+            {
+                _heldButtons.Add(button);
+            }
+        }
 
         public PartyColumnView ColumnOfRow(int row)
         {
@@ -124,12 +144,15 @@ namespace F1.UI
             }
 
             _toInventory.onClick.AddListener(OnToInventoryClicked);
-            _inventoryGrid.SquareClicked += OnInventorySquareClicked;
-            _inventoryGrid.SquareRightClicked += ShowInventoryTooltip;
-            _inventoryGrid.SquareEntered += OnInventorySquareEntered;
-            _inventoryGrid.SquareExited += OnInventorySquareExited;
-            _inventoryPanel.SetActive(false);
+            _inventory.Grid.SquareClicked += OnInventorySquareClicked;
+            _inventory.Grid.SquareRightClicked += ShowInventoryTooltip;
+            _inventory.Grid.SquareEntered += OnInventorySquareEntered;
+            _inventory.Grid.SquareExited += OnInventorySquareExited;
+            _inventory.SetOpen(false);
             _tooltip.Hide();
+            LetThroughWhileHeld(_toInventory);
+            _heldPointer.Pressed += OnHeldPressed;
+            _heldPointer.Hide();
         }
 
         /// <summary>
@@ -191,11 +214,86 @@ namespace F1.UI
                 _hand.Clear();
                 HandReleased?.Invoke();
                 Refresh();
+                return;
             }
-            else if (step != 0)
+
+            if (step != 0)
             {
                 TurnHeld(step);
             }
+
+            // Round 54: the pointer aims what is held wherever it moves; the boards redraw only when where it would land changes.
+            if (_heldPointer.PointerMoved(out Vector2 screen))
+            {
+                AimFrom(screen);
+                if (_hand.AimChanged(Managers.Expedition.Expedition))
+                {
+                    Refresh();
+                }
+            }
+        }
+
+        /// <summary>Aims the hand where a screen position is: at a member's board, at the inventory's grid while it is open, or at neither.</summary>
+        void AimFrom(Vector2 screen)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            Camera camera = _heldPointer.EventCamera;
+            if (InventoryOpen && GridGeometry.PointIn(_inventory.Grid.SquareArea, screen, camera, AimMargin, out Vector2 inInventory))
+            {
+                _hand.AimInventory(inInventory);
+                return;
+            }
+
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                int m = MemberInRow(expedition, row);
+                if (m >= 0 && GridGeometry.PointIn(ColumnOfRow(row).BoardView.Grid.SquareArea, screen, camera, AimMargin, out Vector2 onBoard))
+                {
+                    _hand.AimBoard(m, onBoard);
+                    return;
+                }
+            }
+
+            _hand.AimNowhere();
+        }
+
+        /// <summary>
+        /// A press while something is held (round 54; "아이템 이동 이벤트가 우선", "이상한 곳 클릭시 다시 아이템 복귀"): on a button that works on
+        /// what is held, that button; over a board or the inventory's grid, the hand puts it there (or keeps it where it cannot go);
+        /// anywhere else the hand lets go and it is back where it was, and the press does nothing more.
+        /// </summary>
+        void OnHeldPressed(Vector2 screen)
+        {
+            if (!_hand.Holding || Managers.Expedition?.Expedition == null)
+            {
+                return;
+            }
+
+            foreach (Button button in _heldButtons)
+            {
+                if (button.isActiveAndEnabled && button.interactable
+                    && RectTransformUtility.RectangleContainsScreenPoint((RectTransform)button.transform, screen, _heldPointer.EventCamera))
+                {
+                    button.onClick.Invoke();
+                    return;
+                }
+            }
+
+            _selectedPotion = -1;
+            _selectedState = -1;
+            _tooltip.Hide();
+            AimFrom(screen);
+            if (_hand.HoverMember >= 0 || _hand.OverInventory)
+            {
+                Managers.Sound.PlayEffect(_hand.Commit(Managers.Expedition));
+                Refresh();
+                return;
+            }
+
+            Managers.Sound.PlayEffect(SoundEffect.Button);
+            _hand.Clear();
+            HandReleased?.Invoke();
+            Refresh();
         }
 
         /// <summary>Turns what is held a quarter clockwise (1) or anticlockwise (-1). Tests call it in place of the keys.</summary>
@@ -227,7 +325,8 @@ namespace F1.UI
             }
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
-            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel);
+            ItemBoard board = expedition.Members[member].Board;
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item));
         }
 
         /// <summary>Round 47 (a grid since round 49): the card of the item on a square of the inventory, beside its piece inside the popup, while nothing is held.</summary>
@@ -235,14 +334,14 @@ namespace F1.UI
         {
             ExpeditionState expedition = Managers.Expedition.Expedition;
             BoardItem item = expedition?.Inventory.ItemAt(x, y);
-            ItemSlotView piece = _inventoryGrid.PieceAt(x, y);
+            ItemSlotView piece = _inventory.Grid.PieceAt(x, y);
             if (item == null || piece == null || _hand.Holding)
             {
                 return;
             }
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
-            _tooltip.ShowBeside(item.Item, piece.Rect, true, (RectTransform)_inventoryPanel.transform, true, merge);
+            _tooltip.ShowBeside(item.Item, piece.Rect, true, _inventory.Rect, true, merge);
         }
 
         /// <summary>
@@ -301,7 +400,9 @@ namespace F1.UI
                     pickedBag,
                     merges,
                     _hand.GhostFor(m, manager, _art),
-                    bagHeld);
+                    bagHeld,
+                    _hand.StarsFor(m, manager),
+                    m == _hand.ItemMember || m == _hand.BagMember);
             }
 
             for (int i = 0; i < _potions.Count; i++)
@@ -310,11 +411,13 @@ namespace F1.UI
                 _potions[i].Show(potionId == null ? null : data.Potions.Get(potionId), potionId == null ? null : _art.OfPotion(potionId), i == _selectedPotion, potionId != null);
             }
 
-            _inventoryPanel.SetActive(InventoryOpen);
+            _inventory.SetOpen(InventoryOpen);
             if (InventoryOpen)
             {
-                RefreshInventory(expedition, held);
+                _inventory.Show(expedition, _art, _hand);
             }
+
+            _heldPointer.ShowHand(_hand, expedition, _art);
 
             _toInventory.interactable = _hand.ItemMember >= 0 && manager.CanMoveToInventory(_hand.ItemMember, _hand.ItemX, _hand.ItemY);
 
@@ -355,23 +458,6 @@ namespace F1.UI
                 }
 
                 _detail.text = detail;
-            }
-        }
-
-        /// <summary>
-        /// The popup (round 49): the squares used of the grid's, the coins, the grid with the held item's ghost where the pointer is, and the
-        /// held item (of a board, of the inventory or from outside) in Diablo's tooltip. An item in the inventory costs no fatigue (its tag is off).
-        /// </summary>
-        void RefreshInventory(ExpeditionState expedition, EquippedItem held)
-        {
-            InventoryGrid grid = expedition.Inventory;
-            _inventoryTitle.text = UiStrings.Get(UiKeys.Board.InventoryTitle, grid.UsedSquares, grid.Width * grid.Height);
-            _inventoryCoins.text = expedition.Coins.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            _inventoryGrid.Show(grid, _art, _hand.InventoryIndex, _ => 0, _hand.InventoryGhost(Managers.Expedition, _art));
-            _inventoryInfoBox.SetActive(held != null);
-            if (held != null)
-            {
-                _inventoryInfo.text = UiText.TooltipLines(held) + "\n" + UiText.Colored(UiStrings.Get(UiKeys.Board.TurnHint), UiPalette.TextDim);
             }
         }
 
@@ -492,7 +578,7 @@ namespace F1.UI
             }
 
             _hand.Hover(member, x, y);
-            if (_hand.Holding)
+            if (_hand.Holding || StarsMoved())
             {
                 Refresh();
             }
@@ -500,20 +586,39 @@ namespace F1.UI
 
         void OnSquareExited(int member, int x, int y)
         {
+            // Round 54: while something is held the layer over the screen takes the pointer, and the pointer's moves aim it (Update).
+            if (_hand.Holding)
+            {
+                return;
+            }
+
             _hand.Unhover(member, x, y);
-            if (_hand.Holding && _hand.HoverMember < 0)
+            if (StarsMoved())
             {
                 Refresh();
             }
         }
 
+        /// <summary>Whether the star item under the pointer changed since the boards were drawn (stage 20): its stars show or go.</summary>
+        bool StarsMoved()
+        {
+            BoardItem pointed = _hand.HoveredStarItem(Managers.Expedition.Expedition);
+            if (pointed == _starsShownFor)
+            {
+                return false;
+            }
+
+            _starsShownFor = pointed;
+            return true;
+        }
+
         /// <summary>
-        /// A square of the inventory's grid clicked (round 49): picks up the item there, or lays the held item there (the hand decides). Not
-        /// while the screen holds something of its own or takes the clicks over (the camp's upkeep).
+        /// A square of the inventory's grid clicked (round 49): picks up the item there, or lays what is held there (the hand decides; since
+        /// round 55 a shop's offer too, bought there). Not while the screen takes the clicks over (the camp's upkeep).
         /// </summary>
         void OnInventorySquareClicked(int x, int y)
         {
-            if (SquareClickOverride != null || _hand.Outside != null)
+            if (SquareClickOverride != null)
             {
                 return;
             }
@@ -536,11 +641,12 @@ namespace F1.UI
 
         void OnInventorySquareExited(int x, int y)
         {
-            _hand.UnhoverInventory(x, y);
-            if (_hand.Holding && !_hand.OverInventory)
+            if (_hand.Holding)
             {
-                Refresh();
+                return;
             }
+
+            _hand.UnhoverInventory(x, y);
         }
 
         void OnToInventoryClicked()

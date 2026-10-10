@@ -24,6 +24,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _pickedWord;
         [SerializeField] GameObject _bagWell;
         [SerializeField] SquareGrid _bagSquares;
+        [SerializeField] CanvasGroup _group;
 
         Vector2 _iconSize;
 
@@ -44,10 +45,13 @@ namespace F1.UI
 
         public bool IsPicked { get; private set; }
 
+        /// <summary>Whether the drop shows on the floor: not while it rides the pointer (round 54).</summary>
+        public bool OnTheFloor => gameObject.activeSelf && _group.alpha > 0f;
+
         /// <summary>The words on the plate.</summary>
         public string Title => _title.text;
 
-        /// <summary>The icon's box: what a card is placed against.</summary>
+        /// <summary>The icon's box: what a card is placed against. Since round 55 an item's squares' size in an item window.</summary>
         public RectTransform IconRect => _icon.rectTransform;
 
         public void Show(EquippedItem item, Sprite icon, bool picked)
@@ -57,6 +61,8 @@ namespace F1.UI
             Bag = null;
             IsPicked = picked;
             RestoreIcon();
+            // Round 55 ("아이템 창과 동일한 크기"): the icon at its squares' size in an item window, as on the boards, the inventory and the pointer.
+            _icon.rectTransform.sizeDelta = GridGeometry.ArtBox(new Vector2(GridGeometry.Span(item.Item.Width), GridGeometry.Span(item.Item.Height)), 0, ItemSlotView.ArtMargin);
             _icon.sprite = icon;
             _icon.color = Color.white;
             _icon.enabled = icon != null;
@@ -67,7 +73,7 @@ namespace F1.UI
 
         /// <summary>
         /// A bag lying here (Slice B stage 19): Diablo's well in the icon's place (round 49: its stone rim tinted by its leather round its
-        /// black squares, at a board's size or smaller) and its name on the plate in gold.
+        /// black squares, at a board's size) and its name on the plate in gold.
         /// </summary>
         public void ShowBag(BagData bag, bool picked)
         {
@@ -76,9 +82,8 @@ namespace F1.UI
             Bag = bag;
             IsPicked = picked;
             RestoreIcon();
-            Vector2 well = new Vector2(GridGeometry.Span(bag.Width), GridGeometry.Span(bag.Height)) + 2f * GridGeometry.BagRim * Vector2.one;
-            float fit = Mathf.Min(1f, _iconSize.x / well.x, _iconSize.y / well.y);
-            _icon.rectTransform.sizeDelta = well * fit;
+            // At a board's size (round 55), as the bag lies on a board.
+            _icon.rectTransform.sizeDelta = new Vector2(GridGeometry.Span(bag.Width), GridGeometry.Span(bag.Height)) + 2f * GridGeometry.BagRim * Vector2.one;
             _icon.sprite = null;
             _icon.preserveAspect = false;
             _icon.color = UiPalette.BagRim(bag.Id);
@@ -103,8 +108,10 @@ namespace F1.UI
             _bagWell.SetActive(false);
         }
 
+        /// <summary>Round 54 (Diablo II): the picked drop rides the pointer, so the floor shows nothing where it lay until it is let go.</summary>
         void ShowPicked(bool picked)
         {
+            _group.alpha = picked ? 0f : 1f;
             _plateLine.color = Tinted(picked ? UiPalette.Virtue : UiPalette.LabelLine, _plateLine.color.a);
             _glow.color = Tinted(_glow.color, picked ? GlowPickedAlpha : GlowAlpha);
             _pickedWord.gameObject.SetActive(picked);

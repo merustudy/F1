@@ -43,15 +43,17 @@ namespace F1.Editor.Setup
         const float MendButtonHeight = 56f;
 
         /// <summary>
-        /// The shop's window (2026-10-07 round 44, A; taller in round 46, S1): over the map like the camp's but wider, the offers as
-        /// tiles side by side under the title (BuildItemTile: the offer as a board cell at its own size, its name and kind, its facts,
-        /// its price), the refresh and leave buttons below. The party's coins stand at the window's top right, and beside the floor
-        /// count in the header of every expedition screen.
+        /// The shop's window (2026-10-07 round 44, A; Diablo II's merchant since Slice B stage 21): over the map like the camp's, the title
+        /// and the hint at its top with the party's coins at the right, the merchant's grid under them (BuildMerchantGrid: the goods at
+        /// their own size, each with its price), and the refresh and leave buttons below. The good the pointer is on has Diablo's tooltip
+        /// over it (round 57, B: the window keeps its width).
         /// </summary>
         const float ShopWindowWidth = 860f;
-        const float ShopTileGap = 10f;
-        const float ShopTilesTop = 108f;
-        const float ShopButtonsTop = ShopTilesTop + ItemTileHeight + 16f;
+        const float ShopGridTop = 108f;
+        const float MerchantGridHeight = MerchantGridView.Height * GridGeometry.Square + (MerchantGridView.Height - 1) * GridGeometry.Gap + 2f * MerchantGridView.Rim;
+        const float MerchantInfoPadX = 14f;
+        const float MerchantInfoPadY = 10f;
+        const float ShopButtonsTop = ShopGridTop + MerchantGridHeight + 16f;
         const float ShopButtonHeight = 48f;
         const float ShopWindowHeight = ShopButtonsTop + ShopButtonHeight + 22f;
         const float ShopRefreshWidth = 250f;
@@ -59,27 +61,7 @@ namespace F1.Editor.Setup
         const float ShopCoinSize = 30f;
         const float ShopCoinsWidth = 70f;
         const float ShopTileCoinSize = 22f;
-        const float ShopHeldWidth = 84f;
-        const float ShopHeldHeight = 22f;
-
-        /// <summary>
-        /// A tile of the shop or of the loot (round 46, S1 and L2), from its top: the cell in the room of two cells (a longer item is
-        /// drawn smaller: ItemTileView.FitCell), the name, the kind and cells, a brass rule, the facts (the cooldown, where it works,
-        /// the effects, the fatigue), and the foot: the price, or the loot's take.
-        /// </summary>
-        const float ItemTileWidth = 194f;
-        const float ItemTileHeight = 372f;
-        const float ItemTileCellTop = 10f;
-
-        /// <summary>The potion's pocket on a tile: as big as one of the old board cells was tall.</summary>
-        const float ItemTilePocketSize = 60f;
-        const float ItemTileNameTop = ItemTileCellTop + ItemTileView.CellRoom + 10f;
-        const float ItemTileSubTop = ItemTileNameTop + 26f;
-        const float ItemTileRuleTop = ItemTileSubTop + 28f;
-        const float ItemTileFactsTop = ItemTileRuleTop + 10f;
-        const float ItemTileFootHeight = 28f;
-        const float ItemTileFootBottom = 10f;
-        const float ItemTileFactsMinSize = 12f;
+        const float MerchantPriceSize = 15f;
         const float HeaderCoinX = 1560f;
         const float HeaderCoinSize = 26f;
 
@@ -249,13 +231,9 @@ namespace F1.Editor.Setup
             UiBuild.Box(KitIcon("ShopCoinIcon", shopBox.transform, UiArt.Coin), shopCoinX, 31f, ShopCoinSize, ShopCoinSize);
             UiBuild.Box(UiBuild.SingleLine(UiBuild.LocalizedLabel("ShopCoinsLabel", shopBox.transform, UiKeys.Map.ShopCoinsLabel, 19f, UiPalette.TextDim, TextAlignmentOptions.Right)), shopCoinX - 8f - 160f, 34f, 160f, 28f);
 
-            RectTransform tiles = UiBuild.Box(UiBuild.Rect("ShopTiles", shopBox.transform), CampSideMargin, ShopTilesTop, shopInner - 2f * CampSideMargin, ItemTileHeight);
-            UiBuild.Horizontal(tiles, ShopTileGap, 0, TextAnchor.MiddleCenter);
-            var shopTiles = new ShopTileView[BalanceData.MaxShopSlots];
-            for (int i = 0; i < shopTiles.Length; i++)
-            {
-                shopTiles[i] = BuildShopTile(tiles, "ShopTile" + (i + 1));
-            }
+            // The merchant (stage 21): the grid at the left under the hint (round 57: its tooltip is over the good, not beside the grid).
+            MerchantGridView merchant = BuildMerchantGrid(shopBox.transform);
+            UiBuild.Place((RectTransform)merchant.transform, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(CampSideMargin, -ShopGridTop), MerchantGridView.Size(MerchantGridView.Height));
 
             // Refresh: the word, the coin and the cost in a row in the middle of the button; the screen writes the cost and colours it.
             Image refresh = Rounded("ShopRefresh", shopBox.transform, UiPalette.ButtonQuiet, 8f);
@@ -322,15 +300,38 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_party", party);
             UiBuild.SetReference(screen, "_coins", coins);
             UiBuild.SetReference(screen, "_shop", shopCover.gameObject);
-            UiBuild.SetReference(screen, "_shopWindow", shopWindow.rectTransform);
             UiBuild.SetReference(screen, "_shopTitle", shopTitle);
             UiBuild.SetReference(screen, "_shopHint", shopHint);
             UiBuild.SetReference(screen, "_shopCoins", shopCoins);
-            UiBuild.SetReferences(screen, "_shopTiles", shopTiles);
+            UiBuild.SetReference(screen, "_merchant", merchant);
             UiBuild.SetReference(screen, "_refresh", refreshButton);
             UiBuild.SetReference(screen, "_refreshCost", refreshCost);
             UiBuild.SetReference(screen, "_leave", leaveButton);
             UiBuild.SetReference(screen, "_buyToInventory", buyToInventory.Button);
+
+            // Round 57: the merchant's tooltip (Diablo II's black box with a grey line, the lines centred), as big as its lines; the screen
+            // puts it over the good the pointer is on. Over the screen, under what the party holds; it takes no pointer.
+            Image merchantInfoBox = UiBuild.Image("MerchantInfoBox", frame, UiPalette.TooltipFill);
+            AddLine(merchantInfoBox, UiPalette.TooltipLine, 1f);
+            merchantInfoBox.rectTransform.anchorMin = new Vector2(0f, 1f);
+            merchantInfoBox.rectTransform.anchorMax = new Vector2(0f, 1f);
+            merchantInfoBox.rectTransform.pivot = new Vector2(0f, 1f);
+            VerticalLayoutGroup merchantLines = UiBuild.Vertical(merchantInfoBox.rectTransform, 0f);
+            merchantLines.padding = new RectOffset((int)MerchantInfoPadX, (int)MerchantInfoPadX, (int)MerchantInfoPadY, (int)MerchantInfoPadY);
+            merchantLines.childControlWidth = true;
+            merchantLines.childControlHeight = true;
+            var merchantFit = merchantInfoBox.gameObject.AddComponent<ContentSizeFitter>();
+            merchantFit.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            merchantFit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            TextMeshProUGUI merchantInfo = UiBuild.Label("MerchantInfo", merchantInfoBox.transform, InventoryInfoFontSize, UiPalette.Text, TextAlignmentOptions.Center);
+            merchantInfo.textWrappingMode = TextWrappingModes.NoWrap;
+            merchantInfo.lineSpacing = 4f;
+            merchantInfoBox.gameObject.SetActive(false);
+            UiBuild.SetReference(screen, "_merchantInfoBox", merchantInfoBox.gameObject);
+            UiBuild.SetReference(screen, "_merchantInfo", merchantInfo);
+
+            // Round 54: what the party holds, on the pointer, over everything.
+            UiBuild.SetReference(party, "_heldPointer", BuildHeldPointer(frame));
             return screen;
         }
 
@@ -375,128 +376,38 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// One offer of the shop (round 44, A; round 46, S1): the item tile (BuildItemTile) holding the offer as a board cell or as a
-        /// potion in its pocket, with its price and the coin at the foot; "sold" over an empty tile. The whole tile is the button,
-        /// built silent (the screen sounds what a click did); a tile the coins do not cover is dimmed by the view, not by the button.
+        /// The merchant's grid (Slice B stage 21, MerchantGridView): Diablo's well like the inventory's (a stone rim with a sunk edge round
+        /// the grey of the lines), and in it, in the order they are drawn, the squares (which take the pointer), the goods' pieces and their
+        /// prices (small gold numbers at each piece's bottom-right, outlined). The view makes them from the templates.
         /// </summary>
-        static ShopTileView BuildShopTile(Transform parent, string name)
+        static MerchantGridView BuildMerchantGrid(Transform box)
         {
-            ItemTileParts tile = BuildItemTile(parent, name, ItemTileWidth, ItemTileFootHeight);
+            Image stone = UiBuild.Image("MerchantGrid", box, UiPalette.InventoryRim);
+            RectTransform rim = stone.rectTransform;
+            AddSunkBevel(rim, "MerchantGrid");
+            Image well = UiBuild.Image("MerchantWell", rim, UiPalette.GridSquareLine);
+            UiBuild.Stretch(well.rectTransform, MerchantGridView.Rim, MerchantGridView.Rim, MerchantGridView.Rim, MerchantGridView.Rim);
 
-            Image pocket = KitFrame(name + "Potion", tile.Fill, UiArt.PotionSlot);
-            UiBuild.Place(pocket.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(ItemTilePocketSize, ItemTilePocketSize));
-            Image potionIcon = UiBuild.Image(name + "PotionIcon", pocket.transform, Color.white);
-            potionIcon.preserveAspect = true;
-            UiBuild.Stretch(potionIcon.rectTransform, 7f, 7f, 7f, 7f);
-            pocket.gameObject.SetActive(false);
+            RectTransform squares = Layer(well.rectTransform, "MerchantSquares");
+            RectTransform pieces = Layer(well.rectTransform, "MerchantPieces");
+            RectTransform prices = Layer(well.rectTransform, "MerchantPrices");
+            GridSquareView squareTemplate = BuildGridSquare(squares, "MerchantSquareTemplate");
+            squareTemplate.gameObject.SetActive(false);
+            ItemSlotView pieceTemplate = BuildItemSlot(pieces, "MerchantPieceTemplate");
+            pieceTemplate.gameObject.SetActive(false);
+            TextMeshProUGUI priceTemplate = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label("MerchantPriceTemplate", prices, MerchantPriceSize, UiPalette.DiabloGold, TextAlignmentOptions.BottomRight)));
+            priceTemplate.raycastTarget = false;
+            UiBuild.Size(priceTemplate, 60f, 20f);
+            priceTemplate.gameObject.SetActive(false);
 
-            RectTransform priceRow = UiBuild.Rect(name + "Price", tile.Fill);
-            ItemTileFoot(priceRow);
-            HorizontalLayoutGroup priceLayout = UiBuild.Horizontal(priceRow, 6f, 0, TextAnchor.MiddleCenter);
-            priceLayout.childControlWidth = true;
-            Image coin = KitIcon(name + "Coin", priceRow, UiArt.Coin);
-            UiBuild.Size(coin, ShopTileCoinSize, ShopTileCoinSize);
-            coin.gameObject.AddComponent<LayoutElement>().preferredWidth = ShopTileCoinSize;
-            TextMeshProUGUI price = UiBuild.Size(Numeral(UiBuild.Label(name + "PriceText", priceRow, 24f, UiPalette.Virtue, TextAlignmentOptions.Center)), 60f, ItemTileFootHeight);
-
-            TextMeshProUGUI sold = UiBuild.SingleLine(UiBuild.LocalizedLabel(name + "Sold", tile.Fill, UiKeys.Map.ShopSold, 22f, UiPalette.TextDim, TextAlignmentOptions.Center));
-            UiBuild.Stretch(sold.rectTransform);
-            sold.gameObject.SetActive(false);
-
-            // Round 49: on the picked tile, Diablo's small label at its top that the hand holds it.
-            Image held = UiBuild.Image(name + "Held", tile.Fill, UiPalette.LabelBox);
-            AddLine(held, UiPalette.LabelLine, 1f);
-            UiBuild.Place(held.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -6f), new Vector2(ShopHeldWidth, ShopHeldHeight));
-            TextMeshProUGUI heldWord = UiBuild.SingleLine(UiBuild.LocalizedLabel(name + "HeldWord", held.transform, UiKeys.Map.ShopHeld, 14f, UiPalette.DiabloGold, TextAlignmentOptions.Center));
-            UiBuild.Stretch(heldWord.rectTransform);
-            held.gameObject.SetActive(false);
-
-            var view = tile.Rim.gameObject.AddComponent<ShopTileView>();
-            SetItemTile(view, tile);
-            UiBuild.SetReference(view, "_potionPocket", pocket.gameObject);
-            UiBuild.SetReference(view, "_potionIcon", potionIcon);
-            UiBuild.SetReference(view, "_priceRow", priceRow.gameObject);
-            UiBuild.SetReference(view, "_price", price);
-            UiBuild.SetReference(view, "_sold", sold);
-            UiBuild.SetReference(view, "_held", held.gameObject);
+            var view = stone.gameObject.AddComponent<MerchantGridView>();
+            UiBuild.SetReference(view, "_squareLayer", squares);
+            UiBuild.SetReference(view, "_pieceLayer", pieces);
+            UiBuild.SetReference(view, "_priceLayer", prices);
+            UiBuild.SetReference(view, "_squareTemplate", squareTemplate);
+            UiBuild.SetReference(view, "_pieceTemplate", pieceTemplate);
+            UiBuild.SetReference(view, "_priceTemplate", priceTemplate);
             return view;
-        }
-
-        /// <summary>The parts of an item tile its view needs.</summary>
-        struct ItemTileParts
-        {
-            public Image Rim;
-            public Button Button;
-            public RightClick RightClick;
-            public CanvasGroup Group;
-            public RectTransform Fill;
-            public ItemSlotView Cell;
-            public TextMeshProUGUI Name;
-            public TextMeshProUGUI Sub;
-            public Image Rule;
-            public TextMeshProUGUI Facts;
-        }
-
-        /// <summary>
-        /// The body of a tile of the shop or the loot (round 46): a rim (brass while picked) around a slot-coloured fill holding the
-        /// item as a board cell in the room of two cells (the cell takes no click), its name and its kind with its cells, a brass
-        /// rule and the facts under it, down to the foot of the height given; the caller adds the foot. The whole tile is the button,
-        /// built silent.
-        /// </summary>
-        static ItemTileParts BuildItemTile(Transform parent, string name, float width, float footHeight)
-        {
-            var parts = new ItemTileParts();
-            parts.Rim = Rounded(name, parent, UiPalette.Line, 8f);
-            UiBuild.Size(parts.Rim, width, ItemTileHeight);
-            parts.Button = UiBuild.MakeButton(parts.Rim);
-            parts.RightClick = parts.Rim.gameObject.AddComponent<RightClick>();
-            UiBuild.Silence(parts.Button);
-            ColorBlock colors = parts.Button.colors;
-            colors.disabledColor = Color.white;
-            parts.Button.colors = colors;
-            parts.Group = parts.Rim.gameObject.AddComponent<CanvasGroup>();
-            // Round 49: a slot sunk in the stone, as Diablo's vendor shows its goods.
-            Image fill = Rounded(name + "Fill", parts.Rim.transform, UiPalette.StonePlate, 6f);
-            UiBuild.Stretch(fill.rectTransform, 2f, 2f, 2f, 2f);
-            parts.Fill = fill.rectTransform;
-
-            parts.Cell = BuildItemSlot(fill.transform, name + "Cell");
-            parts.Cell.gameObject.SetActive(true);
-            parts.Cell.GetComponent<Image>().raycastTarget = false;
-            UiBuild.Place((RectTransform)parts.Cell.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -(ItemTileCellTop + ItemTileView.CellRoom / 2f)), new Vector2(GridGeometry.Square, GridGeometry.Square));
-
-            parts.Name = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Name", fill.transform, 19f, UiPalette.Text, TextAlignmentOptions.Center)), 13f);
-            UiBuild.Line(parts.Name, ItemTileNameTop, 26f, 6f, 6f);
-            parts.Sub = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Label(name + "Sub", fill.transform, 16f, UiPalette.TextDim, TextAlignmentOptions.Center)), 11f);
-            UiBuild.Line(parts.Sub, ItemTileSubTop, 22f, 6f, 6f);
-            parts.Rule = UiBuild.Image(name + "Rule", fill.transform, UiPalette.TooltipLine);
-            UiBuild.Line(parts.Rule, ItemTileRuleTop, 1f, 10f, 10f);
-            parts.Facts = UiBuild.ShrinkToFit(UiBuild.Label(name + "Facts", fill.transform, 15f, UiPalette.Text, TextAlignmentOptions.Top), ItemTileFactsMinSize);
-            UiBuild.Line(parts.Facts, ItemTileFactsTop, ItemTileHeight - 4f - ItemTileFactsTop - ItemTileFootBottom - footHeight - 6f, 10f, 10f);
-            return parts;
-        }
-
-        /// <summary>The foot of an item tile: a line across its bottom (the price, or the loot's take).</summary>
-        static void ItemTileFoot(RectTransform foot, float height = ItemTileFootHeight, float side = 0f)
-        {
-            foot.anchorMin = Vector2.zero;
-            foot.anchorMax = new Vector2(1f, 0f);
-            foot.pivot = new Vector2(0.5f, 0f);
-            foot.offsetMin = new Vector2(side, ItemTileFootBottom);
-            foot.offsetMax = new Vector2(-side, ItemTileFootBottom + height);
-        }
-
-        static void SetItemTile(ItemTileView view, ItemTileParts tile)
-        {
-            UiBuild.SetReference(view, "_button", tile.Button);
-            UiBuild.SetReference(view, "_rightClick", tile.RightClick);
-            UiBuild.SetReference(view, "_rim", tile.Rim);
-            UiBuild.SetReference(view, "_group", tile.Group);
-            UiBuild.SetReference(view, "_cell", tile.Cell);
-            UiBuild.SetReference(view, "_name", tile.Name);
-            UiBuild.SetReference(view, "_sub", tile.Sub);
-            UiBuild.SetReference(view, "_rule", tile.Rule);
-            UiBuild.SetReference(view, "_facts", tile.Facts);
         }
 
         /// <summary>A shape with rounded corners of the given radius (Unity's built-in rounded sprite, sliced), in the color.</summary>

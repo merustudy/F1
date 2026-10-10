@@ -617,11 +617,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 344090074931200
-    m_Localized: Show inventory
+    m_Localized: Show inventory (I)
     m_Metadata:
       m_Items: []
   - m_Id: 344090074931201
-    m_Localized: Close inventory
+    m_Localized: Close inventory (I)
     m_Metadata:
       m_Items: []
   - m_Id: 344090074931202
@@ -630,8 +630,8 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 344090074931203
-    m_Localized: "Click an item to hold it \xB7 click a free square of a board or
-      of this grid to put it there"
+    m_Localized: "Click an item to hold it \xB7 click a free square of a board below
+      or of this grid to lay it there \xB7 I: open and close"
     m_Metadata:
       m_Items: []
   - m_Id: 1060957030703104
@@ -1048,6 +1048,44 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 3473104335527936
+    m_Localized: Melee
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3473104343916544
+    m_Localized: Never activates
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3473104343916545
+    m_Localized: "\u2605 A melee weapon on a star: damage +{0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3473104343916546
+    m_Localized: "(\u2605 {0} +{1})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3473104343916547
+    m_Localized: "Stars lit {0}/{1} \u2014 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3473104343916548
+    m_Localized: Stars lit 0/{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3628853393088512
+    m_Localized: 'Price: {0} coins'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3665380550631424
+    m_Localized: "{0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1165,3 +1203,9 @@ MonoBehaviour:
         - id: 2976244546134016
         - id: 2976244546134017
         - id: 3246693813313536
+        - id: 3473104343916545
+        - id: 3473104343916546
+        - id: 3473104343916547
+        - id: 3473104343916548
+        - id: 3628853393088512
+        - id: 3665380550631424

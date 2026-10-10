@@ -6,7 +6,8 @@ namespace F1.Tests
 {
     /// <summary>
     /// Where an item's card goes (round 42): above the board panel over the cell's column on the party side, beside the board
-    /// in battle, and under the shop's window over the offer's tile (round 44). Top-left pixel space of the screen.
+    /// in battle, and under the shop's window over the offer's tile (round 44); the merchant's tooltip over the good (round 57). Top-left
+    /// pixel space of the screen.
     /// </summary>
     public sealed class TooltipPlacementTests
     {
@@ -94,6 +95,34 @@ namespace F1.Tests
             card = TooltipPlacement.Beside(low, tall, true, Panel, Screen, out notchY, out _);
             Assert.AreEqual(Panel.yMin + TooltipPlacement.PanelInset, card.y, 0.001f, "A card taller than the room hangs from the panel's top.");
             Assert.AreEqual(low.center.y - card.y, notchY, 0.001f, "The notch still points at the cell's middle.");
+        }
+
+        [Test]
+        public void Over_CentresTheMerchantsTooltipOnTheGood_JustAboveIt()
+        {
+            var spear = new Rect(1190f, 380f, 102f, 102f);
+
+            Rect tip = TooltipPlacement.Over(spear, Size, Screen);
+
+            Assert.AreEqual(spear.center.x, tip.center.x, 0.001f, "Centred on the good (round 57, Diablo II).");
+            Assert.AreEqual(spear.yMin - TooltipPlacement.Gap, tip.yMax, 0.001f, "Its bottom edge just above the good.");
+            Assert.AreEqual(Size, tip.size);
+        }
+
+        [Test]
+        public void Over_GoesUnderTheGood_WhenThereIsNoRoomAbove_AndStaysInsideTheScreen()
+        {
+            var high = new Rect(1190f, 150f, 102f, 50f);
+            Rect tip = TooltipPlacement.Over(high, Size, Screen);
+            Assert.AreEqual(high.yMax + TooltipPlacement.Gap, tip.y, 0.001f, "Under the good.");
+
+            var farRight = new Rect(1860f, 600f, 50f, 50f);
+            tip = TooltipPlacement.Over(farRight, Size, Screen);
+            Assert.AreEqual(Screen.xMax - TooltipPlacement.ScreenMargin, tip.xMax, 0.001f, "Pushed in from the right edge.");
+
+            var tall = new Vector2(400f, 1000f);
+            tip = TooltipPlacement.Over(high, tall, Screen);
+            Assert.AreEqual(Screen.yMax - TooltipPlacement.ScreenMargin, tip.yMax, 0.001f, "Taller than the room under the good: lifted to stay on the screen.");
         }
     }
 }

@@ -25,7 +25,12 @@ namespace F1.Editor.Setup
         public const string StampPath = PrefabDirectory + "/UiPrefabStamp.txt";
 
         const string BuilderDirectory = "Assets/@Scripts/Editor/Setup/Ui";
-        const string PalettePath = "Assets/@Scripts/UI/UiPalette.cs";
+
+        /// <summary>
+        /// The runtime UI code: the builder lays the prefabs out with its constants (the palette, a grid's squares and rows, a piece's
+        /// margin...), so a change there rebuilds them too (round 56: the merchant's eight rows did not reach the shop's window).
+        /// </summary>
+        const string RuntimeUiDirectory = "Assets/@Scripts/UI";
 
         public const string SaveErrorOverlayPath = PrefabDirectory + "/SaveErrorOverlay.prefab";
 
@@ -140,11 +145,12 @@ namespace F1.Editor.Setup
             }
         }
 
-        /// <summary>A digest of the builder sources. Line endings are ignored so every OS gets the same value.</summary>
+        /// <summary>A digest of the builder sources and the runtime UI code they read. Line endings are ignored so every OS gets the same value.</summary>
         public static string ComputeStamp()
         {
-            List<string> files = Directory.GetFiles(BuilderDirectory, "*.cs").Select(f => f.Replace('\\', '/')).ToList();
-            files.Add(PalettePath);
+            List<string> files = Directory.GetFiles(BuilderDirectory, "*.cs")
+                .Concat(Directory.GetFiles(RuntimeUiDirectory, "*.cs", SearchOption.AllDirectories))
+                .Select(f => f.Replace('\\', '/')).ToList();
             files.Sort(StringComparer.Ordinal);
 
             using (var sha = SHA256.Create())

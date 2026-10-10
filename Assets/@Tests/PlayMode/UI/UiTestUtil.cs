@@ -120,14 +120,53 @@ namespace F1.Tests
             return button;
         }
 
-        /// <summary>Clicks a button. Fails when a player could not click it: hidden, disabled or covered by something else.</summary>
+        /// <summary>
+        /// Clicks a button. Fails when a player could not click it: hidden, disabled or covered by something else. While something is
+        /// held (round 54) the press lands on the layer that carries it, which lets a button that works on what is held through and
+        /// otherwise lets go of what is held: the click goes that way, as a player's would.
+        /// </summary>
         public static void Click(Button button)
         {
             Assert.IsTrue(button.gameObject.activeInHierarchy, $"Button '{button.name}' is not shown.");
             Assert.IsTrue(button.interactable, $"Button '{button.name}' is disabled.");
-            AssertPointerReaches(button);
             PointerPress.Simulate();
+            if (HeldLayerOver((RectTransform)button.transform, out HeldPointerView held, out Vector2 middle))
+            {
+                held.PressAt(middle);
+                return;
+            }
+
+            AssertPointerReaches(button);
             button.onClick.Invoke();
+            PointerAt((RectTransform)button.transform);
+        }
+
+        /// <summary>
+        /// Where the pointer is after a press or a move over a rect (round 54): what is held rides it, so it is drawn there, as for a player
+        /// whose pointer is there (no mouse moves in a test run).
+        /// </summary>
+        public static void PointerAt(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            foreach (HeldPointerView held in Object.FindObjectsByType<HeldPointerView>(FindObjectsSortMode.None))
+            {
+                if (held.Shown)
+                {
+                    held.PlaceAt((corners[0] + corners[2]) * 0.5f);
+                }
+            }
+        }
+
+        /// <summary>Whether the layer that carries what is held lies over the middle of a rect (round 54), and where that middle is on the screen.</summary>
+        public static bool HeldLayerOver(RectTransform rect, out HeldPointerView held, out Vector2 middle)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            middle = (corners[0] + corners[2]) * 0.5f;
+            Transform top = TopmostUnder(rect);
+            held = top != null ? top.GetComponent<HeldPointerView>() : null;
+            return held != null;
         }
 
         /// <summary>A right click on a thing that shows an item (round 47): its card opens. The press that it is closes a card already up.</summary>
@@ -169,13 +208,18 @@ namespace F1.Tests
         /// Casts a pointer ray at the middle of the rect, the way the event system does for a mouse
         /// click, and returns what it lands on first, or null when it hits nothing.
         /// </summary>
-        public static Transform TopmostUnder(RectTransform rect)
+        public static Transform TopmostUnder(RectTransform rect, bool skipHeldLayer = false)
         {
             var corners = new Vector3[4];
             rect.GetWorldCorners(corners);
             var pointer = new PointerEventData(EventSystem.current) { position = (corners[0] + corners[2]) * 0.5f };
             var hits = new List<RaycastResult>();
             EventSystem.current.RaycastAll(pointer, hits);
+            if (skipHeldLayer)
+            {
+                hits.RemoveAll(hit => hit.gameObject.GetComponent<HeldPointerView>() != null);
+            }
+
             return hits.Count == 0 ? null : hits[0].gameObject.transform;
         }
 
@@ -195,6 +239,7 @@ namespace F1.Tests
             PointerPress.Simulate();
             square.Hover();
             square.Click();
+            PointerAt((RectTransform)square.transform);
         }
 
         /// <summary>A right click on a square of a board's grid: the card of the item there, or a turn of what is held.</summary>
@@ -208,17 +253,95 @@ namespace F1.Tests
         /// <summary>The pointer comes over a square of a board's grid: what is held shows its ghost there.</summary>
         public static void HoverSquare(PartyBoardView board, int x, int y)
         {
-            SquareReached(board, x, y).Hover();
+            GridSquareView square = SquareReached(board, x, y);
+            square.Hover();
+            PointerAt((RectTransform)square.transform);
+        }
+
+        /// <summary>
+        /// A click on a good of the merchant (stage 21) at its top-left square, the pointer over it first. While something is held the
+        /// press lands on the layer that carries it (a good is no place for it: it goes back), as a player's would.
+        /// </summary>
+        public static void ClickGood(MerchantGridView merchant, int slot)
+        {
+            GridSquareView square = merchant.SquareOf(slot);
+            Assert.IsNotNull(square, $"Slot {slot} is not on the merchant's grid.");
+            PointerPress.Simulate();
+            if (HeldLayerOver((RectTransform)square.transform, out HeldPointerView held, out Vector2 middle))
+            {
+                held.PressAt(middle);
+                return;
+            }
+
+            square.Hover();
+            square.Click();
+            PointerAt((RectTransform)square.transform);
+        }
+
+        /// <summary>The pointer comes over a good of the merchant at its top-left square (round 57: its tooltip shows over it).</summary>
+        public static void HoverGood(MerchantGridView merchant, int slot)
+        {
+            GridSquareView square = merchant.SquareOf(slot);
+            Assert.IsNotNull(square, $"Slot {slot} is not on the merchant's grid.");
+            square.Hover();
+            PointerAt((RectTransform)square.transform);
+        }
+
+        /// <summary>The pointer leaves a good of the merchant (its top-left square).</summary>
+        public static void LeaveGood(MerchantGridView merchant, int slot)
+        {
+            merchant.SquareOf(slot).OnPointerExit(null);
+        }
+
+        /// <summary>The pointer comes over a square of the inventory's grid: what is held shows its ghost there and rides the pointer there.</summary>
+        public static void HoverSquare(InventoryGridView grid, int x, int y)
+        {
+            GridSquareView square = grid.SquareAt(x, y);
+            square.Hover();
+            PointerAt((RectTransform)square.transform);
+        }
+
+        /// <summary>A click on a square of the inventory's grid, the pointer over it first.</summary>
+        public static void ClickSquare(InventoryGridView grid, int x, int y)
+        {
+            GridSquareView square = grid.SquareAt(x, y);
+            PointerPress.Simulate();
+            square.Hover();
+            square.Click();
+            PointerAt((RectTransform)square.transform);
         }
 
         static GridSquareView SquareReached(PartyBoardView board, int x, int y)
         {
             GridSquareView square = board.Grid.SquareAt(x, y);
             Assert.IsTrue(square.gameObject.activeInHierarchy, $"Square ({x},{y}) of '{board.name}' is not shown.");
-            Transform top = TopmostUnder((RectTransform)square.transform);
+            // While something is held the layer that carries it takes the press and aims at what lies under it (round 54): look under it.
+            Transform top = TopmostUnder((RectTransform)square.transform, skipHeldLayer: true);
             Assert.IsNotNull(top, $"A click on square ({x},{y}) of '{board.name}' hits nothing.");
             Assert.IsTrue(top == square.transform || top.IsChildOf(square.transform), $"'{top.name}' covers square ({x},{y}) of '{board.name}'.");
             return square;
+        }
+
+        /// <summary>
+        /// The row of the nth living member, from the front (0 for the first), whose base weapon lies one row high at the top-left of the
+        /// start bag: a board with two empty rows under its weapon to stage on. Since round 51 the valkyrie's battle axe is 3x2, and the
+        /// party of these tests stands her in row 1.
+        /// </summary>
+        public static int FlatRow(int nth = 0)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            int found = 0;
+            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+            {
+                BoardItem weapon = expedition.Members.Find(m => m.Alive && m.Row == row)?.Board.ItemAt(0, 0);
+                if (weapon != null && weapon.Height == 1 && found++ == nth)
+                {
+                    return row;
+                }
+            }
+
+            Assert.Fail($"Fewer than {nth + 1} members with a base weapon one row high.");
+            return -1;
         }
 
         /// <summary>Puts an item on a member's board as it is (no rule checked): staging.</summary>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using F1.Core;
 using F1.Data;
 using F1.Flow;
@@ -21,7 +22,7 @@ namespace F1.UI
         /// <summary>It cannot go there: red.</summary>
         Refused,
 
-        /// <summary>It is where it already lies: no colour, putting it down there lets it go.</summary>
+        /// <summary>It is where it already lies: putting it down there lets it go. Green since round 54 (it has left that place for the pointer).</summary>
         Same,
     }
 
@@ -62,14 +63,18 @@ namespace F1.UI
         bool CanPlace(int member, Placement at);
         bool MergesAt(int member, int x, int y);
         void Place(int member, Placement at);
+
+        /// <summary>Whether it could be laid on a placement of the inventory's grid now (round 55: a drop taken, an offer bought there).</summary>
+        bool CanPlaceInInventory(Placement at);
+        void PlaceInInventory(Placement at);
     }
 
     /// <summary>
     /// The hand over the party's boards between battles (Slice B stage 19; Docs/Architecture/12_UI.md "격자 보드"): what it holds (an item
     /// of a board, a bag of a board, an item of the inventory, or something from outside), how it is turned (Backpack Battles' turning: a
-    /// quarter clockwise at a time while held), where the pointer is (over a board or over the inventory's grid, round 49), and what a
-    /// click on a square does. The node map's party side and the battle screen after a win both aim with it. It asks the manager
-    /// everything and decides nothing itself.
+    /// quarter clockwise at a time while held), where the pointer is (over a board or over the inventory's grid, round 49; since round 54
+    /// the point in squares, the held thing's centre on it as in Diablo II), and what a press does. The node map's party side and the
+    /// battle screen after a win both aim with it. It asks the manager everything and decides nothing itself.
     /// </summary>
     public sealed class BoardHand
     {
@@ -79,6 +84,12 @@ namespace F1.UI
         bool _hoverInventory;
         int _inventoryX;
         int _inventoryY;
+
+        /// <summary>The pointer's point over the board or the inventory aimed at, in squares (round 54, <see cref="GridGeometry.PointIn"/>).</summary>
+        Vector2 _aimPoint;
+
+        /// <summary>What <see cref="AimChanged"/> last saw: where the held thing would land.</summary>
+        string _aimSeen;
 
         /// <summary>The member whose board item is held, or -1; the item lies from (<see cref="ItemX"/>, <see cref="ItemY"/>).</summary>
         public int ItemMember { get; private set; } = -1;
@@ -136,12 +147,61 @@ namespace F1.UI
             }
         }
 
+        /// <summary>The pointer over a square of a member's board: aimed at the square's centre.</summary>
         public void Hover(int member, int x, int y)
+        {
+            AimBoard(member, GridGeometry.Centre(x, y));
+        }
+
+        /// <summary>The pointer at a point of a member's board, in squares from its top-left (round 54).</summary>
+        public void AimBoard(int member, Vector2 point)
         {
             _hoverInventory = false;
             _hoverMember = member;
-            _hoverX = x;
-            _hoverY = y;
+            _aimPoint = point;
+            _hoverX = Mathf.Clamp(Mathf.FloorToInt(point.x), 0, BoardFrame.Width - 1);
+            _hoverY = Mathf.Clamp(Mathf.FloorToInt(point.y), 0, BoardFrame.Height - 1);
+        }
+
+        /// <summary>The pointer at a point of the inventory's grid, in squares from its top-left (round 54).</summary>
+        public void AimInventory(Vector2 point)
+        {
+            _hoverMember = -1;
+            _hoverInventory = true;
+            _aimPoint = point;
+            _inventoryX = Mathf.FloorToInt(point.x);
+            _inventoryY = Mathf.FloorToInt(point.y);
+        }
+
+        /// <summary>The pointer over neither a board nor the inventory.</summary>
+        public void AimNowhere()
+        {
+            _hoverMember = -1;
+            _hoverInventory = false;
+        }
+
+        /// <summary>
+        /// Whether where the held thing would land (which board or the inventory, and the squares) changed since the last ask: the screen
+        /// redraws only then while the pointer moves (round 54).
+        /// </summary>
+        public bool AimChanged(ExpeditionState expedition)
+        {
+            string seen = "none";
+            if (expedition != null && Holding && Shape(expedition, out int width, out int height, out _))
+            {
+                if (_hoverMember >= 0)
+                {
+                    seen = "b" + _hoverMember + ":" + GridGeometry.Anchor(_aimPoint, width, height, Turns, BoardFrame.Width, BoardFrame.Height);
+                }
+                else if (_hoverInventory)
+                {
+                    seen = "i:" + GridGeometry.Anchor(_aimPoint, width, height, Turns, expedition.Inventory.Width, expedition.Inventory.Height);
+                }
+            }
+
+            bool changed = seen != _aimSeen;
+            _aimSeen = seen;
+            return changed;
         }
 
         public void Unhover(int member, int x, int y)
@@ -157,10 +217,7 @@ namespace F1.UI
 
         public void HoverInventory(int x, int y)
         {
-            _hoverMember = -1;
-            _hoverInventory = true;
-            _inventoryX = x;
-            _inventoryY = y;
+            AimInventory(GridGeometry.Centre(x, y));
         }
 
         public void UnhoverInventory(int x, int y)
@@ -172,10 +229,10 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Where the held item would lie on the inventory's grid with the pointer over a square: that square as its top-left, pulled into
-        /// the grid. False when no item is held (a bag never goes there) or the inventory item held is gone.
+        /// Where the held item would lie on the inventory's grid with the pointer where it is: its centre there, on the nearest squares,
+        /// pulled into the grid (round 54). False when no item is held (a bag never goes there) or the inventory item held is gone.
         /// </summary>
-        public bool InventoryAnchorAt(ExpeditionState expedition, int x, int y, out Placement at)
+        public bool InventoryAnchor(ExpeditionState expedition, out Placement at)
         {
             at = default;
             EquippedItem item = BagMember >= 0 || Outside?.Bag != null ? null : HeldItem(expedition);
@@ -184,23 +241,20 @@ namespace F1.UI
                 return false;
             }
 
-            var turned = new Placement(0, 0, Turns);
-            int width = turned.WidthOf(item.Item.Width, item.Item.Height);
-            int height = turned.HeightOf(item.Item.Width, item.Item.Height);
             InventoryGrid grid = expedition.Inventory;
-            at = new Placement(Mathf.Clamp(x, 0, Mathf.Max(0, grid.Width - width)), Mathf.Clamp(y, 0, Mathf.Max(0, grid.Height - height)), Turns);
+            at = GridGeometry.Anchor(_aimPoint, item.Item.Width, item.Item.Height, Turns, grid.Width, grid.Height);
             return true;
         }
 
         /// <summary>
         /// Where and how the held item would land on the inventory's grid with the pointer over it (round 49): green where it can go (an
-        /// item of a board or of the inventory, to free squares), red where it cannot (over another item; anything from outside, which goes
-        /// there by its button). Null when the pointer is not over the grid or no item is held.
+        /// item of a board, of the inventory or, since round 55, a drop or an offer, to free squares), red where it cannot (over another
+        /// item; a bag). Null when the pointer is not over the grid or no item is held.
         /// </summary>
         public GridGhost InventoryGhost(ExpeditionManager manager, ExpeditionArt art)
         {
             ExpeditionState expedition = manager.Expedition;
-            if (!_hoverInventory || expedition == null || !Holding || !InventoryAnchorAt(expedition, _inventoryX, _inventoryY, out Placement at))
+            if (!_hoverInventory || expedition == null || !Holding || !InventoryAnchor(expedition, out Placement at))
             {
                 return null;
             }
@@ -223,15 +277,15 @@ namespace F1.UI
             }
 
             bool can = InventoryIndex >= 0 ? manager.CanMoveInInventory(InventoryIndex, at)
-                : ItemMember >= 0 && manager.CanMoveToInventoryAt(ItemMember, ItemX, ItemY, at);
+                : ItemMember >= 0 ? manager.CanMoveToInventoryAt(ItemMember, ItemX, ItemY, at)
+                : Outside != null && Outside.CanPlaceInInventory(at);
             ghost.Kind = can ? GhostKind.Fits : GhostKind.Refused;
             return ghost;
         }
 
         /// <summary>
-        /// A click on a square of the inventory's grid (round 49): with nothing held, picks up the item there; holding an item of a board or
-        /// of the inventory, lays it where its ghost is when the squares are free (and lets go), or lets go when it is put back where it
-        /// lies; anything else held stays held. Returns the sound the click makes.
+        /// A click on a square of the inventory's grid (round 49): with nothing held, picks up the item there; with something held, the
+        /// press at that square's centre (<see cref="Commit"/>). Returns the sound the click makes.
         /// </summary>
         public SoundEffect ClickInventory(int x, int y, ExpeditionManager manager)
         {
@@ -247,7 +301,35 @@ namespace F1.UI
                 return SoundEffect.Button;
             }
 
-            if (!InventoryAnchorAt(expedition, x, y, out Placement at))
+            AimInventory(GridGeometry.Centre(x, y));
+            return Commit(manager);
+        }
+
+        /// <summary>
+        /// A press with something held where the pointer is (round 54): over a board, it goes there when it can (and the hand lets go), is
+        /// let go when it is put back where it lies, and stays held where it cannot go; over the inventory's grid, an item of a board, of
+        /// the inventory or from outside (round 55) is laid on free squares the same way (a bag stays held). Over neither,
+        /// nothing happens here: the screen lets go, and the thing is back where it was. Returns the sound the press makes.
+        /// </summary>
+        public SoundEffect Commit(ExpeditionManager manager)
+        {
+            if (!Holding)
+            {
+                return SoundEffect.Button;
+            }
+
+            if (_hoverMember >= 0)
+            {
+                return CommitBoard(_hoverMember, manager);
+            }
+
+            return _hoverInventory ? CommitInventory(manager) : SoundEffect.Button;
+        }
+
+        SoundEffect CommitInventory(ExpeditionManager manager)
+        {
+            ExpeditionState expedition = manager.Expedition;
+            if (!InventoryAnchor(expedition, out Placement at))
             {
                 return SoundEffect.Button;
             }
@@ -273,6 +355,14 @@ namespace F1.UI
             if (ItemMember >= 0 && manager.CanMoveToInventoryAt(ItemMember, ItemX, ItemY, at))
             {
                 manager.MoveToInventoryAt(ItemMember, ItemX, ItemY, at);
+                Clear();
+                return SoundEffect.ItemPlace;
+            }
+
+            // Round 55: a drop or an offer is laid on free squares the same way (taken, or bought, there).
+            if (Outside != null && Outside.CanPlaceInInventory(at))
+            {
+                Outside.PlaceInInventory(at);
                 Clear();
                 return SoundEffect.ItemPlace;
             }
@@ -325,8 +415,8 @@ namespace F1.UI
             return item != null;
         }
 
-        /// <summary>Where what is held would lie with the pointer over a square: that square as its top-left, pulled into the frame.</summary>
-        public bool AnchorAt(ExpeditionState expedition, int x, int y, out Placement at)
+        /// <summary>Where what is held would lie on the board aimed at: its centre at the pointer, on the nearest squares, pulled into the frame (round 54).</summary>
+        public bool BoardAnchor(ExpeditionState expedition, out Placement at)
         {
             at = default;
             if (!Shape(expedition, out int width, out int height, out _))
@@ -334,7 +424,7 @@ namespace F1.UI
                 return false;
             }
 
-            at = GridGeometry.Anchor(x, y, width, height, Turns);
+            at = GridGeometry.Anchor(_aimPoint, width, height, Turns, BoardFrame.Width, BoardFrame.Height);
             return true;
         }
 
@@ -347,7 +437,7 @@ namespace F1.UI
                 return null;
             }
 
-            Placement at = GridGeometry.Anchor(_hoverX, _hoverY, width, height, Turns);
+            Placement at = GridGeometry.Anchor(_aimPoint, width, height, Turns, BoardFrame.Width, BoardFrame.Height);
             var ghost = new GridGhost
             {
                 At = at,
@@ -401,9 +491,51 @@ namespace F1.UI
         }
 
         /// <summary>
+        /// The stars to draw on a member's board (Slice B stage 20, Backpack Battles' stars; Docs/Architecture/12_UI.md "격자 보드"): while a
+        /// star item is held over the board, its stars where its ghost lies; with nothing held, the stars of the star item the pointer is on.
+        /// Null when there are none.
+        /// </summary>
+        public List<StarMark> StarsFor(int member, ExpeditionManager manager)
+        {
+            ExpeditionState expedition = manager.Expedition;
+            if (_hoverMember != member || expedition == null || member >= expedition.Members.Count)
+            {
+                return null;
+            }
+
+            ItemBoard board = expedition.Members[member].Board;
+            if (Holding)
+            {
+                EquippedItem held = BagMember >= 0 || Outside?.Bag != null ? null : HeldItem(expedition);
+                if (held == null || held.Item.Stars.Count == 0)
+                {
+                    return null;
+                }
+
+                Placement at = GridGeometry.Anchor(_aimPoint, held.Item.Width, held.Item.Height, Turns, BoardFrame.Width, BoardFrame.Height);
+                return StarRules.Marks(board, held.Item, at, member == ItemMember ? HeldBoardItem(expedition) : null);
+            }
+
+            BoardItem pointed = HoveredStarItem(expedition);
+            return pointed == null ? null : StarRules.Marks(board, pointed.Item.Item, pointed.At, null);
+        }
+
+        /// <summary>The star item the pointer is on while nothing is held, or null: whose stars show (Slice B stage 20).</summary>
+        public BoardItem HoveredStarItem(ExpeditionState expedition)
+        {
+            if (Holding || _hoverMember < 0 || expedition == null || _hoverMember >= expedition.Members.Count)
+            {
+                return null;
+            }
+
+            BoardItem there = expedition.Members[_hoverMember].Board.ItemAt(_hoverX, _hoverY);
+            return there != null && there.Item.Item.Stars.Count > 0 ? there : null;
+        }
+
+        /// <summary>
         /// A click on a square of a member's board: with nothing held, picks up the item there (or the bag, from an empty square of a bag
-        /// that can move); with something held, puts it where its ghost is when it can go there (and lets go), or lets go when it is put
-        /// back where it lies; a click where it cannot go keeps it held. Returns the sound the click makes: an item put in, or a click.
+        /// that can move); with something held, the press at that square's centre (<see cref="Commit"/>). Returns the sound the click
+        /// makes: an item put in, or a click.
         /// </summary>
         public SoundEffect Click(int member, int x, int y, ExpeditionManager manager)
         {
@@ -431,7 +563,14 @@ namespace F1.UI
                 return SoundEffect.Button;
             }
 
-            if (!AnchorAt(expedition, x, y, out Placement at))
+            AimBoard(member, GridGeometry.Centre(x, y));
+            return Commit(manager);
+        }
+
+        SoundEffect CommitBoard(int member, ExpeditionManager manager)
+        {
+            ExpeditionState expedition = manager.Expedition;
+            if (!BoardAnchor(expedition, out Placement at))
             {
                 Clear();
                 return SoundEffect.Button;

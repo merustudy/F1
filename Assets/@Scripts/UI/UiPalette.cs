@@ -141,19 +141,34 @@ namespace F1.UI
         public static readonly Color GridFrameLine = Rgb(0x78, 0x6C, 0x5C);
 
         /// <summary>
-        /// An item's squares as one piece between battles: Diablo's dark blue (round 49); the held one a lighter blue; the one a held item
-        /// would push out a dark gold. In battle a piece has no ground (the user: "전투 화면에서는 아이템 뒤 파란색 배경 없음").
+        /// An item's squares between battles, square by square with the grid's line between them (round 53): Diablo's dark blue (round 49);
+        /// the held one a lighter blue; the one a held item would push out a dark gold. Solid: the colours round 49's see-through blues made
+        /// over the well's grey, so a piece is the same blue wherever it lies (a board, the inventory, a shop's or the loot's tile; round 53,
+        /// "인벤토리 아이템 배경색도 용병 보드의 파란색과 같은 색상으로"). In battle a piece has no ground (the user: "전투 화면에서는 아이템 뒤 파란색 배경 없음").
         /// </summary>
-        public static readonly Color GridPiece = new Color(0x16 / 255f, 0x20 / 255f, 0x58 / 255f, 0.82f);
-        public static readonly Color GridPiecePicked = new Color(0x36 / 255f, 0x48 / 255f, 0x9C / 255f, 0.86f);
-        public static readonly Color GridPieceDisplaced = new Color(0x60 / 255f, 0x52 / 255f, 0x1C / 255f, 0.86f);
+        public static readonly Color GridPiece = Rgb(0x1F, 0x26, 0x54);
+        public static readonly Color GridPiecePicked = Rgb(0x36, 0x46, 0x93);
+        public static readonly Color GridPieceDisplaced = Rgb(0x5C, 0x4F, 0x22);
+
+        /// <summary>A merchant's good the party cannot buy now (round 57, the user: "살수없을때는 배경색을 검붉은 색으로"): its squares a dark red.</summary>
+        public static readonly Color GridPieceUnaffordable = Rgb(0x52, 0x18, 0x18);
 
         /// <summary>The held item's squares while it is picked: no colour of its own any more (the piece's blue says it).</summary>
         public static readonly Color GridPicked = Color.clear;
 
-        /// <summary>The ghost of a held thing: the squares green where it fits (pushing one out or merging too), red where it cannot go; nothing else (round 49, "빨강 칠만").</summary>
+        /// <summary>The ghost of a held thing: its squares one block, green where it fits (pushing one out or merging too), red where it cannot go; nothing else (round 49, "빨강 칠만"; round 53: no lines in it).</summary>
         public static readonly Color GhostFits = Rgb(0x1A, 0x96, 0x30);
         public static readonly Color GhostRefused = Rgb(0xB0, 0x1E, 0x1E);
+
+        /// <summary>
+        /// A star of an item on its star square (Slice B stage 20, Backpack Battles' stars, Docs/Design/10_Art_Direction.md §5): lit gold with a
+        /// dark edge and a soft glow behind when a melee weapon lies there; else a hollow star, a dark fill in a pale edge.
+        /// </summary>
+        public static readonly Color StarLit = Rgb(0xEC, 0xC4, 0x5C);
+        public static readonly Color StarLitEdge = Rgb(0x0A, 0x08, 0x06);
+        public static readonly Color StarGlow = new Color(1f, 0xD6 / 255f, 0x6E / 255f, 0.45f);
+        public static readonly Color StarHollow = Rgb(0x3A, 0x38, 0x34);
+        public static readonly Color StarHollowEdge = Rgb(0x96, 0x92, 0x88);
 
         /// <summary>The words over a ghost and other small labels: Diablo's black box with a grey line, white words (red where it cannot go).</summary>
         public static readonly Color LabelBox = new Color(0f, 0f, 0f, 0.88f);
@@ -163,6 +178,10 @@ namespace F1.UI
         public static readonly Color BevelDark = Rgb(0x0A, 0x0A, 0x0A);
         public static readonly Color BevelLight = Rgb(0x70, 0x6A, 0x62);
         static readonly Color RimStone = Rgb(0x22, 0x21, 0x1F);
+
+        /// <summary>The stage under the inventory window while it is open (round 52): a little darker, the figures and their marks still seen.
+        /// The mockup's 35% in sRGB; blended in the project's linear space it takes about 55%.</summary>
+        public static readonly Color InventoryShade = new Color(0f, 0f, 0f, 0.55f);
 
         /// <summary>The inventory's rim round its squares, and the dark of a small plate (a heading, the coins): Diablo's stone.</summary>
         public static readonly Color InventoryRim = RimStone;

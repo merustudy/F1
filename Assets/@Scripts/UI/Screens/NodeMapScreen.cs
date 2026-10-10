@@ -56,11 +56,12 @@ namespace F1.UI
         [SerializeField] PartySideView _party;
         [SerializeField] TMP_Text _coins;
         [SerializeField] GameObject _shop;
-        [SerializeField] RectTransform _shopWindow;
         [SerializeField] TMP_Text _shopTitle;
         [SerializeField] TMP_Text _shopHint;
         [SerializeField] TMP_Text _shopCoins;
-        [SerializeField] ShopTileView[] _shopTiles;
+        [SerializeField] MerchantGridView _merchant;
+        [SerializeField] GameObject _merchantInfoBox;
+        [SerializeField] TMP_Text _merchantInfo;
         [SerializeField] Button _refresh;
         [SerializeField] TMP_Text _refreshCost;
         [SerializeField] Button _leave;
@@ -73,6 +74,13 @@ namespace F1.UI
         // The shop (round 44): the slot of the picked offer, and the detail line's note after a purchase.
         int _pick = -1;
         string _shopNote;
+
+        // The merchant (stage 21): where its goods lie, kept while the same stock is shown so that a good bought leaves its place empty
+        // (the places are not saved: after the app opens again what is left is laid anew), and the good the pointer is on.
+        Dictionary<int, Placement> _merchantPlaces;
+        string _merchantShown;
+        int _merchantRows;
+        int _pointedGood = -1;
 
         // The camp's mend step (round 35): choosing on the boards the item to raise a tier, then confirming it in the window.
         bool _mending;
@@ -89,8 +97,11 @@ namespace F1.UI
             return _nodes[nodeId];
         }
 
-        /// <summary>The tiles of the shop's window, by slot; those past the stock are hidden.</summary>
-        public IReadOnlyList<ShopTileView> ShopTiles => _shopTiles;
+        /// <summary>The merchant's grid (stage 21): the shop's goods by slot.</summary>
+        public MerchantGridView Merchant => _merchant;
+
+        /// <summary>The merchant's tooltip over the good the pointer is on (round 57); an empty string while there is none.</summary>
+        public string MerchantInfo => _merchantInfoBox.activeSelf ? _merchantInfo.text : string.Empty;
 
         /// <summary>The slot of the picked offer of the shop, or -1.</summary>
         public int PickedOffer => _pick;
@@ -111,19 +122,29 @@ namespace F1.UI
             _mend.onClick.AddListener(OnMend);
             _mendBack.onClick.AddListener(OnMendBack);
             _mendConfirm.onClick.AddListener(OnMendConfirm);
-            for (int i = 0; i < _shopTiles.Length; i++)
+            _merchant.GoodClicked += OnTileClicked;
+            _merchant.GoodEntered += slot =>
             {
-                int slot = i;
-                _shopTiles[i].Slot = slot;
-                _shopTiles[i].Button.onClick.AddListener(() => OnTileClicked(slot));
-                _shopTiles[i].RightClick.Clicked += () => OnTileRightClicked(slot);
-            }
+                _pointedGood = slot;
+                ShowMerchantInfo();
+            };
+            _merchant.GoodExited += slot =>
+            {
+                if (_pointedGood == slot)
+                {
+                    _pointedGood = -1;
+                    ShowMerchantInfo();
+                }
+            };
 
             _refresh.onClick.AddListener(OnRefreshShop);
             _leave.onClick.AddListener(OnLeaveShop);
             _buyToInventory.onClick.AddListener(OnBuyToInventory);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
+            // Round 54: the buttons that work on what is held still take a press while it rides the pointer.
+            _party.LetThroughWhileHeld(_inventoryToggle);
+            _party.LetThroughWhileHeld(_buyToInventory);
             _party.HandReleased += () =>
             {
                 _pick = -1;
@@ -187,6 +208,8 @@ namespace F1.UI
             {
                 _pick = -1;
                 _shopNote = null;
+                _pointedGood = -1;
+                _merchantInfoBox.SetActive(false);
             }
 
             bool picking = atShop && _pick >= 0 && _pick < manager.ShopStock.Count && manager.ShopStock[_pick] != null;
@@ -273,8 +296,9 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The shop's window (round 44): the title and the party's coins, each offer on its tile with its facts (round 46, S1; picked,
-        /// on sale, beyond the coins, or sold), what the next refresh costs; and the panel's words (how to buy, while an offer is picked).
+        /// The shop's window (round 44; the merchant since stage 21): the title and the party's coins, the goods on the merchant's grid
+        /// (picked, on sale, or beyond the coins; a good bought leaves its place empty), what the next refresh costs; and the panel's words
+        /// (how to buy, while an offer is picked).
         /// </summary>
         void RefreshShop(ExpeditionManager manager, StaticData data, ExpeditionState expedition, bool picking)
         {
@@ -285,50 +309,150 @@ namespace F1.UI
             _shopHint.text = UiStrings.Get(UiKeys.Map.ShopChoose);
             _shopCoins.text = UiStrings.Get(UiKeys.Map.Coins, expedition.Coins);
 
-            IReadOnlyList<ItemOffer> stock = manager.ShopStock;
-            for (int i = 0; i < _shopTiles.Length; i++)
-            {
-                ShopTileView tile = _shopTiles[i];
-                bool shown = i < stock.Count;
-                tile.gameObject.SetActive(shown);
-                if (!shown)
-                {
-                    continue;
-                }
-
-                ItemOffer offer = stock[i];
-                if (offer == null)
-                {
-                    tile.ShowSold();
-                    continue;
-                }
-
-                int price = manager.PriceOf(offer);
-                if (offer.Kind == OfferKind.Item)
-                {
-                    var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-                    ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    string sub = UiStrings.Get(UiKeys.Map.ShopItemSub, UiStrings.Get(UiText.CategoryKey(item.Item.Category)), item.Item.Width, item.Item.Height);
-                    tile.ShowItem(offer, item, _art.OfItem(offer.Id), sub, UiText.ItemTileFacts(item), price, state);
-                }
-                else if (offer.Kind == OfferKind.Bag)
-                {
-                    BagData bag = data.Bags.Get(offer.Id);
-                    ShopTileState state = i == _pick ? ShopTileState.Picked : manager.CanAfford(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    tile.ShowBag(offer, bag, UiStrings.Get(UiKeys.Map.ShopBagSub, bag.Width, bag.Height), UiStrings.Get(UiKeys.Map.BagFacts, bag.Area), price, state);
-                }
-                else
-                {
-                    PotionData potion = data.Potions.Get(offer.Id);
-                    ShopTileState state = manager.CanBuyPotion(i) ? ShopTileState.OnSale : ShopTileState.Unaffordable;
-                    tile.ShowPotion(offer, potion, _art.OfPotion(offer.Id), UiStrings.Get(UiKeys.Map.ShopPotion), UiText.PotionDetails(potion), price, state);
-                }
-            }
+            ShowMerchant(manager, data, expedition, shop);
 
             bool canRefresh = manager.CanRefreshShop;
             _refresh.interactable = canRefresh;
             _refreshCost.text = UiStrings.Get(UiKeys.Map.Coins, manager.RefreshCost);
             _refreshCost.color = canRefresh ? UiPalette.Virtue : UiPalette.Danger;
+        }
+
+        /// <summary>
+        /// The merchant's goods on its grid (stage 21): laid out once for a stock (a shop and its refreshes) and kept, so that a good bought
+        /// leaves its place empty until the next refresh; each one picked (the hand holds it), on sale, or beyond what can be bought now (the
+        /// coins; a potion without an empty slot) with its price.
+        /// </summary>
+        void ShowMerchant(ExpeditionManager manager, StaticData data, ExpeditionState expedition, MapNode shop)
+        {
+            IReadOnlyList<ItemOffer> stock = manager.ShopStock;
+            string shown = shop.Id + ":" + expedition.Shop.Refreshes;
+            if (_merchantPlaces == null || _merchantShown != shown)
+            {
+                // Round 56: the goods biggest first in the first eight columns, the potions down the last one in their order (a potion bought
+                // leaves its square empty: its row is its place among the potions). Round 58: the bags along the last row, the items above
+                // the empty row over it.
+                int goodsCount = manager.ShopGoodsCount;
+                var goods = new List<MerchantGood>();
+                for (int i = 0; i < stock.Count; i++)
+                {
+                    if (stock[i] != null)
+                    {
+                        OfferSize(data, stock[i], out int w, out int h);
+                        bool potion = stock[i].Kind == OfferKind.Potion;
+                        goods.Add(new MerchantGood(i, w, h, stock[i].Kind, potion && i >= goodsCount ? i - goodsCount : -1));
+                    }
+                }
+
+                _merchantPlaces = MerchantLayout.Lay(goods, MerchantGridView.GoodsColumns, MerchantGridView.ItemRows, MerchantGridView.BagRow, MerchantGridView.PotionColumn,
+                    out _merchantRows);
+                _merchantShown = shown;
+                _pointedGood = -1;
+            }
+
+            var pieces = new List<MerchantPiece>();
+            for (int i = 0; i < stock.Count; i++)
+            {
+                ItemOffer offer = stock[i];
+                if (offer == null || !_merchantPlaces.TryGetValue(i, out Placement at))
+                {
+                    continue;
+                }
+
+                OfferSize(data, offer, out int w, out int h);
+                var piece = new MerchantPiece { Slot = i, At = at, Width = w, Height = h, Price = manager.PriceOf(offer) };
+                if (offer.Kind == OfferKind.Item)
+                {
+                    piece.Item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                    piece.Icon = _art.OfItem(offer.Id);
+                }
+                else if (offer.Kind == OfferKind.Bag)
+                {
+                    piece.Bag = data.Bags.Get(offer.Id);
+                }
+                else
+                {
+                    piece.Icon = _art.OfPotion(offer.Id);
+                }
+
+                bool can = offer.Kind == OfferKind.Potion ? manager.CanBuyPotion(i) : manager.CanAfford(i);
+                piece.State = i == _pick ? MerchantGoodState.Picked : can ? MerchantGoodState.OnSale : MerchantGoodState.Unaffordable;
+                pieces.Add(piece);
+            }
+
+            _merchant.Show(pieces, _merchantRows, _art);
+            ShowMerchantInfo();
+        }
+
+        /// <summary>The good's squares across and down: an item's or a bag's, a potion's one.</summary>
+        static void OfferSize(StaticData data, ItemOffer offer, out int width, out int height)
+        {
+            switch (offer.Kind)
+            {
+                case OfferKind.Item:
+                    ItemData item = data.Items.Get(offer.Id);
+                    width = item.Width;
+                    height = item.Height;
+                    break;
+                case OfferKind.Bag:
+                    BagData bag = data.Bags.Get(offer.Id);
+                    width = bag.Width;
+                    height = bag.Height;
+                    break;
+                default:
+                    width = 1;
+                    height = 1;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// The merchant's tooltip (stage 21, Diablo's; round 57: over the good, Docs/Architecture/12_UI.md "상인"): the good the pointer is
+        /// on, with what merging it would make when the boards have its match (the right-click card said so before) and its price, centred
+        /// over its piece (under it when there is no room above) and kept on the screen. Nothing while the pointer is on none, or while
+        /// something is held: it rides the pointer.
+        /// </summary>
+        void ShowMerchantInfo()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            IReadOnlyList<ItemOffer> stock = manager.Phase == GamePhase.Shop ? manager.ShopStock : null;
+            bool holding = _pick >= 0 || _party.Hand.Holding;
+            ItemOffer offer = stock != null && !holding && _pointedGood >= 0 && _pointedGood < stock.Count ? stock[_pointedGood] : null;
+            ItemSlotView piece = offer != null ? _merchant.PieceOf(_pointedGood) : null;
+            _merchantInfoBox.SetActive(piece != null);
+            if (piece == null)
+            {
+                return;
+            }
+
+            StaticData data = Managers.Data.Data;
+            string lines;
+            if (offer.Kind == OfferKind.Item)
+            {
+                var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                lines = UiText.TooltipLines(item);
+                if (manager.HasMergeTarget(item))
+                {
+                    lines += "\n" + UiText.MergeHint(item);
+                }
+            }
+            else if (offer.Kind == OfferKind.Bag)
+            {
+                BagData bag = data.Bags.Get(offer.Id);
+                lines = UiText.Colored(UiText.Name(bag.Name), UiPalette.BagName) + "\n" + UiStrings.Get(UiKeys.Map.ShopBagSub, bag.Width, bag.Height) + "\n"
+                    + UiStrings.Get(UiKeys.Map.BagFacts, bag.Area);
+            }
+            else
+            {
+                PotionData potion = data.Potions.Get(offer.Id);
+                lines = UiText.Name(potion.Name) + "\n" + UiStrings.Get(UiKeys.Map.ShopPotion) + "\n" + UiText.PotionDetails(potion);
+            }
+
+            _merchantInfo.text = lines + "\n" + UiText.Colored(UiStrings.Get(UiKeys.Map.OfferPrice, manager.PriceOf(offer)), UiPalette.DiabloGold);
+            var box = (RectTransform)_merchantInfoBox.transform;
+            var screen = (RectTransform)box.parent;
+            LayoutRebuilder.ForceRebuildLayoutImmediate(box);
+            Rect placed = TooltipPlacement.Over(TooltipPlacement.In(piece.Rect, screen), box.rect.size, new Rect(0f, 0f, screen.rect.width, screen.rect.height));
+            box.anchoredPosition = new Vector2(placed.x, -placed.y);
         }
 
         static int CurrentFloor(ExpeditionState expedition)
@@ -480,6 +604,25 @@ namespace F1.UI
             Refresh();
         }
 
+        /// <summary>The I key (round 52) does what the inventory button does, while the button is there to press.</summary>
+        void Update()
+        {
+            if (InventoryKey.Pressed())
+            {
+                PressInventoryKey();
+            }
+        }
+
+        /// <summary>What the I key does: opens or closes the inventory window when its button is shown and works. Tests call it in place of the key.</summary>
+        public void PressInventoryKey()
+        {
+            if (_inventoryToggle.gameObject.activeInHierarchy && _inventoryToggle.interactable)
+            {
+                Managers.Sound.PlayEffect(SoundEffect.Button);
+                OnInventoryToggle();
+            }
+        }
+
         void OnEnter()
         {
             if (_selectedNodeId < 0)
@@ -545,8 +688,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// A tile of the shop (round 44). The tiles are built silent: a potion is bought with one click and sounds as put in (a click
-        /// when it cannot be); an item is picked, or put down, with a click. The tile shows its facts, so no card opens (round 46, S1).
+        /// A good of the shop (round 44; on the merchant's grid since stage 21): a potion is bought with one click and sounds as put in (a
+        /// click when it cannot be); an item or a bag is picked, or put down, with a click. Its facts and price show in the tooltip beside the grid.
         /// </summary>
         void OnTileClicked(int slot)
         {
@@ -581,21 +724,6 @@ namespace F1.UI
             _shopNote = null;
             _party.ClearSelection();
             Refresh();
-        }
-
-        /// <summary>Round 47: a right click on an item's tile opens its card beside the tile, inside the shop's window, with what merging it would do.</summary>
-        void OnTileRightClicked(int slot)
-        {
-            ExpeditionManager manager = Managers.Expedition;
-            ItemOffer offer = slot < manager.ShopStock.Count ? manager.ShopStock[slot] : null;
-            if (offer == null || offer.Kind != OfferKind.Item)
-            {
-                return;
-            }
-
-            var item = new EquippedItem(Managers.Data.Data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
-            string merge = manager.HasMergeTarget(item) ? UiText.MergeHint(item) : null;
-            _party.Tooltip.ShowBeside(item, (RectTransform)_shopTiles[slot].transform, false, _shopWindow, true, merge);
         }
 
         /// <summary>
@@ -634,6 +762,18 @@ namespace F1.UI
             {
                 int slot = Slot;
                 _screen.Bought(() => Managers.Expedition.BuyToBoard(slot, member, at), sound: false);
+                _screen.Refresh();
+            }
+
+            public bool CanPlaceInInventory(Placement at)
+            {
+                return Managers.Expedition.CanBuyToInventoryAt(Slot, at);
+            }
+
+            public void PlaceInInventory(Placement at)
+            {
+                int slot = Slot;
+                _screen.Bought(() => Managers.Expedition.BuyToInventoryAt(slot, at), sound: false);
                 _screen.Refresh();
             }
         }

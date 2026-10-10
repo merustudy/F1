@@ -26,6 +26,11 @@ namespace F1.Editor.Setup
         const float FrameDash = 4f;
         const float FrameGap = 3f;
 
+        /// <summary>A star on its square (stage 20): the glow behind, the edge and the fill (the view sizes the fill by its state: GridStarView).</summary>
+        const float StarGlowSize = 48f;
+        const float StarEdgeSize = 32f;
+        const float StarFillSize = 26f;
+
         /// <summary>
         /// A member's board between battles as a grid (GridBoardView): the grid's rect at the top of the column, and in it, in the order
         /// they are drawn, the bags, the squares (which take the pointer), the pieces and the ghost. The view makes the bags, the squares
@@ -39,16 +44,20 @@ namespace F1.Editor.Setup
             RectTransform bags = Layer(grid, p + "Bags");
             RectTransform squares = Layer(grid, p + "Squares");
             RectTransform pieces = Layer(grid, p + "Pieces");
+            RectTransform stars = Layer(grid, p + "Stars");
             RectTransform ghosts = Layer(grid, p + "Ghost");
 
             Image bagTemplate = BuildBagLeather(bags, p + "BagTemplate");
             GridSquareView squareTemplate = BuildGridSquare(squares, p + "SquareTemplate");
             ItemSlotView pieceTemplate = BuildItemSlot(pieces, p + "PieceTemplate");
+            GridStarView starTemplate = BuildGridStar(stars, p + "StarTemplate");
 
-            // The ghost's squares are see-through fills without a line (an outline copies the whole square, which would fill it); one edge
-            // of four thin lines goes round the whole shape.
-            Image ghostSquare = UiBuild.Image(p + "GhostSquareTemplate", ghosts, Color.white);
-            ghostSquare.gameObject.SetActive(false);
+            // The ghost's squares as one see-through block (round 53), and under it, among the squares, the squares' black over the lines
+            // between them, so that no line shows through it; one edge of four thin lines goes round the whole shape.
+            Image ghostFill = UiBuild.Image(p + "GhostFill", ghosts, Color.white);
+            ghostFill.gameObject.SetActive(false);
+            Image ghostFloor = UiBuild.Image(p + "GhostFloor", squares, UiPalette.GridSquare);
+            ghostFloor.gameObject.SetActive(false);
 
             Image ghostBag = KitFrame(p + "GhostBag", ghosts, UiArt.Slot);
             ghostBag.gameObject.SetActive(false);
@@ -81,11 +90,14 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_bagLayer", bags);
             UiBuild.SetReference(view, "_squareLayer", squares);
             UiBuild.SetReference(view, "_pieceLayer", pieces);
+            UiBuild.SetReference(view, "_starLayer", stars);
+            UiBuild.SetReference(view, "_starTemplate", starTemplate);
             UiBuild.SetReference(view, "_ghostLayer", ghosts);
             UiBuild.SetReference(view, "_bagTemplate", bagTemplate);
             UiBuild.SetReference(view, "_squareTemplate", squareTemplate);
             UiBuild.SetReference(view, "_pieceTemplate", pieceTemplate);
-            UiBuild.SetReference(view, "_ghostSquareTemplate", ghostSquare);
+            UiBuild.SetReference(view, "_ghostFill", ghostFill);
+            UiBuild.SetReference(view, "_ghostFloor", ghostFloor);
             UiBuild.SetReference(view, "_ghostBag", ghostBag);
             UiBuild.SetReference(view, "_ghostArt", ghostArt);
             UiBuild.SetReference(view, "_ghostIcon", ghostIcon);
@@ -94,6 +106,35 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_ghostEdge", ghostEdge);
             UiBuild.SetReferences(view, "_ghostEdgeLines", edgeLines);
             return view;
+        }
+
+        /// <summary>
+        /// A star on its star square (Slice B stage 20, GridStarView): a square's rect with a soft glow, the star's edge (a bigger star) and its
+        /// fill, centred. Off until the view shows it. Takes no pointer.
+        /// </summary>
+        static GridStarView BuildGridStar(Transform parent, string name)
+        {
+            RectTransform root = UiBuild.Rect(name, parent);
+            UiBuild.Size(root, GridGeometry.Square, GridGeometry.Square);
+            Image glow = StarPart(root, name + "Glow", UiArt.Glow, StarGlowSize);
+            Image edge = StarPart(root, name + "Edge", UiArt.Star, StarEdgeSize);
+            Image fill = StarPart(root, name + "Fill", UiArt.Star, StarFillSize);
+            var view = root.gameObject.AddComponent<GridStarView>();
+            UiBuild.SetReference(view, "_glow", glow);
+            UiBuild.SetReference(view, "_edge", edge);
+            UiBuild.SetReference(view, "_fill", fill);
+            root.gameObject.SetActive(false);
+            return view;
+        }
+
+        static Image StarPart(RectTransform root, string name, string art, float size)
+        {
+            Image image = UiBuild.Image(name, root, Color.white);
+            image.sprite = UiArt.Load(art);
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            UiBuild.Place(image.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(size, size));
+            return image;
         }
 
         /// <summary>One side of the ghost's edge: a thin line stretched along a side of the edge's rect, inside it. Takes no pointer.</summary>
@@ -188,11 +229,71 @@ namespace F1.Editor.Setup
         /// item without an icon; the fatigue tag at the top-right, the merge mark and the tier's stars at the bottom-left; and for a bag
         /// shown as a thing, the grey and the black squares inside its rim. Takes no pointer.
         /// </summary>
+        /// <summary>
+        /// What is held, on the pointer (round 54, HeldPointerView): a clear layer over the whole frame that takes every press while
+        /// something is held, and on it the held thing centred where the pointer is: a bag's rim and squares (or an item's squares when
+        /// it has no icon), the icons of the items in a bag, and an item's icon. Built last so that it lies over everything; hidden.
+        /// </summary>
+        static HeldPointerView BuildHeldPointer(Transform frame)
+        {
+            Image layer = UiBuild.Image("HeldPointer", frame, Color.clear, raycastTarget: true);
+            UiBuild.Stretch(layer.rectTransform);
+            RectTransform shape = UiBuild.Rect("HeldShape", layer.transform);
+            UiBuild.Place(shape, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(GridGeometry.Square, GridGeometry.Square));
+
+            // A held bag's rim is a frame of four edges round its squares (no fill): the colour where it would land shows through it.
+            RectTransform rim = UiBuild.Rect("HeldBagRim", shape);
+            UiBuild.Stretch(rim, -GridGeometry.BagRim, -GridGeometry.BagRim, -GridGeometry.BagRim, -GridGeometry.BagRim);
+            Image[] rimEdges =
+            {
+                EdgeLine(rim, "HeldBagRimTop", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0f, GridGeometry.BagRim)),
+                EdgeLine(rim, "HeldBagRimLeft", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(GridGeometry.BagRim, 0f)),
+                EdgeLine(rim, "HeldBagRimBottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0f, GridGeometry.BagRim)),
+                EdgeLine(rim, "HeldBagRimRight", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(GridGeometry.BagRim, 0f)),
+            };
+            rim.gameObject.SetActive(false);
+
+            RectTransform squaresRect = UiBuild.Rect("HeldSquares", shape);
+            UiBuild.Stretch(squaresRect);
+            var squares = squaresRect.gameObject.AddComponent<SquareGrid>();
+            squares.color = UiPalette.GridSquare;
+            squares.Shape(1, 1, GridGeometry.Gap);
+            squaresRect.gameObject.SetActive(false);
+
+            Image bagItem = UiBuild.Image("HeldBagItem", shape, Color.white);
+            bagItem.preserveAspect = true;
+            bagItem.gameObject.SetActive(false);
+
+            RectTransform art = UiBuild.Rect("HeldArt", shape);
+            UiBuild.Place(art, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(GridGeometry.Square, GridGeometry.Square));
+            Image icon = UiBuild.Image("HeldIcon", art, Color.white);
+            icon.preserveAspect = true;
+            UiBuild.Stretch(icon.rectTransform);
+
+            var view = layer.gameObject.AddComponent<HeldPointerView>();
+            UiBuild.SetReference(view, "_shape", shape);
+            UiBuild.SetReference(view, "_art", art);
+            UiBuild.SetReference(view, "_icon", icon);
+            UiBuild.SetReference(view, "_bagRim", rim.gameObject);
+            UiBuild.SetReferences(view, "_bagRimEdges", rimEdges);
+            UiBuild.SetReference(view, "_squares", squares);
+            UiBuild.SetReference(view, "_bagItemTemplate", bagItem);
+            layer.gameObject.SetActive(false);
+            return view;
+        }
+
         static ItemSlotView BuildItemSlot(Transform parent, string name)
         {
-            Image frame = UiBuild.Image(name, parent, UiPalette.GridPiece);
+            Image frame = UiBuild.Image(name, parent, UiPalette.GridSquareLine);
             UiBuild.Size(frame, GridGeometry.Square, GridGeometry.Square);
             Outline line = AddLine(frame, UiPalette.LabelLine, 1f);
+
+            // An item's ground (round 53): its squares one by one, the frame's grey between them as the grid's line.
+            RectTransform groundRect = UiBuild.Rect(name + "Ground", frame.transform);
+            UiBuild.Stretch(groundRect);
+            var ground = groundRect.gameObject.AddComponent<SquareGrid>();
+            ground.color = UiPalette.GridPiece;
+            ground.Shape(1, 1, GridGeometry.Gap);
 
             Image picked = UiBuild.Image(name + "Picked", frame.transform, UiPalette.GridPicked);
             UiBuild.Stretch(picked.rectTransform);
@@ -238,6 +339,7 @@ namespace F1.Editor.Setup
             var view = frame.gameObject.AddComponent<ItemSlotView>();
             UiBuild.SetReference(view, "_frame", frame);
             UiBuild.SetReference(view, "_frameLine", line);
+            UiBuild.SetReference(view, "_ground", ground);
             UiBuild.SetReference(view, "_picked", picked);
             UiBuild.SetReference(view, "_art", art);
             UiBuild.SetReference(view, "_outline", outline);

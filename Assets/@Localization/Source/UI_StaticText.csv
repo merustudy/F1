@@ -84,16 +84,17 @@ Map.Coins,A number of region coins beside the coin mark (the header; an offer's 
 Map.ShopPotion,Under the name of a potion on offer in the shop.,포션,Potion
 Map.ShopBagSub,Under the name of a bag on offer or dropped (Slice B stage 19). {0} x {1} = its squares across and down.,가방 · {0}×{1},Bag · {0}×{1}
 Map.BagFacts,The facts of a bag on a tile (Slice B stage 19). {0} = the squares it adds.,칸 +{0}. 틀의 빈 자리에 놓습니다. 안의 아이템과 함께 옮길 수 있습니다.,+{0} squares. Lay it in an empty part of the frame; it moves with what lies in it.
+Map.OfferPrice,The price line of a good in the merchant's tooltip (Slice B stage 21). {0} = the coins.,값 {0} 코인,Price: {0} coins
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.Grade,{0} = item grade.,등급 {0},Grade {0}
 Board.Forward,Moves a mercenary one row forward (towards row 1); the one standing there moves back.,앞으로,Forward
 Board.Back,Moves a mercenary one row back; the one standing there moves forward.,뒤로,Back
 Board.Hint,How to use the boards on the party side (Slice B stage 19).,"아이템을 누르면 집고, 칸을 누르면 놓습니다(겹친 하나는 인벤토리로). 든 채로 우클릭·휠·R: 돌리기. 가방의 빈 칸을 누르면 가방을 집습니다. 앞으로와 뒤로는 옆 열의 용병과 자리를 바꿉니다.","Click an item to pick it up, then a square to put it down (one item in the way goes to the inventory). While holding: right-click, wheel or R turns it. Click an empty square of a bag to pick the bag. Forward and Back swap with the next row."
-Board.InventoryShow,Opens the inventory popup.,인벤토리 보기,Show inventory
-Board.InventoryHide,Closes the inventory popup.,인벤토리 닫기,Close inventory
+Board.InventoryShow,Opens the inventory window; I does too (round 52).,인벤토리 보기 (I),Show inventory (I)
+Board.InventoryHide,Closes the inventory window; I does too (round 52).,인벤토리 닫기 (I),Close inventory (I)
 Board.InventoryHeading,The heading of the inventory popup (round 49).,인벤토리,Inventory
 Board.InventoryTitle,"The inventory popup's squares in use, beside its heading (round 49). {0} = squares in use. {1} = all its squares.",{0} / {1}칸,{0} / {1} squares
-Board.InventoryHint,How to use the inventory popup's grid (round 49).,아이템을 누르면 손에 듭니다 · 왼쪽 보드나 이 격자의 빈 칸을 누르면 그 자리에 놓입니다,Click an item to hold it · click a free square of a board or of this grid to put it there
+Board.InventoryHint,"How to use the inventory window's grid (round 49; round 52: the window lies over the stage, the boards below it, and I opens and closes it).",아이템을 누르면 손에 듭니다 · 아래 보드나 이 격자의 빈 칸을 누르면 그 자리에 놓입니다 · I: 열고 닫기,Click an item to hold it · click a free square of a board below or of this grid to lay it there · I: open and close
 Board.TurnHint,"Under a held item's tooltip in the inventory popup (round 49): how to turn it and let go.",R · 우클릭 · 휠: 돌리기   Esc: 내려놓기,R · right-click · wheel: turn   Esc: let go
 Board.ToInventory,Sends the selected board item to the inventory.,인벤토리로,To inventory
 Board.FatigueTag,On the violet tag of a board item that costs fatigue when a battle starts. {0} = the cost.,+{0},+{0}
@@ -105,6 +106,7 @@ Board.GhostBag,Over a held bag's ghost where it can be laid (Slice B stage 19).,
 Board.MergeInto,On a board cell the chosen item would merge into. {0} = the tier the merge makes.,합치기 → {0},Merge → {0}
 Item.Title,{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade. A Common item uses Item.TitlePlain.,{0} · {1} · 등급 {2},{0} · {1} · Grade {2}
 Item.TitlePlain,The title of a Common item (no tier word). {0} = item name. {1} = grade.,{0} · 등급 {1},{0} · Grade {1}
+Item.TooltipTitle,The title in Diablo's tooltip without the grade (round 57). {0} = item name. {1} = tier. A Common item shows its name alone.,{0} · {1},{0} · {1}
 Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
 Item.Armor,Item category: defensive gear.,방어 장비,Armor
 Item.Attack,Item category: an attack that is not a weapon.,공격 아이템,Attack item
@@ -125,6 +127,12 @@ Item.Gold,The last tier of an item.,금,Gold
 Item.MergeHint,"Under a chosen item's facts when a board holds the same item at the same tier. {0} = item name. {1} = its tier. {2} = the tier up.",같은 {0}·{1} 위에 놓으면 합쳐서 {2} 하나가 됩니다.,"Put it on another {0} ({1}) and they merge into one {2}."
 Item.MergeHintPlain,"Item.MergeHint for a Common item, which names no tier of its own. {0} = item name. {1} = the tier up.",같은 {0} 위에 놓으면 합쳐서 {1} 하나가 됩니다.,Put it on another {0} and they merge into one {1}.
 Item.Change,A value before and after a change. {0} = before. {1} = after.,{0} → {1},{0} → {1}
+Item.Melee,"In an item's facts: a melee weapon, which the stars of a whetstone strengthen (Slice B stage 20).",근접,Melee
+Item.NoActivation,In an item's facts in place of its cooldown: an item that never activates and works by its stars (stage 20).,발동하지 않음,Never activates
+Item.StarDamage,The effect line of a star item (stage 20): a melee weapon on one of its stars deals more. {0} = how much.,★에 놓인 근접 무기: 피해 +{0},★ A melee weapon on a star: damage +{0}
+Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which already count it: what the stars on it add. {0} = the star items' names. {1} = the damage they add.",(★ {0} +{1}),(★ {0} +{1})
+Item.StarLit,"On a star item's card (stage 20): how many of its stars a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons' names.",걸린 ★ {0}/{1} — {2},Stars lit {0}/{1} — {2}
+Item.StarLitNone,On a star item's card when no melee weapon lies on its stars (stage 20). {0} = its stars.,걸린 ★ 0/{0},Stars lit 0/{0}
 Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
 Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}

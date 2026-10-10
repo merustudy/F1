@@ -107,6 +107,7 @@ namespace F1.UI
             /// <summary>Under the name of a bag on offer or of a bag dropped (Slice B stage 19). {0} x {1} = its squares, {2} = how many.</summary>
             public const string ShopBagSub = "Map.ShopBagSub";
             public const string BagFacts = "Map.BagFacts";
+            public const string OfferPrice = "Map.OfferPrice";
         }
 
         public static class Board
@@ -138,6 +139,7 @@ namespace F1.UI
         {
             public const string Title = "Item.Title";
             public const string TitlePlain = "Item.TitlePlain";
+            public const string TooltipTitle = "Item.TooltipTitle";
             public const string Weapon = "Item.Weapon";
             public const string Armor = "Item.Armor";
             public const string Attack = "Item.Attack";
@@ -158,6 +160,12 @@ namespace F1.UI
             public const string MergeHint = "Item.MergeHint";
             public const string MergeHintPlain = "Item.MergeHintPlain";
             public const string Change = "Item.Change";
+            public const string Melee = "Item.Melee";
+            public const string NoActivation = "Item.NoActivation";
+            public const string StarDamage = "Item.StarDamage";
+            public const string StarBonus = "Item.StarBonus";
+            public const string StarLit = "Item.StarLit";
+            public const string StarLitNone = "Item.StarLitNone";
         }
 
         public static class Effect
