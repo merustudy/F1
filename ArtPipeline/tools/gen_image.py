@@ -293,20 +293,23 @@ HEIGHT_RANGE = (10, 97)
 # the ring, so the ring never leaves the canvas.
 FIGURE_OUTLINE = 1.35
 
-# The cell fit: an item's icon is drawn for the cells the item takes on a unit's board, stacked
-# top to bottom in the panel column under the unit (ItemData.csv, Size; 2026-10-03 mockup V). A
-# cell is 180x60 on screen with 2 between cells (BattleItemView; 2026-10-04 mockup B, before it
-# 180x50 with 4), so a bigger item is a taller shape; the icon sits inside the slot's rim (8 at
-# the sides, 5 above and below), at twice the size on screen. For each count of cells: the
-# section of STYLE_RUNTIME.md that says how the item lies in that shape, the size it is
-# generated at and the canvas it is fitted to. (The icons on hand were drawn for the 180x50
-# cells, on canvases of 328x80, 328x188 and 328x296; the screen fits them by width, so they
-# stand the same size with more room above and below, and they are not redrawn.)
+# The cell fit: an item's icon is drawn in one of three compositions (a wide strip, a wide rectangle,
+# nearly a square: STYLE_RUNTIME.md §19-§21), made for the stacked strip cells of 2026-10-03 (180x60
+# on screen). Since the grid board (Slice B stage 19) an item has a shape of Width x Height squares;
+# the composition is the one closest in proportion to the item's piece (read_item_cells; round 50).
+# For each: the section of STYLE_RUNTIME.md, the size it is generated at and the canvas it is fitted
+# to. After fitting, an icon is trimmed to what is drawn before it goes into the game
+# (tools/trim_items.py). (The icons on hand were drawn on canvases of 328x80, 328x188 and 328x296.)
 ITEM_CELLS = {
     1: {"section": 19, "generate": "1536x512", "canvas": (328, 100)},
     2: {"section": 20, "generate": "1536x1024", "canvas": (328, 224)},
     3: {"section": 21, "generate": "1024x1024", "canvas": (328, 348)},
 }
+# A grid square and the gap between squares on screen, and the margin inside a piece round its icon
+# (GridGeometry.Square, Gap; ItemSlotView.ArtMargin).
+PIECE_SQUARE = 50
+PIECE_GAP = 2
+PIECE_ART_MARGIN = 5
 # The ring an icon is given, in the pixels of its canvas, and how much of the canvas it may fill.
 ITEM_OUTLINE = 4
 ITEM_FILL = 0.98
@@ -490,21 +493,27 @@ def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
 
 
 def read_item_cells(key: str) -> int:
-    """How many cells of a board the item takes: the Size of its row in the game's data."""
+    """The composition an item's icon is drawn in (a key of ITEM_CELLS): the one whose fitted canvas is
+    closest in proportion to the item's piece on the board, from its Width and Height in the game's data
+    (Slice B stage 19 replaced Size with a grid shape; round 50)."""
     path = GAME_DATA / "ItemData.csv"
     require_file(path, "Game Data ItemData.csv")
     with path.open(encoding="utf-8-sig", newline="") as handle:
-        sizes = {row.get("Id"): row.get("Size") for row in csv.DictReader(handle)}
+        shapes = {row.get("Id"): (row.get("Width"), row.get("Height")) for row in csv.DictReader(handle)}
 
     try:
-        cells = int(sizes.get(key) or "")
+        width, height = (int(v or "") for v in shapes.get(key, ("", "")))
     except ValueError as error:
-        raise PipelineError(f"ItemData.csv 의 '{key}' 의 Size 가 정수가 아니다.\n  파일: {path}") from error
-    if cells not in ITEM_CELLS:
-        raise PipelineError(
-            f"ItemData.csv 의 '{key}' 의 Size {cells} 에 맞는 칸 모양이 없다 (있는 것: {sorted(ITEM_CELLS)})."
-        )
-    return cells
+        raise PipelineError(f"ItemData.csv 의 '{key}' 의 Width·Height 가 정수가 아니다.\n  파일: {path}") from error
+    if not (1 <= width <= 3 and 1 <= height <= 3):
+        raise PipelineError(f"ItemData.csv 의 '{key}' 의 모양 {width}x{height} 가 격자의 한 변 1~3 밖이다.")
+    box = (piece_side(width) - 2 * PIECE_ART_MARGIN) / (piece_side(height) - 2 * PIECE_ART_MARGIN)
+    return min(ITEM_CELLS, key=lambda cells: abs(math.log(ITEM_CELLS[cells]["canvas"][0] / ITEM_CELLS[cells]["canvas"][1] / box)))
+
+
+def piece_side(squares: int) -> int:
+    """A side of an item's piece on the board, in screen pixels (GridGeometry.Square, Gap)."""
+    return squares * PIECE_SQUARE + (squares - 1) * PIECE_GAP
 
 
 def read_ui_columns(row: dict, key: str, path: Path) -> dict:

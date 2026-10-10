@@ -234,3 +234,4 @@ Time,Type,Key,Name,Model,Quality,Size,TextInTokens,ImageInTokens,OutputTokens,Es
 2026-10-06T21:07:07+09:00,hit,archmage,archmage_resolute,gpt-image-2.5-sunburst,medium,1536x1024,1610,1536,343,0.0306
 2026-10-06T21:07:28+09:00,hit,spellblade,spellblade_broken,gpt-image-2.5-sunburst,medium,1536x1024,1682,1536,343,0.0310
 2026-10-06T21:07:48+09:00,hit,spellblade,spellblade_resolute,gpt-image-2.5-sunburst,medium,1536x1024,1641,1536,343,0.0308
+2026-10-10T08:28:57+09:00,item,rat_bite,rat_claw,gpt-image-2.5-sunburst,medium,1536x512,942,1508,134,0.0208

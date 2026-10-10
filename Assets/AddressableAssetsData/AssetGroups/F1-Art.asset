@@ -39,6 +39,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c8e2268248dc4c56ae29726d630d4da
+    m_Address: item/whetstone
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0f7c7f87b8ca442df8004987503377d4
     m_Address: item/spear
     m_ReadOnly: 0

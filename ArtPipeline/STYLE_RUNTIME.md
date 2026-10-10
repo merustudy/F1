@@ -280,7 +280,7 @@ drawing style on a transparent background.
 
 ## 19. Item Shape: One Cell
 
-Added to §7 for an item that takes one cell of a board: a wide strip.
+Added to §7 for an item whose piece on the board is a wide strip (three squares or two side by side).
 
 - The picture is a wide strip, a little over three times as wide as it is tall. The item fills the strip from its left end to its right end.
 - Lay a long item (a sword, an axe, a mace, a staff, a bow) flat and level along the strip: its grip or lower end at the left, its point, blade or head at the right. It is not tilted.
@@ -288,14 +288,14 @@ Added to §7 for an item that takes one cell of a board: a wide strip.
 
 ## 20. Item Shape: Two Cells
 
-Added to §7 for an item that takes two cells of a board: two cells stacked, a wide rectangle.
+Added to §7 for an item whose piece on the board is a wide rectangle (three squares wide, two tall).
 
 - The picture is a wide rectangle, about three units wide to two tall. The item fills it from corner to corner.
 - Lay a long item (a bow, a spear) diagonally across it: its grip or lower end at the bottom left, its point or head at the top right. Draw it as long and as slender as it really is.
 
 ## 21. Item Shape: Three Cells
 
-Added to §7 for an item that takes three cells of a board: three cells stacked, nearly a square.
+Added to §7 for an item whose piece on the board is nearly a square (one square, two by two, or two wide and three tall).
 
 - The picture is nearly square, a little taller than it is wide (about fifteen to sixteen). The item fills it from corner to corner.
 - Lay a long item (a halberd, a pike) diagonally across it: its grip or lower end at the bottom left, its point or head at the top right. Draw it as long and as slender as it really is.
