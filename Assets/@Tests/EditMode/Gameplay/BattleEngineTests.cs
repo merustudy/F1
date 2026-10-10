@@ -1416,5 +1416,49 @@ namespace F1.Tests
             BattleUnitSetup gap = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 1), null);
             Assert.Throws<ArgumentException>(() => Battle(balance, TestData.Units(gap), enemies), "An empty entry on the board.");
         }
+
+        [Test]
+        public void StarDamage_AddsToAWeaponsDamage_BeforeTheWeaponPowerPassiveGrowsIt()
+        {
+            // Slice B stage 20: a whetstone's star on the weapon adds 1; the valkyrie's +100% at death's door doubles the 11.
+            BattleUnitSetup Valkyrie(int hp)
+            {
+                BattleUnitSetup unit = TestData.Mercenary("valkyrie", 1, hp, TestData.Attack(1000, 10)).WithMaxHp(100)
+                    .WithPassive(PassiveTrigger.Always, PassiveCondition.SelfInDog, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self, 100);
+                unit.StarDamage = new[] { 1 };
+                return unit;
+            }
+
+            BattleEngine healthy = Battle(TestData.Balance(), TestData.Units(Valkyrie(100)), TestData.Units(IdleEnemy(100)));
+            healthy.AdvanceTo(1000);
+            Assert.AreEqual(89, healthy.Enemies[0].Hp);
+
+            BattleEngine atDeathsDoor = Battle(TestData.Balance(), TestData.Units(Valkyrie(0)), TestData.Units(IdleEnemy(100)));
+            atDeathsDoor.AdvanceTo(1000);
+            Assert.AreEqual(78, atDeathsDoor.Enemies[0].Hp);
+        }
+
+        [Test]
+        public void AnItemWithoutEffects_NeverActivates_AndTheOthersFireAsBefore()
+        {
+            var whetstone = new EquippedItem(new ItemData("whetstone", TestData.Text("whetstone"), ItemCategory.Other, 1, 1, 0, RowSpan.All,
+                new ItemEffect[0], 8, null, 8, false, new[] { new StarSquare(0, -1), new StarSquare(0, 1) }, 1), 8);
+            BattleUnitSetup unit = TestData.Mercenary("a", 1, 100, whetstone, TestData.Attack(1000, 5, "sword"));
+            unit.StarDamage = new[] { 0, 1 };
+            BattleEngine battle = Battle(TestData.Balance(), TestData.Units(unit), TestData.Units(IdleEnemy(100)));
+
+            battle.AdvanceTo(5000);
+            CollectionAssert.AreEqual(Enumerable.Repeat("sword", 5), Of(battle, BattleEventKind.ItemActivated).Select(e => e.Id));
+            Assert.IsFalse(battle.Party[0].Items[0].Active, "The whetstone is never active: it has no cooldown to fill.");
+            Assert.AreEqual(100 - 5 * 6, battle.Enemies[0].Hp);
+        }
+
+        [Test]
+        public void StarDamage_MustMatchTheItemsOneForOne()
+        {
+            BattleUnitSetup unit = TestData.Mercenary("a", 1, 100, TestData.Attack(1000, 5));
+            unit.StarDamage = new[] { 1, 1 };
+            Assert.Throws<ArgumentException>(() => Battle(TestData.Balance(), TestData.Units(unit), TestData.Units(IdleEnemy(100))));
+        }
     }
 }

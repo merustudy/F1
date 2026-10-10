@@ -112,15 +112,19 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
-                "ShopWeight", RowMapping.Icon, "Price"));
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage"));
 
             return RowMapping.MapRows(table, errors, row =>
             {
-                var effects = new List<ItemEffect> { ReadEffect(row, "Effect1") };
-                string[] second = { "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power" };
-                if (!second.All(row.IsEmpty))
+                // An item without effects (all of Effect1 empty) never activates: a star item (stage 20). ItemData checks the rest.
+                var effects = new List<ItemEffect>();
+                foreach (string prefix in new[] { "Effect1", "Effect2" })
                 {
-                    effects.Add(ReadEffect(row, "Effect2"));
+                    string[] columns = { prefix + "Kind", prefix + "Target", prefix + "Reach", prefix + "Power" };
+                    if (!columns.All(row.IsEmpty))
+                    {
+                        effects.Add(ReadEffect(row, prefix));
+                    }
                 }
 
                 return new ItemData(
@@ -134,7 +138,10 @@ namespace F1.Editor.Data
                     effects,
                     row.Int("ShopWeight"),
                     RowMapping.ReadArt(row, RowMapping.Icon),
-                    row.Int("Price"));
+                    row.Int("Price"),
+                    row.Bool("Melee"),
+                    row.StarSquares("Stars"),
+                    row.OptionalInt("StarDamage", 0));
             });
         }
 

@@ -449,6 +449,32 @@ namespace F1.Gameplay
             Pick(state, slot);
         }
 
+        /// <summary>Whether a drop could be laid on a placement of the inventory's grid (round 55): an item (a bag never goes there) over no item there.</summary>
+        public static bool CanTakeLootToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
+        {
+            ItemOffer drop = DropAt(state, slot);
+            if (drop == null || drop.Kind != OfferKind.Item)
+            {
+                return false;
+            }
+
+            ItemData item = data.Items.Get(drop.Id);
+            return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
+        }
+
+        /// <summary>Takes a drop onto a placement of the inventory's grid (round 55).</summary>
+        public static void TakeLootToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
+        {
+            if (!CanTakeLootToInventoryAt(data, state, slot, at))
+            {
+                throw new InvalidOperationException($"The drop in slot {slot} cannot go to {at} of the inventory now.");
+            }
+
+            ItemOffer drop = state.Loot[slot];
+            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier), at);
+            Pick(state, slot);
+        }
+
         /// <summary>Leaves whatever loot still lies there and goes on to choosing the next node.</summary>
         public static void LeaveLoot(ExpeditionState state)
         {
@@ -848,9 +874,10 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// The stock of a shop after so many refreshes: the shop stream of the node is drawn that many times past the first, and the
-        /// last draw is the stock. Every slot is drawn anew, sold ones too. The offers are the items and potions a shop stocks (those with a
-        /// weight and a price), at the floor's grade and tier, without repetition.
+        /// The stock of a shop after so many refreshes (stage 21, round 56): first its potions, drawn once from the shop stream of the node
+        /// (<see cref="DrawPotions"/>), then its goods, drawn that many times past the first, the last draw being the goods. The goods are
+        /// the items and bags a shop stocks (those with a weight and a price), at the floor's grade and tier, without repetition; the
+        /// stock is the goods followed by the potions.
         /// </summary>
         static List<ItemOffer> DrawStock(StaticData data, ExpeditionState state, MapNode shop, int refreshes)
         {
@@ -858,13 +885,64 @@ namespace F1.Gameplay
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
             int grade = dungeon.ItemGradeAt(shop.Floor);
             ItemTier tier = dungeon.ItemTierAt(shop.Floor, false);
+            List<ItemOffer> potions = DrawPotions(data, rng);
             List<ItemOffer> stock = null;
             for (int draw = 0; draw <= refreshes; draw++)
             {
-                stock = DrawOffers(data, state, rng, data.Balance.ShopSlots, grade, tier);
+                stock = DrawOffers(data, rng, data.Balance.ShopSlots, grade, tier);
             }
 
+            stock.AddRange(potions);
             return stock;
+        }
+
+        /// <summary>
+        /// A shop's potions (round 56, the merchant's last column): each potion a shop stocks comes with `ShopPotionChancePercent`, and when
+        /// none does, one of them by its weight, so that a shop has at least one. They come whether or not a potion slot is empty (one
+        /// cannot be bought without an empty slot).
+        /// </summary>
+        static List<ItemOffer> DrawPotions(StaticData data, Pcg32 rng)
+        {
+            var kinds = new List<PotionData>();
+            foreach (PotionData potion in data.Potions.Ordered)
+            {
+                if (potion.ShopWeight > 0 && potion.Price > 0)
+                {
+                    kinds.Add(potion);
+                }
+            }
+
+            var potions = new List<ItemOffer>();
+            foreach (PotionData potion in kinds)
+            {
+                if (rng.NextInt(100) < data.Balance.ShopPotionChancePercent)
+                {
+                    potions.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
+                }
+            }
+
+            if (potions.Count == 0 && kinds.Count > 0)
+            {
+                int total = 0;
+                foreach (PotionData potion in kinds)
+                {
+                    total += potion.ShopWeight;
+                }
+
+                int pick = rng.NextInt(total);
+                foreach (PotionData potion in kinds)
+                {
+                    if (pick < potion.ShopWeight)
+                    {
+                        potions.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
+                        break;
+                    }
+
+                    pick -= potion.ShopWeight;
+                }
+            }
+
+            return potions;
         }
 
         /// <summary>What an offer costs: an item's price times its tier's percent (as its effects grow), a potion's or a bag's price as it is.</summary>
@@ -981,6 +1059,34 @@ namespace F1.Gameplay
             Pay(data, state, slot);
         }
 
+        /// <summary>
+        /// Whether the item in a slot could be bought onto a placement of the inventory's grid (round 55): the coins cover it and there it
+        /// lies over no item (a bag never goes there).
+        /// </summary>
+        public static bool CanBuyToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
+        {
+            ItemOffer offer = OfferAt(state, slot);
+            if (offer == null || offer.Kind != OfferKind.Item || state.Coins < PriceOf(data, offer))
+            {
+                return false;
+            }
+
+            ItemData item = data.Items.Get(offer.Id);
+            return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
+        }
+
+        public static void BuyToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
+        {
+            if (!CanBuyToInventoryAt(data, state, slot, at))
+            {
+                throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto {at} of the inventory now.");
+            }
+
+            ItemOffer offer = state.Shop.Stock[slot];
+            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), at);
+            Pay(data, state, slot);
+        }
+
         /// <summary>Whether the potion in a slot could be bought: the coins cover it and a potion slot is empty.</summary>
         public static bool CanBuyPotion(StaticData data, ExpeditionState state, int slot)
         {
@@ -1022,7 +1128,43 @@ namespace F1.Gameplay
 
             state.Coins -= RefreshCost(data, state);
             state.Shop.Refreshes++;
-            state.Shop.Stock = DrawStock(data, state, state.Map.Get(state.CurrentNodeId), state.Shop.Refreshes);
+
+            // Round 56 ("포션은 그대로"): the goods are drawn anew; the potions stay as they are (one bought stays gone).
+            List<ItemOffer> fresh = DrawStock(data, state, state.Map.Get(state.CurrentNodeId), state.Shop.Refreshes);
+            int goods = ShopGoodsCount(data);
+            var stock = new List<ItemOffer>();
+            for (int i = 0; i < fresh.Count; i++)
+            {
+                stock.Add(i < goods || i >= state.Shop.Stock.Count ? fresh[i] : state.Shop.Stock[i]);
+            }
+
+            state.Shop.Stock = stock;
+        }
+
+        /// <summary>
+        /// How many goods (items and bags) a shop's stock begins with, before its potions (Slice B stage 21, round 56): `ShopSlots`, or fewer
+        /// when the data has fewer priced items and bags. It depends on the data alone.
+        /// </summary>
+        public static int ShopGoodsCount(StaticData data)
+        {
+            int candidates = 0;
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                if (item.ShopWeight > 0 && item.Price > 0)
+                {
+                    candidates++;
+                }
+            }
+
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                if (bag.ShopWeight > 0 && bag.Price > 0)
+                {
+                    candidates++;
+                }
+            }
+
+            return Math.Min(data.Balance.ShopSlots, candidates);
         }
 
         /// <summary>Leaves the shop: what was not bought is gone, and the party goes on to the next floor.</summary>
@@ -1182,10 +1324,10 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Draws what a shop offers without repetition, by shop weight: the items with a weight and a price at the grade and tier given,
-        /// the bags with a weight and a price (Slice B stage 19), and the potions with a weight and a price while a potion slot is empty.
+        /// Draws a shop's goods without repetition, by shop weight: the items with a weight and a price at the grade and tier given, and
+        /// the bags with a weight and a price (Slice B stage 19). The potions are drawn apart (round 56: <see cref="DrawPotions"/>).
         /// </summary>
-        static List<ItemOffer> DrawOffers(StaticData data, ExpeditionState state, Pcg32 rng, int count, int grade, ItemTier tier)
+        static List<ItemOffer> DrawOffers(StaticData data, Pcg32 rng, int count, int grade, ItemTier tier)
         {
             var candidates = new List<ItemOffer>();
             var weights = new List<int>();
@@ -1204,18 +1346,6 @@ namespace F1.Gameplay
                 {
                     candidates.Add(new ItemOffer(OfferKind.Bag, bag.Id, 0));
                     weights.Add(bag.ShopWeight);
-                }
-            }
-
-            if (FreePotionSlot(state) >= 0)
-            {
-                foreach (PotionData potion in data.Potions.Ordered)
-                {
-                    if (potion.ShopWeight > 0 && potion.Price > 0)
-                    {
-                        candidates.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
-                        weights.Add(potion.ShopWeight);
-                    }
                 }
             }
 
@@ -1262,6 +1392,7 @@ namespace F1.Gameplay
                     Hp = member.Hp,
                     Items = member.Board.InReadingOrder(),
                     Layout = BoardLayout.Of(member.Board),
+                    StarDamage = StarRules.DamageInReadingOrder(member.Board),
                     Passive = data.Jobs.Get(member.JobId).Passive,
                     HasDog = true,
                     Fatigue = member.Fatigue,

@@ -142,6 +142,10 @@
       "Value": 5000
     },
     {
+      "Key": "ShopPotionChancePercent",
+      "Value": 50
+    },
+    {
       "Key": "ShopRefreshBase",
       "Value": 3
     },
@@ -151,7 +155,7 @@
     },
     {
       "Key": "ShopSlots",
-      "Value": 4
+      "Value": 8
     },
     {
       "Key": "StormBaseDamage",

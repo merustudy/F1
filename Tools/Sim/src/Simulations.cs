@@ -278,6 +278,11 @@ namespace F1.Sim
             public int BagsAdded;
             public int MembersAtEnd;
 
+            /// <summary>Star items on the boards at the end, the melee weapons their stars light, and the star damage on the weapons, summed (Slice B stage 20).</summary>
+            public int StarItems;
+            public int StarsLit;
+            public long StarDamage;
+
             /// <summary>Fatigue the survivors came back with, and how many came back.</summary>
             public long SurvivorFatigue;
             public int Survivors;
@@ -327,6 +332,7 @@ namespace F1.Sim
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
             Console.WriteLine($"  bags per member at the end: added {BattleStats.Ratio(stats.BagsAdded, stats.MembersAtEnd)}, bag squares {Average(stats.BagSquares, stats.MembersAtEnd)}");
+            Console.WriteLine($"  stars per expedition at the end: star items {BattleStats.Ratio(stats.StarItems, runs)}, weapons lit {BattleStats.Ratio(stats.StarsLit, runs)}, star damage on weapons {Average(stats.StarDamage, runs)}");
             Console.WriteLine($"  fatigue of the survivors at the end: avg {Average(stats.SurvivorFatigue, stats.Survivors)}, highest {stats.HighestFatigue}; equipment fatigue per member per battle {Average(stats.EquipmentFatigue, stats.MemberBattles)}");
             Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
@@ -493,6 +499,16 @@ namespace F1.Sim
                     stats.BagSquares += member.Board.Bags.Sum(bag => bag.Bag.Area);
                     stats.BagsAdded += member.Board.Bags.Count(bag => !bag.Bag.Start);
                     stats.MembersAtEnd++;
+                    foreach (BoardItem placed in member.Board.Items)
+                    {
+                        if (placed.Item.Item.Stars.Count > 0)
+                        {
+                            stats.StarItems++;
+                            stats.StarsLit += StarRules.Lit(member.Board, placed).Count;
+                        }
+
+                        stats.StarDamage += StarRules.DamageOn(member.Board, placed);
+                    }
                 }
                 stats.ItemsInInventory += state.Inventory.Count;
                 stats.ExpeditionsWithBreakdown += brokeDown ? 1 : 0;

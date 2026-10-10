@@ -53,6 +53,12 @@ namespace F1.Gameplay
             return effect.MagnitudeAt(Grade, balance.TierPercent(Tier));
         }
 
+        /// <summary>
+        /// What a melee weapon on one of the item's stars deals more (Slice B stage 20): the data's StarDamage at Common, as much again per
+        /// tier step (Bronze twice, Silver three times, Gold four times). 0 for an item without stars.
+        /// </summary>
+        public int StarDamage => Item.StarDamage * ((int)Tier - (int)ItemTier.Common + 1);
+
         /// <summary>The same item a tier up: what two of it merge into, or what a camp's upkeep makes of it.</summary>
         public EquippedItem TierUp()
         {
@@ -84,8 +90,14 @@ namespace F1.Gameplay
         /// <summary>The items of the board in reading order (Slice B stage 19): no empty entries. The order is the activation order (see ItemBoard).</summary>
         public IReadOnlyList<EquippedItem> Items;
 
-        /// <summary>Where the items and bags lie, for the screen only (the battle ignores it); null when nobody draws the board (tests, the simulator).</summary>
+        /// <summary>Where the items and bags lie, for the screen only (the battle ignores it); null when nobody draws the board (tests).</summary>
         public BoardLayout Layout;
+
+        /// <summary>
+        /// What each item of <see cref="Items"/> (same order) deals more by the stars on it (Slice B stage 20, <see cref="StarRules"/>): added to a
+        /// weapon's damage before the weapon-power passive. Null when nothing does (an enemy, tests).
+        /// </summary>
+        public IReadOnlyList<int> StarDamage;
         /// <summary>Null when the unit has no passive.</summary>
         public PassiveSpec Passive;
         /// <summary>Mercenaries enter Death-or-Glory at 0 HP. Enemies die.</summary>

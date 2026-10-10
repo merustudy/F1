@@ -500,7 +500,8 @@ namespace F1.Flow
             }
 
             Require(record.Shop.Stock != null && record.Shop.Refreshes >= 0, "The shop record is incomplete.");
-            Require(record.Shop.Stock.Count <= data.Balance.ShopSlots, $"The shop offers more than its {data.Balance.ShopSlots} slots.");
+            int most = data.Balance.ShopSlots + data.Potions.Ordered.Count;
+            Require(record.Shop.Stock.Count <= most, $"The shop offers more than its {data.Balance.ShopSlots} goods and a potion of each kind.");
             var shop = new ShopState { Refreshes = record.Shop.Refreshes };
             foreach (OfferRecord offer in record.Shop.Stock)
             {

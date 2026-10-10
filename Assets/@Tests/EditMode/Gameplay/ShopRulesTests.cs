@@ -141,7 +141,7 @@ namespace F1.Tests
         // ---- Entering and the stock ----------------------------------------------------------
 
         [Test]
-        public void EnteringAShop_DrawsTheStockFromTheSeed_OfThePricedItems_AtTheFloorsTier_AndNoPotionWhileNoSlotIsEmpty()
+        public void EnteringAShop_DrawsTheStockFromTheSeed_OfThePricedItems_AtTheFloorsTier_ThenItsPotions()
         {
             StaticData data = ShopCave();
             ExpeditionState state = InAShop(data, out MapNode shop);
@@ -151,8 +151,10 @@ namespace F1.Tests
             Assert.IsEmpty(ExpeditionRules.AvailableNodes(state), "The party stays until it leaves.");
             Assert.AreEqual(0, state.Shop.Refreshes);
             List<ItemOffer> stock = state.Shop.Stock;
-            Assert.AreEqual(data.Balance.ShopSlots, stock.Count, "Three priced items and the tonic fill the four slots.");
-            CollectionAssert.AreEquivalent(new[] { "charm", "knife", "bow", "tonic" }, stock.Select(o => o.Id), "Every priced item and the potion, once each; never the unpriced trinket.");
+            Assert.AreEqual(3, ExpeditionRules.ShopGoodsCount(data), "Three priced items for four slots: the goods are three.");
+            Assert.AreEqual(4, stock.Count, "The three goods, then the potion (round 56: drawn apart, at least one).");
+            CollectionAssert.AreEquivalent(new[] { "charm", "knife", "bow" }, stock.Take(3).Select(o => o.Id), "Every priced item once; never the unpriced trinket.");
+            Assert.AreEqual("tonic", stock[3].Id, "The potion after the goods.");
             ItemTier tier = data.Dungeons.Get("cave").ItemTierAt(shop.Floor, false);
             Assert.IsTrue(stock.Where(o => o.Kind == OfferKind.Item).All(o => o.Tier == tier && o.Grade == data.Dungeons.Get("cave").ItemGradeAt(shop.Floor)), "The floor's tier and grade, as a reward's.");
 
@@ -160,7 +162,7 @@ namespace F1.Tests
             ExpeditionState again = InAShop(data, out MapNode _);
             CollectionAssert.AreEqual(stock.Select(o => o.Id), again.Shop.Stock.Select(o => o.Id));
 
-            // With every potion slot full, no potion is on offer.
+            // With every potion slot full, the potion is on offer still (round 56: at least one at every shop), and cannot be bought.
             ExpeditionState full = AtAShopNode(data, out MapNode shopNode);
             for (int i = 0; i < full.Potions.Length; i++)
             {
@@ -168,8 +170,26 @@ namespace F1.Tests
             }
 
             ExpeditionRules.EnterShop(data, full, shopNode.Id);
-            Assert.IsTrue(full.Shop.Stock.All(o => o.Kind == OfferKind.Item));
-            Assert.AreEqual(3, full.Shop.Stock.Count);
+            Assert.AreEqual(4, full.Shop.Stock.Count);
+            Assert.AreEqual(OfferKind.Potion, full.Shop.Stock[3].Kind);
+            Assert.IsFalse(ExpeditionRules.CanBuyPotion(data, full, 3), "No empty slot.");
+        }
+
+        [Test]
+        public void EveryShop_HasAPotion_ByItsChance_OrElseOneByItsWeight_AndARefreshKeepsThePotions()
+        {
+            // Round 56: each potion comes by ShopPotionChancePercent; when none does, one does by weight, so a shop always has one.
+            foreach (int chance in new[] { 0, 100 })
+            {
+                StaticData data = ShopCave(balance: ("ShopPotionChancePercent", chance));
+                ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
+                Assert.AreEqual(1, state.Shop.Stock.Count(o => o.Kind == OfferKind.Potion), $"At {chance}%: the one potion the cave stocks.");
+                Assert.AreEqual(OfferKind.Potion, state.Shop.Stock.Last().Kind, "After the goods.");
+
+                string potion = state.Shop.Stock.Last().Id;
+                ExpeditionRules.RefreshShop(data, state);
+                Assert.AreEqual(potion, state.Shop.Stock.Last()?.Id, "A refresh draws the goods anew and keeps the potions.");
+            }
         }
 
         [Test]
@@ -257,10 +277,35 @@ namespace F1.Tests
             }
 
             ExpeditionRules.EnterShop(data, cramped, crampedShop.Id);
-            Assert.IsTrue(cramped.Shop.Stock.All(o => o.Kind == OfferKind.Item), "Drawn with the potion slots full.");
+            Assert.IsFalse(ExpeditionRules.CanBuyPotion(data, cramped, SlotOf(cramped, OfferKind.Potion)), "On offer with the potion slots full (round 56), but not to be bought.");
             Assert.IsFalse(ExpeditionRules.CanBuyToInventory(data, cramped, 0));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyToInventory(data, cramped, 0));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.BuyPotion(data, cramped, 0), "Not a potion.");
+        }
+
+        [Test]
+        public void AnOffer_CanBeBoughtOntoFreeSquaresOfTheInventory_ForItsPrice()
+        {
+            StaticData data = ShopCave();
+            ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
+            int bow = SlotOf(state, OfferKind.Item, "bow");
+            ItemOffer offer = state.Shop.Stock[bow];
+            ItemData item = data.Items.Get("bow");
+            state.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8), TestBoards.At(0, 0));
+            int coins = state.Coins;
+
+            // Round 55: an offer held over the inventory's grid is bought where it is laid, over no item.
+            Assert.IsFalse(ExpeditionRules.CanBuyToInventoryAt(data, state, bow, TestBoards.At(0, 0)), "Over the knife.");
+            Placement free = TestBoards.At(state.Inventory.Width - item.Width, 0);
+            Assert.IsTrue(ExpeditionRules.CanBuyToInventoryAt(data, state, bow, free));
+            ExpeditionRules.BuyToInventoryAt(data, state, bow, free);
+            Assert.AreEqual(free, state.Inventory.Items.Single(i => i.Item.Item.Id == "bow").At);
+            Assert.AreEqual(coins - ExpeditionRules.PriceOf(data, offer), state.Coins);
+            Assert.IsNull(state.Shop.Stock[bow]);
+            Assert.IsFalse(ExpeditionRules.CanBuyToInventoryAt(data, state, SlotOf(state, OfferKind.Potion), TestBoards.At(0, 2)), "A potion goes to a potion slot.");
+
+            ExpeditionState poor = InAShop(data, out MapNode _, coins: 4);
+            Assert.IsFalse(ExpeditionRules.CanBuyToInventoryAt(data, poor, SlotOf(poor, OfferKind.Item), TestBoards.At(0, 2)), "The coins do not cover it.");
         }
 
         [Test]
@@ -340,8 +385,9 @@ namespace F1.Tests
             Assert.AreEqual(13 - balance.ShopRefreshBase, state.Coins);
             Assert.AreEqual(1, state.Shop.Refreshes);
             Assert.AreEqual(balance.ShopRefreshBase + balance.ShopRefreshStep, ExpeditionRules.RefreshCost(data, state), "The next one costs more.");
-            Assert.AreEqual(balance.ShopSlots, state.Shop.Stock.Count, "Every slot is filled again, the sold one too.");
-            Assert.IsTrue(state.Shop.Stock.All(o => o != null));
+            Assert.AreEqual(4, state.Shop.Stock.Count);
+            Assert.IsTrue(state.Shop.Stock.Take(3).All(o => o != null), "Every good is drawn anew.");
+            Assert.IsNull(state.Shop.Stock[3], "Round 56: the potions stay as they were — the one bought stays gone.");
 
             ExpeditionRules.RefreshShop(data, state);
             Assert.AreEqual(13 - 2 * balance.ShopRefreshBase - balance.ShopRefreshStep, state.Coins);
@@ -354,7 +400,7 @@ namespace F1.Tests
             ExpeditionRules.BuyPotion(data, twin, SlotOf(twin, OfferKind.Potion));
             ExpeditionRules.RefreshShop(data, twin);
             ExpeditionRules.RefreshShop(data, twin);
-            CollectionAssert.AreEqual(state.Shop.Stock.Select(o => o.Id), twin.Shop.Stock.Select(o => o.Id));
+            CollectionAssert.AreEqual(state.Shop.Stock.Select(o => o?.Id), twin.Shop.Stock.Select(o => o?.Id));
 
             // Leaving, then another shop further on: its refresh starts at the base again.
             ExpeditionRules.LeaveShop(state);

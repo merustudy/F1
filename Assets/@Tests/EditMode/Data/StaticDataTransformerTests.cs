@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using F1.Data;
 using F1.Editor.Data;
 using NUnit.Framework;
@@ -307,6 +308,39 @@ namespace F1.Tests
 
             StringAssert.StartsWith("ItemData.csv(2)", exception.Errors[0]);
             StringAssert.Contains("[Rows]", exception.Errors[0]);
+        }
+
+        /// <summary>A whetstone-like row (Slice B stage 20) after the test items: no effects, no cooldown, its stars as given.</summary>
+        static string WithHone(string stars)
+        {
+            return TestCsv.Items + "hone,숫돌,Hone,Other,1,1,0,all,,,,,,,,,8,,8,false," + stars + ",1\n";
+        }
+
+        [Test]
+        public void Transform_ReadsMeleeStarsAndAnItemWithoutEffects()
+        {
+            StaticData data = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, WithHone("0:-1+0:1"))).Data;
+
+            ItemData hone = data.Items.Get("hone");
+            Assert.IsTrue(hone.IsPassive);
+            Assert.AreEqual(0, hone.CooldownMs);
+            CollectionAssert.AreEqual(new[] { (0, -1), (0, 1) }, hone.Stars.Select(s => (s.X, s.Y)));
+            Assert.AreEqual(1, hone.StarDamage);
+            Assert.IsTrue(data.Items.Get("sword").Melee);
+            Assert.IsFalse(data.Items.Get("staff").Melee);
+            Assert.IsEmpty(data.Items.Get("sword").Stars, "An empty cell: no stars.");
+            Assert.AreEqual(0, data.Items.Get("sword").StarDamage);
+        }
+
+        [TestCase("0:0")]
+        [TestCase("0:-2")]
+        [TestCase("0:-1+0:-1")]
+        [TestCase("0-1")]
+        public void Transform_WhenStarsAreNotSquaresRoundTheItem_Reports(string stars)
+        {
+            DataTransformException exception = TransformFails(StaticDataFiles.Item, WithHone(stars));
+
+            StringAssert.StartsWith("ItemData.csv(6)", exception.Errors[0]);
         }
 
         [TestCase("0")]

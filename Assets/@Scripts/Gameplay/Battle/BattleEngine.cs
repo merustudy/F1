@@ -301,6 +301,11 @@ namespace F1.Gameplay
             }
 
             var items = new List<BattleItemState>();
+            if (setup.StarDamage != null && (setup.Items == null || setup.StarDamage.Count != setup.Items.Count))
+            {
+                throw new ArgumentException($"Unit '{setup.SourceId}': the star damage does not match its items one for one.");
+            }
+
             if (setup.Items != null)
             {
                 for (int slot = 0; slot < setup.Items.Count; slot++)
@@ -311,8 +316,9 @@ namespace F1.Gameplay
                         throw new ArgumentException($"Unit '{setup.SourceId}' has an empty entry on its board.");
                     }
 
-                    bool active = equipped.Item.UsableIn(setup.Row, lineLength);
-                    items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille)));
+                    bool active = Works(equipped.Item, setup.Row, lineLength);
+                    int star = setup.StarDamage == null ? 0 : setup.StarDamage[slot];
+                    items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille), star));
                 }
             }
 
@@ -325,6 +331,12 @@ namespace F1.Gameplay
             }
 
             return unit;
+        }
+
+        /// <summary>Whether an item activates where its owner stands: never for an item without effects (Slice B stage 20), else where its rows say.</summary>
+        static bool Works(ItemData item, int row, int lineLength)
+        {
+            return !item.IsPassive && item.UsableIn(row, lineLength);
         }
 
         /// <summary>base x (1000 + permille) / 1000, rounded to the nearest millisecond, never below MinCooldownMs.</summary>
@@ -438,7 +450,8 @@ namespace F1.Gameplay
                 bool weaponDamage = effect.Kind == EffectKind.Damage && data.Category == ItemCategory.Weapon;
                 if (weaponDamage)
                 {
-                    magnitude = WithWeaponPower(owner, magnitude);
+                    // The stars on it add first (stage 20), so the weapon-power passive grows them too.
+                    magnitude = WithWeaponPower(owner, magnitude + item.StarDamage);
                 }
 
                 foreach (BattleUnit target in ResolveTargets(owner, effect))
@@ -991,7 +1004,7 @@ namespace F1.Gameplay
 
                 foreach (BattleItemState item in unit.Items)
                 {
-                    bool usable = item.Equipped.Item.UsableIn(unit.Row, lineLength);
+                    bool usable = Works(item.Equipped.Item, unit.Row, lineLength);
                     if (usable && !item.Active)
                     {
                         item.NextFireMs = TimeMs + CooldownOf(unit, item);

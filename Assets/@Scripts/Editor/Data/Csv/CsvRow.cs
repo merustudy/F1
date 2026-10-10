@@ -134,6 +134,29 @@ namespace F1.Editor.Data
             return grants;
         }
 
+        /// <summary>An item's star squares (stage 20): "x:y" pairs joined with '+', for example "0:-1+0:1"; none for an empty cell.</summary>
+        public List<StarSquare> StarSquares(string header)
+        {
+            var squares = new List<StarSquare>();
+            if (IsEmpty(header))
+            {
+                return squares;
+            }
+
+            foreach (string part in Text(header).Split(ListSeparator))
+            {
+                string[] pair = part.Split(':');
+                if (pair.Length != 2 || !TryParseInt(pair[0], out int x) || !TryParseInt(pair[1], out int y))
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not 'x:y'.");
+                }
+
+                squares.Add(new StarSquare(x, y));
+            }
+
+            return squares;
+        }
+
         /// <summary>A PascalCase constant name, for example "DogGraceMs".</summary>
         public string Key(string header)
         {

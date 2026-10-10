@@ -25,7 +25,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/buckler",
-      "Price": 12
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "crude_bow",
@@ -34,7 +37,7 @@
         "ko-KR": "조잡한 활"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 3400,
       "Rows": {
@@ -51,7 +54,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/crude-bow",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "dagger",
@@ -77,7 +83,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/dagger",
-      "Price": 10
+      "Price": 10,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "ember_flask",
@@ -103,7 +112,10 @@
       ],
       "ShopWeight": 8,
       "Icon": "item/ember-flask",
-      "Price": 12
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "fire_staff",
@@ -129,17 +141,20 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/fire-staff",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "greataxe",
       "Name": {
-        "en-US": "Greataxe",
-        "ko-KR": "대도끼"
+        "en-US": "Battle Axe",
+        "ko-KR": "전투도끼"
       },
       "Category": "Weapon",
       "Width": 3,
-      "Height": 1,
+      "Height": 2,
       "CooldownMs": 3600,
       "Rows": {
         "From": "Front",
@@ -155,7 +170,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/greataxe",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "halberd",
@@ -164,7 +182,7 @@
         "ko-KR": "미늘창"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 3,
       "CooldownMs": 3600,
       "Rows": {
@@ -181,7 +199,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/halberd",
-      "Price": 22
+      "Price": 22,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "healing_staff",
@@ -207,7 +228,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/healing-staff",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "herb_pouch",
@@ -233,7 +257,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/herb-pouch",
-      "Price": 10
+      "Price": 10,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "lantern_staff",
@@ -259,7 +286,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/lantern-staff",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "longbow",
@@ -268,7 +298,7 @@
         "ko-KR": "장궁"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 2,
       "CooldownMs": 3000,
       "Rows": {
@@ -285,7 +315,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/longbow",
-      "Price": 16
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "longsword",
@@ -311,7 +344,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/longsword",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "mace",
@@ -343,7 +379,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/mace",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "mending_chant",
@@ -352,7 +391,7 @@
         "ko-KR": "치유의 부적"
       },
       "Category": "Support",
-      "Width": 3,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 5500,
       "Rows": {
@@ -369,7 +408,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/mending-chant",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "overseer_maul",
@@ -378,7 +420,7 @@
         "ko-KR": "감독관의 망치"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 4500,
       "Rows": {
@@ -395,7 +437,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/overseer-maul",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "overseer_roar",
@@ -421,16 +466,19 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/overseer-roar",
-      "Price": 0
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "rat_bite",
       "Name": {
-        "en-US": "Rat Fang",
-        "ko-KR": "쥐 송곳니"
+        "en-US": "Rat Claw",
+        "ko-KR": "쥐 발톱"
       },
       "Category": "Weapon",
-      "Width": 1,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 2000,
       "Rows": {
@@ -447,7 +495,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/rat-bite",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "rusty_blade",
@@ -456,7 +507,7 @@
         "ko-KR": "녹슨 칼"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 2800,
       "Rows": {
@@ -473,7 +524,10 @@
       ],
       "ShopWeight": 0,
       "Icon": "item/rusty-blade",
-      "Price": 0
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "spear",
@@ -482,7 +536,7 @@
         "ko-KR": "창"
       },
       "Category": "Weapon",
-      "Width": 3,
+      "Width": 2,
       "Height": 2,
       "CooldownMs": 3200,
       "Rows": {
@@ -499,7 +553,10 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/spear",
-      "Price": 16
+      "Price": 16,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0
     },
     {
       "Id": "ward_charm",
@@ -508,7 +565,7 @@
         "ko-KR": "수호 부적"
       },
       "Category": "Support",
-      "Width": 3,
+      "Width": 2,
       "Height": 1,
       "CooldownMs": 6000,
       "Rows": {
@@ -525,7 +582,41 @@
       ],
       "ShopWeight": 10,
       "Icon": "item/ward-charm",
-      "Price": 12
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0
+    },
+    {
+      "Id": "whetstone",
+      "Name": {
+        "en-US": "Whetstone",
+        "ko-KR": "숫돌"
+      },
+      "Category": "Other",
+      "Width": 1,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [],
+      "ShopWeight": 8,
+      "Icon": "item/whetstone",
+      "Price": 8,
+      "Melee": false,
+      "Stars": [
+        {
+          "X": 0,
+          "Y": -1
+        },
+        {
+          "X": 0,
+          "Y": 1
+        }
+      ],
+      "StarDamage": 1
     }
   ]
 }

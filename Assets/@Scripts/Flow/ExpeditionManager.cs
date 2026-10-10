@@ -235,6 +235,23 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>How many goods the shop's stock begins with, before its potions (round 56: the merchant's goods and its potion column).</summary>
+        public int ShopGoodsCount => ExpeditionRules.ShopGoodsCount(_data.Data);
+
+        /// <summary>True when the item in a slot could be bought onto a placement of the inventory's grid now (round 55): over no item there.</summary>
+        public bool CanBuyToInventoryAt(int slot, Placement at)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToInventoryAt(_data.Data, Expedition, slot, at);
+        }
+
+        public void BuyToInventoryAt(int slot, Placement at)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            ExpeditionRules.BuyToInventoryAt(_data.Data, Expedition, slot, at);
+            Commit();
+        }
+
         /// <summary>True when the potion in a slot could be bought now: the coins cover it and a potion slot is empty.</summary>
         public bool CanBuyPotion(int slot)
         {
@@ -427,6 +444,20 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>True when the drop in a slot of the loot could be laid on a placement of the inventory's grid now (round 55): over no item there.</summary>
+        public bool CanTakeLootToInventoryAt(int slot, Placement at)
+        {
+            return LootOpen && ExpeditionRules.CanTakeLootToInventoryAt(_data.Data, Expedition, slot, at);
+        }
+
+        public void TakeLootToInventoryAt(int slot, Placement at)
+        {
+            _run.RequireWritable();
+            RequireLoot();
+            ExpeditionRules.TakeLootToInventoryAt(_data.Data, Expedition, slot, at);
+            Commit();
+        }
+
         /// <summary>Leaves whatever loot still lies there and goes on to the node map.</summary>
         public void LeaveLoot()
         {
@@ -555,7 +586,14 @@ namespace F1.Flow
             Report = null;
         }
 
-        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Camp || Phase == GamePhase.Shop || LootOpen;
+        bool IsBetweenBattles => Phase == GamePhase.NodeMap || Phase == GamePhase.Camp || Phase == GamePhase.Shop || LootOpen || WonBattleOnShow;
+
+        /// <summary>
+        /// A won battle still on show after its loot is all taken or there was none (round 47: the screen stays until "continue"): its boards
+        /// are the node map's, so they can be changed until the battle is closed (round 52: they froze once the last drop was taken).
+        /// </summary>
+        bool WonBattleOnShow => Battle != null && Battle.IsFinished && Battle.Engine.Result == BattleResult.Victory
+            && Expedition != null && Expedition.Phase == ExpeditionPhase.ChoosingNode;
 
         /// <summary>
         /// Applies an ended battle to the expedition, and an ended expedition to the run, in the

@@ -61,12 +61,14 @@ namespace F1.Tests
             Assert.AreEqual(GamePhase.Shop, kit.Expedition.Phase);
             Assert.IsNull(kit.Expedition.Battle);
             Assert.IsEmpty(kit.Expedition.AvailableNodes(), "No node is offered until the party leaves.");
-            Assert.AreEqual(kit.Data.Balance.ShopSlots, kit.Expedition.ShopStock.Count);
+            int goods = kit.Expedition.ShopGoodsCount;
+            Assert.Greater(kit.Expedition.ShopStock.Count, goods, "The goods, then at least one potion (round 56).");
+            Assert.IsTrue(kit.Expedition.ShopStock.Skip(goods).All(o => o.Kind == OfferKind.Potion));
             Assert.AreEqual(kit.Data.Balance.ShopRefreshBase, kit.Expedition.RefreshCost);
             ExpeditionRecord saved = kit.Save.Load<RunSaveData>(RunManager.FileName).Value.Expedition;
             Assert.AreEqual("AtShop", saved.Phase);
             Assert.AreEqual(coinsWon, saved.Coins);
-            Assert.AreEqual(kit.Data.Balance.ShopSlots, saved.Shop.Stock.Count);
+            Assert.AreEqual(kit.Expedition.ShopStock.Count, saved.Shop.Stock.Count);
             Assert.AreEqual(0, saved.Shop.Refreshes);
 
             FlowTestKit restarted = kit.Restart();

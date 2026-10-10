@@ -74,6 +74,7 @@ namespace F1.Tests
                 { "CoinsPerEnemy", 2 },
                 { "CoinsPerFloor", 1 },
                 { "EliteCoinPercent", 200 },
+                { "ShopPotionChancePercent", 50 },
             };
             foreach ((string key, int value) in overrides)
             {

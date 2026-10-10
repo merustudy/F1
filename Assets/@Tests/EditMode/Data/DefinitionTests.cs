@@ -160,6 +160,33 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ItemData_StarsLieRoundTheShape_AndAnItemWithoutEffectsHasStarsAndNoCooldown()
+        {
+            // Slice B stage 20: Backpack Battles' stars, and the whetstone, which never activates.
+            LocalizedText name = TestData.Text("x");
+            ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
+            RowSpan rows = RowSpan.All;
+            var none = new ItemEffect[0];
+            StarSquare[] aboveBelow = { new StarSquare(0, -1), new StarSquare(0, 1) };
+
+            ItemData whetstone = new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0, null, 0, false, aboveBelow, 1);
+            Assert.IsTrue(whetstone.IsPassive);
+            Assert.DoesNotThrow(() => new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { effect }, 0, null, 0, true,
+                new[] { new StarSquare(-1, -1), new StarSquare(2, 1) }, 2), "Corners and either side are round a 2x1 shape.");
+            Assert.IsFalse(new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0).IsPassive);
+
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0, null, 0, false, new[] { new StarSquare(0, 0) }, 1), "On its own square.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0, null, 0, false, new[] { new StarSquare(0, -2) }, 1), "Two squares away.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0, null, 0, false, new[] { new StarSquare(0, -1), new StarSquare(0, -1) }, 1), "Twice.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0, null, 0, false, aboveBelow, 0), "Stars without their damage.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, null, 0, false, null, 1), "Damage without stars.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 0, rows, none, 0), "No effects and no stars: it would do nothing.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Other, 1, 1, 1000, rows, none, 0, null, 0, false, aboveBelow, 1), "No effects: no cooldown.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 0, rows, new[] { effect }, 0), "Effects: a cooldown.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Armor, 1, 1, 1000, rows, new[] { effect }, 0, null, 0, true), "Only a weapon is melee.");
+        }
+
+        [Test]
         public void ItemData_RejectsBadSizeCooldownEffectCountAndWeight()
         {
             ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);

@@ -516,6 +516,29 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ADrop_CanBeLaidOnFreeSquaresOfTheInventory_NotOverAnItem()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = AtLoot(data);
+            ItemOffer drop = state.Loot[1];
+            ItemData item = data.Items.Get(drop.Id);
+            state.Inventory.Add(new EquippedItem(data.Items.Get("blade"), 8), At(0, 0));
+
+            // Round 55: the drop held over the inventory's grid lands where it is laid, over no item and inside the grid.
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, At(0, 0)), "Over the blade: the inventory swaps nothing.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, At(state.Inventory.Width - item.Width + 1, 0)), "Out of the grid.");
+            Placement free = At(state.Inventory.Width - item.Width, state.Inventory.Height - item.Height);
+            Assert.IsTrue(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, free));
+
+            ExpeditionRules.TakeLootToInventoryAt(data, state, 1, free);
+
+            Assert.AreEqual(free, state.Inventory.Items.Single(i => i.Item.Item.Id == drop.Id).At);
+            Assert.IsNull(state.Loot[1]);
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, At(0, 1)), "Taken already.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeLootToInventoryAt(data, state, 1, At(0, 1)));
+        }
+
+        [Test]
         public void ABigItem_NeedsBagsUnderEverySquare_ABagAddedMakesTheRoom()
         {
             StaticData data = TestData.Data();

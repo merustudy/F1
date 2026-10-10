@@ -6,13 +6,14 @@ namespace F1.Gameplay
     /// <summary>Runtime state of one item slot during a battle.</summary>
     public sealed class BattleItemState
     {
-        internal BattleItemState(int slotIndex, EquippedItem equipped, bool active, int cooldownMs)
+        internal BattleItemState(int slotIndex, EquippedItem equipped, bool active, int cooldownMs, int starDamage)
         {
             SlotIndex = slotIndex;
             Equipped = equipped;
             Active = active;
             CooldownMs = cooldownMs;
             NextFireMs = cooldownMs;
+            StarDamage = starDamage;
         }
 
         /// <summary>Position on the owner's board: the activation order.</summary>
@@ -20,7 +21,8 @@ namespace F1.Gameplay
         public EquippedItem Equipped { get; }
 
         /// <summary>
-        /// False while the owner stands outside the span of the line the item works in. An inactive
+        /// False while the owner stands outside the span of the line the item works in, and always for an item that never activates
+        /// (<see cref="ItemData.IsPassive"/>, Slice B stage 20). An inactive
         /// item does not fill its cooldown and never fires. It is judged again whenever someone on
         /// the owner's side dies, because the span is counted on the living line.
         /// </summary>
@@ -30,6 +32,9 @@ namespace F1.Gameplay
         public int CooldownMs { get; }
 
         public int NextFireMs { get; internal set; }
+
+        /// <summary>What the item deals more by the stars on it (Slice B stage 20): added to a weapon's damage before the weapon-power passive.</summary>
+        public int StarDamage { get; }
     }
 
     /// <summary>Runtime state of one unit during a battle. Only the engine changes it.</summary>

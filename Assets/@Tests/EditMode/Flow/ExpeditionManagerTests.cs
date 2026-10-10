@@ -234,6 +234,39 @@ namespace F1.Tests
         }
 
         [Test]
+        public void TheBoards_StillWork_AfterTheLastDropIsTaken_UntilTheWonBattleCloses()
+        {
+            // Round 52: once the last drop was taken the boards froze, though the won battle still showed until "continue".
+            FlowTestKit kit = new FlowTestKit().InBattle();
+            kit.FightToTheEnd();
+            ExpeditionState state = kit.Expedition.Expedition;
+            kit.Expedition.TakeLoot(0, 0, At(2, 0));
+            kit.Expedition.TakeLoot(1, 0, At(0, 1));
+            Assert.IsFalse(kit.Expedition.LootOpen, "Every drop was taken.");
+            Assert.AreEqual(GamePhase.Battle, kit.Expedition.Phase, "The won battle still shows.");
+
+            EquippedItem claw = TestBoards.ItemAt(state.Members[0], 0, 1);
+            Assert.IsTrue(kit.Expedition.CanPickItem(0, 0, 1));
+            Assert.IsTrue(kit.Expedition.CanMoveItem(0, 0, 1, 0, At(1, 1)));
+            kit.Expedition.MoveItem(0, 0, 1, 0, At(1, 1));
+            Assert.AreSame(claw, TestBoards.ItemAt(state.Members[0], 1, 1));
+            Assert.IsTrue(kit.Expedition.CanMoveToInventory(0, 1, 1), "The inventory works too.");
+
+            kit.Expedition.CloseBattle();
+            Assert.AreEqual(GamePhase.NodeMap, kit.Expedition.Phase);
+            Assert.IsTrue(kit.Expedition.CanPickItem(0, 1, 1), "And on the map as ever.");
+        }
+
+        [Test]
+        public void ALostBattleOnShow_LeavesTheBoardsAlone()
+        {
+            FlowTestKit kit = new FlowTestKit(FlowTestKit.StrongParty(("RetreatChancePercent", 100))).InBattle();
+            Assert.IsTrue(kit.Expedition.TryRetreat());
+            Assert.IsTrue(kit.Expedition.Battle.IsFinished);
+            Assert.IsFalse(kit.Expedition.CanPickItem(0, 0, 0), "A retreat is no win: the result shows, the boards wait for the map.");
+        }
+
+        [Test]
         public void ADrop_CanGoStraightToTheInventory_AndTheLastOneTakenEndsTheLoot()
         {
             FlowTestKit kit = new FlowTestKit().InBattle();

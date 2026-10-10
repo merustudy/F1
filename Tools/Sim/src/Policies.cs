@@ -493,9 +493,17 @@ namespace F1.Sim
             return false;
         }
 
-        /// <summary>The first living member standing where the item works whose bags have room for it, and the first such room; or -1.</summary>
+        /// <summary>
+        /// The first living member standing where the item works whose bags have room for it, and the first such room; or -1. A star item
+        /// (Slice B stage 20) goes where its stars light the most melee weapons instead, and nowhere when they would light none.
+        /// </summary>
         static int MemberWithRoomFor(ExpeditionState state, ItemData item, out Placement at)
         {
+            if (item.Stars.Count > 0)
+            {
+                return MemberWithStarRoomFor(state, item, out at);
+            }
+
             int living = ExpeditionRules.LivingCount(state);
             for (int m = 0; m < state.Members.Count; m++)
             {
@@ -508,6 +516,57 @@ namespace F1.Sim
 
             at = default;
             return -1;
+        }
+
+        /// <summary>
+        /// For a star item: the living member and the free placement (every turn) whose stars light the most melee weapons, the first such in
+        /// member order and then reading order; -1 when no placement lights any.
+        /// </summary>
+        static int MemberWithStarRoomFor(ExpeditionState state, ItemData item, out Placement at)
+        {
+            int best = -1;
+            int most = 0;
+            at = default;
+            for (int m = 0; m < state.Members.Count; m++)
+            {
+                ExpeditionMember member = state.Members[m];
+                if (!member.Alive)
+                {
+                    continue;
+                }
+
+                for (int y = 0; y < BoardFrame.Height; y++)
+                {
+                    for (int x = 0; x < BoardFrame.Width; x++)
+                    {
+                        for (int turns = 0; turns < 4; turns++)
+                        {
+                            var spot = new Placement(x, y, turns);
+                            int w = spot.WidthOf(item.Width, item.Height);
+                            int h = spot.HeightOf(item.Width, item.Height);
+                            if (!member.Board.OnBags(x, y, w, h) || member.Board.ItemsUnder(x, y, w, h, null).Count > 0)
+                            {
+                                continue;
+                            }
+
+                            int lit = 0;
+                            foreach (StarMark mark in StarRules.Marks(member.Board, item, spot, null))
+                            {
+                                lit += mark.Lit ? 1 : 0;
+                            }
+
+                            if (lit > most)
+                            {
+                                most = lit;
+                                best = m;
+                                at = spot;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return best;
         }
 
         /// <summary>The living member with the fewest bag squares whose frame has room for a bag, and the first such room; or -1.</summary>

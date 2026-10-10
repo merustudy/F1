@@ -148,6 +148,38 @@ namespace F1.Tests
             }
         }
 
+        /// <summary>Slice B stage 20 and round 51: the whetstone and its stars, the melee weapons, the valkyrie's battle axe.</summary>
+        [Test]
+        public void ShippedStarsAndShapes_AreAsDecided()
+        {
+            StaticData data = LoadShipped();
+
+            ItemData whetstone = data.Items.Get("whetstone");
+            Assert.AreEqual(ItemCategory.Other, whetstone.Category);
+            Assert.IsTrue(whetstone.IsPassive, "It never activates.");
+            Assert.AreEqual((1, 1), (whetstone.Width, whetstone.Height));
+            CollectionAssert.AreEqual(new[] { (0, -1), (0, 1) }, whetstone.Stars.Select(s => (s.X, s.Y)), "A star above and one below.");
+            Assert.AreEqual(1, whetstone.StarDamage);
+            Assert.Greater(whetstone.ShopWeight, 0, "Sold in shops.");
+            Assert.Greater(whetstone.Price, 0);
+            Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "whetstone")), "No enemy carries it: shops only.");
+
+            CollectionAssert.AreEquivalent(
+                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul" },
+                data.Items.Ordered.Where(i => i.Melee).Select(i => i.Id));
+
+            ItemData axe = data.Items.Get("greataxe");
+            Assert.AreEqual("전투도끼", axe.Name.Resolve("ko-KR"));
+            Assert.AreEqual((3, 2), (axe.Width, axe.Height), "The valkyrie's battle axe is the one base weapon of 3x2.");
+            foreach (JobData job in data.Jobs.Ordered.Where(j => j.WeaponItemId != "greataxe"))
+            {
+                ItemData weapon = data.Items.Get(job.WeaponItemId);
+                Assert.AreEqual((3, 1), (weapon.Width, weapon.Height), job.Id);
+            }
+
+            Assert.AreEqual("쥐 발톱", data.Items.Get("rat_bite").Name.Resolve("ko-KR"));
+        }
+
         static StaticData LoadShipped()
         {
             StaticDataFileStore store = DataTransformMenu.CreateStore();
