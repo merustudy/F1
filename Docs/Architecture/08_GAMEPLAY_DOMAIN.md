@@ -77,7 +77,14 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 놓기는 한 곳(`CanPut`·`Put`)이다: 자리가 모두 가방의 칸이고, 겹치는 아이템이 없거나 **하나**면 놓인다. 하나면 그것이 인벤토리의 첫 빈 자리로 간다(자리가 있을 때. 인벤토리에서 넣을 때는 나가는 아이템의 자리를 빈 것으로 친다). 둘 이상이면 안 된다.
   옮기는 아이템 자신은 겹침에서 빠진다. 같은 아이템의 왼쪽 위 칸에 왼쪽 위를 맞추면(`MergesAt`) 놓는 대신 합친다(아래 "단계와 합치기").
 - 가방을 옮기면 그 안에 온전히 든 아이템이 가방 안의 자리를 지키며 함께 가고, 돌리면 함께 돈다(가방의 상자 안에서 시계 방향으로: (x, y) → (높이 − y − h, x)). 가방은 틀 안의 다른 가방이 없는 자리에만 놓인다. 시작 가방은 옮기지 않는다.
+- **★(별, 20단계)**: 별의 계산은 `StarRules` 한 곳에 있다(순수 C#). 아이템의 별 칸(`ItemData.Stars`, 돌리지 않은 모양의 왼쪽 위 칸에서 잰 칸)은 아이템과 함께 돈다:
+  시계 방향으로 한 번 돌리면 (x, y) → (높이 − 1 − y, x)(높이는 돌리기 전 모양의 것. 가방째 돌리기와 같은 셈). `StarSquares(아이템, 자리)`는 보드의 칸이고, `Marks(보드, 아이템, 자리, 뺄 아이템)`은
+  가방 안의 별 칸마다 켜졌는지(그 칸의 아이템이 근접 무기인지)다(화면이 그린다). `DamageOn(보드, 무기)`는 그 근접 무기가 받는 피해 +N의 합이다: 별 아이템마다 그 별 칸 가운데 하나라도 무기가 덮으면
+  그 아이템의 `EquippedItem.StarDamage`(데이터의 `StarDamage` × (단계 + 1): 일반 1배, 동 2배, 은 3배, 금 4배)를 **한 번** 더한다(한 아이템은 다른 아이템 하나의 별을 하나만 채운다).
+  `Lit(보드, 별 아이템)`은 그 아이템의 켜진 별 칸과 그 무기들이다(카드의 "걸린 ★"). 별은 같은 보드 안에서만 세고, 적의 보드에는 별 아이템이 없다.
 - 전투의 `BattleUnitSetup.Items`는 보드의 아이템을 **읽는 순서**로 늘어놓은 목록이고 `BattleItemState.SlotIndex`는 그 순서(발동 순서)다. `BattleUnitSetup.Layout`(`BoardLayout`)은 화면이 그리려는 자리(아이템마다의 `Placement`와 가방)이고 규칙은 쓰지 않는다.
+  `BattleUnitSetup.StarDamage`는 같은 순서의 피해 +N이다(`ExpeditionRules`가 전투를 세울 때 `StarRules.DamageInReadingOrder`로 채운다. 적과 Test는 null = 모두 0). 엔진은 `BattleItemState.StarDamage`로 갖고,
+  무기 장비의 피해 효과에 "무기 피해 +%" 패시브를 곱하기 **전에** 더한다. 발동하지 않는 아이템(`ItemData.IsPassive`)은 늘 활성이 아니어서 쿨다운이 돌지 않고 발동 이벤트도 없다. 별은 전투를 세울 때 정해지므로 결정론과 이어하기는 그대로다.
   적은 가방 없이 아이템을 한 줄씩 아래로 놓은 `BoardLayout.Stacked`다.
 
 ## 피로
@@ -127,15 +134,17 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 ## 상점과 지역 코인 (Slice B 17단계)
 
-규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`(`ShopSlots`, `ShopRefreshBase`, `ShopRefreshStep`, `CoinsPerEnemy`, `CoinsPerFloor`, `EliteCoinPercent`),
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`(`ShopSlots`, `ShopRefreshBase`, `ShopRefreshStep`, `ShopPotionChancePercent`, `CoinsPerEnemy`, `CoinsPerFloor`, `EliteCoinPercent`),
 `DungeonData`(`ShopMinFloor`, `ShopChancePercent`), `ItemData`·`PotionData`의 `Price`에 있다.
 
 - 코인은 `ExpeditionState.Coins`(정수)다. 런 상태에는 없다. `ExpeditionRules.CompleteBattle`이 이긴 전투의 코인(`CoinsFor(노드)`: 적마다 + 층마다, 정예는 배, 보스와 싸우지 않는 노드는 0)을 더한다.
   원정이 끝나면 `ExpeditionState`와 함께 버려진다(정산은 코인을 모른다).
 - 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
-- 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 빈 포션 칸이 있을 때만 포션, 겹침 없음). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
-  난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열고, 새로고침 k번째의 물건은 같은 스트림을 처음부터 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
+- 물건(`Stock`)은 **물건 다음에 포션**이다(Round 56). 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 겹침 없음, `ShopGoodsCount` = `ShopSlots`나 후보 수 중 작은 것).
+  포션은 `DrawPotions`가 상점마다 한 번 뽑는다(종류마다 `ShopPotionChancePercent`, 하나도 없으면 가중치로 하나: 늘 하나 이상. 빈 포션 칸과 상관없이). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
+  난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열어 포션을 먼저 뽑고, 새로고침 k번째의 물건은 그 뒤를 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
+  새로고침은 물건 자리만 새로 채우고 포션 자리(판 것은 null 그대로)는 둔다(`RefreshShop`).
 - 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션과 가방은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
 - 사는 명령은 전리품의 것과 짝이다: `BuyToBoard(자리, 구성원, Placement)`(합쳐지면 합치고, 아니면 놓기. 가방은 틀에), `BuyToInventory`(아이템만), `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
   `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.

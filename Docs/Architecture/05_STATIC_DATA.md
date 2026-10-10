@@ -81,6 +81,10 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
 - `ItemData.csv`와 `PotionData.csv`의 `Price`는 상점의 값이다(일반 기준의 정수. 0이면 상점에 나오지 않는다. 17단계). `ShopWeight`는 상점에 나올 상대 확률이다(18단계에 `RewardWeight`에서 이름을 바꿨다: 전투는 적이 든 것을 떨어뜨린다). `DungeonData.csv`의 `ShopMinFloor`·`ShopChancePercent`는 정예·야영지의 열과 같은 방식이다.
 - `ItemData.csv`의 `Width`·`Height`는 격자에서 아이템이 차지하는 가로·세로 칸이다(19단계. 한 변 1..`BoardFrame.MaxSide` 3. 그 전의 `Size`를 대신했다). `JobData.csv`에는 칸 수가 없다(보드는 가방이 만든다).
+- `ItemData.csv`의 20단계 열(`Docs/Design/02_Combat_System.md` §4의 ★): `Melee`(근접 무기. `true`/`false`, `Weapon`만 `true`), `Stars`(별 칸: 돌리지 않은 모양의 왼쪽 위 칸에서 잰 `x:y`를 `+`로 이음,
+  비우면 별이 없다), `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준. 비우면 0). 정의(`ItemData`)의 검사: 별 칸은 모양 밖이고 모양에서 한 칸 안(대각선 포함)이며 겹치지 않는다,
+  별이 있으면 `StarDamage` 1 이상이고 없으면 0이다. **효과가 없는 아이템**(Effect1을 모두 비움)은 발동하지 않는다(`IsPassive`): 별이 있어야 하고 `CooldownMs`는 0이다. 효과가 있으면 지금처럼 `CooldownMs` 100 이상.
+  별 칸은 `StarSquare`(X·Y)의 목록으로 Generated JSON에 들어간다.
 - `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률).
   틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.

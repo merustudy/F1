@@ -37,9 +37,9 @@
 
 | 파일 | 내용 |
 |---|---|
-| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다. 17단계: 상점의 `ShopSlots`·`ShopRefreshBase`·`ShopRefreshStep`, 코인의 `CoinsPerEnemy`·`CoinsPerFloor`·`EliteCoinPercent`. 18단계: 전리품의 `DropCount`·`EliteDropCount`(보상의 `RewardChoices`는 뺐다) |
+| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다. 17단계: 상점의 `ShopSlots`·`ShopRefreshBase`·`ShopRefreshStep`(Round 56: 포션의 `ShopPotionChancePercent`), 코인의 `CoinsPerEnemy`·`CoinsPerFloor`·`EliteCoinPercent`. 18단계: 전리품의 `DropCount`·`EliteDropCount`(보상의 `RewardChoices`는 뺐다) |
 | `JobData.csv` | 직업: 이름, 최대 HP, 보드의 칸 수, 기본 무기와 등급, 패시브(자리 조건 포함)와 그 설명문, 권장 열 |
-| `ItemData.csv` | 아이템: 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 상점 가중치 `ShopWeight`(18단계에 보상 가중치에서 이름을 바꿨다. 0이면 상점에 나오지 않음), 상점의 값 `Price`(일반 기준. 0이면 팔지 않음, 17단계). 적의 아이템도 같은 척도다(02 §4) |
+| `ItemData.csv` | 아이템: 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 상점 가중치 `ShopWeight`(18단계에 보상 가중치에서 이름을 바꿨다. 0이면 상점에 나오지 않음), 상점의 값 `Price`(일반 기준. 0이면 팔지 않음, 17단계). 적의 아이템도 같은 척도다(02 §4). 20단계: 근접 무기 `Melee`(true/false, 무기 장비만 true), 별 칸 `Stars`(돌리지 않은 모양의 왼쪽 위 칸에서 잰 "x:y"를 +로 이음, 아이템 둘레의 칸만), 별의 피해 `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준이고 단계마다 N씩 더. 별이 있으면 1 이상). 효과가 없는 아이템은 별이 있고 쿨다운이 0이다(발동하지 않음) |
 | `PotionData.csv` | 포션: 효과와 크기, 상점 가중치 `ShopWeight`(18단계), 병 아이콘, 상점의 값 `Price`(17단계) |
 | `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급(적의 힘. 쓰러뜨리면 그 아이템이 던전의 등급으로 떨어진다: 03 §5), 그림과 그림의 크기 배율(보스는 더 크게) |
 | `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 정예 여부(Slice B), 서는 순서(앞에서부터, 넷까지) |
