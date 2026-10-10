@@ -1,6 +1,6 @@
 # Slice B 19단계: 격자 보드
 
-Snapshot: 2026-10-09 (세션 정리)
+Snapshot: 2026-10-10 (Round 50 구현과 정정)
 
 ## Goal
 
@@ -36,7 +36,14 @@ Architecture/09 "Slice B" Acceptance 11이 참이다: 용병의 보드가 틀 3�
 - **Round 49(2026-10-09) 인벤토리 UI와 격자**: 기획 Design/00·01·03 §5·10 §5, 데이터 `InventoryWidth`·`InventoryHeight`, Domain `InventoryGrid`(`ItemBoard.cs`)·`ExpeditionRules`(자리로 세기, `MoveToInventoryAt`·`MoveInInventory`), 저장(인벤토리의 X·Y·Turns, `From9To10`), `ExpeditionManager`,
   화면(`UiPalette` 디아블로 색, `UiPrefabSetup.Grid`·`PartySide`·`NodeMap`·`Battle`·`Kit`, `GridBoardView`·`GridSquareView`·`ItemSlotView`·`BattleBoardView`·`BattleItemView`·`ItemTileView`·`ShopTileView`·`LootDropView`·`ItemTooltipView`·`PartySideView`, 새 `InventoryGridView`·`SquareGrid`, `BoardHand`의 인벤토리 손, `InventoryEntryView` 삭제), 문구, Test, Architecture/07·08·11·12.
 
+- **Round 50(2026-10-09) 아이템의 크기**: 기획 Design/02 §4·00 "Round 50", 데이터 `ItemData.csv`의 `Width` 열넷 3 → 2(가로는 2칸까지: 3×1 → 2×1, 3×2 → 2×2, 3×3 → 2×3), 시뮬 Design/08 §16, Architecture/12 "아이템의 아이콘". 코드·저장 형식은 그대로(좁아지기만 해 지금 저장의 자리가 모두 유효).
+  목업과 대조해 아이콘 파일의 빈 둘레를 잘랐다(`ArtPipeline/tools/trim_items.py`, Architecture/12·13). PlayMode Test 셋이 무기의 마지막 칸을 `Item.Width`로 센다.
+  → **정정**(사용자 "기본 무기 3*1로 복구, 장비 무기류는 2*1 이상", "쥐 송곳니를 쥐 발톱으로 대체"): 기본 무기 다섯 3×1, `rat_bite` = 쥐 발톱 2×1(id 그대로, 그림은 송곳니). 시뮬 63.8% / 0.31, 보스전 91.4%(Design/08 §16).
+
 ## Open
+
+- **Round 51**(2026-10-10, 판정 뒤 20단계로 구현: `b20-stars.md`. `ArtPipeline/Archive/51-claw-axe-whetstone/README.md`): 쥐 발톱 그림의 후보(`ArtPipeline/output/item/rat_claw.png`, 연결은 승인 뒤), 발키리의 대도끼 3×2(목업과 시뮬), 숫돌과 ★ 닿음(20단계의 권장 범위: ★ 체계와 숫돌 하나). 그림 파이프라인의 아이템 경로는 격자의 모양으로 고쳤다(`gen_image.read_item_cells`).
+- 쥐 발톱의 그림(지시가 있을 때, 유료 호출 1회. 그 전에 그림 파이프라인의 아이템 경로를 격자의 모양으로). 2026-10-09 20:01의 진행 중 저장은 정정으로 무효가 된다(인벤토리의 쥐 발톱이 녹슨 칼과 겹침).
 
 - 사후 검토(Roadmap "19단계의 권장안 세부"). 합본과 다르게 한 것: **가방은 인벤토리에 넣지 않는다**(합본의 "빈 가방만 인벤토리로"). 칸이 모두 찬 가방은 아이템을 하나 빼야 집힌다.
 - 돌리기의 방향과 가방째 돌리기는 백팩 배틀즈 자료에 없어 권장안이다(Design/02 §4). 사용자가 실제 게임과 다르다고 하면 `TurnInput`과 `ExpeditionRules.MoveBag`을 고친다.
@@ -44,6 +51,7 @@ Architecture/09 "Slice B" Acceptance 11이 참이다: 용병의 보드가 틀 3�
 - 20단계(★ 닿음 효과): 효과를 가진 아이템과 수치는 기획 【제안】 → 시뮬 → 승인. Round 48 판정 8·9·12·13이 남았다.
 - 가방의 그림은 도형(가죽 색 셋과 바늘땀 점선)이다. 그림은 지시가 있을 때.
 - **Round 49 인벤토리 UI 스타일**(2026-10-09 사용자 "인벤토리 ui 스타일이 마음에 안들어"): 디아블로 2 / 백팩 배틀즈 / 권장 3 원정 짐칸의 목업과 판정할 것 아홉(`ArtPipeline/Archive/49-inventory-style/README.md`). → 사용자가 **디아블로 2를 골라 변형** → 판정 V1~V6("다른안·돌 테·디아블로 식·금색·디아블로식 격자·빨강 칠만") → **구현**(아래 Done의 Round 49 줄). 사후 검토: 인벤토리의 첫 빈 자리 규칙(돌리지 않은 채 먼저), 직접 놓기는 빈 칸에만(바꾸기 없음), 전리품·상점은 버튼으로만 인벤토리에, 인벤토리 칸 66, 저장 버전 10 그대로.
+- **Round 50 아이템 크기**(2026-10-09 사용자 "아이템 크기 재조정 검토 후 보고"): 검토·시뮬·목업 셋(`ArtPipeline/Archive/50-item-size/README.md`). 권장 B2 → 사용자 **"권장안 구현"** → 구현(아래 Done의 Round 50 줄). 사후 검토: 보스전 92.3%(띠 위 0.3%p)는 직접 플레이 뒤의 맞추기에서, 가로로 긴 아이콘이 2칸에서 읽히는지는 직접 플레이에서.
 - 직접 플레이의 체크리스트(`b16-tuning.md`)에 더할 것: 든 채로 우클릭·휠·R이 손에 맞는지, 그림자가 읽히는지, 3×8 틀의 높이가 패널에 맞는지, 쿨다운 안 2가 잘 읽히는지, 가방을 집는 법(빈 칸)이 드러나는지.
 
 ## Verification
@@ -64,7 +72,12 @@ Architecture/09 "Slice B" Acceptance 11이 참이다: 용병의 보드가 틀 3�
   체인 2차 `20261009-162858` **CHAIN OK**(EditMode 794/794, PlayMode 79/88, 9 skipped). 스크린샷 `20261009-r49`에서 목업과 대조: 전투 중 아이템 밑으로 우물의 회색이 비치고 적의 아이템이 바탕 없이 떠 있었다 → `BattleBoardView`가 가방의 칸을 아이템 밑까지 검게, 적의 아이템마다 붉은빛 돌 우물(`UiPalette.EnemyRim`).
   상점의 고른 타일에 목업의 "손에 듦"이 빠져 있었다 → `Map.ShopHeld`. 체인 3차 `20261009-164435` **CHAIN OK**(EditMode 794/794, PlayMode 79/88), 스크린샷 `20261009-r49b` 9/9(PNG 75). 장면 일곱은 `ArtPipeline/Archive/49-inventory-style/game/`.
 
+- **Round 50 구현의 검증**(2026-10-09): `transform`·`validate` OK, 시뮬 balanced 64.4% / 0.30(Design/08 §16). 체인 1차 PlayMode 3 실패(Test의 3칸 가정) → 2차 `20261009-231440` CHAIN OK.
+  아이콘을 자른 뒤 체인 3차 `20261009-233251` **CHAIN OK**(EditMode 798/798, PlayMode 79/88, 9 skipped), 스크린샷 `20261009-r50b` 9/9(PNG 75). 장면은 `ArtPipeline/Archive/50-item-size/game/`.
+
+- **정정의 검증**: 체인 `20261009-235658` **CHAIN OK**(setup·sim, EditMode 798/798, PlayMode 79/88), 스크린샷 `20261009-r50c` 9/9.
+
 ## Next Action (제안)
 
-- 사용자: 구현 장면(`ArtPipeline/Archive/48-grid-board/game/`)이나 직접 플레이로 격자를 본다. 사후 검토(가방과 인벤토리, 돌리기 방향, 칸 50, 모양)와 20단계(★)의 판정.
+- 사용자: 구현 장면(`ArtPipeline/Archive/48-grid-board/game/`)이나 직접 플레이로 격자를 본다. 사후 검토(가방과 인벤토리, 돌리기 방향. 모양과 칸은 Round 50에서 정함)와 20단계(★)의 판정. ★의 시뮬은 Round 50의 모양으로 잰다.
 - 사용자: Round 49 구현 장면(`ArtPipeline/Archive/49-inventory-style/game/`)이나 직접 플레이로 인벤토리 격자와 디아블로 모습을 본다. 사후 검토는 Roadmap "Round 49의 세부".
