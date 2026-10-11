@@ -24,7 +24,7 @@ namespace F1.Tests
                 item = TestData.Item(id, item.CooldownMs, item.Effects[0].Kind, item.Effects[0].Target, category: category.Value, width: item.Width, height: item.Height);
             }
 
-            return new EquippedItem(item, 8);
+            return new EquippedItem(item, powerPercent: 8);
         }
 
         [Test]
@@ -38,7 +38,7 @@ namespace F1.Tests
             Assert.AreEqual(0, FatigueRules.ItemCost(balance, Found(data, "charm")), "A support item.");
             Assert.AreEqual(0, FatigueRules.ItemCost(balance, Found(data, "knife", ItemCategory.Attack)), "An attack item.");
             Assert.AreEqual(0, FatigueRules.ItemCost(balance, Found(data, "knife", ItemCategory.Other)), "Anything else.");
-            Assert.AreEqual(0, FatigueRules.ItemCost(balance, new EquippedItem(data.Items.Get("blade"), 10, isBase: true)), "A base weapon.");
+            Assert.AreEqual(0, FatigueRules.ItemCost(balance, new EquippedItem(data.Items.Get("blade"), isBase: true, powerPercent: 10)), "A base weapon.");
             Assert.AreEqual(2, FatigueRules.ItemCost(balance, Found(data, "ballista")), "By count: three cells cost as much as one.");
         }
 
@@ -48,7 +48,7 @@ namespace F1.Tests
             StaticData data = TestData.Data(("FatigueBattleEntry", 5), ("FatigueEquipment", 1));
             var board = new List<EquippedItem>
             {
-                new EquippedItem(data.Items.Get("blade"), 10, isBase: true),
+                new EquippedItem(data.Items.Get("blade"), isBase: true, powerPercent: 10),
                 Found(data, "knife"),
                 Found(data, "bow"),
                 Found(data, "charm"),

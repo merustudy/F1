@@ -8,11 +8,11 @@
         "ko-KR": "동굴 쥐"
       },
       "Level": 2,
-      "MaxHp": 40,
+      "MaxHp": 1100,
       "Items": [
         {
           "ItemId": "rat_bite",
-          "Grade": 17
+          "PowerPercent": 208
         }
       ],
       "Figure": "unit/enemy/cave-rat",
@@ -25,11 +25,11 @@
         "ko-KR": "고블린 궁수"
       },
       "Level": 4,
-      "MaxHp": 55,
+      "MaxHp": 1500,
       "Items": [
         {
           "ItemId": "crude_bow",
-          "Grade": 14
+          "PowerPercent": 152
         }
       ],
       "Figure": "unit/enemy/goblin-archer",
@@ -42,15 +42,15 @@
         "ko-KR": "고블린 주술 대가"
       },
       "Level": 7,
-      "MaxHp": 110,
+      "MaxHp": 3000,
       "Items": [
         {
           "ItemId": "lantern_staff",
-          "Grade": 18
+          "PowerPercent": 225
         },
         {
           "ItemId": "mending_chant",
-          "Grade": 18
+          "PowerPercent": 225
         }
       ],
       "Figure": "unit/enemy/goblin-shaman",
@@ -63,11 +63,11 @@
         "ko-KR": "고블린 약탈자"
       },
       "Level": 4,
-      "MaxHp": 80,
+      "MaxHp": 2200,
       "Items": [
         {
           "ItemId": "rusty_blade",
-          "Grade": 19
+          "PowerPercent": 222
         }
       ],
       "Figure": "unit/enemy/goblin-raider",
@@ -80,15 +80,15 @@
         "ko-KR": "고블린 주술사"
       },
       "Level": 5,
-      "MaxHp": 60,
+      "MaxHp": 1600,
       "Items": [
         {
           "ItemId": "lantern_staff",
-          "Grade": 12
+          "PowerPercent": 150
         },
         {
           "ItemId": "mending_chant",
-          "Grade": 12
+          "PowerPercent": 150
         }
       ],
       "Figure": "unit/enemy/goblin-shaman",
@@ -101,15 +101,15 @@
         "ko-KR": "고블린 고참"
       },
       "Level": 6,
-      "MaxHp": 150,
+      "MaxHp": 4100,
       "Items": [
         {
           "ItemId": "rusty_blade",
-          "Grade": 28
+          "PowerPercent": 328
         },
         {
           "ItemId": "buckler",
-          "Grade": 14
+          "PowerPercent": 175
         }
       ],
       "Figure": "unit/enemy/goblin-raider",
@@ -122,15 +122,15 @@
         "ko-KR": "광산 감독관"
       },
       "Level": 9,
-      "MaxHp": 400,
+      "MaxHp": 12000,
       "Items": [
         {
           "ItemId": "overseer_maul",
-          "Grade": 27
+          "PowerPercent": 100
         },
         {
           "ItemId": "overseer_roar",
-          "Grade": 22
+          "PowerPercent": 100
         }
       ],
       "Figure": "unit/enemy/mine-overseer",

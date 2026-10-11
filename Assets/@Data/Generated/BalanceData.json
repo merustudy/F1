@@ -2,6 +2,10 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Key": "BurnDamagePerStack",
+      "Value": 27
+    },
+    {
       "Key": "BurnTickMs",
       "Value": 1000
     },
@@ -20,6 +24,26 @@
     {
       "Key": "CoinsPerFloor",
       "Value": 1
+    },
+    {
+      "Key": "CritDamagePercent",
+      "Value": 150
+    },
+    {
+      "Key": "CritFatigueDealt",
+      "Value": 3
+    },
+    {
+      "Key": "CritFatigueDealtAllies",
+      "Value": 1
+    },
+    {
+      "Key": "CritFatigueTaken",
+      "Value": 9
+    },
+    {
+      "Key": "CritFatigueTakenAllies",
+      "Value": 2
     },
     {
       "Key": "DogDeathChancePercent",
@@ -88,6 +112,10 @@
     {
       "Key": "FinalBossLevel",
       "Value": 14
+    },
+    {
+      "Key": "HitMinDamage",
+      "Value": 50
     },
     {
       "Key": "InventoryHeight",
@@ -159,11 +187,11 @@
     },
     {
       "Key": "StormBaseDamage",
-      "Value": 2
+      "Value": 55
     },
     {
       "Key": "StormGrowth",
-      "Value": 2
+      "Value": 55
     },
     {
       "Key": "StormStartMs",

@@ -26,9 +26,9 @@ namespace F1.Tests
             return ExpeditionRules.Create(data, "cave", 1, Party);
         }
 
-        static EquippedItem Item(StaticData data, string id, ItemTier tier, int grade = 8)
+        static EquippedItem Item(StaticData data, string id, ItemTier tier)
         {
-            return new EquippedItem(data.Items.Get(id), grade, tier: tier);
+            return new EquippedItem(data.Items.Get(id), tier: tier);
         }
 
         /// <summary>A board as "blade:Common knife:Bronze".</summary>
@@ -54,7 +54,7 @@ namespace F1.Tests
             var potions = new List<string>();
             DungeonData Make(int bronze, int silver, int gold)
             {
-                return new DungeonData("d", TestData.Text("d"), "swift", 10, 2, 3, 2, 8, 0, potions, bronzeFloor: bronze, silverFloor: silver, goldFloor: gold);
+                return new DungeonData("d", TestData.Text("d"), "swift", 10, 2, 3, 2, potions, bronzeFloor: bronze, silverFloor: silver, goldFloor: gold);
             }
 
             Assert.DoesNotThrow(() => Make(3, 6, 9));
@@ -76,10 +76,10 @@ namespace F1.Tests
             ItemData knife = TestData.Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50);
             ItemEffect cut = knife.Effects[0];
 
-            Assert.AreEqual(5, new EquippedItem(knife, 10).Magnitude(balance, cut), "Common: grade 10 x 50%.");
-            Assert.AreEqual(10, new EquippedItem(knife, 10, tier: ItemTier.Bronze).Magnitude(balance, cut), "200%.");
-            Assert.AreEqual(15, new EquippedItem(knife, 10, tier: ItemTier.Silver).Magnitude(balance, cut), "300%.");
-            Assert.AreEqual(22, new EquippedItem(knife, 10, tier: ItemTier.Gold).Magnitude(balance, cut), "450% of 5 is 22.5, rounded down.");
+            Assert.AreEqual(5, new EquippedItem(knife, powerPercent: 10).Magnitude(balance, cut), "Common: 50 at power 10%.");
+            Assert.AreEqual(10, new EquippedItem(knife, tier: ItemTier.Bronze, powerPercent: 10).Magnitude(balance, cut), "200%.");
+            Assert.AreEqual(15, new EquippedItem(knife, tier: ItemTier.Silver, powerPercent: 10).Magnitude(balance, cut), "300%.");
+            Assert.AreEqual(22, new EquippedItem(knife, tier: ItemTier.Gold, powerPercent: 10).Magnitude(balance, cut), "450% of 5 is 22.5, rounded down.");
         }
 
         [Test]
@@ -92,7 +92,7 @@ namespace F1.Tests
             {
                 var battle = new BattleEngine(TestData.Setup(
                     balance,
-                    TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(blow, 7, tier: tier))),
+                    TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(blow, tier: tier, powerPercent: 7))),
                     TestData.Units(TestData.Enemy("e", 1, 1000))));
                 battle.AdvanceTo(1000);
                 return battle.Events.Single(e => e.Kind == BattleEventKind.Damaged).A;
@@ -108,7 +108,7 @@ namespace F1.Tests
         public void ItemTier_IsTheDeepestTierStartedByTheFloor_OneUpForAnElitesLoot()
         {
             var potions = new List<string>();
-            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 12, 2, 3, 2, 8, 0, potions, bronzeFloor: 4, silverFloor: 8, goldFloor: 12);
+            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 12, 2, 3, 2, potions, bronzeFloor: 4, silverFloor: 8, goldFloor: 12);
 
             Assert.AreEqual(ItemTier.Common, dungeon.ItemTierAt(3, elite: false));
             Assert.AreEqual(ItemTier.Bronze, dungeon.ItemTierAt(3, elite: true));
@@ -117,7 +117,7 @@ namespace F1.Tests
             Assert.AreEqual(ItemTier.Gold, dungeon.ItemTierAt(11, elite: true));
             Assert.AreEqual(ItemTier.Gold, dungeon.ItemTierAt(12, elite: true), "Gold is the last.");
 
-            var bronze = new DungeonData("e", TestData.Text("e"), "swift", 12, 2, 3, 2, 8, 0, potions);
+            var bronze = new DungeonData("e", TestData.Text("e"), "swift", 12, 2, 3, 2, potions);
             Assert.AreEqual(ItemTier.Common, bronze.ItemTierAt(12, elite: false), "No tier floors: Common everywhere.");
             Assert.AreEqual(ItemTier.Bronze, bronze.ItemTierAt(12, elite: true));
         }
@@ -128,7 +128,7 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, bronzeFloor: 1),
+                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, bronzeFloor: 1),
             };
             var data = new StaticData(parts);
             ExpeditionState state = Expedition(data);
@@ -156,8 +156,8 @@ namespace F1.Tests
             ExpeditionState state = Expedition(data);
             ExpeditionMember anna = state.Members[0];
             ExpeditionMember ben = state.Members[1];
-            TestBoards.Put(anna, Item(data, "knife", ItemTier.Bronze, grade: 8), 2, 0);
-            TestBoards.Put(ben, Item(data, "knife", ItemTier.Bronze, grade: 9), 0, 1);
+            TestBoards.Put(anna, Item(data, "knife", ItemTier.Bronze), 2, 0);
+            TestBoards.Put(ben, Item(data, "knife", ItemTier.Bronze), 0, 1);
 
             Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 2, 0, 1, At(0, 1)));
             ExpeditionRules.MoveItem(data, state, 0, 2, 0, 1, At(0, 1));
@@ -165,7 +165,6 @@ namespace F1.Tests
             Assert.AreEqual("blade:Common", Board(anna), "The knife left anna's board.");
             Assert.AreEqual("staff:Common knife:Silver", Board(ben), "Ben's knife is a tier up, where it was.");
             EquippedItem merged = TestBoards.ItemAt(ben, 0, 1);
-            Assert.AreEqual(9, merged.Grade, "At the better grade of the two.");
             Assert.IsFalse(merged.IsBase);
             Assert.IsEmpty(state.Inventory);
         }
@@ -187,7 +186,7 @@ namespace F1.Tests
             TestBoards.Put(anna, Item(data, "charm", ItemTier.Common), 0, 1);
             TestBoards.Put(anna, Item(data, "claw", ItemTier.Common), 1, 1);
             TestBoards.Put(anna, Item(data, "claw", ItemTier.Common), 2, 1);
-            state.Inventory.Add(new EquippedItem(data.Items.Get("ballista"), 8), At(0, 0));
+            state.Inventory.Add(new EquippedItem(data.Items.Get("ballista"), powerPercent: 8), At(0, 0));
             state.Inventory.Add(Item(data, "knife", ItemTier.Bronze), At(3, 0));
             state.Inventory.Add(Item(data, "charm", ItemTier.Common), At(3, 1));
             state.Inventory.Add(Item(data, "charm", ItemTier.Common), At(3, 2));
@@ -199,7 +198,7 @@ namespace F1.Tests
 
             // From the loot: one drop lying there, so taking it ends the loot.
             state.Phase = ExpeditionPhase.PickingLoot;
-            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Silver));
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", ItemTier.Silver));
             Assert.IsTrue(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(2, 0)));
             ExpeditionRules.TakeLoot(data, state, 0, 0, At(2, 0));
             Assert.AreEqual("blade:Common knife:Gold charm:Common claw:Common claw:Common", Board(anna));
@@ -230,9 +229,9 @@ namespace F1.Tests
             EquippedItem annas = TestBoards.ItemAt(anna, 0, 0);
             EquippedItem coras = TestBoards.ItemAt(state.Members[2], 0, 0);
             Assert.IsTrue(annas.IsBase && coras.IsBase && annas.Tier == coras.Tier);
-            coras = new EquippedItem(coras.Item, annas.Grade, isBase: true);
+            coras = new EquippedItem(coras.Item, isBase: true);
             Assert.IsFalse(ExpeditionRules.CanMerge(coras, annas), "Base weapons do not merge.");
-            Assert.IsFalse(ExpeditionRules.CanMerge(new EquippedItem(annas.Item, annas.Grade), annas), "Not even with a found one.");
+            Assert.IsFalse(ExpeditionRules.CanMerge(new EquippedItem(annas.Item), annas), "Not even with a found one.");
         }
 
         [Test]
@@ -269,8 +268,8 @@ namespace F1.Tests
             Assert.IsFalse(ExpeditionRules.HasMergeTarget(state, TestBoards.ItemAt(ben, 0, 1)), "Not into itself.");
 
             state.Phase = ExpeditionPhase.PickingLoot;
-            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Common));
-            state.Loot.Add(new ItemOffer(OfferKind.Potion, "tonic", 0));
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", ItemTier.Common));
+            state.Loot.Add(new ItemOffer(OfferKind.Potion, "tonic"));
             Assert.IsTrue(ExpeditionRules.LootMergesAt(state, 0, 1, 0, 1));
             Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 1, 1, 0, 1), "A potion.");
             Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 0, 0, 0, 0), "The blade.");
@@ -285,7 +284,7 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, campFloor: 2),
+                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2),
             };
             return new StaticData(parts);
         }
@@ -312,7 +311,6 @@ namespace F1.Tests
             EquippedItem blade = TestBoards.ItemAt(anna, 0, 0);
             Assert.AreEqual(ItemTier.Bronze, blade.Tier);
             Assert.IsTrue(blade.IsBase, "A base weapon stays one.");
-            Assert.AreEqual(10, blade.Grade);
             Assert.AreEqual(new Placement(0, 0), anna.Board.Items[0].At, "Where it lay.");
             Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase);
             Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0, 0), "Once per camp: the party has gone on.");

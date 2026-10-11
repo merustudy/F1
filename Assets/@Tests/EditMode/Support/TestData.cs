@@ -50,6 +50,15 @@ namespace F1.Tests
                 { "StormTickMs", 1000 },
                 { "StormBaseDamage", 5 },
                 { "StormGrowth", 5 },
+                // Slice B stage 22, at the values that keep the arithmetic of these tests as before: a burn stack deals 1, every damage that
+                // gets through is a hit, and no item has a crit chance unless a test gives it one.
+                { "BurnDamagePerStack", 1 },
+                { "HitMinDamage", 0 },
+                { "CritDamagePercent", 150 },
+                { "CritFatigueTaken", 0 },
+                { "CritFatigueTakenAllies", 0 },
+                { "CritFatigueDealt", 0 },
+                { "CritFatigueDealtAllies", 0 },
                 { "PotionSlots", 3 },
                 { "PotionCooldownMs", 1500 },
                 { "RetreatChancePercent", 100 },
@@ -88,12 +97,13 @@ namespace F1.Tests
         /// <param name="width">Squares the item takes across on a board, unturned (Slice B stage 19). One when omitted.</param>
         /// <param name="height">Squares it takes down. One when omitted.</param>
         /// <param name="price">What a shop sells it for at Common; 0 (the default) keeps it out of every shop.</param>
+        /// <param name="value">The effect's one value (stage 22: no range unless a test builds one); an item carried at power 10 then deals value x 10%.</param>
         public static ItemData Item(
             string id,
             int cooldownMs,
             EffectKind kind,
             TargetMode target,
-            int powerPercent = 100,
+            int value = 100,
             ItemCategory category = ItemCategory.Weapon,
             RowSpan rows = null,
             int shopWeight = 0,
@@ -103,7 +113,7 @@ namespace F1.Tests
             int height = 1,
             int price = 0)
         {
-            var effects = new List<ItemEffect> { Effect(kind, target, powerPercent, reach) };
+            var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
             {
                 effects.Add(second);
@@ -115,21 +125,21 @@ namespace F1.Tests
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
         public const int DefaultReach = -1;
 
-        /// <summary>An item effect. Without a reach it hits one enemy (the front or the rearmost one).</summary>
-        public static ItemEffect Effect(EffectKind kind, TargetMode target, int powerPercent = 100, int reach = DefaultReach)
+        /// <summary>An item effect with one value (no range). Without a reach it hits one enemy (the front or the rearmost one).</summary>
+        public static ItemEffect Effect(EffectKind kind, TargetMode target, int value = 100, int reach = DefaultReach)
         {
             if (reach == DefaultReach)
             {
                 reach = ItemEffect.TakesReach(target) ? 1 : 0;
             }
 
-            return new ItemEffect(kind, target, reach, powerPercent);
+            return new ItemEffect(kind, target, reach, value, value);
         }
 
-        /// <summary>A plain attack: grade x 100% damage to the front enemy.</summary>
+        /// <summary>A plain attack: <paramref name="damage"/> to the front enemy, every time (value 100 carried at that power).</summary>
         public static EquippedItem Attack(int cooldownMs, int damage, string id = "attack")
         {
-            return new EquippedItem(Item(id, cooldownMs, EffectKind.Damage, TargetMode.EnemyFront), damage);
+            return new EquippedItem(Item(id, cooldownMs, EffectKind.Damage, TargetMode.EnemyFront), powerPercent: damage);
         }
 
         /// <summary>A mercenary carrying exactly these items, in this order (no layout: a screen would stack them).</summary>
@@ -249,14 +259,15 @@ namespace F1.Tests
                 Balance = BalanceEntries(balanceOverrides),
                 Jobs = new List<JobData>
                 {
-                    new JobData("tank", Text("tank"), 100, "blade", 10, 1, null),
-                    new JobData("healer", Text("healer"), 60, "staff", 10, 2, null),
-                    new JobData("striker", Text("striker"), 80, "blade", 12, 3, null),
+                    new JobData("tank", Text("tank"), 100, "blade", 1, null),
+                    new JobData("healer", Text("healer"), 60, "staff", 2, null),
+                    new JobData("striker", Text("striker"), 80, "blade", 3, null),
                 },
                 Items = new List<ItemData>
                 {
-                    Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, width: 2),
-                    Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, category: ItemCategory.Support, width: 3),
+                    // The base weapons deal what the jobs' weapon grade 10 made them deal before stage 22 took the grade out.
+                    Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2),
+                    Item("staff", 4000, EffectKind.Heal, TargetMode.AllyLowestHp, 10, category: ItemCategory.Support, width: 3),
                     Item("claw", 3000, EffectKind.Damage, TargetMode.EnemyFront),
                     Item("charm", 5000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Support, shopWeight: 5, price: 10),
                     Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, shopWeight: 5, price: 10),
@@ -291,7 +302,7 @@ namespace F1.Tests
                 },
                 Dungeons = new List<DungeonData>
                 {
-                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }),
+                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }),
                 },
                 Mercenaries = new List<MercenaryData>
                 {
@@ -302,6 +313,15 @@ namespace F1.Tests
                 },
                 FatigueStates = FatigueStates(),
             };
+        }
+
+        /// <summary>
+        /// The blade at a value that wins every battle of the test dungeon (the flow kits' strong party: before stage 22, a weapon grade of
+        /// 200 did it).
+        /// </summary>
+        public static void StrongBlade(StaticDataParts parts, int value = 200)
+        {
+            parts.Items = parts.Items.Select(item => item.Id == "blade" ? Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, value, width: 2) : item).ToList();
         }
 
         public static StaticData Data(params (string Key, int Value)[] balanceOverrides)

@@ -42,11 +42,10 @@ namespace F1.Gameplay
     /// <summary>An item, a potion or a bag not yet owned: a drop of a won battle's loot (Slice B stage 18; a potion never drops), or what a shop sells (stage 17).</summary>
     public sealed class ItemOffer
     {
-        public ItemOffer(OfferKind kind, string id, int grade, ItemTier tier = ItemTier.Common)
+        public ItemOffer(OfferKind kind, string id, ItemTier tier = ItemTier.Common)
         {
             Kind = kind;
             Id = id;
-            Grade = grade;
             Tier = tier;
         }
 
@@ -54,9 +53,6 @@ namespace F1.Gameplay
 
         /// <summary>Item id, potion id or bag id.</summary>
         public string Id { get; }
-
-        /// <summary>Item grade. 0 for a potion or a bag.</summary>
-        public int Grade { get; }
 
         /// <summary>Item tier. Common for a potion or a bag.</summary>
         public ItemTier Tier { get; }

@@ -11,31 +11,32 @@ namespace F1.Tests
             "Key,Value\n" +
             "PartySize,3\nMinPartySize,1\nTotalDays,100\nMaxFatigue,200\nFatigueRecoveryPerDay,10\nFatigueBreakdown,100\nFatigueBattleEntry,3\nFatigueEquipment,1\nFatigueOnHit,2\nFatigueOnDog,10\nFatigueOnAllyDog,5\nFatigueOnAllyDeath,15\nFatigueOnKill,2\nVirtueChancePercent,25\nVirtueFatigue,40\nRestDays,1\n" +
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
-            "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,2\nStormGrowth,2\n" +
+            "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,0.55\nStormGrowth,0.55\n" +
+            "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,WeaponGrade,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
-            "knight,기사,Knight,140,sword,10,1,BattleStart,InRows,front:1,Shield,Self,20,보호막 {0},Shield {0},unit/job/knight\n" +
-            "bishop,주교,Bishop,90,staff,10,3,,,,,,,,,\n";
+            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
+            "knight,기사,Knight,38,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight\n" +
+            "bishop,주교,Bishop,24.5,staff,3,,,,,,,,,\n";
 
         public const string Items =
-            "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Power,Effect2Kind,Effect2Target,Effect2Reach,Effect2Power,ShopWeight,Icon,Price,Melee,Stars,StarDamage\n" +
-            "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,100,,,,,0,item/sword,0,true,,\n" +
-            "staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,100,,,,,0,,0,false,,\n" +
-            "mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,100,Shield,Self,,40,10,item/mace,16,true,,\n" +
-            "claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,100,,,,,0,,0,false,,\n";
+            "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Value,Effect2Kind,Effect2Target,Effect2Reach,Effect2Value,ShopWeight,Icon,Price,Melee,Stars,StarDamage,CritChancePercent\n" +
+            "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,,,,,0,item/sword,0,true,,,5\n" +
+            "staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,2.73,,,,,0,,0,false,,,\n" +
+            "mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,1.23-3.68,Shield,Self,,0.98,10,item/mace,16,true,,,5\n" +
+            "claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,0.5-1.5,,,,,0,,0,false,,,\n";
 
         public const string Potions =
             "Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price\n" +
-            "tonic,강장제,Tonic,Heal,50,5,potion/tonic,8\n";
+            "tonic,강장제,Tonic,Heal,14,5,potion/tonic,8\n";
 
         public const string Enemies =
             "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale\n" +
-            "rat,쥐,Rat,2,30,claw:4,unit/enemy/rat,100\n" +
-            "ogre,오우거,Ogre,9,200,claw:12+mace:8,,150\n";
+            "rat,쥐,Rat,2,11,claw:200,unit/enemy/rat,100\n" +
+            "ogre,오우거,Ogre,9,54.5,claw:300+mace:150,,150\n";
 
         public const string EnemyGroups =
             "Id,DungeonId,MinFloor,MaxFloor,IsBoss,IsElite,Enemies\n" +
@@ -48,9 +49,9 @@ namespace F1.Tests
             "swift,신속,Swift,-80\n";
 
         public const string Dungeons =
-            "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,ItemGradeBase,ItemGradePerFloor,StartingPotions,Background," +
-            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyGradePerFloor,BronzeFloor,SilverFloor,GoldFloor,ShopMinFloor,ShopChancePercent\n" +
-            "mine,광산,Mine,swift,2,2,3,2,8,2,tonic,background/dungeon/mine,2,20,0,0,0,5,1,2,0,0,2,20\n";
+            "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,StartingPotions,Background," +
+            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyPowerPerFloorPercent,BronzeFloor,SilverFloor,GoldFloor,ShopMinFloor,ShopChancePercent\n" +
+            "mine,광산,Mine,swift,2,2,3,2,tonic,background/dungeon/mine,2,20,0,0,0,5,10,2,0,0,2,20\n";
 
         public const string Mercenaries =
             "Id,Name.ko-KR,Name.en-US,JobId\n" +

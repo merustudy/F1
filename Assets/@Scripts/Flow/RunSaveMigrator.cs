@@ -72,6 +72,38 @@ namespace F1.Flow
             {
                 From9To10(save, data);
             }
+
+            if (save.SchemaVersion == 10)
+            {
+                From10To11(save, data);
+            }
+        }
+
+        /// <summary>
+        /// Version 11 (Slice B stage 22): every number of HP moved to the scale of a longsword dealing 2-4, in hundredths. A member keeps the
+        /// share of its maximum it had: its maximum becomes its job's, its HP that share of it (rounded, at least 0.01 while it had any). An
+        /// item's grade is gone (the files' Grade fields are no longer read). A battle in progress replays under the new numbers, so it
+        /// resumes as diverged (Docs/Architecture/07_SAVE.md). A member of an unknown job is left for the validation.
+        /// </summary>
+        static void From10To11(RunSaveData save, StaticData data)
+        {
+            if (save.Expedition?.Members != null)
+            {
+                foreach (MemberRecord member in save.Expedition.Members)
+                {
+                    if (member == null || member.JobId == null || !data.Jobs.Contains(member.JobId) || member.MaxHp < 1)
+                    {
+                        continue;
+                    }
+
+                    int maxHp = data.Jobs.Get(member.JobId).MaxHp;
+                    int hp = (int)(((long)member.Hp * maxHp * 2 + member.MaxHp) / (2L * member.MaxHp));
+                    member.Hp = member.Hp > 0 ? Math.Max(1, Math.Min(maxHp, hp)) : 0;
+                    member.MaxHp = maxHp;
+                }
+            }
+
+            save.SchemaVersion = 11;
         }
 
         /// <summary>
@@ -151,7 +183,7 @@ namespace F1.Flow
                     item.X = at.X;
                     item.Y = at.Y;
                     item.Turns = at.Turns;
-                    grid.Items.Add(new BoardItem(new EquippedItem(shape, 1), at));
+                    grid.Items.Add(new BoardItem(new EquippedItem(shape), at));
                 }
             }
 

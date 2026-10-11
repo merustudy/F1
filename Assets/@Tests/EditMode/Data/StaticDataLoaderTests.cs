@@ -35,7 +35,7 @@ namespace F1.Tests
             Assert.AreEqual(PassiveEffect.Shield, data.Jobs.Get("knight").Passive.Effect);
             Assert.IsNull(data.Jobs.Get("bishop").Passive);
             Assert.AreEqual(2, data.Items.Get("mace").Effects.Count);
-            Assert.AreEqual(8, data.Enemies.Get("ogre").Items[1].Grade);
+            Assert.AreEqual(150, data.Enemies.Get("ogre").Items[1].PowerPercent);
             Assert.AreEqual(30, data.Balance.DogDeathChancePercent);
             CollectionAssert.AreEqual(new[] { "tonic" }, data.Dungeons.Get("mine").StartingPotions);
         }
@@ -96,7 +96,7 @@ namespace F1.Tests
         [Test]
         public void Load_WhenJsonRecordBreaksADefinitionRule_ThrowsWithTheFileName()
         {
-            string edited = Json(StaticDataFiles.Potion).Replace("\"Magnitude\": 50", "\"Magnitude\": 0");
+            string edited = Json(StaticDataFiles.Potion).Replace("\"Magnitude\": 1400", "\"Magnitude\": 0");
 
             var exception = Assert.Throws<DataException>(() => Load(Generate(), StaticDataFiles.Potion, edited));
             StringAssert.Contains(StaticDataFiles.Potion.GeneratedFileName, exception.Message);

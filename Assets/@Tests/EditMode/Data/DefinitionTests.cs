@@ -147,16 +147,16 @@ namespace F1.Tests
         {
             foreach (TargetMode target in new[] { TargetMode.EnemyFront, TargetMode.EnemyBack })
             {
-                Assert.AreEqual(1, new ItemEffect(EffectKind.Damage, target, 1, 100).Reach);
-                Assert.AreEqual(BattleRows.Count, new ItemEffect(EffectKind.Damage, target, BattleRows.Count, 100).Reach);
-                Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, target, 0, 100), "No reach.");
-                Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, target, BattleRows.Count + 1, 100), "Deeper than a side has rows.");
+                Assert.AreEqual(1, new ItemEffect(EffectKind.Damage, target, 1, 100, 100).Reach);
+                Assert.AreEqual(BattleRows.Count, new ItemEffect(EffectKind.Damage, target, BattleRows.Count, 100, 100).Reach);
+                Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, target, 0, 100, 100), "No reach.");
+                Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, target, BattleRows.Count + 1, 100, 100), "Deeper than a side has rows.");
             }
 
-            Assert.AreEqual(0, new ItemEffect(EffectKind.Damage, TargetMode.EnemyAll, 0, 100).Reach);
-            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyAll, 2, 100));
-            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Heal, TargetMode.AllyLowestHp, 1, 100));
-            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Shield, TargetMode.Self, 1, 100));
+            Assert.AreEqual(0, new ItemEffect(EffectKind.Damage, TargetMode.EnemyAll, 0, 100, 100).Reach);
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyAll, 2, 100, 100));
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Heal, TargetMode.AllyLowestHp, 1, 100, 100));
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Shield, TargetMode.Self, 1, 100, 100));
         }
 
         [Test]
@@ -226,12 +226,11 @@ namespace F1.Tests
         {
             LocalizedText name = TestData.Text("x");
 
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 0, "sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 0, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "Sword", 10, 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 0, null), "Recommended row below 1.");
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, BattleRows.Count + 1, null), "Recommended row beyond the last row.");
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 0, "sword", 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "Sword", 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 0, null), "Recommended row below 1.");
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", BattleRows.Count + 1, null), "Recommended row beyond the last row.");
         }
 
         [Test]
@@ -240,10 +239,10 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.InRows, RowSpan.Front(1), PassiveEffect.Shield, PassiveTarget.Self, 20);
 
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, null));
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 10, 1, passive, TestData.Text("Shield {0}")));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, passive));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, TestData.Text("Shield {0}")));
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, null));
+            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, passive, TestData.Text("Shield {0}")));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, passive));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, TestData.Text("Shield {0}")));
         }
 
         [Test]
@@ -252,13 +251,13 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
 
-            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).Figure, "No figure by default.");
-            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x").Figure);
+            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).Figure, "No figure by default.");
+            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x").Figure);
             Assert.AreEqual("unit/enemy/x", new EnemyData("x", name, 1, 10, items, "unit/enemy/x").Figure);
             Assert.IsNull(new EnemyData("x", name, 1, 10, items).Figure);
 
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, null, ""));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x "));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, null, ""));
+            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x "));
             Assert.Throws<DataException>(() => new EnemyData("x", name, 1, 10, items, "unit/ enemy/x"));
         }
 
@@ -266,12 +265,12 @@ namespace F1.Tests
         public void Poses_AreTheFigureAddressUnderPose_WithThePose_OrNullWithoutAFigure()
         {
             LocalizedText name = TestData.Text("x");
-            var job = new JobData("x", name, 100, "sword", 10, 1, null, null, "unit/job/x");
+            var job = new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x");
 
             Assert.AreEqual("pose/job/x-attack", job.AttackPose);
             Assert.AreEqual("pose/job/x-hit", job.HitPose);
-            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).AttackPose, "No pose without a figure.");
-            Assert.IsNull(new JobData("x", name, 100, "sword", 10, 1, null).HitPose);
+            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).AttackPose, "No pose without a figure.");
+            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).HitPose);
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
             var enemy = new EnemyData("goblin_raider", name, 1, 10, items, "unit/enemy/goblin-raider");
             Assert.AreEqual("pose/enemy/goblin-raider-attack", enemy.AttackPose, "A monster has its poses too (Docs/Design/10 §5).");
@@ -317,12 +316,11 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var potions = new List<string>();
 
-            Assert.DoesNotThrow(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 0, 2, 3, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 3, 2, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, DungeonData.MaxMapWidth + 1, 2, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 0, 8, 2, potions));
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 0, 2, potions));
+            Assert.DoesNotThrow(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 0, 2, 3, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 3, 2, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, DungeonData.MaxMapWidth + 1, 2, potions));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 0, potions));
         }
 
         [Test]
@@ -331,11 +329,11 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var potions = new List<string>();
 
-            Assert.IsNull(new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions).Background, "No background by default.");
-            Assert.AreEqual("background/dungeon/d", new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, "background/dungeon/d").Background);
+            Assert.IsNull(new DungeonData("d", name, "swift", 3, 2, 3, 2, potions).Background, "No background by default.");
+            Assert.AreEqual("background/dungeon/d", new DungeonData("d", name, "swift", 3, 2, 3, 2, potions, "background/dungeon/d").Background);
 
-            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, ""));
-            DataException error = Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, 8, 2, potions, "background/ dungeon/d"));
+            Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, potions, ""));
+            DataException error = Assert.Throws<DataException>(() => new DungeonData("d", name, "swift", 3, 2, 3, 2, potions, "background/ dungeon/d"));
             StringAssert.Contains("Background", error.Message, "The error names the column.");
         }
 
@@ -352,15 +350,6 @@ namespace F1.Tests
             Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, ""));
             DataException error = Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { effect }, 0, "item/ x"));
             StringAssert.Contains("Icon", error.Message, "The error names the column.");
-        }
-
-        [Test]
-        public void DungeonData_ItemGradeGrowsByFloor()
-        {
-            var dungeon = new DungeonData("d", TestData.Text("d"), "swift", 3, 2, 3, 2, 8, 2, new List<string>());
-
-            Assert.AreEqual(8, dungeon.ItemGradeAt(1));
-            Assert.AreEqual(12, dungeon.ItemGradeAt(3));
         }
 
         [Test]
@@ -396,13 +385,59 @@ namespace F1.Tests
         }
 
         [Test]
-        public void ItemEffect_MagnitudeAt_IsNeverBelowOne()
+        public void ItemEffect_Scaled_IsTheValueAtTierAndPower_NeverBelowOne()
         {
-            ItemEffect effect = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 25);
+            // Stage 22: value x tier percent x power percent / 10000, rounded down, at least 1 (0.01, or one burn stack).
+            Assert.AreEqual(300, ItemEffect.Scaled(300, 100, 100), "Common at the party's power: the data's value.");
+            Assert.AreEqual(1200, ItemEffect.Scaled(300, 400, 100), "Gold: four times.");
+            Assert.AreEqual(666, ItemEffect.Scaled(300, 100, 222), "An enemy carries it at its own power: 666.0, rounded down.");
+            Assert.AreEqual(1, ItemEffect.Scaled(1, 100, 50), "Never below 1.");
+        }
 
-            Assert.AreEqual(1, effect.MagnitudeAt(1));
-            Assert.AreEqual(1, effect.MagnitudeAt(4));
-            Assert.AreEqual(2, effect.MagnitudeAt(8));
+        [Test]
+        public void ItemEffect_DamageIsARange_EveryOtherEffectOneValue()
+        {
+            Assert.DoesNotThrow(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyFront, 1, 200, 400));
+            Assert.DoesNotThrow(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyFront, 1, 300, 300), "A range of one value.");
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyFront, 1, 400, 200), "The least above the most.");
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Damage, TargetMode.EnemyFront, 1, 0, 200), "Below 0.01.");
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Heal, TargetMode.Self, 0, 200, 300), "A heal has one value.");
+            Assert.Throws<DataException>(() => new ItemEffect(EffectKind.Burn, TargetMode.EnemyFront, 1, 2, 3), "So has a burn.");
+        }
+
+        [Test]
+        public void ItemData_OnlyAWeaponThatDealsDamage_HasACritChance()
+        {
+            LocalizedText name = TestData.Text("x");
+            ItemEffect hit = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
+            ItemEffect heal = TestData.Effect(EffectKind.Heal, TargetMode.Self);
+            RowSpan rows = RowSpan.All;
+
+            Assert.AreEqual(5, new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { hit }, 0, critChancePercent: 5).CritChancePercent);
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Attack, 1, 1, 1000, rows, new[] { hit }, 0, critChancePercent: 5), "Not a weapon.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { heal }, 0, critChancePercent: 5), "A weapon that only heals.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 1, 1, 1000, rows, new[] { hit }, 0, critChancePercent: 101));
+        }
+
+        [Test]
+        public void Centi_ReadsUpToTwoDecimals_AndRoundsHalfUpForTheScreen()
+        {
+            Assert.IsTrue(Centi.TryParse("2", out int two));
+            Assert.AreEqual(200, two);
+            Assert.IsTrue(Centi.TryParse("5.45", out int shield));
+            Assert.AreEqual(545, shield);
+            Assert.IsTrue(Centi.TryParse("0.5", out int half));
+            Assert.AreEqual(50, half);
+            Assert.IsFalse(Centi.TryParse("1.234", out _), "Three decimals.");
+            Assert.IsFalse(Centi.TryParse("-1", out _));
+            Assert.IsFalse(Centi.TryParse("1.", out _));
+            Assert.IsFalse(Centi.TryParse(".5", out _));
+            Assert.AreEqual(2, Centi.Round(249));
+            Assert.AreEqual(3, Centi.Round(250));
+            Assert.AreEqual(0, Centi.Round(49));
+            Assert.AreEqual("2", Centi.ToText(200));
+            Assert.AreEqual("2.5", Centi.ToText(250));
+            Assert.AreEqual("2.37", Centi.ToText(237));
         }
     }
 }

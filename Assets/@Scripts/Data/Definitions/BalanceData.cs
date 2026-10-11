@@ -37,16 +37,20 @@ namespace F1.Data
 
         readonly struct KeySpec
         {
-            public KeySpec(string key, int min, int max)
+            public KeySpec(string key, int min, int max, bool centi = false)
             {
                 Key = key;
                 Min = min;
                 Max = max;
+                Centi = centi;
             }
 
             public string Key { get; }
             public int Min { get; }
             public int Max { get; }
+
+            /// <summary>A value in hundredths (Slice B stage 22, <see cref="Data.Centi"/>): the data writes "0.55" and the rules read 55.</summary>
+            public bool Centi { get; }
         }
 
         const int Big = 1000000;
@@ -75,8 +79,15 @@ namespace F1.Data
             new KeySpec(nameof(BurnTickMs), 100, Big),
             new KeySpec(nameof(StormStartMs), 1000, Big),
             new KeySpec(nameof(StormTickMs), 100, Big),
-            new KeySpec(nameof(StormBaseDamage), 1, Big),
-            new KeySpec(nameof(StormGrowth), 0, Big),
+            new KeySpec(nameof(StormBaseDamage), 1, Big, centi: true),
+            new KeySpec(nameof(StormGrowth), 0, Big, centi: true),
+            new KeySpec(nameof(BurnDamagePerStack), 1, Big, centi: true),
+            new KeySpec(nameof(HitMinDamage), 0, Big, centi: true),
+            new KeySpec(nameof(CritDamagePercent), 100, 1000),
+            new KeySpec(nameof(CritFatigueTaken), 0, Big),
+            new KeySpec(nameof(CritFatigueTakenAllies), 0, Big),
+            new KeySpec(nameof(CritFatigueDealt), 0, Big),
+            new KeySpec(nameof(CritFatigueDealtAllies), 0, Big),
             new KeySpec(nameof(PotionSlots), 0, 6),
             new KeySpec(nameof(PotionCooldownMs), 0, Big),
             new KeySpec(nameof(RetreatChancePercent), 0, 100),
@@ -175,6 +186,12 @@ namespace F1.Data
             }
         }
 
+        /// <summary>True for a key whose value is in hundredths: the data writes it with up to two decimals (stage 22).</summary>
+        public static bool IsCenti(string key)
+        {
+            return Specs.Any(spec => spec.Key == key && spec.Centi);
+        }
+
         /// <summary>The rows in key order, for writing the generated file.</summary>
         public List<BalanceEntry> ToEntries()
         {
@@ -220,6 +237,20 @@ namespace F1.Data
         public int StormTickMs => _values[nameof(StormTickMs)];
         public int StormBaseDamage => _values[nameof(StormBaseDamage)];
         public int StormGrowth => _values[nameof(StormGrowth)];
+
+        /// <summary>
+        /// Slice B stage 22 (Docs/Design/02_Combat_System.md §4·§5, 04 §3): a burn's tick deals this per stack (hundredths); damage that gets
+        /// through a shield is a hit only from <see cref="HitMinDamage"/> (hundredths) or when it takes the HP to 0; a critical hit is the
+        /// rolled damage times <see cref="CritDamagePercent"/>%, and tires the one it hit and its allies, and relieves the one who dealt it and
+        /// its allies.
+        /// </summary>
+        public int BurnDamagePerStack => _values[nameof(BurnDamagePerStack)];
+        public int HitMinDamage => _values[nameof(HitMinDamage)];
+        public int CritDamagePercent => _values[nameof(CritDamagePercent)];
+        public int CritFatigueTaken => _values[nameof(CritFatigueTaken)];
+        public int CritFatigueTakenAllies => _values[nameof(CritFatigueTakenAllies)];
+        public int CritFatigueDealt => _values[nameof(CritFatigueDealt)];
+        public int CritFatigueDealtAllies => _values[nameof(CritFatigueDealtAllies)];
         public int PotionSlots => _values[nameof(PotionSlots)];
         public int PotionCooldownMs => _values[nameof(PotionCooldownMs)];
         public int RetreatChancePercent => _values[nameof(RetreatChancePercent)];

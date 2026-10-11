@@ -3,26 +3,30 @@ using Newtonsoft.Json;
 
 namespace F1.Data
 {
-    /// <summary>An item at a grade, as carried by an enemy.</summary>
+    /// <summary>
+    /// An item as an enemy carries it (Slice B stage 22, Docs/Design/02_Combat_System.md §4): the item's own values times the enemy's
+    /// power percent. Enemies carry the same items harder than they drop.
+    /// </summary>
     public sealed class ItemGrant
     {
         [JsonConstructor]
-        public ItemGrant(string itemId, int grade)
+        public ItemGrant(string itemId, int powerPercent)
         {
             ItemId = DataId.Require(itemId, "ItemGrant ItemId");
-            if (grade < 1)
+            if (powerPercent < 1)
             {
-                throw new DataException($"Item '{itemId}': grade must be at least 1.");
+                throw new DataException($"Item '{itemId}': an enemy's power percent must be at least 1.");
             }
 
-            Grade = grade;
+            PowerPercent = powerPercent;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
         public string ItemId { get; }
 
+        /// <summary>How hard the enemy carries the item, in percent of the item's values.</summary>
         [JsonProperty(Order = 2, Required = Required.Always)]
-        public int Grade { get; }
+        public int PowerPercent { get; }
     }
 
     public sealed class EnemyData
@@ -75,6 +79,7 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public int Level { get; }
 
+        /// <summary>In hundredths (stage 22).</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
         public int MaxHp { get; }
 

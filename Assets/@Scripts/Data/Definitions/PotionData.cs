@@ -43,6 +43,7 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public PotionEffect Effect { get; }
 
+        /// <summary>The heal or the shield in hundredths (Slice B stage 22).</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
         public int Magnitude { get; }
 

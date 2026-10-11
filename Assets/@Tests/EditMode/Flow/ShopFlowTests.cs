@@ -23,13 +23,14 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, "blade", 200, 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, "staff", 10, 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, "blade", 200, 3, null),
+                new JobData("tank", TestData.Text("tank"), 100, "blade", 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, "staff", 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, "blade", 3, null),
             };
+            TestData.StrongBlade(parts);
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, null, shopMinFloor: 2, shopChancePercent: 100),
+                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, null, shopMinFloor: 2, shopChancePercent: 100),
             };
             return new StaticData(parts);
         }
@@ -175,11 +176,11 @@ namespace F1.Tests
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "At a shop without a shop record.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            broken.Expedition.Shop.Stock.Add(new OfferRecord { Kind = "Item", Id = "knife", Grade = 8, Tier = "Common" });
+            broken.Expedition.Shop.Stock.Add(new OfferRecord { Kind = "Item", Id = "knife", Tier = "Common" });
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "More offers than slots.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            broken.Expedition.Shop.Stock[0] = new OfferRecord { Kind = "Item", Id = "nothing", Grade = 8, Tier = "Common" };
+            broken.Expedition.Shop.Stock[0] = new OfferRecord { Kind = "Item", Id = "nothing", Tier = "Common" };
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(broken, kit.Data, out RunState _, out ExpeditionState _), "An unknown item on offer.");
 
             broken = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;

@@ -29,6 +29,10 @@ namespace F1.Sim
         public int Virtues;
         public int Collapses;
         public int CollapseDeaths;
+
+        /// <summary>Critical hits (Slice B stage 22) the party dealt and took.</summary>
+        public int CritsDealt;
+        public int CritsTaken;
         public readonly Dictionary<string, int> DeathsByMercenary = new Dictionary<string, int>();
 
         public void Add(BattleEngine battle)
@@ -59,6 +63,17 @@ namespace F1.Sim
                         break;
                     case BattleEventKind.DeathRolled:
                         DeathRolls++;
+                        break;
+                    case BattleEventKind.CriticalHit:
+                        if (e.Source.Side == BattleSide.Party)
+                        {
+                            CritsDealt++;
+                        }
+                        else
+                        {
+                            CritsTaken++;
+                        }
+
                         break;
                     case BattleEventKind.Died:
                         if (e.Target.Side == BattleSide.Party)
@@ -120,6 +135,7 @@ namespace F1.Sim
             Console.WriteLine($"  duration avg {DurationMs / Battles / 1000.0:F1}s, longest {LongestMs / 1000.0:F1}s, reached storm {Percent(ReachedStorm, Battles)}");
             Console.WriteLine($"  per battle: deaths {Ratio(Deaths, Battles)}, DoG entries {Ratio(DogEntries, Battles)}, grace breaks {Ratio(GraceBreaks, Battles)}, death rolls {Ratio(DeathRolls, Battles)}");
             Console.WriteLine($"  per battle: potions {Ratio(PotionsUsed, Battles)}, retreat attempts {Ratio(RetreatAttempts, Battles)}, party advances {Ratio(PartyAdvances, Battles)}");
+            Console.WriteLine($"  per battle: critical hits dealt {Ratio(CritsDealt, Battles)}, taken {Ratio(CritsTaken, Battles)}");
             if (Afflictions + Virtues + Collapses > 0)
             {
                 Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths})");

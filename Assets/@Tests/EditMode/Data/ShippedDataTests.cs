@@ -159,7 +159,7 @@ namespace F1.Tests
             Assert.IsTrue(whetstone.IsPassive, "It never activates.");
             Assert.AreEqual((1, 1), (whetstone.Width, whetstone.Height));
             CollectionAssert.AreEqual(new[] { (0, -1), (0, 1) }, whetstone.Stars.Select(s => (s.X, s.Y)), "A star above and one below.");
-            Assert.AreEqual(1, whetstone.StarDamage);
+            Assert.AreEqual(100, whetstone.StarDamage, "+1, in hundredths (stage 22).");
             Assert.Greater(whetstone.ShopWeight, 0, "Sold in shops.");
             Assert.Greater(whetstone.Price, 0);
             Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "whetstone")), "No enemy carries it: shops only.");

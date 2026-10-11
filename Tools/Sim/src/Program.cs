@@ -37,6 +37,7 @@ namespace F1.Sim
                     case "formations": return Formations(store, options);
                     case "trace": return Trace(store, options);
                     case "map": return Map(store, options);
+                    case "items": return Items(store);
                     default:
                         PrintUsage();
                         return 2;
@@ -144,6 +145,35 @@ namespace F1.Sim
         }
 
         /// <summary>Prints the map of one expedition: one node per line, "id floor column kind group next,ids".</summary>
+        /// <summary>
+        /// Every item's damage at Common as the size rule reads it (Slice B stage 22, Docs/Design/02_Combat_System.md §4): the range, the
+        /// average on one unit, how many it hits, and the damage per square per second over all it hits. The dungeon's weapons follow
+        /// "squares x 1/3 x cooldown / units hit" (1/3 a square a second); the rest are out of the rule.
+        /// </summary>
+        static int Items(StaticDataFileStore store)
+        {
+            StaticData data = LoadGenerated(store);
+            Console.WriteLine("item            shape cooldown  range        avg/unit units  per square per second  (rule: 0.33)");
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                foreach (ItemEffect effect in item.Effects)
+                {
+                    if (effect.Kind != EffectKind.Damage)
+                    {
+                        continue;
+                    }
+
+                    int units = effect.Target == TargetMode.EnemyAll ? BattleRows.Count : effect.Reach;
+                    double average = (effect.Min + effect.Max) / 2.0 / Centi.One;
+                    double perSquare = average * units / (item.CooldownMs / 1000.0) / item.Area;
+                    Console.WriteLine(string.Format(CultureInfo.InvariantCulture, "{0,-15} {1}x{2}  {3,5:F1}s   {4,-12} {5,6:F2} {6,5}  {7,8:F2}",
+                        item.Id, item.Width, item.Height, item.CooldownMs / 1000.0, Centi.ToText(effect.Min) + "-" + Centi.ToText(effect.Max), average, units, perSquare));
+                }
+            }
+
+            return 0;
+        }
+
         static int Map(StaticDataFileStore store, Dictionary<string, string> options)
         {
             StaticData data = LoadGenerated(store);
@@ -222,6 +252,7 @@ namespace F1.Sim
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  formations   Whole expeditions for every order of the party, front to back");
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
+            Console.WriteLine("  items        Every item's damage per square per second (the size rule of stage 22)");
             Console.WriteLine("  map          The map of one expedition, one node per line");
             Console.WriteLine("               --dungeon id  --seed n");
             Console.WriteLine("  trace        Event log of one battle");

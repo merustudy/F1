@@ -7,9 +7,8 @@
         "en-US": "Archmage",
         "ko-KR": "대마법사"
       },
-      "MaxHp": 80,
+      "MaxHp": 2200,
       "WeaponItemId": "fire_staff",
-      "WeaponGrade": 10,
       "RecommendedRow": 3,
       "Passive": {
         "Trigger": "Always",
@@ -34,9 +33,8 @@
         "en-US": "Bishop",
         "ko-KR": "주교"
       },
-      "MaxHp": 90,
+      "MaxHp": 2500,
       "WeaponItemId": "healing_staff",
-      "WeaponGrade": 10,
       "RecommendedRow": 3,
       "Passive": {
         "Trigger": "Heal",
@@ -44,7 +42,7 @@
         "Rows": null,
         "Effect": "Shield",
         "Target": "EventTarget",
-        "Magnitude": 10
+        "Magnitude": 273
       },
       "PassiveText": {
         "en-US": "Healed targets also gain {0} Shield",
@@ -58,9 +56,8 @@
         "en-US": "Knight",
         "ko-KR": "기사"
       },
-      "MaxHp": 140,
+      "MaxHp": 3800,
       "WeaponItemId": "longsword",
-      "WeaponGrade": 10,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "BattleStart",
@@ -71,7 +68,7 @@
         },
         "Effect": "Shield",
         "Target": "Self",
-        "Magnitude": 20
+        "Magnitude": 545
       },
       "PassiveText": {
         "en-US": "Front row: gains {0} Shield at the start of battle",
@@ -85,9 +82,8 @@
         "en-US": "Paladin",
         "ko-KR": "성기사"
       },
-      "MaxHp": 130,
+      "MaxHp": 3500,
       "WeaponItemId": "mace",
-      "WeaponGrade": 9,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "BattleStart",
@@ -98,7 +94,7 @@
         },
         "Effect": "Shield",
         "Target": "AllyAll",
-        "Magnitude": 8
+        "Magnitude": 218
       },
       "PassiveText": {
         "en-US": "Front row: every ally gains {0} Shield at the start of battle",
@@ -112,9 +108,8 @@
         "en-US": "Spellblade",
         "ko-KR": "마검사"
       },
-      "MaxHp": 100,
+      "MaxHp": 2700,
       "WeaponItemId": "longsword",
-      "WeaponGrade": 12,
       "RecommendedRow": 2,
       "Passive": {
         "Trigger": "WeaponHit",
@@ -136,9 +131,8 @@
         "en-US": "Valkyrie",
         "ko-KR": "발키리"
       },
-      "MaxHp": 120,
+      "MaxHp": 3300,
       "WeaponItemId": "greataxe",
-      "WeaponGrade": 12,
       "RecommendedRow": 1,
       "Passive": {
         "Trigger": "Always",

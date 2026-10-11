@@ -19,43 +19,61 @@ namespace F1.Gameplay
         Retreated,
     }
 
-    /// <summary>An item at a grade and a tier, in a unit's item slot.</summary>
+    /// <summary>
+    /// An item at a tier, in a unit's item slot. An enemy carries its items at its own power percent (Slice B stage 22: the grade is gone;
+    /// the party's items are always at 100).
+    /// </summary>
     public sealed class EquippedItem
     {
         /// <param name="isBase">True for a base weapon: the job's weapon a mercenary leaves on the expedition with.</param>
-        public EquippedItem(ItemData item, int grade, bool isBase = false, ItemTier tier = ItemTier.Common)
+        /// <param name="powerPercent">How hard the item is carried: 100 for the party, an enemy's own for its items.</param>
+        public EquippedItem(ItemData item, bool isBase = false, ItemTier tier = ItemTier.Common, int powerPercent = 100)
         {
             Item = item ?? throw new ArgumentNullException(nameof(item));
-            if (grade < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(grade), grade, "Grade must be at least 1.");
-            }
-
             if (tier < ItemTier.Common || tier > ItemTier.Gold)
             {
                 throw new ArgumentOutOfRangeException(nameof(tier), tier, "Not a tier.");
             }
 
-            Grade = grade;
+            if (powerPercent < 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(powerPercent), powerPercent, "Power percent must be at least 1.");
+            }
+
             IsBase = isBase;
             Tier = tier;
+            PowerPercent = powerPercent;
         }
 
         public ItemData Item { get; }
-        public int Grade { get; }
 
         /// <summary>Common, Bronze, Silver or Gold: the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
         public ItemTier Tier { get; }
 
-        /// <summary>The size of one of the item's effects at its grade and tier.</summary>
+        /// <summary>100 for the party's items; an enemy's own percent for its items (stage 22).</summary>
+        public int PowerPercent { get; }
+
+        /// <summary>The least damage of one of the item's effects at its tier and power, or the one value of any other effect.</summary>
+        public int Min(BalanceData balance, ItemEffect effect)
+        {
+            return ItemEffect.Scaled(effect.Min, balance.TierPercent(Tier), PowerPercent);
+        }
+
+        /// <summary>The most damage of one of the item's effects at its tier and power; <see cref="Min"/> for any other effect.</summary>
+        public int Max(BalanceData balance, ItemEffect effect)
+        {
+            return ItemEffect.Scaled(effect.Max, balance.TierPercent(Tier), PowerPercent);
+        }
+
+        /// <summary>The size of an effect without a range (a heal, a shield, a burn) at the item's tier and power.</summary>
         public int Magnitude(BalanceData balance, ItemEffect effect)
         {
-            return effect.MagnitudeAt(Grade, balance.TierPercent(Tier));
+            return Min(balance, effect);
         }
 
         /// <summary>
-        /// What a melee weapon on one of the item's stars deals more (Slice B stage 20): the data's StarDamage at Common, as much again per
-        /// tier step (Bronze twice, Silver three times, Gold four times). 0 for an item without stars.
+        /// What a melee weapon on one of the item's stars deals more (Slice B stage 20), in hundredths: the data's StarDamage at Common, as much
+        /// again per tier step (Bronze twice, Silver three times, Gold four times). 0 for an item without stars.
         /// </summary>
         public int StarDamage => Item.StarDamage * ((int)Tier - (int)ItemTier.Common + 1);
 
@@ -67,7 +85,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"'{Item.Id}' is Gold already.");
             }
 
-            return new EquippedItem(Item, Grade, IsBase, Tier + 1);
+            return new EquippedItem(Item, IsBase, Tier + 1, PowerPercent);
         }
 
         /// <summary>
@@ -85,6 +103,7 @@ namespace F1.Gameplay
         public LocalizedText Name;
         /// <summary>The row the unit starts in (1 = facing the enemy).</summary>
         public int Row;
+        /// <summary>In hundredths (stage 22), as <see cref="Hp"/>.</summary>
         public int MaxHp;
         public int Hp;
         /// <summary>The items of the board in reading order (Slice B stage 19): no empty entries. The order is the activation order (see ItemBoard).</summary>
@@ -193,7 +212,7 @@ namespace F1.Gameplay
         BattleStarted,
         /// <summary>Source = owner, Id = item id, A = item slot.</summary>
         ItemActivated,
-        /// <summary>Source (None for burn and storm), Target, Id = cause, A = amount, B = absorbed by shield, C = target HP after.</summary>
+        /// <summary>Source (None for burn and storm), Target, Id = cause, A = amount, B = absorbed by shield, C = target HP after. Amounts and HP in hundredths (stage 22).</summary>
         Damaged,
         /// <summary>Source, Target, Id = cause, A = amount, B = HP actually restored, C = target HP after.</summary>
         Healed,
@@ -225,7 +244,7 @@ namespace F1.Gameplay
         /// <summary>A = (int)BattleResult.</summary>
         BattleEnded,
 
-        /// <summary>A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue"), A = change, C = fatigue after.</summary>
+        /// <summary>A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue", and the critical hit's four), A = change, C = fatigue after.</summary>
         FatigueChanged,
         /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent, C = 1 for a virtue.</summary>
         BrokeDown,
@@ -233,6 +252,11 @@ namespace F1.Gameplay
         Collapsed,
         /// <summary>An affliction ended: fatigue came back under the threshold. Target, Id = the state's id.</summary>
         FatigueStateEnded,
+        /// <summary>
+        /// A weapon's damage on one unit is a critical hit (Slice B stage 22), just before its Damaged. Source, Target, Id = the item, A = the damage
+        /// (hundredths), B = the roll 0..99, C = the chance percent.
+        /// </summary>
+        CriticalHit,
     }
 
     /// <summary>
@@ -251,6 +275,12 @@ namespace F1.Gameplay
         public const string FatigueAllyDog = "ally_dog";
         public const string FatigueAllyDeath = "ally_death";
         public const string FatigueKill = "kill";
+
+        /// <summary>Fatigue from a critical hit (stage 22): taken by the unit hit, by its allies; dealt by the owner, by its allies.</summary>
+        public const string FatigueCritTaken = "crit_taken";
+        public const string FatigueAllyCritTaken = "ally_crit_taken";
+        public const string FatigueCritDealt = "crit_dealt";
+        public const string FatigueAllyCritDealt = "ally_crit_dealt";
         public const string FatigueVirtue = "virtue";
 
         public BattleEvent(int timeMs, BattleEventKind kind, UnitRef source, UnitRef target, string id, int a, int b, int c)

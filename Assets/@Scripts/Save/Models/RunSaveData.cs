@@ -7,7 +7,8 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 10 (Slice B stage 19): a member's board is a grid: its Bags (the start bag and those added, each where it lies and how it is
+    /// Version 11 (Slice B stage 22): HP is in hundredths at the new scale (a longsword deals 2-4) and an item has no grade any more. Version 10
+    /// (Slice B stage 19): a member's board is a grid: its Bags (the start bag and those added, each where it lies and how it is
     /// turned) and its Items, each where it lies and how it is turned; an offer can be a Bag. Version 9 (Slice B stage 18): the expedition's Loot (the drops of the last won battle, null where one was taken) replaces
     /// PendingRewards (the reward choice, which is not read any more). Version 8 (stage 17): the expedition's region Coins and, at a
     /// shop, its Shop (the stock and the refreshes).
@@ -19,7 +20,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 10;
+        public const int CurrentSchemaVersion = 11;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -104,6 +105,8 @@ namespace F1.Save
         public string MercenaryId;
         public string JobId;
         public int Row;
+
+        /// <summary>In hundredths (version 11; whole numbers at the old scale before).</summary>
         public int MaxHp;
         public int Hp;
         public bool Alive;
@@ -124,7 +127,6 @@ namespace F1.Save
     public sealed class ItemRecord
     {
         public string ItemId;
-        public int Grade;
 
         /// <summary>True for a base weapon: the job's weapon given when the expedition left.</summary>
         public bool Base;
@@ -152,7 +154,6 @@ namespace F1.Save
         /// <summary>Item, Potion or Bag (version 10).</summary>
         public string Kind;
         public string Id;
-        public int Grade;
 
         /// <summary>The tier's name of an item on offer; Common for a potion or a bag (version 7, as above). An entry that does not name one is Common.</summary>
         public string Tier = "Common";

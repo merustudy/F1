@@ -97,6 +97,8 @@ namespace F1.Gameplay
         public const ulong Fatigue = 5UL;
         /// <summary>What a shop offers, and offers again on a refresh (Slice B stage 17). Separate from the loot.</summary>
         public const ulong Shop = 6UL;
+        /// <summary>A weapon's damage roll and the critical hits on each unit it hits (Slice B stage 22). Separate so that it never changes death rolls.</summary>
+        public const ulong Damage = 7UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

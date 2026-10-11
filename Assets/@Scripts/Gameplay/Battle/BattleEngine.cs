@@ -28,6 +28,7 @@ namespace F1.Gameplay
         readonly Pcg32 _battleRng;
         readonly Pcg32 _inputRng;
         readonly Pcg32 _fatigueRng;
+        readonly Pcg32 _damageRng;
         readonly List<BattleEvent> _events = new List<BattleEvent>();
         readonly List<BattleInput> _inputs = new List<BattleInput>();
 
@@ -74,6 +75,7 @@ namespace F1.Gameplay
             _battleRng = new Pcg32(setup.Seed, RngStream.Battle);
             _inputRng = new Pcg32(setup.Seed, RngStream.Input);
             _fatigueRng = new Pcg32(setup.Seed, RngStream.Fatigue);
+            _damageRng = new Pcg32(setup.Seed, RngStream.Damage);
             _nextBurnTickMs = _balance.BurnTickMs;
             _nextStormTickMs = _balance.StormStartMs;
 
@@ -448,10 +450,15 @@ namespace F1.Gameplay
             {
                 int magnitude = item.Equipped.Magnitude(_balance, effect);
                 bool weaponDamage = effect.Kind == EffectKind.Damage && data.Category == ItemCategory.Weapon;
-                if (weaponDamage)
+                if (effect.Kind == EffectKind.Damage)
                 {
-                    // The stars on it add first (stage 20), so the weapon-power passive grows them too.
-                    magnitude = WithWeaponPower(owner, magnitude + item.StarDamage);
+                    // Damage is rolled once for the attack (stage 22): every unit it hits takes the same roll. The stars on a weapon add
+                    // next (stage 20); a critical hit is rolled for each unit hit, then the weapon-power passive grows it all.
+                    magnitude = _damageRng.NextInt(item.Equipped.Min(_balance, effect), item.Equipped.Max(_balance, effect));
+                    if (weaponDamage)
+                    {
+                        magnitude += item.StarDamage;
+                    }
                 }
 
                 foreach (BattleUnit target in ResolveTargets(owner, effect))
@@ -464,13 +471,32 @@ namespace F1.Gameplay
                     switch (effect.Kind)
                     {
                         case EffectKind.Damage:
-                            ApplyDamage(target, magnitude, owner.Ref, data.Id);
+                        {
+                            int dealt = magnitude;
+                            bool critical = weaponDamage && RollCritical(owner, target, data, ref dealt);
+                            if (weaponDamage)
+                            {
+                                dealt = WithWeaponPower(owner, dealt);
+                            }
+
+                            if (critical)
+                            {
+                                Log(BattleEventKind.CriticalHit, owner.Ref, target.Ref, data.Id, dealt, _lastCritRoll, data.CritChancePercent);
+                            }
+
+                            ApplyDamage(target, dealt, owner.Ref, data.Id);
+                            if (critical)
+                            {
+                                CriticalFatigue(owner, target);
+                            }
+
                             if (weaponDamage && target.Alive)
                             {
                                 ApplyTriggeredPassive(owner, PassiveTrigger.WeaponHit, target);
                             }
 
                             break;
+                        }
                         case EffectKind.Heal:
                             ApplyHeal(target, magnitude, owner.Ref, data.Id);
                             ApplyTriggeredPassive(owner, PassiveTrigger.Heal, target);
@@ -491,6 +517,47 @@ namespace F1.Gameplay
                         return;
                     }
                 }
+            }
+        }
+
+        int _lastCritRoll;
+
+        /// <summary>
+        /// Rolls the weapon's critical hit on one unit (stage 22, Docs/Design/02_Combat_System.md §4): with the weapon's chance, the damage
+        /// becomes <see cref="BalanceData.CritDamagePercent"/>% of the attack's roll (stars included). A weapon without a chance rolls nothing.
+        /// </summary>
+        bool RollCritical(BattleUnit owner, BattleUnit target, ItemData weapon, ref int damage)
+        {
+            if (weapon.CritChancePercent <= 0)
+            {
+                return false;
+            }
+
+            _lastCritRoll = _damageRng.NextInt(100);
+            if (_lastCritRoll >= weapon.CritChancePercent)
+            {
+                return false;
+            }
+
+            damage = (int)((long)damage * _balance.CritDamagePercent / 100);
+            return true;
+        }
+
+        /// <summary>
+        /// The fatigue of a critical hit (stage 22, Docs/Design/04_Lobby_100Day_Economy.md §3, after Darkest Dungeon's stress): a mercenary hit
+        /// by one is tired and so are its allies; a mercenary who lands one is relieved and so are its allies. Enemies have no fatigue.
+        /// </summary>
+        void CriticalFatigue(BattleUnit owner, BattleUnit target)
+        {
+            if (owner.Side == BattleSide.Party)
+            {
+                ChangeFatigue(owner, -_balance.CritFatigueDealt, BattleEvent.FatigueCritDealt);
+                ChangeAlliesFatigue(owner, -_balance.CritFatigueDealtAllies, BattleEvent.FatigueAllyCritDealt);
+            }
+            else if (target.Side == BattleSide.Party)
+            {
+                ChangeFatigue(target, _balance.CritFatigueTaken, BattleEvent.FatigueCritTaken);
+                ChangeAlliesFatigue(target, _balance.CritFatigueTakenAllies, BattleEvent.FatigueAllyCritTaken);
             }
         }
 
@@ -709,7 +776,10 @@ namespace F1.Gameplay
             }
 
             Log(BattleEventKind.Damaged, source, target.Ref, cause, amount, absorbed, target.Hp);
-            if (through <= 0)
+
+            // Damage that gets through under HitMinDamage is no hit (stage 22): it costs HP but tires nobody and rolls no death, unless it
+            // takes the HP to 0. In hundredths a shield lets slivers through that whole numbers never had (Docs/Design/02_Combat_System.md §5).
+            if (through <= 0 || (through < _balance.HitMinDamage && (wasInDog || target.Hp > 0)))
             {
                 return;
             }
@@ -1050,7 +1120,7 @@ namespace F1.Gameplay
                 }
                 else if (unit.Burn > 0)
                 {
-                    ApplyDamage(unit, unit.Burn, UnitRef.None, BattleEvent.CauseBurn);
+                    ApplyDamage(unit, unit.Burn * _balance.BurnDamagePerStack, UnitRef.None, BattleEvent.CauseBurn);
                     if (unit.Alive)
                     {
                         unit.Burn--;

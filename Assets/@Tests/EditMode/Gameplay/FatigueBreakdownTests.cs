@@ -65,7 +65,7 @@ namespace F1.Tests
             // The enemy's hex burns 3 at 2500 ms (and again at 5000); the ticks at 3000, 4000, 5000 deal 3, 2, 1.
             // The storm starts at 6000 and deals 1 a tick. 2026-10-07 decision: a burn tick raises no fatigue, a storm tick does.
             BalanceData balance = Balance(("StormStartMs", 6000), ("StormTickMs", 1000), ("StormBaseDamage", 1), ("StormGrowth", 0));
-            var hex = new EquippedItem(TestData.Item("hex", 2500, EffectKind.Burn, TargetMode.EnemyFront, 100, ItemCategory.Support), 3);
+            var hex = new EquippedItem(TestData.Item("hex", 2500, EffectKind.Burn, TargetMode.EnemyFront, 100, ItemCategory.Support), powerPercent: 3);
             var battle = new BattleEngine(TestData.Setup(balance, TestData.Units(TestData.Mercenary("a", 1, 100)), TestData.Units(TestData.Enemy("e", 1, 1000, hex))));
 
             battle.AdvanceTo(4500);
@@ -255,7 +255,7 @@ namespace F1.Tests
             ItemData staff = TestData.Item("staff", 1000, EffectKind.Heal, TargetMode.AllyLowestHp, 100, ItemCategory.Support);
             BattleEngine hopeless = new BattleEngine(TestData.Setup(
                 balance,
-                TestData.Units(TestData.Mercenary("a", 1, 50, new EquippedItem(staff, 20)).WithMaxHp(100).WithFatigue(120, State("hopeless"))),
+                TestData.Units(TestData.Mercenary("a", 1, 50, new EquippedItem(staff, powerPercent: 20)).WithMaxHp(100).WithFatigue(120, State("hopeless"))),
                 TestData.Units(TestData.Enemy("e", 1, 1000))));
             hopeless.AdvanceTo(1000);
             BattleEvent healed = Of(hopeless, BattleEventKind.Healed).Single();
@@ -282,7 +282,7 @@ namespace F1.Tests
             ItemData staff = TestData.Item("staff", 1000, EffectKind.Heal, TargetMode.AllyLowestHp, 100, ItemCategory.Support);
             BattleEngine stalwart = new BattleEngine(TestData.Setup(
                 balance,
-                TestData.Units(TestData.Mercenary("a", 1, 50, new EquippedItem(staff, 20)).WithMaxHp(100).WithFatigue(40, State("stalwart"))),
+                TestData.Units(TestData.Mercenary("a", 1, 50, new EquippedItem(staff, powerPercent: 20)).WithMaxHp(100).WithFatigue(40, State("stalwart"))),
                 TestData.Units(TestData.Enemy("e", 1, 1000))));
             stalwart.AdvanceTo(1000);
             Assert.AreEqual(30, Of(stalwart, BattleEventKind.Healed).Single().A, "20 and half again.");
@@ -379,7 +379,7 @@ namespace F1.Tests
         public void TheCampsRest_EndsAnAffliction_OnceTheFatigueIsUnderTheThreshold()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, campFloor: 2) };
+            parts.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2) };
             var data = new StaticData(parts);
             var party = new[] { new PartyMember("anna", "tank", 1, 110, "fearful"), new PartyMember("ben", "healer", 2, 150, "hopeless") };
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, party);

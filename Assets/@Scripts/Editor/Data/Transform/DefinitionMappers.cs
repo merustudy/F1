@@ -50,7 +50,12 @@ namespace F1.Editor.Data
         public static List<BalanceEntry> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(new[] { "Key", "Value" });
-            return RowMapping.MapRows(table, errors, row => new BalanceEntry(row.Key("Key"), row.Int("Value")));
+            // A value in hundredths is written with up to two decimals (stage 22): "0.55" is read as 55.
+            return RowMapping.MapRows(table, errors, row =>
+            {
+                string key = row.Key("Key");
+                return new BalanceEntry(key, BalanceData.IsCenti(key) ? row.Centi("Value") : row.Int("Value"));
+            });
         }
     }
 
@@ -59,7 +64,7 @@ namespace F1.Editor.Data
         public static List<JobData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers(
-                "MaxHp", "WeaponItemId", "WeaponGrade", "RecommendedRow",
+                "MaxHp", "WeaponItemId", "RecommendedRow",
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
                 RowMapping.Figure)
                 .Concat(CsvRow.LocalizedHeaders(PassiveText)));
@@ -67,9 +72,8 @@ namespace F1.Editor.Data
             return RowMapping.MapRows(table, errors, row => new JobData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
-                row.Int("MaxHp"),
+                row.Centi("MaxHp"),
                 row.Id("WeaponItemId"),
-                row.Int("WeaponGrade"),
                 row.Int("RecommendedRow"),
                 ReadPassive(row),
                 ReadPassiveText(row),
@@ -93,14 +97,15 @@ namespace F1.Editor.Data
                 return null;
             }
 
-            // PassiveRows is filled only for the InRows condition; PassiveSpec checks that.
+            // PassiveRows is filled only for the InRows condition; PassiveSpec checks that. A shield is in hundredths (stage 22).
+            PassiveEffect effect = row.Enum<PassiveEffect>("PassiveEffect");
             return new PassiveSpec(
                 row.Enum<PassiveTrigger>("PassiveTrigger"),
                 row.Enum<PassiveCondition>("PassiveCondition"),
                 row.OptionalRows("PassiveRows"),
-                row.Enum<PassiveEffect>("PassiveEffect"),
+                effect,
                 row.Enum<PassiveTarget>("PassiveTarget"),
-                row.Int("PassiveMagnitude"));
+                effect == PassiveEffect.Shield ? row.Centi("PassiveMagnitude") : row.Int("PassiveMagnitude"));
         }
     }
 
@@ -110,9 +115,9 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "Category", "Width", "Height", "CooldownMs", "Rows",
-                "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Power",
-                "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Power",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage"));
+                "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
+                "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"));
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -120,7 +125,7 @@ namespace F1.Editor.Data
                 var effects = new List<ItemEffect>();
                 foreach (string prefix in new[] { "Effect1", "Effect2" })
                 {
-                    string[] columns = { prefix + "Kind", prefix + "Target", prefix + "Reach", prefix + "Power" };
+                    string[] columns = { prefix + "Kind", prefix + "Target", prefix + "Reach", prefix + "Value" };
                     if (!columns.All(row.IsEmpty))
                     {
                         effects.Add(ReadEffect(row, prefix));
@@ -141,18 +146,34 @@ namespace F1.Editor.Data
                     row.Int("Price"),
                     row.Bool("Melee"),
                     row.StarSquares("Stars"),
-                    row.OptionalInt("StarDamage", 0));
+                    row.IsEmpty("StarDamage") ? 0 : row.Centi("StarDamage"),
+                    row.OptionalInt("CritChancePercent", 0));
             });
         }
 
-        /// <summary>Reach is filled only for targets counted from an end of the enemy line; ItemEffect checks that.</summary>
+        /// <summary>
+        /// Reach is filled only for targets counted from an end of the enemy line; ItemEffect checks that. The value (stage 22): damage "least-most"
+        /// in hundredths ("2-4", "1.5-2.5"), a heal or a shield one value in hundredths ("2.73"), a burn its stacks ("2").
+        /// </summary>
         static ItemEffect ReadEffect(CsvRow row, string prefix)
         {
-            return new ItemEffect(
-                row.Enum<EffectKind>(prefix + "Kind"),
-                row.Enum<TargetMode>(prefix + "Target"),
-                row.OptionalInt(prefix + "Reach", 0),
-                row.Int(prefix + "Power"));
+            EffectKind kind = row.Enum<EffectKind>(prefix + "Kind");
+            int min;
+            int max;
+            if (kind == EffectKind.Burn)
+            {
+                min = max = row.Int(prefix + "Value");
+            }
+            else if (kind == EffectKind.Damage)
+            {
+                (min, max) = row.CentiRange(prefix + "Value");
+            }
+            else
+            {
+                min = max = row.Centi(prefix + "Value");
+            }
+
+            return new ItemEffect(kind, row.Enum<TargetMode>(prefix + "Target"), row.OptionalInt(prefix + "Reach", 0), min, max);
         }
     }
 
@@ -182,7 +203,7 @@ namespace F1.Editor.Data
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Enum<PotionEffect>("Effect"),
-                row.Int("Magnitude"),
+                row.Centi("Magnitude"),
                 row.Int("ShopWeight"),
                 RowMapping.ReadArt(row, RowMapping.Icon),
                 row.Int("Price")));
@@ -198,7 +219,7 @@ namespace F1.Editor.Data
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Int("Level"),
-                row.Int("MaxHp"),
+                row.Centi("MaxHp"),
                 row.GrantList("Items"),
                 RowMapping.ReadArt(row, RowMapping.Figure),
                 row.Int("FigureScale")));
@@ -239,9 +260,9 @@ namespace F1.Editor.Data
         {
             table.RequireHeaders(RowMapping.Headers(
                 "AffinityId", "Floors", "MapMinWidth", "MapMaxWidth", "DurationDays",
-                "ItemGradeBase", "ItemGradePerFloor", "StartingPotions", RowMapping.Background,
+                "StartingPotions", RowMapping.Background,
                 "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
-                "EnemyHpPerFloorPercent", "EnemyGradePerFloor", "BronzeFloor", "SilverFloor", "GoldFloor", "ShopMinFloor", "ShopChancePercent"));
+                "EnemyHpPerFloorPercent", "EnemyPowerPerFloorPercent", "BronzeFloor", "SilverFloor", "GoldFloor", "ShopMinFloor", "ShopChancePercent"));
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -251,8 +272,6 @@ namespace F1.Editor.Data
                 row.Int("MapMinWidth"),
                 row.Int("MapMaxWidth"),
                 row.Int("DurationDays"),
-                row.Int("ItemGradeBase"),
-                row.Int("ItemGradePerFloor"),
                 row.IdList("StartingPotions"),
                 RowMapping.ReadArt(row, RowMapping.Background),
                 row.Int("EliteMinFloor"),
@@ -261,7 +280,7 @@ namespace F1.Editor.Data
                 row.Int("CampChancePercent"),
                 row.Int("CampFloor"),
                 row.Int("EnemyHpPerFloorPercent"),
-                row.Int("EnemyGradePerFloor"),
+                row.Int("EnemyPowerPerFloorPercent"),
                 row.Int("BronzeFloor"),
                 row.Int("SilverFloor"),
                 row.Int("GoldFloor"),

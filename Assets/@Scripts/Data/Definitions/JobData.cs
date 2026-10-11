@@ -84,6 +84,7 @@ namespace F1.Data
         [JsonProperty(Order = 5, Required = Required.Always)]
         public PassiveTarget Target { get; }
 
+        /// <summary>A shield in hundredths (Slice B stage 22), burn stacks, or a weapon power percent.</summary>
         [JsonProperty(Order = 6, Required = Required.Always)]
         public int Magnitude { get; }
     }
@@ -99,7 +100,6 @@ namespace F1.Data
             LocalizedText name,
             int maxHp,
             string weaponItemId,
-            int weaponGrade,
             int recommendedRow,
             PassiveSpec passive,
             LocalizedText passiveText = null,
@@ -112,11 +112,6 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': MaxHp must be at least 1.");
             }
 
-            if (weaponGrade < 1)
-            {
-                throw new DataException($"{DefinitionName} '{id}': WeaponGrade must be at least 1.");
-            }
-
             if (!BattleRows.IsValid(recommendedRow))
             {
                 throw new DataException($"{DefinitionName} '{id}': RecommendedRow must be {BattleRows.Front}..{BattleRows.Count}.");
@@ -124,7 +119,6 @@ namespace F1.Data
 
             MaxHp = maxHp;
             WeaponItemId = DataId.Require(weaponItemId, $"{DefinitionName} '{id}' WeaponItemId");
-            WeaponGrade = weaponGrade;
             if ((passive == null) != (passiveText == null))
             {
                 throw new DataException($"{DefinitionName} '{id}': a passive and its PassiveText come together.");
@@ -142,15 +136,13 @@ namespace F1.Data
         [JsonProperty(Order = 2, Required = Required.Always)]
         public LocalizedText Name { get; }
 
+        /// <summary>In hundredths (Slice B stage 22).</summary>
         [JsonProperty(Order = 3, Required = Required.Always)]
         public int MaxHp { get; }
 
         /// <summary>The item every mercenary of this job starts an expedition with.</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
         public string WeaponItemId { get; }
-
-        [JsonProperty(Order = 5, Required = Required.Always)]
-        public int WeaponGrade { get; }
 
         /// <summary>Where the job usually stands. The simulator lines a party up by it; rules always use the actual row.</summary>
         [JsonProperty(Order = 6, Required = Required.Always)]

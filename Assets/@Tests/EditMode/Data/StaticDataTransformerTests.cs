@@ -40,9 +40,9 @@ namespace F1.Tests
             StaticData data = Transform().Data;
 
             JobData knight = data.Jobs.Get("knight");
-            Assert.AreEqual(140, knight.MaxHp);
+            Assert.AreEqual(3800, knight.MaxHp, "HP in hundredths (stage 22): 38 is 3800.");
+            Assert.AreEqual(2450, data.Jobs.Get("bishop").MaxHp, "24.5 is 2450.");
             Assert.AreEqual("sword", knight.WeaponItemId);
-            Assert.AreEqual(10, knight.WeaponGrade);
             Assert.AreEqual(1, knight.RecommendedRow);
             Assert.AreEqual(PassiveTrigger.BattleStart, knight.Passive.Trigger);
             Assert.AreEqual(PassiveCondition.InRows, knight.Passive.Condition);
@@ -50,7 +50,7 @@ namespace F1.Tests
             Assert.AreEqual(1, knight.Passive.Rows.Reach);
             Assert.AreEqual(PassiveEffect.Shield, knight.Passive.Effect);
             Assert.AreEqual(PassiveTarget.Self, knight.Passive.Target);
-            Assert.AreEqual(20, knight.Passive.Magnitude);
+            Assert.AreEqual(545, knight.Passive.Magnitude, "A shield is in hundredths: 5.45.");
             Assert.AreEqual("보호막 {0}", knight.PassiveText.Resolve("ko-KR"));
             Assert.AreEqual("Shield {0}", knight.PassiveText.Resolve("en-US"));
             Assert.IsNull(data.Jobs.Get("bishop").Passive, "Empty Passive* cells mean no passive.");
@@ -79,9 +79,21 @@ namespace F1.Tests
             Assert.AreEqual(TargetMode.EnemyFront, mace.Effects[0].Target);
             Assert.AreEqual(2, mace.Effects[0].Reach);
             Assert.AreEqual(EffectKind.Shield, mace.Effects[1].Kind);
+            Assert.AreEqual(123, mace.Effects[0].Min, "Damage \"1.23-3.68\" in hundredths (stage 22).");
+            Assert.AreEqual(368, mace.Effects[0].Max);
+            Assert.AreEqual(98, mace.Effects[1].Min, "A shield has one value.");
+            Assert.AreEqual(98, mace.Effects[1].Max);
+            Assert.AreEqual(200, data.Items.Get("sword").Effects[0].Min, "\"2-4\".");
+            Assert.AreEqual(400, data.Items.Get("sword").Effects[0].Max);
+            Assert.AreEqual(5, data.Items.Get("sword").CritChancePercent);
+            Assert.AreEqual(0, data.Items.Get("claw").CritChancePercent, "An empty cell is no crit chance.");
+            Assert.AreEqual(55, data.Balance.StormBaseDamage, "A balance value in hundredths is written with decimals.");
+            Assert.AreEqual(50, data.Balance.HitMinDamage);
+            Assert.AreEqual(27, data.Balance.BurnDamagePerStack);
+            Assert.AreEqual(150, data.Balance.CritDamagePercent);
+            Assert.AreEqual(1400, data.Potions.Get("tonic").Magnitude);
             Assert.AreEqual(TargetMode.Self, mace.Effects[1].Target);
             Assert.AreEqual(0, mace.Effects[1].Reach, "An empty Reach cell: the target takes none.");
-            Assert.AreEqual(40, mace.Effects[1].PowerPercent);
             Assert.AreEqual(TargetMode.EnemyBack, data.Items.Get("claw").Effects[0].Target);
             Assert.AreEqual(1, data.Items.Get("claw").Effects[0].Reach);
             Assert.AreEqual(10, mace.ShopWeight);
@@ -89,16 +101,16 @@ namespace F1.Tests
 
             PotionData tonic = data.Potions.Get("tonic");
             Assert.AreEqual(PotionEffect.Heal, tonic.Effect);
-            Assert.AreEqual(50, tonic.Magnitude);
+            Assert.AreEqual(1400, tonic.Magnitude, "14 in hundredths (stage 22).");
             Assert.AreEqual("potion/tonic", tonic.Icon);
 
             EnemyData ogre = data.Enemies.Get("ogre");
             Assert.AreEqual(150, ogre.FigureScale, "a boss is drawn larger than the common figure place");
             Assert.AreEqual(EnemyData.DefaultFigureScale, data.Enemies.Get("rat").FigureScale);
             Assert.AreEqual(9, ogre.Level);
-            Assert.AreEqual(200, ogre.MaxHp);
+            Assert.AreEqual(5450, ogre.MaxHp);
             Assert.AreEqual("mace", ogre.Items[1].ItemId);
-            Assert.AreEqual(8, ogre.Items[1].Grade);
+            Assert.AreEqual(150, ogre.Items[1].PowerPercent, "An enemy carries its items at its own power (stage 22).");
 
             EnemyGroupData lair = data.EnemyGroups.Get("ogre_lair");
             Assert.IsTrue(lair.IsBoss);
@@ -113,7 +125,6 @@ namespace F1.Tests
             Assert.AreEqual("swift", mine.AffinityId);
             Assert.AreEqual(2, mine.Floors);
             Assert.AreEqual(2, mine.DurationDays);
-            Assert.AreEqual(10, mine.ItemGradeAt(2));
             CollectionAssert.AreEqual(new[] { "tonic" }, mine.StartingPotions);
             Assert.AreEqual("background/dungeon/mine", mine.Background);
             Assert.AreEqual(2, mine.EliteMinFloor);
@@ -122,7 +133,7 @@ namespace F1.Tests
             Assert.AreEqual(0, mine.CampChancePercent);
             Assert.AreEqual(0, mine.CampFloor);
             Assert.AreEqual(5, mine.EnemyHpPerFloorPercent);
-            Assert.AreEqual(1, mine.EnemyGradePerFloor);
+            Assert.AreEqual(10, mine.EnemyPowerPerFloorPercent);
             Assert.AreEqual(2, mine.BronzeFloor);
             Assert.AreEqual(0, mine.SilverFloor);
             Assert.AreEqual(0, mine.GoldFloor);
@@ -271,8 +282,8 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenPassiveIsOnlyPartlyFilled_Reports()
         {
-            string jobs = TestCsv.Jobs.Replace("staff,10,3,,", "staff,10,3,Heal,");
-            StringAssert.Contains("staff,10,3,Heal,", jobs);
+            string jobs = TestCsv.Jobs.Replace("staff,3,,", "staff,3,Heal,");
+            StringAssert.Contains("staff,3,Heal,", jobs);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Job, jobs);
 
@@ -282,10 +293,10 @@ namespace F1.Tests
         [Test]
         public void Transform_WhenPassiveAndItsTextDoNotComeTogether_Reports()
         {
-            string textOnly = TestCsv.Jobs.Replace("staff,10,3,,,,,,,,", "staff,10,3,,,,,,,보호막,Shield");
+            string textOnly = TestCsv.Jobs.Replace("staff,3,,,,,,,,", "staff,3,,,,,,,보호막,Shield");
             StringAssert.Contains("보호막,Shield", textOnly);
-            string passiveOnly = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,,");
-            string oneLocale = TestCsv.Jobs.Replace("Self,20,보호막 {0},Shield {0}", "Self,20,보호막 {0},");
+            string passiveOnly = TestCsv.Jobs.Replace("Self,5.45,보호막 {0},Shield {0}", "Self,5.45,,");
+            string oneLocale = TestCsv.Jobs.Replace("Self,5.45,보호막 {0},Shield {0}", "Self,5.45,보호막 {0},");
 
             StringAssert.StartsWith("JobData.csv(3)", TransformFails(StaticDataFiles.Job, textOnly).Errors[0]);
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, passiveOnly).Errors[0]);
@@ -313,7 +324,7 @@ namespace F1.Tests
         /// <summary>A whetstone-like row (Slice B stage 20) after the test items: no effects, no cooldown, its stars as given.</summary>
         static string WithHone(string stars)
         {
-            return TestCsv.Items + "hone,숫돌,Hone,Other,1,1,0,all,,,,,,,,,8,,8,false," + stars + ",1\n";
+            return TestCsv.Items + "hone,숫돌,Hone,Other,1,1,0,all,,,,,,,,,8,,8,false," + stars + ",1,\n";
         }
 
         [Test]
@@ -325,7 +336,7 @@ namespace F1.Tests
             Assert.IsTrue(hone.IsPassive);
             Assert.AreEqual(0, hone.CooldownMs);
             CollectionAssert.AreEqual(new[] { (0, -1), (0, 1) }, hone.Stars.Select(s => (s.X, s.Y)));
-            Assert.AreEqual(1, hone.StarDamage);
+            Assert.AreEqual(100, hone.StarDamage, "+1 in hundredths (stage 22).");
             Assert.IsTrue(data.Items.Get("sword").Melee);
             Assert.IsFalse(data.Items.Get("staff").Melee);
             Assert.IsEmpty(data.Items.Get("sword").Stars, "An empty cell: no stars.");
@@ -372,13 +383,13 @@ namespace F1.Tests
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, notASpan).Errors[0]);
         }
 
-        [TestCase("EnemyFront,,100", Description = "A target counted from an end needs a reach.")]
-        [TestCase("EnemyFront,0,100")]
-        [TestCase("EnemyBack,5,100", Description = "Deeper than a side has rows.")]
-        [TestCase("EnemyAll,2,100", Description = "All enemies: no reach to give.")]
+        [TestCase("EnemyFront,,2-4", Description = "A target counted from an end needs a reach.")]
+        [TestCase("EnemyFront,0,2-4")]
+        [TestCase("EnemyBack,5,2-4", Description = "Deeper than a side has rows.")]
+        [TestCase("EnemyAll,2,2-4", Description = "All enemies: no reach to give.")]
         public void Transform_WhenTheReachDoesNotFitTheTarget_Reports(string targetReachPower)
         {
-            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,100,", "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage," + targetReachPower + ",");
+            string items = TestCsv.Items.Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,", "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage," + targetReachPower + ",");
             StringAssert.Contains("Damage," + targetReachPower + ",", items);
 
             DataTransformException exception = TransformFails(StaticDataFiles.Item, items);

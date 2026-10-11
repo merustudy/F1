@@ -103,7 +103,7 @@ namespace F1.Flow
 
             foreach (ItemOffer drop in expedition.Loot)
             {
-                record.Loot.Add(drop == null ? null : new OfferRecord { Kind = drop.Kind.ToString(), Id = drop.Id, Grade = drop.Grade, Tier = drop.Tier.ToString() });
+                record.Loot.Add(drop == null ? null : new OfferRecord { Kind = drop.Kind.ToString(), Id = drop.Id, Tier = drop.Tier.ToString() });
             }
 
             if (battle != null)
@@ -142,7 +142,7 @@ namespace F1.Flow
             var record = new ShopRecord { Stock = new List<OfferRecord>(), Refreshes = shop.Refreshes };
             foreach (ItemOffer offer in shop.Stock)
             {
-                record.Stock.Add(offer == null ? null : new OfferRecord { Kind = offer.Kind.ToString(), Id = offer.Id, Grade = offer.Grade, Tier = offer.Tier.ToString() });
+                record.Stock.Add(offer == null ? null : new OfferRecord { Kind = offer.Kind.ToString(), Id = offer.Id, Tier = offer.Tier.ToString() });
             }
 
             return record;
@@ -165,7 +165,6 @@ namespace F1.Flow
             return new ItemRecord
             {
                 ItemId = item.Item.Id,
-                Grade = item.Grade,
                 Base = item.IsBase,
                 Tier = item.Tier.ToString(),
                 X = at.X,
@@ -343,7 +342,7 @@ namespace F1.Flow
         }
 
         /// <summary>
-        /// A list of items (a board or the inventory): every entry present, known and graded. A base weapon
+        /// A list of items (a board or the inventory): every entry present and known. A base weapon
         /// must be the weapon of some job: nothing found on the way can become free of fatigue.
         /// </summary>
         static List<EquippedItem> ToItems(List<ItemRecord> records, StaticData data, string what)
@@ -354,9 +353,8 @@ namespace F1.Flow
             {
                 Require(item != null, $"{what} has an empty entry.");
                 Require(data.Items.Contains(item.ItemId), $"Unknown item '{item.ItemId}'.");
-                Require(item.Grade >= 1, $"Grade of '{item.ItemId}' must be at least 1.");
                 Require(!item.Base || IsJobWeapon(data, item.ItemId), $"'{item.ItemId}' is marked as a base weapon but no job carries it.");
-                items.Add(new EquippedItem(data.Items.Get(item.ItemId), item.Grade, item.Base, Parse<ItemTier>(item.Tier)));
+                items.Add(new EquippedItem(data.Items.Get(item.ItemId), item.Base, Parse<ItemTier>(item.Tier)));
             }
 
             return items;
@@ -511,25 +509,25 @@ namespace F1.Flow
             state.Shop = shop;
         }
 
-        /// <summary>A drop of loot or an offer of a shop: a known item with a grade, or a known potion or bag (not the start bag) at Common with no grade.</summary>
+        /// <summary>A drop of loot or an offer of a shop: a known item, or a known potion or bag (not the start bag) at Common.</summary>
         static ItemOffer ReadOption(OfferRecord record, StaticData data)
         {
             OfferKind kind = Parse<OfferKind>(record.Kind);
             ItemTier tier = Parse<ItemTier>(record.Tier);
             if (kind == OfferKind.Item)
             {
-                Require(data.Items.Contains(record.Id) && record.Grade >= 1, $"Offer item '{record.Id}' is not valid.");
+                Require(data.Items.Contains(record.Id), $"Offer item '{record.Id}' is not valid.");
             }
             else if (kind == OfferKind.Bag)
             {
-                Require(data.Bags.Contains(record.Id) && !data.Bags.Get(record.Id).Start && record.Grade == 0 && tier == ItemTier.Common, $"Offer bag '{record.Id}' is not valid.");
+                Require(data.Bags.Contains(record.Id) && !data.Bags.Get(record.Id).Start && tier == ItemTier.Common, $"Offer bag '{record.Id}' is not valid.");
             }
             else
             {
-                Require(data.Potions.Contains(record.Id) && record.Grade == 0 && tier == ItemTier.Common, $"Offer potion '{record.Id}' is not valid.");
+                Require(data.Potions.Contains(record.Id) && tier == ItemTier.Common, $"Offer potion '{record.Id}' is not valid.");
             }
 
-            return new ItemOffer(kind, record.Id, record.Grade, tier);
+            return new ItemOffer(kind, record.Id, tier);
         }
 
         static void ValidateBattle(ExpeditionRecord record, ExpeditionPhase phase)

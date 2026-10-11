@@ -34,7 +34,7 @@ namespace F1.Tests
             RowSpan rows = null,
             int reach = TestData.DefaultReach)
         {
-            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), grade);
+            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), powerPercent: grade);
         }
 
         /// <summary>Enemies that do nothing, one per row from row 1, with the given HP.</summary>
@@ -155,7 +155,7 @@ namespace F1.Tests
         [TestCase(10, 110, 11)]
         public void EffectSize_IsGradeTimesPowerPercent_RoundedDown_AtLeastOne(int grade, int powerPercent, int expected)
         {
-            var item = new EquippedItem(TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, powerPercent), grade);
+            var item = new EquippedItem(TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, powerPercent), powerPercent: grade);
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(TestData.Mercenary("a", 1, 100, item)),
@@ -227,7 +227,7 @@ namespace F1.Tests
             ItemData mace = TestData.Item("mace", 1000, EffectKind.Damage, TargetMode.EnemyFront, 100, second: TestData.Effect(EffectKind.Shield, TargetMode.Self, 50));
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(mace, 10))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(mace, powerPercent: 10))),
                 TestData.Units(IdleEnemy(100)));
 
             battle.AdvanceTo(1000);
@@ -463,7 +463,7 @@ namespace F1.Tests
             ItemData doubleStrike = TestData.Item("double", 1000, EffectKind.Damage, TargetMode.EnemyFront, 100, second: TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 50));
             BattleEngine battle = Battle(
                 TestData.Balance(),
-                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(doubleStrike, 20))),
+                TestData.Units(TestData.Mercenary("a", 1, 100, new EquippedItem(doubleStrike, powerPercent: 20))),
                 TestData.Units(TestData.Enemy("front", 1, 20), TestData.Enemy("behind", 2, 100)));
 
             battle.AdvanceTo(1000);
@@ -1095,7 +1095,7 @@ namespace F1.Tests
         public void PartyDeaths_WhenBurnDealtTheLastHit_NameBurnWithNoSource()
         {
             // The enemy applies 5 burn at 500. Burn ticks at 1000 (5, to 0 HP), 2000 (4, counted), 3000 (3, grace over: roll).
-            var ember = new EquippedItem(TestData.Item("ember", 500, EffectKind.Burn, TargetMode.EnemyFront, category: ItemCategory.Support), 5);
+            var ember = new EquippedItem(TestData.Item("ember", 500, EffectKind.Burn, TargetMode.EnemyFront, category: ItemCategory.Support), powerPercent: 5);
             BattleEngine battle = Battle(
                 TestData.Balance(("DogGraceMs", 1500), ("DogGraceBreakHits", 3), ("DogDeathChancePercent", 100), ("BurnTickMs", 1000)),
                 TestData.Units(TestData.Mercenary("a", 1, 5)),
@@ -1442,7 +1442,7 @@ namespace F1.Tests
         public void AnItemWithoutEffects_NeverActivates_AndTheOthersFireAsBefore()
         {
             var whetstone = new EquippedItem(new ItemData("whetstone", TestData.Text("whetstone"), ItemCategory.Other, 1, 1, 0, RowSpan.All,
-                new ItemEffect[0], 8, null, 8, false, new[] { new StarSquare(0, -1), new StarSquare(0, 1) }, 1), 8);
+                new ItemEffect[0], 8, null, 8, false, new[] { new StarSquare(0, -1), new StarSquare(0, 1) }, 1), powerPercent: 8);
             BattleUnitSetup unit = TestData.Mercenary("a", 1, 100, whetstone, TestData.Attack(1000, 5, "sword"));
             unit.StarDamage = new[] { 0, 1 };
             BattleEngine battle = Battle(TestData.Balance(), TestData.Units(unit), TestData.Units(IdleEnemy(100)));

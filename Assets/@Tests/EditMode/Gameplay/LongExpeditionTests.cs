@@ -24,14 +24,14 @@ namespace F1.Tests
         /// The test data with an eight-floor cave: elites and camps by chance from floor 3, every node of floor 8 a camp, the
         /// boss on floor 9. Its groups: "pair" on floors 1..8, an elite "guard" on floors 3..8, the boss "lair".
         /// </summary>
-        static StaticData DeepCave(int elitePercent = 30, int campPercent = 30, int hpPerFloor = 0, int gradePerFloor = 0, bool eliteGroups = true)
+        static StaticData DeepCave(int elitePercent = 30, int campPercent = 30, int hpPerFloor = 0, int powerPerFloor = 0, bool eliteGroups = true)
         {
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, 8, 1, new List<string> { "tonic" }, null,
+                new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, new List<string> { "tonic" }, null,
                     eliteMinFloor: 3, eliteChancePercent: elitePercent, campMinFloor: 3, campChancePercent: campPercent, campFloor: 8,
-                    enemyHpPerFloorPercent: hpPerFloor, enemyGradePerFloor: gradePerFloor),
+                    enemyHpPerFloorPercent: hpPerFloor, enemyPowerPerFloorPercent: powerPerFloor),
             };
             var groups = new List<EnemyGroupData>
             {
@@ -99,9 +99,9 @@ namespace F1.Tests
             Assert.DoesNotThrow(() => DeepCave(elitePercent: 0, eliteGroups: false), "No elite can stand anywhere: no elite group is needed.");
 
             List<string> potions = new List<string>();
-            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, 8, 2, potions, null, campFloor: 1));
-            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, 8, 2, potions, null, campFloor: 6));
-            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, 8, 2, potions, null, eliteChancePercent: 101));
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, campFloor: 1));
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, campFloor: 6));
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, eliteChancePercent: 101));
             Assert.Throws<DataException>(() => new EnemyGroupData("g", "d", 0, 0, true, new[] { "grunt" }, isElite: true));
         }
 
@@ -110,7 +110,7 @@ namespace F1.Tests
         [Test]
         public void TheEnemiesOfADeeperFloor_HaveMoreHpAndBetterItems_ButTheBossIsAsItsDataSays()
         {
-            StaticData data = DeepCave(hpPerFloor: 10, gradePerFloor: 2);
+            StaticData data = DeepCave(hpPerFloor: 10, powerPerFloor: 20);
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
             EnemyData grunt = data.Enemies.Get("grunt");
 
@@ -121,7 +121,7 @@ namespace F1.Tests
             Assert.AreEqual(grunt.MaxHp, first.Enemies[0].MaxHp);
             Assert.AreEqual(grunt.MaxHp * 140 / 100, fifth.Enemies[0].MaxHp, "Four floors deeper: +40%.");
             Assert.AreEqual(fifth.Enemies[0].MaxHp, fifth.Enemies[0].Hp);
-            Assert.AreEqual(grunt.Items[0].Grade + 8, fifth.Enemies[0].Items[0].Grade, "Four floors deeper: +8 grades.");
+            Assert.AreEqual(grunt.Items[0].PowerPercent + 80, fifth.Enemies[0].Items[0].PowerPercent, "Four floors deeper: +80% power (stage 22: was +8 grades).");
             Assert.AreEqual(data.Enemies.Get("chief").MaxHp, boss.Enemies[0].MaxHp, "The boss is not scaled.");
             Assert.AreEqual(grunt.MaxHp, boss.Enemies[1].MaxHp, "Nor are its guards.");
         }

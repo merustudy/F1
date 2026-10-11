@@ -20,7 +20,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "PowerPercent": 80
+          "Min": 175,
+          "Max": 175
         }
       ],
       "ShopWeight": 10,
@@ -28,7 +29,8 @@
       "Price": 12,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "crude_bow",
@@ -49,7 +51,8 @@
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 1,
-          "PowerPercent": 90
+          "Min": 170,
+          "Max": 283
         }
       ],
       "ShopWeight": 0,
@@ -57,7 +60,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "dagger",
@@ -78,7 +82,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 45
+          "Min": 100,
+          "Max": 200
         }
       ],
       "ShopWeight": 10,
@@ -86,7 +91,8 @@
       "Price": 10,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 10
     },
     {
       "Id": "ember_flask",
@@ -107,7 +113,8 @@
           "Kind": "Burn",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 25
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 8,
@@ -115,7 +122,8 @@
       "Price": 12,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "fire_staff",
@@ -136,7 +144,8 @@
           "Kind": "Damage",
           "Target": "EnemyAll",
           "Reach": 0,
-          "PowerPercent": 110
+          "Min": 200,
+          "Max": 400
         }
       ],
       "ShopWeight": 0,
@@ -144,7 +153,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "greataxe",
@@ -165,7 +175,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 190
+          "Min": 311,
+          "Max": 933
         }
       ],
       "ShopWeight": 0,
@@ -173,7 +184,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "halberd",
@@ -194,7 +206,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 3,
-          "PowerPercent": 80
+          "Min": 120,
+          "Max": 360
         }
       ],
       "ShopWeight": 10,
@@ -202,7 +215,8 @@
       "Price": 22,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "healing_staff",
@@ -223,7 +237,8 @@
           "Kind": "Heal",
           "Target": "AllyLowestHp",
           "Reach": 0,
-          "PowerPercent": 100
+          "Min": 273,
+          "Max": 273
         }
       ],
       "ShopWeight": 0,
@@ -231,7 +246,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "herb_pouch",
@@ -252,7 +268,8 @@
           "Kind": "Heal",
           "Target": "Self",
           "Reach": 0,
-          "PowerPercent": 60
+          "Min": 131,
+          "Max": 131
         }
       ],
       "ShopWeight": 10,
@@ -260,7 +277,8 @@
       "Price": 10,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "lantern_staff",
@@ -281,7 +299,8 @@
           "Kind": "Burn",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 25
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 0,
@@ -289,7 +308,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "longbow",
@@ -310,7 +330,8 @@
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 2,
-          "PowerPercent": 85
+          "Min": 150,
+          "Max": 250
         }
       ],
       "ShopWeight": 10,
@@ -318,7 +339,8 @@
       "Price": 16,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "longsword",
@@ -339,7 +361,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 110
+          "Min": 200,
+          "Max": 400
         }
       ],
       "ShopWeight": 0,
@@ -347,7 +370,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "mace",
@@ -368,13 +392,15 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 100
+          "Min": 123,
+          "Max": 368
         },
         {
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "PowerPercent": 40
+          "Min": 98,
+          "Max": 98
         }
       ],
       "ShopWeight": 0,
@@ -382,7 +408,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "mending_chant",
@@ -403,7 +430,8 @@
           "Kind": "Heal",
           "Target": "AllyLowestHp",
           "Reach": 0,
-          "PowerPercent": 100
+          "Min": 218,
+          "Max": 218
         }
       ],
       "ShopWeight": 0,
@@ -411,7 +439,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "overseer_maul",
@@ -432,7 +461,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 150
+          "Min": 552,
+          "Max": 1657
         }
       ],
       "ShopWeight": 0,
@@ -440,7 +470,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "overseer_roar",
@@ -461,7 +492,8 @@
           "Kind": "Damage",
           "Target": "EnemyAll",
           "Reach": 0,
-          "PowerPercent": 60
+          "Min": 240,
+          "Max": 480
         }
       ],
       "ShopWeight": 0,
@@ -469,7 +501,8 @@
       "Price": 0,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "rat_bite",
@@ -490,7 +523,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 60
+          "Min": 67,
+          "Max": 200
         }
       ],
       "ShopWeight": 0,
@@ -498,7 +532,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "rusty_blade",
@@ -519,7 +554,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "PowerPercent": 80
+          "Min": 124,
+          "Max": 249
         }
       ],
       "ShopWeight": 0,
@@ -527,7 +563,8 @@
       "Price": 0,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "spear",
@@ -548,7 +585,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 2,
-          "PowerPercent": 85
+          "Min": 160,
+          "Max": 267
         }
       ],
       "ShopWeight": 10,
@@ -556,7 +594,8 @@
       "Price": 16,
       "Melee": true,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 5
     },
     {
       "Id": "ward_charm",
@@ -577,7 +616,8 @@
           "Kind": "Shield",
           "Target": "AllyLowestHp",
           "Reach": 0,
-          "PowerPercent": 70
+          "Min": 153,
+          "Max": 153
         }
       ],
       "ShopWeight": 10,
@@ -585,7 +625,8 @@
       "Price": 12,
       "Melee": false,
       "Stars": [],
-      "StarDamage": 0
+      "StarDamage": 0,
+      "CritChancePercent": 0
     },
     {
       "Id": "whetstone",
@@ -616,7 +657,8 @@
           "Y": 1
         }
       ],
-      "StarDamage": 1
+      "StarDamage": 100,
+      "CritChancePercent": 0
     }
   ]
 }

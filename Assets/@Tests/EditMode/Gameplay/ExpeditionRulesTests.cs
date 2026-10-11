@@ -116,7 +116,7 @@ namespace F1.Tests
             Assert.AreEqual(1, tank.Board.Items.Count, "Only the weapon.");
             Assert.AreEqual("blade", tank.Board.Items[0].Item.Item.Id);
             Assert.AreEqual(new Placement(0, 0), tank.Board.Items[0].At, "Unturned at the bag's top-left.");
-            Assert.AreEqual(10, tank.Board.Items[0].Item.Grade);
+            Assert.AreEqual(100, tank.Board.Items[0].Item.PowerPercent, "At the item's own values (stage 22: no grade).");
             Assert.IsEmpty(state.Inventory);
             CollectionAssert.AreEqual(new[] { "tonic", null, null }, state.Potions);
         }
@@ -311,7 +311,7 @@ namespace F1.Tests
             ExpeditionState state = Create(data);
             foreach (ExpeditionMember member in state.Members)
             {
-                member.Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), 200);
+                member.Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), powerPercent: 200);
             }
 
             while (state.Phase != ExpeditionPhase.Finished)
@@ -343,16 +343,16 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Loot_IsWhatTheEnemiesCarried_AtTheFloorsGradeAndTier_AndTheSameForTheSameSeed()
+        public void Loot_IsWhatTheEnemiesCarried_AtTheItemsOwnValuesAndTheFloorsTier_AndTheSameForTheSameSeed()
         {
             StaticData data = TestData.Data();
 
             ExpeditionState first = AtLoot(data, 9);
             ExpeditionState second = AtLoot(data, 9);
 
-            CollectionAssert.AreEqual(first.Loot.Select(d => (d.Id, d.Grade, d.Tier)), second.Loot.Select(d => (d.Id, d.Grade, d.Tier)));
+            CollectionAssert.AreEqual(first.Loot.Select(d => (d.Id, d.Tier)), second.Loot.Select(d => (d.Id, d.Tier)));
             Assert.IsTrue(first.Loot.All(d => d.Id == "claw"), "The grunts carry claws and nothing else.");
-            Assert.IsTrue(first.Loot.All(d => d.Grade == 8 && d.Tier == ItemTier.Common), "ItemGradeBase on floor 1, at Common: not the grade 5 the grunt carried it at.");
+            Assert.IsTrue(first.Loot.All(d => d.Tier == ItemTier.Common), "Common on floor 1. A drop is the item's own values, not the power the grunt carried it at (stage 22).");
         }
 
         [Test]
@@ -373,7 +373,7 @@ namespace F1.Tests
 
             List<ItemOffer> elite = ExpeditionRules.DropLoot(data, state, new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0]));
             Assert.AreEqual(2, elite.Count);
-            Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Bronze && d.Grade == 10), "A tier up for an elite, at the second floor's grade (8 + 2).");
+            Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Bronze), "A tier up for an elite.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(98, 3, 0, MapNodeKind.Boss, "lair", new int[0])), "The boss ends the expedition.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(97, 2, 0, MapNodeKind.Camp, null, new int[0])), "Nobody is fought at a camp.");
         }
@@ -389,7 +389,6 @@ namespace F1.Tests
             Assert.AreEqual(OfferKind.Item, elite[0].Kind);
             Assert.AreEqual(OfferKind.Bag, elite[1].Kind, "Its last drop is a bag (Slice B stage 19).");
             Assert.IsTrue(elite[1].Id == "pouch" || elite[1].Id == "strap", "A bag with a loot weight: never the start bag.");
-            Assert.AreEqual(0, elite[1].Grade);
 
             List<ItemOffer> battle = ExpeditionRules.DropLoot(data, state, new MapNode(98, 2, 0, MapNodeKind.Battle, "trio", new int[0]));
             Assert.IsTrue(battle.All(d => d.Kind == OfferKind.Item), "Only an elite drops a bag.");
@@ -410,7 +409,7 @@ namespace F1.Tests
 
         static EquippedItem Big(StaticData data, string id)
         {
-            return new EquippedItem(data.Items.Get(id), 9);
+            return new EquippedItem(data.Items.Get(id), powerPercent: 9);
         }
 
         static Placement At(int x, int y, int turns = 0)
@@ -433,7 +432,7 @@ namespace F1.Tests
             ExpeditionRules.TakeLoot(data, state, 0, 0, At(2, 0));
 
             Assert.AreEqual("blade " + drop.Id, Board(state.Members[0]));
-            Assert.AreEqual(drop.Grade, TestBoards.ItemAt(state.Members[0], 2, 0).Grade);
+            Assert.AreEqual(drop.Tier, TestBoards.ItemAt(state.Members[0], 2, 0).Tier);
             Assert.IsEmpty(state.Inventory);
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "One drop still lies there.");
             Assert.IsNull(state.Loot[0], "The slot of the taken drop is empty.");
@@ -508,7 +507,7 @@ namespace F1.Tests
             ExpeditionRules.TakeLootToInventory(data, state, 1);
 
             Assert.AreEqual(drop.Id, Inventory(state));
-            Assert.AreEqual(drop.Grade, state.Inventory[0].Grade);
+            Assert.AreEqual(drop.Tier, state.Inventory[0].Tier);
             Assert.IsTrue(state.Members.All(m => m.Board.Items.Count == 1), "Every board still holds only its weapon.");
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "The other drop still lies there.");
             Assert.IsNull(state.Loot[1]);
@@ -522,7 +521,7 @@ namespace F1.Tests
             ExpeditionState state = AtLoot(data);
             ItemOffer drop = state.Loot[1];
             ItemData item = data.Items.Get(drop.Id);
-            state.Inventory.Add(new EquippedItem(data.Items.Get("blade"), 8), At(0, 0));
+            state.Inventory.Add(new EquippedItem(data.Items.Get("blade"), powerPercent: 8), At(0, 0));
 
             // Round 55: the drop held over the inventory's grid lands where it is laid, over no item and inside the grid.
             Assert.IsFalse(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, At(0, 0)), "Over the blade: the inventory swaps nothing.");
@@ -951,7 +950,7 @@ namespace F1.Tests
         {
             StaticData data = TestData.Data(("EliteBagPercent", 100));
             ExpeditionState state = AtLoot(data);
-            state.Loot[0] = new ItemOffer(OfferKind.Bag, "pouch", 0);
+            state.Loot[0] = new ItemOffer(OfferKind.Bag, "pouch");
 
             Assert.IsFalse(ExpeditionRules.CanTakeLootToInventory(data, state, 0), "Bags are never kept in the inventory.");
             Assert.IsFalse(ExpeditionRules.CanTakeLoot(data, state, 0, 0, At(0, 1)), "Over the pack.");
@@ -1021,7 +1020,7 @@ namespace F1.Tests
             StaticData data = TestData.Data(("DogGraceMs", 0), ("DogDeathChancePercent", 100));
             ExpeditionState state = Create(data);
             state.Members[0].Hp = 0;
-            state.Members[2].Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), 200);
+            state.Members[2].Board.Items[0].Item = new EquippedItem(data.Items.Get("blade"), powerPercent: 200);
 
             BattleEngine battle = Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
 

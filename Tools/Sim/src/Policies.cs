@@ -298,7 +298,7 @@ namespace F1.Sim
                     continue;
                 }
 
-                var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
                 if (FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
                     ExpeditionRules.BuyToBoard(data, state, slot, member, at);
@@ -392,7 +392,7 @@ namespace F1.Sim
                     continue;
                 }
 
-                var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+                var item = new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier);
                 if (Active && FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanTakeLoot(data, state, slot, member, at))
                 {
                     ExpeditionRules.TakeLoot(data, state, slot, member, at);

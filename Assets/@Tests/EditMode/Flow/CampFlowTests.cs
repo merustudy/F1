@@ -23,13 +23,14 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Jobs = new List<JobData>
             {
-                new JobData("tank", TestData.Text("tank"), 100, "blade", 200, 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, "staff", 10, 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, "blade", 200, 3, null),
+                new JobData("tank", TestData.Text("tank"), 100, "blade", 1, null),
+                new JobData("healer", TestData.Text("healer"), 60, "staff", 2, null),
+                new JobData("striker", TestData.Text("striker"), 80, "blade", 3, null),
             };
+            TestData.StrongBlade(parts);
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }, null, campFloor: 2),
+                new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, null, campFloor: 2),
             };
             return new StaticData(parts);
         }

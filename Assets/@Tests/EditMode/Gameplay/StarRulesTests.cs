@@ -43,7 +43,7 @@ namespace F1.Tests
 
         static BoardItem Lay(ItemBoard board, ItemData item, int x, int y, int turns = 0, ItemTier tier = ItemTier.Common)
         {
-            var placed = new BoardItem(new EquippedItem(item, 8, tier: tier), new Placement(x, y, turns));
+            var placed = new BoardItem(new EquippedItem(item, tier: tier, powerPercent: 8), new Placement(x, y, turns));
             board.Items.Add(placed);
             return placed;
         }
@@ -112,11 +112,11 @@ namespace F1.Tests
         public void StarDamage_GrowsByItsOwnPerTierStep()
         {
             ItemData whetstone = Whetstone(starDamage: 2);
-            Assert.AreEqual(2, new EquippedItem(whetstone, 8).StarDamage);
-            Assert.AreEqual(4, new EquippedItem(whetstone, 8, tier: ItemTier.Bronze).StarDamage);
-            Assert.AreEqual(6, new EquippedItem(whetstone, 8, tier: ItemTier.Silver).StarDamage);
-            Assert.AreEqual(8, new EquippedItem(whetstone, 8, tier: ItemTier.Gold).StarDamage);
-            Assert.AreEqual(0, new EquippedItem(Weapon("sword", 3), 8, tier: ItemTier.Gold).StarDamage, "No stars, nothing.");
+            Assert.AreEqual(2, new EquippedItem(whetstone, powerPercent: 8).StarDamage);
+            Assert.AreEqual(4, new EquippedItem(whetstone, tier: ItemTier.Bronze, powerPercent: 8).StarDamage);
+            Assert.AreEqual(6, new EquippedItem(whetstone, tier: ItemTier.Silver, powerPercent: 8).StarDamage);
+            Assert.AreEqual(8, new EquippedItem(whetstone, tier: ItemTier.Gold, powerPercent: 8).StarDamage);
+            Assert.AreEqual(0, new EquippedItem(Weapon("sword", 3), tier: ItemTier.Gold, powerPercent: 8).StarDamage, "No stars, nothing.");
 
             ItemBoard board = PackBoard();
             BoardItem sword = Lay(board, Weapon("sword", 3), 0, 1);

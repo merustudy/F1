@@ -12,8 +12,6 @@
       "MapMinWidth": 2,
       "MapMaxWidth": 4,
       "DurationDays": 5,
-      "ItemGradeBase": 8,
-      "ItemGradePerFloor": 0,
       "StartingPotions": [
         "healing_potion",
         "healing_potion"
@@ -25,7 +23,7 @@
       "CampChancePercent": 15,
       "CampFloor": 15,
       "EnemyHpPerFloorPercent": 3,
-      "EnemyGradePerFloor": 0,
+      "EnemyPowerPerFloorPercent": 0,
       "BronzeFloor": 5,
       "SilverFloor": 10,
       "GoldFloor": 0,

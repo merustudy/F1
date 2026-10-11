@@ -116,22 +116,47 @@ namespace F1.Editor.Data
             return IsEmpty(header) ? null : Rows(header);
         }
 
-        /// <summary>A list of "id:grade" pairs joined with '+', for example "claws:5+bite:4".</summary>
+        /// <summary>An enemy's items: "id:power percent" pairs joined with '+', for example "rusty_blade:222+buckler:175" (stage 22: was id:grade).</summary>
         public List<ItemGrant> GrantList(string header)
         {
             var grants = new List<ItemGrant>();
             foreach (string part in Text(header).Split(ListSeparator))
             {
                 string[] pair = part.Split(':');
-                if (pair.Length != 2 || !DataId.IsValid(pair[0]) || !TryParseInt(pair[1], out int grade) || grade < 1)
+                if (pair.Length != 2 || !DataId.IsValid(pair[0]) || !TryParseInt(pair[1], out int percent) || percent < 1)
                 {
-                    throw new DataException($"{Where(header)}: '{part}' is not 'item_id:grade'.");
+                    throw new DataException($"{Where(header)}: '{part}' is not 'item_id:power percent'.");
                 }
 
-                grants.Add(new ItemGrant(pair[0], grade));
+                grants.Add(new ItemGrant(pair[0], percent));
             }
 
             return grants;
+        }
+
+        /// <summary>A value with up to two decimals, read in hundredths (Slice B stage 22, <see cref="global::F1.Data.Centi"/>): "38" is 3800, "5.45" is 545.</summary>
+        public int Centi(string header)
+        {
+            string value = Text(header);
+            if (!global::F1.Data.Centi.TryParse(value, out int hundredths))
+            {
+                throw new DataException($"{Where(header)}: '{value}' is not a number with at most two decimals.");
+            }
+
+            return hundredths;
+        }
+
+        /// <summary>A damage range "least-most" in hundredths, for example "2-4" or "1.5-2.5"; a single value is both ends.</summary>
+        public (int Min, int Max) CentiRange(string header)
+        {
+            string value = Text(header);
+            string[] ends = value.Split('-');
+            if (ends.Length > 2 || !global::F1.Data.Centi.TryParse(ends[0], out int min) || !global::F1.Data.Centi.TryParse(ends[ends.Length - 1], out int max))
+            {
+                throw new DataException($"{Where(header)}: '{value}' is not 'least-most' with at most two decimals.");
+            }
+
+            return (min, max);
         }
 
         /// <summary>An item's star squares (stage 20): "x:y" pairs joined with '+', for example "0:-1+0:1"; none for an empty cell.</summary>

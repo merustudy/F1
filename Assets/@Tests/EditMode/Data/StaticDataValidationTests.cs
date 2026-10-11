@@ -38,7 +38,7 @@ namespace F1.Tests
         public void MissingReferences_AreReportedWithTheReferringDefinition()
         {
             StringAssert.Contains("Job 'tank' WeaponItemId: 'axe' does not exist", ProblemOf(p =>
-                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, "axe", 10, 1, null))));
+                p.Jobs = Replace(p.Jobs, j => j.Id == "tank", new JobData("tank", TestData.Text("tank"), 100, "axe", 1, null))));
 
             StringAssert.Contains("Enemy 'grunt' Items: 'fang' does not exist", ProblemOf(p =>
                 p.Enemies = Replace(p.Enemies, e => e.Id == "grunt", new EnemyData("grunt", TestData.Text("grunt"), 2, 30, new List<ItemGrant> { new ItemGrant("fang", 5) }))));
@@ -50,10 +50,10 @@ namespace F1.Tests
                 p.EnemyGroups = Replace(p.EnemyGroups, g => g.Id == "pair", new EnemyGroupData("pair", "tower", 1, 2, false, new[] { "grunt" }))));
 
             StringAssert.Contains("Dungeon 'cave' AffinityId: 'regen' does not exist", ProblemOf(p =>
-                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "regen", 2, 2, 3, 2, 8, 2, new List<string> { "tonic" }) }));
+                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "regen", 2, 2, 3, 2, new List<string> { "tonic" }) }));
 
             StringAssert.Contains("Dungeon 'cave' StartingPotions: 'elixir' does not exist", ProblemOf(p =>
-                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, 8, 2, new List<string> { "elixir" }) }));
+                p.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "elixir" }) }));
 
             StringAssert.Contains("Mercenary 'anna' JobId: 'samurai' does not exist", ProblemOf(p =>
                 p.Mercenaries = Replace(p.Mercenaries, m => m.Id == "anna", new MercenaryData("anna", TestData.Text("anna"), "samurai"))));
@@ -121,7 +121,7 @@ namespace F1.Tests
         {
             // Slice B stage 19: the weapon lies unturned at the top-left of the start bag (the test pack is 3x2; the ballista is 3x3).
             string problem = ProblemOf(p =>
-                p.Jobs = Replace(p.Jobs, j => j.Id == "striker", new JobData("striker", TestData.Text("striker"), 80, "ballista", 12, 3, null)));
+                p.Jobs = Replace(p.Jobs, j => j.Id == "striker", new JobData("striker", TestData.Text("striker"), 80, "ballista", 3, null)));
 
             StringAssert.Contains("Job 'striker'", problem);
             StringAssert.Contains("'ballista' (3x3) does not fit the start bag 'pack' (3x2)", problem);
@@ -155,7 +155,7 @@ namespace F1.Tests
         public void DuplicateIds_AndMissingDefinitions_AreAllReported()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, "blade", 10, 1, null) }).ToList();
+            parts.Jobs = parts.Jobs.Concat(new[] { new JobData("tank", TestData.Text("again"), 100, "blade", 1, null) }).ToList();
             parts.Affinities = null;
 
             var exception = Assert.Throws<DataValidationException>(() => new StaticData(parts));

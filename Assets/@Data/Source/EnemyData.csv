@@ -1,8 +1,8 @@
 Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale
-cave_rat,동굴 쥐,Cave Rat,2,40,rat_bite:17,unit/enemy/cave-rat,100
-goblin_raider,고블린 약탈자,Goblin Raider,4,80,rusty_blade:19,unit/enemy/goblin-raider,100
-goblin_archer,고블린 궁수,Goblin Archer,4,55,crude_bow:14,unit/enemy/goblin-archer,100
-goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:12+mending_chant:12,unit/enemy/goblin-shaman,100
-mine_overseer,광산 감독관,Mine Overseer,9,400,overseer_maul:27+overseer_roar:22,unit/enemy/mine-overseer,150
-goblin_veteran,고블린 고참,Goblin Veteran,6,150,rusty_blade:28+buckler:14,unit/enemy/goblin-raider,115
-goblin_hexer,고블린 주술 대가,Goblin Hexer,7,110,lantern_staff:18+mending_chant:18,unit/enemy/goblin-shaman,115
+cave_rat,동굴 쥐,Cave Rat,2,11,rat_bite:208,unit/enemy/cave-rat,100
+goblin_raider,고블린 약탈자,Goblin Raider,4,22,rusty_blade:222,unit/enemy/goblin-raider,100
+goblin_archer,고블린 궁수,Goblin Archer,4,15,crude_bow:152,unit/enemy/goblin-archer,100
+goblin_shaman,고블린 주술사,Goblin Shaman,5,16,lantern_staff:150+mending_chant:150,unit/enemy/goblin-shaman,100
+mine_overseer,광산 감독관,Mine Overseer,9,120,overseer_maul:100+overseer_roar:100,unit/enemy/mine-overseer,150
+goblin_veteran,고블린 고참,Goblin Veteran,6,41,rusty_blade:328+buckler:175,unit/enemy/goblin-raider,115
+goblin_hexer,고블린 주술 대가,Goblin Hexer,7,30,lantern_staff:225+mending_chant:225,unit/enemy/goblin-shaman,115

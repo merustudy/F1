@@ -17,7 +17,7 @@ namespace F1.Tests
 
         static EquippedItem Item(string id, int width, int height)
         {
-            return new EquippedItem(TestData.Item(id, 1000, EffectKind.Damage, TargetMode.EnemyFront, width: width, height: height), 5);
+            return new EquippedItem(TestData.Item(id, 1000, EffectKind.Damage, TargetMode.EnemyFront, width: width, height: height), powerPercent: 5);
         }
 
         static ItemBoard PackBoard()

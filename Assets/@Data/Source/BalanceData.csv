@@ -21,8 +21,8 @@ DogDeathChancePercent,30
 BurnTickMs,1000
 StormStartMs,45000
 StormTickMs,1000
-StormBaseDamage,2
-StormGrowth,2
+StormBaseDamage,0.55
+StormGrowth,0.55
 PotionSlots,3
 PotionCooldownMs,1500
 RetreatChancePercent,60
@@ -48,3 +48,10 @@ ShopPotionChancePercent,50
 CoinsPerEnemy,1
 CoinsPerFloor,1
 EliteCoinPercent,200
+BurnDamagePerStack,0.27
+HitMinDamage,0.5
+CritDamagePercent,150
+CritFatigueTaken,9
+CritFatigueTakenAllies,2
+CritFatigueDealt,3
+CritFatigueDealtAllies,1

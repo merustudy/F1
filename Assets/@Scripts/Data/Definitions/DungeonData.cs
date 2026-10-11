@@ -46,8 +46,6 @@ namespace F1.Data
             int mapMinWidth,
             int mapMaxWidth,
             int durationDays,
-            int itemGradeBase,
-            int itemGradePerFloor,
             IReadOnlyList<string> startingPotions,
             string background = null,
             int eliteMinFloor = 0,
@@ -56,7 +54,7 @@ namespace F1.Data
             int campChancePercent = 0,
             int campFloor = 0,
             int enemyHpPerFloorPercent = 0,
-            int enemyGradePerFloor = 0,
+            int enemyPowerPerFloorPercent = 0,
             int bronzeFloor = 0,
             int silverFloor = 0,
             int goldFloor = 0,
@@ -80,11 +78,6 @@ namespace F1.Data
             if (durationDays < 1)
             {
                 throw new DataException($"{DefinitionName} '{id}': DurationDays must be at least 1.");
-            }
-
-            if (itemGradeBase < 1 || itemGradePerFloor < 0)
-            {
-                throw new DataException($"{DefinitionName} '{id}': item grades must be positive.");
             }
 
             if (startingPotions == null)
@@ -112,7 +105,7 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': CampFloor is 0 or a map floor from 2 (the first floor is battles only).");
             }
 
-            if (enemyHpPerFloorPercent < 0 || enemyGradePerFloor < 0)
+            if (enemyHpPerFloorPercent < 0 || enemyPowerPerFloorPercent < 0)
             {
                 throw new DataException($"{DefinitionName} '{id}': the deeper enemies cannot get weaker.");
             }
@@ -142,8 +135,6 @@ namespace F1.Data
             MapMinWidth = mapMinWidth;
             MapMaxWidth = mapMaxWidth;
             DurationDays = durationDays;
-            ItemGradeBase = itemGradeBase;
-            ItemGradePerFloor = itemGradePerFloor;
             StartingPotions = startingPotions;
             Background = ArtAddress.Optional(background, $"{DefinitionName} '{id}'", nameof(Background));
             EliteMinFloor = eliteMinFloor;
@@ -152,7 +143,7 @@ namespace F1.Data
             CampChancePercent = campChancePercent;
             CampFloor = campFloor;
             EnemyHpPerFloorPercent = enemyHpPerFloorPercent;
-            EnemyGradePerFloor = enemyGradePerFloor;
+            EnemyPowerPerFloorPercent = enemyPowerPerFloorPercent;
             BronzeFloor = bronzeFloor;
             SilverFloor = silverFloor;
             GoldFloor = goldFloor;
@@ -182,12 +173,6 @@ namespace F1.Data
         [JsonProperty(Order = 7, Required = Required.Always)]
         public int DurationDays { get; }
 
-        [JsonProperty(Order = 8, Required = Required.Always)]
-        public int ItemGradeBase { get; }
-
-        [JsonProperty(Order = 9, Required = Required.Always)]
-        public int ItemGradePerFloor { get; }
-
         [JsonProperty(Order = 10, Required = Required.Always)]
         public IReadOnlyList<string> StartingPotions { get; }
 
@@ -214,12 +199,15 @@ namespace F1.Data
         [JsonProperty(Order = 16, Required = Required.Always)]
         public int CampFloor { get; }
 
-        /// <summary>How much stronger the enemies of a floor are than those of the first: HP percent and item grades per floor deeper. The boss is as its data says.</summary>
+        /// <summary>
+        /// How much stronger the enemies of a floor are than those of the first: HP percent, and power percent of their items (stage 22: was item
+        /// grades), per floor deeper. The boss is as its data says.
+        /// </summary>
         [JsonProperty(Order = 17, Required = Required.Always)]
         public int EnemyHpPerFloorPercent { get; }
 
         [JsonProperty(Order = 18, Required = Required.Always)]
-        public int EnemyGradePerFloor { get; }
+        public int EnemyPowerPerFloorPercent { get; }
 
         /// <summary>The first floor from which the loot of battles and the stock of shops are Bronze, Silver and Gold items; 0 for never. An elite's loot is a tier up.</summary>
         [JsonProperty(Order = 19, Required = Required.Always)]
@@ -257,12 +245,6 @@ namespace F1.Data
         public bool ShopCanStandOn(int floor)
         {
             return ShopChancePercent > 0 && floor >= ShopMinFloor && floor > 1 && floor <= Floors && floor != CampFloor;
-        }
-
-        /// <summary>Grade of the items found on a floor (1-based): a battle's loot and a shop's stock.</summary>
-        public int ItemGradeAt(int floor)
-        {
-            return ItemGradeBase + (floor - 1) * ItemGradePerFloor;
         }
 
         /// <summary>Tier of the items found on a floor: the deepest tier started by then, one more for an elite's loot (Gold at most).</summary>

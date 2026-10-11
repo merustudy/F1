@@ -53,7 +53,7 @@ namespace F1.Gameplay
                     MaxHp = job.MaxHp,
                     Hp = job.MaxHp,
                     Alive = true,
-                    Board = ItemBoard.Starting(data.StartBag, new EquippedItem(data.Items.Get(job.WeaponItemId), job.WeaponGrade, isBase: true)),
+                    Board = ItemBoard.Starting(data.StartBag, new EquippedItem(data.Items.Get(job.WeaponItemId), isBase: true)),
                     Fatigue = member.Fatigue,
                     StateId = member.AfflictionId,
                 });
@@ -284,8 +284,8 @@ namespace F1.Gameplay
         /// <summary>
         /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried,
         /// <c>DropCount</c> are drawn without repetition from the loot stream of the node (<c>EliteDropCount</c> for an elite); all of them
-        /// when they carried fewer. A drop is the item at the dungeon's grade and the floor's tier (an elite's a tier up), as the shop's stock is:
-        /// not at the grade the enemy carried it (that is the enemy's strength, far above a found item's). An elite's loot holds a bag with the
+        /// when they carried fewer. A drop is the item at its own values and the floor's tier (an elite's a tier up), as the shop's stock is:
+        /// not at the power the enemy carried it (that is the enemy's strength, far above a found item's). An elite's loot holds a bag with the
         /// chance <c>EliteBagPercent</c> (Slice B stage 19): its last drop is a bag drawn by loot weight instead. The boss drops nothing: the
         /// expedition ends there. Nothing for a node that is not fought.
         /// </summary>
@@ -298,14 +298,13 @@ namespace F1.Gameplay
             }
 
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
-            int grade = dungeon.ItemGradeAt(node.Floor);
             ItemTier tier = dungeon.ItemTierAt(node.Floor, node.Kind == MapNodeKind.Elite);
             var carried = new List<ItemOffer>();
             foreach (string enemyId in data.EnemyGroups.Get(node.EnemyGroupId).Enemies)
             {
                 foreach (ItemGrant grant in data.Enemies.Get(enemyId).Items)
                 {
-                    carried.Add(new ItemOffer(OfferKind.Item, grant.ItemId, grade, tier));
+                    carried.Add(new ItemOffer(OfferKind.Item, grant.ItemId, tier));
                 }
             }
 
@@ -323,7 +322,7 @@ namespace F1.Gameplay
                 BagData bag = DrawBag(data, rng);
                 if (bag != null)
                 {
-                    var offer = new ItemOffer(OfferKind.Bag, bag.Id, 0);
+                    var offer = new ItemOffer(OfferKind.Bag, bag.Id);
                     if (drops.Count > 0)
                     {
                         drops[drops.Count - 1] = offer;
@@ -415,7 +414,7 @@ namespace F1.Gameplay
                 return;
             }
 
-            var item = new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier);
+            var item = new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier);
             BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
             if (CanMerge(item, there?.Item))
             {
@@ -445,7 +444,7 @@ namespace F1.Gameplay
             }
 
             ItemOffer drop = state.Loot[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier));
+            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier));
             Pick(state, slot);
         }
 
@@ -471,7 +470,7 @@ namespace F1.Gameplay
             }
 
             ItemOffer drop = state.Loot[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier), at);
+            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier), at);
             Pick(state, slot);
         }
 
@@ -876,20 +875,19 @@ namespace F1.Gameplay
         /// <summary>
         /// The stock of a shop after so many refreshes (stage 21, round 56): first its potions, drawn once from the shop stream of the node
         /// (<see cref="DrawPotions"/>), then its goods, drawn that many times past the first, the last draw being the goods. The goods are
-        /// the items and bags a shop stocks (those with a weight and a price), at the floor's grade and tier, without repetition; the
+        /// the items and bags a shop stocks (those with a weight and a price), at the floor's tier, without repetition; the
         /// stock is the goods followed by the potions.
         /// </summary>
         static List<ItemOffer> DrawStock(StaticData data, ExpeditionState state, MapNode shop, int refreshes)
         {
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "shop", shop.Id), RngStream.Shop);
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
-            int grade = dungeon.ItemGradeAt(shop.Floor);
             ItemTier tier = dungeon.ItemTierAt(shop.Floor, false);
             List<ItemOffer> potions = DrawPotions(data, rng);
             List<ItemOffer> stock = null;
             for (int draw = 0; draw <= refreshes; draw++)
             {
-                stock = DrawOffers(data, rng, data.Balance.ShopSlots, grade, tier);
+                stock = DrawOffers(data, rng, data.Balance.ShopSlots, tier);
             }
 
             stock.AddRange(potions);
@@ -917,7 +915,7 @@ namespace F1.Gameplay
             {
                 if (rng.NextInt(100) < data.Balance.ShopPotionChancePercent)
                 {
-                    potions.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
+                    potions.Add(new ItemOffer(OfferKind.Potion, potion.Id));
                 }
             }
 
@@ -934,7 +932,7 @@ namespace F1.Gameplay
                 {
                     if (pick < potion.ShopWeight)
                     {
-                        potions.Add(new ItemOffer(OfferKind.Potion, potion.Id, 0));
+                        potions.Add(new ItemOffer(OfferKind.Potion, potion.Id));
                         break;
                     }
 
@@ -1025,7 +1023,7 @@ namespace F1.Gameplay
                 return;
             }
 
-            var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+            var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
             BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
             if (CanMerge(item, there?.Item))
             {
@@ -1055,7 +1053,7 @@ namespace F1.Gameplay
             }
 
             ItemOffer offer = state.Shop.Stock[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier));
+            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier));
             Pay(data, state, slot);
         }
 
@@ -1083,7 +1081,7 @@ namespace F1.Gameplay
             }
 
             ItemOffer offer = state.Shop.Stock[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), at);
+            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), at);
             Pay(data, state, slot);
         }
 
@@ -1227,12 +1225,11 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Merges an item into another lying on a board: the board's item becomes the merge, a tier up at the better grade of the two, where
-        /// it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer).
+        /// Merges an item into another lying on a board: the board's item becomes the merge, a tier up, where it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer).
         /// </summary>
         static void MergeInto(EquippedItem item, BoardItem into)
         {
-            into.Item = new EquippedItem(into.Item.Item, Math.Max(item.Grade, into.Item.Grade), tier: into.Item.Tier + 1);
+            into.Item = into.Item.TierUp();
         }
 
         /// <summary>The item covering a square of a living member's board between battles, or null.</summary>
@@ -1324,10 +1321,10 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Draws a shop's goods without repetition, by shop weight: the items with a weight and a price at the grade and tier given, and
+        /// Draws a shop's goods without repetition, by shop weight: the items with a weight and a price at the tier given, and
         /// the bags with a weight and a price (Slice B stage 19). The potions are drawn apart (round 56: <see cref="DrawPotions"/>).
         /// </summary>
-        static List<ItemOffer> DrawOffers(StaticData data, Pcg32 rng, int count, int grade, ItemTier tier)
+        static List<ItemOffer> DrawOffers(StaticData data, Pcg32 rng, int count, ItemTier tier)
         {
             var candidates = new List<ItemOffer>();
             var weights = new List<int>();
@@ -1335,7 +1332,7 @@ namespace F1.Gameplay
             {
                 if (item.ShopWeight > 0 && item.Price > 0)
                 {
-                    candidates.Add(new ItemOffer(OfferKind.Item, item.Id, grade, tier));
+                    candidates.Add(new ItemOffer(OfferKind.Item, item.Id, tier));
                     weights.Add(item.ShopWeight);
                 }
             }
@@ -1344,7 +1341,7 @@ namespace F1.Gameplay
             {
                 if (bag.ShopWeight > 0 && bag.Price > 0)
                 {
-                    candidates.Add(new ItemOffer(OfferKind.Bag, bag.Id, 0));
+                    candidates.Add(new ItemOffer(OfferKind.Bag, bag.Id));
                     weights.Add(bag.ShopWeight);
                 }
             }
@@ -1407,13 +1404,13 @@ namespace F1.Gameplay
             return group.IsBoss ? 0 : Math.Max(0, floor - 1);
         }
 
-        /// <param name="deeper">How many floors below the first the enemy stands: its HP and item grades grow by the dungeon's share for each.</param>
+        /// <param name="deeper">How many floors below the first the enemy stands: its HP and the power of its items grow by the dungeon's share for each.</param>
         static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data, DungeonData dungeon, int deeper)
         {
             var items = new List<EquippedItem>();
             foreach (ItemGrant grant in enemy.Items)
             {
-                items.Add(new EquippedItem(data.Items.Get(grant.ItemId), grant.Grade + deeper * dungeon.EnemyGradePerFloor));
+                items.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
             }
 
             // An enemy's board is exactly what it carries, one item under another: it has no bags and no empty squares to show.

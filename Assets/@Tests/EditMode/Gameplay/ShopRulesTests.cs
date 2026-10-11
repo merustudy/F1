@@ -38,7 +38,7 @@ namespace F1.Tests
             parts.Items = parts.Items.Concat(new[] { TestData.Item("trinket", 3000, EffectKind.Shield, TargetMode.Self, category: ItemCategory.Other, shopWeight: 5) }).ToList();
             parts.Dungeons = new List<DungeonData>
             {
-                new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, 8, 1, new List<string> { "tonic" }, null,
+                new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, new List<string> { "tonic" }, null,
                     campFloor: 8, bronzeFloor: 4, shopMinFloor: 3, shopChancePercent: shopPercent),
             };
             parts.EnemyGroups = new List<EnemyGroupData>
@@ -130,8 +130,8 @@ namespace F1.Tests
         public void Data_RefusesABadShopChance_AndANegativePrice()
         {
             var potions = new List<string>();
-            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, 8, 2, potions, null, shopChancePercent: 101));
-            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, 8, 2, potions, null, shopMinFloor: -1));
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, shopChancePercent: 101));
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, shopMinFloor: -1));
             Assert.Throws<DataException>(() => TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, price: -1));
             Assert.Throws<DataException>(() => new PotionData("p", TestData.Text("p"), PotionEffect.Heal, 10, 1, null, -1));
             Assert.Throws<DataException>(() => TestData.Balance(("ShopSlots", BalanceData.MaxShopSlots + 1)));
@@ -156,7 +156,7 @@ namespace F1.Tests
             CollectionAssert.AreEquivalent(new[] { "charm", "knife", "bow" }, stock.Take(3).Select(o => o.Id), "Every priced item once; never the unpriced trinket.");
             Assert.AreEqual("tonic", stock[3].Id, "The potion after the goods.");
             ItemTier tier = data.Dungeons.Get("cave").ItemTierAt(shop.Floor, false);
-            Assert.IsTrue(stock.Where(o => o.Kind == OfferKind.Item).All(o => o.Tier == tier && o.Grade == data.Dungeons.Get("cave").ItemGradeAt(shop.Floor)), "The floor's tier and grade, as a reward's.");
+            Assert.IsTrue(stock.Where(o => o.Kind == OfferKind.Item).All(o => o.Tier == tier), "The floor's tier, as a drop's (stage 22: no grade).");
 
             // The same seed draws the same stock in the same order.
             ExpeditionState again = InAShop(data, out MapNode _);
@@ -196,10 +196,10 @@ namespace F1.Tests
         public void Prices_FollowTheTier_AndAPotionsIsItsOwn()
         {
             StaticData data = ShopCave();
-            Assert.AreEqual(10, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8)));
-            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Bronze)), "Bronze: twice, as its effects.");
-            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", 8, ItemTier.Gold)));
-            Assert.AreEqual(5, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Potion, "tonic", 0)));
+            Assert.AreEqual(10, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife")));
+            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Bronze)), "Bronze: twice, as its effects.");
+            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Gold)));
+            Assert.AreEqual(5, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Potion, "tonic")));
         }
 
         // ---- Buying --------------------------------------------------------------------------
@@ -254,7 +254,7 @@ namespace F1.Tests
             Assert.IsTrue(ExpeditionRules.CanBuyToInventory(data, state, bow));
             ExpeditionRules.BuyToInventory(data, state, bow);
             Assert.AreEqual("bow", state.Inventory.Single().Item.Id);
-            Assert.AreEqual(coins - ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "bow", 8, state.Inventory[0].Tier)), state.Coins);
+            Assert.AreEqual(coins - ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "bow", state.Inventory[0].Tier)), state.Coins);
             Assert.IsNull(state.Shop.Stock[bow]);
 
             coins = state.Coins;
@@ -273,7 +273,7 @@ namespace F1.Tests
 
             while (cramped.Inventory.HasRoomFor(data.Items.Get("knife")))
             {
-                cramped.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8));
+                cramped.Inventory.Add(new EquippedItem(data.Items.Get("knife"), powerPercent: 8));
             }
 
             ExpeditionRules.EnterShop(data, cramped, crampedShop.Id);
@@ -291,7 +291,7 @@ namespace F1.Tests
             int bow = SlotOf(state, OfferKind.Item, "bow");
             ItemOffer offer = state.Shop.Stock[bow];
             ItemData item = data.Items.Get("bow");
-            state.Inventory.Add(new EquippedItem(data.Items.Get("knife"), 8), TestBoards.At(0, 0));
+            state.Inventory.Add(new EquippedItem(data.Items.Get("knife"), powerPercent: 8), TestBoards.At(0, 0));
             int coins = state.Coins;
 
             // Round 55: an offer held over the inventory's grid is bought where it is laid, over no item.
@@ -348,7 +348,6 @@ namespace F1.Tests
             }
 
             Assert.GreaterOrEqual(slot, 0, "The pouch comes on offer.");
-            Assert.AreEqual(0, state.Shop.Stock[slot].Grade);
             Assert.AreEqual(6, ExpeditionRules.PriceOf(data, state.Shop.Stock[slot]), "A bag's own price.");
             ExpeditionMember anna = state.Members[0];
             int coins = state.Coins;
@@ -476,7 +475,7 @@ namespace F1.Tests
             foreach (ExpeditionMember member in state.Members)
             {
                 BoardItem weapon = member.Board.Items[0];
-                weapon.Item = new EquippedItem(weapon.Item.Item, 999, isBase: true);
+                weapon.Item = new EquippedItem(weapon.Item.Item, isBase: true, powerPercent: 999);
             }
 
             MapNode first = ExpeditionRules.AvailableNodes(state)[0];

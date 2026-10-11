@@ -8,7 +8,7 @@
         "ko-KR": "방벽 포션"
       },
       "Effect": "Shield",
-      "Magnitude": 40,
+      "Magnitude": 1100,
       "ShopWeight": 4,
       "Icon": "potion/barrier-potion",
       "Price": 8
@@ -20,7 +20,7 @@
         "ko-KR": "치유 포션"
       },
       "Effect": "Heal",
-      "Magnitude": 50,
+      "Magnitude": 1400,
       "ShopWeight": 6,
       "Icon": "potion/healing-potion",
       "Price": 8

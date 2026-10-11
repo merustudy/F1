@@ -3,19 +3,32 @@ using Newtonsoft.Json;
 
 namespace F1.Data
 {
-    /// <summary>One effect of an item. Its size is grade x PowerPercent / 100 (at least 1), times the percent of the item's tier.</summary>
+    /// <summary>
+    /// One effect of an item and its size at Common (Slice B stage 22, Docs/Design/02_Combat_System.md §4): damage from <see cref="Min"/> to
+    /// <see cref="Max"/> in hundredths (<see cref="Centi"/>); a heal or a shield one value in hundredths; a burn its stacks. The item's tier
+    /// multiplies it, and an enemy's power percent too (<c>EquippedItem</c>).
+    /// </summary>
     public sealed class ItemEffect
     {
         /// <param name="reach">
         /// How many enemies are hit, counted from the front (EnemyFront) or from the back (EnemyBack).
         /// 0 for every other target.
         /// </param>
+        /// <param name="min">The least damage, or the one value of any other effect.</param>
+        /// <param name="max">The most damage; the same as <paramref name="min"/> for any other effect.</param>
         [JsonConstructor]
-        public ItemEffect(EffectKind kind, TargetMode target, int reach, int powerPercent)
+        public ItemEffect(EffectKind kind, TargetMode target, int reach, int min, int max)
         {
-            if (powerPercent < 1)
+            if (min < 1)
             {
-                throw new DataException("Effect PowerPercent must be at least 1.");
+                throw new DataException($"Effect {kind} must be at least 1 (0.01 for damage, a heal or a shield; one stack for a burn).");
+            }
+
+            if (kind == EffectKind.Damage ? max < min : max != min)
+            {
+                throw new DataException(kind == EffectKind.Damage
+                    ? "Damage needs its least no larger than its most."
+                    : $"Effect {kind} has one value, not a range.");
             }
 
             bool harmful = kind == EffectKind.Damage || kind == EffectKind.Burn;
@@ -39,7 +52,8 @@ namespace F1.Data
             Kind = kind;
             Target = target;
             Reach = reach;
-            PowerPercent = powerPercent;
+            Min = min;
+            Max = max;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -52,8 +66,13 @@ namespace F1.Data
         [JsonProperty(Order = 3, Required = Required.Always)]
         public int Reach { get; }
 
+        /// <summary>The least damage at Common in hundredths, or the one value of a heal or a shield (hundredths) or a burn (stacks).</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]
-        public int PowerPercent { get; }
+        public int Min { get; }
+
+        /// <summary>The most damage at Common in hundredths; <see cref="Min"/> for every other effect.</summary>
+        [JsonProperty(Order = 5, Required = Required.Always)]
+        public int Max { get; }
 
         public static bool TargetsEnemy(TargetMode target)
         {
@@ -66,17 +85,14 @@ namespace F1.Data
             return target == TargetMode.EnemyFront || target == TargetMode.EnemyBack;
         }
 
-        /// <summary>Effect size at a grade, at Common: grade x PowerPercent / 100, rounded down, at least 1.</summary>
-        public int MagnitudeAt(int grade)
+        /// <summary>
+        /// A value of this effect at a tier's percent (<see cref="BalanceData.TierPercent"/>) and a power percent (100 for the party's items, an
+        /// enemy's own for its items): value x tierPercent x powerPercent / 10000, rounded down, at least 1.
+        /// </summary>
+        public static int Scaled(int value, int tierPercent, int powerPercent)
         {
-            return MagnitudeAt(grade, 100);
-        }
-
-        /// <summary>Effect size at a grade and a tier's percent (<see cref="BalanceData.TierPercent"/>): grade x PowerPercent x tierPercent / 10000, rounded down, at least 1.</summary>
-        public int MagnitudeAt(int grade, int tierPercent)
-        {
-            long magnitude = (long)grade * PowerPercent * tierPercent / 10000;
-            return magnitude < 1 ? 1 : (int)magnitude;
+            long scaled = (long)value * tierPercent * powerPercent / 10000;
+            return scaled < 1 ? 1 : (int)scaled;
         }
     }
 
@@ -126,7 +142,8 @@ namespace F1.Data
             int price = 0,
             bool melee = false,
             IReadOnlyList<StarSquare> stars = null,
-            int starDamage = 0)
+            int starDamage = 0,
+            int critChancePercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -184,6 +201,17 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': Price cannot be negative.");
             }
 
+            // Only a weapon's damage can be a critical hit (stage 22).
+            if (critChancePercent < 0 || critChancePercent > 100)
+            {
+                throw new DataException($"{DefinitionName} '{id}': CritChancePercent must be 0..100.");
+            }
+
+            if (critChancePercent > 0 && (category != ItemCategory.Weapon || !HasDamage(effects)))
+            {
+                throw new DataException($"{DefinitionName} '{id}': only a weapon that deals damage can have a CritChancePercent.");
+            }
+
             Category = category;
             Width = width;
             Height = height;
@@ -195,6 +223,20 @@ namespace F1.Data
             Melee = melee;
             Stars = stars;
             StarDamage = starDamage;
+            CritChancePercent = critChancePercent;
+        }
+
+        static bool HasDamage(IReadOnlyList<ItemEffect> effects)
+        {
+            foreach (ItemEffect effect in effects)
+            {
+                if (effect.Kind == EffectKind.Damage)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>Star squares lie round the shape (outside it, at most one square away, corners too) and once each; stars come with their damage.</summary>
@@ -275,9 +317,13 @@ namespace F1.Data
         [JsonProperty(Order = 13, Required = Required.Always)]
         public IReadOnlyList<StarSquare> Stars { get; }
 
-        /// <summary>What a melee weapon on one of its stars deals more, at Common (a tier adds as much again per step); 0 without stars.</summary>
+        /// <summary>What a melee weapon on one of its stars deals more, at Common, in hundredths (a tier adds as much again per step); 0 without stars.</summary>
         [JsonProperty(Order = 14, Required = Required.Always)]
         public int StarDamage { get; }
+
+        /// <summary>The chance in percent that the weapon's damage is a critical hit, rolled for each unit it hits (Slice B stage 22). 0 for any other item.</summary>
+        [JsonProperty(Order = 15, Required = Required.Always)]
+        public int CritChancePercent { get; }
 
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]
