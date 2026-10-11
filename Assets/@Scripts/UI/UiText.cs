@@ -30,12 +30,41 @@ namespace F1.UI
             return Name(Managers.Data.Data.Jobs.Get(jobId).Name);
         }
 
-        /// <summary>What the job's passive does, or an empty string when it has none.</summary>
+        /// <summary>What the job's passive does, or an empty string when it has none. A shield is shown whole (stage 22).</summary>
         public static string Passive(JobData job)
         {
-            return job.Passive == null
-                ? string.Empty
-                : string.Format(CultureInfo.InvariantCulture, Name(job.PassiveText), job.Passive.Magnitude);
+            if (job.Passive == null)
+            {
+                return string.Empty;
+            }
+
+            int magnitude = job.Passive.Effect == PassiveEffect.Shield ? Amount(job.Passive.Magnitude) : job.Passive.Magnitude;
+            return string.Format(CultureInfo.InvariantCulture, Name(job.PassiveText), magnitude);
+        }
+
+        /// <summary>
+        /// A damage, a heal or a shield in hundredths as the screen shows it (Slice B stage 22, Docs/Architecture/12_UI.md "수의 표시"): a whole
+        /// number, rounded half up.
+        /// </summary>
+        public static int Amount(int hundredths)
+        {
+            return Centi.Round(hundredths);
+        }
+
+        /// <summary>HP in hundredths as the screen shows it: rounded half up, but at least 1 while there is any (0 is death's door or death).</summary>
+        public static int Hp(int hundredths)
+        {
+            return hundredths > 0 ? Math.Max(1, Centi.Round(hundredths)) : 0;
+        }
+
+        /// <summary>A damage range in hundredths as the screen shows it: "2-4", or one number when both ends round alike ("1").</summary>
+        public static string Range(int min, int max)
+        {
+            int least = Amount(min);
+            int most = Amount(max);
+            return least == most
+                ? least.ToString(CultureInfo.InvariantCulture)
+                : string.Format(CultureInfo.InvariantCulture, "{0}-{1}", least, most);
         }
 
         /// <summary>Names of mercenaries separated by commas, or "None" for an empty list.</summary>
@@ -75,23 +104,21 @@ namespace F1.UI
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", tenths / 10, tenths % 10);
         }
 
-        /// <summary>"Name · tier · grade", the tier in its colour (round 35); a Common item leaves the tier out: "Name · grade" (round 41).</summary>
-        public static string ItemTitle(EquippedItem item)
-        {
-            return item.Tier == ItemTier.Common
-                ? UiStrings.Get(UiKeys.Item.TitlePlain, Name(item.Item.Name), item.Grade)
-                : UiStrings.Get(UiKeys.Item.Title, Name(item.Item.Name), TierWord(item.Tier), item.Grade);
-        }
-
         /// <summary>
-        /// The title in Diablo's tooltip (round 57, the user: "인벤 창에 등급 점수는 삭제"): the name and, above Common, the tier word — no
-        /// grade. The inventory window's box and the merchant's tooltip show it; cards and other lines keep <see cref="ItemTitle"/>.
+        /// "Name · tier", the tier in its colour (round 35); a Common item is its name alone (round 41). Items have no grade any more (Slice B
+        /// stage 22; round 57 had taken it out of the tooltips already).
         /// </summary>
-        public static string TooltipTitle(EquippedItem item)
+        public static string ItemTitle(EquippedItem item)
         {
             return item.Tier == ItemTier.Common
                 ? Name(item.Item.Name)
                 : UiStrings.Get(UiKeys.Item.TooltipTitle, Name(item.Item.Name), TierWord(item.Tier));
+        }
+
+        /// <summary>The title in Diablo's tooltip (round 57): the same as <see cref="ItemTitle"/> since stage 22.</summary>
+        public static string TooltipTitle(EquippedItem item)
+        {
+            return ItemTitle(item);
         }
 
         /// <summary>The name of a tier (Docs/Design/02_Combat_System.md §4).</summary>
@@ -160,7 +187,8 @@ namespace F1.UI
         /// <param name="starDamage">What the stars on the item's board add to a weapon's damage (stage 20): its damage line counts it.</param>
         public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0)
         {
-            facts = string.Join(FactSeparator, ItemFacts(item));
+            // Each fact keeps together (stage 22: "치명타 5%" split as "치|명타" on a Korean card); the line breaks between facts only.
+            facts = string.Join(FactSeparator, ItemFacts(item).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
             effects = string.Join("\n", ItemEffects(item, starDamage));
             var parts = new List<string>();
             AddFatigue(parts, item);
@@ -270,6 +298,12 @@ namespace F1.UI
 
             facts.Add(CooldownFact(data));
 
+            // A weapon's chance of a critical hit (stage 22).
+            if (data.CritChancePercent > 0)
+            {
+                facts.Add(UiStrings.Get(UiKeys.Item.Crit, data.CritChancePercent));
+            }
+
             // An item that works anywhere in the line needs no fact about where.
             if (!data.Rows.IsEveryRow)
             {
@@ -292,14 +326,13 @@ namespace F1.UI
             BalanceData balance = Managers.Data.Data.Balance;
             foreach (ItemEffect effect in item.Item.Effects)
             {
-                bool weaponDamage = effect.Kind == EffectKind.Damage && item.Item.Category == ItemCategory.Weapon;
-                effects.Add(Effect(effect, item.Magnitude(balance, effect) + (weaponDamage ? starDamage : 0)));
+                effects.Add(Effect(effect, item, balance, starDamage));
             }
 
             // A star item's work (stage 20): what a melee weapon on one of its stars deals more, at its tier.
             if (item.Item.Stars.Count > 0)
             {
-                effects.Add(UiStrings.Get(UiKeys.Item.StarDamage, item.StarDamage));
+                effects.Add(UiStrings.Get(UiKeys.Item.StarDamage, Amount(item.StarDamage)));
             }
 
             return effects;
@@ -342,7 +375,7 @@ namespace F1.UI
                 }
             }
 
-            return Colored(UiStrings.Get(UiKeys.Item.StarBonus, string.Join("·", names), StarRules.DamageOn(board, placed)), UiPalette.StarLit);
+            return Colored(UiStrings.Get(UiKeys.Item.StarBonus, string.Join("·", names), Amount(StarRules.DamageOn(board, placed))), UiPalette.StarLit);
         }
 
         /// <summary>Where in its line the owner must stand: "only in the front row", "only within the rear 3 rows".</summary>
@@ -356,18 +389,40 @@ namespace F1.UI
             return rows.Reach == 1 ? UiStrings.Get(UiKeys.Item.RowsBackOne) : UiStrings.Get(UiKeys.Item.RowsBack, rows.Reach);
         }
 
-        /// <param name="magnitude">The effect's size on the item it is of (<see cref="EquippedItem.Magnitude"/>: its grade and tier).</param>
-        public static string Effect(ItemEffect effect, int magnitude)
+        /// <summary>One effect of an item at its tier and power, as its card says it: "맨 앞 적에게 피해 2-4", "자신에게 보호막 2", "화상 2".</summary>
+        /// <param name="starDamage">What stars add to a weapon's damage on its board (stage 20, as the battle adds it), in hundredths, or 0.</param>
+        public static string Effect(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0)
         {
-            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), magnitude);
+            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), EffectValue(effect, item, balance, starDamage));
+        }
+
+        /// <summary>
+        /// The value of one effect of an item at its tier and power (stage 22): damage as a range with the stars of its board on both ends
+        /// ("2-4"), a heal or a shield whole ("3"), a burn its stacks.
+        /// </summary>
+        public static string EffectValue(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0)
+        {
+            switch (effect.Kind)
+            {
+                case EffectKind.Damage:
+                {
+                    int stars = item.Item.Category == ItemCategory.Weapon ? starDamage : 0;
+                    return Range(item.Min(balance, effect) + stars, item.Max(balance, effect) + stars);
+                }
+
+                case EffectKind.Burn:
+                    return item.Magnitude(balance, effect).ToString(CultureInfo.InvariantCulture);
+                default:
+                    return Amount(item.Magnitude(balance, effect)).ToString(CultureInfo.InvariantCulture);
+            }
         }
 
         public static string PotionDetails(PotionData potion)
         {
             switch (potion.Effect)
             {
-                case PotionEffect.Heal: return UiStrings.Get(UiKeys.Potion.Heal, potion.Magnitude);
-                case PotionEffect.Shield: return UiStrings.Get(UiKeys.Potion.Shield, potion.Magnitude);
+                case PotionEffect.Heal: return UiStrings.Get(UiKeys.Potion.Heal, Amount(potion.Magnitude));
+                case PotionEffect.Shield: return UiStrings.Get(UiKeys.Potion.Shield, Amount(potion.Magnitude));
                 default: throw new ArgumentOutOfRangeException(nameof(potion), potion.Effect, "No text for this potion effect.");
             }
         }

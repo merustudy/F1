@@ -93,13 +93,21 @@ namespace F1.UI
                         return null;
                     }
 
-                    return e.B > 0
-                        ? UiStrings.Get(UiKeys.Log.DamageAbsorbed, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A, e.B)
-                        : UiStrings.Get(UiKeys.Log.Damage, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
+                    // A sliver that rounds to 0 (the last 0.27 of a burn) is no line, as it rises as no number (stage 22).
+                    if (UiText.Amount(e.A) == 0)
+                    {
+                        return null;
+                    }
+
+                    return UiText.Amount(e.B) > 0
+                        ? UiStrings.Get(UiKeys.Log.DamageAbsorbed, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A), UiText.Amount(e.B))
+                        : UiStrings.Get(UiKeys.Log.Damage, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
+                case BattleEventKind.CriticalHit:
+                    return UiStrings.Get(UiKeys.Log.CriticalHit, Source(engine, e.Source, e.Id), UnitName(engine, e.Target));
                 case BattleEventKind.Healed:
-                    return UiStrings.Get(UiKeys.Log.Heal, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.B);
+                    return UiStrings.Get(UiKeys.Log.Heal, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.B));
                 case BattleEventKind.ShieldGained:
-                    return UiStrings.Get(UiKeys.Log.Shield, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
+                    return UiStrings.Get(UiKeys.Log.Shield, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
                 case BattleEventKind.BurnApplied:
                     return UiStrings.Get(UiKeys.Log.Burn, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
                 case BattleEventKind.DogEntered:
@@ -119,7 +127,7 @@ namespace F1.UI
                 case BattleEventKind.RetreatAttempted:
                     return UiStrings.Get(e.C == 1 ? UiKeys.Log.RetreatSucceeded : UiKeys.Log.RetreatFailed, e.A, e.B);
                 case BattleEventKind.StormTicked:
-                    return UiStrings.Get(UiKeys.Log.Storm, e.A);
+                    return UiStrings.Get(UiKeys.Log.Storm, UiText.Amount(e.A));
                 case BattleEventKind.FatigueChanged:
                     return FatigueLine(e, engine);
                 case BattleEventKind.BrokeDown:
@@ -143,8 +151,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// A fatigue change worth a line: death's door (the unit's own, or an ally's), an ally's death, a virtue. A hit's and a
-        /// kill's are too many to read; the pips under the unit's feet show them.
+        /// A fatigue change worth a line: death's door (the unit's own, or an ally's), an ally's death, a virtue, a critical hit taken (stage 22).
+        /// A hit's and a kill's are too many to read, and so are the allies' share of a critical hit; the pips under the unit's feet show them.
         /// </summary>
         static string FatigueLine(BattleEvent e, BattleEngine engine)
         {
@@ -152,6 +160,7 @@ namespace F1.UI
             switch (e.Id)
             {
                 case BattleEvent.FatigueDog: key = UiKeys.Log.FatigueDog; break;
+                case BattleEvent.FatigueCritTaken: key = UiKeys.Log.FatigueCritTaken; break;
                 case BattleEvent.FatigueAllyDog: key = UiKeys.Log.FatigueAllyDog; break;
                 case BattleEvent.FatigueAllyDeath: key = UiKeys.Log.FatigueAllyDeath; break;
                 case BattleEvent.FatigueVirtue: key = UiKeys.Log.FatigueVirtue; break;

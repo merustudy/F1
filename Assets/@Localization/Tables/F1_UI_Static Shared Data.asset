@@ -200,21 +200,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909217
-  - m_Id: 9766393864226
-    m_Key: Board.Grade
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909219
   - m_Id: 9766393864229
     m_Key: Board.Hint
     m_Metadata:
       m_Items:
       - rid: 636489279218909222
-  - m_Id: 9766393864230
-    m_Key: Item.Title
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909223
   - m_Id: 9766393864231
     m_Key: Item.Weapon
     m_Metadata:
@@ -990,11 +980,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673243377860622
-  - m_Id: 2271577767927808
-    m_Key: Item.TitlePlain
-    m_Metadata:
-      m_Items:
-      - rid: 8623673257781362688
   - m_Id: 2271577780510720
     m_Key: Item.Common
     m_Metadata:
@@ -1190,6 +1175,31 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673344893911040
+  - m_Id: 3903216373719040
+    m_Key: Item.Crit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673359758786560
+  - m_Id: 3903216390496256
+    m_Key: Log.CriticalHit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673359758786561
+  - m_Id: 3903216390496257
+    m_Key: Log.FatigueCritTaken
+    m_Metadata:
+      m_Items:
+      - rid: 8623673359758786562
+  - m_Id: 3903216390496258
+    m_Key: Fx.Crit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673359758786563
+  - m_Id: 3937123085312000
+    m_Key: Fx.CritDamage
+    m_Metadata:
+      m_Items:
+      - rid: 8623673361877958656
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1351,19 +1361,10 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: On the HP bar under a unit's feet. {0} = HP. {1} = max HP.
-    - rid: 636489279218909219
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = item grade.'
     - rid: 636489279218909222
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: How to use the boards on the party side (Slice B stage 19).
-    - rid: 636489279218909223
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade.
-          A Common item uses Item.TitlePlain.'
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2032,11 +2033,6 @@ MonoBehaviour:
         m_CommentText: The word over a mercenary whose fatigue reached its maximum,
           in the moment of its collapse (it went to death's door, or died there).
           The unit's name is written under it.
-    - rid: 8623673257781362688
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The title of a Common item (no tier word). {0} = item name.
-          {1} = grade.
     - rid: 8623673257781362689
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2225,3 +2221,29 @@ MonoBehaviour:
       data:
         m_CommentText: The title in Diablo's tooltip without the grade (round 57).
           {0} = item name. {1} = tier. A Common item shows its name alone.
+    - rid: 8623673359758786560
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In a weapon''s facts (Slice B stage 22): the chance that
+          its damage on a unit is a critical hit, rolled for each unit it hits. {0}
+          = percent.'
+    - rid: 8623673359758786561
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A critical hit (stage 22), just before its damage line. {0}
+          = source. {1} = target.
+    - rid: 8623673359758786562
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Fatigue from taking a critical hit (stage 22). {0} = unit.
+          {1} = amount. {2} = fatigue after.
+    - rid: 8623673359758786563
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The small word over a critical hit's number (stage 22, Round
+          60 mock A in the damage red).
+    - rid: 8623673361877958656
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A critical hit's HP lost (stage 22), under Fx.Crit. {0} =
+          HP lost.

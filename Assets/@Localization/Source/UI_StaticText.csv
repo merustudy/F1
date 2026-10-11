@@ -86,7 +86,6 @@ Map.ShopBagSub,Under the name of a bag on offer or dropped (Slice B stage 19). {
 Map.BagFacts,The facts of a bag on a tile (Slice B stage 19). {0} = the squares it adds.,칸 +{0}. 틀의 빈 자리에 놓습니다. 안의 아이템과 함께 옮길 수 있습니다.,+{0} squares. Lay it in an empty part of the frame; it moves with what lies in it.
 Map.OfferPrice,The price line of a good in the merchant's tooltip (Slice B stage 21). {0} = the coins.,값 {0} 코인,Price: {0} coins
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
-Board.Grade,{0} = item grade.,등급 {0},Grade {0}
 Board.Forward,Moves a mercenary one row forward (towards row 1); the one standing there moves back.,앞으로,Forward
 Board.Back,Moves a mercenary one row back; the one standing there moves forward.,뒤로,Back
 Board.Hint,How to use the boards on the party side (Slice B stage 19).,"아이템을 누르면 집고, 칸을 누르면 놓습니다(겹친 하나는 인벤토리로). 든 채로 우클릭·휠·R: 돌리기. 가방의 빈 칸을 누르면 가방을 집습니다. 앞으로와 뒤로는 옆 열의 용병과 자리를 바꿉니다.","Click an item to pick it up, then a square to put it down (one item in the way goes to the inventory). While holding: right-click, wheel or R turns it. Click an empty square of a bag to pick the bag. Forward and Back swap with the next row."
@@ -104,8 +103,6 @@ Board.StateDetail,"On the detail line when the state's name under a member's fee
 Board.GhostToInventory,Over a held item's ghost where it would push one item out (Slice B stage 19). {0} = that item's name.,{0} → 인벤토리,{0} → inventory
 Board.GhostBag,Over a held bag's ghost where it can be laid (Slice B stage 19).,가방 놓기,Lay the bag
 Board.MergeInto,On a board cell the chosen item would merge into. {0} = the tier the merge makes.,합치기 → {0},Merge → {0}
-Item.Title,{0} = item name. {1} = tier (Item.Bronze etc.). {2} = grade. A Common item uses Item.TitlePlain.,{0} · {1} · 등급 {2},{0} · {1} · Grade {2}
-Item.TitlePlain,The title of a Common item (no tier word). {0} = item name. {1} = grade.,{0} · 등급 {1},{0} · Grade {1}
 Item.TooltipTitle,The title in Diablo's tooltip without the grade (round 57). {0} = item name. {1} = tier. A Common item shows its name alone.,{0} · {1},{0} · {1}
 Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
 Item.Armor,Item category: defensive gear.,방어 장비,Armor
@@ -114,6 +111,7 @@ Item.Support,Item category: heals or strengthens.,지원 아이템,Support item
 Item.Other,Item category: anything else.,기타 아이템,Other item
 Item.Size,{0} x {1} = the squares the item takes across and down on a board (Slice B stage 19).,크기 {0}×{1},Size {0}×{1}
 Item.Cooldown,{0} = seconds.,쿨다운 {0}초,Cooldown {0}s
+Item.Crit,"In a weapon's facts (Slice B stage 22): the chance that its damage on a unit is a critical hit, rolled for each unit it hits. {0} = percent.",치명타 {0}%,Crit {0}%
 Item.RowsFront,The item only works while its owner stands within the front N rows. {0} = N (2 or more).,앞에서 {0}번째 자리까지만 발동,Only within the front {0} rows
 Item.RowsFrontOne,The item only works in the front row.,맨 앞에서만 발동,Only in the front row
 Item.RowsBack,The item only works while its owner stands within the rear N rows of the living line. {0} = N (2 or more).,뒤에서 {0}번째 자리까지만 발동,Only within the rear {0} rows
@@ -181,6 +179,7 @@ Log.SourceBurn,Damage source.,화상,Burn
 Log.SourceStorm,Damage source.,폭풍,Storm
 Log.Damage,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 피해 {2},{0} → {1}: {2} damage
 Log.DamageAbsorbed,{0} = source. {1} = target. {2} = amount. {3} = absorbed by shield.,{0} → {1}: 피해 {2} (보호막이 {3} 흡수),{0} → {1}: {2} damage ({3} absorbed by Shield)
+Log.CriticalHit,"A critical hit (stage 22), just before its damage line. {0} = source. {1} = target.",{0} → {1}: 치명타!,{0} → {1}: critical hit!
 Log.Heal,{0} = source. {1} = target. {2} = HP restored.,{0} → {1}: 회복 {2},{0} → {1}: healed {2}
 Log.Shield,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 보호막 +{2},{0} → {1}: Shield +{2}
 Log.Burn,{0} = source. {1} = target. {2} = stacks.,{0} → {1}: 화상 +{2},{0} → {1}: Burn +{2}
@@ -201,6 +200,7 @@ Log.Virtue,"{0} = unit. {1} = the virtue. {2} = roll. {3} = virtue chance.",{0}:
 Log.Collapsed,"{0} = unit. Its fatigue reached the maximum: death's door, or death if it was there already (the death is logged after).",{0}: 피로가 가득 차 쓰러짐,{0} collapsed from fatigue
 Log.FatigueStateEnded,"{0} = unit. {1} = the affliction that ended because the fatigue came back under the threshold.",{0}: {1}에서 벗어남,{0} is free of {1}
 Log.FatigueDog,"Fatigue from reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 빈사로 피로 +{1} → {2},{0}: death's door · fatigue +{1} → {2}
+Log.FatigueCritTaken,"Fatigue from taking a critical hit (stage 22). {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 치명타를 맞아 피로 +{1} → {2},{0}: took a critical hit · fatigue +{1} → {2}
 Log.FatigueAllyDog,"Fatigue from an ally reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 빈사로 피로 +{1} → {2},{0}: an ally at death's door · fatigue +{1} → {2}
 Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 죽음으로 피로 +{1} → {2},{0}: an ally died · fatigue +{1} → {2}
 Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
@@ -233,4 +233,6 @@ Fx.Died,A unit died.,쓰러짐,Fallen
 Fx.RetreatSucceeded,The retreat roll succeeded.,후퇴!,Retreat!
 Fx.RetreatFailed,The retreat roll failed.,후퇴 실패,Retreat failed
 Fx.Storm,{0} = damage of this storm tick. Rises from the clock.,폭풍 -{0},Storm -{0}
+Fx.Crit,"The small word over a critical hit's number (stage 22, Round 60 mock A in the damage red).",치명타,Critical
+Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
 Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue

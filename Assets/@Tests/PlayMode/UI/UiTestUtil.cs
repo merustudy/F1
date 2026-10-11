@@ -498,16 +498,22 @@ namespace F1.Tests
         {
             ExpeditionMember champion = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
             Regrade(champion, 999);
-            champion.MaxHp = 100000;
+            champion.MaxHp = EndlessHp;
             champion.Hp = champion.MaxHp;
         }
 
-        /// <summary>The member's first item (the job weapon) at another grade, where it lies.</summary>
-        public static void Regrade(ExpeditionMember member, int grade)
+        /// <summary>
+        /// The member's first item (the job weapon) carried at another power, where it lies: 1 for a weapon too weak to end a battle, 999
+        /// for one that ends every battle (Slice B stage 22: items have no grade; the power percent stands in for it in tests).
+        /// </summary>
+        public static void Regrade(ExpeditionMember member, int powerPercent)
         {
             BoardItem weapon = member.Board.Items[0];
-            weapon.Item = new EquippedItem(weapon.Item.Item, grade);
+            weapon.Item = new EquippedItem(weapon.Item.Item, weapon.Item.IsBase, weapon.Item.Tier, powerPercent);
         }
+
+        /// <summary>HP nobody brings down in a battle, in hundredths (stage 22).</summary>
+        public const int EndlessHp = 100000 * Centi.One;
 
         /// <summary>
         /// From the title: a new run, a full party, the first node, and its battle advanced (and
@@ -566,7 +572,7 @@ namespace F1.Tests
             foreach (ExpeditionMember member in members)
             {
                 member.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, member.Board.InReadingOrder()) - 6 * balance.FatigueOnHit;
-                member.MaxHp = 100000;
+                member.MaxHp = EndlessHp;
                 member.Hp = member.MaxHp;
                 Regrade(member, 1);
             }
@@ -619,7 +625,7 @@ namespace F1.Tests
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
                 member.Board.Items.Clear();
-                member.MaxHp = 100000;
+                member.MaxHp = EndlessHp;
                 member.Hp = member.MaxHp;
             }
 
@@ -648,7 +654,7 @@ namespace F1.Tests
                 member.Board.Items.Clear();
                 if (member.Row != BattleRows.Front)
                 {
-                    member.MaxHp = 100000;
+                    member.MaxHp = EndlessHp;
                 }
 
                 member.Hp = member.Row == BattleRows.Front ? 1 : member.MaxHp;

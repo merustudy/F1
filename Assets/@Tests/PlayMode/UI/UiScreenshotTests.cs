@@ -161,6 +161,14 @@ namespace F1.Tests
 
             party[2].Pulse();
             yield return Capture("ko_25_battle_support_pulse");
+            yield return new WaitForSeconds(0.5f);
+
+            // Slice B stage 22 (Round 60 mock "A 빨강"): a critical hit's number over an enemy beside an ordinary one over row 1.
+            BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Enemy).OrderBy(view => view.Unit.Row).First();
+            battle.Fx.FloatCritical(enemy.FigureRect, UiStrings.Get(UiKeys.Fx.CritDamage, 5), UiStrings.Get(UiKeys.Fx.Crit), UiPalette.Danger);
+            battle.Fx.Float(party[0].FigureRect, UiStrings.Get(UiKeys.Fx.Damage, 3), UiPalette.Danger, false);
+            yield return new WaitForSeconds(0.25f);
+            yield return Capture("ko_51_battle_critical");
         }
 
         /// <summary>
@@ -276,9 +284,9 @@ namespace F1.Tests
                             BoardItem jobWeapon = front.Board.ItemAt(0, 0);
                             front.Board.Items.Clear();
                             front.Board.Items.Add(jobWeapon);
-                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("dagger"), 8), 0, 1);
-                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("buckler"), 8), 2, 1);
-                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("herb_pouch"), 8), 0, 2);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("dagger")), 0, 1);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("buckler")), 2, 1);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("herb_pouch")), 0, 2);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.ClickSquare(board1, 0, 1);
@@ -294,12 +302,12 @@ namespace F1.Tests
 
                             // Tiers (round 35): the buckler Silver and the herb pouch Gold on their pieces, a second Common dagger on row 2's
                             // board, and the row-1 dagger held over it, which marks the piece it would merge into and shows the merge.
-                            front.Board.ItemAt(2, 1).Item = new EquippedItem(shotData.Items.Get("buckler"), 8, tier: ItemTier.Silver);
-                            front.Board.ItemAt(0, 2).Item = new EquippedItem(shotData.Items.Get("herb_pouch"), 8, tier: ItemTier.Gold);
+                            front.Board.ItemAt(2, 1).Item = new EquippedItem(shotData.Items.Get("buckler"), tier: ItemTier.Silver);
+                            front.Board.ItemAt(0, 2).Item = new EquippedItem(shotData.Items.Get("herb_pouch"), tier: ItemTier.Gold);
                             ExpeditionMember second = Managers.Expedition.Expedition.Members[party.ColumnOfRow(2).Member];
                             var secondKept = new List<BoardItem>(second.Board.Items);
                             second.Board.Items.RemoveAll(placed => placed.At.Y > 0);
-                            UiTestUtil.Put(second, new EquippedItem(shotData.Items.Get("dagger"), 9), 0, 1);
+                            UiTestUtil.Put(second, new EquippedItem(shotData.Items.Get("dagger")), 0, 1);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.ClickSquare(board1, 0, 1);
@@ -322,7 +330,7 @@ namespace F1.Tests
                             // right end and over an empty square. Pointed at, its stars show, lit on the weapon and hollow on the empty square;
                             // then the weapon's card says what the star adds.
                             front.Board.Items.Remove(front.Board.ItemAt(2, 1));
-                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("whetstone"), 8), 2, 1);
+                            UiTestUtil.Put(front, new EquippedItem(shotData.Items.Get("whetstone")), 2, 1);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.HoverSquare(board1, 2, 1);
@@ -436,7 +444,7 @@ namespace F1.Tests
                             // battle shows a cell's outline under the charge's dark and the tier tag above it (the rear survives the longest).
                             ExpeditionMember rear = Managers.Expedition.Expedition.Members.OrderByDescending(m => m.Row).First(m => m.Alive);
                             BoardItem rearWeapon = rear.Board.ItemAt(0, 0);
-                            rearWeapon.Item = new EquippedItem(rearWeapon.Item.Item, rearWeapon.Item.Grade, isBase: true, tier: ItemTier.Bronze);
+                            rearWeapon.Item = new EquippedItem(rearWeapon.Item.Item, isBase: true, tier: ItemTier.Bronze);
                         }
 
                         yield return UiTestUtil.GoIntoTheFirstNode();

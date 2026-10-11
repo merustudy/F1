@@ -754,7 +754,6 @@ namespace F1.Tests
             grid.SquareAt(0, 0).Click();
             yield return null;
             StringAssert.Contains(UiText.TooltipTitle(expedition.Inventory[0]), party.InventoryInfo, "The held item in Diablo's tooltip.");
-            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Board.Grade, expedition.Inventory[0].Grade), party.InventoryInfo, "Without its grade (round 57).");
             UiTestUtil.HoverSquare(board1, 0, 0);
             yield return null;
             Assert.AreEqual(GhostKind.Displaces, board1.Grid.GhostShown, "The ghost says the weapon would go to the inventory.");
@@ -823,7 +822,7 @@ namespace F1.Tests
             // still go to another board.
             while (expedition.Inventory.HasRoomFor(data.Items.Get("buckler")))
             {
-                expedition.Inventory.Add(new EquippedItem(data.Items.Get("buckler"), 1));
+                expedition.Inventory.Add(new EquippedItem(data.Items.Get("buckler")));
             }
 
             map.Refresh();
@@ -874,9 +873,9 @@ namespace F1.Tests
             PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
             Assert.AreEqual(string.Empty, row1.FatigueTotal, "Only the base weapon: nothing on the head.");
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), 8), 0, 1);
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler"), 8), 2, 1);
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("herb_pouch"), 8), 0, 2);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger")), 0, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler")), 2, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("herb_pouch")), 0, 2);
             map.Refresh();
             yield return null;
 
@@ -1243,9 +1242,8 @@ namespace F1.Tests
             Assert.AreEqual(string.Empty, map.MerchantInfo, "Nothing pointed at, no tooltip.");
             UiTestUtil.HoverGood(map.Merchant, slot);
             yield return null;
-            var offered = new EquippedItem(data.Items.Get(bought), stock[slot].Grade, tier: stock[slot].Tier);
+            var offered = new EquippedItem(data.Items.Get(bought), tier: stock[slot].Tier);
             StringAssert.Contains(UiText.TooltipLines(offered), map.MerchantInfo, "Its facts in Diablo's tooltip.");
-            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Board.Grade, offered.Grade), map.MerchantInfo, "Without its grade (round 57).");
             StringAssert.Contains(UiStrings.Get(UiKeys.Map.OfferPrice, price), map.MerchantInfo, "And its price.");
             var tip = (RectTransform)UiTestUtil.At(map, "Frame/MerchantInfoBox");
             var screenRect = (RectTransform)tip.parent;
@@ -1353,8 +1351,8 @@ namespace F1.Tests
             PartySideView party = map.GetComponentInChildren<PartySideView>();
             PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), 8, tier: ItemTier.Bronze), 0, 1);
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler"), 8, tier: ItemTier.Silver), 2, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), tier: ItemTier.Bronze), 0, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler"), tier: ItemTier.Silver), 2, 1);
             map.Refresh();
             yield return null;
 
@@ -1417,8 +1415,8 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             ExpeditionMember first = expedition.Members[row1.Member];
             ExpeditionMember second = expedition.Members[row2.Member];
-            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger"), 8), 0, 1);
-            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger"), 9), 1, 2);
+            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger")), 0, 1);
+            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger")), 1, 2);
             map.Refresh();
             yield return null;
             PartyBoardView board1 = row1.BoardView;
@@ -1445,13 +1443,12 @@ namespace F1.Tests
             Assert.AreEqual(GhostKind.Merges, board2.Grid.GhostShown);
             Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze)), board2.Grid.GhostLabel);
 
-            // Put there, they merge: one Bronze dagger at the better grade on row 2, where it lay; none on row 1.
+            // Put there, they merge: one Bronze dagger on row 2, where it lay; none on row 1.
             Managers.Sound.ForgetEffects();
             UiTestUtil.ClickSquare(board2, 1, 2);
             yield return null;
             EquippedItem merged = UiTestUtil.ItemAt(second, 1, 2);
             Assert.AreEqual(ItemTier.Bronze, merged.Tier);
-            Assert.AreEqual(9, merged.Grade, "The better grade of the two.");
             Assert.AreEqual(1, first.Board.Items.Count, "The dagger left row 1's board.");
             CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
             Assert.AreEqual(ItemTier.Bronze, board2.PieceAt(1, 2).TierShown);
@@ -1473,7 +1470,7 @@ namespace F1.Tests
             PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
             front.Board.Bags.Add(new BoardBag(data.Bags.Get("leather_pouch"), new Placement(0, 3)));
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), 8), 0, 3);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger")), 0, 3);
             map.Refresh();
             yield return null;
             PartyBoardView board = row1.BoardView;
@@ -1615,8 +1612,8 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             ExpeditionMember first = expedition.Members[row1.Member];
             ExpeditionMember second = expedition.Members[row2.Member];
-            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger"), 8), 0, 1);
-            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger"), 9), 1, 2);
+            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger")), 0, 1);
+            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger")), 1, 2);
             map.Refresh();
             yield return null;
             PartyBoardView board1 = row1.BoardView;
@@ -1803,12 +1800,12 @@ namespace F1.Tests
             // Staged: the first drop is a Bronze dagger, and row 1 already holds a Bronze dagger under its weapon. The battle's boards gave
             // way to the node map's: the member's board stands in row 1's column with the weapon and the staged item on it.
             int index = 0;
-            ItemOffer drop = new ItemOffer(OfferKind.Item, "dagger", expedition.Loot[index].Grade, ItemTier.Bronze);
+            ItemOffer drop = new ItemOffer(OfferKind.Item, "dagger", ItemTier.Bronze);
             expedition.Loot[index] = drop;
             int flat = UiTestUtil.FlatRow();
             PartyBoardView row1 = battle.LootBoardOfRow(flat);
             int front = expedition.Members.FindIndex(m => m.Alive && m.Row == flat);
-            UiTestUtil.Put(expedition.Members[front], new EquippedItem(data.Items.Get(drop.Id), 8, tier: ItemTier.Bronze), 0, 1);
+            UiTestUtil.Put(expedition.Members[front], new EquippedItem(data.Items.Get(drop.Id), tier: ItemTier.Bronze), 0, 1);
             battle.Refresh();
             yield return null;
             Assert.IsTrue(row1.gameObject.activeSelf);
@@ -1885,7 +1882,7 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             Assert.AreEqual(ExpeditionPhase.PickingLoot, expedition.Phase);
             ItemOffer first = expedition.Loot[0];
-            expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Grade, first.Tier));
+            expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Tier));
             yield return UiTestUtil.WaitForResult(battle);
             Assert.AreEqual(2, battle.Drops.Count, "A drop per slot, at the first two enemy columns.");
             Assert.Less(((RectTransform)battle.Drops[0].transform).anchoredPosition.x, ((RectTransform)battle.Drops[1].transform).anchoredPosition.x);
@@ -2068,7 +2065,7 @@ namespace F1.Tests
             StringAssert.Contains(UiText.Name(weapon.Item.Name), change);
             StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Common), UiText.TierWord(ItemTier.Bronze)), change);
             StringAssert.Contains(
-                UiText.Change(UiText.Effect(effect, weapon.Magnitude(balance, effect)), weapon.TierUp().Magnitude(balance, effect).ToString()),
+                UiText.Change(UiText.Effect(effect, weapon, balance), UiText.EffectValue(effect, weapon.TierUp(), balance)),
                 UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendEffects"));
             Assert.IsTrue(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampMend/MendConfirm").interactable);
             StringAssert.Contains(UiText.ItemTitle(weapon), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
@@ -2110,9 +2107,9 @@ namespace F1.Tests
             Assert.IsTrue(weapon.Item.Item.Melee);
 
             // Slice B stage 20: a whetstone under the base weapon's left end, a herb pouch under the whetstone.
-            var whetstone = new EquippedItem(data.Items.Get("whetstone"), 8);
+            var whetstone = new EquippedItem(data.Items.Get("whetstone"));
             UiTestUtil.Put(front, whetstone, 0, 1);
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("herb_pouch"), 8), 0, 2);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("herb_pouch")), 0, 2);
             map.Refresh();
             yield return null;
             PartyBoardView board = row1.BoardView;
@@ -2146,7 +2143,7 @@ namespace F1.Tests
             yield return null;
             ItemEffect damage = weapon.Item.Item.Effects[0];
             string weaponLines = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipEffects");
-            StringAssert.Contains(UiText.Effect(damage, weapon.Item.Magnitude(data.Balance, damage) + 1), weaponLines, "The damage line counts the star's 1.");
+            StringAssert.Contains(UiText.Effect(damage, weapon.Item, data.Balance, weapon.Item.Item.Category == ItemCategory.Weapon ? whetstone.StarDamage : 0), weaponLines, "The damage range counts the star's 1 on both ends.");
             StringAssert.Contains(UiStrings.Get(UiKeys.Item.StarBonus, UiText.Name(whetstone.Item.Name), 1), weaponLines);
             UiTestUtil.RightClickSquare(board, 2, 1);
             yield return null;
@@ -2329,6 +2326,53 @@ namespace F1.Tests
                 Assert.AreNotEqual(BattleUnitView.Rim.Danger, other.RimShown);
                 Assert.IsFalse(UiTestUtil.At(other, "UnitMarks/UnitStates/UnitStatusChip").gameObject.activeSelf);
             }
+        }
+
+        /// <summary>
+        /// Slice B stage 22 (Round 60 mock "A 빨강"): a weapon's critical hit rises in the damage red, larger, with the small word
+        /// "치명타" over its number, and the log says so. Staged: row 1's weapon is a copy that always lands one.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_ACriticalHit_RisesAsItsNumberWithTheWord_AndTheLogSaysSo()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            ExpeditionMember front = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
+            BoardItem weapon = front.Board.Items[0];
+            ItemData data = weapon.Item.Item;
+            var sure = new ItemData(data.Id, data.Name, data.Category, data.Width, data.Height, data.CooldownMs, data.Rows, data.Effects, data.ShopWeight,
+                data.Icon, data.Price, data.Melee, data.Stars, data.StarDamage, critChancePercent: 100);
+            weapon.Item = new EquippedItem(sure, weapon.Item.IsBase, weapon.Item.Tier);
+
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+
+            int guard = 0;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.CriticalHit) && !Managers.Expedition.Battle.IsFinished && guard++ < 300)
+            {
+                Managers.Expedition.AdvanceBattle(100);
+                yield return null;
+            }
+
+            yield return null;
+            BattleEvent critical = engine.Events.First(e => e.Kind == BattleEventKind.CriticalHit);
+            Assert.AreEqual(BattleSide.Party, critical.Source.Side, "Row 1's weapon landed it.");
+            Assert.Greater(battle.Fx.CriticalsPlayed, 0, "It rose as a critical hit.");
+            StringAssert.Contains(UiStrings.Get(UiKeys.Fx.Crit), battle.Fx.LastCriticalText, "With the word over it.");
+            BattleEvent damaged = engine.Events[engine.Events.ToList().IndexOf(critical) + 1];
+            int lost = UiText.Amount(damaged.A - damaged.B);
+            StringAssert.Contains(UiStrings.Get(UiKeys.Fx.CritDamage, lost), battle.Fx.LastCriticalText, "And its number with the mark.");
+            Assert.IsNotNull(BattleLogText.Line(critical, engine), "The log says it was a critical hit.");
         }
 
         /// <summary>

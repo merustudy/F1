@@ -119,6 +119,10 @@ namespace F1.UI
         /// <summary>How many texts have risen since the screen opened.</summary>
         public int FloatingPlayed { get; private set; }
 
+        /// <summary>Critical hits that rose (Slice B stage 22), and the text of the last one.</summary>
+        public int CriticalsPlayed { get; private set; }
+        public string LastCriticalText { get; private set; }
+
         /// <summary>How many ghosts have started to fade since the screen opened.</summary>
         public int GhostsShown { get; private set; }
 
@@ -164,9 +168,32 @@ namespace F1.UI
         /// <param name="big">True for a heavy moment: a large hit, death's door, a death.</param>
         public void Float(RectTransform over, string text, Color color, bool big)
         {
+            Rise(over, text, color, big ? 1.4f : 1f, big ? 1.4f : 1.05f);
+        }
+
+        /// <summary>
+        /// A critical hit's number (Slice B stage 22, Round 60 mock "A 빨강"): in the colour given (the damage red), larger than a heavy hit
+        /// and as long, with the small word above it. It takes the place of the heavy look when the hit is both.
+        /// </summary>
+        public void FloatCritical(RectTransform over, string number, string word, Color color)
+        {
+            string text = "<size=" + CriticalWordPercent + "%>" + word + "</size>\n" + number;
+            if (Rise(over, text, color, CriticalScale, CriticalLife))
+            {
+                CriticalsPlayed++;
+                LastCriticalText = text;
+            }
+        }
+
+        const float CriticalScale = 1.6f;
+        const float CriticalLife = 1.4f;
+        const int CriticalWordPercent = 45;
+
+        bool Rise(RectTransform over, string text, Color color, float scale, float life)
+        {
             if (over == null)
             {
-                return;
+                return false;
             }
 
             FloatingTextView view = null;
@@ -188,8 +215,9 @@ namespace F1.UI
             Vector2 top = LocalPoint(over, new Vector2(over.rect.center.x, over.rect.yMax));
             top += new Vector2(0f, StackStep * CountRecentNear(top));
             _launches.Add(new Launch { Point = top, Time = Time.time });
-            view.Play(top, text, color, big ? 1.4f : 1f, big ? 1.4f : 1.05f);
+            view.Play(top, text, color, scale, life);
             FloatingPlayed++;
+            return true;
         }
 
         /// <summary>How many texts started near this point a moment ago. Old launches are forgotten here.</summary>

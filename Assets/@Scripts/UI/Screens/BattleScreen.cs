@@ -1145,7 +1145,7 @@ namespace F1.UI
 
             _clockShown = true;
             _clockLabel.text = storm
-                ? UiStrings.Get(UiKeys.Battle.StormActive, engine.NextStormDamage)
+                ? UiStrings.Get(UiKeys.Battle.StormActive, UiText.Amount(engine.NextStormDamage))
                 : UiStrings.Get(UiKeys.Battle.StormIn, UiText.Seconds(balance.StormStartMs - engine.TimeMs));
             _clockLabel.color = storm ? UiPalette.Burn : UiPalette.TextDim;
         }
@@ -1456,7 +1456,7 @@ namespace F1.UI
                 }
                 else
                 {
-                    _drops[slot].Show(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier), _art.OfItem(offer.Id), slot == _pickedDrop);
+                    _drops[slot].Show(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), _art.OfItem(offer.Id), slot == _pickedDrop);
                 }
             }
 
@@ -1544,7 +1544,7 @@ namespace F1.UI
                 Slot = slot;
                 ItemOffer drop = Managers.Expedition.BattleLoot[slot];
                 StaticData data = Managers.Data.Data;
-                Item = drop.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(drop.Id), drop.Grade, tier: drop.Tier) : null;
+                Item = drop.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier) : null;
                 Bag = drop.Kind == OfferKind.Bag ? data.Bags.Get(drop.Id) : null;
             }
 

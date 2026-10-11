@@ -289,7 +289,7 @@ namespace F1.UI
             var lines = new List<string>();
             foreach (ItemEffect effect in item.Item.Effects)
             {
-                lines.Add(UiText.Change(UiText.Effect(effect, item.Magnitude(balance, effect)), mended.Magnitude(balance, effect).ToString(CultureInfo.InvariantCulture)));
+                lines.Add(UiText.Change(UiText.Effect(effect, item, balance), UiText.EffectValue(effect, mended, balance)));
             }
 
             _mendEffects.text = string.Join("\n", lines);
@@ -362,7 +362,7 @@ namespace F1.UI
                 var piece = new MerchantPiece { Slot = i, At = at, Width = w, Height = h, Price = manager.PriceOf(offer) };
                 if (offer.Kind == OfferKind.Item)
                 {
-                    piece.Item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                    piece.Item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
                     piece.Icon = _art.OfItem(offer.Id);
                 }
                 else if (offer.Kind == OfferKind.Bag)
@@ -428,7 +428,7 @@ namespace F1.UI
             string lines;
             if (offer.Kind == OfferKind.Item)
             {
-                var item = new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier);
+                var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
                 lines = UiText.TooltipLines(item);
                 if (manager.HasMergeTarget(item))
                 {
@@ -740,7 +740,7 @@ namespace F1.UI
                 Slot = slot;
                 ItemOffer offer = Managers.Expedition.ShopStock[slot];
                 StaticData data = Managers.Data.Data;
-                Item = offer.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier) : null;
+                Item = offer.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier) : null;
                 Bag = offer.Kind == OfferKind.Bag ? data.Bags.Get(offer.Id) : null;
             }
 
@@ -799,7 +799,7 @@ namespace F1.UI
             StaticData data = Managers.Data.Data;
             string what = offer.Kind == OfferKind.Bag
                 ? UiText.Name(data.Bags.Get(offer.Id).Name)
-                : UiText.ItemTitle(new EquippedItem(data.Items.Get(offer.Id), offer.Grade, tier: offer.Tier));
+                : UiText.ItemTitle(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier));
             int before = manager.Expedition.Coins;
             buy();
             if (sound)

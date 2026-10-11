@@ -180,11 +180,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864226
-    m_Localized: Grade {0}
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864229
     m_Localized: 'Click an item to pick it up, then a square to put it down (one
       item in the way goes to the inventory). While holding: right-click, wheel or
@@ -192,11 +187,6 @@ MonoBehaviour:
       swap with the next row.'
     m_Metadata:
       m_Items: []
-  - m_Id: 9766393864230
-    m_Localized: "{0} \xB7 {1} \xB7 Grade {2}"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864231
     m_Localized: Weapon
     m_Metadata:
@@ -904,11 +894,6 @@ MonoBehaviour:
     m_Localized: Collapsed from fatigue
     m_Metadata:
       m_Items: []
-  - m_Id: 2271577767927808
-    m_Localized: "{0} \xB7 Grade {1}"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 2271577780510720
     m_Localized: Common
     m_Metadata:
@@ -1086,6 +1071,30 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 3903216373719040
+    m_Localized: Crit {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3903216390496256
+    m_Localized: "{0} \u2192 {1}: critical hit!"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3903216390496257
+    m_Localized: "{0}: took a critical hit \xB7 fatigue +{1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 3903216390496258
+    m_Localized: Critical
+    m_Metadata:
+      m_Items: []
+  - m_Id: 3937123085312000
+    m_Localized: -{0}!
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1107,8 +1116,6 @@ MonoBehaviour:
         - id: 9766393864215
         - id: 9766393864219
         - id: 9766393864224
-        - id: 9766393864226
-        - id: 9766393864230
         - id: 9766393864233
         - id: 9766393864236
         - id: 9766393864237
@@ -1192,7 +1199,6 @@ MonoBehaviour:
         - id: 2041124016349190
         - id: 2041124016349191
         - id: 2041124016349192
-        - id: 2271577767927808
         - id: 2271577780510721
         - id: 2552399930581001
         - id: 2552399930581002
@@ -1209,3 +1215,7 @@ MonoBehaviour:
         - id: 3473104343916548
         - id: 3628853393088512
         - id: 3665380550631424
+        - id: 3903216373719040
+        - id: 3903216390496256
+        - id: 3903216390496257
+        - id: 3937123085312000

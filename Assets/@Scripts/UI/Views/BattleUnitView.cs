@@ -291,14 +291,14 @@ namespace F1.UI
             if (_unit.Hp != _shownHp)
             {
                 _shownHp = _unit.Hp;
-                _hp.text = UiStrings.Get(UiKeys.Battle.Hp, _unit.Hp, _unit.MaxHp);
+                _hp.text = UiStrings.Get(UiKeys.Battle.Hp, UiText.Hp(_unit.Hp), UiText.Hp(_unit.MaxHp));
                 _hpBar.Set(_unit.Hp, _unit.MaxHp);
             }
 
             if (_unit.Shield != _shownShield)
             {
                 _shownShield = _unit.Shield;
-                _badgeNumber.text = UiStrings.Get(UiKeys.Battle.Shield, _unit.Shield);
+                _badgeNumber.text = UiStrings.Get(UiKeys.Battle.Shield, UiText.Amount(_unit.Shield));
             }
 
             if (_unit.Burn != _shownBurn)

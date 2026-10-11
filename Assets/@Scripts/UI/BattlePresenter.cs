@@ -142,16 +142,29 @@ namespace F1.UI
                 case BattleEventKind.ItemActivated:
                     PlayActivation(e);
                     break;
+                case BattleEventKind.CriticalHit:
+                    // Told just before its damage (stage 22): the next number on that unit rises as a critical hit.
+                    _criticalOn = e.Target;
+                    break;
                 case BattleEventKind.Damaged:
                     PlayDamage(e, KillMoments && KillingBlowAt(index) != null);
                     break;
                 case BattleEventKind.Healed:
-                    FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Heal, e.B), UiPalette.Good, false);
+                    // Amounts are in hundredths (stage 22): the screen shows them whole, and nothing for what rounds to 0.
+                    if (UiText.Amount(e.B) > 0)
+                    {
+                        FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Heal, UiText.Amount(e.B)), UiPalette.Good, false);
+                    }
+
                     _unitView(e.Target)?.Flash(HealTint);
                     Sound(SoundEffect.Heal);
                     break;
                 case BattleEventKind.ShieldGained:
-                    FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Shield, e.A), UiPalette.Shield, false);
+                    if (UiText.Amount(e.A) > 0)
+                    {
+                        FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Shield, UiText.Amount(e.A)), UiPalette.Shield, false);
+                    }
+
                     Sound(SoundEffect.Shield);
                     break;
                 case BattleEventKind.BurnApplied:
@@ -208,7 +221,7 @@ namespace F1.UI
                 case BattleEventKind.StormTicked:
                     _fx.Flash(0.22f);
                     _fx.Shake(4f);
-                    _fx.Float(_clock, UiStrings.Get(UiKeys.Fx.Storm, e.A), UiPalette.Burn, true);
+                    _fx.Float(_clock, UiStrings.Get(UiKeys.Fx.Storm, UiText.Amount(e.A)), UiPalette.Burn, true);
                     Sound(SoundEffect.Thunder);
                     break;
                 case BattleEventKind.BrokeDown:
@@ -308,8 +321,12 @@ namespace F1.UI
         /// as a second one. A blow from a unit makes the target flash and recoil; the storm's and
         /// burn's damage have no blow. A heavy blow shakes the stage, unless it is a kill moment's.
         /// </summary>
+        UnitRef? _criticalOn;
+
         void PlayDamage(BattleEvent e, bool killMoment)
         {
+            bool critical = _criticalOn.HasValue && _criticalOn.Value.Equals(e.Target);
+            _criticalOn = null;
             BattleUnitView target = _unitView(e.Target);
             if (target == null)
             {
@@ -320,14 +337,21 @@ namespace F1.UI
             bool burn = e.Id == BattleEvent.CauseBurn;
             int lost = e.A - e.B;
             bool heavy = lost >= HeavyShare * target.Unit.MaxHp;
-            if (lost > 0)
+
+            // Hundredths (stage 22): the numbers are whole, and one that rounds to 0 does not rise (under 0.50 is no hit either).
+            if (UiText.Amount(lost) > 0 && critical)
             {
-                _fx.Float(target.FigureRect, UiStrings.Get(UiKeys.Fx.Damage, lost), burn ? UiPalette.Burn : UiPalette.Danger, heavy);
+                // A critical hit (stage 22, Round 60 "A 빨강"): the damage red, larger, with the word; it wins over the heavy look.
+                _fx.FloatCritical(target.FigureRect, UiStrings.Get(UiKeys.Fx.CritDamage, UiText.Amount(lost)), UiStrings.Get(UiKeys.Fx.Crit), UiPalette.Danger);
+            }
+            else if (UiText.Amount(lost) > 0)
+            {
+                _fx.Float(target.FigureRect, UiStrings.Get(UiKeys.Fx.Damage, UiText.Amount(lost)), burn ? UiPalette.Burn : UiPalette.Danger, heavy);
             }
 
-            if (e.B > 0)
+            if (UiText.Amount(e.B) > 0)
             {
-                _fx.Float(target.FigureRect, UiStrings.Get(UiKeys.Fx.Absorbed, e.B), UiPalette.Shield, false);
+                _fx.Float(target.FigureRect, UiStrings.Get(UiKeys.Fx.Absorbed, UiText.Amount(e.B)), UiPalette.Shield, false);
             }
 
             if (!storm && !burn && !killMoment)

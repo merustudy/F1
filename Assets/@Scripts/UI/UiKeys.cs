@@ -113,7 +113,6 @@ namespace F1.UI
         public static class Board
         {
             public const string Hp = "Board.Hp";
-            public const string Grade = "Board.Grade";
             public const string Forward = "Board.Forward";
             public const string Back = "Board.Back";
             public const string Hint = "Board.Hint";
@@ -137,8 +136,6 @@ namespace F1.UI
 
         public static class Item
         {
-            public const string Title = "Item.Title";
-            public const string TitlePlain = "Item.TitlePlain";
             public const string TooltipTitle = "Item.TooltipTitle";
             public const string Weapon = "Item.Weapon";
             public const string Armor = "Item.Armor";
@@ -163,6 +160,7 @@ namespace F1.UI
             public const string Melee = "Item.Melee";
             public const string NoActivation = "Item.NoActivation";
             public const string StarDamage = "Item.StarDamage";
+            public const string Crit = "Item.Crit";
             public const string StarBonus = "Item.StarBonus";
             public const string StarLit = "Item.StarLit";
             public const string StarLitNone = "Item.StarLitNone";
@@ -239,6 +237,8 @@ namespace F1.UI
             public const string RetreatSucceeded = "Fx.RetreatSucceeded";
             public const string RetreatFailed = "Fx.RetreatFailed";
             public const string Storm = "Fx.Storm";
+            public const string Crit = "Fx.Crit";
+            public const string CritDamage = "Fx.CritDamage";
             public const string Collapsed = "Fx.Collapsed";
         }
 
@@ -251,6 +251,7 @@ namespace F1.UI
             public const string SourceStorm = "Log.SourceStorm";
             public const string Damage = "Log.Damage";
             public const string DamageAbsorbed = "Log.DamageAbsorbed";
+            public const string CriticalHit = "Log.CriticalHit";
             public const string Heal = "Log.Heal";
             public const string Shield = "Log.Shield";
             public const string Burn = "Log.Burn";
@@ -271,6 +272,7 @@ namespace F1.UI
             public const string Collapsed = "Log.Collapsed";
             public const string FatigueStateEnded = "Log.FatigueStateEnded";
             public const string FatigueDog = "Log.FatigueDog";
+            public const string FatigueCritTaken = "Log.FatigueCritTaken";
             public const string FatigueAllyDog = "Log.FatigueAllyDog";
             public const string FatigueAllyDeath = "Log.FatigueAllyDeath";
             public const string FatigueVirtue = "Log.FatigueVirtue";

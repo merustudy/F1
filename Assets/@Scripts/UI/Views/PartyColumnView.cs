@@ -123,7 +123,7 @@ namespace F1.UI
             _figure.SetActive(true);
             _figureView.Show(art.OfJob(member.JobId));
             _info.SetActive(true);
-            _hp.text = UiStrings.Get(UiKeys.Board.Hp, member.Hp, member.MaxHp);
+            _hp.text = UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(member.Hp), UiText.Hp(member.MaxHp));
             _hpBar.Set(member.Hp, member.MaxHp);
             _forward.interactable = canMoveForward;
             _back.interactable = canMoveBack;
