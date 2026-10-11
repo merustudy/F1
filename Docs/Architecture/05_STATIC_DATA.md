@@ -68,7 +68,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
 - quoted field, escaped quote(`""`), 필드 안 개행을 처리하는 Parser를 쓴다. `Split(',')` 금지.
 - Localization 열은 `<Field>.<LocaleCode>`다. Locale 집합은 `LocalePolicy.SupportedCodes`와 정확히 같아야 한다.
 - 다른 Definition 참조는 그 Definition의 `Id` 문자열이다.
-- 목록 값은 `+`로 잇는다. 아이템과 등급의 목록은 `item_id:grade`를 `+`로 잇는다.
+- 목록 값은 `+`로 잇는다. 적의 아이템 목록은 `item_id:세기 퍼센트`를 `+`로 잇는다(22단계: 그 전에는 `item_id:grade`).
   순서에 뜻이 있는 목록은 적힌 순서를 그대로 쓴다(적 무리의 `Enemies`는 앞에서부터 서는 순서다).
 - 줄에서 세는 자리(아이템의 `Rows`, 직업의 `PassiveRows`)는 `front:N`, `back:N`, `all`로 적는다(`RowSpan`. 구문은 그 Type이 가진다).
 - 다른 열의 값에 따라 비워 두는 칸은 Mapper가 Optional로 읽고, 채워야 하는지는 Definition 생성자가 검증한다
@@ -87,6 +87,11 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   별 칸은 `StarSquare`(X·Y)의 목록으로 Generated JSON에 들어간다.
 - `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률).
   틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
+- **22단계의 수**(`Docs/Design/02_Combat_System.md` §4·§13): HP·피해·회복·보호막·폭풍은 **0.01 단위**다. CSV는 소수 둘째 자리까지 적고("38", "5.45") Generated JSON과 코드는 0.01을 1로 세는 정수다(`Centi`: 38 → 3800).
+  - `ItemData.csv`의 효과 값은 `Effect1Value`·`Effect2Value`(그 전의 `…Power` 퍼센트를 대신함): 피해는 "최소-최대"("2-4", "1.5-2.5"), 회복·보호막은 값 하나("2.73"), 화상은 중첩 수(정수). 정의(`ItemEffect`)는 `Min`·`Max`를 갖고, 피해 밖은 둘이 같다.
+  - `CritChancePercent`(0..100, 비우면 0): 피해 효과가 있는 `Weapon`만 0보다 크다. `StarDamage`는 0.01 단위("1"은 100).
+  - 등급은 없다: `JobData.WeaponGrade`, `DungeonData.ItemGradeBase`·`ItemGradePerFloor`를 뺐고 `EnemyGradePerFloor`는 `EnemyPowerPerFloorPercent`다. `JobData.MaxHp`·`EnemyData.MaxHp`·`PotionData.Magnitude`와 패시브의 보호막(`PassiveMagnitude`, 효과가 `Shield`일 때)은 0.01 단위다.
+  - `BalanceData`의 0.01 단위 Key(`StormBaseDamage`, `StormGrowth`, `BurnDamagePerStack`, `HitMinDamage`)는 소수로 적는다(`BalanceData.IsCenti`). 나머지 Key는 정수다.
 - `BalanceData.csv`만 `Key,Value` 형식이다. Key는 PascalCase 상수 이름이고 전부 필수다. 모르는 Key는 에러다.
 - 모르는 Header는 에러다(오타를 조용히 넘기지 않는다).
 
@@ -95,7 +100,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
 - Required/Optional과 Default를 Mapper에 명시한다. 누락을 CLR Default로 바꾸지 않는다.
 - 정수: Invariant Culture, 전체 문자열 소비, 범위 검증. 앞뒤 공백, `+` 부호, 천 단위 구분자 금지.
 - bool: `true`/`false`만. Enum: 정의된 이름만.
-- Gameplay 수치에 소수를 쓰지 않는다. 비율은 정수(백분율이나 천분율)로 적는다.
+- Gameplay 수치에 소수(float)를 쓰지 않는다. 비율은 정수(백분율이나 천분율)로 적는다. 22단계의 0.01 단위 값만 CSV에 소수 둘째 자리까지 적고, 읽을 때 정수(0.01 = 1)가 된다: `+`·지수·셋째 자리는 에러다.
 
 ## Validation
 

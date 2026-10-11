@@ -118,19 +118,19 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   정예 노드는 정예 무리(`EnemyGroupData.IsElite`, `StaticData.ElitesFor`)에서, 전투 노드는 정예가 아닌 무리에서 고른다. 정예가 설 수 있는 층마다 정예 무리가 있어야 한다(`StaticData`의 검증).
 - 야영지: `ExpeditionRules.EnterCamp`가 야영지 노드로 옮겨 `ExpeditionPhase.AtCamp`로 둔다(피로를 더하지 않는다). 그동안 고를 노드는 없고(`AvailableNodes`가 빈다) 보드와 자리는 바꿀 수 있다.
   `RestAtCamp`는 살아 있는 구성원마다 HP를 최대의 `CampHealPercent`%만큼(최대를 넘지 않게) 올리고 피로를 `CampFatigueRelief`만큼 내린 뒤(`FatigueRules.Add`) `ChoosingNode`로 돌린다. 정비는 14단계다.
-- 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템 등급 `EnemyGradePerFloor`만큼 올린다.
+- 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템의 세기 `EnemyPowerPerFloorPercent`%만큼 올린다(22단계: 그 전에는 아이템 등급).
   보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
 
 ## 전리품 (Slice B 18단계)
 
-규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(등급 `ItemGradeAt`, 단계 `ItemTierAt`: 상점의 물건과 같은 것)에 있다.
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
 
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
   `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 등급은 던전의 것, 단계는 층의 것(정예 한 단계 위)이다 — 적이 들었던 등급이 아니다.
 - `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
 - 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
   마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
-- 적의 아이템은 용병의 아이템과 같은 척도로 적는다(`Docs/Design/02_Combat_System.md` §4): 계수는 우리 아이템의 자리이고 적의 힘은 등급이 말한다. 그래서 던전의 등급으로 떨어진 것이 상점의 물건과 비슷한 힘이다.
+- 적의 아이템은 용병의 아이템과 같은 척도로 적는다(`Docs/Design/02_Combat_System.md` §4): 아이템의 값은 떨어지는 것의 값이고 적의 힘은 세기 %(`ItemGrant.PowerPercent`, 22단계: 그 전에는 등급)가 말한다. 그래서 떨어진 것이 상점의 물건과 비슷한 힘이다.
 
 ## 상점과 지역 코인 (Slice B 17단계)
 
@@ -153,11 +153,11 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`와 `DungeonData`에 있다.
 
-- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 그대로 있다.
-- 효과 크기는 한 곳에서 센다: `EquippedItem.Magnitude(balance, effect)` = `ItemEffect.MagnitudeAt(등급, BalanceData.TierPercent(단계))`(정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
+- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 22단계에 뺐다(`EquippedItem.PowerPercent`: 용병의 것은 100, 적의 것은 그 적의 세기).
+- 효과 크기는 한 곳에서 센다(22단계): `EquippedItem.Min`·`Max`(피해의 최소·최대)와 `Magnitude`(범위가 없는 효과) = `ItemEffect.Scaled(값, BalanceData.TierPercent(단계), 세기 %)`(0.01 단위 정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
 - 단계는 `DungeonData.ItemTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 전리품과 상점의 물건에 싣는다.
 - 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드에 놓는 명령
-  (`MoveItem`, `PlaceFromInventory`, `TakeLoot`, `BuyToBoard`)은 놓을 자리의 왼쪽 위 칸이 합쳐질 아이템의 왼쪽 위 칸이면 합친다(`MergesAt`): 그 아이템이 그 자리·방향 그대로 한 단계 위(높은 등급)가 되고, 놓은 것은 원래 목록에서 빠진다.
+  (`MoveItem`, `PlaceFromInventory`, `TakeLoot`, `BuyToBoard`)은 놓을 자리의 왼쪽 위 칸이 합쳐질 아이템의 왼쪽 위 칸이면 합친다(`MergesAt`): 그 아이템이 그 자리·방향 그대로 한 단계 위(`TierUp`)가 되고, 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
 - 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp(구성원, X, Y)`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나(덮은 칸 어디로든)를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
 
@@ -169,7 +169,11 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 같은 시각의 순서는 코드 한 곳(`ProcessAutomaticEvents`)에 고정돼 있다: 화상 틱 -> 아이템(아군, 유닛 순서, 칸 순서) -> 폭풍 틱.
   플레이어 입력은 `AdvanceTo`가 끝난 뒤의 현재 시각에 적용되므로, 그 시각의 자동 사건 뒤에 온다.
 - 난수는 `Pcg32`뿐이다. 전투 스트림(사망 판정)과 입력 스트림(후퇴 판정)을 나눠, 후퇴 시도가 사망 판정을 바꾸지 않는다.
-- 수치는 정수다. 효과 크기, 쿨다운 수정의 반올림은 한 함수에서만 계산한다.
+  **피해 스트림**(`RngStream.Damage`, 22단계)은 피해의 굴림과 치명타를 뽑는다: 피해 효과마다 공격에 한 번 `NextInt(최소, 최대)`, 그 뒤 맞는 대상마다 치명타의 `NextInt(100)`(무기의 확률이 0이면 뽑지 않음).
+- 수치는 정수다. HP·피해·회복·보호막·폭풍은 0.01을 1로 센다(`F1.Data.Centi`, 22단계). 효과 크기, 쿨다운 수정의 반올림은 한 함수에서만 계산한다.
+- 피해의 차례(22단계, `Activate`): 굴림 → 무기면 별의 피해(+) → 대상마다 치명타(`× CritDamagePercent`%, `CriticalHit` 이벤트를 `Damaged` 바로 앞에) → 무기 피해 % 패시브 → `ApplyDamage`.
+  치명타의 피로는 `ApplyDamage` 뒤에 붙인다: 맞은 용병 `CritFatigueTaken`, 그 동료 `…TakenAllies`, 넣은 용병 `CritFatigueDealt`(덜어 냄), 그 동료 `…DealtAllies`(원인 `crit_taken`·`ally_crit_taken`·`crit_dealt`·`ally_crit_dealt`).
+- 피격의 최소(22단계, `ApplyDamage`): 보호막을 뚫은 피해가 `HitMinDamage` 미만이고 그 피해가 HP를 0으로 만들지 않으면 HP만 줄고 피격으로 세지 않는다(피로·빈사의 사망 판정 없음). 화상 틱은 중첩 × `BurnDamagePerStack`이다.
 - 입력은 받아들여졌을 때만 기록한다(`TryUsePotion`, `TryRetreat`). `BattleEngine.Replay(setup, inputs, untilMs)`가 같은 전투를 다시 만든다.
 - 결과 계산에 `UnityEngine.Random`, `System.Random`, `DateTime`, `Time.deltaTime`, 연출 완료 시점을 쓰지 않는다.
 
