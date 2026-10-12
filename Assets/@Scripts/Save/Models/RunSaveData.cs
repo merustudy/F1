@@ -134,7 +134,7 @@ namespace F1.Save
         /// <summary>The tier's name: Common, Bronze, Silver or Gold (version 7; version 5 named them Bronze, Silver, Gold, Diamond). An entry that does not name one is Common, as every item was before.</summary>
         public string Tier = "Common";
 
-        /// <summary>On a board (version 10): the top-left square the item lies from and its quarter turns clockwise. 0 in the inventory.</summary>
+        /// <summary>The top-left square the item lies from and its quarter turns clockwise: on a board (version 10) and in the inventory's grid (round 49).</summary>
         public int X;
         public int Y;
         public int Turns;

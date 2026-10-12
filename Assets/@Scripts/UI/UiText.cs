@@ -115,12 +115,6 @@ namespace F1.UI
                 : UiStrings.Get(UiKeys.Item.TooltipTitle, Name(item.Item.Name), TierWord(item.Tier));
         }
 
-        /// <summary>The title in Diablo's tooltip (round 57): the same as <see cref="ItemTitle"/> since stage 22.</summary>
-        public static string TooltipTitle(EquippedItem item)
-        {
-            return ItemTitle(item);
-        }
-
         /// <summary>The name of a tier (Docs/Design/02_Combat_System.md §4).</summary>
         public static string TierName(ItemTier tier)
         {
@@ -201,31 +195,13 @@ namespace F1.UI
         /// </summary>
         public static string TooltipLines(EquippedItem item)
         {
-            var lines = new List<string> { Colored(TooltipTitle(item), UiPalette.Rarity(item.Tier)) };
+            var lines = new List<string> { Colored(ItemTitle(item), UiPalette.Rarity(item.Tier)) };
             lines.AddRange(ItemFacts(item));
             foreach (string effect in ItemEffects(item))
             {
                 lines.Add(Colored(effect, UiPalette.TooltipEffect));
             }
 
-            AddFatigue(lines, item);
-            return string.Join("\n", lines);
-        }
-
-        /// <summary>
-        /// The facts on a tile of the shop or the loot (round 46), under its name and its kind with its cells: the cooldown and where
-        /// it works, dimmed, a line each; the effects, a line each; the fatigue last.
-        /// </summary>
-        public static string ItemTileFacts(EquippedItem item)
-        {
-            ItemData data = item.Item;
-            var lines = new List<string> { Colored(CooldownFact(data), UiPalette.TextDim) };
-            if (!data.Rows.IsEveryRow)
-            {
-                lines.Add(Colored(Rows(data.Rows), UiPalette.TextDim));
-            }
-
-            lines.AddRange(ItemEffects(item));
             AddFatigue(lines, item);
             return string.Join("\n", lines);
         }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// Squares in columns and rows over its rect with gaps between them (round 49): a bag shown as a thing (a shop's tile, the loot on the
+    /// Squares in columns and rows over its rect with gaps between them (round 49): a bag shown as a thing (the merchant's grid, the loot on the
     /// floor) draws its black squares with it, Diablo II's well, inside its rim. Drawn as quads, so it needs no picture; it takes no pointer.
     /// </summary>
     [RequireComponent(typeof(CanvasRenderer))]

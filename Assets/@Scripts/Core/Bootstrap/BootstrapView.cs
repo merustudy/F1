@@ -12,7 +12,6 @@ namespace F1.Core
         [SerializeField] TMP_Text _status;
         [SerializeField] TMP_Text _error;
 
-        public string StatusText => _status.text;
         public string ErrorText => _error.text;
 
         public void ShowLoading()

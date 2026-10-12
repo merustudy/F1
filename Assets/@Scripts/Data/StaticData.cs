@@ -127,8 +127,7 @@ namespace F1.Data
             return FatigueStates.Ordered.Where(state => state.Kind == kind).ToList();
         }
 
-        /// <summary>Non-boss groups that can appear on a battle floor (1-based) of a dungeon, in id order.</summary>
-        /// <summary>The groups a battle node of a floor can hold: neither a boss nor an elite group.</summary>
+        /// <summary>The groups a battle node of a floor (1-based) of a dungeon can hold, in id order: neither a boss nor an elite group.</summary>
         public List<EnemyGroupData> GroupsFor(string dungeonId, int floor)
         {
             return EnemyGroups.Ordered

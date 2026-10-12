@@ -97,9 +97,6 @@ namespace F1.UI
             public const string ShopCoinsLabel = "Map.ShopCoinsLabel";
             public const string ShopRefresh = "Map.ShopRefresh";
             public const string ShopLeave = "Map.ShopLeave";
-            public const string ShopSold = "Map.ShopSold";
-            public const string ShopHeld = "Map.ShopHeld";
-            public const string ShopItemSub = "Map.ShopItemSub";
             public const string ShopBought = "Map.ShopBought";
             public const string Coins = "Map.Coins";
             public const string ShopPotion = "Map.ShopPotion";

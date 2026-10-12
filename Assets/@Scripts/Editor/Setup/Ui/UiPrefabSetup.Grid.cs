@@ -224,12 +224,6 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// An item's piece (ItemSlotView), the board's and the tiles' alike: a plain piece the view colours (Diablo's dark blue, round 49);
-        /// the icon's box (turned at runtime) with the silhouette of a tier's outline behind the icon (off in Diablo's look); the name for an
-        /// item without an icon; the fatigue tag at the top-right, the merge mark and the tier's stars at the bottom-left; and for a bag
-        /// shown as a thing, the grey and the black squares inside its rim. Takes no pointer.
-        /// </summary>
-        /// <summary>
         /// What is held, on the pointer (round 54, HeldPointerView): a clear layer over the whole frame that takes every press while
         /// something is held, and on it the held thing centred where the pointer is: a bag's rim and squares (or an item's squares when
         /// it has no icon), the icons of the items in a bag, and an item's icon. Built last so that it lies over everything; hidden.
@@ -282,6 +276,12 @@ namespace F1.Editor.Setup
             return view;
         }
 
+        /// <summary>
+        /// An item's piece (ItemSlotView), the board's, the inventory's and the merchant's alike: a plain piece the view colours (Diablo's
+        /// dark blue, round 49); the icon's box (turned at runtime) with the silhouette of a tier's outline behind the icon (off in Diablo's
+        /// look); the name for an item without an icon; the fatigue tag at the top-right, the merge mark and the tier's stars at the
+        /// bottom-left; and for a bag shown as a thing, the grey and the black squares inside its rim. Takes no pointer.
+        /// </summary>
         static ItemSlotView BuildItemSlot(Transform parent, string name)
         {
             Image frame = UiBuild.Image(name, parent, UiPalette.GridSquareLine);
@@ -302,7 +302,6 @@ namespace F1.Editor.Setup
             RectTransform art = UiBuild.Rect(name + "Art", frame.transform);
             UiBuild.Size(art, GridGeometry.Square - 2f * ItemSlotView.ArtMargin, GridGeometry.Square - 2f * ItemSlotView.ArtMargin);
             Image outline = BuildOutline(art, name + "Outline", out SilhouetteOutline outlineEffect);
-            UiBuild.Stretch(outline.rectTransform);
             Image icon = UiBuild.Image(name + "Icon", art, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform);
@@ -378,7 +377,6 @@ namespace F1.Editor.Setup
 
             RectTransform darkArt = UiBuild.Rect("ItemDarkArt", piece.transform);
             Image darkOutline = BuildOutline(darkArt, "ItemDarkOutline", out SilhouetteOutline darkOutlineEffect);
-            UiBuild.Stretch(darkOutline.rectTransform);
             Image darkIcon = UiBuild.Image("ItemDarkIcon", darkArt, Color.white);
             darkIcon.preserveAspect = true;
             UiBuild.Stretch(darkIcon.rectTransform);
@@ -387,7 +385,6 @@ namespace F1.Editor.Setup
             mask.gameObject.AddComponent<RectMask2D>();
             RectTransform litArt = UiBuild.Rect("ItemLitArt", mask);
             Image outline = BuildOutline(litArt, "ItemOutline", out SilhouetteOutline outlineEffect);
-            UiBuild.Stretch(outline.rectTransform);
             Image icon = UiBuild.Image("ItemIcon", litArt, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform);

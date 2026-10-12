@@ -213,13 +213,13 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   게임에 들어가는 틀은 전부 이 변형이다(`output/ui_variant/<Key>.png`).
 - 화면에서 늘일 때 늘어나지 않는 가장자리(9-slice의 Border)는 화면의 일이라 Unity 쪽이 갖는다(`UiArt`. `12_UI.md` "UI의 그림").
 - (2026-10-03 연출 3차) 틀은 **질감과 장식이 있는 그림**으로 다시 생성한다(스타일 문서 §14·§15·§17: 가죽·쇠·놋쇠, 리벳, 모서리 장식. 평면 채색과 굵은 외곽선은 그대로).
-  결(두 톤의 평면 무늬)을 남길 틀은 Roster의 `Flat`을 no로 두면 `frame` 후처리가 바탕색을 펴지 않는다(`panel`, `bag`). 색 변형은 `Rosters/ui_variant.csv`의 `Mode`로 정한다:
+  결(두 톤의 평면 무늬)을 남길 틀은 Roster의 `Flat`을 no로 두면 `frame` 후처리가 바탕색을 펴지 않는다(`panel`). 색 변형은 `Rosters/ui_variant.csv`의 `Mode`로 정한다:
   `flatten`(바탕을 한 색으로 펴며 바꾼다. 명패·칸·버튼)과 `tint`(결을 남긴 채 바탕의 색을 바꾼다. `tint_fill`). 전의 틀은 `Archive/09-battle-ui-feel/frames-before/`에 있다.
 - `ui_piece`(§22)는 늘이지 않는 장식 조각이다. `glyph`처럼 비율을 지켜 캔버스의 84%에 맞추므로, 화면 크기의 2배를 0.84로 나눈 `Size`를 적는다(다이얼 200 → 476).
-- (2026-10-04) 틀의 변형(`ui_variant.csv`)은 Sprite의 이름과 생성한 틀을 떼어 놓는다. 그래서 그림체나 재질을 바꿀 때 Unity 쪽 이름은 그대로다. 디아블로 컨셉(`Archive/14-ui-diablo/`)에서는 `panel`·`table`·`tablet`이 `stone_panel`에서, `plate_*`가 `gothic_plate`에 편의 색을 `tint`로, `bag`이 `iron_inventory`, `belt`가 `belt_iron`, `trough`가 `iron_slot`, `potion_slot`(과 금색 `_selected`)이 `iron_pocket`, `button`이 `button_iron`을 흰색으로 편 것이다.
+- (2026-10-04) 틀의 변형(`ui_variant.csv`)은 Sprite의 이름과 생성한 틀을 떼어 놓는다. 그래서 그림체나 재질을 바꿀 때 Unity 쪽 이름은 그대로다. 디아블로 컨셉(`Archive/14-ui-diablo/`)에서는 `panel`·`table`·`tablet`이 `stone_panel`에서, `plate_*`가 `gothic_plate`에 편의 색을 `tint`로, `belt`가 `belt_iron`, `trough`가 `iron_slot`, `potion_slot`(과 금색 `_selected`)이 `iron_pocket`, `button`이 `button_iron`을 흰색으로 편 것이다.
   유닛의 명패 `plate_party`·`plate_enemy`·`plate_danger`·`plate_target`은 2026-10-05 명패를 없애며 지웠다(`plate_label`은 남는다). 그때 더한 **보드의 머리 띠** `name_tag`는 `iron_tag`를 색 그대로(`tint`) 쓴 것이고,
   그 왼쪽 끝의 **금 징** `gold_stud`는 늘이지 않는 `ui_piece`다. 둘 다 Round 29의 견본(`tag29_slim`, `badge29_a_stud`)을 사용자가 목업으로 승인해 같은 소재로 `Rosters/ui_frame.csv`·`ui_piece.csv`에 올렸다(`Archive/29-plates/`).
-  **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`·`slot_selected`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
+  **도형으로 그린 조각**은 변형이 아니라 `Archive/<round>/draw_pieces.py`가 `output/ui_placeholder/`에 그린 것을 복사한다: 장식 없는 뼈색 칸 `slot`, 양초의 녹은 윗면 `candle_top`, 연기 `smoke`, 쇠 사슬 `chain`(14), 빛 `glow`(13), 비네트 `vignette`와 양초의 빛 `candle_dark`·`candle_warm`(16. 09가 그린 비네트는 밝기 경사가 거꾸로였다), 아이템 쿨다운의 경사 `charge_ramp`(18. 왼쪽이 투명하고 오른쪽이 불투명한 흰 띠). 야영지 장비(13)의 변형 매핑은 그 README에 남아 있다.
   장비 피로의 표 `fatigue_tag`(32. 자주 바탕에 연보라 테, 끝이 둥근 64x40. Border 20이라 옆으로만 늘어난다)는 `Archive/32-equipment-fatigue/draw_tag.py`가 `Assets/@Art/UI/Frame`에 바로 그린다.
   지도의 정예와 야영지 표식 `node_elite`(전투의 검을 붉은 마름모 위에)와 `node_camp`(장작 둘과 불꽃)(34. 96x96, 화면의 2배)는 `Archive/34-long-map/draw_icons.py`가 `Assets/@Art/UI/Icon`에 바로 그린다.
   상점의 표식 `node_shop`(코인 더미. 96x96)과 지역 코인 `coin`(놋쇠 원판, 64x64. 헤더·값·새로고침의 수 옆)(44)은 `Archive/44-shop-node/draw_icons.py`가 같은 곳에 그린다. 그림으로 바꾸는 것은 지시가 있을 때다.
@@ -306,8 +306,7 @@ UI의 틀과 아이콘
 ```
 
 - 그림은 **직업**과 **적**에 붙는다. 용병은 자기 직업의 그림으로 보인다.
-- UI의 틀 가운데 **가방**(`Frame/bag`. 보드 패널에서 유닛의 칸 뒤에 깔린다)은 생성한 그림이 아니라 **도형 Placeholder**다: `Archive/08-panel-cells/draw_bag.py`가
-  목업에서 승인된 모양(가죽판, 어두운 테, 안쪽 솔기)을 128x128의 9-slice로 그린다(호출 없음. Border 40). 그림으로 바꿀 때는 `ui_frame`으로 생성해 같은 자리에 둔다.
+- 보드의 가방은 그림이 아니라 테와 칸으로 그린다(`12_UI.md` "격자 보드").
 - `Figure`가 빈 값이면 그 유닛은 도형 Placeholder로 남는다. 그림이 없다는 것은 데이터가 말한다. Load 실패를 Placeholder로 바꾸지 않는다.
   `Figure`가 있는데 자세 파일이 없으면 `ArtSetup.FindProblems`가 잡는다.
 - 배경은 **던전**에 붙고, 전투 화면이 깐다. `Background`가 빈 값이면 그 던전의 전투는 배경색 그대로다.

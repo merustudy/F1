@@ -12,8 +12,8 @@ namespace F1.UI
     /// push out a dark gold), its icon over the lines turned as
     /// the item lies, and over it the tier's stars in Diablo's rarity colours at the bottom-left, the violet "+1" of fatigue at the top-right
     /// for equipment that costs fatigue when a battle starts (round 32; a dot on a piece of one square), and the merge mark with the tier a
-    /// merge would make (round 35). An item without an icon shows its name. A piece takes no pointer: the squares under it do. A shop's or
-    /// the loot's tile shows its item, or a bag as Diablo's well (its rim and black squares), with the same view.
+    /// merge would make (round 35). An item without an icon shows its name. A piece takes no pointer: the squares under it do. The
+    /// merchant's grid shows its goods with the same view, a bag as Diablo's well (its rim and black squares).
     /// </summary>
     public sealed class ItemSlotView : MonoBehaviour
     {
@@ -103,12 +103,6 @@ namespace F1.UI
         void Awake()
         {
             _fatigueSize = ((RectTransform)_fatigue.transform).sizeDelta;
-        }
-
-        /// <summary>Sizes the piece to so many squares across and down (gaps included).</summary>
-        public void SetSquares(int width, int height)
-        {
-            Rect.sizeDelta = new Vector2(GridGeometry.Span(width), GridGeometry.Span(height));
         }
 
         /// <param name="icon">The item's icon, or null when it has none.</param>

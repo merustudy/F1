@@ -753,7 +753,7 @@ namespace F1.Tests
             Managers.Sound.ForgetEffects();
             grid.SquareAt(0, 0).Click();
             yield return null;
-            StringAssert.Contains(UiText.TooltipTitle(expedition.Inventory[0]), party.InventoryInfo, "The held item in Diablo's tooltip.");
+            StringAssert.Contains(UiText.ItemTitle(expedition.Inventory[0]), party.InventoryInfo, "The held item in Diablo's tooltip.");
             UiTestUtil.HoverSquare(board1, 0, 0);
             yield return null;
             Assert.AreEqual(GhostKind.Displaces, board1.Grid.GhostShown, "The ghost says the weapon would go to the inventory.");

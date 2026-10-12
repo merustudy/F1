@@ -26,11 +26,6 @@ namespace F1.Editor.Data
         public IReadOnlyList<string> Headers { get; }
         public IReadOnlyList<CsvRow> Rows { get; }
 
-        public bool HasHeader(string header)
-        {
-            return _columns.ContainsKey(header);
-        }
-
         internal bool TryGetColumn(string header, out int index)
         {
             return _columns.TryGetValue(header, out index);

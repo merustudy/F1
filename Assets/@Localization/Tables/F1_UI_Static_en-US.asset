@@ -940,15 +940,6 @@ MonoBehaviour:
     m_Localized: Leave
     m_Metadata:
       m_Items: []
-  - m_Id: 2552399930581000
-    m_Localized: Sold
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2552399930581001
-    m_Localized: "{0} \xB7 {1}\xD7{2}"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 2552399930581002
     m_Localized: "Bought: {0} \xB7 coins {1} \u2192 {2}"
     m_Metadata:
@@ -1021,10 +1012,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 3219372028977152
     m_Localized: "R \xB7 right-click \xB7 wheel: turn   Esc: let go"
-    m_Metadata:
-      m_Items: []
-  - m_Id: 3222362102161408
-    m_Localized: Held
     m_Metadata:
       m_Items: []
   - m_Id: 3246693813313536
@@ -1200,7 +1187,6 @@ MonoBehaviour:
         - id: 2041124016349191
         - id: 2041124016349192
         - id: 2271577780510721
-        - id: 2552399930581001
         - id: 2552399930581002
         - id: 2552399930581003
         - id: 2552399930581004

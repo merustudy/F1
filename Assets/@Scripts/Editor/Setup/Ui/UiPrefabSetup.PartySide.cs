@@ -10,14 +10,14 @@ namespace F1.Editor.Setup
     public static partial class UiPrefabSetup
     {
         /// <summary>
-        /// The party side of the node map and the loot screen, in the battle screen's shape
+        /// The party side of the node map, in the battle screen's shape
         /// (2026-10-03 mockups A and V): on the stage, the battle's party columns, each with the
         /// figure, the marks under its feet and the two buttons that move the member a row; under
         /// the stage, the battle's board panel, with the board of each row (its head with the row and
         /// the name, its cells) stacked in the panel column under its figure on a table that holds only the boards, and the
         /// screen's own words and buttons on a plate of their own under the right half (2026-10-08 round 46, A); the
-        /// potions in the battle's strip at the battle's place, top left; the right half (the map, the loot, the inventory
-        /// popup) from under the header down to that plate. The columns stand in a field shaped like the battle's, and the view puts them
+        /// potions in the battle's strip at the battle's place, top left; the right half (the map) from under the header down to that
+        /// plate. The columns stand in a field shaped like the battle's, and the view puts them
         /// and the panel columns in the battle screen's places when it opens (FieldLayout), so
         /// everything inside a column is laid out as lines that stretch across it.
         /// Built after the right half of the screen so the popup draws over it.
@@ -28,7 +28,7 @@ namespace F1.Editor.Setup
         const float PartyPotionsX = BattlePotionsX;
 
         /// <summary>
-        /// What the right half holds (the map, the loot, the inventory popup; round 46): from under the header, the potion strip's
+        /// What the right half holds (the map; round 46): from under the header, the potion strip's
         /// top in battle, down to the right half's table under it.
         /// </summary>
         const float PartyRightTop = 92f;
@@ -95,7 +95,7 @@ namespace F1.Editor.Setup
         /// <param name="panel">The board panel, for the screen's own words and buttons on its right half's plate.</param>
         static PartySideView BuildPartySide(RectTransform frame, float toInventoryX, float toInventoryWidth, out RectTransform panel)
         {
-            // The battle screen's potion strip, above the right half.
+            // The battle screen's potion strip, at the battle's place (round 46).
             PotionSlotView potionTemplate = BuildPotionStrip(frame, PartyPotionsX, out RectTransform potions);
 
             // The field is the battle field's box, so that the view can place the columns with the

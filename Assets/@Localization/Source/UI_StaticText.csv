@@ -76,9 +76,6 @@ Map.ShopBuyHint,In the panel while an offer of the shop is picked.,놓을 칸을
 Map.ShopCoinsLabel,In the shop window before the coins the party has.,가진 코인,Coins
 Map.ShopRefresh,The shop's refresh button; its cost follows.,새로고침,Refresh
 Map.ShopLeave,Leaves the shop and goes on to the next floor.,나가기,Leave
-Map.ShopSold,On the tile of an offer that was bought.,팔림,Sold
-Map.ShopHeld,"On the top of the picked tile of the shop, while the hand holds its offer (round 49).",손에 듦,Held
-Map.ShopItemSub,Under the name of an item on offer or of a drop of loot. {0} = category. {1} x {2} = its squares across and down.,{0} · {1}×{2},{0} · {1}×{2}
 Map.ShopBought,On the detail line after a purchase. {0} = what was bought. {1} = coins before. {2} = coins after.,구매: {0} · 코인 {1} → {2},Bought: {0} · coins {1} → {2}
 Map.Coins,A number of region coins beside the coin mark (the header; an offer's price; the refresh cost). {0} = coins.,{0},{0}
 Map.ShopPotion,Under the name of a potion on offer in the shop.,포션,Potion

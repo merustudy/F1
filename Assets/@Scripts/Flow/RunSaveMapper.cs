@@ -561,7 +561,6 @@ namespace F1.Flow
             return seed;
         }
 
-        /// <summary>Only names defined by the enum are accepted; numbers are not.</summary>
         /// <summary>
         /// A saved fatigue state must exist; an affliction must stand at or over the threshold (under it, it would have ended); a
         /// mercenary at home holds only an affliction (a virtue ends with the expedition).
@@ -579,6 +578,7 @@ namespace F1.Flow
             Require(state.Kind != FatigueStateKind.Affliction || fatigue >= data.Balance.FatigueBreakdown, $"{who} holds the affliction '{stateId}' under the breakdown.");
         }
 
+        /// <summary>Only names defined by the enum are accepted; numbers are not.</summary>
         static TEnum Parse<TEnum>(string name)
             where TEnum : struct
         {

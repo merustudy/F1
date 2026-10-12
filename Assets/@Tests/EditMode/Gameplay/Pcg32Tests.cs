@@ -48,29 +48,6 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Restore_ContinuesExactlyWhereTheGeneratorWas()
-        {
-            var original = new Pcg32(7UL, RngStream.Map);
-            for (int i = 0; i < 5; i++)
-            {
-                original.NextUInt();
-            }
-
-            Pcg32 restored = Pcg32.Restore(original.State, original.Increment);
-
-            for (int i = 0; i < 20; i++)
-            {
-                Assert.AreEqual(original.NextUInt(), restored.NextUInt());
-            }
-        }
-
-        [Test]
-        public void Restore_WhenIncrementIsEven_Throws()
-        {
-            Assert.Throws<ArgumentException>(() => Pcg32.Restore(1UL, 2UL));
-        }
-
-        [Test]
         public void NextInt_StaysInRangeAndCoversIt()
         {
             var rng = new Pcg32(99UL, RngStream.Loot);

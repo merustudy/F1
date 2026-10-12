@@ -251,7 +251,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The first placement, in reading order of its top-left square and then unturned before turned, where a shape lies on bags
-        /// over no item. False when there is none. The simulator's policies and the 9 -> 10 save conversion place with it.
+        /// over no item. False when there is none. The simulator's policies place with it.
         /// </summary>
         public bool FindRoom(int width, int height, out Placement at)
         {

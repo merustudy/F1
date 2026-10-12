@@ -17,7 +17,7 @@ namespace F1.UI
     /// and picks the next node on the right. Who waits at a node is not shown: that is found out
     /// in the battle (Docs/Design/03_Dungeon_Structure.md §1). The map scrolls up from the first floor
     /// to the boss; at a camp, its window lies over the map (2026-10-06 round 34), and so does the shop's (2026-10-07 round 44):
-    /// an offer is picked on a tile and bought by the cell it is put in, or straight into the inventory.
+    /// a good is picked on the merchant's grid (stage 21) and bought by the square it is put in, or straight into the inventory.
     /// </summary>
     public sealed class NodeMapScreen : UIScreen
     {
@@ -122,7 +122,7 @@ namespace F1.UI
             _mend.onClick.AddListener(OnMend);
             _mendBack.onClick.AddListener(OnMendBack);
             _mendConfirm.onClick.AddListener(OnMendConfirm);
-            _merchant.GoodClicked += OnTileClicked;
+            _merchant.GoodClicked += OnGoodClicked;
             _merchant.GoodEntered += slot =>
             {
                 _pointedGood = slot;
@@ -689,9 +689,9 @@ namespace F1.UI
 
         /// <summary>
         /// A good of the shop (round 44; on the merchant's grid since stage 21): a potion is bought with one click and sounds as put in (a
-        /// click when it cannot be); an item or a bag is picked, or put down, with a click. Its facts and price show in the tooltip beside the grid.
+        /// click when it cannot be); an item or a bag is picked, or put down, with a click. Its facts and price show in the tooltip over it (round 57).
         /// </summary>
-        void OnTileClicked(int slot)
+        void OnGoodClicked(int slot)
         {
             ExpeditionManager manager = Managers.Expedition;
             ItemOffer offer = slot < manager.ShopStock.Count ? manager.ShopStock[slot] : null;

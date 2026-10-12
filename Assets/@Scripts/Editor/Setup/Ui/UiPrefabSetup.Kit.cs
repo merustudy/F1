@@ -57,18 +57,6 @@ namespace F1.Editor.Setup
         /// <summary>The name tag is drawn for a strip 30 high: a thinner one shrinks its border in step (UiArt.NameTag).</summary>
         const float NameTagArtHeight = 30f;
 
-        /// <summary>
-        /// The margin between an item cell and its icon. The icon is scaled into the place inside
-        /// it, in proportion. The icons were drawn for cells of this width stacked like these
-        /// (Docs/Architecture/13_ART_PIPELINE.md "후처리 (`cell`)"), so they fill the place.
-        /// </summary>
-        const float ItemIconMarginX = 8f;
-        const float ItemIconMarginY = 5f;
-
-        /// <summary>How far the inventory panel behind a board reaches out past its cells, sideways (the panels of two columns, FieldLayout.ColumnGap apart, must not touch) and up and down.</summary>
-        const float BoardBagPadX = 4f;
-        const float BoardBagPadY = 10f;
-
         /// <summary>The gloom of the Diablo kit: a soft darkening towards the edges of the whole screen.</summary>
         const float ScreenVignetteAlpha = 0.35f;
 
@@ -93,32 +81,12 @@ namespace F1.Editor.Setup
         const float TierTagInset = 5f;
         const float MergeVeilInset = 3f;
         const float MergeVeilAlpha = 0.6f;
-        const float MergeMarkFontSize = 20f;
-        const float MergeMarkLift = 6f;
 
         /// <summary>The space between a figure and its marks, and between the marks and what stands under them.</summary>
         const float MarksGap = 6f;
 
         /// <summary>A unit's name shrinks down to this size when it does not fit the head of its board.</summary>
         const float UnitNameMinSize = 10f;
-
-        /// <summary>How much of an empty item cell shows: it is there, but nothing is in it.</summary>
-        const float EmptyCellAlpha = 0.8f;
-
-        /// <summary>
-        /// How much of its color a board cell keeps while it takes no click: dimmer than a live cell,
-        /// but opaque, so that bone stays bone over the iron panel instead of sinking into it.
-        /// </summary>
-        const float QuietCellTint = 0.8f;
-
-        /// <summary>
-        /// The cooldown's light (2026-10-04 round 18): how strongly the candle's gold lies on the charged
-        /// part of a cell (under the icon), and the glow and the line at the front of the charge. How dark
-        /// the part not charged yet is belongs to the view, which brings it back after a flash (BattleItemView).
-        /// </summary>
-        const float ChargeTint = 0.22f;
-        const float FrontGlowAlpha = 0.45f;
-        const float FrontLineAlpha = 0.9f;
 
         /// <summary>The parts of a unit's marks that a view fills in. The state line is left to the caller.</summary>
         struct MarksParts
@@ -266,20 +234,6 @@ namespace F1.Editor.Setup
             rect.localRotation = Quaternion.Euler(0f, 0f, 45f);
         }
 
-        /// <summary>
-        /// The bag behind a board: a leather slab stretched over the cells and a little past them,
-        /// so it is as long as the board. It is the first child of the cells' rect and the layout
-        /// skips it, so the cells are laid out over it.
-        /// </summary>
-        static Image BuildBoardBag(RectTransform cells, string name)
-        {
-            Image bag = KitFrame(name, cells, UiArt.Bag);
-            bag.transform.SetAsFirstSibling();
-            UiBuild.Stretch(bag.rectTransform, -BoardBagPadX, -BoardBagPadY, -BoardBagPadX, -BoardBagPadY);
-            bag.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
-            return bag;
-        }
-
         /// <summary>An icon of the kit, in proportion inside wherever the caller puts it.</summary>
         static Image KitIcon(string name, Transform parent, string art)
         {
@@ -348,7 +302,7 @@ namespace F1.Editor.Setup
             Image outline = UiBuild.Image(name, parent, Color.white);
             outline.preserveAspect = true;
             outline.material = SilhouetteMaterial();
-            UiBuild.Stretch(outline.rectTransform, ItemIconMarginX, ItemIconMarginY, ItemIconMarginX, ItemIconMarginY);
+            UiBuild.Stretch(outline.rectTransform);
             effect = outline.gameObject.AddComponent<SilhouetteOutline>();
             outline.enabled = false;
             return outline;
@@ -458,8 +412,7 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The strip of potion slots under the header, on a panel so that the slots show against
-        /// whatever is behind them. The battle screen has it on the left; the party side, whose
-        /// party stands higher, above the right half (2026-10-03 mockup V).
+        /// whatever is behind them. The battle screen and the party side have it at the same place, top left (round 46).
         /// </summary>
         static PotionSlotView BuildPotionStrip(Transform frame, float x, out RectTransform potions)
         {

@@ -118,7 +118,7 @@ namespace F1.Data
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
         public const int MaxShopSlots = 8;
 
-        /// <summary>The most drops a battle can leave: what the loot screen has room for (Docs/Architecture/12_UI.md "전리품 화면").</summary>
+        /// <summary>The most drops a battle can leave: one on the floor before each of the enemy's rows 1 to 3 (Docs/Architecture/12_UI.md "이긴 뒤: 전리품").</summary>
         public const int MaxLootCards = 3;
 
         readonly Dictionary<string, int> _values = new Dictionary<string, int>(StringComparer.Ordinal);

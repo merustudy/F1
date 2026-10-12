@@ -39,13 +39,7 @@ namespace F1.UI
         public static readonly Color RimTarget = Rgb(0x6E, 0xAA, 0xFF);
         public static readonly Color TargetLight = new Color(RimTarget.r, RimTarget.g, RimTarget.b, 0.6f);
         public static readonly Color EnemyName = Rgb(0xF2, 0x8C, 0x7E);
-        /// <summary>
-        /// The cooldown of an item's cell as light (2026-10-04 round 18, the candle's gold): the smoky dark over the part
-        /// not charged yet (and over an empty cell of a battle board), the gold on the charged part of the cell, and the
-        /// gold of the line and the glow at the front of the charge.
-        /// </summary>
-        public static readonly Color ChargeDark = Rgb(0x1E, 0x10, 0x06);
-        public static readonly Color ChargeLight = Rgb(0xFF, 0xB8, 0x48);
+        /// <summary>The candle's gold (2026-10-04 round 18): the warm light a support item lights behind a figure (FigureView.Pulse).</summary>
         public static readonly Color ChargeEdge = Rgb(0xFF, 0xCE, 0x68);
         public static readonly Color Dead = Rgb(0x33, 0x33, 0x38);
         public static readonly Color Line = Rgb(0x55, 0x5C, 0x6B);
@@ -123,10 +117,6 @@ namespace F1.UI
         /// <summary>The outline tone of the art, for a shape that stands next to it without a sprite.</summary>
         public static readonly Color Ink = Rgb(0x18, 0x09, 0x07);
 
-        /// <summary>Text written on the light pieces of the camp kit (the canvas pockets, the parchment), and its dimmed tone.</summary>
-        public static readonly Color InkText = Rgb(0x2A, 0x1A, 0x12);
-        public static readonly Color InkTextDim = Rgb(0x6B, 0x55, 0x40);
-
         /// <summary>Multiplied into an icon that is shown but cannot be used now, as TextDim is for a name.</summary>
         public static readonly Color IconDim = Rgb(0x6E, 0x6E, 0x74);
 
@@ -143,7 +133,7 @@ namespace F1.UI
         /// <summary>
         /// An item's squares between battles, square by square with the grid's line between them (round 53): Diablo's dark blue (round 49);
         /// the held one a lighter blue; the one a held item would push out a dark gold. Solid: the colours round 49's see-through blues made
-        /// over the well's grey, so a piece is the same blue wherever it lies (a board, the inventory, a shop's or the loot's tile; round 53,
+        /// over the well's grey, so a piece is the same blue wherever it lies (a board, the inventory, the merchant's grid; round 53,
         /// "인벤토리 아이템 배경색도 용병 보드의 파란색과 같은 색상으로"). In battle a piece has no ground (the user: "전투 화면에서는 아이템 뒤 파란색 배경 없음").
         /// </summary>
         public static readonly Color GridPiece = Rgb(0x1F, 0x26, 0x54);
@@ -208,9 +198,6 @@ namespace F1.UI
         public static readonly Color TooltipLine = Rgb(0x40, 0x40, 0x40);
         public static readonly Color TooltipEffect = Rgb(0x70, 0x70, 0xFF);
         public static readonly Color BagName = Rgb(0xC7, 0xB3, 0x77);
-
-        /// <summary>An item that cannot be used where its owner stands, in battle: grey (it has no ground there).</summary>
-        public static readonly Color GridPieceUnusable = Color.clear;
 
         /// <summary>Battle (round 48, the fifth ask's 안 2): the item's dark before it charges, and how much brighter it flashes as it fires.</summary>
         public const float CooldownDark = 0.4f;

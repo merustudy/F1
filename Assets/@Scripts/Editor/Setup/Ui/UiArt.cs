@@ -56,9 +56,8 @@ namespace F1.Editor.Setup
         /// <summary>The plate a line of text is written on so that it reads over the background.</summary>
         public const string PlateLabel = "Frame/plate_label";
 
-        /// <summary>An item cell of a unit's inventory panel: a plain bone cell with a thin dark line (drawn: Archive/14-ui-diablo/draw_pieces.py); and the same in gold when it is the chosen one.</summary>
+        /// <summary>An item cell of a unit's inventory panel before the grid: a plain bone cell with a thin dark line (drawn: Archive/14-ui-diablo/draw_pieces.py).</summary>
         public const string Slot = "Frame/slot";
-        public const string SlotSelected = "Frame/slot_selected";
 
         /// <summary>
         /// The fatigue tag (2026-10-06 round 32, B1): a plum pill with a violet rim. On a party-side cell whose item costs
@@ -86,9 +85,6 @@ namespace F1.Editor.Setup
 
         /// <summary>A white button: the screen tints it.</summary>
         public const string Button = "Frame/button";
-
-        /// <summary>The inventory panel of blackened iron behind a unit's item cells, as long as its board.</summary>
-        public const string Bag = "Frame/bag";
 
         /// <summary>
         /// The storm candle in the middle of the board panel: the skull holder, the body that burns down (filled from the
@@ -141,13 +137,6 @@ namespace F1.Editor.Setup
         public const string CandleWarm = "Icon/candle_warm";
 
         /// <summary>
-        /// The soft ramp of an item's cooldown light (2026-10-04 round 18): white, clear on the left and opaque on the
-        /// right. The item's cell tints and stretches it as the glow behind the front of the charge and as the soft left
-        /// end of the dark. Drawn (Archive/18-cooldown-light/draw_pieces.py).
-        /// </summary>
-        public const string ChargeRamp = "Icon/charge_ramp";
-
-        /// <summary>
         /// The effect bursts of the moment of a breakdown (2026-10-06 round 38, "B"): the ink burst of an affliction and of the collapse, the
         /// light burst of a virtue, laid behind the unit with the glow in the state's colour. Drawn in round 38 (`Archive/38-breakdown-fx`),
         /// kept at 512 from the 1024 raws.
@@ -171,14 +160,12 @@ namespace F1.Editor.Setup
             new Piece(GoldStud),
             new Piece(PlateLabel, 44),
             new Piece(Slot, 16),
-            new Piece(SlotSelected, 16),
             new Piece(FatigueTag, 20),
             new Piece(TierTag, 20),
             new Piece(Trough, 30),
             new Piece(PotionSlot, 30),
             new Piece(PotionSlotSelected, 30),
             new Piece(Button, 32),
-            new Piece(Bag, 40),
             new Piece(CandleHolder),
             new Piece(CandleBody),
             new Piece(CandleFlame),
@@ -197,7 +184,6 @@ namespace F1.Editor.Setup
             new Piece(Vignette),
             new Piece(CandleDark),
             new Piece(CandleWarm),
-            new Piece(ChargeRamp),
             new Piece(InkBurst),
             new Piece(LightBurst),
             new Piece(Shield),

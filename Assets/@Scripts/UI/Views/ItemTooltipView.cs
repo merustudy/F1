@@ -10,7 +10,7 @@ namespace F1.UI
     /// party side, what merging it does, in Diablo II's tooltip since round 49 (a black see-through card with a grey hairline, the lines
     /// centred, the title in the item's rarity colour, the effects in the magic blue; no stripe). The party side floats it
     /// above the board panel over the cell's column with a notch down towards the cell; the battle stands it beside the board
-    /// with a notch on the edge facing the cell (mockup 6). The shop's tiles show their facts themselves (round 46, S1). It takes no clicks: the screen closes it on the next press anywhere (<see cref="PointerPress"/>).
+    /// with a notch on the edge facing the cell (mockup 6). The merchant's goods show theirs in a tooltip over the good (round 57). It takes no clicks: the screen closes it on the next press anywhere (<see cref="PointerPress"/>).
     /// </summary>
     public sealed class ItemTooltipView : MonoBehaviour
     {

@@ -60,7 +60,7 @@ namespace F1.Editor.Setup
         const float ShopLeaveWidth = 190f;
         const float ShopCoinSize = 30f;
         const float ShopCoinsWidth = 70f;
-        const float ShopTileCoinSize = 22f;
+        const float ShopRefreshCoinSize = 22f;
         const float MerchantPriceSize = 15f;
         const float HeaderCoinX = 1560f;
         const float HeaderCoinSize = 26f;
@@ -213,8 +213,8 @@ namespace F1.Editor.Setup
             campCover.gameObject.SetActive(false);
 
             // The shop's window (round 44; Diablo II's stone since round 49), over the map like the camp's: the coin stack, the title and the
-            // hint at its top with the party's coins at the right, the offers as tiles under them, and the refresh (with its cost) and leave
-            // buttons below.
+            // hint at its top with the party's coins at the right, the merchant's grid under them (stage 21), and the refresh (with its cost)
+            // and leave buttons below.
             Image shopCover = UiBuild.Image("Shop", map.transform, new Color(0f, 0f, 0f, CampShadeAlpha), raycastTarget: true);
             UiBuild.Stretch(shopCover.rectTransform, MapViewInset, MapViewInset, MapViewInset, MapViewInset);
             Image shopWindow = UiBuild.Image("ShopWindow", shopCover.transform, UiPalette.StonePlate);
@@ -245,8 +245,8 @@ namespace F1.Editor.Setup
             refreshLayout.childControlWidth = true;
             UiBuild.Size(UiBuild.SingleLine(UiBuild.LocalizedLabel("ShopRefreshLabel", refreshRow, UiKeys.Map.ShopRefresh, 24f, UiPalette.Text, TextAlignmentOptions.Center)), 120f, 32f);
             Image refreshCoin = KitIcon("ShopRefreshCoin", refreshRow, UiArt.Coin);
-            UiBuild.Size(refreshCoin, ShopTileCoinSize, ShopTileCoinSize);
-            refreshCoin.gameObject.AddComponent<LayoutElement>().preferredWidth = ShopTileCoinSize;
+            UiBuild.Size(refreshCoin, ShopRefreshCoinSize, ShopRefreshCoinSize);
+            refreshCoin.gameObject.AddComponent<LayoutElement>().preferredWidth = ShopRefreshCoinSize;
             TextMeshProUGUI refreshCost = UiBuild.Size(Numeral(UiBuild.Label("ShopRefreshCost", refreshRow, 24f, UiPalette.Virtue, TextAlignmentOptions.Center)), 60f, 32f);
 
             Image leave = Rounded("ShopLeave", shopBox.transform, UiPalette.Button, 8f);

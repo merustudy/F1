@@ -9,7 +9,6 @@ namespace F1.Core
         public const string BootSceneName = "Boot";
         public const string MainSceneName = "Main";
 
-        public string ActiveSceneName => SceneManager.GetActiveScene().name;
 
         public async Awaitable LoadMainAsync()
         {

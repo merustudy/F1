@@ -14,7 +14,6 @@ namespace F1.UI
     {
         [SerializeField] bool _silent;
 
-        public bool Silent => _silent;
 
         void Awake()
         {

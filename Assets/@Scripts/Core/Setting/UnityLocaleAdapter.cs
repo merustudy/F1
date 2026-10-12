@@ -52,7 +52,6 @@ namespace F1.Core
             await WaitForInitializationAsync();
         }
 
-        public string CurrentCode => LocalizationSettings.SelectedLocale.Identifier.Code;
 
         static async Task WaitForInitializationAsync()
         {

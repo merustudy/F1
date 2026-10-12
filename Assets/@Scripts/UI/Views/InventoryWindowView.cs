@@ -23,7 +23,6 @@ namespace F1.UI
 
         public InventoryGridView Grid => _grid;
 
-        public bool IsOpen => gameObject.activeSelf;
 
         /// <summary>The held item's lines on show in the tooltip, or an empty string.</summary>
         public string Info => _infoBox.activeSelf ? _info.text : string.Empty;

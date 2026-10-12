@@ -16,7 +16,7 @@ namespace F1.Editor.Setup
         /// floor with its marks under its feet. The stage's box leaves room at both ends of the
         /// frame; the screen sets the columns' places and widths when it opens (FieldLayout). The
         /// board panel has one column per row on each side, right under the stage's column of that
-        /// row: the unit's item cells stacked on a bag under the head with its row and name (2026-10-03
+        /// row: the unit's grid board (stage 19) under the head with its row and name (2026-10-03
         /// mockup V, after the lines of mockups A, E and G; the head 2026-10-05). The storm clock stands between the two sides. The stage is lit by the
         /// storm candle alone: right over the background lies its light, a half disc around the flame.
         /// </summary>
@@ -695,8 +695,7 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// One row's column of the board panel, under the stage's column of that row: it holds the
-        /// board of the unit standing in the row. The party side of the node map and the loot
-        /// screen builds the same columns.
+        /// board of the unit standing in the row. The party side of the node map builds the same columns.
         /// </summary>
         static RectTransform BuildBoardColumn(Transform panel, string name, float x, float width)
         {

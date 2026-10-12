@@ -8,5 +8,4 @@ trough,iron_slot,,flatten
 potion_slot,iron_pocket,,flatten
 potion_slot_selected,iron_pocket,#B8944E,flatten
 button,button_iron,#FFFFFF,flatten
-bag,iron_inventory,,flatten
 name_tag,iron_tag,,tint

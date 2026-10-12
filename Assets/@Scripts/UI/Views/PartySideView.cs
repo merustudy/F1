@@ -439,7 +439,7 @@ namespace F1.UI
             }
             else if (_hand.Outside != null && DetailOverride != null)
             {
-                // What the screen holds of its own (a shop's offer): its tile shows its facts, so the line says how to put it down.
+                // What the screen holds of its own (a shop's good): the line says how to put it down.
                 _detail.text = DetailOverride;
             }
             else if (heldBag != null)

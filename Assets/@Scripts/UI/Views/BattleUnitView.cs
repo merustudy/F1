@@ -138,8 +138,6 @@ namespace F1.UI
         /// <summary>True while a state pose is held through the moment of a breakdown.</summary>
         public bool HoldsPose => _holdLeft > 0f;
 
-        /// <summary>True while the unit shivers (the moment of an affliction).</summary>
-        public bool Shivering => _shiverLeft > 0f;
 
         /// <summary>True when the unit has a hit pose: its red flash is at half strength (Docs/Design/10 §5).</summary>
         public bool HasHitPose => _hitPose != null;

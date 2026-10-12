@@ -145,7 +145,10 @@ namespace F1.Editor.Setup
             }
         }
 
-        /// <summary>A digest of the builder sources and the runtime UI code they read. Line endings are ignored so every OS gets the same value.</summary>
+        /// <summary>
+        /// A digest of the builder sources, the runtime UI code they read and the board sizes they bake in (BattleRows, BoardFrame:
+        /// round 56 found a size the stamp did not see). Line endings are ignored so every OS gets the same value.
+        /// </summary>
         public static string ComputeStamp()
         {
             List<string> files = Directory.GetFiles(BuilderDirectory, "*.cs")
@@ -156,6 +159,7 @@ namespace F1.Editor.Setup
             using (var sha = SHA256.Create())
             {
                 var all = new StringBuilder();
+                all.Append($"rows {F1.Data.BattleRows.Count}, frame {F1.Data.BoardFrame.Width}x{F1.Data.BoardFrame.Height}\n");
                 foreach (string file in files)
                 {
                     all.Append(file).Append('\n').Append(File.ReadAllText(file).Replace("\r", string.Empty)).Append('\n');

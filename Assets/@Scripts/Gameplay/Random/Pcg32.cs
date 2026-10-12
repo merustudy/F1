@@ -4,8 +4,7 @@ namespace F1.Gameplay
 {
     /// <summary>
     /// PCG32 (XSH-RR 64/32). The only source of randomness in gameplay results.
-    /// The generator is fully described by <see cref="State"/> and <see cref="Increment"/>,
-    /// so it can be saved and restored exactly.
+    /// A generator is set by its seed and stream alone: a saved game keeps seeds, never a generator.
     /// </summary>
     public sealed class Pcg32
     {
@@ -21,25 +20,6 @@ namespace F1.Gameplay
             NextUInt();
             _state = unchecked(_state + seed);
             NextUInt();
-        }
-
-        Pcg32(ulong state, ulong increment, bool restored)
-        {
-            _state = state;
-            _increment = increment;
-        }
-
-        public ulong State => _state;
-        public ulong Increment => _increment;
-
-        public static Pcg32 Restore(ulong state, ulong increment)
-        {
-            if ((increment & 1UL) == 0UL)
-            {
-                throw new ArgumentException("A PCG32 increment is always odd.", nameof(increment));
-            }
-
-            return new Pcg32(state, increment, true);
         }
 
         public uint NextUInt()

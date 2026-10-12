@@ -117,7 +117,6 @@ namespace F1.Gameplay
 
         public int PotionReadyMs { get; private set; }
         public int RetreatReadyMs { get; private set; }
-        public int NextStormTickMs => _nextStormTickMs;
 
         /// <summary>Damage the next storm tick will deal to every unit.</summary>
         public int NextStormDamage => _balance.StormBaseDamage + _balance.StormGrowth * _stormTicks;

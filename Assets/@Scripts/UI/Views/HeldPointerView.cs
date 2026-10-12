@@ -72,9 +72,6 @@ namespace F1.UI
         /// <summary>The held item's icon on the pointer, or null (nothing held, a bag, or an item without one).</summary>
         public Sprite Icon => Shown && _art.gameObject.activeSelf ? _icon.sprite : null;
 
-        /// <summary>The held bag on the pointer, or null.</summary>
-        public BagData Bag { get; private set; }
-
         /// <summary>How the held thing is drawn turned, in quarters clockwise.</summary>
         public int Turns => Mathf.RoundToInt(-_shape.localEulerAngles.z / 90f + 4f) % 4;
 
@@ -144,7 +141,6 @@ namespace F1.UI
         public void ShowItem(Sprite icon, int width, int height, int turns)
         {
             Open();
-            Bag = null;
             Vector2 size = new Vector2(GridGeometry.Span(width), GridGeometry.Span(height));
             _shape.sizeDelta = size;
             _shape.localRotation = GridGeometry.ArtTurn(turns);
@@ -174,7 +170,6 @@ namespace F1.UI
         public void ShowBag(BagData bag, int baseTurns, int turns, IReadOnlyList<HeldBagItem> items)
         {
             Open();
-            Bag = bag;
             var lay = new Placement(0, 0, baseTurns);
             int width = lay.WidthOf(bag.Width, bag.Height);
             int height = lay.HeightOf(bag.Width, bag.Height);
@@ -227,7 +222,6 @@ namespace F1.UI
         /// <summary>Nothing held: the layer and the drawing go, and the pointer comes back.</summary>
         public void Hide()
         {
-            Bag = null;
             _primed = false;
             _following = false;
             gameObject.SetActive(false);
