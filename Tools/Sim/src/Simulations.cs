@@ -249,15 +249,22 @@ namespace F1.Sim
                 return unit.IsNone ? "-" : $"{(unit.Side == BattleSide.Party ? "P" : "E")}{unit.Index}:{battle.Unit(unit).Setup.SourceId}";
             }
 
+            // HP, damage, healing, shields and the storm are hundredths (Slice B stage 22): printed as the numbers they stand for.
+            string C(int hundredths)
+            {
+                return Centi.ToText(hundredths);
+            }
+
             foreach (BattleEvent e in battle.Events)
             {
                 string detail;
                 switch (e.Kind)
                 {
                     case BattleEventKind.ItemActivated: detail = $"{Name(e.Source)} uses {e.Id}"; break;
-                    case BattleEventKind.Damaged: detail = $"{Name(e.Target)} takes {e.A} from {e.Id} (shield absorbed {e.B}) -> hp {e.C}"; break;
-                    case BattleEventKind.Healed: detail = $"{Name(e.Target)} healed {e.B} by {e.Id} -> hp {e.C}"; break;
-                    case BattleEventKind.ShieldGained: detail = $"{Name(e.Target)} shield +{e.A} by {e.Id} -> {e.C}"; break;
+                    case BattleEventKind.Damaged: detail = $"{Name(e.Target)} takes {C(e.A)} from {e.Id} (shield absorbed {C(e.B)}) -> hp {C(e.C)}"; break;
+                    case BattleEventKind.CriticalHit: detail = $"{Name(e.Target)} critical hit by {e.Id}: {C(e.A)} (roll {e.B} vs {e.C}%)"; break;
+                    case BattleEventKind.Healed: detail = $"{Name(e.Target)} healed {C(e.B)} by {e.Id} -> hp {C(e.C)}"; break;
+                    case BattleEventKind.ShieldGained: detail = $"{Name(e.Target)} shield +{C(e.A)} by {e.Id} -> {C(e.C)}"; break;
                     case BattleEventKind.BurnApplied: detail = $"{Name(e.Target)} burn +{e.A} by {e.Id} -> {e.C}"; break;
                     case BattleEventKind.DogEntered: detail = $"{Name(e.Target)} at death's door, grace until {e.A}"; break;
                     case BattleEventKind.DogExited: detail = $"{Name(e.Target)} back from death's door"; break;
@@ -267,7 +274,9 @@ namespace F1.Sim
                     case BattleEventKind.RowsAdvanced: detail = $"{(BattleSide)e.A} row {e.B} is empty: those behind advance"; break;
                     case BattleEventKind.PotionUsed: detail = $"potion {e.Id} on {Name(e.Target)}"; break;
                     case BattleEventKind.RetreatAttempted: detail = $"retreat roll {e.B} vs {e.A}% -> {(e.C == 1 ? "success" : "failed")}"; break;
-                    case BattleEventKind.StormTicked: detail = $"storm {e.A}"; break;
+                    case BattleEventKind.StormTicked: detail = $"storm {C(e.A)}"; break;
+                    case BattleEventKind.BrokeDown: detail = $"{Name(e.Target)} broke down: {e.Id} (roll {e.A} vs virtue {e.B}%)"; break;
+                    case BattleEventKind.Collapsed: detail = $"{Name(e.Target)} collapsed -> {(e.C == 1 ? "DIED" : "death's door")}"; break;
                     case BattleEventKind.BattleEnded: detail = $"ended: {(BattleResult)e.A}"; break;
                     default: detail = e.Kind.ToString(); break;
                 }
@@ -348,7 +357,7 @@ namespace F1.Sim
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
             Console.WriteLine($"  bags per member at the end: added {BattleStats.Ratio(stats.BagsAdded, stats.MembersAtEnd)}, bag squares {Average(stats.BagSquares, stats.MembersAtEnd)}");
-            Console.WriteLine($"  stars per expedition at the end: star items {BattleStats.Ratio(stats.StarItems, runs)}, weapons lit {BattleStats.Ratio(stats.StarsLit, runs)}, star damage on weapons {Average(stats.StarDamage, runs)}");
+            Console.WriteLine($"  stars per expedition at the end: star items {BattleStats.Ratio(stats.StarItems, runs)}, weapons lit {BattleStats.Ratio(stats.StarsLit, runs)}, star damage on weapons {AverageCenti(stats.StarDamage, runs)}");
             Console.WriteLine($"  fatigue of the survivors at the end: avg {Average(stats.SurvivorFatigue, stats.Survivors)}, highest {stats.HighestFatigue}; equipment fatigue per member per battle {Average(stats.EquipmentFatigue, stats.MemberBattles)}");
             Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
@@ -442,8 +451,9 @@ namespace F1.Sim
                     if (state.Phase == ExpeditionPhase.AtShop)
                     {
                         int coinsBefore = state.Coins;
-                        stats.Bought += policy.ShopAt(data, state, out int refreshes);
+                        stats.Bought += policy.ShopAt(data, state, out int refreshes, out int shopMerges);
                         stats.Refreshes += refreshes;
+                        stats.Merges += shopMerges;
                         stats.CoinsSpent += coinsBefore - state.Coins;
                         continue;
                     }
@@ -544,6 +554,12 @@ namespace F1.Sim
         static string Average(long total, int count)
         {
             return count == 0 ? "-" : $"{(double)total / count:F2}";
+        }
+
+        /// <summary>The average of values kept in hundredths (Slice B stage 22), as the number it stands for.</summary>
+        static string AverageCenti(long hundredths, int count)
+        {
+            return count == 0 ? "-" : $"{(double)hundredths / count / Centi.One:F2}";
         }
 
         static string Describe(List<PartyMember> party)

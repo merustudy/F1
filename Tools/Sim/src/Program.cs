@@ -144,7 +144,6 @@ namespace F1.Sim
             return 0;
         }
 
-        /// <summary>Prints the map of one expedition: one node per line, "id floor column kind group next,ids".</summary>
         /// <summary>
         /// Every item's damage at Common as the size rule reads it (Slice B stage 22, Docs/Design/02_Combat_System.md §4): the range, the
         /// average on one unit, how many it hits, and the damage per square per second over all it hits. The dungeon's weapons follow
@@ -174,6 +173,7 @@ namespace F1.Sim
             return 0;
         }
 
+        /// <summary>Prints the map of one expedition: one node per line, "id floor column kind group next,ids".</summary>
         static int Map(StaticDataFileStore store, Dictionary<string, string> options)
         {
             StaticData data = LoadGenerated(store);

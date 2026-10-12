@@ -214,13 +214,15 @@ dotnet run --project Tools/Sim -- expedition --dungeon <id> --party a,b,c --poli
 dotnet run --project Tools/Sim -- formations --dungeon <id> --party a,b,c --policy ... --runs n --seed n
 dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy ... --seed n
 dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
+dotnet run --project Tools/Sim -- items
 ```
 
 - 파티는 용병 id나 직업 id로 적는다. 모두에게 열 번호를 붙이면 그 열에 세운다(`knight:1,spellblade:2,bishop:3,archmage:4`).
   붙이지 않으면 직업의 권장 열 순서로 앞에서부터 세운다.
 - `formations`는 같은 파티를 가능한 모든 순서로 세워 같은 시드로 돌린다. 자리가 결과를 얼마나 바꾸는지 본다.
+- `items`는 아이템마다 일반 단계의 피해 범위, 한 대상의 평균, 맞히는 수, 칸·초당 피해를 적는다(22단계의 크기 규칙). `trace`는 0.01 단위의 값(HP, 피해, 회복, 보호막, 폭풍)을 수로 적는다.
 - `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
-  합치기와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 전리품(떨어진 수, 주운 수), 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
+  합치기(전리품과 상점에서 바로 합친 것과 정리의 합치기)와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 전리품(떨어진 수, 주운 수), 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
   정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13,
   전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14, 격자의 자리(`ItemBoard.FindRoom`, 가방은 가방 칸이 가장 적은 용병에게. 밀어내기·가방 옮기기는 하지 않는다)와 가방의 수는 §15.
 

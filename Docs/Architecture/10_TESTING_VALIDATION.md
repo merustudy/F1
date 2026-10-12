@@ -38,6 +38,7 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 규칙:
 
 - Test 결과는 exit code가 아니라 **결과 XML**로 판정한다. XML이 없으면 Compile Error로 보고 Log의 `error CS` 줄을 보인다.
+- 결론을 내지 못한 Test(`Assume`이 맞지 않은 것. 예: 상점이 없는 지도)는 실패가 아니지만, 보고는 그 수(`inconclusive=N`)와 이름을 따로 보인다. 그 라운드가 고친 Test가 Inconclusive면 다시 돌린다.
 - Log와 결과 XML은 저장소 밖(`~/Library/Caches/F1/chain/<시각>/`)에 둔다.
 - 이 프로젝트를 연 Unity Editor가 있으면 체인은 시작하지 않는다.
 - Setup 메서드는 멱등하다. 끝에 고정 Log Token을 찍는다.

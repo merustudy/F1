@@ -237,19 +237,22 @@ namespace F1.Sim
         /// At a shop (Slice B stage 17): without player input, leaves at once. Otherwise buys what is useful while the coins last:
         /// a potion while fewer than two are held, an item that merges into one on a board (a tier up), an item that has room on the
         /// bags of a member standing where it works, a bag that has room in a member's frame (Slice B stage 19); refreshes the stock, at most <see cref="MaxRefreshes"/> times, while nothing
-        /// on offer is useful and the coins cover the refresh and the cheapest offer; then leaves. Returns how many things it bought.
+        /// on offer is useful and the coins cover the refresh and the cheapest offer; then leaves. Returns how many things it bought;
+        /// <paramref name="merges"/> is how many of them merged into an item on a board.
         /// </summary>
-        public int ShopAt(StaticData data, ExpeditionState state, out int refreshes)
+        public int ShopAt(StaticData data, ExpeditionState state, out int refreshes, out int merges)
         {
             refreshes = 0;
+            merges = 0;
             int bought = 0;
             if (Active)
             {
                 for (int guard = 0; guard < 50; guard++)
                 {
-                    if (BuyOne(data, state))
+                    if (BuyOne(data, state, out bool merged))
                     {
                         bought++;
+                        merges += merged ? 1 : 0;
                         continue;
                     }
 
@@ -268,9 +271,13 @@ namespace F1.Sim
             return bought;
         }
 
-        /// <summary>Buys the first useful offer the coins cover: a potion, a merge, an item for a member standing where it works, then a bag.</summary>
-        static bool BuyOne(StaticData data, ExpeditionState state)
+        /// <summary>
+        /// Buys the first useful offer the coins cover: a potion, a merge, an item for a member standing where it works, then a bag.
+        /// <paramref name="merged"/> is true when what it bought merged into an item on a board.
+        /// </summary>
+        static bool BuyOne(StaticData data, ExpeditionState state, out bool merged)
         {
+            merged = false;
             int potionsHeld = 0;
             foreach (string potion in state.Potions)
             {
@@ -302,6 +309,7 @@ namespace F1.Sim
                 if (FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
                     ExpeditionRules.BuyToBoard(data, state, slot, member, at);
+                    merged = true;
                     return true;
                 }
             }
@@ -367,11 +375,12 @@ namespace F1.Sim
         /// up), else one that has room on the bags of a mercenary standing where it works, else one that fits the inventory; a bag goes
         /// where a frame has room for it (stage 19); the rest is left. Without player input there is no merging, only what has room on a
         /// board or fits the inventory. Then merges what can merge and equips from the inventory whatever has room. Returns how many
-        /// merges it made; <paramref name="taken"/> is how many drops it took.
+        /// merges it made, a drop merged as it was picked up included; <paramref name="taken"/> is how many drops it took.
         /// </summary>
         public int PickLoot(StaticData data, ExpeditionState state, out int taken)
         {
             taken = 0;
+            int merges = 0;
             for (int slot = 0; slot < state.Loot.Count && state.Phase == ExpeditionPhase.PickingLoot; slot++)
             {
                 ItemOffer drop = state.Loot[slot];
@@ -397,6 +406,7 @@ namespace F1.Sim
                 {
                     ExpeditionRules.TakeLoot(data, state, slot, member, at);
                     taken++;
+                    merges++;
                     continue;
                 }
 
@@ -420,7 +430,7 @@ namespace F1.Sim
                 ExpeditionRules.LeaveLoot(state);
             }
 
-            return taken > 0 ? Tidy(data, state) : 0;
+            return merges + (taken > 0 ? Tidy(data, state) : 0);
         }
 
         /// <summary>

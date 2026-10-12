@@ -95,17 +95,23 @@ root = ET.parse(path).getroot()
 total = int(root.get("total", "0"))
 passed = int(root.get("passed", "0"))
 failed = int(root.get("failed", "0"))
-skipped = int(root.get("skipped", "0")) + int(root.get("inconclusive", "0"))
-print(f"  {name}: total={total} passed={passed} failed={failed} skipped={skipped}")
+skipped = int(root.get("skipped", "0"))
+inconclusive = int(root.get("inconclusive", "0"))
+print(f"  {name}: total={total} passed={passed} failed={failed} skipped={skipped} inconclusive={inconclusive}")
 
+# An inconclusive test (an Assume that did not hold) does not fail the chain, but it is named so that a test
+# the round changed cannot pass unseen.
 for case in root.iter("test-case"):
     if case.get("result") == "Failed":
         message = case.findtext("failure/message", default="").strip().splitlines()
         print(f"    FAILED {case.get('fullname')}")
         for line in message[:6]:
             print(f"      {line}")
+    elif case.get("result") == "Inconclusive":
+        message = case.findtext("reason/message", default="").strip().splitlines()
+        print(f"    INCONCLUSIVE {case.get('fullname')}: {message[0] if message else ''}")
 
-ok = total > 0 and failed == 0 and passed + skipped == total
+ok = total > 0 and failed == 0 and passed + skipped + inconclusive == total
 if total == 0:
     print("    no tests ran")
 sys.exit(0 if ok else 1)
