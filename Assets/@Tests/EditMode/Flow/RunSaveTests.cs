@@ -326,6 +326,9 @@ namespace F1.Tests
                     case GamePhase.Loot:
                         stepped.Expedition.LeaveLoot();
                         break;
+                    default:
+                        Assert.Fail($"The loop does not know the phase {stepped.Expedition.Phase}.");
+                        break;
                 }
             }
 

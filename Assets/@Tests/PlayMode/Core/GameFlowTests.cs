@@ -89,6 +89,9 @@ namespace F1.Tests
                         // A shop node (stage 17): the party buys nothing and goes on.
                         expedition.LeaveShop();
                         break;
+                    default:
+                        Assert.Fail($"The loop does not know the phase {expedition.Phase}.");
+                        break;
                 }
             }
 

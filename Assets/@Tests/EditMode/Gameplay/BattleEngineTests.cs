@@ -29,12 +29,12 @@ namespace F1.Tests
             int cooldownMs,
             EffectKind kind,
             TargetMode target,
-            int grade,
+            int powerPercent,
             ItemCategory category = ItemCategory.Weapon,
             RowSpan rows = null,
             int reach = TestData.DefaultReach)
         {
-            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), powerPercent: grade);
+            return new EquippedItem(TestData.Item(id, cooldownMs, kind, target, 100, category, rows, reach: reach), powerPercent: powerPercent);
         }
 
         /// <summary>Enemies that do nothing, one per row from row 1, with the given HP.</summary>
@@ -95,7 +95,7 @@ namespace F1.Tests
         [Test]
         public void BurnTick_IsProcessedBeforeItemsOfTheSameTimestamp()
         {
-            // Burn item: grade 3 -> 3 stacks, fires at 1500 and 3000. Ticks are at 1000, 2000, 3000...
+            // Burn item: 3% of 100 -> 3 stacks, fires at 1500 and 3000. Ticks are at 1000, 2000, 3000...
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(TestData.Mercenary("a", 1, 100, Item("torch", 1500, EffectKind.Burn, TargetMode.EnemyFront, 3))),
@@ -153,9 +153,9 @@ namespace F1.Tests
         [TestCase(12, 100, 12)]
         [TestCase(1, 45, 1)]
         [TestCase(10, 110, 11)]
-        public void EffectSize_IsGradeTimesPowerPercent_RoundedDown_AtLeastOne(int grade, int powerPercent, int expected)
+        public void EffectSize_IsValueTimesPowerPercent_RoundedDown_AtLeastOne(int powerPercent, int value, int expected)
         {
-            var item = new EquippedItem(TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, powerPercent), powerPercent: grade);
+            var item = new EquippedItem(TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, value), powerPercent: powerPercent);
             BattleEngine battle = Battle(
                 TestData.Balance(),
                 TestData.Units(TestData.Mercenary("a", 1, 100, item)),

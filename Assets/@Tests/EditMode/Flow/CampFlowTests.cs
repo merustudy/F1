@@ -21,12 +21,6 @@ namespace F1.Tests
         static StaticData CaveWithACamp()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Jobs = new List<JobData>
-            {
-                new JobData("tank", TestData.Text("tank"), 100, "blade", 1, null),
-                new JobData("healer", TestData.Text("healer"), 60, "staff", 2, null),
-                new JobData("striker", TestData.Text("striker"), 80, "blade", 3, null),
-            };
             TestData.StrongBlade(parts);
             parts.Dungeons = new List<DungeonData>
             {

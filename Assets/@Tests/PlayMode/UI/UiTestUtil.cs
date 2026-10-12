@@ -518,7 +518,7 @@ namespace F1.Tests
         /// <summary>
         /// From the title: a new run, a full party, the first node, and its battle advanced (and
         /// left paused) to the moment a mercenary is at death's door. The party is staged so that
-        /// this does not hang on the luck of the encounter: everyone has one HP, and weapons too
+        /// this does not hang on the luck of the encounter: everyone has the least HP (0.01), and weapons too
         /// weak to end the battle first.
         /// </summary>
         public static IEnumerator ReachDeathsDoorInTheFirstBattle()
@@ -638,8 +638,8 @@ namespace F1.Tests
 
         /// <summary>
         /// From the title: a new run, a full party, and the first node's battle entered (and left paused), staged so that the
-        /// mercenary in row 1 is the one who falls: the party carries no item, so it cannot end the battle, and row 1 has one
-        /// HP while everyone else has so much that the enemy cannot bring them down first.
+        /// mercenary in row 1 is the one who falls: the party carries no item, so it cannot end the battle, and row 1 has the least
+        /// HP (0.01) while everyone else has so much that the enemy cannot bring them down first.
         /// </summary>
         public static IEnumerator EnterAFirstBattleWhereRow1Falls()
         {
