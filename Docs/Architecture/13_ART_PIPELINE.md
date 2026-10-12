@@ -175,7 +175,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
   (`tools/trim_items.py`. 그린 픽셀은 바꾸지 않고, 다시 돌려도 그대로다). 다음에 그리는 아이콘도 맞춘 뒤 같은 도구로 자른다.
 - Round 51(2026-10-10): `rat_bite`는 새로 그린 쥐 발톱(호출 1회, 원본 `Archive/51-claw-axe-whetstone/approved/`), `greataxe`(전투도끼 3×2)는 지금 그림을 30° 돌려 구운 것(호출 없음),
   `whetstone`(숫돌)은 **그린 도형**(회색 숫돌 막대, `Archive/51-claw-axe-whetstone/whetstone_shape.py`가 만든다. 생성한 그림이 아니다. 그림은 지시가 있을 때)이다.
-- 리뷰 시트(`review_sheet.py --type item`)는 아이콘을 실제 칸에 넣어 만든다: 화면 크기(쿨다운이 절반 찬 것과 다 찬 것)와 그 2배.
+- 리뷰 시트(`review_sheet.py --type item`)는 아직 옛 띠 칸(위 표)에 넣어 만든다: 화면 크기(쿨다운이 절반 찬 것과 다 찬 것)와 그 2배. 격자의 조각은 라운드의 검토 스크립트로 본다.
 
 ## 얼굴 (`cutface.py`)
 

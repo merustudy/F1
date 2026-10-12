@@ -49,7 +49,7 @@ Application 계층이 하는 일은 넷이다.
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
 | `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
-| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
+| `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로, 상점 노드는 `Shop`으로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyToInventoryAt`(인벤토리의 한 자리, Round 55)·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기. **이긴 뒤**(`LootOpen`: 끝난 전투가 열려 있고 원정이 `PickingLoot`. Round 47)에는 `Loot`의 명령도 모두 된다(전리품은 전투 화면에서 줍는다). 전리품을 다 주웠거나 없어서 원정이 `ChoosingNode`인데 이긴 전투가 아직 화면에 있으면(`WonBattleOnShow`, Round 52) 보드·인벤토리의 명령이 [계속](닫기)까지 된다 |

@@ -9,7 +9,7 @@ Domain 코드의 구조, 결정론을 지키는 방법, 상태 Type, 시뮬 실�
 Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Managers, Save DTO를 참조하지 않는다
 ├─ Random       Pcg32, RngStream, SeedDeriver
 ├─ Battle       BattleEngine, BattleSetup, BattleUnit, BattleEvent, BattleInput, BattleLog, Formation
-├─ Expedition   ExpeditionState, ExpeditionRules, ItemBoard, FatigueRules, NodeMap, MapGenerator
+├─ Expedition   ExpeditionState, ExpeditionRules, ItemBoard, StarRules, FatigueRules, NodeMap, MapGenerator
 └─ Run          RunState, RunRules, SettlementReport
 ```
 
@@ -126,7 +126,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
 
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
-  `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 등급은 던전의 것, 단계는 층의 것(정예 한 단계 위)이다 — 적이 들었던 등급이 아니다.
+  `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
 - `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
 - 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
   마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
@@ -142,7 +142,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
 - 물건(`Stock`)은 **물건 다음에 포션**이다(Round 56). 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 겹침 없음, `ShopGoodsCount` = `ShopSlots`나 후보 수 중 작은 것).
-  포션은 `DrawPotions`가 상점마다 한 번 뽑는다(종류마다 `ShopPotionChancePercent`, 하나도 없으면 가중치로 하나: 늘 하나 이상. 빈 포션 칸과 상관없이). 단계·등급은 그 층의 것(`DungeonData.ItemTierAt`·`ItemGradeAt`: 전리품과 같은 셈)이다.
+  포션은 `DrawPotions`가 상점마다 한 번 뽑는다(종류마다 `ShopPotionChancePercent`, 하나도 없으면 가중치로 하나: 늘 하나 이상. 빈 포션 칸과 상관없이). 단계는 그 층의 것(`DungeonData.ItemTierAt`: 전리품과 같은 셈, 정예의 한 단계는 없다)이다.
   난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열어 포션을 먼저 뽑고, 새로고침 k번째의 물건은 그 뒤를 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
   새로고침은 물건 자리만 새로 채우고 포션 자리(판 것은 null 그대로)는 둔다(`RefreshShop`).
 - 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션과 가방은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
@@ -203,7 +203,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 상수는 전부 `BalanceData`, 콘텐츠는 Definition에서 온다. Domain 코드에 밸런스 숫자가 없다.
   열의 수와 "한 열에 하나"는 상수가 아니라 구조다("자리 (열)").
 - 패시브, 아이템 효과, 지역 속성은 데이터가 "언제, 조건, 무엇을, 누구에게, 얼마"를 적고, 코드는 그 어휘(Enum)만 구현한다.
-  새 어휘가 필요하면 Enum, Definition 생성자의 검증, `BattleEngine`의 처리, Test를 함께 넣는다.
+  새 어휘가 필요하면 Enum, Definition 생성자의 검증, `BattleEngine`의 처리, Test를 함께 넣는다. 값이 0.01 단위인지(`05_STATIC_DATA.md`)와 화면의 글(`UiText`, `12_UI.md` "수의 표시")도 함께 정한다.
 - Definition 생성자가 거르는 조합(`PassiveSpec`, `ItemEffect`)은 `BattleEngine`이 구현한 조합과 같아야 한다.
 
 ## 시뮬 실행기 (`Tools/Sim`)
