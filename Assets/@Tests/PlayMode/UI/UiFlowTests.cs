@@ -851,9 +851,13 @@ namespace F1.Tests
             yield return null;
             Assert.IsTrue(party.InventoryPanel.activeSelf, "I opens it.");
             Assert.AreEqual(UiStrings.Get(UiKeys.Board.InventoryHide), UiTestUtil.TextAt(map, "Frame/BoardPanel/InventoryToggle/InventoryToggleLabel"));
+            grid.SquareAt(0, 0).RightClickNow();
+            yield return null;
+            Assert.IsTrue(party.Tooltip.IsShown, "The card of an item in the inventory.");
             map.PressInventoryKey();
             yield return null;
             Assert.IsFalse(party.InventoryPanel.activeSelf, "I closes it.");
+            Assert.IsFalse(party.Tooltip.IsShown, "And the card with it, as after a win.");
         }
 
         [UnityTest]
@@ -2319,6 +2323,16 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.At(unit, "UnitMarks/UnitStates/UnitStatusChip").gameObject.activeSelf);
             Assert.IsNotEmpty(UiTestUtil.TextAt(unit, "UnitMarks/UnitStates/UnitStatusChip/UnitStatus"));
             Assert.IsFalse(UiTestUtil.At(unit, "UnitMarks/UnitStates/UnitBurnChip").gameObject.activeSelf);
+
+            // Past its grace, the chip says the chance the battle rolls: the base moved by a fatigue state (a reckless one dies more easily).
+            StaticData data = Managers.Data.Data;
+            FatigueStateData reckless = data.FatigueStates.Get("reckless");
+            int chance = FatigueRules.DogDeathChancePercent(data.Balance, reckless);
+            Assert.AreNotEqual(data.Balance.DogDeathChancePercent, chance, "Staged so that the state moves the chance.");
+            unit.Unit.State = reckless;
+            unit.Unit.GraceEndMs = Managers.Expedition.Battle.Engine.TimeMs;
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.DogRolling, chance), UiTestUtil.TextAt(unit, "UnitMarks/UnitStates/UnitStatusChip/UnitStatus"));
 
             // Everyone else has neither the rim nor the state.
             foreach (BattleUnitView other in UiTestUtil.Views<BattleUnitView>(UiTestUtil.Screen<BattleScreen>()).Where(u => !u.Unit.InDog))

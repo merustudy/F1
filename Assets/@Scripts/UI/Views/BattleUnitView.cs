@@ -482,9 +482,10 @@ namespace F1.UI
 
         void RenderStatus(BalanceData balance, int timeMs)
         {
-            // One number that changes exactly when the status text has to change.
+            // One number that changes exactly when the status text has to change. The chance is in it: a state can come or go at death's door.
             long status;
             int graceTenths = 0;
+            int chance = 0;
             if (!_unit.InDog)
             {
                 status = 0;
@@ -496,7 +497,8 @@ namespace F1.UI
             }
             else
             {
-                status = 2;
+                chance = FatigueRules.DogDeathChancePercent(balance, _unit.State);
+                status = -2L - chance;
             }
 
             if (status == _shownStatus)
@@ -509,9 +511,9 @@ namespace F1.UI
             {
                 _status.text = string.Empty;
             }
-            else if (status == 2)
+            else if (status < 0)
             {
-                _status.text = UiStrings.Get(UiKeys.Battle.DogRolling, balance.DogDeathChancePercent);
+                _status.text = UiStrings.Get(UiKeys.Battle.DogRolling, chance);
             }
             else
             {

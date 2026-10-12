@@ -180,6 +180,12 @@ namespace F1.Gameplay
             PassDays(data, state, data.Balance.RestDays, null);
         }
 
+        /// <summary>How much fatigue comes down over a number of days at home. The lobby shows it on the rest button.</summary>
+        public static int FatigueRecovery(BalanceData balance, int days)
+        {
+            return balance.FatigueRecoveryPerDay * days;
+        }
+
         /// <summary>Starts an expedition with the lobby party. Its seed is derived from the run seed.</summary>
         public static ExpeditionState BeginExpedition(StaticData data, RunState state, string dungeonId)
         {
@@ -296,7 +302,7 @@ namespace F1.Gameplay
         static void PassDays(StaticData data, RunState state, int days, HashSet<string> away)
         {
             state.Day += days;
-            int recovery = data.Balance.FatigueRecoveryPerDay * days;
+            int recovery = FatigueRecovery(data.Balance, days);
             foreach (MercenaryState mercenary in state.Roster)
             {
                 if (away != null && away.Contains(mercenary.Id))

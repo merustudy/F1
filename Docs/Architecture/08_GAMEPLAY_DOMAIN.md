@@ -105,7 +105,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   상태가 고통이고 문턱 아래면 풀림(`FatigueStateEnded`). 전투가 시작할 때 들어온 피로를 같은 함수로 먼저 판정한다(`BattleStarted` 뒤, 패시브 앞).
 - 붕괴 판정의 난수는 `RngStream.Fatigue`(사망 판정의 `Battle` 스트림과 다름)다: 각성인지, 어느 상태인지 두 번 뽑는다. 상태의 목록은 `BattleSetup.FatigueStates`(데이터의 id 순)에서 온다.
 - 상태의 효과는 `FatigueStateData`의 세 수치다: 쿨다운은 `CooldownOf(유닛, 아이템)`이 발동 때마다 센다(들어온 상태는 첫 쿨다운부터), 받는 회복은 `ApplyHeal`에서 `FatigueRules.Scaled`,
-  빈사의 사망 확률은 `DogHit`에서 더해 0~100에 묶는다. 고통이 풀리는 세 자리(전투의 처치, 야영지의 쉬기, 로비의 쉬는 날)는 모두 `FatigueRules.AfflictionEnds`·`StateAfter`로 묻는다.
+  빈사의 사망 확률은 `FatigueRules.DogDeathChancePercent`가 더해 0~100에 묶는다(`DogHit`이 굴리고, 전투 화면의 상태 줄이 같은 값을 보인다). 고통이 풀리는 세 자리(전투의 처치, 야영지의 쉬기, 로비의 쉬는 날)는 모두 `FatigueRules.AfflictionEnds`·`StateAfter`로 묻는다.
 
 ## 긴 원정: 노드 종류와 깊은 층
 

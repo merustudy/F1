@@ -849,9 +849,7 @@ namespace F1.Gameplay
                 Log(BattleEventKind.GraceBroken, UnitRef.None, target.Ref, null, target.GraceHits, 0, 0);
             }
 
-            // A fatigue state moves the chance (a reckless mercenary dies more easily, a stalwart one less).
-            int chance = _balance.DogDeathChancePercent + (target.State?.DeathChanceDelta ?? 0);
-            chance = Math.Max(0, Math.Min(100, chance));
+            int chance = FatigueRules.DogDeathChancePercent(_balance, target.State);
             int roll = _battleRng.NextInt(100);
             bool died = roll < chance;
             Log(BattleEventKind.DeathRolled, UnitRef.None, target.Ref, null, chance, roll, died ? 1 : 0);

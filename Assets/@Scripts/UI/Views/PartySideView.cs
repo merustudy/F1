@@ -345,8 +345,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Opens or closes the inventory popup. Closing it lets go of an inventory item held. The owning screen refreshes afterwards
-        /// (its toggle label changes too), which refreshes this view.
+        /// Opens or closes the inventory popup. Closing it lets go of an inventory item held and closes an item's card, as after a win.
+        /// The owning screen refreshes afterwards (its toggle label changes too), which refreshes this view.
         /// </summary>
         public void ToggleInventory()
         {
@@ -355,6 +355,8 @@ namespace F1.UI
             {
                 _hand.Clear();
             }
+
+            _tooltip.Hide();
         }
 
         public void Refresh()

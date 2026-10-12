@@ -248,6 +248,7 @@ namespace F1.Tests
             Assert.AreEqual(2, run.Day);
             Assert.AreEqual(30, RunRules.FindMercenary(run, "anna").Fatigue);
             Assert.AreEqual(0, RunRules.FindMercenary(run, "ben").Fatigue);
+            Assert.AreEqual(10, RunRules.FatigueRecovery(data.Balance, data.Balance.RestDays), "What the rest button says comes down.");
         }
 
         [Test]

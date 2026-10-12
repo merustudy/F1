@@ -60,6 +60,15 @@ namespace F1.Gameplay
             return stateId != null && AfflictionEnds(data.Balance, data.FatigueStates.Get(stateId), fatigue) ? null : stateId;
         }
 
+        /// <summary>
+        /// The chance of dying on a hit at death's door: the base chance moved by the fatigue state (a reckless mercenary dies more
+        /// easily, a stalwart one less), within 0..100. The battle rolls it and the screen shows it.
+        /// </summary>
+        public static int DogDeathChancePercent(BalanceData balance, FatigueStateData state)
+        {
+            return Math.Max(0, Math.Min(100, balance.DogDeathChancePercent + (state?.DeathChanceDelta ?? 0)));
+        }
+
         /// <summary>A value changed by a state's percent: value x (100 + percent) / 100, rounded down, never below 0.</summary>
         public static int Scaled(int value, int percent)
         {

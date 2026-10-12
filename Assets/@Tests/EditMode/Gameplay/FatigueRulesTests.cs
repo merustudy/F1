@@ -43,6 +43,20 @@ namespace F1.Tests
         }
 
         [Test]
+        public void DeathsDoorChance_IsTheBaseMovedByTheState_WithinZeroAndAHundred()
+        {
+            StaticData data = TestData.Data(("DogDeathChancePercent", 30));
+            FatigueStateData reckless = data.FatigueStates.Get("reckless");
+            FatigueStateData stalwart = data.FatigueStates.Get("stalwart");
+
+            Assert.AreEqual(30, FatigueRules.DogDeathChancePercent(data.Balance, null), "No state: the base.");
+            Assert.AreEqual(55, FatigueRules.DogDeathChancePercent(data.Balance, reckless), "Reckless: +25.");
+            Assert.AreEqual(15, FatigueRules.DogDeathChancePercent(data.Balance, stalwart), "Stalwart: -15.");
+            Assert.AreEqual(100, FatigueRules.DogDeathChancePercent(TestData.Data(("DogDeathChancePercent", 90)).Balance, reckless), "Never above 100.");
+            Assert.AreEqual(0, FatigueRules.DogDeathChancePercent(TestData.Data(("DogDeathChancePercent", 10)).Balance, stalwart), "Never below 0.");
+        }
+
+        [Test]
         public void ABattle_CostsTheEntry_AndEveryPieceOfEquipmentOnTheBoard()
         {
             StaticData data = TestData.Data(("FatigueBattleEntry", 5), ("FatigueEquipment", 1));

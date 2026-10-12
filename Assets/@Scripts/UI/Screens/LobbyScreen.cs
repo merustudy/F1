@@ -78,7 +78,7 @@ namespace F1.UI
             _departStatus.color = check == DepartCheck.Ok ? UiPalette.Good : UiPalette.Burn;
 
             _rest.interactable = !run.IsOver;
-            _restLabel.text = UiStrings.Get(UiKeys.Lobby.Rest, balance.FatigueRecoveryPerDay * balance.RestDays, balance.RestDays);
+            _restLabel.text = UiStrings.Get(UiKeys.Lobby.Rest, RunRules.FatigueRecovery(balance, balance.RestDays), balance.RestDays);
 
             _runOverPanel.SetActive(run.IsOver);
             _runOverDay.text = UiStrings.Get(UiKeys.Lobby.RunOverDay, run.Day);
