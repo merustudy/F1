@@ -1,6 +1,6 @@
 # Slice B 16단계: 맞추기
 
-Snapshot: 2026-10-07 (18단계 뒤)
+Snapshot: 2026-10-12 (리팩토링 검토와 R5~R9 뒤)
 
 ## Goal
 
@@ -22,6 +22,10 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
   권장: 지역 코인은 원정 안에서만(귀환 정산에 소멸), 표식 A(코인 더미), 창 A(지도 위, 보드 칸 모양의 물건 넷), 사기 ㄴ(좌클릭 고르기 + 카드, 칸에 놓을 때 삼. 우클릭은 들이지 않음), 새로고침은 시작값 + 증가(나가면 초기화),
   **범위는 17단계(16단계 뒤, Slice B에 더함)**. 판정할 것 여섯은 README 44. **판정 대기**. 플레이 기록은 아직 없다(`Logs/`가 없음).
 - 2026-10-07 사용자가 검토 항목을 더했다: **아이템 클릭 툴팁**(Backpack Battles처럼, 아무 곳이나 누르면 닫힘) → **Round 42** 목업 다섯과 README(`ArtPipeline/Archive/42-item-tooltip/`). 권장 안 1(먹색 판 + 놋쇠 선) + 자리 P1(파티 쪽은 패널 위, 전투는 보드 옆) + 동작(고르기 그대로 + 카드, 다음 클릭에 카드만 닫힘) → 사용자 **"권장안 구현"** → 구현했다(아래 Done). 호출 없음.
+
+- 2026-10-12 상태 복구: `Logs/`에 플레이 기록이 여섯 있다(10-08~10-10). 정산까지 간 것은 둘(10-09 09:45 약 6분, 10-10 10:12 약 9.8분)이고 둘 다 21·22단계 전이며 메모가 없다.
+  맞추기의 근거로 쓸지는 사용자가 정한다(권장: 22단계 데이터로 x1 원정을 새로 하나).
+- 2026-10-12 **리팩토링 검토**(사용자 "코드 리팩토링 필요 여부 검토" → "수행"): 아래 "리팩토링 검토 (2026-10-12)". 지금 할 것 R5~R9를 주제별 커밋으로 했다.
 
 ## Done
 
@@ -92,11 +96,32 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 - 목업 7의 명패 스타일은 **유니크 아이템**(사용자 2026-10-07: 금 아이템 조합으로 만들고 전투당 하나만 소유)의 툴팁에 쓰기로 하고 보관했다: Design/02 §4 【검토】, Architecture/09 Deferred·12 "툴팁" 보관, README 42 "보관". 규칙은 Slice C에서 정한다.
 - **Round 44 상점 노드와 지역 코인**: 2026-10-07 사용자 **"권장안 구현"** → 17단계를 열어 구현했다(`b17-shop.md`). 판정할 것 여섯과 권장안, 구현의 기록은 `ArtPipeline/Archive/44-shop-node/README.md`.
 - Round 42의 사후 검토: 카드가 열린 동안 설명 줄에 같은 사실이 두 곳에 있는 것(설명 줄을 안내만으로 줄일지), 전투의 카드 클릭 소리, 카드가 용병 그림을 덮는 느낌 — 직접 플레이에서 본다.
-- **결정타 분리(R2·R3)**(a10 Open): 연출을 바꾸는 라운드에서 한다. 16단계에서 연출을 바꾸지 않으면 하지 않는다(권장).
+- **결정타 분리(R2·R3)**(a10 Open): 결정타·붕괴·쓰러짐·치명타 처치의 연출을 바꾸는 라운드의 **첫 커밋**에서 한다(Round 38에서 이 계기를 한 번 놓쳤다). 데이터 조정만이면 하지 않는다. 상세는 아래 "리팩토링 검토".
+
 - Round 37의 붕괴·각성 초상은 B안에 자리가 없어 **보류** 그대로.
 - Unity가 만든 추적되지 않은 파일 넷은 2026-10-07 세션 정리에서 권장안대로 정리했다(Addressables Profile 설정과 `ScriptableBuildPipeline.json`은 저장소에, `OSX/`·`OSX.meta`는 `.gitignore`. 사후 검토).
 - Roadmap "사후 검토 대기" 표의 항목은 플레이 중 눈에 띄면 그때 올린다.
 
+### 리팩토링 검토 (2026-10-12)
+
+영역 열 곳을 나눠 후보 102개를 찾고 하나씩 반박 검증한 뒤 묶었다. 결론: **큰 리팩토링은 필요 없다**(파일 크기 때문에 생긴 버그·충돌 기록이 없고, 불변조건 위반은 아래 R5의 UI 계산 둘뿐).
+`BattleScreen`·`ExpeditionRules`·`BattleEngine`·`UiFlowTests`를 크기만 보고 나누기, 세 격자 뷰의 기반 클래스, Setup 공용 Framework는 하지 않는다(나눠도 한 라운드가 고칠 곳이 줄지 않거나 §7).
+
+한 것(커밋): R5 빈사 칩의 확률(피로 상태 보정 누락 버그)·I 키로 닫을 때의 카드·로비 쉬기 글 / R7 Owner 문서의 낡은 줄 / R6 시뮬의 합치기 셈(**0.14 → 3.27/원정**: G18의 근거가 바뀜)과 0.01 단위 출력, 체인의 Inconclusive 이름 /
+R8 죽은 코드·쓰지 않는 그림 셋·문구 키 셋·낡은 주석, Prefab Stamp의 보드 크기 / R9 Test 이름의 등급, 효과 없는 직업 목록 사본, 진행 루프의 default. R9의 `FlatRow` 변수 이름(row1 → flat1)은 하지 않았다(이름만의 문제, 다음에 그 Test를 고칠 때).
+
+미룬 것 — 계기가 오면 그 라운드의 첫 커밋으로:
+
+| # | 무엇 | 계기 |
+|---|---|---|
+| R10 | PlayMode 새 런의 시드 고정(`AppRoot`의 override)과 지도에 기대는 `Assume`을 `Assert`로, 전리품 Test 셋의 연출 없는 승리 가정(`StageChampion`), 인벤토리 크기와 Prefab에 구운 크기가 다르면 실패하는 검사(상한 대신) | 튜닝 라운드의 첫 커밋 |
+| R11 | 이긴 뒤 전투 화면과 노드 맵의 손·인벤토리 배선 두 벌(`AimFrom`·`OnHeldPressed`·칸 핸들러·합치기 미리보기), Round 54 뒤 꺼진 그림자 부품, `InventoryGridView`의 `GridGeometry` 사본 | 두 화면의 손을 함께 바꾸는 라운드(G18 안 2·3 포함) |
+| R12 | 꺼진 단계 외곽선(Round 41) 부품: `SilhouetteOutline`, `ItemSlotView`·`BattleItemView`의 외곽선 필드, `TierStyle.Outline`, `UiPalette.TierMark`·`TierBronze/Silver/Gold`, 툴팁 띠 | 단계·유니크 표시를 바꿀 때 |
+| R13 | `ItemOffer` → `EquippedItem` 14곳, 전리품·상점 놓기 짝, `OfferRecord` 식 둘, UI의 `Tier + 1` 셋, 상점 후보 조건 둘 | G18 구현(채택안에 맞는 항목만) |
+| R14 | `StarDamage`의 두 뜻(주는 쪽·받는 쪽), `RollCritical`의 필드 반환, 효과 단위 판단 둘(선택) | 별·치명타·효과 어휘를 바꿀 때 |
+| R2/R3 | 결정타·붕괴 연출(`StageMoment`)을 `BattleScreen`에서 떼기 | 위 "결정타 분리" |
+| R15 | run.json 옛 변환 단계(v2~v9, 약 300줄). **사용자 결정 필요**: 읽는 가장 옛 버전(권장: 그때 개발자 저장의 버전) | 다음 저장 형식 변경 전에 묻는다 |
+| R16 | "전투 사이" 판정을 원정 단계 하나로(`Phase != InBattle`; Round 52 버그의 목록) | 원정 단계가 늘거나 이긴 뒤 흐름을 바꿀 때 |
 ## Verification
 
 - 체인 1(`20261007-032022`, `setup sim editmode`, J 전): setup OK(새 .cs 둘의 .meta 생성), sim OK, EditMode **727/727**(`PlayLogTests` 3, `ABurnTick_IsAHitThatTiresNobody_AStormTickTires` 포함).
@@ -115,6 +140,9 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 - `git diff --check` 깨끗. 데이터 변경은 `BalanceData.csv`의 두 줄(`FatigueOnHit` 2, `FatigueOnKill` 5)과 Generated뿐.
 - 쓰러짐 사망의 문장 버그 수정(2026-10-09, 워크트리 브랜치 `claude/objective-poincare-e25ee1`, `feature/slice-a`의 `cdab8f0` 위)의 체인(`20261009-094930`, 전체): setup OK(String Table에 `Death.Collapsed`. 새 글자가 없어 Font Atlas는 그대로), sim OK, EditMode **756/756**(새 Test 넷: `PartyDeaths_WhenTheCollapse…` 둘, `BattleLogTextTests` 둘), PlayMode **78/87**(9 skipped. `OneLap_…` 통과). `Assets/InitTestScene*` 없음, `git diff --check` 깨끗. Unity가 고쳐 쓴 `.vscode/settings.json`(워크트리의 솔루션 이름)은 되돌렸다. 변경은 코드 셋·Test 둘(새 파일 `BattleLogTextTests.cs`와 .meta)·CSV와 Table 셋·문서 셋뿐이다. 커밋 `13f66d2`.
   19단계(`b3d41e6`)를 그 브랜치에 합친 뒤(merge: 충돌은 String Table 셋과 Architecture/12의 한 곳. Table은 19단계 쪽을 받고 setup이 CSV에서 다시 만듦) 체인(`20261009-180536`, 전체): setup·sim OK, EditMode **798/798**(새 Test 넷 통과), PlayMode **79/88**(9 skipped. `OneLap_…` 통과). `Assets/InitTestScene*` 없음. 그 merge 커밋을 `feature/slice-a`에 올렸다(앞으로 감기).
+
+- 리팩토링 R5~R9(2026-10-12): R5 뒤 setup·EditMode `20261012-163545` 847/847, PlayMode `20261012-163637` 83/92. R8 뒤 setup·EditMode `20261012-164948` 845/845(Pcg32 Test 둘을 뺌), setup 뒤 Prefab 파일 diff 없음.
+  끝에 체인 전체 `20261012-165035` **CHAIN OK**(setup, sim, EditMode 845/845, PlayMode 83/92, 9 skipped, inconclusive 0). 시뮬은 같은 시드로 R5·R8 전후 출력이 같고, R6는 합치기 수와 0.01 단위의 출력만 바뀌었다.
 
 ## Next Action (제안)
 
