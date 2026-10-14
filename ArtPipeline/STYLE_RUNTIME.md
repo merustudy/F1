@@ -9,6 +9,8 @@
 **조립 순서:** 타입의 Style Rule → Subject → 타입 섹션 → (던전의 것이면) 던전 컨셉 → 타입의 Forbidden → 타입의 Reference Rule
 **형식 계약:** 번호 섹션의 제목은 `## <번호>. <제목>`. §1, §2와 Reference Rule 섹션에는 ```` ```text ```` 블록이 하나씩 있고, 타입 섹션은 `- ` 불릿으로 쓴다.
 던전 컨셉 섹션의 제목은 `## Dungeon: <DungeonData.Id>`이고, 그 안의 `### Creatures`(적)와 `### Place`(배경) 아래에 `- ` 불릿으로 쓴다.
+저장한 체형 섹션의 제목은 `## Body: <이름>`이고 그 아래에 `- ` 불릿으로 쓴다(2026-10-14). 소재의 `Body` 열이 이름을 가리키면 그 문구가 Subject 다음에 "Body type:"으로 붙는다.
+체형은 `--style`로 다른 문서를 쓸 때도 이 문서에서 읽는다(저장한 체형은 한 곳에 둔다). `character`, `attack`, `hit`만 쓴다.
 번호를 바꾸면 `gen_image.py`의 섹션 번호도 함께 바꾼다.
 오려 낸 그림(`character`, `enemy`, `item`)은 §1과 §2를, 배경은 자기 것(§10, §12)을, UI는 자기 것(§14, §17)을 Style Rule과 Forbidden으로 쓴다:
 배경은 불투명하고 장면을 그리기 때문이고, UI는 인물이 아니라 정면에서 본 납작한 조각을 그리기 때문이다.
@@ -84,7 +86,7 @@ transparent background.
 ## 4. Character
 
 - Draw one mercenary alone, the whole body from the top of the head to the boots, standing on both feet in an energetic, characterful stance as the subject says, in a three-quarter view turned toward the viewer's right.
-- Proportions and build: exaggerated and rubbery, between three and five heads tall as the subject says, always with a big head: the head is as big as the heads of the characters on the reference sheet. A tall, broad or heroic build is shown by the body, never by a smaller head. Every character has a strongly different body type (brawny and top-heavy, squat and barrel-shaped, tall and lanky, round and soft, lean and wiry): follow the subject. A woman keeps a curvy figure (a full bust, a narrow waist, full hips) whatever her build. Rubbery limbs with no muscles drawn inside, big hands and big boots.
+- Proportions and build: exaggerated and rubbery, between three and five heads tall as the subject says, always with a big head: the head is as big as the heads of the characters on the reference sheet. A tall, broad or heroic build is shown by the body, never by a smaller head. Every character has a strongly different body type (brawny and top-heavy, squat and barrel-shaped, tall and lanky, round and soft, lean and wiry): follow the subject and its body type. A woman keeps a curvy figure (a full bust, a narrow waist, full hips) whatever her build. Rubbery limbs with no muscles drawn inside, big hands and big boots.
 - Face: caricatured but attractive, as the subject says: large expressive eyes with dark pupils (one may be a touch larger than the other), well-shaped thick eyebrows, a distinctive but elegant nose (long and straight, small and upturned, or strong and straight), a strong handsome jaw for a man and soft pretty features for a woman, and a serious mouth that does not smile (closed in a firm line, set, or pressed thin): a mercenary about to fight in a dark dungeon looks determined, stern, wary or grim, never cheerful, never grinning. A few freckle or stubble dots are fine. Each character gets its own face shape and its own kind of seriousness, never grotesque.
 - Gaze: the eyes look toward the viewer's right, where the enemy stands: the pupils sit toward the right side of the eyes and the head is turned a little that way. Never looking at the viewer, never looking left.
 - The eyes always have their dark pupils: never dot eyes, never blank eyes without pupils.
@@ -420,3 +422,15 @@ background, and do not reproduce the background of the attached image.
 - Old timber frames, two posts and a beam, shore the back wall at even intervals. A tin lantern with a candle stub hangs on some of the posts.
 - A rusted rail track runs along the floor near the back wall. An ore cart, crates, coils of rope, a pickaxe and loose rock are what is left lying around.
 - The colors of the mine: dark brown and soot grey rock, rust orange and dull lantern yellow.
+
+## Body: hourglass
+
+- A voluptuous hourglass figure about four and a half heads tall, still with the big head the composition asks for.
+- A full, round bust, a very narrow cinched waist, wide curvy hips and thick, shapely thighs.
+- Softer, rounded shoulders and slimmer arms: never top-heavy, never a brawler's bulk.
+
+## Body: athletic
+
+- A toned, athletic and curvy figure about four and a half heads tall, still with the big head the composition asks for.
+- A full bust, a narrow waist, round hips, strong shapely thighs and calves, and defined but feminine shoulders and arms.
+- Where the outfit bares the midriff, a flat toned stomach drawn with a few simple lines for the abs.

@@ -102,6 +102,8 @@ TYPES = {
         "mirror_references": False,
         "data": "JobData.csv",
         "dungeon_theme": None,
+        # A mercenary may name a saved body type (STYLE_RUNTIME.md "## Body: <name>", 2026-10-14).
+        "body": True,
         "quality": "medium",
         "tail": "Draw this one character, full body.",
         "fit": "figure",
@@ -207,6 +209,7 @@ TYPES = {
         "mirror_references": False,
         "data": "JobData.csv",
         "dungeon_theme": None,
+        "body": True,
         "quality": "medium",
         "size": "1536x1024",
         "tail": "Draw this one character, full body.",
@@ -221,6 +224,7 @@ TYPES = {
         "mirror_references": False,
         "data": "JobData.csv",
         "dungeon_theme": None,
+        "body": True,
         "quality": "medium",
         "size": "1536x1024",
         "tail": "Draw this one character, full body.",
@@ -488,8 +492,20 @@ def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
     elif spec.get("dungeon_required"):
         raise PipelineError(f"Roster의 '{key}' 에 Dungeon 이 없다.\n  파일: {path}")
 
+    # A row may name a saved body type: its rules join the subject (STYLE_RUNTIME.md "## Body: <name>").
+    body = (row.get("Body") or "").strip()
+    if body:
+        if not spec.get("body"):
+            raise PipelineError(f"Roster의 '{key}' 에 Body 가 있지만 타입 {kind} 은 체형을 쓰지 않는다.\n  파일: {path}")
+        known = body_types(STYLE_RUNTIME.read_text(encoding="utf-8"))
+        if body not in known:
+            raise PipelineError(
+                f"Roster의 '{key}' 의 Body '{body}' 가 {STYLE_RUNTIME.name} 의 '## Body: <이름>' 절에 없다.\n"
+                f"  파일: {path}\n  있는 체형: {', '.join(known) or '(없음)'}"
+            )
+
     return {"subject": subject, "height": height, "flip": flip == "true", "floor_line": floor_line,
-            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells}
+            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells, "body": body}
 
 
 def read_item_cells(key: str) -> int:
@@ -603,6 +619,29 @@ def dungeon_themes(text: str) -> dict:
     return themes
 
 
+def body_types(text: str) -> dict:
+    """The saved body types: the '## Body: <name>' sections of the runtime document, name -> its rules in one run.
+
+    A body type is chosen by name in a roster's Body column, so several characters can share one (2026-10-14).
+    """
+    bodies, name, buffer = {}, None, []
+
+    def close():
+        if name is not None:
+            bodies[name] = bullet_rules("\n".join(buffer))
+
+    for line in text.split("\n"):
+        heading = re.match(r"^##\s+Body:\s*(\S+)\s*$", line)
+        if heading or line.startswith("## "):
+            close()
+            name, buffer = (heading.group(1) if heading else None), []
+        elif name is not None:
+            buffer.append(line)
+
+    close()
+    return bodies
+
+
 def fenced_block(body: str) -> str:
     """First ```text fence in a section - the blocks meant to be pasted verbatim."""
     match = re.search(r"```text\n(.*?)\n```", body, re.S)
@@ -616,7 +655,7 @@ def bullet_rules(body: str) -> str:
 
 
 def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", held: bool = False, cells: int = 0,
-                 style: Path = None, tail: str = "") -> str:
+                 style: Path = None, tail: str = "", body: str = "") -> str:
     """Assembles the prompt in the order the style document prescribes.
 
     held: the attached reference is the figure of the unit that holds the subject, so the prompt
@@ -625,6 +664,8 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     style: another style document than STYLE_RUNTIME.md, for a style test (--style). Same format.
     tail: the sentence that ends the subject instead of the type's, for a style test that draws the
     type's subject in another framing (--tail; round 37: a bust of a mercenary).
+    body: a saved body type the roster row names. Its rules are always read from STYLE_RUNTIME.md, also
+    under --style: the saved body types live in one place.
     """
     style = style or STYLE_RUNTIME
     text = style.read_text(encoding="utf-8")
@@ -642,6 +683,7 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     forbidden = fenced_block(sections.get(forbidden_section, ""))
     reference_rule = fenced_block(sections.get(spec["reference_section"], ""))
     theme = dungeon_themes(text).get(dungeon, {}).get(spec["dungeon_theme"], "") if dungeon else ""
+    body_rules = body_types(STYLE_RUNTIME.read_text(encoding="utf-8")).get(body, "") if body else ""
 
     required = [
         (f"{shared_section}. Style Rule (```text 블록)", shared),
@@ -653,6 +695,8 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
         required.append((f"Dungeon: {dungeon} / {spec['dungeon_theme']} (- 규칙)", theme))
     if shape_section:
         required.append((f"{shape_section}. {kind} shape of {cells} cell(s) (- 규칙)", shape))
+    if body:
+        required.append((f"Body: {body} (- 규칙, {STYLE_RUNTIME.name})", body_rules))
 
     missing = [name for name, value in required if not value]
     if missing:
@@ -665,8 +709,10 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     parts = [
         shared,
         f"Subject: {subject}. {extra + ' ' if extra else ''}{tail or spec['tail']}",
-        f"Composition: {composition}{' ' + shape if shape else ''}",
     ]
+    if body_rules:
+        parts.append(f"Body type: {body_rules}")
+    parts.append(f"Composition: {composition}{' ' + shape if shape else ''}")
     if theme:
         parts.append(f"Dungeon: {theme}")
     parts += [forbidden, reference_rule]
@@ -1335,7 +1381,7 @@ def main() -> int:
                   f"{', 좌우를 뒤집어 붙인다' if mirror else ''}{', 이 아이템을 든 유닛' if held else ''}"
                   f"{', --reference 로 받은 것' if custom_reference is not None else ''})")
 
-        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style, args.tail)
+        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style, args.tail, row["body"])
         print(f"[2/6] {style if args.style else style.name} 로 프롬프트 조립 ({len(prompt):,} chars"
               f"{f', 소재는 {roster}' if roster else ''}).")
 

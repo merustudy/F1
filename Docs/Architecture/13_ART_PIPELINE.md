@@ -47,6 +47,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 - 운영 문서는 `STYLE_RUNTIME.md` 하나다. 방향과 결정은 `Docs/Design/10_Art_Direction.md`, 라운드의 경위는 `Archive`가 가진다.
 - 스크립트가 파싱하는 형식: 번호 섹션의 제목은 `## <번호>. <제목>`. 공통 규칙, 금지, 기준 그림 문구 섹션에는 ```` ```text ```` 블록이 하나씩 있고,
   타입 섹션은 `- ` 불릿이다. 던전 컨셉 섹션의 제목은 `## Dungeon: <DungeonData.Id>`이고, 그 안의 `### Creatures`(적)와 `### Place`(배경) 아래가 `- ` 불릿이다.
+  저장한 체형 섹션의 제목은 `## Body: <이름>`이고 그 아래가 `- ` 불릿이다(2026-10-14, Design/10 §2. 지금 `hourglass`, `athletic`).
   필요한 섹션이 비면 호출 전에 실패한다.
 - 배경은 불투명한 장면이라 오려 낸 그림(전신 그림, 아이콘)과 공통 규칙, 금지를 따로 가진다.
   UI도 따로 가진다: 인물이 아니라 정면에서 본 납작한 조각이고, 원근과 입체감을 금지해야 하기 때문이다.
@@ -66,7 +67,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 
 | 타입 | 그리는 것 | Roster (`Key`) | 후처리 |
 |---|---|---|---|
-| `character` | 직업의 전신 그림. 오른쪽을 본다 | `Rosters/character.csv` (`JobData.Id`) | `figure` |
+| `character` | 직업의 전신 그림. 오른쪽을 본다 | `Rosters/character.csv` (`JobData.Id`. `Body`는 저장한 체형의 이름이거나 빈 값) | `figure` |
 | `enemy` | 적의 전신 그림. 왼쪽을 본다 | `Rosters/enemy.csv` (`EnemyData.Id`, `Dungeon`은 `DungeonData.Id`) | `figure` |
 | `item` | 아이템의 아이콘. 그 아이템이 차지하는 칸의 모양으로 그린다 | `Rosters/item.csv` (`ItemData.Id`. 모양은 `ItemData.Width`·`Height`) | `cell` |
 | `background` | 화면의 배경. 불투명, 인물 없음 | `Rosters/background.csv` (던전의 배경은 `Dungeon`이 `DungeonData.Id`) | `scene` |
@@ -74,7 +75,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 | `ui_piece` | UI의 장식 조각: 양초의 조각, 해골 더미, 보드 머리의 금 징(전에는 폭풍 시계의 다이얼). 늘이지 않고 통째로 보인다 | `Rosters/ui_piece.csv` (쓰임새의 이름) | `glyph` |
 | `ui_icon` | UI의 작은 기호: 상태 아이콘 | `Rosters/ui_icon.csv` (쓰임새의 이름) | `glyph` |
 | `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21, C 채택). 전신 그림처럼 바닥선에 세운다 | `Rosters/prop.csv` (쓰임새의 이름. 데이터가 가리키지 않는다) | `figure` |
-| `attack`, `hit` | 용병의 공격 자세와 피격 자세(Round 19·23). 확정 그림을 보고 같은 인물로, 자세와 표정만 바꾼다 | `Rosters/attack.csv`, `Rosters/hit.csv` (`JobData.Id`) | `pose` (`tools/fit_pose.py`) |
+| `attack`, `hit` | 용병의 공격 자세와 피격 자세(Round 19·23). 확정 그림을 보고 같은 인물로, 자세와 표정만 바꾼다 | `Rosters/attack.csv`, `Rosters/hit.csv` (`JobData.Id`. `Body`는 그 용병의 `character` 행과 같게) | `pose` (`tools/fit_pose.py`) |
 | `enemy_attack`, `enemy_hit` | 몬스터의 공격 자세와 피격 자세(2026-10-05 Round 26~28). 확정 그림을 보고 같은 몬스터로, 자세와 표정만. 왼쪽을 보고 눈동자 없는 눈 그대로 | `Rosters/enemy_attack.csv`, `Rosters/enemy_hit.csv` (`EnemyData.Id`, 잰 배율 `Scale`) | `pose` (`tools/fit_pose.py`) |
 
 - **공격·피격 자세**는 용병의 기본 그림이 확정될 때마다 더한다(규칙, Design/10 §2. Round 23에서 정식 타입이 됐다): `gen_image.py --type attack|hit --key <job>`.
@@ -87,7 +88,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 - **붕괴·각성의 자세**(2026-10-06 Round 38 "B", Design/10 §5): 붕괴의 순간 용병의 그림이 공격 자세처럼 **상태의 자세**로 바뀌었다가 돌아온다(`12_UI.md` "연출"). 그리는 길은 피격 자세의 것이다:
   `gen_image.py --type hit --key <job> --name <job>_broken|<job>_resolute --style Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md --roster Archive/38-breakdown-fx/broken.csv|resolute.csv`(§25를 "제자리에 선 상태의 자세"로, 색의 기분을 더한 시험 문서. 소재는 그 라운드의 것),
   맞추기는 `Archive/38-breakdown-fx/fit_state_poses.py`(`tools/fit_pose.py`를 그 직업의 확정 원본에 대고 돌린다). 파일은 `Assets/@Art/Pose/Job/<Id>_broken.png`, `<Id>_resolute.png`(2048x1024), 주소는 `pose/job/<kebab-id>-broken`, `-resolute`(`ArtAddress.Broken`·`Resolute`, `JobData.BrokenPose`·`ResolutePose`).
-  **직업마다 따로 그리는 선택 그림**이다(발키리는 Round 38, 나머지 다섯은 Round 40에 확정 — `Archive/40-state-poses/`: 소재 `broken.csv`·`resolute.csv`, 맞추기 `fit_state_poses.py --scale`. 지금은 여섯 직업 모두 있다): `ArtSetup.Files`는 파일이 있는 것만 Entry로 만들고, `ExpeditionArt`는 `ResourceManager.ExistsAsync`로 등록된 것만 읽으며, 없는 직업은 그 순간 대기 그림 그대로다. 정식 타입(`broken`·`resolute`)으로 올리고 선택을 거두는 일은 Slice C의 후보다(Round 40 권장안: 생성 도구·스타일 문서·로스터·`fit_pose` 네 곳을 바꾸는 일).
+  **직업마다 따로 그리는 선택 그림**이다(발키리는 Round 38, 나머지 다섯은 Round 40에 확정 — `Archive/40-state-poses/`: 소재 `broken.csv`·`resolute.csv`, 맞추기 `fit_state_poses.py --scale`. 발키리는 2026-10-14 모래시계 체형으로 다시 그렸다 — 소재 `Archive/64-valkyrie-body-manga/state/`, 맞추기 `40-state-poses/fit_state_poses.py --jobs valkyrie --scale valkyrie_broken=1.05 --scale valkyrie_resolute=0.97`(머리 크기). 지금은 여섯 직업 모두 있다): `ArtSetup.Files`는 파일이 있는 것만 Entry로 만들고, `ExpeditionArt`는 `ResourceManager.ExistsAsync`로 등록된 것만 읽으며, 없는 직업은 그 순간 대기 그림 그대로다. 정식 타입(`broken`·`resolute`)으로 올리고 선택을 거두는 일은 Slice C의 후보다(Round 40 권장안: 생성 도구·스타일 문서·로스터·`fit_pose` 네 곳을 바꾸는 일).
 - **몬스터의 공격·피격 자세**(2026-10-05, Design/10 §5. Round 26~28의 시험이 확정되어 정식 타입이 됐다): `gen_image.py --type enemy_attack|enemy_hit --key <enemy>`. 용병의 것을 왼쪽을 보는 몬스터로 돌린 것이다:
   기준 그림은 그 몬스터의 확정 원본(`output/enemy/<key>.raw.png`, 눈동자를 지운 것)을 같은 캔버스에 앉혀 공격은 **오른쪽** 3분의 1에(왼쪽으로 돌진할 자리), 피격은 가운데에. 스타일 문서 §27(구도: 왼쪽, 눈동자 없는 한 가지 색의 눈, 발·짐승의 발·부츠가 바닥선에, 장비 그대로, 날아가는 화살 없음, 우스꽝스럽게 위협적인 얼굴)과 §28(기준 그림 규칙).
   던전 컨셉은 붙이지 않는다(확정 그림이 이미 지니고, 자세는 그 장비를 그대로 지킨다. 던전 절의 "장비 하나를 걸친다"는 장비를 바꾸게 할 수 있었다). 소재는 정체 목록(확정 그림에서 읽은 체형·장비·무기, 눈의 색) + 자세 + 표정(공격은 사나운 비명·포효, 피격은 한 눈을 감은 찡그림).
@@ -101,6 +102,9 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
   오른쪽을 보는 기준 그림(확정한 직업 셋의 시트 `References/Character/style_ref_roster.png`, 2026-10-04)을 직업에는 그대로, 적에는 좌우를 뒤집어 붙인다.
   이전 기준 그림(`style_ref_mercenary.jpg`, 왼쪽을 본다)은 아이템·배경·UI 타입이 계속 쓴다.
 - 체형(등신 포함), 얼굴, 자세는 Roster의 `Subject`가 캐릭터마다 적는다(2026-10-04 그림체: 캐릭터마다 다른 체형과 표정이 핵심이다). 스타일 문서는 손맛과 공통 규칙만 갖는다.
+  **여러 캐릭터가 함께 쓰는 체형**은 스타일 문서의 `## Body: <이름>` 절에 저장하고 Roster의 `Body` 열이 이름으로 고른다(2026-10-14, Design/10 §2). 그 행의 `Subject`는 몸을 다시 적지 않는다.
+  `gen_image.py`가 그 절의 불릿을 Subject 다음에 "Body type:"으로 붙인다. 체형은 `--style`로 시험 문서를 써도 `STYLE_RUNTIME.md`에서 읽는다(저장한 체형은 한 곳). `character`, `attack`, `hit`만 받고,
+  없는 이름이나 체형을 받지 않는 타입의 `Body`는 호출 전에 실패한다. 붕괴·각성처럼 시험 문서로 그리는 자세의 소재도 같은 `Body`를 적는다(`Archive/64-valkyrie-body-manga/state/`).
   다만 용병의 머리는 늘 크다(스타일 문서 §4 "always with a big head"). 키가 크거나 덩치가 큰 체형도 머리를 줄여 내지 않는다(Design/10 §2. 2026-10-04 성기사).
 - **몬스터는 던전마다 컨셉이 있다.** 던전의 컨셉(눈의 색, 몸의 표시, 장비, 강조색)은 스타일 문서에 던전마다 한 절로 적고,
   그 던전의 적을 그릴 때마다 같은 문구가 붙는다. 그래서 한 던전의 몬스터는 서로 닮고 다른 던전과 구별된다.
