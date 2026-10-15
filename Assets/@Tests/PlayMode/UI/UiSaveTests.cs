@@ -96,17 +96,18 @@ namespace F1.Tests
             yield return NewRunWithParty();
             UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            UiTestUtil.StageChampion();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
 
-            // The first battle won: its loot lies there, saved with the win (round 47: the battle record is gone, the loot stays).
+            // The first battle won (staged): its loot lies there, saved with the win (round 47: the battle record is gone, the loot stays).
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             yield return UiTestUtil.EndBattle(battle);
             Assert.IsTrue(battle.AfterWin);
             ExpeditionState expedition = Managers.Expedition.Expedition;
-            Assume.That(expedition.Loot.Count, Is.GreaterThan(0), "The first battle drops something.");
+            Assert.Greater(expedition.Loot.Count, 0, "The first battle drops something.");
             string dropId = expedition.Loot[0].Id;
             int members = expedition.Members.Count(m => m.Alive);
 

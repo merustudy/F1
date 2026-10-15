@@ -21,6 +21,9 @@ namespace F1.Core
         /// <summary>Tests point this at a temporary directory so they never touch real saves.</summary>
         internal static string SaveRootOverride;
 
+        /// <summary>Tests fix the seed of a new run with this, so that their maps, shops, loot and battles are the same every time.</summary>
+        internal static ulong? NewRunSeedOverride;
+
         ResourceManager _resource;
 
         public static AppRoot Current { get; private set; }
@@ -63,9 +66,14 @@ namespace F1.Core
             Managers.Reset();
         }
 
-        /// <summary>The seed of a new run comes from the OS random source, never from game randomness.</summary>
+        /// <summary>The seed of a new run comes from the OS random source, never from game randomness (in tests, from <see cref="NewRunSeedOverride"/>).</summary>
         static ulong NewRunSeed()
         {
+            if (NewRunSeedOverride.HasValue)
+            {
+                return NewRunSeedOverride.Value;
+            }
+
             var bytes = new byte[8];
             using (var random = RandomNumberGenerator.Create())
             {

@@ -12,6 +12,12 @@ namespace F1.Tests
     {
         public const float DefaultTimeoutSeconds = 20f;
 
+        /// <summary>
+        /// The seed every new run of a test starts from, so that a test sees the same map, shops, loot and battles every time
+        /// instead of hanging on luck. Its map has a shop on floor 4 with goods that fit the start bag, and its first battle drops loot.
+        /// </summary>
+        public const ulong RunSeed = 1;
+
         /// <summary>Waits until the boot sequence has finished, successfully or not.</summary>
         public static IEnumerator WaitForBootToFinish(float timeoutSeconds = DefaultTimeoutSeconds)
         {
@@ -29,11 +35,12 @@ namespace F1.Tests
             }
         }
 
-        /// <summary>Points the next boot at a fresh temporary save directory and returns its path.</summary>
+        /// <summary>Points the next boot at a fresh temporary save directory and returns its path; new runs start from <see cref="RunSeed"/>.</summary>
         public static string UseTemporarySaveRoot()
         {
             string root = Path.Combine(Path.GetTempPath(), "F1Tests", Guid.NewGuid().ToString("N"));
             AppRoot.SaveRootOverride = root;
+            AppRoot.NewRunSeedOverride = RunSeed;
             return root;
         }
 
@@ -76,6 +83,7 @@ namespace F1.Tests
 
             Managers.Reset();
 
+            AppRoot.NewRunSeedOverride = null;
             string root = AppRoot.SaveRootOverride;
             AppRoot.SaveRootOverride = null;
             if (root != null && Directory.Exists(root))

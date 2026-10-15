@@ -359,7 +359,7 @@ namespace F1.Editor.Setup
         {
             Image stone = UiBuild.Image("InventoryGrid", box, UiPalette.InventoryRim);
             rim = stone.rectTransform;
-            Vector2 size = InventoryGridView.Size(10, 3) + 2f * InventoryRimWidth * Vector2.one;
+            Vector2 size = InventoryGridView.Size(InventoryGridView.LaidOutWidth, InventoryGridView.LaidOutHeight) + 2f * InventoryRimWidth * Vector2.one;
             UiBuild.Place(rim, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(InventoryGridLeft, -InventoryGridTop), size);
             AddSunkBevel(rim, "InventoryGrid");
             Image well = UiBuild.Image("InventoryWell", rim, UiPalette.GridSquareLine);

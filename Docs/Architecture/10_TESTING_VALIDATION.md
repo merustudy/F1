@@ -15,6 +15,9 @@ Test, 검증 체인, 검증 보고, Definition of Done을 소유한다.
 - 이름: `<Subject>Tests` / `<Behavior>_When<Condition>_<Expected>`.
 - PlayMode Test는 실제 Save 폴더를 쓰지 않는다. Test 전용 Save Root를 쓴다.
 - PlayMode Test는 끝날 때 `AppRoot`를 파괴하고 `Managers`를 비운다.
+- PlayMode Test의 새 런은 고정 시드(`BootTestUtil.RunSeed`, `AppRoot.NewRunSeedOverride`)로 시작한다. 지도·상점·전리품·전투가 매번 같아서 Test가 운에 기대지 않는다(실제 게임의 새 런은 OS 난수).
+  그 시드의 지도에 기대는 전제(상점이 있다, 첫 전투가 떨어뜨린다)는 `Assume`이 아니라 `Assert`로 쓰고, 이겨야 하는 Test는 승리를 꾸민다(`UiTestUtil.StageChampion`).
+  데이터를 바꾼 뒤 그 전제가 깨지면 시드를 바꾸지 말고 먼저 이유를 본다. 시드를 바꿀 때는 새 시드의 지도가 전제를 만족하는지 확인한다.
 - 시뮬의 통계(승률 등)는 Test의 통과 조건이 아니다. 결정론 Test(같은 시드와 입력 -> 같은 결과)와 구분한다.
 
 ## 검증 체인
@@ -38,7 +41,7 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 규칙:
 
 - Test 결과는 exit code가 아니라 **결과 XML**로 판정한다. XML이 없으면 Compile Error로 보고 Log의 `error CS` 줄을 보인다.
-- 결론을 내지 못한 Test(`Assume`이 맞지 않은 것. 예: 상점이 없는 지도)는 실패가 아니지만, 보고는 그 수(`inconclusive=N`)와 이름을 따로 보인다. 그 라운드가 고친 Test가 Inconclusive면 다시 돌린다.
+- 결론을 내지 못한 Test(`Assume`이 맞지 않은 것. 예: 피로 상한이 200이 아닌 데이터)는 실패가 아니지만, 보고는 그 수(`inconclusive=N`)와 이름을 따로 보인다. 그 라운드가 고친 Test가 Inconclusive면 다시 돌린다.
 - Log와 결과 XML은 저장소 밖(`~/Library/Caches/F1/chain/<시각>/`)에 둔다.
 - 이 프로젝트를 연 Unity Editor가 있으면 체인은 시작하지 않는다.
 - Setup 메서드는 멱등하다. 끝에 고정 Log Token을 찍는다.

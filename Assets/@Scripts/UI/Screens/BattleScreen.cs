@@ -182,6 +182,7 @@ namespace F1.UI
         readonly List<PotionSlotView> _potionViews = new List<PotionSlotView>();
         readonly List<TMP_Text> _logChunks = new List<TMP_Text>();
         readonly List<string> _captionLines = new List<string>();
+        readonly List<string> _captionsPushed = new List<string>();
         readonly List<LootDropView> _drops = new List<LootDropView>();
 
         /// <summary>The battle being fought or just ended; null when the screen shows the loot of a battle the app was closed after (round 47).</summary>
@@ -330,6 +331,12 @@ namespace F1.UI
 
         /// <summary>The captions in the header, oldest first.</summary>
         public IReadOnlyList<string> Captions => _captionLines;
+
+        /// <summary>
+        /// Every caption pushed since the screen was last refreshed, oldest first, including those the header no longer has room for
+        /// (events of the same moment can push a line out at once). For tests.
+        /// </summary>
+        public IReadOnlyList<string> CaptionsPushed => _captionsPushed;
 
         /// <summary>The dungeon's background behind the battle, or null when the dungeon has none.</summary>
         public Sprite Background => _background.enabled ? _background.sprite : null;
@@ -694,6 +701,7 @@ namespace F1.UI
         /// <summary>A new caption in the header; the oldest goes when there are more than fit.</summary>
         void PushCaption(string line)
         {
+            _captionsPushed.Add(line);
             _captionLines.Add(line);
             while (_captionLines.Count > _captions.Length)
             {
@@ -748,6 +756,7 @@ namespace F1.UI
             _resultShown = false;
             RenderTitle();
             _captionLines.Clear();
+            _captionsPushed.Clear();
             RenderCaptions();
             if (_logPanel.activeSelf)
             {

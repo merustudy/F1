@@ -21,6 +21,13 @@ namespace F1.UI
         /// <summary>The stone rim round the squares (the view's own rect is the rim; its layers lie inside it).</summary>
         public const float Rim = 6f;
 
+        /// <summary>
+        /// The inventory's squares across and down that the window is laid out around (the Builder bakes the window for them; the grid
+        /// itself takes the data's size). The shipped data's size must be this one, or the grid would spill out of its window.
+        /// </summary>
+        public const int LaidOutWidth = 10;
+        public const int LaidOutHeight = 3;
+
         const float GhostAlpha = 0.45f;
 
         [SerializeField] RectTransform _squareLayer;

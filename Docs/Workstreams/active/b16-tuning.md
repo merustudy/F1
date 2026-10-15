@@ -1,6 +1,6 @@
 # Slice B 16단계: 맞추기
 
-Snapshot: 2026-10-15 (Round 65~67 시험, 저장한 얼굴 기준 `subculture_60`, Round 68 대마법사의 새 모습 확정과 연결. 세션 정리에서 커밋·푸시)
+Snapshot: 2026-10-15 (Round 65~67 시험, 저장한 얼굴 기준 `subculture_60`, Round 68 대마법사의 새 모습 확정과 연결. 세션 정리에서 커밋·푸시. 이어서 R10 PlayMode 고정 시드 — 커밋 안 함)
 
 ## Goal
 
@@ -31,6 +31,7 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 - 2026-10-14 그림: Round 63(카오스 제로 나이트메어 섞기, 사용자 "안어울리네"로 닫음) → Round 64(체형 셋과 만화풍 시험 → 체형 `hourglass`·`athletic` 저장, 발키리를 `hourglass`로 다시 그려 연결, 공격 자세의 도끼 고침과 2차 얼굴 합성). 기록 `ArtPipeline/Archive/64-valkyrie-body-manga/README.md`. 세션 정리에서 커밋·푸시했다. 16단계의 다음 걸음(직접 플레이)은 그대로다.
 - 2026-10-14~15 그림: Round 65(발키리 체인소맨 20~80%, 네 장 뒤 중단), Round 66(대마법사 체형·옷 시험, 2차 보관), Round 67(서브컬처 얼굴 20~80% → 60%, **저장한 얼굴 기준 `subculture_60`**과 `gen_image.py`의 `Face` 열),
   Round 68(대마법사의 새 모습: 실제 인물 사진은 쓰지 않음, 사용자가 AI로 만든 가상 인물을 `--extra-reference`로 → 6차 마법사 로브 **확정**, `Height` 75, 대기와 자세 넷을 게임에 연결). 기록은 각 Round의 README. 2026-10-15 세션 정리에서 커밋·푸시했다.
+- 2026-10-15 **R10**(사용자 "R10 시드 고정 먼저 진행해줘 / 이거 어떤 의미지? 검토 후 보고" → 검토 보고와 판정할 것 넷 → **"승인"**: 모두 권장안): PlayMode의 새 런을 고정 시드로, 지도에 기대는 `Assume` 넷을 `Assert`로, 이겨야 하는 전리품 Test에 승리를 꾸밈, 운에 기대던 Test 둘(치명타의 주인, 붕괴 캡션)을 운과 상관없게, 인벤토리 창의 크기 검사. 아래 "리팩토링 검토"의 R10과 Verification. 커밋 안 함.
 
 ## Done
 
@@ -120,11 +121,19 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 한 것(커밋): R5 빈사 칩의 확률(피로 상태 보정 누락 버그)·I 키로 닫을 때의 카드·로비 쉬기 글 / R7 Owner 문서의 낡은 줄 / R6 시뮬의 합치기 셈(**0.14 → 3.27/원정**: G18의 근거가 바뀜)과 0.01 단위 출력, 체인의 Inconclusive 이름 /
 R8 죽은 코드·쓰지 않는 그림 셋·문구 키 셋·낡은 주석, Prefab Stamp의 보드 크기 / R9 Test 이름의 등급, 효과 없는 직업 목록 사본, 진행 루프의 default. R9의 `FlatRow` 변수 이름(row1 → flat1)은 하지 않았다(이름만의 문제, 다음에 그 Test를 고칠 때).
 
+R10(2026-10-15, 10-15 체인에서 시드에 기대는 Test 둘이 번갈아 실패한 것이 계기. 사용자 "승인", 커밋 안 함):
+- 시드: `AppRoot.NewRunSeedOverride`(테스트 전용, `SaveRootOverride`와 같은 길)와 `BootTestUtil.RunSeed` = 1. `UseTemporarySaveRoot`가 켜고 `ShutdownApp`이 끈다. 실제 게임은 그대로 OS 난수.
+  시드 1의 지도: 상점 셋(첫 상점 4층, 시작 배낭에 맞는 물건 여섯), 첫 전투 고블린 정찰대(녹슨 칼). 저장소 밖 복사본으로 시드 1~20을 훑어 스물 모두 조건을 만족함을 봤다.
+- `Assume` → `Assert` 넷: 상점이 있음·맞는 물건(상점 Test), 첫 드랍이 아이템(전리품 Test), 첫 전투의 드랍(저장 Test). 데이터의 전제(피로 상한 200 등)는 `Assume` 그대로.
+- 승리를 꾸밈(`StageChampion`): 전리품 Test 셋(`EnterFirstBattle(champion: true)`)과 같은 가정을 하던 저장 Test 하나(`Continue_AfterTheAppWasClosedOverTheLoot_…`).
+- 운과 상관없게: 치명타 Test는 "첫 치명타"가 아니라 1열 유닛의 치명타를 20ms 걸음으로 기다림. 붕괴 Test는 머리의 캡션 세 줄이 아니라 그동안 나온 캡션의 기록(`BattleScreen.CaptionsPushed`, 새 Test용 기록, 화면이 새로 그려질 때 비움)을 봄 — 같은 ms의 다른 캡션이 붕괴 줄을 밀어내던 것.
+- 인벤토리 창: `InventoryGridView.LaidOutWidth`·`LaidOutHeight`(10×3)를 Builder가 쓰고, `ShippedDataTests.ShippedInventory_IsTheSizeItsWindowIsLaidOutFor`가 출하 데이터와 다르면 실패.
+- 문서: Architecture/10(고정 시드, Inconclusive의 예), 12(창의 구운 크기).
+
 미룬 것 — 계기가 오면 그 라운드의 첫 커밋으로:
 
 | # | 무엇 | 계기 |
 |---|---|---|
-| R10 | PlayMode 새 런의 시드 고정(`AppRoot`의 override)과 지도에 기대는 `Assume`을 `Assert`로, 전리품 Test 셋의 연출 없는 승리 가정(`StageChampion`), 인벤토리 크기와 Prefab에 구운 크기가 다르면 실패하는 검사(상한 대신) | 튜닝 라운드의 첫 커밋 |
 | R11 | 이긴 뒤 전투 화면과 노드 맵의 손·인벤토리 배선 두 벌(`AimFrom`·`OnHeldPressed`·칸 핸들러·합치기 미리보기), Round 54 뒤 꺼진 그림자 부품, `InventoryGridView`의 `GridGeometry` 사본 | 두 화면의 손을 함께 바꾸는 라운드(G18 안 2·3 포함) |
 | R12 | 꺼진 단계 외곽선(Round 41) 부품: `SilhouetteOutline`, `ItemSlotView`·`BattleItemView`의 외곽선 필드, `TierStyle.Outline`, `UiPalette.TierMark`·`TierBronze/Silver/Gold`, 툴팁 띠 | 단계·유니크 표시를 바꿀 때 |
 | R13 | `ItemOffer` → `EquippedItem` 14곳, 전리품·상점 놓기 짝, `OfferRecord` 식 둘, UI의 `Tier + 1` 셋, 상점 후보 조건 둘 | G18 구현(채택안에 맞는 항목만) |
@@ -163,10 +172,13 @@ R8 죽은 코드·쓰지 않는 그림 셋·문구 키 셋·낡은 주석, Prefa
   두 손이 붙어 공격 자세를 한 번 더(3차, 두 팔을 반대로, Scale 1.03): 스크린샷 `20261015-r68c` 9/9. 체인은 **PlayMode가 두 번 다른 Test로 1개씩 실패**(붕괴 캡션이 밀림 / 적이 먼저 치명타) — 둘 다 새 런의 무작위 시드에 기대는 Test라 그림과 무관(앞의 두 체인은 같은 코드로 통과). **R10의 계기가 왔다**: 다음 걸음으로 PlayMode 새 런의 시드 고정을 권장.
   자세가 바닥 아래로 내려가던 것(`fit_pose`가 회보라 부츠 대신 지팡이의 갈색을 부츠로 잡음) → `Rosters/character.csv`의 `Boots` 열과 `fit_pose.roster_boots`, 대마법사 자세 넷을 다시 맞춤(호출 없음, 공격 +20 → +4): 체인 `20261015-171030` **CHAIN OK**(EditMode 845/845, PlayMode 83/92), 스크린샷 `20261015-r68e` 9/9.
 
+- R10(2026-10-15): 체인 `20261015-210800` **CHAIN OK** 첫 실행(setup, sim, EditMode **846/846**(새 `ShippedInventory_…` 하나), PlayMode **83/92**, 9 skipped, **inconclusive 0**). setup 뒤 Prefab 파일 diff 없음(`UiPrefabStamp.txt`만 바뀜), `Assets/InitTestScene*` 없음, `git diff --check` 깨끗. PlayMode만 다시 `20261015-212042` **CHAIN OK**(83/92, inconclusive 0) — 같은 코드로 두 번 같은 결과.
+  작업 트리에 R10과 무관한 Unity 설정 파일 셋의 변경이 있다(`Assets/Settings/UniversalRP.asset`, `Assets/UniversalRenderPipelineGlobalSettings.asset`, `ProjectSettings/ProjectSettings.asset`. 바뀐 시각 10-15 18:07 — 마지막 커밋 18:00 뒤, Editor가 고쳐 쓴 모양). 되돌리지 않고 커밋에서 뺀다(사용자 판단).
+
 ## Next Action (제안)
 
 - 사용자: **직접 플레이**(x1, 원정 하나를 끝까지). 끝나면 `python3 Tools/playlog.py`의 출력과 체크리스트의 메모를 세션에.
-- **R10(PlayMode 새 런의 시드 고정)의 계기가 왔다**(2026-10-15 체인에서 시드에 기대는 Test 둘이 번갈아 실패: 붕괴 캡션, 치명타의 주인). 다음 코드 작업의 첫 커밋으로 권장(위 "리팩토링 검토" R10).
+- **R10은 했다**(2026-10-15, 위 "리팩토링 검토"). 커밋은 지시가 있을 때 — 맞추기 라운드 앞에 이것만의 한 커밋으로 권장. 남은 Unity 설정 파일 셋의 변경(아래 Verification)은 R10과 무관하다.
 - 열린 결정(사용자가 정한다): **G18** 담금질(README 59 "재검토"의 판정할 것 열), **G20** 움직임(README 62 — "나중에 요청"). 그림체는 지금 것 유지(G19). 둘 다 요청 전에는 호출·구현을 하지 않는다.
 - 그림(지시가 있을 때): 저장한 체형·얼굴 기준으로 다른 캐릭터 그리기(`Rosters/*.csv`의 `Body`·`Face`), 주교의 체형, `subculture_60`을 여성 셋에 같이 쓸지(Round 67 판정 2 "대기"), 확정 시트(`style_ref_roster.png`)의 대마법사를 새 그림으로 다시 합성할지, Round 65(체인소맨 20~80%)의 목업. 새 발키리(무대에서 약 11% 큼)와 새 대마법사는 직접 플레이에서 본다.
 - 세션: 플레이 기록과 메모가 오면 "맞추기와 마감"으로(17·18단계의 수치도 함께. 지금 데이터로 시뮬 전후). 18단계는 2026-10-08 세션 정리에서 다섯 커밋으로 올렸고, 같은 날 Round 46(오른쪽 열)·47(전투 화면의 전리품, 우클릭 카드)도 다섯 커밋으로 올렸다(`b18-loot.md`, README 46·47).

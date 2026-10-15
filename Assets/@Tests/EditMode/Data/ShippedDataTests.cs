@@ -4,6 +4,7 @@ using System.Linq;
 using F1.Data;
 using F1.Editor.Data;
 using F1.Gameplay;
+using F1.UI;
 using NUnit.Framework;
 
 namespace F1.Tests
@@ -178,6 +179,18 @@ namespace F1.Tests
             }
 
             Assert.AreEqual("쥐 발톱", data.Items.Get("rat_bite").Name.Resolve("ko-KR"));
+        }
+
+        [Test]
+        public void ShippedInventory_IsTheSizeItsWindowIsLaidOutFor()
+        {
+            BalanceData balance = LoadShipped().Balance;
+
+            // The data allows a larger inventory than the window holds: a size of its own would lay the grid past the window's edge.
+            Assert.AreEqual(
+                (InventoryGridView.LaidOutWidth, InventoryGridView.LaidOutHeight),
+                (balance.InventoryWidth, balance.InventoryHeight),
+                "The inventory window is laid out for another size: change InventoryGridView.LaidOutWidth/Height and the window with the data.");
         }
 
         static StaticData LoadShipped()

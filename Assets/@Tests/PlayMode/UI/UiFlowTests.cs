@@ -1020,7 +1020,8 @@ namespace F1.Tests
             Assert.AreEqual(UiPalette.FatigueState(state.Kind), battle.Fx.WordColor);
             Assert.AreEqual(UiText.FatigueStateName(state), broken.FatigueStateShown, "The state's name under its feet.");
             Assert.IsTrue(units.Where(u => u != broken).All(u => u.FatigueStateShown == string.Empty), "Nobody else is in a state.");
-            Assert.IsTrue(battle.Captions.Any(c => c.Contains(UiText.FatigueStateName(state))), "The breakdown reads as a caption.");
+            Assert.IsTrue(battle.CaptionsPushed.Any(c => c.Contains(UiText.FatigueStateName(state))),
+                "The breakdown reads as a caption (whether or not the captions of the same moment have pushed it out of the header since).");
             Assert.IsTrue(Managers.Sound.Asked.Contains(virtue ? SoundEffect.Survived : SoundEffect.DeathsDoor), "The breakdown sounds.");
 
             // Then everything of the moment goes by itself; the state stays.
@@ -1161,7 +1162,7 @@ namespace F1.Tests
             StaticData data = Managers.Data.Data;
             NodeMap nodes = Managers.Expedition.Expedition.Map;
             MapNode shop = nodes.Nodes.FirstOrDefault(n => n.Kind == MapNodeKind.Shop);
-            Assume.That(shop, Is.Not.Null, "This map has no shop node (a few maps in a hundred have none): nothing to test on it.");
+            Assert.IsNotNull(shop, "The map of the tests' run seed has a shop node (BootTestUtil.RunSeed).");
 
             // Staged before the shop with coins to spend: the chosen node says what it is and how to go in, and the header the coins.
             yield return StandOn(nodes.Nodes.First(n => n.NextNodeIds.Contains(shop.Id)));
@@ -1233,7 +1234,7 @@ namespace F1.Tests
             // tooltip shows (it rides the pointer); no card opens; the panel says how to buy.
             // One no taller than the start bag's two free rows (Slice B stage 19) and with an effect to read (not the whetstone, stage 20).
             int slot = Enumerable.Range(0, stock.Count).Where(i => stock[i].Kind == OfferKind.Item && data.Items.Get(stock[i].Id).Height <= 2 && !data.Items.Get(stock[i].Id).IsPassive).DefaultIfEmpty(-1).First();
-            Assume.That(slot, Is.GreaterThanOrEqualTo(0), "No item on offer fits the start bag's free rows.");
+            Assert.GreaterOrEqual(slot, 0, "An item on offer fits the start bag's free rows (BootTestUtil.RunSeed).");
             string bought = stock[slot].Id;
             int price = Managers.Expedition.PriceOf(stock[slot]);
             ItemData offeredData = data.Items.Get(bought);
@@ -1780,7 +1781,7 @@ namespace F1.Tests
         public IEnumerator Loot_AfterTheWin_TheBandIsUp_ADropLiesOnTheFloor_AndTakenOntoTheSameItem_Merges()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            yield return EnterFirstBattle();
+            yield return EnterFirstBattle(champion: true);
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             yield return UiTestUtil.EndBattle(battle);
             ExpeditionState expedition = Managers.Expedition.Expedition;
@@ -1873,7 +1874,7 @@ namespace F1.Tests
         public IEnumerator Loot_AfterTheWin_ItemsMoveBetweenTheBoards_AndContinuingLeavesTheRest()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            yield return EnterFirstBattle();
+            yield return EnterFirstBattle(champion: true);
 
             // Staged: a second drop beside the one the first battle drops (an elite drops two, and the first battle never is one).
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
@@ -1974,7 +1975,7 @@ namespace F1.Tests
         public IEnumerator Loot_ADropLiesAtAnItemWindowsSize_AndHeldOverTheOpenInventory_IsTakenWhereItIsLaid()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            yield return EnterFirstBattle();
+            yield return EnterFirstBattle(champion: true);
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             battle.Clock.Paused = true;
             while (!Managers.Expedition.Battle.IsFinished)
@@ -1985,7 +1986,7 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForResult(battle);
             ExpeditionState expedition = Managers.Expedition.Expedition;
             ItemOffer drop = expedition.Loot[0];
-            Assume.That(drop.Kind, Is.EqualTo(OfferKind.Item), "The first battle drops an item.");
+            Assert.AreEqual(OfferKind.Item, drop.Kind, "The first battle drops an item.");
             ItemData item = Managers.Data.Data.Items.Get(drop.Id);
 
             // Round 55: on the floor the drop's icon is the size it has in an item window (its squares, less the margin), tilted as before.
@@ -2370,17 +2371,21 @@ namespace F1.Tests
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             battle.Clock.Paused = true;
             BattleEngine engine = Managers.Expedition.Battle.Engine;
+            UnitRef row1 = engine.Party.Single(u => u.Row == BattleRows.Front).Ref;
+            System.Func<BattleEvent, bool> isRow1sCritical = e => e.Kind == BattleEventKind.CriticalHit && e.Source.Equals(row1);
 
+            // Row 1's critical hit, whether or not an enemy's weapon landed one first (theirs are a matter of luck). Small steps, so that the
+            // battle stops at the moment of it and its number is the last critical to rise.
             int guard = 0;
-            while (!engine.Events.Any(e => e.Kind == BattleEventKind.CriticalHit) && !Managers.Expedition.Battle.IsFinished && guard++ < 300)
+            while (!engine.Events.Any(isRow1sCritical) && !Managers.Expedition.Battle.IsFinished && guard++ < 1500)
             {
-                Managers.Expedition.AdvanceBattle(100);
+                Managers.Expedition.AdvanceBattle(20);
                 yield return null;
             }
 
             yield return null;
-            BattleEvent critical = engine.Events.First(e => e.Kind == BattleEventKind.CriticalHit);
-            Assert.AreEqual(BattleSide.Party, critical.Source.Side, "Row 1's weapon landed it.");
+            BattleEvent critical = engine.Events.FirstOrDefault(isRow1sCritical);
+            Assert.IsNotNull(critical, "Row 1's weapon landed it.");
             Assert.Greater(battle.Fx.CriticalsPlayed, 0, "It rose as a critical hit.");
             StringAssert.Contains(UiStrings.Get(UiKeys.Fx.Crit), battle.Fx.LastCriticalText, "With the word over it.");
             BattleEvent damaged = engine.Events[engine.Events.ToList().IndexOf(critical) + 1];
@@ -3080,7 +3085,8 @@ namespace F1.Tests
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, depart and enter the first node.</summary>
-        static IEnumerator EnterFirstBattle()
+        /// <param name="champion">Staged so that the battle is won (<see cref="UiTestUtil.StageChampion"/>), for a test that needs the win.</param>
+        static IEnumerator EnterFirstBattle(bool champion = false)
         {
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
@@ -3089,6 +3095,11 @@ namespace F1.Tests
 
             UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            if (champion)
+            {
+                UiTestUtil.StageChampion();
+            }
+
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
