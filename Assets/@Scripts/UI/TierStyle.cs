@@ -3,10 +3,9 @@ using F1.Data;
 namespace F1.UI
 {
     /// <summary>
-    /// How an item cell marks a tier above Common (2026-10-07 round 41, palette P3): the outline around the icon in the tier's
-    /// colour, thicker at a higher tier, and the tier tag at the cell's bottom-left corner with one star for Bronze, two for
-    /// Silver and three for Gold. Common has neither. The party side and the battle draw the same marks; the colours are
-    /// UiPalette's (TierMark for the outline and the tag's rim, TierText for the stars).
+    /// How an item piece marks a tier above Common (2026-10-07 round 41; round 49 took the icon's outline away, R12 its parts): the
+    /// tier tag at the piece's bottom-left corner with one star for Bronze, two for Silver and three for Gold. Common has none. The
+    /// party side and the battle draw the same mark; the colours are UiPalette's (Rarity).
     /// </summary>
     public static class TierStyle
     {
@@ -17,18 +16,6 @@ namespace F1.UI
         public const float TagPad = 6f;
         public const float StarSize = 12f;
         public const float StarPitch = 13f;
-
-        /// <summary>The outline's thickness around the icon, in pixels on screen; 0 for Common, which has none.</summary>
-        public static float Outline(ItemTier tier)
-        {
-            switch (tier)
-            {
-                case ItemTier.Bronze: return 2f;
-                case ItemTier.Silver: return 3f;
-                case ItemTier.Gold: return 4f;
-                default: return 0f;
-            }
-        }
 
         /// <summary>How many stars the tier tag carries; 0 for Common, which has no tag.</summary>
         public static int Stars(ItemTier tier)

@@ -28,13 +28,9 @@ namespace F1.UI
         [SerializeField] Image _frame;
         [SerializeField] Outline _frameLine;
         [SerializeField] RectTransform _darkArt;
-        [SerializeField] Image _darkOutline;
-        [SerializeField] SilhouetteOutline _darkOutlineEffect;
         [SerializeField] Image _darkIcon;
         [SerializeField] RectTransform _litMask;
         [SerializeField] RectTransform _litArt;
-        [SerializeField] Image _outline;
-        [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
         [SerializeField] Image _flash;
         [SerializeField] Button _button;
@@ -95,14 +91,11 @@ namespace F1.UI
         /// <summary>How many stars the tier tag shows; 0 while it is hidden.</summary>
         public int Stars { get; private set; }
 
-        /// <summary>The outline's colour, or null while the icon has no outline (a Common item, or no icon to outline).</summary>
         /// <summary>The stars' colour (Diablo's rarity colour, round 49), or null while none show.</summary>
         public Color? StarColor => Stars > 0 ? _stars[0].color : (Color?)null;
 
         /// <summary>The piece's ground colour on show: none in battle (round 49).</summary>
         public Color Ground => _frame.color;
-
-        public Color? OutlineColor => _outline.enabled ? _outline.color : (Color?)null;
 
         public RectTransform Rect => (RectTransform)transform;
 
@@ -238,7 +231,7 @@ namespace F1.UI
             art.localRotation = GridGeometry.ArtTurn(turns);
         }
 
-        /// <summary>The icons and their outlines, mirrored for an enemy, swelled by this much while the item fires.</summary>
+        /// <summary>The icons, mirrored for an enemy, swelled by this much while the item fires.</summary>
         void ScaleArt(float swell)
         {
             var scale = new Vector3(_mirror * swell, swell, 1f);
@@ -246,13 +239,11 @@ namespace F1.UI
             _darkArt.localScale = scale;
         }
 
-        /// <summary>The tier's stars in Diablo II's rarity colours on no pill, and no outline round the icon (round 49); nothing for Common.</summary>
+        /// <summary>The tier's stars in Diablo II's rarity colours on no pill (round 49); nothing for Common.</summary>
         void ShowTier(ItemTier tier, Sprite icon)
         {
             TierShown = tier > ItemTier.Common ? tier : (ItemTier?)null;
             Stars = TierStyle.Stars(tier);
-            _outline.enabled = false;
-            _darkOutline.enabled = false;
             _tierTag.gameObject.SetActive(Stars > 0);
             if (Stars > 0)
             {
@@ -275,15 +266,12 @@ namespace F1.UI
             active |= _passive;
             _shownActive = active;
             float dark = UiPalette.CooldownDark;
-            Color tier = TierShown.HasValue ? UiPalette.TierMark(TierShown.Value) : Color.white;
             _name.color = active ? UiPalette.Text : UiPalette.TextDim;
             // Round 49: in battle an item lies on its black squares with no ground ("전투 화면에서는 아이템 뒤 파란색 배경 없음").
             _frame.color = Color.clear;
             _frameLine.enabled = false;
             _icon.color = Color.white;
-            _outline.color = tier;
             _darkIcon.color = active ? new Color(dark, dark, dark, 1f) : new Color(UiPalette.IconDim.r * dark, UiPalette.IconDim.g * dark, UiPalette.IconDim.b * dark, 1f);
-            _darkOutline.color = new Color(tier.r * dark, tier.g * dark, tier.b * dark, 1f);
             _litMask.gameObject.SetActive(active);
             if (!active)
             {

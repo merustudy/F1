@@ -132,8 +132,8 @@ namespace F1.Editor.Setup
 
         const float TooltipWidth = 400f;
         const float TooltipPadding = 16f;
+        /// <summary>Room at the card's left that round 41's tier stripe took; the lines keep its margin (R12 took the stripe's parts out).</summary>
         const float TooltipStripeRoom = 8f;
-        const float TooltipStripeWidth = 6f;
         const float TooltipRadius = 4f;
         const float TooltipNotch = 16f;
 
@@ -158,14 +158,6 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(OutOfLayout(line.rectTransform));
             Image fill = Rounded(name + "Fill", card, UiPalette.TooltipFill, TooltipRadius - 1f);
             UiBuild.Stretch(OutOfLayout(fill.rectTransform), 1f, 1f, 1f, 1f);
-            Image stripe = UiBuild.Image(name + "Stripe", card, UiPalette.TierBronze);
-            RectTransform stripeRect = OutOfLayout(stripe.rectTransform);
-            stripeRect.anchorMin = Vector2.zero;
-            stripeRect.anchorMax = new Vector2(0f, 1f);
-            stripeRect.pivot = new Vector2(0f, 0.5f);
-            stripeRect.offsetMin = new Vector2(2f, 2f);
-            stripeRect.offsetMax = new Vector2(2f + TooltipStripeWidth, -2f);
-            stripe.enabled = false;
 
             // The notches (one shows at a time): under the bottom edge for the party side, on a side edge for the battle (mockup 6).
             RectTransform notch = NotchClip(name + "Notch", card, Vector2.zero, new Vector2(0.5f, 1f), new Vector2(TooltipNotch * 2f, TooltipNotch), new Vector2(0.5f, 1f));
@@ -183,7 +175,6 @@ namespace F1.Editor.Setup
             TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
 
             var view = card.gameObject.AddComponent<ItemTooltipView>();
-            UiBuild.SetReference(view, "_stripe", stripe);
             UiBuild.SetReference(view, "_notchBottom", notch);
             UiBuild.SetReference(view, "_notchLeft", notchLeft);
             UiBuild.SetReference(view, "_notchRight", notchRight);
@@ -196,7 +187,7 @@ namespace F1.Editor.Setup
             return view;
         }
 
-        /// <summary>A part of the card the layout leaves where it is (the frame, the stripe, the notch).</summary>
+        /// <summary>A part of the card the layout leaves where it is (the frame, the notch).</summary>
         static RectTransform OutOfLayout(RectTransform rect)
         {
             rect.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
@@ -290,22 +281,6 @@ namespace F1.Editor.Setup
             }
 
             return bar;
-        }
-
-        /// <summary>
-        /// The silhouette behind an item's icon that becomes the outline of its tier (round 41): the same sprite in the icon's
-        /// place, drawn in one colour by the silhouette material and copied around a circle by SilhouetteOutline. Off until the
-        /// view shows a tier.
-        /// </summary>
-        static Image BuildOutline(Transform parent, string name, out SilhouetteOutline effect)
-        {
-            Image outline = UiBuild.Image(name, parent, Color.white);
-            outline.preserveAspect = true;
-            outline.material = SilhouetteMaterial();
-            UiBuild.Stretch(outline.rectTransform);
-            effect = outline.gameObject.AddComponent<SilhouetteOutline>();
-            outline.enabled = false;
-            return outline;
         }
 
         /// <summary>

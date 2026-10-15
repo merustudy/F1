@@ -1369,11 +1369,9 @@ namespace F1.Tests
             Assert.AreEqual(0, weapon.Stars);
             Assert.AreEqual(UiPalette.GridPiece, weapon.Ground, "Diablo's dark blue under an item between battles (round 49).");
             Assert.AreEqual(new Vector2Int(weapon.Item.Item.Width, weapon.Item.Item.Height), weapon.GroundSquares, "Square by square, the grid's line between them (round 53).");
-            Assert.IsNull(weapon.OutlineColor, "No outline round an icon in Diablo's look.");
             Assert.AreEqual(ItemTier.Bronze, daggerPiece.TierShown);
             Assert.AreEqual(1, daggerPiece.Stars);
             Assert.AreEqual(UiPalette.Rarity(ItemTier.Bronze), daggerPiece.StarColor, "Diablo's rarity colours: Bronze the magic blue.");
-            Assert.IsNull(daggerPiece.OutlineColor);
             Assert.AreEqual(ItemTier.Silver, bucklerPiece.TierShown);
             Assert.AreEqual(2, bucklerPiece.Stars);
             Assert.AreEqual(UiPalette.Rarity(ItemTier.Silver), bucklerPiece.StarColor, "Silver the rare yellow.");
@@ -1404,7 +1402,7 @@ namespace F1.Tests
             Assert.AreEqual(ItemTier.Silver, buckler.TierShown);
             Assert.AreEqual(2, buckler.Stars);
             Assert.AreEqual(UiPalette.Rarity(ItemTier.Silver), buckler.StarColor);
-            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierShown == null && c.Stars == 0 && c.OutlineColor == null));
+            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierShown == null && c.Stars == 0));
         }
 
         [UnityTest]

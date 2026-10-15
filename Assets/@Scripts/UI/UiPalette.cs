@@ -82,25 +82,10 @@ namespace F1.UI
         /// reads on the dark panels. Common has no mark (a Common cell is the plain cell) and its word is a plain bone tone, used
         /// only where a tier word is needed ("일반 → 동" at the camp).
         /// </summary>
-        public static readonly Color TierBronze = Rgb(0xA8, 0x68, 0x3A);
-        public static readonly Color TierSilver = Rgb(0x9A, 0xA7, 0xB8);
-        public static readonly Color TierGold = Rgb(0xD4, 0xA2, 0x32);
         public static readonly Color TierCommonText = Rgb(0xC9, 0xC2, 0xB0);
         public static readonly Color TierBronzeText = Rgb(0xD5, 0x9A, 0x66);
         public static readonly Color TierSilverText = Rgb(0xD3, 0xDB, 0xE4);
         public static readonly Color TierGoldText = Rgb(0xF0, 0xC8, 0x5A);
-
-        /// <summary>The colour of a tier's marks (outline, stars, stripe, merge mark). Clear for Common, which has none.</summary>
-        public static Color TierMark(ItemTier tier)
-        {
-            switch (tier)
-            {
-                case ItemTier.Bronze: return TierBronze;
-                case ItemTier.Silver: return TierSilver;
-                case ItemTier.Gold: return TierGold;
-                default: return Color.clear;
-            }
-        }
 
         /// <summary>The colour of a tier's name in words.</summary>
         public static Color TierText(ItemTier tier)

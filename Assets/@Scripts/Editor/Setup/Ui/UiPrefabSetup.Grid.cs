@@ -301,7 +301,6 @@ namespace F1.Editor.Setup
 
             RectTransform art = UiBuild.Rect(name + "Art", frame.transform);
             UiBuild.Size(art, GridGeometry.Square - 2f * ItemSlotView.ArtMargin, GridGeometry.Square - 2f * ItemSlotView.ArtMargin);
-            Image outline = BuildOutline(art, name + "Outline", out SilhouetteOutline outlineEffect);
             Image icon = UiBuild.Image(name + "Icon", art, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform);
@@ -341,8 +340,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_ground", ground);
             UiBuild.SetReference(view, "_picked", picked);
             UiBuild.SetReference(view, "_art", art);
-            UiBuild.SetReference(view, "_outline", outline);
-            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_text", text);
             UiBuild.SetReference(view, "_fatigue", fatigue);
@@ -376,7 +373,6 @@ namespace F1.Editor.Setup
             button.transition = Selectable.Transition.None;
 
             RectTransform darkArt = UiBuild.Rect("ItemDarkArt", piece.transform);
-            Image darkOutline = BuildOutline(darkArt, "ItemDarkOutline", out SilhouetteOutline darkOutlineEffect);
             Image darkIcon = UiBuild.Image("ItemDarkIcon", darkArt, Color.white);
             darkIcon.preserveAspect = true;
             UiBuild.Stretch(darkIcon.rectTransform);
@@ -384,7 +380,6 @@ namespace F1.Editor.Setup
             RectTransform mask = UiBuild.Rect("ItemLit", piece.transform);
             mask.gameObject.AddComponent<RectMask2D>();
             RectTransform litArt = UiBuild.Rect("ItemLitArt", mask);
-            Image outline = BuildOutline(litArt, "ItemOutline", out SilhouetteOutline outlineEffect);
             Image icon = UiBuild.Image("ItemIcon", litArt, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform);
@@ -403,13 +398,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_frame", piece);
             UiBuild.SetReference(view, "_frameLine", line);
             UiBuild.SetReference(view, "_darkArt", darkArt);
-            UiBuild.SetReference(view, "_darkOutline", darkOutline);
-            UiBuild.SetReference(view, "_darkOutlineEffect", darkOutlineEffect);
             UiBuild.SetReference(view, "_darkIcon", darkIcon);
             UiBuild.SetReference(view, "_litMask", mask);
             UiBuild.SetReference(view, "_litArt", litArt);
-            UiBuild.SetReference(view, "_outline", outline);
-            UiBuild.SetReference(view, "_outlineEffect", outlineEffect);
             UiBuild.SetReference(view, "_icon", icon);
             UiBuild.SetReference(view, "_flash", flash);
             UiBuild.SetReference(view, "_button", button);

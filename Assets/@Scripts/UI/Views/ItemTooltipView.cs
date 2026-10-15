@@ -23,7 +23,6 @@ namespace F1.UI
             Right,
         }
 
-        [SerializeField] Image _stripe;
         [SerializeField] RectTransform _notchBottom;
         [SerializeField] RectTransform _notchLeft;
         [SerializeField] RectTransform _notchRight;
@@ -101,7 +100,6 @@ namespace F1.UI
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
             _title.color = UiPalette.Rarity(item.Tier);
-            _stripe.enabled = false;
 
             gameObject.SetActive(true);
             transform.SetAsLastSibling();

@@ -29,8 +29,6 @@ namespace F1.UI
         [SerializeField] SquareGrid _ground;
         [SerializeField] Image _picked;
         [SerializeField] RectTransform _art;
-        [SerializeField] Image _outline;
-        [SerializeField] SilhouetteOutline _outlineEffect;
         [SerializeField] Image _icon;
         [SerializeField] TMP_Text _text;
         [SerializeField] GameObject _fatigue;
@@ -88,12 +86,6 @@ namespace F1.UI
 
         /// <summary>The stars' colour (Diablo's rarity colour, round 49), or null while none show.</summary>
         public Color? StarColor => Stars > 0 ? _stars[0].color : (Color?)null;
-
-        /// <summary>The outline's colour, or null while the icon has no outline (no tier, or no icon to outline).</summary>
-        public Color? OutlineColor => _outline.enabled ? _outline.color : (Color?)null;
-
-        /// <summary>The outline's thickness on show; 0 while there is none.</summary>
-        public float OutlineThickness => _outline.enabled ? _outlineEffect.Thickness : 0f;
 
         /// <summary>The words of the merge mark, or an empty string while it is hidden.</summary>
         public string MergeMark => _merge.activeSelf ? _mergeText.text : string.Empty;
@@ -166,7 +158,6 @@ namespace F1.UI
             _picked.enabled = false;
             _merge.SetActive(false);
             _icon.enabled = false;
-            _outline.enabled = false;
             _text.enabled = false;
             TierShown = null;
             Stars = 0;
@@ -196,7 +187,6 @@ namespace F1.UI
             _text.enabled = false;
             TierShown = null;
             Stars = 0;
-            _outline.enabled = false;
             _tierTag.gameObject.SetActive(false);
             _fatigue.SetActive(false);
         }
@@ -263,13 +253,12 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// The tier's stars at the bottom-left in Diablo II's rarity colours on no pill, and no outline round the icon (round 49; round 41
-        /// had both); nothing for Common. An item without an icon shows its words in the rarity colour instead.
+        /// The tier's stars at the bottom-left in Diablo II's rarity colours on no pill (round 49; round 41 had an outline round the icon too,
+        /// whose parts went in R12); nothing for Common. An item without an icon shows its words in the rarity colour instead.
         /// </summary>
         void ShowTier(ItemTier? tier, bool pictured)
         {
             Stars = tier.HasValue ? TierStyle.Stars(tier.Value) : 0;
-            _outline.enabled = false;
             _tierTag.gameObject.SetActive(Stars > 0);
             if (Stars > 0)
             {
