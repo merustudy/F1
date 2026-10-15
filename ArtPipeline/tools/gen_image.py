@@ -104,6 +104,9 @@ TYPES = {
         "dungeon_theme": None,
         # A mercenary may name a saved body type (STYLE_RUNTIME.md "## Body: <name>", 2026-10-14).
         "body": True,
+        # ...and a saved face standard (STYLE_RUNTIME.md "## Face: <name>", 2026-10-14): it takes the place of
+        # the composition's "Face:" rule. Only here: a pose takes its face from the attached figure.
+        "face": True,
         "quality": "medium",
         "tail": "Draw this one character, full body.",
         "fit": "figure",
@@ -504,8 +507,20 @@ def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
                 f"  파일: {path}\n  있는 체형: {', '.join(known) or '(없음)'}"
             )
 
+    # A row may name a saved face standard (STYLE_RUNTIME.md "## Face: <name>").
+    face = (row.get("Face") or "").strip()
+    if face:
+        if not spec.get("face"):
+            raise PipelineError(f"Roster의 '{key}' 에 Face 가 있지만 타입 {kind} 은 얼굴 기준을 쓰지 않는다.\n  파일: {path}")
+        known = face_types(STYLE_RUNTIME.read_text(encoding="utf-8"))
+        if face not in known:
+            raise PipelineError(
+                f"Roster의 '{key}' 의 Face '{face}' 가 {STYLE_RUNTIME.name} 의 '## Face: <이름>' 절에 없다.\n"
+                f"  파일: {path}\n  있는 얼굴 기준: {', '.join(known) or '(없음)'}"
+            )
+
     return {"subject": subject, "height": height, "flip": flip == "true", "floor_line": floor_line,
-            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells, "body": body}
+            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells, "body": body, "face": face}
 
 
 def read_item_cells(key: str) -> int:
@@ -642,20 +657,66 @@ def body_types(text: str) -> dict:
     return bodies
 
 
+def face_types(text: str) -> dict:
+    """The saved face standards: the '## Face: <name>' sections of the runtime document (2026-10-14).
+
+    A section says the face under '### Rules', and may name under '### Lift' the exact phrases of the
+    Style Rule and the Forbidden block that the face goes against (they are taken out) and under
+    '### Avoid' what it adds to the Forbidden block: name -> {"rules": run, "lift": [...], "avoid": [...]}.
+    """
+    faces, name, part, buffer = {}, None, None, []
+
+    def close():
+        if name is not None and part is not None:
+            lines = "\n".join(buffer)
+            if part == "Rules":
+                faces[name]["rules"] = bullet_rules(lines)
+            else:
+                faces[name][part.lower()] = [line[2:].strip() for line in lines.split("\n") if line.startswith("- ")]
+
+    for line in text.split("\n"):
+        heading = re.match(r"^##\s+Face:\s*(\S+)\s*$", line)
+        sub = re.match(r"^###\s+(Rules|Lift|Avoid)\s*$", line)
+        if heading or line.startswith("## "):
+            close()
+            name, part, buffer = (heading.group(1) if heading else None), None, []
+            if name is not None:
+                faces[name] = {"rules": "", "lift": [], "avoid": []}
+        elif sub and name is not None:
+            close()
+            part, buffer = sub.group(1), []
+        elif part is not None:
+            buffer.append(line)
+
+    close()
+    return faces
+
+
+def lift_phrase(text: str, phrase: str):
+    """Takes one listed phrase out of a comma list (a Style Rule sentence or the avoid list), with its comma.
+
+    Returns the text and whether the phrase was there. The words may be broken across lines.
+    """
+    words = r"\s+".join(map(re.escape, phrase.split()))
+    pattern = re.compile(rf"{words},\s*|,\s*{words}(?=[.\n]|$)|{words}", re.I)
+    lifted, count = pattern.subn("", text, count=1)
+    return lifted, count > 0
+
+
 def fenced_block(body: str) -> str:
     """First ```text fence in a section - the blocks meant to be pasted verbatim."""
     match = re.search(r"```text\n(.*?)\n```", body, re.S)
     return match.group(1).strip() if match else ""
 
 
-def bullet_rules(body: str) -> str:
-    """The '- ' rules of a section, joined into one sentence run."""
+def bullet_rules(body: str, skip: str = "") -> str:
+    """The '- ' rules of a section, joined into one sentence run (without the rules that start with skip)."""
     rules = [line[2:].strip() for line in body.split("\n") if line.startswith("- ")]
-    return " ".join(rules)
+    return " ".join(rule for rule in rules if not (skip and rule.startswith(skip)))
 
 
 def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", held: bool = False, cells: int = 0,
-                 style: Path = None, tail: str = "", body: str = "") -> str:
+                 style: Path = None, tail: str = "", body: str = "", face: str = "") -> str:
     """Assembles the prompt in the order the style document prescribes.
 
     held: the attached reference is the figure of the unit that holds the subject, so the prompt
@@ -666,6 +727,9 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     type's subject in another framing (--tail; round 37: a bust of a mercenary).
     body: a saved body type the roster row names. Its rules are always read from STYLE_RUNTIME.md, also
     under --style: the saved body types live in one place.
+    face: a saved face standard the roster row names, read the same way. Its rules take the place of the
+    composition's "Face:" rule, the phrases it lifts leave the Style Rule and the Forbidden block (each must
+    be found there), and what it avoids joins the Forbidden block.
     """
     style = style or STYLE_RUNTIME
     text = style.read_text(encoding="utf-8")
@@ -677,13 +741,14 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
     shared_section = spec.get("shared_section", SHARED_SECTION)
     forbidden_section = spec.get("forbidden_section", FORBIDDEN_SECTION)
     shared = fenced_block(sections.get(shared_section, ""))
-    composition = bullet_rules(sections.get(spec["section"], ""))
+    composition = bullet_rules(sections.get(spec["section"], ""), skip="Face:" if face else "")
     shape_section = ITEM_CELLS[cells]["section"] if cells else None
     shape = bullet_rules(sections.get(shape_section, "")) if shape_section else ""
     forbidden = fenced_block(sections.get(forbidden_section, ""))
     reference_rule = fenced_block(sections.get(spec["reference_section"], ""))
     theme = dungeon_themes(text).get(dungeon, {}).get(spec["dungeon_theme"], "") if dungeon else ""
     body_rules = body_types(STYLE_RUNTIME.read_text(encoding="utf-8")).get(body, "") if body else ""
+    face_standard = face_types(STYLE_RUNTIME.read_text(encoding="utf-8")).get(face, {}) if face else {}
 
     required = [
         (f"{shared_section}. Style Rule (```text 블록)", shared),
@@ -697,6 +762,8 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
         required.append((f"{shape_section}. {kind} shape of {cells} cell(s) (- 규칙)", shape))
     if body:
         required.append((f"Body: {body} (- 규칙, {STYLE_RUNTIME.name})", body_rules))
+    if face:
+        required.append((f"Face: {face} / Rules (- 규칙, {STYLE_RUNTIME.name})", face_standard.get("rules", "")))
 
     missing = [name for name, value in required if not value]
     if missing:
@@ -706,12 +773,24 @@ def build_prompt(kind: str, subject: str, extra: str = "", dungeon: str = "", he
             + f"  파일: {style}"
         )
 
+    for phrase in face_standard.get("lift", []):
+        shared, in_shared = lift_phrase(shared, phrase)
+        forbidden, in_forbidden = lift_phrase(forbidden, phrase)
+        if not (in_shared or in_forbidden):
+            raise PipelineError(
+                f"Face: {face} 의 Lift '{phrase}' 가 {style.name} 의 Style Rule 에도 Forbidden 에도 없다.\n  파일: {style}"
+            )
+    if face_standard.get("avoid"):
+        forbidden = f"{forbidden.rstrip()}, {', '.join(face_standard['avoid'])}"
+
     parts = [
         shared,
         f"Subject: {subject}. {extra + ' ' if extra else ''}{tail or spec['tail']}",
     ]
     if body_rules:
         parts.append(f"Body type: {body_rules}")
+    if face_standard:
+        parts.append(f"Face: {face_standard['rules']}")
     parts.append(f"Composition: {composition}{' ' + shape if shape else ''}")
     if theme:
         parts.append(f"Dungeon: {theme}")
@@ -1309,6 +1388,9 @@ def parse_args():
     parser.add_argument("--reference", default="",
                         help="Style reference for this run instead of the type's. Attached as it is, never mirrored: "
                              "give one that already faces the way the subject should.")
+    parser.add_argument("--extra-reference", action="append", default=[],
+                        help="One more image attached after the reference, as it is, for a test whose style document says "
+                             "what it is for (e.g. a face). May be given more than once.")
     parser.add_argument("--tail", default="",
                         help="The sentence that ends the subject instead of the type's (a style test in another framing, "
                              "e.g. a bust instead of a full body).")
@@ -1380,8 +1462,16 @@ def main() -> int:
             print(f"[1/6] 레퍼런스 확인: {reference.name} ({reference_size:,} bytes, 보내는 포맷 {extension.upper()}"
                   f"{', 좌우를 뒤집어 붙인다' if mirror else ''}{', 이 아이템을 든 유닛' if held else ''}"
                   f"{', --reference 로 받은 것' if custom_reference is not None else ''})")
+        # A test may attach more images after the reference (--extra-reference); its style document says what each is for.
+        for extra_reference in (Path(path).resolve() for path in args.extra_reference):
+            require_file(extra_reference, f"추가 레퍼런스 이미지 {extra_reference.name}")
+            upload, extension, reference_size = reference_upload(extra_reference)
+            uploads.append(upload)
+            print(f"[1/6] 추가 레퍼런스 확인: {extra_reference.name} ({reference_size:,} bytes, 보내는 포맷 {extension.upper()}, "
+                  f"--extra-reference 로 받은 것)")
 
-        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style, args.tail, row["body"])
+        prompt = build_prompt(args.kind, row["subject"], args.extra, row["dungeon"], held, row["cells"], style, args.tail,
+                              row["body"], row["face"])
         print(f"[2/6] {style if args.style else style.name} 로 프롬프트 조립 ({len(prompt):,} chars"
               f"{f', 소재는 {roster}' if roster else ''}).")
 

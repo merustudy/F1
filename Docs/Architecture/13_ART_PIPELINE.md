@@ -19,12 +19,12 @@ CSV 열은 `05_STATIC_DATA.md`, 화면이 그림을 보여 주는 방식은 `12_
 ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 ├─ STYLE_RUNTIME.md            # 스타일 규칙. 스크립트가 읽어 프롬프트를 조립한다
 ├─ References/<Type>/          # 타입별 기준 그림. 그리는 방식만 빌린다
-├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy(용병은 Gender, 양손에 각각 장비를 들면 Hands도, 적은 자세를 맞출 발의 색 Feet: 밝은 색 규칙이 발을 찾지 못할 때), 자세(attack, hit)는 Scale(잰 배율을 덮어쓸 때. enemy_attack, enemy_hit는 늘), 소품은 Height, Flip, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
+├─ Rosters/<type>.csv          # 무엇을 그리는가: Key, Subject. 전신 그림은 Height, Flip(적은 Dungeon도)과 얼굴의 보정 FaceDx, FaceDy(용병은 Gender, 자세의 발을 찾을 부츠의 색 Boots(규칙이 못 찾을 때), 양손에 각각 장비를 들면 Hands도, 적은 자세를 맞출 발의 색 Feet: 밝은 색 규칙이 발을 찾지 못할 때), 자세(attack, hit)는 Scale(잰 배율을 덮어쓸 때. enemy_attack, enemy_hit는 늘), 소품은 Height, Flip, 아이템은 Reference, 배경은 Dungeon, FloorLine, UI는 Size, Outline. `ui_variant.csv`는 틀의 색 변형(Key, Source, Fill)
 ├─ Archive
 │  ├─ calls.csv                # 유료 호출의 장부: 시각, 대상, 모델, 사용량, 추정 비용
 │  └─ <round>/                 # README.md, 리뷰 시트, 승인된 원본, 목업과 그 스크립트 (움직임 목업의 MP4는 gitignore)
 ├─ tools
-│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference, --tail(타입의 꼬리 문장을 바꾼다: 초상 시험) 은 그림체 시험용, --size 는 넓은 자세를 그릴 전신 그림의 캔버스(1536x1024 등)
+│  ├─ gen_image.py             # 한 번 실행 = 호출 한 번. --dry-run, --refit 은 호출하지 않는다. --style, --roster, --reference, --tail(타입의 꼬리 문장을 바꾼다: 초상 시험), --extra-reference(기준 그림 뒤에 한 장 더 붙인다: 시험 문서의 §3이 그 쓰임을 적는다. 2026-10-15 얼굴 시험) 은 그림체 시험용, --size 는 넓은 자세를 그릴 전신 그림의 캔버스(1536x1024 등)
 │  ├─ run_roster.py            # Roster의 빠진 항목을 하나씩 돌린다. --max-calls 가 필수다
 │  ├─ cutout.py                # 단색 배경의 그림에서 캐릭터를 오려 낸다. 호출하지 않는다
 │  ├─ cutface.py               # 확정된 전신 그림에서 얼굴을 잘라 낸다 (지금 게임은 얼굴을 쓰지 않는다. 아래 "얼굴"). 호출하지 않는다
@@ -105,6 +105,9 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
   **여러 캐릭터가 함께 쓰는 체형**은 스타일 문서의 `## Body: <이름>` 절에 저장하고 Roster의 `Body` 열이 이름으로 고른다(2026-10-14, Design/10 §2). 그 행의 `Subject`는 몸을 다시 적지 않는다.
   `gen_image.py`가 그 절의 불릿을 Subject 다음에 "Body type:"으로 붙인다. 체형은 `--style`로 시험 문서를 써도 `STYLE_RUNTIME.md`에서 읽는다(저장한 체형은 한 곳). `character`, `attack`, `hit`만 받고,
   없는 이름이나 체형을 받지 않는 타입의 `Body`는 호출 전에 실패한다. 붕괴·각성처럼 시험 문서로 그리는 자세의 소재도 같은 `Body`를 적는다(`Archive/64-valkyrie-body-manga/state/`).
+  **저장한 얼굴 기준**도 같은 길이다(2026-10-14, Design/10 §2): 스타일 문서의 `## Face: <이름>` 절(`### Rules` 얼굴의 `- ` 불릿, `### Lift` 그 얼굴과 부딪혀 Style Rule·Forbidden에서 빼는 구절, `### Avoid` Forbidden에 더하는 말)을
+  Roster의 `Face` 열이 이름으로 고른다. `gen_image.py`가 타입 섹션의 "Face:" 규칙을 빼고 Rules를 "Face:"로 붙이며, Lift의 구절을 글자 그대로 찾아 빼고(못 찾으면 호출 전에 실패), Avoid를 금지 목록 끝에 더한다.
+  `--style` 시험 문서를 써도 `STYLE_RUNTIME.md`에서 읽는다. `character`만 받는다: 자세(`attack`, `hit`, 붕괴·각성)는 붙인 대기 그림의 얼굴을 따르므로 얼굴 기준을 붙이지 않는다. 없는 이름이나 다른 타입의 `Face`는 호출 전에 실패한다.
   다만 용병의 머리는 늘 크다(스타일 문서 §4 "always with a big head"). 키가 크거나 덩치가 큰 체형도 머리를 줄여 내지 않는다(Design/10 §2. 2026-10-04 성기사).
 - **몬스터는 던전마다 컨셉이 있다.** 던전의 컨셉(눈의 색, 몸의 표시, 장비, 강조색)은 스타일 문서에 던전마다 한 절로 적고,
   그 던전의 적을 그릴 때마다 같은 문구가 붙는다. 그래서 한 던전의 몬스터는 서로 닮고 다른 던전과 구별된다.
@@ -146,6 +149,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 - 배율: 자세가 바뀌어도 크기가 그대로인 부위로 잰다. 둥근 금 장식(걸쇠, 리벳, 버클, 징)의 긴 지름을 확정 원본과 자세에서 재어 큰 것 넷의 중앙값의 비. 금 장식이 없거나 가려져 맞지 않으면 소재의 `Scale`로 덮어쓴다
   (Round 23: 대마법사는 지팡이의 수정, 마검사는 부츠의 네모 버클, 성기사 피격은 허리 버클과 머리로 잰 값). 리뷰 시트에서 머리가 대기 그림과 같은 크기로 보이는지 본다.
   모델이 장식과 무기를 몸보다 작게 그리면(Round 40의 상태 자세: 장식 0.7~0.85배, 머리 0.85~1.0배) **머리 크기**가 기준이다 — 자세는 그 유닛의 머리와 몸이 그대로 보여야 하므로 장식의 배율은 버리고, 두 눈 사이의 거리와 격자 시트로 잰 머리 크기를 `Scale`로 적는다(`Archive/40-state-poses/README.md` "맞추기").
+- 부츠의 색(2026-10-15): 뒷발과 바닥은 부츠의 가죽색으로 찾는다(확정 원본 맨 아래 10분의 1에서 가장 흔한 중간 어둡기의 따뜻한 색, `boot_colour`). 부츠가 따뜻한 가죽이 아니어서 그 규칙이 다른 것(무기의 나무)을 잡으면 `Rosters/character.csv`의 **Boots**("r g b")에 부츠의 색을 적는다(몬스터의 `Feet`와 같은 길). Round 68의 대마법사: 회보라 부츠 대신 지팡이의 갈색 나무를 잡아 자세가 바닥 아래로 가라앉았다(공격 +20).
 - 기준 크기: 확정 그림을 게임의 그림(`Assets/@Art/Unit/Job/<Id>.png`)과 같은 크기로 세운다 — `Rosters/character.csv`의 **Height**로 맞추고 키우지 않는다(`fit_figure`와 같은 규칙. `approved_place`). Round 40까지는 늘 90으로 세워 Height 79인 마검사(Round 39)의 자세가 게임 안에서 13.7% 컸다.
 - 자리: 디딘 뒷발(부츠 가죽색의 맨 왼쪽 무리)을 확정 그림의 뒷발 자리에 두고, 그 발바닥이 바닥선이다. 돌진에서도 밀림에서도 뒷발은 땅에 있다. 앞발은 들릴 수 있고 무기는 바닥선 아래로 내려갈 수 있다.
 - 색: 확정 원본의 주요 색(14색으로 줄인 팔레트)마다 평균의 차이만큼 옮기되, 가장 큰 차이를 줄일 때만 쓴다(CIE76 ΔE). 잉크와 흰색은 그대로.

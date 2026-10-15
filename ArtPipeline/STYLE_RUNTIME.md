@@ -11,6 +11,8 @@
 던전 컨셉 섹션의 제목은 `## Dungeon: <DungeonData.Id>`이고, 그 안의 `### Creatures`(적)와 `### Place`(배경) 아래에 `- ` 불릿으로 쓴다.
 저장한 체형 섹션의 제목은 `## Body: <이름>`이고 그 아래에 `- ` 불릿으로 쓴다(2026-10-14). 소재의 `Body` 열이 이름을 가리키면 그 문구가 Subject 다음에 "Body type:"으로 붙는다.
 체형은 `--style`로 다른 문서를 쓸 때도 이 문서에서 읽는다(저장한 체형은 한 곳에 둔다). `character`, `attack`, `hit`만 쓴다.
+저장한 얼굴 기준 섹션의 제목은 `## Face: <이름>`이고, `### Rules`(얼굴, `- ` 불릿), `### Lift`(그 얼굴과 부딪혀 Style Rule·Forbidden에서 빼는 구절, 글자 그대로), `### Avoid`(Forbidden에 더하는 말)를 둔다(2026-10-14).
+소재의 `Face` 열이 이름을 가리키면 §4의 "Face:" 규칙 대신 그 Rules가 "Face:"로 붙는다. 얼굴 기준도 이 문서에서만 읽고 `character`만 쓴다(자세는 붙인 대기 그림의 얼굴을 따른다).
 번호를 바꾸면 `gen_image.py`의 섹션 번호도 함께 바꾼다.
 오려 낸 그림(`character`, `enemy`, `item`)은 §1과 §2를, 배경은 자기 것(§10, §12)을, UI는 자기 것(§14, §17)을 Style Rule과 Forbidden으로 쓴다:
 배경은 불투명하고 장면을 그리기 때문이고, UI는 인물이 아니라 정면에서 본 납작한 조각을 그리기 때문이다.
@@ -434,3 +436,35 @@ background, and do not reproduce the background of the attached image.
 - A toned, athletic and curvy figure about four and a half heads tall, still with the big head the composition asks for.
 - A full bust, a narrow waist, round hips, strong shapely thighs and calves, and defined but feminine shoulders and arms.
 - Where the outfit bares the midriff, a flat toned stomach drawn with a few simple lines for the abs.
+
+## Face: subculture_60
+
+사용자 이름 "서브컬쳐_60"(2026-10-14, Round 67): 중국·일본 서브컬처 여캐 얼굴을 60%, 우리 예쁜 얼굴 기준(Round 66)을 40%. 기록은 `Archive/67-archmage-subculture-face/README.md`.
+
+### Rules
+
+- A blend of a little more than half a modern Chinese and Japanese anime and game heroine face and a little less than half our pretty face: a heart-shaped anime face with soft round cheeks narrowing to a small pointed chin and a short lower face, the eyes set at about the middle of the head.
+- Very large eyes: tall oval irises in three flat tones of the eye colour the subject gives (otherwise a deep colour that suits her), a dark pupil and two white highlights, a bold dark upper lash line flicking out at the corner and a few lower lashes.
+- Thin high brows, partly under the bangs when she has bangs.
+- The nose only as a tiny tick or a small shadow at the tip, never the nostrils or the wings of the nose.
+- A small mouth drawn as a short line with a hint of rose lip colour, and a flat pink blush under the eyes.
+- Clean, thin lines on the face; the rest of the figure stays in our hand-drawn ink line and flat color.
+- A mercenary about to fight in a dark dungeon does not smile: the mouth is closed and the look is calm, cool and focused, the brows relaxed, not frowning. The only highlights in the whole figure are the small white ones in the eyes.
+
+### Lift
+
+- not polished anime
+- anime face
+
+### Avoid
+
+- sparkling star eyes
+- drawn nostrils
+- nose wings
+- wide nose
+- long nose
+- hooked nose
+- heavy jaw
+- dark lipstick
+- realistic nose
+- realistic lips

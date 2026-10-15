@@ -269,6 +269,13 @@ def roster_heights():
         return {row["Key"]: int(row["Height"]) for row in csv.DictReader(handle) if (row.get("Height") or "").strip()}
 
 
+def roster_boots():
+    """Key -> the colour of the boots ("r g b") of Rosters/character.csv's Boots, where boot_colour's rule (a warm leather) would
+    find something else: round 68, the archmage's grey-violet boots, where the rule found her staff's brown wood."""
+    with (ROSTERS / "character.csv").open(encoding="utf-8", newline="") as handle:
+        return {row["Key"]: tuple(int(c) for c in row["Boots"].split()) for row in csv.DictReader(handle) if (row.get("Boots") or "").strip()}
+
+
 def approved_place(key):
     """The approved figure on the pose canvas: (raw, ratio, origin of its subject's box, box, back foot x on the canvas,
     boot colour), as gen_image.fit_figure fits it (the roster's Height, bound by the canvas width, never scaled up), its
@@ -280,7 +287,7 @@ def approved_place(key):
     target = round(FIGURE_CANVAS[1] * roster_heights().get(key, 90) / 100)
     ratio = min(target / height, (FIGURE_CANVAS[0] - 2 * FIGURE_SIDE_MARGIN) / width, 1.0)
     x = (FIGURE_CANVAS[0] - round(width * ratio)) // 2 + SIDE
-    leather = boot_colour(approved)
+    leather = roster_boots().get(key) or boot_colour(approved)
     back, soles, _ = feet(approved, leather)
     return approved, ratio, (x, FLOOR - round((soles - box[1]) * ratio)), box, x + (back - box[0]) * ratio, leather
 
