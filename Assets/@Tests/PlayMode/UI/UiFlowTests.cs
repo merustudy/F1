@@ -1356,8 +1356,8 @@ namespace F1.Tests
             PartySideView party = map.GetComponentInChildren<PartySideView>();
             PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), tier: ItemTier.Bronze), 0, 1);
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler"), tier: ItemTier.Silver), 2, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger"), tier: ItemTier.Tier1), 0, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("buckler"), tier: ItemTier.Tier2), 2, 1);
             map.Refresh();
             yield return null;
 
@@ -1365,23 +1365,23 @@ namespace F1.Tests
             ItemSlotView weapon = board.PieceAt(0, 0);
             ItemSlotView daggerPiece = board.PieceAt(0, 1);
             ItemSlotView bucklerPiece = board.PieceAt(2, 1);
-            Assert.IsNull(weapon.TierShown, "Common: the plain piece, no stars.");
-            Assert.AreEqual(0, weapon.Stars);
+            Assert.IsNull(weapon.TierShown, "Common: the plain piece, no pips.");
+            Assert.AreEqual(0, weapon.Pips);
             Assert.AreEqual(UiPalette.GridPiece, weapon.Ground, "Diablo's dark blue under an item between battles (round 49).");
             Assert.AreEqual(new Vector2Int(weapon.Item.Item.Width, weapon.Item.Item.Height), weapon.GroundSquares, "Square by square, the grid's line between them (round 53).");
-            Assert.AreEqual(ItemTier.Bronze, daggerPiece.TierShown);
-            Assert.AreEqual(1, daggerPiece.Stars);
-            Assert.AreEqual(UiPalette.Rarity(ItemTier.Bronze), daggerPiece.StarColor, "Diablo's rarity colours: Bronze the magic blue.");
-            Assert.AreEqual(ItemTier.Silver, bucklerPiece.TierShown);
-            Assert.AreEqual(2, bucklerPiece.Stars);
-            Assert.AreEqual(UiPalette.Rarity(ItemTier.Silver), bucklerPiece.StarColor, "Silver the rare yellow.");
+            Assert.AreEqual(ItemTier.Tier1, daggerPiece.TierShown);
+            Assert.AreEqual(1, daggerPiece.Pips);
+            Assert.AreEqual(UiPalette.Rarity(ItemTier.Tier1), daggerPiece.PipColor, "The one colour of a tier (round 69): 1성 the magic blue.");
+            Assert.AreEqual(ItemTier.Tier2, bucklerPiece.TierShown);
+            Assert.AreEqual(2, bucklerPiece.Pips);
+            Assert.AreEqual(UiPalette.Rarity(ItemTier.Tier2), bucklerPiece.PipColor, "2성 silver.");
             Assert.IsNull(board.PieceAt(0, 2), "An empty square.");
             Assert.AreEqual(string.Empty, daggerPiece.MergeMark, "Nothing merges into it.");
 
             // The held item's title names its tier.
             UiTestUtil.ClickSquare(board, 1, 1);
             yield return null;
-            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
+            StringAssert.Contains(UiText.TierWord(ItemTier.Tier1), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
             UiTestUtil.ClickSquare(board, 0, 1);
             yield return null;
 
@@ -1395,14 +1395,14 @@ namespace F1.Tests
             BattleItemView[] cells = UiTestUtil.Views<BattleItemView>(battle);
             BattleItemView dagger = cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "dagger");
             BattleItemView buckler = cells.Single(c => !c.Mirrored && c.Icon != null && c.Icon.name == "buckler");
-            Assert.AreEqual(ItemTier.Bronze, dagger.TierShown);
-            Assert.AreEqual(1, dagger.Stars);
-            Assert.AreEqual(UiPalette.Rarity(ItemTier.Bronze), dagger.StarColor);
+            Assert.AreEqual(ItemTier.Tier1, dagger.TierShown);
+            Assert.AreEqual(1, dagger.Pips);
+            Assert.AreEqual(UiPalette.Rarity(ItemTier.Tier1), dagger.PipColor);
             Assert.AreEqual(0f, dagger.Ground.a, "No blue behind an item on the battle screen (round 49).");
-            Assert.AreEqual(ItemTier.Silver, buckler.TierShown);
-            Assert.AreEqual(2, buckler.Stars);
-            Assert.AreEqual(UiPalette.Rarity(ItemTier.Silver), buckler.StarColor);
-            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierShown == null && c.Stars == 0));
+            Assert.AreEqual(ItemTier.Tier2, buckler.TierShown);
+            Assert.AreEqual(2, buckler.Pips);
+            Assert.AreEqual(UiPalette.Rarity(ItemTier.Tier2), buckler.PipColor);
+            Assert.IsTrue(cells.Where(c => c.Mirrored).All(c => c.TierShown == null && c.Pips == 0));
         }
 
         [UnityTest]
@@ -1430,8 +1430,8 @@ namespace F1.Tests
             EquippedItem chosen = UiTestUtil.ItemAt(first, 0, 1);
             UiTestUtil.ClickSquare(board1, 0, 1);
             yield return null;
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze)), board2.PieceAt(1, 2).MergeMark);
-            Assert.AreEqual(ItemTier.Bronze, board2.PieceAt(1, 2).TierShown);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Tier1)), board2.PieceAt(1, 2).MergeMark);
+            Assert.AreEqual(ItemTier.Tier1, board2.PieceAt(1, 2).TierShown);
             Assert.AreEqual(string.Empty, board2.PieceAt(0, 0).MergeMark, "Another item.");
             Assert.IsNull(board1.PieceAt(0, 1), "Lifted off its board while held (round 54), so not marked as merging into itself.");
             StringAssert.Contains(UiText.MergeHint(chosen), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
@@ -1444,17 +1444,17 @@ namespace F1.Tests
             UiTestUtil.HoverSquare(board2, 1, 2);
             yield return null;
             Assert.AreEqual(GhostKind.Merges, board2.Grid.GhostShown);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze)), board2.Grid.GhostLabel);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierWord(ItemTier.Tier1)), board2.Grid.GhostLabel, "The ghost's label colours the tier word (round 69).");
 
             // Put there, they merge: one Bronze dagger on row 2, where it lay; none on row 1.
             Managers.Sound.ForgetEffects();
             UiTestUtil.ClickSquare(board2, 1, 2);
             yield return null;
             EquippedItem merged = UiTestUtil.ItemAt(second, 1, 2);
-            Assert.AreEqual(ItemTier.Bronze, merged.Tier);
+            Assert.AreEqual(ItemTier.Tier1, merged.Tier);
             Assert.AreEqual(1, first.Board.Items.Count, "The dagger left row 1's board.");
             CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
-            Assert.AreEqual(ItemTier.Bronze, board2.PieceAt(1, 2).TierShown);
+            Assert.AreEqual(ItemTier.Tier1, board2.PieceAt(1, 2).TierShown);
             Assert.AreEqual(string.Empty, board2.PieceAt(1, 2).MergeMark);
         }
 
@@ -1627,7 +1627,7 @@ namespace F1.Tests
             // Nothing held: a right click on any square of the row-1 dagger opens its card just above the panel, centred on its piece,
             // with its words.
             EquippedItem dagger = UiTestUtil.ItemAt(first, 0, 1);
-            string mergeMark = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Bronze));
+            string mergeMark = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Tier1));
             UiTestUtil.RightClickSquare(board1, 1, 1);
             yield return null;
             Assert.IsTrue(card.IsShown);
@@ -1697,7 +1697,7 @@ namespace F1.Tests
             Assert.AreEqual(1, party.Hand.Turns, "Held as it lies.");
             UiTestUtil.ClickSquare(board2, 1, 2);
             yield return null;
-            Assert.AreEqual(ItemTier.Bronze, UiTestUtil.ItemAt(second, 1, 2).Tier);
+            Assert.AreEqual(ItemTier.Tier1, UiTestUtil.ItemAt(second, 1, 2).Tier);
             Assert.AreEqual(new Placement(1, 2), second.Board.ItemAt(1, 2).At, "The merged dagger lies where the one merged into lay.");
             Assert.IsNull(card.Item);
         }
@@ -1803,19 +1803,19 @@ namespace F1.Tests
             // Staged: the first drop is a Bronze dagger, and row 1 already holds a Bronze dagger under its weapon. The battle's boards gave
             // way to the node map's: the member's board stands in row 1's column with the weapon and the staged item on it.
             int index = 0;
-            ItemOffer drop = new ItemOffer(OfferKind.Item, "dagger", ItemTier.Bronze);
+            ItemOffer drop = new ItemOffer(OfferKind.Item, "dagger", ItemTier.Tier1);
             expedition.Loot[index] = drop;
             int flat = UiTestUtil.FlatRow();
             PartyBoardView row1 = battle.LootBoardOfRow(flat);
             int front = expedition.Members.FindIndex(m => m.Alive && m.Row == flat);
-            UiTestUtil.Put(expedition.Members[front], new EquippedItem(data.Items.Get(drop.Id), tier: ItemTier.Bronze), 0, 1);
+            UiTestUtil.Put(expedition.Members[front], new EquippedItem(data.Items.Get(drop.Id), tier: ItemTier.Tier1), 0, 1);
             battle.Refresh();
             yield return null;
             Assert.IsTrue(row1.gameObject.activeSelf);
             Assert.AreEqual(2, row1.Pieces.Count(), "The weapon and the staged item.");
             Assert.IsFalse(UiTestUtil.Views<BattleBoardView>(battle).Any(b => b.Unit.Side == BattleSide.Party && b.gameObject.activeSelf), "The battle's party boards are away.");
             LootDropView first = battle.Drops[index];
-            StringAssert.Contains(UiText.TierWord(ItemTier.Bronze), first.Title);
+            StringAssert.Contains(UiText.TierWord(ItemTier.Tier1), first.Title);
             Assert.IsTrue(first.gameObject.activeSelf);
             Assert.IsFalse(first.IsPicked);
 
@@ -1837,14 +1837,14 @@ namespace F1.Tests
             Assert.IsTrue(first.IsPicked);
             Assert.IsTrue(battle.LootHand.Holding, "The drop is in the hand.");
             Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootPickedHint), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Silver)), row1.PieceAt(0, 1).MergeMark);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Tier2)), row1.PieceAt(0, 1).MergeMark);
             UiTestUtil.HoverSquare(row1, 0, 1);
             yield return null;
             Assert.AreEqual(GhostKind.Merges, row1.Grid.GhostShown);
             UiTestUtil.ClickSquare(row1, 0, 1);
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(2, expedition.Members[front].Board.Items.Count, "The base weapon and the merge.");
-            Assert.AreEqual(ItemTier.Silver, UiTestUtil.ItemAt(expedition.Members[front], 0, 1).Tier);
+            Assert.AreEqual(ItemTier.Tier2, UiTestUtil.ItemAt(expedition.Members[front], 0, 1).Tier);
             Assert.AreEqual(drop.Id, UiTestUtil.ItemAt(expedition.Members[front], 0, 1).Item.Id);
             Assert.IsFalse(battle.LootHand.Holding);
             Assert.IsFalse(first.gameObject.activeSelf, "The taken drop is gone from the floor.");
@@ -2066,7 +2066,7 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampMend/MendPlate").gameObject.activeSelf);
             string change = UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendChange");
             StringAssert.Contains(UiText.Name(weapon.Item.Name), change);
-            StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Common), UiText.TierWord(ItemTier.Bronze)), change);
+            StringAssert.Contains(UiText.Change(UiText.TierWord(ItemTier.Common), UiText.TierWord(ItemTier.Tier1)), change);
             StringAssert.Contains(
                 UiText.Change(UiText.Effect(effect, weapon, balance), UiText.EffectValue(effect, weapon.TierUp(), balance)),
                 UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampMend/MendPlate/MendEffects"));
@@ -2086,12 +2086,12 @@ namespace F1.Tests
             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendConfirm");
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase);
-            Assert.AreEqual(ItemTier.Bronze, UiTestUtil.ItemAt(front, 0, 0).Tier);
+            Assert.AreEqual(ItemTier.Tier1, UiTestUtil.ItemAt(front, 0, 0).Tier);
             Assert.IsTrue(UiTestUtil.ItemAt(front, 0, 0).IsBase);
             CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
             Assert.IsFalse(UiTestUtil.At(map, "Frame/Map/Camp").gameObject.activeSelf);
             Assert.IsTrue(UiTestUtil.At(map, "Frame/BoardPanel/InventoryToggle").gameObject.activeSelf);
-            Assert.AreEqual(ItemTier.Bronze, board.PieceAt(0, 0).TierShown);
+            Assert.AreEqual(ItemTier.Tier1, board.PieceAt(0, 0).TierShown);
             Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
         }
 

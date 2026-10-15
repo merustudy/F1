@@ -73,8 +73,11 @@ namespace F1.Editor.Setup
         /// </summary>
         public const string TierTag = "Frame/tier_tag";
 
-        /// <summary>A star of the tier tag (round 41): white with an ink outline, tinted with the tier's word colour. Drawn (Archive/41-tier-marks/draw_pieces.py).</summary>
+        /// <summary>A star (round 41): white with an ink outline. The whetstone's star squares (stage 20) tint it. Drawn (Archive/41-tier-marks/draw_pieces.py).</summary>
         public const string Star = "Icon/star";
+
+        /// <summary>A pip of the tier tag (round 69): a white diamond with an ink outline, the star's size, tinted with the tier's colour. Drawn (Archive/69-tier-naming/draw_pieces.py).</summary>
+        public const string TierPip = "Icon/tier_pip";
 
         /// <summary>The trough of a bar: a dark iron recess (the HP bar under a unit's feet).</summary>
         public const string Trough = "Frame/trough";
@@ -162,6 +165,7 @@ namespace F1.Editor.Setup
             new Piece(Slot, 16),
             new Piece(FatigueTag, 20),
             new Piece(TierTag, 20),
+            new Piece(TierPip),
             new Piece(Trough, 30),
             new Piece(PotionSlot, 30),
             new Piece(PotionSlotSelected, 30),

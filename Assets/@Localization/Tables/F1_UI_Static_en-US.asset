@@ -808,20 +808,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 2017500597313536
-    m_Localized: Bronze
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2017500597313537
-    m_Localized: Silver
-    m_Metadata:
-      m_Items: []
-  - m_Id: 2017500597313538
-    m_Localized: Gold
-    m_Metadata:
-      m_Items: []
   - m_Id: 2017500597313540
-    m_Localized: Put it on another {0} ({1}) and they merge into one {2}.
+    m_Localized: Put it on another {0} {1} and they merge into one {2}.
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1054,7 +1042,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 3665380550631424
-    m_Localized: "{0} \xB7 {1}"
+    m_Localized: '{0} {1}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1082,6 +1070,18 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 5496660372217856
+    m_Localized: 1-star
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5496660384800768
+    m_Localized: 2-star
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5496660384800769
+    m_Localized: 3-star
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

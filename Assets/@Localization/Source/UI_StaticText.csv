@@ -100,7 +100,7 @@ Board.StateDetail,"On the detail line when the state's name under a member's fee
 Board.GhostToInventory,Over a held item's ghost where it would push one item out (Slice B stage 19). {0} = that item's name.,{0} → 인벤토리,{0} → inventory
 Board.GhostBag,Over a held bag's ghost where it can be laid (Slice B stage 19).,가방 놓기,Lay the bag
 Board.MergeInto,On a board cell the chosen item would merge into. {0} = the tier the merge makes.,합치기 → {0},Merge → {0}
-Item.TooltipTitle,The title in Diablo's tooltip without the grade (round 57). {0} = item name. {1} = tier. A Common item shows its name alone.,{0} · {1},{0} · {1}
+Item.TooltipTitle,"The title of an item above Common (round 57 without the grade; round 69 with the star word). {0} = item name. {1} = tier. A Common item shows its name alone.",{0} {1},{0} {1}
 Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
 Item.Armor,Item category: defensive gear.,방어 장비,Armor
 Item.Attack,Item category: an attack that is not a weapon.,공격 아이템,Attack item
@@ -115,11 +115,11 @@ Item.RowsBack,The item only works while its owner stands within the rear N rows 
 Item.RowsBackOne,The item only works in the rearmost row.,맨 뒤에서만 발동,Only in the rearmost row
 Item.FatigueCost,In an item's facts: equipment that costs fatigue when a battle starts. {0} = the cost.,전투마다 피로 +{0},Fatigue +{0} each battle
 Item.BaseWeapon,In a base weapon's facts: it costs no fatigue.,기본 무기: 피로 없음,Base weapon: no fatigue
-Item.Common,"The tier an item is found at. Not written in titles; only where a tier word is needed (the camp's mend: 일반 → 동).",일반,Common
-Item.Bronze,The first tier above Common (one merge).,동,Bronze
-Item.Silver,The second tier above Common.,은,Silver
-Item.Gold,The last tier of an item.,금,Gold
-Item.MergeHint,"Under a chosen item's facts when a board holds the same item at the same tier. {0} = item name. {1} = its tier. {2} = the tier up.",같은 {0}·{1} 위에 놓으면 합쳐서 {2} 하나가 됩니다.,"Put it on another {0} ({1}) and they merge into one {2}."
+Item.Common,"The tier an item is found at. Not written in titles; only where a tier word is needed (the camp's mend: 일반 → 1성).",일반,Common
+Item.Tier1,"The first tier above Common (one merge). Round 69: the tiers count stars, as TFT does.",1성,1-star
+Item.Tier2,The second tier above Common.,2성,2-star
+Item.Tier3,The last tier of an item.,3성,3-star
+Item.MergeHint,"Under a chosen item's facts when a board holds the same item at the same tier. {0} = item name. {1} = its tier. {2} = the tier up.",같은 {0} {1} 위에 놓으면 합쳐서 {2} 하나가 됩니다.,"Put it on another {0} {1} and they merge into one {2}."
 Item.MergeHintPlain,"Item.MergeHint for a Common item, which names no tier of its own. {0} = item name. {1} = the tier up.",같은 {0} 위에 놓으면 합쳐서 {1} 하나가 됩니다.,Put it on another {0} and they merge into one {1}.
 Item.Change,A value before and after a change. {0} = before. {1} = after.,{0} → {1},{0} → {1}
 Item.Melee,"In an item's facts: a melee weapon, which the stars of a whetstone strengthen (Slice B stage 20).",근접,Melee

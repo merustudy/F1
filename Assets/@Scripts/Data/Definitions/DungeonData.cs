@@ -55,9 +55,9 @@ namespace F1.Data
             int campFloor = 0,
             int enemyHpPerFloorPercent = 0,
             int enemyPowerPerFloorPercent = 0,
-            int bronzeFloor = 0,
-            int silverFloor = 0,
-            int goldFloor = 0,
+            int tier1Floor = 0,
+            int tier2Floor = 0,
+            int tier3Floor = 0,
             int shopMinFloor = 0,
             int shopChancePercent = 0)
         {
@@ -111,7 +111,7 @@ namespace F1.Data
             }
 
             int lastTierFloor = 0;
-            foreach (int tierFloor in new[] { bronzeFloor, silverFloor, goldFloor })
+            foreach (int tierFloor in new[] { tier1Floor, tier2Floor, tier3Floor })
             {
                 if (tierFloor == 0)
                 {
@@ -120,13 +120,13 @@ namespace F1.Data
 
                 if (tierFloor < 1 || tierFloor > floors || tierFloor <= lastTierFloor)
                 {
-                    throw new DataException($"{DefinitionName} '{id}': the floors where Bronze, Silver and Gold items start are 0 (never) or map floors, each deeper than the one before.");
+                    throw new DataException($"{DefinitionName} '{id}': the floors where 1-, 2- and 3-star items start are 0 (never) or map floors, each deeper than the one before.");
                 }
 
                 lastTierFloor = tierFloor;
             }
 
-            if ((silverFloor != 0 && bronzeFloor == 0) || (goldFloor != 0 && silverFloor == 0))
+            if ((tier2Floor != 0 && tier1Floor == 0) || (tier3Floor != 0 && tier2Floor == 0))
             {
                 throw new DataException($"{DefinitionName} '{id}': a tier cannot start where the tier under it never does.");
             }
@@ -144,9 +144,9 @@ namespace F1.Data
             CampFloor = campFloor;
             EnemyHpPerFloorPercent = enemyHpPerFloorPercent;
             EnemyPowerPerFloorPercent = enemyPowerPerFloorPercent;
-            BronzeFloor = bronzeFloor;
-            SilverFloor = silverFloor;
-            GoldFloor = goldFloor;
+            Tier1Floor = tier1Floor;
+            Tier2Floor = tier2Floor;
+            Tier3Floor = tier3Floor;
             ShopMinFloor = shopMinFloor;
             ShopChancePercent = shopChancePercent;
         }
@@ -209,15 +209,15 @@ namespace F1.Data
         [JsonProperty(Order = 18, Required = Required.Always)]
         public int EnemyPowerPerFloorPercent { get; }
 
-        /// <summary>The first floor from which the loot of battles and the stock of shops are Bronze, Silver and Gold items; 0 for never. An elite's loot is a tier up.</summary>
+        /// <summary>The first floor from which the loot of battles and the stock of shops are 1-, 2- and 3-star items; 0 for never. An elite's loot is a tier up.</summary>
         [JsonProperty(Order = 19, Required = Required.Always)]
-        public int BronzeFloor { get; }
+        public int Tier1Floor { get; }
 
         [JsonProperty(Order = 20, Required = Required.Always)]
-        public int SilverFloor { get; }
+        public int Tier2Floor { get; }
 
         [JsonProperty(Order = 21, Required = Required.Always)]
-        public int GoldFloor { get; }
+        public int Tier3Floor { get; }
 
         /// <summary>The shop nodes (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §1): from which floor a shop may stand on a node, and its chance.</summary>
         [JsonProperty(Order = 22, Required = Required.Always)]
@@ -247,26 +247,26 @@ namespace F1.Data
             return ShopChancePercent > 0 && floor >= ShopMinFloor && floor > 1 && floor <= Floors && floor != CampFloor;
         }
 
-        /// <summary>Tier of the items found on a floor: the deepest tier started by then, one more for an elite's loot (Gold at most).</summary>
+        /// <summary>Tier of the items found on a floor: the deepest tier started by then, one more for an elite's loot (3-star at most).</summary>
         public ItemTier ItemTierAt(int floor, bool elite)
         {
             ItemTier tier = ItemTier.Common;
-            if (BronzeFloor != 0 && floor >= BronzeFloor)
+            if (Tier1Floor != 0 && floor >= Tier1Floor)
             {
-                tier = ItemTier.Bronze;
+                tier = ItemTier.Tier1;
             }
 
-            if (SilverFloor != 0 && floor >= SilverFloor)
+            if (Tier2Floor != 0 && floor >= Tier2Floor)
             {
-                tier = ItemTier.Silver;
+                tier = ItemTier.Tier2;
             }
 
-            if (GoldFloor != 0 && floor >= GoldFloor)
+            if (Tier3Floor != 0 && floor >= Tier3Floor)
             {
-                tier = ItemTier.Gold;
+                tier = ItemTier.Tier3;
             }
 
-            return elite && tier < ItemTier.Gold ? tier + 1 : tier;
+            return elite && tier < ItemTier.Tier3 ? tier + 1 : tier;
         }
     }
 

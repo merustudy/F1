@@ -113,14 +113,14 @@ namespace F1.Tests
         {
             ItemData whetstone = Whetstone(starDamage: 2);
             Assert.AreEqual(2, new EquippedItem(whetstone, powerPercent: 8).StarDamage);
-            Assert.AreEqual(4, new EquippedItem(whetstone, tier: ItemTier.Bronze, powerPercent: 8).StarDamage);
-            Assert.AreEqual(6, new EquippedItem(whetstone, tier: ItemTier.Silver, powerPercent: 8).StarDamage);
-            Assert.AreEqual(8, new EquippedItem(whetstone, tier: ItemTier.Gold, powerPercent: 8).StarDamage);
-            Assert.AreEqual(0, new EquippedItem(Weapon("sword", 3), tier: ItemTier.Gold, powerPercent: 8).StarDamage, "No stars, nothing.");
+            Assert.AreEqual(4, new EquippedItem(whetstone, tier: ItemTier.Tier1, powerPercent: 8).StarDamage);
+            Assert.AreEqual(6, new EquippedItem(whetstone, tier: ItemTier.Tier2, powerPercent: 8).StarDamage);
+            Assert.AreEqual(8, new EquippedItem(whetstone, tier: ItemTier.Tier3, powerPercent: 8).StarDamage);
+            Assert.AreEqual(0, new EquippedItem(Weapon("sword", 3), tier: ItemTier.Tier3, powerPercent: 8).StarDamage, "No stars, nothing.");
 
             ItemBoard board = PackBoard();
             BoardItem sword = Lay(board, Weapon("sword", 3), 0, 1);
-            Lay(board, Whetstone(), 1, 2, tier: ItemTier.Silver);
+            Lay(board, Whetstone(), 1, 2, tier: ItemTier.Tier2);
             Assert.AreEqual(3, StarRules.DamageOn(board, sword));
         }
 

@@ -105,8 +105,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// "Name · tier", the tier in its colour (round 35); a Common item is its name alone (round 41). Items have no grade any more (Slice B
-        /// stage 22; round 57 had taken it out of the tooltips already).
+        /// "Name N성", the tier in its colour (round 35; round 69 the star word); a Common item is its name alone (round 41). Items have no grade
+        /// any more (Slice B stage 22; round 57 had taken it out of the tooltips already).
         /// </summary>
         public static string ItemTitle(EquippedItem item)
         {
@@ -121,17 +121,17 @@ namespace F1.UI
             switch (tier)
             {
                 case ItemTier.Common: return UiStrings.Get(UiKeys.Item.Common);
-                case ItemTier.Bronze: return UiStrings.Get(UiKeys.Item.Bronze);
-                case ItemTier.Silver: return UiStrings.Get(UiKeys.Item.Silver);
-                case ItemTier.Gold: return UiStrings.Get(UiKeys.Item.Gold);
+                case ItemTier.Tier1: return UiStrings.Get(UiKeys.Item.Tier1);
+                case ItemTier.Tier2: return UiStrings.Get(UiKeys.Item.Tier2);
+                case ItemTier.Tier3: return UiStrings.Get(UiKeys.Item.Tier3);
                 default: throw new ArgumentOutOfRangeException(nameof(tier), tier, null);
             }
         }
 
-        /// <summary>The name of a tier in the tier's colour.</summary>
+        /// <summary>The name of a tier in the tier's colour (the one palette of round 69: the pips' colours, Diablo's blue and yellow round silver).</summary>
         public static string TierWord(ItemTier tier)
         {
-            return Colored(TierName(tier), UiPalette.TierText(tier));
+            return Colored(TierName(tier), UiPalette.Rarity(tier));
         }
 
         /// <summary>Under a chosen item's facts: what putting it on the same item at the same tier does (round 35). A Common item names no tier of its own.</summary>

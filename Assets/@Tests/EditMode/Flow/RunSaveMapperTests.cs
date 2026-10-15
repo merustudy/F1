@@ -449,9 +449,9 @@ namespace F1.Tests
 
             Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
             Assert.AreEqual("Common", first.Tier);
-            Assert.AreEqual("Bronze", save.Expedition.Inventory[0].Tier);
-            Assert.AreEqual("Silver", save.Expedition.Inventory[1].Tier);
-            Assert.AreEqual("Gold", save.Expedition.Inventory[2].Tier);
+            Assert.AreEqual("Tier1", save.Expedition.Inventory[0].Tier, "Version 7's Bronze, version 12's Tier1.");
+            Assert.AreEqual("Tier2", save.Expedition.Inventory[1].Tier);
+            Assert.AreEqual("Tier3", save.Expedition.Inventory[2].Tier);
             Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
         }
 
@@ -490,20 +490,20 @@ namespace F1.Tests
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
             ExpeditionMember first = expedition.Members[0];
             BoardItem weapon = first.Board.Items[0];
-            weapon.Item = new EquippedItem(weapon.Item.Item, isBase: true, tier: ItemTier.Silver);
-            expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), tier: ItemTier.Bronze));
+            weapon.Item = new EquippedItem(weapon.Item.Item, isBase: true, tier: ItemTier.Tier2);
+            expedition.Inventory.Add(new EquippedItem(data.Items.Get("knife"), tier: ItemTier.Tier1));
             ItemOffer drop = expedition.Loot.First(d => d != null);
-            expedition.Loot[expedition.Loot.IndexOf(drop)] = new ItemOffer(OfferKind.Item, drop.Id, ItemTier.Gold);
+            expedition.Loot[expedition.Loot.IndexOf(drop)] = new ItemOffer(OfferKind.Item, drop.Id, ItemTier.Tier3);
 
             RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
 
-            Assert.AreEqual(ItemTier.Silver, read.Members[0].Board.Items[0].Item.Tier);
+            Assert.AreEqual(ItemTier.Tier2, read.Members[0].Board.Items[0].Item.Tier);
             Assert.IsTrue(read.Members[0].Board.Items[0].Item.IsBase);
-            Assert.AreEqual(ItemTier.Bronze, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
-            Assert.AreEqual(ItemTier.Gold, read.Loot.First(d => d != null).Tier);
+            Assert.AreEqual(ItemTier.Tier1, read.Inventory.Single(i => i.Item.Id == "knife").Tier);
+            Assert.AreEqual(ItemTier.Tier3, read.Loot.First(d => d != null).Tier);
             Assert.IsNull(read.Loot[1], "The taken slot stays empty.");
-            Assert.AreEqual("Silver", again.Expedition.Members[0].Items[0].Tier, "Stored by name.");
+            Assert.AreEqual("Tier2", again.Expedition.Members[0].Items[0].Tier, "Stored by name.");
         }
 
         [Test]
@@ -540,6 +540,30 @@ namespace F1.Tests
             CollectionAssert.AreEqual(board.Bags.Select(b => b.At), readBoard.Bags.Select(b => b.At));
             CollectionAssert.AreEqual(board.Items.Select(i => i.At), readBoard.Items.Select(i => i.At));
             Assert.AreEqual("bow", readBoard.ItemAt(2, 2).Item.Item.Id, "The bow stands across the pack and the pouch.");
+        }
+
+        [Test]
+        public void Migrate_From11_RenamesTheTiers_OnItemsAndOffers()
+        {
+            // Version 7 named the tiers Common, Bronze, Silver, Gold; version 12 (round 69) names the same four Common, Tier1, Tier2, Tier3.
+            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.PickingLoot);
+            save.SchemaVersion = 11;
+            ItemRecord first = save.Expedition.Members[0].Items[0];
+            first.Tier = "Bronze";
+            var knife = new ItemRecord { ItemId = "knife", Tier = "Silver", X = 7, Y = 2 };   // a free room of the grid, past the drop taken in
+            save.Expedition.Inventory.Add(knife);
+            OfferRecord drop = save.Expedition.Loot.First(d => d != null);
+            drop.Tier = "Gold";
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.AreEqual("Tier1", first.Tier);
+            Assert.AreEqual("Tier2", knife.Tier);
+            Assert.AreEqual("Tier3", drop.Tier);
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState read);
+            Assert.AreEqual(ItemTier.Tier1, read.Members[0].Board.Items[0].Item.Tier);
+            Assert.AreEqual(ItemTier.Tier3, read.Loot.First(d => d != null).Tier);
         }
 
         [Test]

@@ -30,7 +30,7 @@ namespace F1.Gameplay
         public EquippedItem(ItemData item, bool isBase = false, ItemTier tier = ItemTier.Common, int powerPercent = 100)
         {
             Item = item ?? throw new ArgumentNullException(nameof(item));
-            if (tier < ItemTier.Common || tier > ItemTier.Gold)
+            if (tier < ItemTier.Common || tier > ItemTier.Tier3)
             {
                 throw new ArgumentOutOfRangeException(nameof(tier), tier, "Not a tier.");
             }
@@ -47,7 +47,7 @@ namespace F1.Gameplay
 
         public ItemData Item { get; }
 
-        /// <summary>Common, Bronze, Silver or Gold: the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
+        /// <summary>Common, Tier1, Tier2 or Tier3 (일반·1성·2성·3성): the effects grow with it (Docs/Design/02_Combat_System.md §4).</summary>
         public ItemTier Tier { get; }
 
         /// <summary>100 for the party's items; an enemy's own percent for its items (stage 22).</summary>
@@ -73,16 +73,16 @@ namespace F1.Gameplay
 
         /// <summary>
         /// What a melee weapon on one of the item's stars deals more (Slice B stage 20), in hundredths: the data's StarDamage at Common, as much
-        /// again per tier step (Bronze twice, Silver three times, Gold four times). 0 for an item without stars.
+        /// again per tier step (Tier1 twice, Tier2 three times, Tier3 four times). 0 for an item without stars.
         /// </summary>
         public int StarDamage => Item.StarDamage * ((int)Tier - (int)ItemTier.Common + 1);
 
         /// <summary>The same item a tier up: what two of it merge into, or what a camp's upkeep makes of it.</summary>
         public EquippedItem TierUp()
         {
-            if (Tier == ItemTier.Gold)
+            if (Tier == ItemTier.Tier3)
             {
-                throw new InvalidOperationException($"'{Item.Id}' is Gold already.");
+                throw new InvalidOperationException($"'{Item.Id}' is Tier3 already.");
             }
 
             return new EquippedItem(Item, IsBase, Tier + 1, PowerPercent);

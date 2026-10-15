@@ -890,21 +890,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673241901465606
-  - m_Id: 2017500597313536
-    m_Key: Item.Bronze
-    m_Metadata:
-      m_Items:
-      - rid: 8623673241901465607
-  - m_Id: 2017500597313537
-    m_Key: Item.Silver
-    m_Metadata:
-      m_Items:
-      - rid: 8623673241901465608
-  - m_Id: 2017500597313538
-    m_Key: Item.Gold
-    m_Metadata:
-      m_Items:
-      - rid: 8623673241901465609
   - m_Id: 2017500597313540
     m_Key: Item.MergeHint
     m_Metadata:
@@ -1185,6 +1170,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673361877958656
+  - m_Id: 5496660372217856
+    m_Key: Item.Tier1
+    m_Metadata:
+      m_Items:
+      - rid: 8623673459348865024
+  - m_Id: 5496660384800768
+    m_Key: Item.Tier2
+    m_Metadata:
+      m_Items:
+      - rid: 8623673459348865025
+  - m_Id: 5496660384800769
+    m_Key: Item.Tier3
+    m_Metadata:
+      m_Items:
+      - rid: 8623673459348865026
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1930,18 +1930,6 @@ MonoBehaviour:
       data:
         m_CommentText: On a board cell the chosen item would merge into. {0} = the
           tier the merge makes.
-    - rid: 8623673241901465607
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The first tier above Common (one merge).
-    - rid: 8623673241901465608
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The second tier above Common.
-    - rid: 8623673241901465609
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The last tier of an item.
     - rid: 8623673241901465611
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2022,7 +2010,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: "The tier an item is found at. Not written in titles; only
-          where a tier word is needed (the camp's mend: \uC77C\uBC18 \u2192 \uB3D9)."
+          where a tier word is needed (the camp's mend: \uC77C\uBC18 \u2192 1\uC131)."
     - rid: 8623673257781362690
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2190,8 +2178,9 @@ MonoBehaviour:
     - rid: 8623673344893911040
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: The title in Diablo's tooltip without the grade (round 57).
-          {0} = item name. {1} = tier. A Common item shows its name alone.
+        m_CommentText: The title of an item above Common (round 57 without the grade;
+          round 69 with the star word). {0} = item name. {1} = tier. A Common item
+          shows its name alone.
     - rid: 8623673359758786560
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2218,3 +2207,16 @@ MonoBehaviour:
       data:
         m_CommentText: A critical hit's HP lost (stage 22), under Fx.Crit. {0} =
           HP lost.
+    - rid: 8623673459348865024
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The first tier above Common (one merge). Round 69: the tiers
+          count stars, as TFT does.'
+    - rid: 8623673459348865025
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The second tier above Common.
+    - rid: 8623673459348865026
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The last tier of an item.

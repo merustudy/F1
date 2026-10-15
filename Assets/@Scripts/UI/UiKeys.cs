@@ -148,9 +148,9 @@ namespace F1.UI
             public const string FatigueCost = "Item.FatigueCost";
             public const string BaseWeapon = "Item.BaseWeapon";
             public const string Common = "Item.Common";
-            public const string Bronze = "Item.Bronze";
-            public const string Silver = "Item.Silver";
-            public const string Gold = "Item.Gold";
+            public const string Tier1 = "Item.Tier1";
+            public const string Tier2 = "Item.Tier2";
+            public const string Tier3 = "Item.Tier3";
             public const string MergeHint = "Item.MergeHint";
             public const string MergeHintPlain = "Item.MergeHintPlain";
             public const string Change = "Item.Change";

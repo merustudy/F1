@@ -302,8 +302,8 @@ namespace F1.Tests
 
                             // Tiers (round 35): the buckler Silver and the herb pouch Gold on their pieces, a second Common dagger on row 2's
                             // board, and the row-1 dagger held over it, which marks the piece it would merge into and shows the merge.
-                            front.Board.ItemAt(2, 1).Item = new EquippedItem(shotData.Items.Get("buckler"), tier: ItemTier.Silver);
-                            front.Board.ItemAt(0, 2).Item = new EquippedItem(shotData.Items.Get("herb_pouch"), tier: ItemTier.Gold);
+                            front.Board.ItemAt(2, 1).Item = new EquippedItem(shotData.Items.Get("buckler"), tier: ItemTier.Tier2);
+                            front.Board.ItemAt(0, 2).Item = new EquippedItem(shotData.Items.Get("herb_pouch"), tier: ItemTier.Tier3);
                             ExpeditionMember second = Managers.Expedition.Expedition.Members[party.ColumnOfRow(2).Member];
                             var secondKept = new List<BoardItem>(second.Board.Items);
                             second.Board.Items.RemoveAll(placed => placed.At.Y > 0);
@@ -444,7 +444,7 @@ namespace F1.Tests
                             // battle shows a cell's outline under the charge's dark and the tier tag above it (the rear survives the longest).
                             ExpeditionMember rear = Managers.Expedition.Expedition.Members.OrderByDescending(m => m.Row).First(m => m.Alive);
                             BoardItem rearWeapon = rear.Board.ItemAt(0, 0);
-                            rearWeapon.Item = new EquippedItem(rearWeapon.Item.Item, isBase: true, tier: ItemTier.Bronze);
+                            rearWeapon.Item = new EquippedItem(rearWeapon.Item.Item, isBase: true, tier: ItemTier.Tier1);
                         }
 
                         yield return UiTestUtil.GoIntoTheFirstNode();

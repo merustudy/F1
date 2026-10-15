@@ -134,13 +134,13 @@ namespace F1.Tests
             Assert.AreEqual(0, mine.CampFloor);
             Assert.AreEqual(5, mine.EnemyHpPerFloorPercent);
             Assert.AreEqual(10, mine.EnemyPowerPerFloorPercent);
-            Assert.AreEqual(2, mine.BronzeFloor);
-            Assert.AreEqual(0, mine.SilverFloor);
-            Assert.AreEqual(0, mine.GoldFloor);
+            Assert.AreEqual(2, mine.Tier1Floor);
+            Assert.AreEqual(0, mine.Tier2Floor);
+            Assert.AreEqual(0, mine.Tier3Floor);
             Assert.AreEqual(ItemTier.Common, mine.ItemTierAt(1, elite: false));
-            Assert.AreEqual(ItemTier.Bronze, mine.ItemTierAt(2, elite: false));
-            Assert.AreEqual(ItemTier.Silver, mine.ItemTierAt(2, elite: true), "An elite's loot is a tier up.");
-            Assert.AreEqual(300, data.Balance.TierPercent(ItemTier.Silver));
+            Assert.AreEqual(ItemTier.Tier1, mine.ItemTierAt(2, elite: false));
+            Assert.AreEqual(ItemTier.Tier2, mine.ItemTierAt(2, elite: true), "An elite's loot is a tier up.");
+            Assert.AreEqual(300, data.Balance.TierPercent(ItemTier.Tier2));
 
             Assert.AreEqual("knight", data.Mercenaries.Get("rowan").JobId);
 

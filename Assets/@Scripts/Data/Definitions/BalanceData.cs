@@ -101,9 +101,9 @@ namespace F1.Data
             new KeySpec(nameof(EliteBagPercent), 0, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
-            new KeySpec(nameof(TierBronzePercent), 100, Big),
-            new KeySpec(nameof(TierSilverPercent), 100, Big),
-            new KeySpec(nameof(TierGoldPercent), 100, Big),
+            new KeySpec(nameof(Tier1Percent), 100, Big),
+            new KeySpec(nameof(Tier2Percent), 100, Big),
+            new KeySpec(nameof(Tier3Percent), 100, Big),
             new KeySpec(nameof(MapBranchChancePercent), 0, 100),
             new KeySpec(nameof(FinalBossLevel), 2, Big),
             new KeySpec(nameof(ShopSlots), 1, MaxShopSlots),
@@ -159,7 +159,7 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: unknown key '{unknown}'.");
             }
 
-            if (TierBronzePercent <= 100 || TierSilverPercent <= TierBronzePercent || TierGoldPercent <= TierSilverPercent)
+            if (Tier1Percent <= 100 || Tier2Percent <= Tier1Percent || Tier3Percent <= Tier2Percent)
             {
                 throw new DataException($"{DefinitionName}: every tier must be stronger than the one under it (Common is 100).");
             }
@@ -276,18 +276,18 @@ namespace F1.Data
         public int CampHealPercent => _values[nameof(CampHealPercent)];
         public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];
         /// <summary>How big an item's effects are at a tier, in percent of Common's.</summary>
-        public int TierBronzePercent => _values[nameof(TierBronzePercent)];
-        public int TierSilverPercent => _values[nameof(TierSilverPercent)];
-        public int TierGoldPercent => _values[nameof(TierGoldPercent)];
+        public int Tier1Percent => _values[nameof(Tier1Percent)];
+        public int Tier2Percent => _values[nameof(Tier2Percent)];
+        public int Tier3Percent => _values[nameof(Tier3Percent)];
 
         /// <summary>The percent of Common's effects an item has at a tier: 100 at Common.</summary>
         public int TierPercent(ItemTier tier)
         {
             switch (tier)
             {
-                case ItemTier.Bronze: return TierBronzePercent;
-                case ItemTier.Silver: return TierSilverPercent;
-                case ItemTier.Gold: return TierGoldPercent;
+                case ItemTier.Tier1: return Tier1Percent;
+                case ItemTier.Tier2: return Tier2Percent;
+                case ItemTier.Tier3: return Tier3Percent;
                 default: return 100;
             }
         }

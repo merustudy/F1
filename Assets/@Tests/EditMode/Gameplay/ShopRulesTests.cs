@@ -39,7 +39,7 @@ namespace F1.Tests
             parts.Dungeons = new List<DungeonData>
             {
                 new DungeonData("cave", TestData.Text("cave"), "swift", 8, 2, 4, 3, new List<string> { "tonic" }, null,
-                    campFloor: 8, bronzeFloor: 4, shopMinFloor: 3, shopChancePercent: shopPercent),
+                    campFloor: 8, tier1Floor: 4, shopMinFloor: 3, shopChancePercent: shopPercent),
             };
             parts.EnemyGroups = new List<EnemyGroupData>
             {
@@ -197,8 +197,8 @@ namespace F1.Tests
         {
             StaticData data = ShopCave();
             Assert.AreEqual(10, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife")));
-            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Bronze)), "Bronze: twice, as its effects.");
-            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Gold)));
+            Assert.AreEqual(20, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Tier1)), "Bronze: twice, as its effects.");
+            Assert.AreEqual(40, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Item, "knife", ItemTier.Tier3)));
             Assert.AreEqual(5, ExpeditionRules.PriceOf(data, new ItemOffer(OfferKind.Potion, "tonic")));
         }
 

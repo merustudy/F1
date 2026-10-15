@@ -37,7 +37,7 @@ namespace F1.UI
         [SerializeField] RightClick _rightClick;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _tierTag;
-        [SerializeField] Image[] _stars;
+        [SerializeField] Image[] _pips;
 
         BattleItemState _item;
         bool _shownActive;
@@ -88,11 +88,11 @@ namespace F1.UI
         /// <summary>The tier the piece marks (the item's, above Common), or null for a Common item.</summary>
         public ItemTier? TierShown { get; private set; }
 
-        /// <summary>How many stars the tier tag shows; 0 while it is hidden.</summary>
-        public int Stars { get; private set; }
+        /// <summary>How many pips the tier tag shows (the tier's stars); 0 while it is hidden.</summary>
+        public int Pips { get; private set; }
 
-        /// <summary>The stars' colour (Diablo's rarity colour, round 49), or null while none show.</summary>
-        public Color? StarColor => Stars > 0 ? _stars[0].color : (Color?)null;
+        /// <summary>The pips' colour (the tier's one colour, round 69), or null while none show.</summary>
+        public Color? PipColor => Pips > 0 ? _pips[0].color : (Color?)null;
 
         /// <summary>The piece's ground colour on show: none in battle (round 49).</summary>
         public Color Ground => _frame.color;
@@ -239,20 +239,20 @@ namespace F1.UI
             _darkArt.localScale = scale;
         }
 
-        /// <summary>The tier's stars in Diablo II's rarity colours on no pill (round 49); nothing for Common.</summary>
+        /// <summary>The tier's pips in the tier's colour on no pill (round 69; round 49 Diablo's colours on stars); nothing for Common.</summary>
         void ShowTier(ItemTier tier, Sprite icon)
         {
             TierShown = tier > ItemTier.Common ? tier : (ItemTier?)null;
-            Stars = TierStyle.Stars(tier);
-            _tierTag.gameObject.SetActive(Stars > 0);
-            if (Stars > 0)
+            Pips = TierStyle.Pips(tier);
+            _tierTag.gameObject.SetActive(Pips > 0);
+            if (Pips > 0)
             {
                 _tierTag.color = Color.clear;
-                _tierTag.rectTransform.sizeDelta = new Vector2(TierStyle.TagWidth(Stars), TierStyle.TagHeight);
-                for (int i = 0; i < _stars.Length; i++)
+                _tierTag.rectTransform.sizeDelta = new Vector2(TierStyle.TagWidth(Pips), TierStyle.TagHeight);
+                for (int i = 0; i < _pips.Length; i++)
                 {
-                    _stars[i].enabled = i < Stars;
-                    _stars[i].color = UiPalette.Rarity(tier);
+                    _pips[i].enabled = i < Pips;
+                    _pips[i].color = UiPalette.Rarity(tier);
                 }
             }
         }

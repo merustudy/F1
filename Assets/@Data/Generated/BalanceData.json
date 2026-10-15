@@ -202,16 +202,16 @@
       "Value": 1000
     },
     {
-      "Key": "TierBronzePercent",
+      "Key": "Tier1Percent",
       "Value": 200
     },
     {
-      "Key": "TierGoldPercent",
-      "Value": 400
+      "Key": "Tier2Percent",
+      "Value": 300
     },
     {
-      "Key": "TierSilverPercent",
-      "Value": 300
+      "Key": "Tier3Percent",
+      "Value": 400
     },
     {
       "Key": "TotalDays",

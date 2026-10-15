@@ -20,7 +20,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 11;
+        public const int CurrentSchemaVersion = 12;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -131,7 +131,7 @@ namespace F1.Save
         /// <summary>True for a base weapon: the job's weapon given when the expedition left.</summary>
         public bool Base;
 
-        /// <summary>The tier's name: Common, Bronze, Silver or Gold (version 7; version 5 named them Bronze, Silver, Gold, Diamond). An entry that does not name one is Common, as every item was before.</summary>
+        /// <summary>The tier's name: Common, Tier1, Tier2 or Tier3 (version 12; version 7 named them Common, Bronze, Silver, Gold and version 5 Bronze, Silver, Gold, Diamond). An entry that does not name one is Common, as every item was before.</summary>
         public string Tier = "Common";
 
         /// <summary>The top-left square the item lies from and its quarter turns clockwise: on a board (version 10) and in the inventory's grid (round 49).</summary>
@@ -155,7 +155,7 @@ namespace F1.Save
         public string Kind;
         public string Id;
 
-        /// <summary>The tier's name of an item on offer; Common for a potion or a bag (version 7, as above). An entry that does not name one is Common.</summary>
+        /// <summary>The tier's name of an item on offer; Common for a potion or a bag (version 12, as above). An entry that does not name one is Common.</summary>
         public string Tier = "Common";
     }
 

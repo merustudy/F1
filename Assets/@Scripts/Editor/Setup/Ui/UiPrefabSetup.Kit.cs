@@ -285,21 +285,22 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// The tier tag at a cell's bottom-left corner (round 41): the pill, which the view tints and widens to the tier's
-        /// stars, and every star it could carry, from the left. Off until the view shows a tier. Takes no clicks.
+        /// pips, and every pip it could carry, from the left (round 69: diamonds the size of round 41's stars). Off until the view shows a
+        /// tier. Takes no clicks.
         /// </summary>
-        static Image BuildTierTag(Transform parent, string name, out Image[] stars)
+        static Image BuildTierTag(Transform parent, string name, out Image[] pips)
         {
             Image pill = KitFrame(name, parent, UiArt.TierTag);
-            UiBuild.Place(pill.rectTransform, Vector2.zero, Vector2.zero, new Vector2(TierTagInset, TierTagInset), new Vector2(TierStyle.TagWidth(TierStyle.MostStars), TierStyle.TagHeight));
-            stars = new Image[TierStyle.MostStars];
-            for (int i = 0; i < stars.Length; i++)
+            UiBuild.Place(pill.rectTransform, Vector2.zero, Vector2.zero, new Vector2(TierTagInset, TierTagInset), new Vector2(TierStyle.TagWidth(TierStyle.MostPips), TierStyle.TagHeight));
+            pips = new Image[TierStyle.MostPips];
+            for (int i = 0; i < pips.Length; i++)
             {
-                stars[i] = KitIcon(name + "Star" + (i + 1), pill.transform, UiArt.Star);
-                // Round 49: the pill is see-through in Diablo's look, so each star has a dark edge to stand on any ground.
-                var edge = stars[i].gameObject.AddComponent<Outline>();
+                pips[i] = KitIcon(name + "Pip" + (i + 1), pill.transform, UiArt.TierPip);
+                // Round 49: the pill is see-through in Diablo's look, so each pip has a dark edge to stand on any ground.
+                var edge = pips[i].gameObject.AddComponent<Outline>();
                 edge.effectColor = new Color(0f, 0f, 0f, 0.9f);
                 edge.effectDistance = new Vector2(1f, -1f);
-                UiBuild.Place(stars[i].rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(TierStyle.TagPad + i * TierStyle.StarPitch, 0f), new Vector2(TierStyle.StarSize, TierStyle.StarSize));
+                UiBuild.Place(pips[i].rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(TierStyle.TagPad + i * TierStyle.PipPitch, 0f), new Vector2(TierStyle.PipSize, TierStyle.PipSize));
             }
 
             pill.gameObject.SetActive(false);

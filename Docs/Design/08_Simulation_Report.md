@@ -375,8 +375,8 @@ spellblade가 3열이나 4열이면 16~21%, bishop이나 archmage가 1열이면 
 ### 출발값
 | 레버 | 값 | 데이터 |
 |---|---|---|
-| 단계의 효과 | 일반 100%, 동 200%, 은 300%, 금 400% | `TierBronzePercent`, `TierSilverPercent`, `TierGoldPercent` |
-| 보상의 단계 | 1~4층 일반, 5~9층 동, 10~14층 은, 정예는 한 단계 위 | `BronzeFloor` 5, `SilverFloor` 10, `GoldFloor` 0 |
+| 단계의 효과 | 일반 100%, 1성 200%, 2성 300%, 3성 400% | `Tier1Percent`, `Tier2Percent`, `Tier3Percent` |
+| 보상의 단계 | 1~4층 일반, 5~9층 1성, 10~14층 2성, 정예는 한 단계 위 | `Tier1Floor` 5, `Tier2Floor` 10, `Tier3Floor` 0 |
 | 보상의 등급 | 8 (층마다 오르지 않음) | `ItemGradeBase` 8, `ItemGradePerFloor` 0 |
 
 ### 결과 (클리어율 / 원정당 사망 수, 3,000회)

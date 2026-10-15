@@ -331,8 +331,8 @@ namespace F1.Editor.Setup
             bagSquares.Shape(1, 1, GridGeometry.Gap);
             bagWell.gameObject.SetActive(false);
 
-            // Over everything, the tier tag with the stars (round 41).
-            Image tierTag = BuildTierTag(frame.transform, name + "Tier", out Image[] stars);
+            // Over everything, the tier tag with the pips (round 41; round 69).
+            Image tierTag = BuildTierTag(frame.transform, name + "Tier", out Image[] pips);
 
             var view = frame.gameObject.AddComponent<ItemSlotView>();
             UiBuild.SetReference(view, "_frame", frame);
@@ -345,7 +345,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_fatigue", fatigue);
             UiBuild.SetReference(view, "_fatigueText", fatigueText);
             UiBuild.SetReference(view, "_tierTag", tierTag);
-            UiBuild.SetReferences(view, "_stars", stars);
+            UiBuild.SetReferences(view, "_pips", pips);
             UiBuild.SetReference(view, "_merge", merge.gameObject);
             UiBuild.SetReference(view, "_mergeText", mergeText);
             UiBuild.SetReference(view, "_bagWell", bagWell.gameObject);
@@ -392,7 +392,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI name = UiBuild.ShrinkToFit(UiBuild.Label("ItemName", piece.transform, 15f, UiPalette.Text, TextAlignmentOptions.Center), 10f);
             UiBuild.Stretch(name.rectTransform, 4f, 2f, 4f, 2f);
 
-            Image tierTag = BuildTierTag(piece.transform, "ItemTier", out Image[] stars);
+            Image tierTag = BuildTierTag(piece.transform, "ItemTier", out Image[] pips);
 
             var view = piece.gameObject.AddComponent<BattleItemView>();
             UiBuild.SetReference(view, "_frame", piece);
@@ -407,7 +407,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_rightClick", piece.gameObject.AddComponent<RightClick>());
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_tierTag", tierTag);
-            UiBuild.SetReferences(view, "_stars", stars);
+            UiBuild.SetReferences(view, "_pips", pips);
 
             piece.gameObject.SetActive(false);
             return view;

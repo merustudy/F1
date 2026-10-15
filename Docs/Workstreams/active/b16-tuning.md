@@ -107,6 +107,9 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 - **G19 그림체의 방향**(결정 관문, 2026-10-13 Round 61 — 사용자 "스팀에서 어필하는 그림체인지 냉정하게 검토"): 조사 셋과 우리 그림의 관찰로 "감점을 피하는 수준, 끌어당기는 수준은 아님. 더 큰 위험은 AI 표시"로 판정하고 선택지 A~D, 권장 **A 지금 + B 목표**(생성 밑그림 + 사람의 손, 시험 세트로 잉크/평면 카툰을 정함), 판정할 것 아홉을 보고했다(`ArtPipeline/Archive/61-style-market-review/README.md`). 호출·그림 변경 없음. 같은 날 사용자 "A 시험세트 수행", "목업만 우선 제공" → 후처리 목업 셋(`mock-trial-units/battle/closeup.png`: 지금 / A / B-1 / B-2)과 판정할 것 T1~T4 → 사용자 **"오리지날 스타일 유지하는 걸로"**: **G19 결정됨**(지금 그림체 유지, B·C·D 없음). 톤·캡슐·공개 문구는 지시가 있을 때. 움직임(스파인·유니티 애니메이션, 리그·무기 바꾸기, 클로드 코드로 가능한지)은 **Round 62**로 검토해 보고했다(`ArtPipeline/Archive/62-rig-animation/README.md`: 선택지 0~4, 권장 1 무기 층 + 0 지금 틀 보강 먼저, 리그는 기사 하나의 시험. 결정 관문 **G20**). **판정 대기**. 구현은 어느 안이든 직접 플레이·16단계 마감 뒤가 권장이고, 안 1의 빈손 자세 재생성(호출 ≈ 33회)은 지시가 있을 때. 추가 질문(사람 손 없이 자동 분리 가능한가, Spine 라이선스 있음)에 README 62 "추가 질문"으로 답했다: 자동 분리 파이프라인(부위별 생성·마스크 인페인트·잉크선 분할)의 기사 하나 시험(호출 10~20)을 제안, Spine 런타임 권장(사용자는 **Professional** 보유, 편집기는 이 Mac에 없음, 패키지 추가는 Authority 확인). 사용자 **"일단 이것도 열린 결정으로 남겨줘. 내가 나중에 요청할께"** → G20은 미결로 두고, 요청 전에는 시험·호출·패키지 추가를 하지 않는다.
 - **Round 63 카오스 제로 나이트메어 섞기 시험**(2026-10-14 사용자 "이미지 스타일 검색 후 우리 그림체 스타일에 조합, 테스트 세트로 발키리 이미지 1개 생성"): 조사와 시험용 스타일 문서(`ArtPipeline/Archive/63-czn-style-blend/blend/`), 발키리 한 장(호출 1회). 색·장비만 섞이고 얼굴·명암은 그대로 → 권장은 더 강한 문구로 한 장 더. 판정할 것 셋은 README 63. → 사용자 "이 스타일은 안어울리네"(닫음).
 - **Round 64 발키리의 체형 셋과 실사 + 체인소맨 만화풍**(2026-10-14, 호출 4회): 체형 A·B·C(지금 그림체로 몸만)와 섞음 한 장, 비교 목업 둘. 권장은 체형 B, 섞음은 접음. → 사용자 "a, b형 체형 모두 가능하게 저장, 지금의 발키리는 a형 체형으로 변경 및 다시 그리기 수행": 체형 `hourglass`·`athletic`을 `STYLE_RUNTIME.md`의 `## Body:` 절과 소재의 `Body` 열로 저장(`gen_image.py`), 발키리의 대기(시험 A 그대로)와 공격·피격·붕괴·각성(호출 4회, 붕괴·각성은 머리 배율 1.05·0.97)을 게임에 연결. 판정 3(주교·대마법사)은 답 없음, 4(만화풍)는 더 하지 않음. 체인과 스크린샷은 아래 Verification. 커밋 안 함. 직접 플레이에서 새 발키리(무대에서 약 11% 큼)를 본다. → 사용자 "공격시 도끼날 이상": 날이 갈고리처럼 늘어진 것을 그림 속 방향을 적은 `--extra`로 3차에 바로잡아 게임의 공격 자세를 바꿈(호출 2회, README 64 "공격 자세의 도끼"). → 사용자 "도끼는 만족, 얼굴은 2차 얼굴로": 3차에 2차 얼굴을 호출 없이 합성해 연결(`compose_attack_face.py`, README 64 "공격 자세의 얼굴").
+- **Round 69 단계의 이름과 표시**(2026-10-15 사용자 "아이템 등급에 따른 금/은/동 이라는 표현 개선과 표시방식 개선안 … 유사 게임 및 네 생각 검토 후 개선안 제안"): 레퍼런스 열(같은 것을 겹쳐 올리는 게임은 센다 — TFT 성·SAP 레벨·StS "+"; 품질·희귀도는 말과 색)과 문제 여섯(금속어는 재료로 읽힘, 동이 첫 상승, 말과 색의 어긋남(별은 디아블로 색), 숫돌 ★과 단계 ★의 겹침, 금빛 UI, 작은 별),
+  이름 안 넷(권장 로마 숫자)과 조각의 표 안 셋(권장 A 숫자 표)의 목업 `mock-marks.png`·`mock-words.png`, 판정할 것 일곱 → 사용자 **"1. n성 - 일반 1성 2성 3성 / 2. 제목에서 뺌 / 3. B안(별 크기, 1성 파랑·2성 은·3성 노랑) / 4. 디아블로 색 유지 / 5. 코드까지 바꿈 / 6. 예 / 7. 지금구현"**, "구현 후 목업 제공해줘"(Roadmap "Round 69의 승인").
+  → 구현(`ArtPipeline/Archive/69-tier-naming/README.md` "판정·구현"): R12를 첫 커밋으로, 그 뒤 이름(코드 `ItemTier.Tier1`~`Tier3`, CSV 키, 저장 12 `From11To12`, 문구 1성·2성·3성 / 1-star~), 마름모 눈금 `tier_pip`(별 크기·먹 테), 한 팔레트 `Rarity`(1성 파랑·2성 은·3성 노랑: 글도 같은 색 — 사후 검토), 확정 목업 `mock-chosen.png`. 호출 없음. 검증은 아래 Verification.
 - **결정타 분리(R2·R3)**(a10 Open): 결정타·붕괴·쓰러짐·치명타 처치의 연출을 바꾸는 라운드의 **첫 커밋**에서 한다(Round 38에서 이 계기를 한 번 놓쳤다). 데이터 조정만이면 하지 않는다. 상세는 아래 "리팩토링 검토".
 
 - Round 37의 붕괴·각성 초상은 B안에 자리가 없어 **보류** 그대로.
@@ -120,6 +123,8 @@ Slice B의 Acceptance 1~8(Architecture/09 "Slice B")이 참이다: 원정 하나
 
 한 것(커밋): R5 빈사 칩의 확률(피로 상태 보정 누락 버그)·I 키로 닫을 때의 카드·로비 쉬기 글 / R7 Owner 문서의 낡은 줄 / R6 시뮬의 합치기 셈(**0.14 → 3.27/원정**: G18의 근거가 바뀜)과 0.01 단위 출력, 체인의 Inconclusive 이름 /
 R8 죽은 코드·쓰지 않는 그림 셋·문구 키 셋·낡은 주석, Prefab Stamp의 보드 크기 / R9 Test 이름의 등급, 효과 없는 직업 목록 사본, 진행 루프의 default. R9의 `FlatRow` 변수 이름(row1 → flat1)은 하지 않았다(이름만의 문제, 다음에 그 Test를 고칠 때).
+
+R12(2026-10-15, Round 69가 계기. 커밋 `3ce9129`): 꺼진 단계 외곽선 부품(`SilhouetteOutline`, Builder `BuildOutline`, 두 View의 외곽선 Image·`OutlineColor`·`OutlineThickness`, `TierStyle.Outline`, `UiPalette.TierMark`·`TierBronze/Silver/Gold`, 툴팁 카드의 Stripe)을 뺐다. 실루엣 셰이더·재질은 발동 섬광과 무대 실루엣이 써서 그대로. 체인 `20261015-225632` setup·sim·EditMode 846/846(PlayMode는 Round 69의 체인에서).
 
 R10(2026-10-15, 10-15 체인에서 시드에 기대는 Test 둘이 번갈아 실패한 것이 계기. 사용자 "승인", 커밋 안 함):
 - 시드: `AppRoot.NewRunSeedOverride`(테스트 전용, `SaveRootOverride`와 같은 길)와 `BootTestUtil.RunSeed` = 1. `UseTemporarySaveRoot`가 켜고 `ShutdownApp`이 끈다. 실제 게임은 그대로 OS 난수.
@@ -135,7 +140,6 @@ R10(2026-10-15, 10-15 체인에서 시드에 기대는 Test 둘이 번갈아 실
 | # | 무엇 | 계기 |
 |---|---|---|
 | R11 | 이긴 뒤 전투 화면과 노드 맵의 손·인벤토리 배선 두 벌(`AimFrom`·`OnHeldPressed`·칸 핸들러·합치기 미리보기), Round 54 뒤 꺼진 그림자 부품, `InventoryGridView`의 `GridGeometry` 사본 | 두 화면의 손을 함께 바꾸는 라운드(G18 안 2·3 포함) |
-| R12 | 꺼진 단계 외곽선(Round 41) 부품: `SilhouetteOutline`, `ItemSlotView`·`BattleItemView`의 외곽선 필드, `TierStyle.Outline`, `UiPalette.TierMark`·`TierBronze/Silver/Gold`, 툴팁 띠 | 단계·유니크 표시를 바꿀 때 |
 | R13 | `ItemOffer` → `EquippedItem` 14곳, 전리품·상점 놓기 짝, `OfferRecord` 식 둘, UI의 `Tier + 1` 셋, 상점 후보 조건 둘 | G18 구현(채택안에 맞는 항목만) |
 | R14 | `StarDamage`의 두 뜻(주는 쪽·받는 쪽), `RollCritical`의 필드 반환, 효과 단위 판단 둘(선택) | 별·치명타·효과 어휘를 바꿀 때 |
 | R2/R3 | 결정타·붕괴 연출(`StageMoment`)을 `BattleScreen`에서 떼기 | 위 "결정타 분리" |
@@ -175,10 +179,13 @@ R10(2026-10-15, 10-15 체인에서 시드에 기대는 Test 둘이 번갈아 실
 - R10(2026-10-15): 체인 `20261015-210800` **CHAIN OK** 첫 실행(setup, sim, EditMode **846/846**(새 `ShippedInventory_…` 하나), PlayMode **83/92**, 9 skipped, **inconclusive 0**). setup 뒤 Prefab 파일 diff 없음(`UiPrefabStamp.txt`만 바뀜), `Assets/InitTestScene*` 없음, `git diff --check` 깨끗. PlayMode만 다시 `20261015-212042` **CHAIN OK**(83/92, inconclusive 0) — 같은 코드로 두 번 같은 결과.
   작업 트리에 R10과 무관한 Unity 설정 파일 셋의 변경이 있다(`Assets/Settings/UniversalRP.asset`, `Assets/UniversalRenderPipelineGlobalSettings.asset`, `ProjectSettings/ProjectSettings.asset`. 바뀐 시각 10-15 18:07 — 마지막 커밋 18:00 뒤, Editor가 고쳐 쓴 모양). 되돌리지 않고 커밋에서 뺀다(사용자 판단).
 
+- Round 69(2026-10-15): 체인 `20261015-230612` **전체**(setup·sim OK, EditMode 846/847 → 새 Test의 꾸밈을 고쳐 `20261015-232214` 847/847, PlayMode 83/92, inconclusive 0), 스크린샷 `20261015-231913` 9/9. 확정 목업과 대조해 든 아이템의 그림자 라벨(흰 글)에 단계의 색을 칠한 뒤 PlayMode `20261015-232357` 83/92, 스크린샷 `20261015-233559` 9/9. `Assets/InitTestScene*` 없음, `git diff --check` 깨끗.
+  Unity 설정 파일 셋(`UniversalRP.asset`·`UniversalRenderPipelineGlobalSettings.asset`·`ProjectSettings.asset`)의 변경은 이 세션 전(10-15 18:07)의 것이라 커밋에서 뺐다(사용자 판단 대기).
+
 ## Next Action (제안)
 
 - 사용자: **직접 플레이**(x1, 원정 하나를 끝까지). 끝나면 `python3 Tools/playlog.py`의 출력과 체크리스트의 메모를 세션에.
-- **R10은 했다**(2026-10-15, 위 "리팩토링 검토"). 커밋은 지시가 있을 때 — 맞추기 라운드 앞에 이것만의 한 커밋으로 권장. 남은 Unity 설정 파일 셋의 변경(아래 Verification)은 R10과 무관하다.
+- **R10·R12·Round 69는 했고 커밋했다**(2026-10-15: `8f33555` R10, `3ce9129` R12, Round 69는 세션 끝의 커밋). 푸시는 지시가 있을 때. Unity 설정 파일 셋의 변경(위 Verification)은 되돌릴지 사용자가 정한다.
 - 열린 결정(사용자가 정한다): **G18** 담금질(README 59 "재검토"의 판정할 것 열), **G20** 움직임(README 62 — "나중에 요청"). 그림체는 지금 것 유지(G19). 둘 다 요청 전에는 호출·구현을 하지 않는다.
 - 그림(지시가 있을 때): 저장한 체형·얼굴 기준으로 다른 캐릭터 그리기(`Rosters/*.csv`의 `Body`·`Face`), 주교의 체형, `subculture_60`을 여성 셋에 같이 쓸지(Round 67 판정 2 "대기"), 확정 시트(`style_ref_roster.png`)의 대마법사를 새 그림으로 다시 합성할지, Round 65(체인소맨 20~80%)의 목업. 새 발키리(무대에서 약 11% 큼)와 새 대마법사는 직접 플레이에서 본다.
 - 세션: 플레이 기록과 메모가 오면 "맞추기와 마감"으로(17·18단계의 수치도 함께. 지금 데이터로 시뮬 전후). 18단계는 2026-10-08 세션 정리에서 다섯 커밋으로 올렸고, 같은 날 Round 46(오른쪽 열)·47(전투 화면의 전리품, 우클릭 카드)도 다섯 커밋으로 올렸다(`b18-loot.md`, README 46·47).

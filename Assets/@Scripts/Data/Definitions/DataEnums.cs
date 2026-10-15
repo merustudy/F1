@@ -61,15 +61,16 @@ namespace F1.Data
 
     /// <summary>
     /// The tier of an item (Docs/Design/02_Combat_System.md §4). Common is the tier an item is found at and the base weapon's;
-    /// two of the same item at the same tier merge into one a tier up (The Bazaar's way), and Gold is the last. Renamed on
-    /// 2026-10-07 (round 41) from Bronze·Silver·Gold·Diamond: the three tiers above the base read as copper, silver and gold.
+    /// two of the same item at the same tier merge into one a tier up (The Bazaar's way), and Tier3 is the last. Named by stars
+    /// on screen (일반·1성·2성·3성; 2026-10-15 round 69, the way TFT counts its merges). Before that Common·Bronze·Silver·Gold
+    /// (round 41) and Bronze·Silver·Gold·Diamond (The Bazaar's); the order of the values never changed.
     /// </summary>
     public enum ItemTier
     {
         Common,
-        Bronze,
-        Silver,
-        Gold,
+        Tier1,
+        Tier2,
+        Tier3,
     }
 
     public enum EffectKind

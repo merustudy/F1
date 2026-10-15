@@ -36,9 +36,9 @@ InventoryHeight,3
 EliteBagPercent,50
 CampHealPercent,30
 CampFatigueRelief,20
-TierBronzePercent,200
-TierSilverPercent,300
-TierGoldPercent,400
+Tier1Percent,200
+Tier2Percent,300
+Tier3Percent,400
 MapBranchChancePercent,50
 FinalBossLevel,14
 ShopSlots,8

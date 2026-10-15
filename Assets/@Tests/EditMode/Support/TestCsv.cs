@@ -14,7 +14,7 @@ namespace F1.Tests
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,0.55\nStormGrowth,0.55\n" +
             "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
-            "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTierBronzePercent,200\nTierSilverPercent,300\nTierGoldPercent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
+            "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n";
 
         public const string Jobs =
@@ -50,7 +50,7 @@ namespace F1.Tests
 
         public const string Dungeons =
             "Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,StartingPotions,Background," +
-            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyPowerPerFloorPercent,BronzeFloor,SilverFloor,GoldFloor,ShopMinFloor,ShopChancePercent\n" +
+            "EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyPowerPerFloorPercent,Tier1Floor,Tier2Floor,Tier3Floor,ShopMinFloor,ShopChancePercent\n" +
             "mine,광산,Mine,swift,2,2,3,2,tonic,background/dungeon/mine,2,20,0,0,0,5,10,2,0,0,2,20\n";
 
         public const string Mercenaries =

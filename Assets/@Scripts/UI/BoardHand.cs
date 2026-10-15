@@ -471,7 +471,7 @@ namespace F1.UI
             if (merges)
             {
                 ghost.Kind = GhostKind.Merges;
-                ghost.Label = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(item.Tier + 1));
+                ghost.Label = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierWord(item.Tier + 1));   // the tier word in its colour (round 69), as on the piece's own merge mark
                 return ghost;
             }
 

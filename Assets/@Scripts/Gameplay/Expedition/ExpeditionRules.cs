@@ -1183,7 +1183,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Whether an item merges into another (Docs/Design/02_Combat_System.md §4 "합치기"): the same item at the same tier, below
-        /// Gold, two different items and neither a base weapon. They become one a tier up where the second one is.
+        /// Tier3, two different items and neither a base weapon. They become one a tier up where the second one is.
         /// </summary>
         public static bool CanMerge(EquippedItem item, EquippedItem into)
         {
@@ -1221,7 +1221,7 @@ namespace F1.Gameplay
         /// <summary>Whether an item of this id and tier merges into the item given (null for none).</summary>
         static bool MergesInto(string itemId, ItemTier tier, EquippedItem into)
         {
-            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Gold;
+            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Tier3;
         }
 
         /// <summary>
@@ -1243,11 +1243,11 @@ namespace F1.Gameplay
             return state.Members[memberIndex].Board.ItemAt(x, y);
         }
 
-        /// <summary>Whether the item covering a square of a member's board can go a tier up at the camp (the camp's upkeep): any item below Gold, a base weapon too.</summary>
+        /// <summary>Whether the item covering a square of a member's board can go a tier up at the camp (the camp's upkeep): any item below Tier3, a base weapon too.</summary>
         public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int x, int y)
         {
             BoardItem item = LivingItemAt(state, memberIndex, x, y);
-            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Item.Tier < ItemTier.Gold;
+            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Item.Tier < ItemTier.Tier3;
         }
 
         /// <summary>The camp's upkeep: the item covering a square goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>

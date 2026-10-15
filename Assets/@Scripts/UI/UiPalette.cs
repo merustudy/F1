@@ -75,30 +75,6 @@ namespace F1.UI
             return kind == FatigueStateKind.Virtue ? Virtue : FatigueDanger;
         }
 
-        /// <summary>
-        /// The tiers of an item (2026-10-07 round 41, palette P3): the outline around an icon, the stars on the tier tag, the stripe
-        /// of a loot card and the mark of a cell an item would merge into take the tier's colour — copper, silver and gold for
-        /// the three tiers above Common, deep enough to read on a bone cell; a tier's name in words takes the lighter tone, which
-        /// reads on the dark panels. Common has no mark (a Common cell is the plain cell) and its word is a plain bone tone, used
-        /// only where a tier word is needed ("일반 → 동" at the camp).
-        /// </summary>
-        public static readonly Color TierCommonText = Rgb(0xC9, 0xC2, 0xB0);
-        public static readonly Color TierBronzeText = Rgb(0xD5, 0x9A, 0x66);
-        public static readonly Color TierSilverText = Rgb(0xD3, 0xDB, 0xE4);
-        public static readonly Color TierGoldText = Rgb(0xF0, 0xC8, 0x5A);
-
-        /// <summary>The colour of a tier's name in words.</summary>
-        public static Color TierText(ItemTier tier)
-        {
-            switch (tier)
-            {
-                case ItemTier.Bronze: return TierBronzeText;
-                case ItemTier.Silver: return TierSilverText;
-                case ItemTier.Gold: return TierGoldText;
-                default: return TierCommonText;
-            }
-        }
-
         /// <summary>The outline tone of the art, for a shape that stands next to it without a sprite.</summary>
         public static readonly Color Ink = Rgb(0x18, 0x09, 0x07);
 
@@ -166,14 +142,18 @@ namespace F1.UI
         public static readonly Color Bone = Rgb(0xCD, 0xC0, 0xA0);
         public static readonly Color DiabloGold = Rgb(0xC7, 0xB3, 0x77);
 
-        /// <summary>Diablo II's rarity colours for the tiers (round 49): Common white, Bronze magic blue, Silver rare yellow, Gold unique gold.</summary>
+        /// <summary>
+        /// The one colour of a tier, for its pips and its word (round 49 Diablo II's rarity colours; round 69 the user's ladder on the pips —
+        /// 1성 the magic blue, 2성 silver, 3성 the rare yellow — and the words follow the pips, so a tier reads the same everywhere). Common
+        /// is Diablo's white, used where a Common item's name is coloured.
+        /// </summary>
         public static Color Rarity(ItemTier tier)
         {
             switch (tier)
             {
-                case ItemTier.Bronze: return Rgb(0x70, 0x70, 0xFF);
-                case ItemTier.Silver: return Rgb(0xFF, 0xFF, 0x6E);
-                case ItemTier.Gold: return Rgb(0xC7, 0xB3, 0x77);
+                case ItemTier.Tier1: return Rgb(0x70, 0x70, 0xFF);
+                case ItemTier.Tier2: return Rgb(0xD3, 0xDB, 0xE4);
+                case ItemTier.Tier3: return Rgb(0xFF, 0xFF, 0x6E);
                 default: return Rgb(0xEE, 0xEE, 0xEE);
             }
         }

@@ -153,7 +153,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 규칙은 `Docs/Design/02_Combat_System.md` §4와 `03_Dungeon_Structure.md` §1·§5가 소유한다. 수치는 `BalanceData`와 `DungeonData`에 있다.
 
-- 단계는 `ItemTier`(일반·동·은·금. 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 22단계에 뺐다(`EquippedItem.PowerPercent`: 용병의 것은 100, 적의 것은 그 적의 세기).
+- 단계는 `ItemTier`(일반·1성·2성·3성 = `Common`·`Tier1`·`Tier2`·`Tier3`. 2026-10-15 Round 69에 일반·동·은·금에서, 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 22단계에 뺐다(`EquippedItem.PowerPercent`: 용병의 것은 100, 적의 것은 그 적의 세기).
 - 효과 크기는 한 곳에서 센다(22단계): `EquippedItem.Min`·`Max`(피해의 최소·최대)와 `Magnitude`(범위가 없는 효과) = `ItemEffect.Scaled(값, BalanceData.TierPercent(단계), 세기 %)`(0.01 단위 정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
 - 단계는 `DungeonData.ItemTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 전리품과 상점의 물건에 싣는다.
 - 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드에 놓는 명령

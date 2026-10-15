@@ -364,7 +364,7 @@ namespace F1.Sim
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
-                + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, bronze {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, silver {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, gold {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
+                + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, 1-star {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, 2-star {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, 3-star {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             Console.WriteLine($"  per expedition: shops {BattleStats.Ratio(stats.Shops, runs)}, bought {BattleStats.Ratio(stats.Bought, runs)}, refreshes {BattleStats.Ratio(stats.Refreshes, runs)}; "
                 + $"coins won {Average(stats.CoinsWon, runs)}, spent {Average(stats.CoinsSpent, runs)}, left at the end {Average(stats.CoinsLeft, runs)}");
             stats.All.Print("all battles");

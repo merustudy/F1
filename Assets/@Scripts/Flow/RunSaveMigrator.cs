@@ -77,6 +77,64 @@ namespace F1.Flow
             {
                 From10To11(save, data);
             }
+
+            if (save.SchemaVersion == 11)
+            {
+                From11To12(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 12 (2026-10-15 round 69): the tiers are counted in stars on screen (일반·1성·2성·3성) and named Common, Tier1, Tier2 and
+        /// Tier3 in the files; version 7 called the same four Common, Bronze, Silver and Gold. Only the names change, on the items of the
+        /// boards and the inventory and on the offers of the loot and the shop; a name that is not one of the four is left for the
+        /// validation to refuse.
+        /// </summary>
+        static void From11To12(RunSaveData save)
+        {
+            if (save.Expedition != null)
+            {
+                if (save.Expedition.Members != null)
+                {
+                    foreach (MemberRecord member in save.Expedition.Members)
+                    {
+                        RenameTiers(member?.Items, Version12Name);
+                    }
+                }
+
+                RenameTiers(save.Expedition.Inventory, Version12Name);
+                RenameOffers(save.Expedition.Loot, Version12Name);
+                RenameOffers(save.Expedition.Shop?.Stock, Version12Name);
+            }
+
+            save.SchemaVersion = 12;
+        }
+
+        static string Version12Name(string version7Name)
+        {
+            switch (version7Name)
+            {
+                case "Bronze": return nameof(ItemTier.Tier1);
+                case "Silver": return nameof(ItemTier.Tier2);
+                case "Gold": return nameof(ItemTier.Tier3);
+                default: return version7Name;
+            }
+        }
+
+        static void RenameOffers(List<OfferRecord> offers, Func<string, string> rename)
+        {
+            if (offers == null)
+            {
+                return;
+            }
+
+            foreach (OfferRecord offer in offers)
+            {
+                if (offer != null)
+                {
+                    offer.Tier = rename(offer.Tier);
+                }
+            }
         }
 
         /// <summary>
@@ -321,8 +379,8 @@ namespace F1.Flow
 
         /// <summary>
         /// Version 6 named the tiers Bronze, Silver, Gold and Diamond (The Bazaar's). Version 7 (2026-10-07 round 41) calls the same four
-        /// Common, Bronze, Silver and Gold: the base tier is unmarked and the three above it read as copper, silver and gold. Only the
-        /// names change; a name that is not one of the four is left for the validation to refuse.
+        /// Common, Bronze, Silver and Gold (version 12 renames them again: From11To12). Only the names change; a name that is not one of
+        /// the four is left for the validation to refuse.
         /// </summary>
         static void From6To7(RunSaveData save)
         {
@@ -332,17 +390,17 @@ namespace F1.Flow
                 {
                     foreach (MemberRecord member in save.Expedition.Members)
                     {
-                        RenameTiers(member?.Items);
+                        RenameTiers(member?.Items, Version7Name);
                     }
                 }
 
-                RenameTiers(save.Expedition.Inventory);
+                RenameTiers(save.Expedition.Inventory, Version7Name);
             }
 
             save.SchemaVersion = 7;
         }
 
-        static void RenameTiers(List<ItemRecord> items)
+        static void RenameTiers(List<ItemRecord> items, Func<string, string> rename)
         {
             if (items == null)
             {
@@ -353,7 +411,7 @@ namespace F1.Flow
             {
                 if (item != null)
                 {
-                    item.Tier = Version7Name(item.Tier);
+                    item.Tier = rename(item.Tier);
                 }
             }
         }
@@ -362,10 +420,10 @@ namespace F1.Flow
         {
             switch (version6Name)
             {
-                case "Bronze": return nameof(ItemTier.Common);
-                case "Silver": return nameof(ItemTier.Bronze);
-                case "Gold": return nameof(ItemTier.Silver);
-                case "Diamond": return nameof(ItemTier.Gold);
+                case "Bronze": return "Common";
+                case "Silver": return "Bronze";
+                case "Gold": return "Silver";
+                case "Diamond": return "Gold";
                 default: return version6Name;
             }
         }

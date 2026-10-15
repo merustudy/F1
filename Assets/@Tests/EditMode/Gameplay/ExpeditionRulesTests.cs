@@ -373,7 +373,7 @@ namespace F1.Tests
 
             List<ItemOffer> elite = ExpeditionRules.DropLoot(data, state, new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0]));
             Assert.AreEqual(2, elite.Count);
-            Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Bronze), "A tier up for an elite.");
+            Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Tier1), "A tier up for an elite.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(98, 3, 0, MapNodeKind.Boss, "lair", new int[0])), "The boss ends the expedition.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(97, 2, 0, MapNodeKind.Camp, null, new int[0])), "Nobody is fought at a camp.");
         }

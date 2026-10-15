@@ -24,9 +24,9 @@
       "CampFloor": 15,
       "EnemyHpPerFloorPercent": 3,
       "EnemyPowerPerFloorPercent": 0,
-      "BronzeFloor": 5,
-      "SilverFloor": 10,
-      "GoldFloor": 0,
+      "Tier1Floor": 5,
+      "Tier2Floor": 10,
+      "Tier3Floor": 0,
       "ShopMinFloor": 4,
       "ShopChancePercent": 15
     }
