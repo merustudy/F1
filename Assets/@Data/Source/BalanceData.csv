@@ -58,7 +58,7 @@ CritFatigueDealt,3
 CritFatigueDealtAllies,1
 GoldPerFloor,2
 GoldClear,20
-HirePrice,30
+HirePrice,20
 RecruitCount,3
 RosterLimit,8
 TreatmentPrice,20

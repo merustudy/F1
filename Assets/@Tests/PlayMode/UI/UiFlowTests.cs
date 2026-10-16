@@ -2433,7 +2433,7 @@ namespace F1.Tests
             StaticData data = Managers.Data.Data;
             BalanceData balance = data.Balance;
             RunState run = Managers.Run.Run;
-            Assume.That(balance.HirePrice, Is.EqualTo(30));
+            Assume.That(balance.HirePrice, Is.EqualTo(20));
             Assume.That(balance.TreatmentPrice, Is.EqualTo(20));
             Assume.That(balance.TreatmentRelief, Is.EqualTo(40));
 
@@ -2454,7 +2454,7 @@ namespace F1.Tests
             Assert.IsTrue(lobby.Coach.IsLit);
             Assert.IsTrue(lobby.BubbleShown);
             Assert.AreEqual("역마차", lobby.BubbleName);
-            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 30", lobby.BubbleDetail);
+            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 20", lobby.BubbleDetail);
             lobby.Coach.Leave();
             Assert.IsFalse(lobby.Coach.IsLit);
             Assert.IsFalse(lobby.BubbleShown);
@@ -2472,7 +2472,7 @@ namespace F1.Tests
             Assert.IsTrue(lobby.Candidates.All(c => !c.Hire.interactable), "No gold yet.");
             Assert.AreEqual(UiText.Mercenary(run.Recruits[0].Id), lobby.Candidates[0].Name);
             Assert.AreEqual(UiText.Job(run.Recruits[0].JobId), lobby.Candidates[0].Job);
-            Assert.AreEqual("고용 금 30", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateHire/CandidateHireLabel"));
+            Assert.AreEqual("고용 금 20", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateHire/CandidateHireLabel"));
             Assert.AreEqual($"Lv 1 · 피로도 0/{balance.MaxFatigue}", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateDetail"), "A candidate is always level 1 and fresh.");
             Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks while a window is open.");
 
@@ -2484,12 +2484,12 @@ namespace F1.Tests
             string hiredJob = run.Recruits[0].JobId;
             int rosterBefore = run.Roster.Count;
             UiTestUtil.Click(lobby.Candidates[0].Hire);
-            Assert.AreEqual(70, run.Gold);
+            Assert.AreEqual(80, run.Gold);
             Assert.AreEqual(rosterBefore + 1, run.Roster.Count);
             Assert.AreEqual(hiredJob, RunRules.FindMercenary(run, hiredId).JobId);
             Assert.AreEqual(balance.RecruitCount - 1, lobby.Candidates.Count, "The hired one left the coach.");
-            Assert.AreEqual("금 70", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
-            Assert.AreEqual("금 70 · 로스터 7/8", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachSummary"));
+            Assert.AreEqual("금 80", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
+            Assert.AreEqual("금 80 · 로스터 7/8", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachSummary"));
             UiTestUtil.CloseQuarter(lobby);
             Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
@@ -2516,7 +2516,7 @@ namespace F1.Tests
             UiTestUtil.Click(patients[0].Treat);
             Assert.AreEqual(88, tired.Fatigue);
             Assert.IsNull(tired.AfflictionId);
-            Assert.AreEqual(50, run.Gold);
+            Assert.AreEqual(60, run.Gold);
             Assert.AreEqual(1, run.Day, "The treatment takes no day.");
             UiTestUtil.CloseQuarter(lobby);
 
@@ -2528,7 +2528,7 @@ namespace F1.Tests
             string dismissedId = run.Roster[run.Roster.Count - 1].Id;
             UiTestUtil.Click(entries[entries.Length - 1].Dismiss);
             yield return null;
-            Assert.AreEqual(50, run.Gold, "Dismissing is free.");
+            Assert.AreEqual(60, run.Gold, "Dismissing is free.");
             Assert.IsNull(RunRules.FindMercenary(run, dismissedId));
             CollectionAssert.AreEqual(new[] { dismissedId }, run.Dismissed);
             Assert.AreEqual(run.Roster.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length);
