@@ -161,6 +161,14 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
 - 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp(구성원, X, Y)`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나(덮은 칸 어디로든)를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
 
+## 담금질과 유니크 (Slice B 23단계)
+
+- 규칙은 `ForgeRules` 한 곳에 있다(순수 C#. `Docs/Design/02_Combat_System.md` §4 "담금질"). 레시피는 데이터(`RecipeData`: 결과·바탕과 단계·촉매와 단계)다.
+- `ForgeRules.Options(data, state)`: 살아 있는 구성원의 보드에서 읽는 순서로, 바탕이 그 단계이고 `StarRules.Sources`가 주는 ★ 아이템 가운데 촉매가 그 단계인 것이 있으며, 결과를 바탕의 자리(`Placement` 그대로)에 두었을 때 가방 위이고 바탕·촉매 말고 아무것도 덮지 않으면 하나. 파티가 유니크를 가지면(`PartyHasUnique`: 보드와 인벤토리) 없다.
+- `ForgeAtCamp(data, state, 구성원, X, Y)`(단계 `AtCamp`에서만): 촉매를 보드에서 빼고, 바탕의 `EquippedItem`을 결과 아이템으로 바꾼다(`ForgeRules.Result`: 기본 무기 여부·세기 % 그대로, 단계는 `Common` — 유니크에는 성이 없다), 단계를 `ChoosingNode`로(쉬기·정비 없음). 피로는 들지 않는다(사용자 결정).
+- 유니크 아이템(`ItemData.Unique`)은 상점·전리품에 없고(`ShopWeight`·`Price` 0, 데이터 검사) 합치기 대상이 없고 정비 대상도 아니다(`CanUpgradeAtCamp`가 거른다: 성이 없다). 저장은 유니크가 `Common`일 때만 유효하다(`RunSaveMapper`). 효과가 있는 아이템도 ★을 가질 수 있다(글라디우스: 발동하는 무기이면서 자기 ★로 옆의 근접 무기를 벼린다). `StarRules`는 ★ 아이템이 발동하는지 묻지 않는다.
+- 시뮬(`Tools/Sim`): 상점에서 레시피의 촉매를 먼저 사서 바탕을 든 용병의 ★ 자리에 두고, 야영지에서 레시피가 갖춰졌고 아무도 아프지 않으면 담금질한다. 보고에 담금질 /원정과 유니크를 가지고 끝난 원정.
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.

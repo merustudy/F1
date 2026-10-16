@@ -31,6 +31,7 @@ ArtPipeline                    # 저장소 root. Unity가 Import하지 않는다
 │  ├─ ui_variants.py           # 맞춘 틀에서 게임에 넣을 Sprite를 만든다: 바탕색을 바꾼 변형. 호출하지 않는다
 │  ├─ fit_pose.py              # 용병과 몬스터의 공격·피격 자세를 확정 그림과 같은 크기·자리의 자세 캔버스(2016x1008)에 세우고 2048x1024 파일로 쓴다. 호출하지 않는다
 │  ├─ trim_items.py            # 아이템 아이콘(`Assets/@Art/Item`)을 그려진 부분만 남기고 자른다(Round 50). 호출하지 않는다
+│  ├─ glow_items.py            # 유니크 아이템의 금빛 외곽선 `<icon>_glow.png`를 아이콘에서 만든다(23단계). 호출하지 않는다
 │  ├─ review_pose.py           # 자세의 리뷰 시트: 용병마다 대기/공격/피격, 양손 장비의 손(--enemies 는 몬스터). 호출하지 않는다
 │  └─ review_sheet.py          # 리뷰 시트. 호출하지 않는다. 용병(character)은 지금 게임의 용병 전원과 한 줄에 세우고 머리를 같은 배율로 맞대 본다(FACE_BAND, 성별은 Roster의 Gender)
 └─ output/                     # 생성 직후 산출물 (gitignore)
@@ -183,6 +184,10 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
   (`tools/trim_items.py`. 그린 픽셀은 바꾸지 않고, 다시 돌려도 그대로다). 다음에 그리는 아이콘도 맞춘 뒤 같은 도구로 자른다.
 - Round 51(2026-10-10): `rat_bite`는 새로 그린 쥐 발톱(호출 1회, 원본 `Archive/51-claw-axe-whetstone/approved/`), `greataxe`(전투도끼 3×2)는 지금 그림을 30° 돌려 구운 것(호출 없음),
   `whetstone`(숫돌)은 **그린 도형**(회색 숫돌 막대, `Archive/51-claw-axe-whetstone/whetstone_shape.py`가 만든다. 생성한 그림이 아니다. 그림은 지시가 있을 때)이다.
+- 23단계(2026-10-16, Round 70): `gladius`(글라디우스 3×1)는 생성 1회(사용자 "생성 1회(유니크하게)". 소재는 로마식 글라디우스: 짧고 넓은 날에 금 새김, 청동 날밑·둥근 자루 끝, 기사의 그림을 기준으로. 원본 `Archive/70-unique-gladius/approved/`, 맞춘 뒤 `trim_items.py`로 자름). 유니크라 `gladius_glow`가 따른다(아래).
+- **유니크의 금빛**(23단계, Round 70 후속 2. 사용자 "금테는 삭제, 빛을 넣는데 외곽선이 전체적으로 해당 빛으로" → "2px로 확정. 숨쉬기 제거"): 유니크 아이템(`ItemData.Unique`)의 아이콘마다 `tools/glow_items.py`가 같은 폴더에 `<icon>_glow.png`를 만든다 —
+  아이콘의 알파를 화면 2px(아이콘 px로는 2 ÷ 조각 안에서 보이는 배율: 글라디우스 5)만큼 넓히고 그 0.6배로 흐린 뒤, 유니크 금 `#C7B377`에 가장자리의 밝은 심 `#F2E2A6`을 **구운** 것(흰 그림을 화면이 물들이는 다른 조각과 달리 색을 굽는다: 두 색이라서).
+  호출 없음, 다시 돌려도 같다. 주소는 `ItemData.GlowIcon`(= `Icon + "-glow"`: 주소 `item/gladius-glow`, 파일 `gladius_glow.png`. `ArtAddress.GlowOf`)이 이름 짓고 아이콘의 정책으로 들여오며, `ExpeditionArt`가 아이콘과 함께 싣는다(없으면 검사가 빠진 그림으로 보고한다). 아이콘을 다시 그리거나 자르면 같은 도구를 다시 돌린다(`--check`가 어긋남을 보고한다).
 - 리뷰 시트(`review_sheet.py --type item`)는 아직 옛 띠 칸(위 표)에 넣어 만든다: 화면 크기(쿨다운이 절반 찬 것과 다 찬 것)와 그 2배. 격자의 조각은 라운드의 검토 스크립트로 본다.
 
 ## 얼굴 (`cutface.py`)
@@ -234,7 +239,7 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
   붕괴의 순간의 **효과 조각** `ink_burst`(먹 튐: 검정에 붉은 보라 핏줄)와 `light_burst`(빛살: 크림 원판과 금빛 빛살)(38. 1024 원본을 512로)는 `Archive/38-breakdown-fx`의 시험 문서(`STYLE_RUNTIME-fx.md`: `ui_piece`의 자리에 "무대 위의 효과 조각")와 소재(`fx.csv`)로 생성한 것이다.
   무대에서 유닛 뒤에 상태 색의 `glow`와 함께 선다(`12_UI.md` "연출"). 사용자가 먹 튐 2차(붉은 보라 먹)보다 1차를 골랐고 둘 다 0.8배(416·352)로 쓴다.
   아이템 칸의 단계 표 `tier_tag`(41. 먹색 알약에 흰 테 3, 64x40, Border 20이라 옆으로만 늘어난다. 화면이 단계의 색으로 물들인다)와 그 별 `star`(41. 흰 별에 먹 외곽선, 24x24. Round 69부터는 숫돌의 별 칸만 쓴다)는
-  `Archive/41-tier-marks/draw_pieces.py`가 `Assets/@Art/UI`에 바로 그린다. 단계의 눈금 `tier_pip`(69. 흰 마름모에 먹 외곽선, 24x24, 별과 같은 크기. 화면이 단계의 색으로 물들인다)는 `Archive/69-tier-naming/draw_pieces.py`가 그린다. Round 35의 단계 테 `tier_rim`은 Round 41이 뺐다. Round 41의 단계 외곽선(아이콘 자신의 실루엣)은 Round 49부터 그리지 않았고 R12(2026-10-15)에 부품을 뺐다(`12_UI.md` "단계").
+  `Archive/41-tier-marks/draw_pieces.py`가 `Assets/@Art/UI`에 바로 그린다. 단계의 눈금 `tier_pip`(69. 흰 마름모에 먹 외곽선, 24x24, 별과 같은 크기. 화면이 단계의 색으로 물들인다)는 `Archive/69-tier-naming/draw_pieces.py`가 그린다. 23단계의 유니크 금 테 `unique_rim`은 Round 70 후속 2가 아이콘 외곽선의 금빛으로 바꾸며 뺐다("유니크의 금빛"). Round 35의 단계 테 `tier_rim`은 Round 41이 뺐다. Round 41의 단계 외곽선(아이콘 자신의 실루엣)은 Round 49부터 그리지 않았고 R12(2026-10-15)에 부품을 뺐다(`12_UI.md` "단계").
   양초의 불꽃 `candle_flame`은 `Outline` **2**다(2026-10-07 Round 43, 사용자 "안 C". 다른 `ui_piece`의 6과 다르다). 생성 원본에서 `gen_image.py --type ui_piece --key candle_flame --refit`으로 다시 맞췄다(호출 없음).
   양초의 빛처럼 화면에서 크게 늘이는 부드러운 경사는 2배로 그리지 않는다(UI의 MaxSize 512 안에서 512x256. 늘여도 경사는 매끄럽다).
 

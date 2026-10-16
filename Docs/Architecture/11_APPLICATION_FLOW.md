@@ -50,7 +50,7 @@ Application 계층이 하는 일은 넷이다.
 |---|---|---|
 | `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
 | `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로, 상점 노드는 `Shop`으로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
-| `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`. 둘 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
+| `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`)나 담금질(`ForgeAtCamp`, 23단계. 셋 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyToInventoryAt`(인벤토리의 한 자리, Round 55)·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
 | `Battle` | 전투 세션이 있다(끝났어도 닫기 전까지) | 전투 진행, 포션, 후퇴, 닫기. **이긴 뒤**(`LootOpen`: 끝난 전투가 열려 있고 원정이 `PickingLoot`. Round 47)에는 `Loot`의 명령도 모두 된다(전리품은 전투 화면에서 줍는다). 전리품을 다 주웠거나 없어서 원정이 `ChoosingNode`인데 이긴 전투가 아직 화면에 있으면(`WonBattleOnShow`, Round 52) 보드·인벤토리의 명령이 [계속](닫기)까지 된다 |
 | `Loot` | 원정 중이고 이긴 전투의 전리품이 놓여 있는데 전투 세션은 없다(`ExpeditionPhase.PickingLoot`. 앱을 닫았다 연 경우뿐이다) | 줍기(`TakeLoot`·`TakeLootToInventory`·`TakeLootToInventoryAt`(인벤토리의 한 자리, Round 55). 하나마다, 마지막 것을 주우면 `NodeMap`), 두고 가기(`LeaveLoot`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `CanTakeLoot`·`CanTakeLootToInventory`·`CanTakeLootToInventoryAt`·`LootMergesAt`, 놓인 것은 `BattleLoot`. 화면은 전투 화면의 "이긴 뒤" 모습(`12_UI.md`) |
@@ -67,7 +67,7 @@ Application 계층이 하는 일은 넷이다.
 - 노드에 들어가는 명령(`EnterNode`)은 그 호출 안에서 살아 있는 구성원의 피로를 올리고(전투에 들어가는 비용, `08_GAMEPLAY_DOMAIN.md` "피로")
   전투를 세운 뒤 한 번에 저장한다. 이어하기는 저장된 피로로 같은 전투를 다시 만들 뿐 다시 더하지 않는다.
 - 야영지 노드면 `EnterNode`는 전투를 세우지 않고 야영지에 들어가(`ExpeditionRules.EnterCamp`) 저장한다. 피로는 오르지 않는다.
-  `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, X, Y)`가 정비를 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
+  `RestAtCamp`가 쉬기를, `UpgradeAtCamp(구성원, X, Y)`가 정비를, `ForgeAtCamp(구성원, X, Y)`가 담금질(23단계. 질의는 `ForgeOptions()`·`CanForgeAtCamp`·`ForgeOptionAt`)을 적용하고 저장한다(`08_GAMEPLAY_DOMAIN.md` "긴 원정", "단계와 합치기"). 야영지의 화면은 노드 맵이다(`12_UI.md` "노드 맵의 오른쪽").
 - 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
   이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
   이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전리품은 **그 전투 화면에서** 줍는다(Round 47):
