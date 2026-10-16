@@ -27,6 +27,7 @@ namespace F1.UI
         public const float HomeYPercent = 69.6f;
 
         [SerializeField] TMP_Text _day;
+        [SerializeField] TMP_Text _gold;
         [SerializeField] Button _toLobby;
         [SerializeField] Image _map;
         [SerializeField] DungeonMarkerView _markerTemplate;
@@ -36,6 +37,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _days;
         [SerializeField] TMP_Text _potions;
         [SerializeField] TMP_Text _cleared;
+        [SerializeField] TMP_Text _reward;
         [SerializeField] TMP_Text _hint;
         [SerializeField] ExpeditionPartyCardView[] _cards;
         [SerializeField] TMP_Text _status;
@@ -101,6 +103,7 @@ namespace F1.UI
             BalanceData balance = data.Balance;
             RunState run = Managers.Run.Run;
             _day.text = UiStrings.Get(UiKeys.Lobby.Day, run.Day, balance.TotalDays);
+            _gold.text = UiStrings.Get(UiKeys.Lobby.Gold, run.Gold);
 
             foreach (DungeonMarkerView marker in _markers)
             {
@@ -141,6 +144,8 @@ namespace F1.UI
             _potions.text = PotionsText(data, dungeon);
             run.ClearedDungeons.TryGetValue(dungeon.Id, out int cleared);
             _cleared.text = UiStrings.Get(UiKeys.Expedition.ClearedCount, cleared);
+            // What the settlement pays (stage 26): the same for every dungeon until a dungeon has rewards of its own.
+            _reward.text = UiStrings.Get(UiKeys.Expedition.Reward, data.Balance.GoldPerFloor, data.Balance.GoldClear);
 
             var hints = new List<string>();
             if (dungeon.IsFinal)

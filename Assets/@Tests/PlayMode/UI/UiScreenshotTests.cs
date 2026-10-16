@@ -211,13 +211,15 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
             for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
             {
                 int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
                 UiTestUtil.Click(entries[index].Rows[i]);
             }
 
+            UiTestUtil.CloseQuarter(lobby);
             yield return UiTestUtil.DepartFromLobby();
 
             // The row-1 weapon (the knight's longsword, 3x1) becomes the gladius, as the forge would leave it (no tier).
@@ -247,19 +249,42 @@ namespace F1.Tests
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             yield return Capture(prefix + "_02_lobby_empty");
 
-            // knight, spellblade, bishop, archmage from row 1 back: the party the balance was tuned with.
+            // The town (stage 26): the stagecoach under the pointer with its bubble, then the barracks window where the party is formed:
+            // knight, spellblade, bishop, archmage from row 1 back, the party the balance was tuned with.
+            lobby.Coach.Hover();
+            yield return Capture(prefix + "_61_lobby_hover");
+            lobby.Coach.Leave();
             string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
             for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
             {
                 int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
                 UiTestUtil.Click(entries[index].Rows[i]);
             }
 
+            yield return Capture(prefix + "_57_lobby_barracks");
+            UiTestUtil.CloseQuarter(lobby);
             yield return Capture(prefix + "_03_lobby_party");
 
+            // The stagecoach and the inn with some gold (staged), then the lobby past the last day (staged): the final stand.
+            Managers.Run.Run.Gold = 120;
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
+            yield return Capture(prefix + "_58_lobby_coach");
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
+            yield return Capture(prefix + "_59_lobby_inn");
+            UiTestUtil.CloseQuarter(lobby);
+            Managers.Run.Run.Gold = 0;
+            Managers.Run.Run.Day = data.Balance.TotalDays + 1;
+            lobby.Refresh();
+            yield return Capture(prefix + "_60_lobby_final_stand");
+            Managers.Run.Run.Day = 1;
+            lobby.Refresh();
+            yield return null;
+
             // The expedition screen (round 71 E2): the map, the first open dungeon chosen, the party as formed.
-            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
+            UiTestUtil.Click(lobby, "Frame/Strip/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             yield return Capture(prefix + "_56_expedition");
             UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
@@ -627,39 +652,53 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             yield return Capture(prefix + "_12_lobby_after");
 
-            // A mercenary that came home afflicted (round 36), staged on the first of the roster for one picture, then as before.
+            // A mercenary that came home afflicted (round 36), staged on the first of the roster for one picture of the barracks, then as before.
             MercenaryState first = Managers.Run.Run.Roster[0];
             int homeFatigue = first.Fatigue;
             first.Fatigue = 128;
             first.AfflictionId = "fearful";
-            UiTestUtil.Screen<LobbyScreen>().Refresh();
+            yield return UiTestUtil.OpenBarracks(UiTestUtil.Screen<LobbyScreen>());
             yield return Capture(prefix + "_37_lobby_affliction");
             first.Fatigue = homeFatigue;
             first.AfflictionId = null;
-            UiTestUtil.Screen<LobbyScreen>().Refresh();
+            UiTestUtil.CloseQuarter(UiTestUtil.Screen<LobbyScreen>());
             yield return null;
 
-            // A failed save: the save directory is made unwritable for one command.
+            // A failed save: the save directory is made unwritable for one command (resting at the inn).
+            yield return UiTestUtil.OpenQuarter(UiTestUtil.Screen<LobbyScreen>(), LobbyScreen.Quarter.Inn);
             Directory.Delete(_saveRoot, true);
             File.WriteAllText(_saveRoot, "blocked");
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Rest");
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/InnWindow/Rest");
             yield return Capture(prefix + "_14_save_failed");
             File.Delete(_saveRoot);
             Directory.CreateDirectory(_saveRoot);
             yield return UiTestUtil.WaitForRedraw();
             UiTestUtil.Click(Managers.UI.SaveError, "Blocker/Box/Retry");
             Assert.IsFalse(Managers.Run.IsSaveBlocked);
+            UiTestUtil.CloseQuarter(UiTestUtil.Screen<LobbyScreen>());
 
-            // The end of a run, staged directly.
+            // The end of a run, staged directly: the result window over the town (Round 72) — a defeat at the death limit with two left, then a victory.
             RunState run = Managers.Run.Run;
-            run.Fallen.AddRange(run.Roster.Select(m => m.Id));
+            List<MercenaryState> living = run.Roster.Take(2).ToList();
+            run.Fallen.AddRange(run.Roster.Skip(2).Select(m => m.Id));
+            run.Fallen.AddRange(data.RecruitPool.Take(data.Balance.DeathLimit - run.Fallen.Count).Select(m => m.Id));
             run.Roster.Clear();
+            run.Roster.AddRange(living);
             run.Party.Clear();
+            run.Day = 63;
+            run.ExpeditionCount = 10;
+            run.ExpeditionsByDungeon["abandoned_mine"] = 9;
+            run.ExpeditionsByDungeon["abyss"] = 1;
             run.Outcome = RunOutcome.Defeat;
-            run.DefeatCause = DefeatCause.Wipeout;
+            run.DefeatCause = DefeatCause.DeathLimit;
             UiTestUtil.Screen<LobbyScreen>().Refresh();
             yield return null;
             yield return Capture(prefix + "_13_run_over");
+            run.Outcome = RunOutcome.Victory;
+            run.DefeatCause = DefeatCause.None;
+            UiTestUtil.Screen<LobbyScreen>().Refresh();
+            yield return null;
+            yield return Capture(prefix + "_62_run_victory");
         }
 
         /// <summary>Draws the UI through the main camera into a texture and writes it as a PNG.</summary>

@@ -114,6 +114,13 @@ namespace F1.Data
             new KeySpec(nameof(CoinsPerEnemy), 0, Big),
             new KeySpec(nameof(CoinsPerFloor), 0, Big),
             new KeySpec(nameof(EliteCoinPercent), 100, Big),
+            new KeySpec(nameof(GoldPerFloor), 0, Big),
+            new KeySpec(nameof(GoldClear), 0, Big),
+            new KeySpec(nameof(HirePrice), 0, Big),
+            new KeySpec(nameof(RecruitCount), 0, 10),
+            new KeySpec(nameof(RosterLimit), 1, Big),
+            new KeySpec(nameof(TreatmentPrice), 0, Big),
+            new KeySpec(nameof(TreatmentRelief), 1, Big),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -184,6 +191,11 @@ namespace F1.Data
             if (PartySize > BattleRows.Count)
             {
                 throw new DataException($"{DefinitionName}: PartySize cannot exceed the {BattleRows.Count} rows of a side.");
+            }
+
+            if (RosterLimit < PartySize)
+            {
+                throw new DataException($"{DefinitionName}: RosterLimit cannot be under PartySize, or a full party could never be formed.");
             }
         }
 
@@ -318,5 +330,24 @@ namespace F1.Data
         public int CoinsPerEnemy => _values[nameof(CoinsPerEnemy)];
         public int CoinsPerFloor => _values[nameof(CoinsPerFloor)];
         public int EliteCoinPercent => _values[nameof(EliteCoinPercent)];
+
+        /// <summary>
+        /// The lobby's gold (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §5·§9): what the return settlement pays for each map floor
+        /// the party reached, and on top of that for clearing the dungeon (its boss). It comes in nowhere else; a run starts with none.
+        /// </summary>
+        public int GoldPerFloor => _values[nameof(GoldPerFloor)];
+        public int GoldClear => _values[nameof(GoldClear)];
+
+        /// <summary>
+        /// The stagecoach (Docs/Design/04 §6): what hiring a candidate costs (one price, whatever the job), how many candidates are drawn at
+        /// each settlement, and the most mercenaries the roster holds.
+        /// </summary>
+        public int HirePrice => _values[nameof(HirePrice)];
+        public int RecruitCount => _values[nameof(RecruitCount)];
+        public int RosterLimit => _values[nameof(RosterLimit)];
+
+        /// <summary>The inn's treatment (Docs/Design/04 §3): what it costs, and how much fatigue it takes off one mercenary without a day passing.</summary>
+        public int TreatmentPrice => _values[nameof(TreatmentPrice)];
+        public int TreatmentRelief => _values[nameof(TreatmentRelief)];
     }
 }

@@ -332,11 +332,12 @@ namespace F1.Editor.Data
     {
         public static List<MercenaryData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("JobId"));
+            table.RequireHeaders(RowMapping.Headers("JobId", "Starting"));
             return RowMapping.MapRows(table, errors, row => new MercenaryData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
-                row.Id("JobId")));
+                row.OptionalId("JobId"),
+                row.Bool("Starting")));
         }
     }
 }

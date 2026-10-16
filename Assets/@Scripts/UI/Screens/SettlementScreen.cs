@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace F1.UI
 {
-    /// <summary>What the expedition cost: who came back, who died, fatigue and days. The run has already been settled.</summary>
+    /// <summary>What the expedition cost and paid: who came back, who died, fatigue, days and the gold (stage 26). The run has already been settled.</summary>
     public sealed class SettlementScreen : UIScreen
     {
         [SerializeField] TMP_Text _title;
@@ -17,6 +17,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _fallen;
         [SerializeField] TMP_Text _fatigue;
         [SerializeField] TMP_Text _days;
+        [SerializeField] TMP_Text _gold;
         [SerializeField] TMP_Text _runOver;
         [SerializeField] Button _confirm;
 
@@ -52,6 +53,7 @@ namespace F1.UI
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
             _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
+            _gold.text = UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
             _runOver.text = RunOverText(report);
         }
 

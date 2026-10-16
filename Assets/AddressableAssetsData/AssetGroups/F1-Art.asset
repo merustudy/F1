@@ -393,6 +393,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d9642ba4c6bcd448b94b2fad11be7669
+    m_Address: background/lobby/town
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e426af557a41d47d0990399ee48adefd
     m_Address: pose/enemy/goblin-archer-attack
     m_ReadOnly: 0

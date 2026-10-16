@@ -7,6 +7,8 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 14 (Slice C stage 26): the run's Gold, the candidates at the stagecoach (Recruits), the mercenaries Dismissed and the expeditions
+    /// started per dungeon (Expeditions). Version 13 (stage 25): the run's Outcome and DefeatCause, and whether the expedition is the final stand.
     /// Version 11 (Slice B stage 22): HP is in hundredths at the new scale (a longsword deals 2-4) and an item has no grade any more. Version 10
     /// (Slice B stage 19): a member's board is a grid: its Bags (the start bag and those added, each where it lies and how it is
     /// turned) and its Items, each where it lies and how it is turned; an offer can be a Bag. Version 9 (Slice B stage 18): the expedition's Loot (the drops of the last won battle, null where one was taken) replaces
@@ -20,7 +22,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 13;
+        public const int CurrentSchemaVersion = 14;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -42,6 +44,30 @@ namespace F1.Save
         /// <summary>RunOutcome and DefeatCause by name (version 13). Version 12 had IsOver instead.</summary>
         public string Outcome;
         public string DefeatCause;
+
+        /// <summary>The lobby's gold (version 14). Never negative.</summary>
+        public int Gold;
+
+        /// <summary>The candidates at the stagecoach (version 14): at most RecruitCount names of the recruit pool, each with its rolled job.</summary>
+        public List<RecruitRecord> Recruits;
+
+        /// <summary>The mercenaries dismissed from the roster (version 14): they never return.</summary>
+        public List<string> Dismissed;
+
+        /// <summary>Expeditions started per dungeon (version 14). A version 13 file knows none.</summary>
+        public List<ExpeditionCountRecord> Expeditions;
+    }
+
+    public sealed class RecruitRecord
+    {
+        public string Id;
+        public string JobId;
+    }
+
+    public sealed class ExpeditionCountRecord
+    {
+        public string DungeonId;
+        public int Count;
     }
 
     public sealed class MercenaryRecord

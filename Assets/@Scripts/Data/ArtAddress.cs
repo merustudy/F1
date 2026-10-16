@@ -26,6 +26,9 @@ namespace F1.Data
         /// <summary>The painted map of the lands the expedition screen shows (Round 71 E2): no definition names it, the screen does.</summary>
         public const string ExpeditionMap = "background/expedition/map";
 
+        /// <summary>The painted town the lobby lays under its buildings (Round 71, the three-quarter view): no definition names it, the lobby does.</summary>
+        public const string LobbyTown = "background/lobby/town";
+
         /// <summary>Null for "no art". Anything else must be text without spaces.</summary>
         /// <param name="owner">The definition the value belongs to, for the error.</param>
         /// <param name="column">The name of the column, for the error.</param>

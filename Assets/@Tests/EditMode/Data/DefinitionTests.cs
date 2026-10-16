@@ -439,5 +439,18 @@ namespace F1.Tests
             Assert.AreEqual("2.5", Centi.ToText(250));
             Assert.AreEqual("2.37", Centi.ToText(237));
         }
+
+
+        /// <summary>A row of MercenaryData.csv (stage 26): a starting mercenary needs its job; a name of the recruit pool has none (the job is rolled when it is drawn).</summary>
+        [Test]
+        public void MercenaryData_AStartingMercenaryNeedsAJob_AndAPoolNameHasNone()
+        {
+            Assert.DoesNotThrow(() => new MercenaryData("rowan", TestData.Text("rowan"), "knight"));
+            Assert.DoesNotThrow(() => new MercenaryData("teo", TestData.Text("teo"), null, starting: false));
+            Assert.IsTrue(new MercenaryData("rowan", TestData.Text("rowan"), "knight").Starting);
+            Assert.Throws<DataException>(() => new MercenaryData("rowan", TestData.Text("rowan"), null));
+            Assert.Throws<DataException>(() => new MercenaryData("rowan", TestData.Text("rowan"), ""));
+            Assert.Throws<DataException>(() => new MercenaryData("teo", TestData.Text("teo"), "knight", starting: false));
+        }
     }
 }

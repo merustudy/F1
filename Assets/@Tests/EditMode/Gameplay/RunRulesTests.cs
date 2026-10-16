@@ -62,6 +62,10 @@ namespace F1.Tests
             Assert.IsEmpty(run.Fallen);
             Assert.IsEmpty(run.ClearedDungeons);
             Assert.IsFalse(run.IsOver);
+            Assert.AreEqual(0, run.Gold, "Stage 26: a run starts with no gold, and candidates wait at the stagecoach.");
+            Assert.AreEqual(3, run.Recruits.Count);
+            Assert.IsEmpty(run.Dismissed);
+            Assert.IsEmpty(run.ExpeditionsByDungeon);
         }
 
         [Test]

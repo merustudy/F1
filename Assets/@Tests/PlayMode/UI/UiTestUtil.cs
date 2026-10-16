@@ -367,23 +367,75 @@ namespace F1.Tests
         /// Fills the party from the top of the roster list: the first mercenary takes row 1, the
         /// second row 2 and so on. Each click is on the only row a newcomer can take.
         /// </summary>
-        /// <summary>From the lobby to the expedition screen (round 71 E2) and off to the dungeon it offers first.</summary>
+        /// <summary>From the lobby (the town, stage 26) to the expedition screen (round 71 E2) and off to the dungeon it offers first.</summary>
         public static IEnumerator DepartFromLobby()
         {
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            Click(Screen<LobbyScreen>(), "Frame/Strip/Depart");
             yield return WaitForScreen(ScreenId.Expedition);
             Click(Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
             yield return WaitForScreen(ScreenId.NodeMap);
         }
 
-        public static void FillParty(LobbyScreen lobby)
+        /// <summary>
+        /// Opens a quarter's window of the town (stage 26) by its building, then waits for a redraw: the window and the shade were just
+        /// turned on, and a panel takes clicks (and blocks them) only once the canvas has drawn it. Nothing if that window is open.
+        /// </summary>
+        public static IEnumerator OpenQuarter(LobbyScreen lobby, LobbyScreen.Quarter quarter)
         {
-            RosterEntryView[] entries = Views<RosterEntryView>(lobby);
+            if (lobby.OpenQuarter == quarter)
+            {
+                yield break;
+            }
+
+            string building = quarter == LobbyScreen.Quarter.Barracks ? "Frame/Barracks" : quarter == LobbyScreen.Quarter.Inn ? "Frame/Inn" : "Frame/Coach";
+            Click(lobby, building);
+            yield return WaitForRedraw();
+        }
+
+        /// <summary>Opens the barracks window, where the roster's lines and their row buttons are.</summary>
+        public static IEnumerator OpenBarracks(LobbyScreen lobby)
+        {
+            return OpenQuarter(lobby, LobbyScreen.Quarter.Barracks);
+        }
+
+        /// <summary>Closes whatever window of the town is open, so the strip and the buildings take clicks again.</summary>
+        public static void CloseQuarter(LobbyScreen lobby)
+        {
+            switch (lobby.OpenQuarter)
+            {
+                case LobbyScreen.Quarter.Barracks: Click(lobby, "Frame/BarracksWindow/BarracksClose"); break;
+                case LobbyScreen.Quarter.Inn: Click(lobby, "Frame/InnWindow/InnClose"); break;
+                case LobbyScreen.Quarter.Coach: Click(lobby, "Frame/CoachWindow/CoachClose"); break;
+            }
+        }
+
+        /// <summary>The roster's lines in the barracks window, which must be open (<see cref="OpenBarracks"/>).</summary>
+        public static RosterEntryView[] RosterEntries(LobbyScreen lobby)
+        {
+            Assert.AreEqual(LobbyScreen.Quarter.Barracks, lobby.OpenQuarter, "The barracks must be open to read its lines.");
+            return Views<RosterEntryView>(lobby);
+        }
+
+        /// <summary>Fills the party in the barracks from the top of the roster list (the first mercenary takes row 1, the second row 2 and so on) and closes the window.</summary>
+        public static IEnumerator FillParty(LobbyScreen lobby)
+        {
+            yield return OpenBarracks(lobby);
+            RosterEntryView[] entries = RosterEntries(lobby);
             int size = Managers.Data.Data.Balance.PartySize;
             for (int i = 0; i < size; i++)
             {
                 Click(entries[i].Rows[i]);
             }
+
+            CloseQuarter(lobby);
+        }
+
+        /// <summary>Rests a day at the inn of the town and closes its window.</summary>
+        public static IEnumerator RestAtTheInn(LobbyScreen lobby)
+        {
+            yield return OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
+            Click(lobby, "Frame/InnWindow/Rest");
+            CloseQuarter(lobby);
         }
 
         /// <summary>
@@ -450,7 +502,7 @@ namespace F1.Tests
         {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
-            FillParty(Screen<LobbyScreen>());
+            yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
             StageChampion();
@@ -534,7 +586,7 @@ namespace F1.Tests
         {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
-            FillParty(Screen<LobbyScreen>());
+            yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
@@ -570,7 +622,7 @@ namespace F1.Tests
         {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
-            FillParty(Screen<LobbyScreen>());
+            yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
             BalanceData balance = Managers.Data.Data.Balance;
@@ -625,7 +677,7 @@ namespace F1.Tests
         {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
-            FillParty(Screen<LobbyScreen>());
+            yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
@@ -651,7 +703,7 @@ namespace F1.Tests
         {
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
-            FillParty(Screen<LobbyScreen>());
+            yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)

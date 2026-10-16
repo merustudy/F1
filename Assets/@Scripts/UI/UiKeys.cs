@@ -43,28 +43,63 @@ namespace F1.UI
         {
             public const string Title = "Lobby.Title";
             public const string Day = "Lobby.Day";
-            public const string Roster = "Lobby.Roster";
+            public const string DayFinalStand = "Lobby.DayFinalStand";
+            public const string Gold = "Lobby.Gold";
             public const string Fatigue = "Lobby.Fatigue";
             public const string FatigueState = "Lobby.FatigueState";
             public const string Remove = "Lobby.Remove";
+            public const string Dismiss = "Lobby.Dismiss";
             public const string Expedition = "Lobby.Expedition";
-            public const string Affinity = "Lobby.Affinity";
-            public const string Cost = "Lobby.Cost";
-            public const string Cleared = "Lobby.Cleared";
-            public const string Party = "Lobby.Party";
             public const string EmptyRow = "Lobby.EmptyRow";
             public const string Rest = "Lobby.Rest";
             public const string Depart = "Lobby.Depart";
+            public const string ToFinalStand = "Lobby.ToFinalStand";
             public const string DepartOk = "Lobby.DepartOk";
             public const string PartyTooSmall = "Lobby.PartyTooSmall";
-            public const string Fallen = "Lobby.Fallen";
             public const string RunOver = "Lobby.RunOver";
-            public const string RunOverDay = "Lobby.RunOverDay";
             public const string FinalStandDue = "Lobby.FinalStandDue";
             public const string Victory = "Lobby.Victory";
             public const string DefeatDeathLimit = "Lobby.DefeatDeathLimit";
             public const string DefeatFinalStand = "Lobby.DefeatFinalStand";
             public const string ToTitle = "Lobby.ToTitle";
+
+            // The town (Round 71): the buildings' plates and bubbles.
+            public const string Barracks = "Lobby.Barracks";
+            public const string Inn = "Lobby.Inn";
+            public const string Coach = "Lobby.Coach";
+            public const string Gate = "Lobby.Gate";
+            public const string FinalStand = "Lobby.FinalStand";
+            public const string FinalStandSub = "Lobby.FinalStandSub";
+            public const string InnClosed = "Lobby.InnClosed";
+            public const string BarracksHint = "Lobby.BarracksHint";
+            public const string InnHint = "Lobby.InnHint";
+            public const string CoachHint = "Lobby.CoachHint";
+            public const string DungeonLocked = "Lobby.DungeonLocked";
+
+            // The quarters' windows (stage 26).
+            public const string BarracksTitle = "Lobby.BarracksTitle";
+            public const string InnTitle = "Lobby.InnTitle";
+            public const string CoachTitle = "Lobby.CoachTitle";
+            public const string RosterCount = "Lobby.RosterCount";
+            public const string Deaths = "Lobby.Deaths";
+            public const string ClearedOf = "Lobby.ClearedOf";
+            public const string LockedOf = "Lobby.LockedOf";
+            public const string Hire = "Lobby.Hire";
+            public const string NoCandidates = "Lobby.NoCandidates";
+            public const string CoachNote = "Lobby.CoachNote";
+            public const string Treat = "Lobby.Treat";
+            public const string InnNote = "Lobby.InnNote";
+
+            // The result window (Round 72).
+            public const string EndedOn = "Lobby.EndedOn";
+            public const string DayValue = "Lobby.DayValue";
+            public const string Expeditions = "Lobby.Expeditions";
+            public const string Times = "Lobby.Times";
+            public const string ExpeditionsValue = "Lobby.ExpeditionsValue";
+            public const string ExpeditionsOf = "Lobby.ExpeditionsOf";
+            public const string FallenLabel = "Lobby.FallenLabel";
+            public const string FallenValue = "Lobby.FallenValue";
+            public const string Survivors = "Lobby.Survivors";
         }
 
         /// <summary>The expedition screen (Round 71 E2): the map, the chosen dungeon and the departure.</summary>
@@ -91,6 +126,8 @@ namespace F1.UI
             public const string ClearedLabel = "Expedition.ClearedLabel";
             public const string ClearedCount = "Expedition.ClearedCount";
             public const string FinalStandHint = "Expedition.FinalStandHint";
+            public const string RewardLabel = "Expedition.RewardLabel";
+            public const string Reward = "Expedition.Reward";
         }
 
         public static class Map
@@ -345,6 +382,7 @@ namespace F1.UI
             public const string Victory = "Settle.Victory";
             public const string DeathLimit = "Settle.DeathLimit";
             public const string FinalStandLost = "Settle.FinalStandLost";
+            public const string Gold = "Settle.Gold";
         }
 
         public static class Save

@@ -42,7 +42,7 @@ namespace F1.Tests
         /// <summary>The first mercenaries of the roster, lined up from row 1 back.</summary>
         static List<PartyMember> FirstParty(StaticData data)
         {
-            return data.Mercenaries.Ordered
+            return data.StartingMercenaries
                 .Take(data.Balance.PartySize)
                 .Select((m, index) => new PartyMember(m.Id, m.JobId, BattleRows.Front + index))
                 .ToList();

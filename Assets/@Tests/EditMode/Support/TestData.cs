@@ -83,6 +83,13 @@ namespace F1.Tests
                 { "ShopRefreshStep", 2 },
                 { "CoinsPerEnemy", 2 },
                 { "CoinsPerFloor", 1 },
+                { "GoldPerFloor", 2 },
+                { "GoldClear", 20 },
+                { "HirePrice", 30 },
+                { "RecruitCount", 3 },
+                { "RosterLimit", 6 },
+                { "TreatmentPrice", 20 },
+                { "TreatmentRelief", 40 },
                 { "EliteCoinPercent", 200 },
                 { "ShopPotionChancePercent", 50 },
             };
@@ -314,12 +321,18 @@ namespace F1.Tests
                     new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, mapX: 40, mapY: 30),
                     Pit(),
                 },
+                // The starting roster, then the recruit pool (Slice C stage 26): names the stagecoach draws candidates from, with a job rolled.
                 Mercenaries = new List<MercenaryData>
                 {
                     new MercenaryData("anna", Text("anna"), "tank"),
                     new MercenaryData("ben", Text("ben"), "healer"),
                     new MercenaryData("cora", Text("cora"), "striker"),
                     new MercenaryData("dan", Text("dan"), "tank"),
+                    new MercenaryData("eve", Text("eve"), null, starting: false),
+                    new MercenaryData("finn", Text("finn"), null, starting: false),
+                    new MercenaryData("gil", Text("gil"), null, starting: false),
+                    new MercenaryData("hana", Text("hana"), null, starting: false),
+                    new MercenaryData("ivo", Text("ivo"), null, starting: false),
                 },
                 FatigueStates = FatigueStates(),
                 Recipes = new List<RecipeData>(),

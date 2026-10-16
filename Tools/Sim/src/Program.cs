@@ -126,7 +126,9 @@ namespace F1.Sim
                 SimPolicy.Parse(Option(options, "policy", "balanced")),
                 int.Parse(Option(options, "runs", "300"), CultureInfo.InvariantCulture),
                 ulong.Parse(Option(options, "seed", "1"), CultureInfo.InvariantCulture),
-                int.Parse(Option(options, "rest-above", "60"), CultureInfo.InvariantCulture));
+                int.Parse(Option(options, "rest-above", "60"), CultureInfo.InvariantCulture),
+                int.Parse(Option(options, "bench", "2"), CultureInfo.InvariantCulture),
+                int.Parse(Option(options, "treat-above", "100"), CultureInfo.InvariantCulture));
             return 0;
         }
 
@@ -263,8 +265,8 @@ namespace F1.Sim
             Console.WriteLine("               --dungeon id  --group id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  expedition   Many whole expeditions");
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
-            Console.WriteLine("  run          Whole runs to their end: a lobby policy picks the party, rests and the dungeon (Slice C stage 25)");
-            Console.WriteLine("               --policy none|balanced|safe  --runs n  --seed n  --rest-above fatigue");
+            Console.WriteLine("  run          Whole runs to their end: a lobby policy hires, treats, picks the party, rests and the dungeon (Slice C stages 25-26)");
+            Console.WriteLine("               --policy none|balanced|safe  --runs n  --seed n  --rest-above fatigue  --bench n (hire up to PartySize + n)  --treat-above fatigue");
             Console.WriteLine("  formations   Whole expeditions for every order of the party, front to back");
             Console.WriteLine("               --dungeon id  --party a,b,c  --policy none|balanced|safe  --runs n  --seed n");
             Console.WriteLine("  items        Every item's damage per square per second (the size rule of stage 22)");

@@ -56,3 +56,10 @@ CritFatigueTaken,9
 CritFatigueTakenAllies,2
 CritFatigueDealt,3
 CritFatigueDealtAllies,1
+GoldPerFloor,2
+GoldClear,20
+HirePrice,30
+RecruitCount,3
+RosterLimit,8
+TreatmentPrice,20
+TreatmentRelief,40

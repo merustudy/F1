@@ -100,6 +100,8 @@ namespace F1.Gameplay
     {
         /// <summary>Mercenary id or enemy id.</summary>
         public string SourceId;
+        /// <summary>A mercenary's job (its figure and poses are the job's; Slice C stage 26: a hired mercenary's job is the roster's, not the data's). Null for an enemy.</summary>
+        public string JobId;
         public LocalizedText Name;
         /// <summary>The row the unit starts in (1 = facing the enemy).</summary>
         public int Row;

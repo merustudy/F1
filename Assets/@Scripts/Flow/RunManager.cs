@@ -9,7 +9,7 @@ namespace F1.Flow
 {
     /// <summary>
     /// Owns the run (the 100 days) and its save file: creating and loading the run, the lobby
-    /// commands and applying the return settlement. Rules are computed by RunRules; this class
+    /// commands (the party, resting, and from Slice C stage 26 hiring, dismissing and the inn's treatment) and applying the return settlement. Rules are computed by RunRules; this class
     /// checks that a command is allowed now, calls the rule and saves the result.
     ///
     /// run.json is written here and nowhere else. ExpeditionManager hands over its part of the
@@ -151,6 +151,45 @@ namespace F1.Flow
         public DepartCheck CanDepart(string dungeonId)
         {
             return RunRules.CanDepart(_data.Data, Run, dungeonId);
+        }
+
+        // ---- The stagecoach and the inn (Slice C stage 26) -------------------------------------
+
+        /// <summary>Whether the candidate at that index of the run's Recruits can be hired now.</summary>
+        public HireCheck CanHire(int index)
+        {
+            return !HasRun || IsAway ? HireCheck.NoCandidate : RunRules.CanHire(_data.Data, _run, index);
+        }
+
+        public void Hire(int index)
+        {
+            RequireAtHome();
+            RunRules.Hire(_data.Data, _run, index);
+            Save(null);
+        }
+
+        public bool CanDismiss(string mercenaryId)
+        {
+            return HasRun && !IsAway && RunRules.CanDismiss(_run, mercenaryId);
+        }
+
+        public void Dismiss(string mercenaryId)
+        {
+            RequireAtHome();
+            RunRules.Dismiss(_run, mercenaryId);
+            Save(null);
+        }
+
+        public TreatCheck CanTreat(string mercenaryId)
+        {
+            return !HasRun || IsAway ? TreatCheck.NotInRoster : RunRules.CanTreat(_data.Data, _run, mercenaryId);
+        }
+
+        public void Treat(string mercenaryId)
+        {
+            RequireAtHome();
+            RunRules.Treat(_data.Data, _run, mercenaryId);
+            Save(null);
         }
 
         public bool CanRest => RunRules.CanRest(_data.Data, Run);

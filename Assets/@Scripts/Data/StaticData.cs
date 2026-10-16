@@ -122,6 +122,12 @@ namespace F1.Data
         public DataTable<DungeonData> Dungeons { get; }
         public DataTable<MercenaryData> Mercenaries { get; }
 
+        /// <summary>The starting roster, in data order: the rows of MercenaryData.csv that are Starting.</summary>
+        public List<MercenaryData> StartingMercenaries => Mercenaries.Ordered.Where(m => m.Starting).ToList();
+
+        /// <summary>The names the stagecoach draws candidates from (Slice C stage 26): the rows that are not Starting.</summary>
+        public List<MercenaryData> RecruitPool => Mercenaries.Ordered.Where(m => !m.Starting).ToList();
+
         /// <summary>The forge recipes (Slice B stage 23); empty until a dungeon has one.</summary>
         public DataTable<RecipeData> Recipes { get; }
         public DataTable<FatigueStateData> FatigueStates { get; }
@@ -277,14 +283,25 @@ namespace F1.Data
                 problems.Add($"{DungeonData.DefinitionName}: at most one dungeon is final.");
             }
 
-            foreach (MercenaryData mercenary in Mercenaries.Ordered)
+            foreach (MercenaryData mercenary in StartingMercenaries)
             {
                 Require(Jobs, mercenary.JobId, $"{MercenaryData.DefinitionName} '{mercenary.Id}' JobId", problems);
             }
 
-            if (Mercenaries.Count < Balance.MinPartySize)
+            if (StartingMercenaries.Count < Balance.MinPartySize)
             {
                 problems.Add($"{MercenaryData.DefinitionName}: the starting roster is smaller than MinPartySize.");
+            }
+
+            if (StartingMercenaries.Count > Balance.RosterLimit)
+            {
+                problems.Add($"{MercenaryData.DefinitionName}: the starting roster is larger than RosterLimit.");
+            }
+
+            // The stagecoach draws RecruitCount names at a time (Slice C stage 26): the pool must hold at least that many.
+            if (RecruitPool.Count < Balance.RecruitCount)
+            {
+                problems.Add($"{MercenaryData.DefinitionName}: the recruit pool ({RecruitPool.Count} names) is smaller than RecruitCount.");
             }
 
             if (Dungeons.Count == 0)

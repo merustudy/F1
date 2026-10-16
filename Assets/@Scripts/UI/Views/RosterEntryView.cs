@@ -6,7 +6,8 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One mercenary of the roster in the lobby, with the buttons that put it in a row of the party. Its fatigue is pips and
+    /// One mercenary of the roster in the barracks (Round 71: the lobby's barracks window), with the buttons that put it in a row of the party
+    /// and, from Slice C stage 26, the one that dismisses it. Its fatigue is pips and
     /// words (round 33, C); a mercenary that came home in an affliction has its name after the words and what it does at the
     /// right end of the passive's line (round 36). The lobby never shows a virtue: it ends with the expedition.
     /// </summary>
@@ -21,10 +22,14 @@ namespace F1.UI
         [SerializeField] Button[] _rows;
         [SerializeField] Image[] _rowFrames;
         [SerializeField] Button _remove;
+        [SerializeField] Button _dismiss;
 
         /// <summary>One button per battle row; index 0 is row 1.</summary>
         public IReadOnlyList<Button> Rows => _rows;
         public Button Remove => _remove;
+
+        /// <summary>Dismisses the mercenary from the roster for good (Slice C stage 26). Off for the last mercenary left.</summary>
+        public Button Dismiss => _dismiss;
 
         /// <summary>The fatigue pips, left to right: each a tenth of the most fatigue (round 33, C).</summary>
         public IReadOnlyList<UiBar> FatiguePips => _fatiguePips;
@@ -42,6 +47,7 @@ namespace F1.UI
         /// </param>
         /// <param name="affliction">The name of the affliction the mercenary is in, or null.</param>
         /// <param name="afflictionEffect">What the affliction does, or null.</param>
+        /// <param name="canDismiss">Whether the mercenary can be dismissed now.</param>
         public void Show(
             string mercenaryName,
             string jobName,
@@ -52,8 +58,10 @@ namespace F1.UI
             int row,
             IReadOnlyList<bool> canTake,
             string affliction = null,
-            string afflictionEffect = null)
+            string afflictionEffect = null,
+            bool canDismiss = false)
         {
+            _dismiss.interactable = canDismiss;
             _name.text = mercenaryName;
             _job.text = jobName;
             _passive.text = passive;

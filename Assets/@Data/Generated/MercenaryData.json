@@ -2,12 +2,31 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "abel",
+      "Name": {
+        "en-US": "Abel",
+        "ko-KR": "아벨"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
       "Id": "astrid",
       "Name": {
         "en-US": "Astrid",
         "ko-KR": "아스트리드"
       },
-      "JobId": "valkyrie"
+      "JobId": "valkyrie",
+      "Starting": true
+    },
+    {
+      "Id": "bran",
+      "Name": {
+        "en-US": "Bran",
+        "ko-KR": "브란"
+      },
+      "JobId": null,
+      "Starting": false
     },
     {
       "Id": "cedric",
@@ -15,7 +34,26 @@
         "en-US": "Cedric",
         "ko-KR": "세드릭"
       },
-      "JobId": "paladin"
+      "JobId": "paladin",
+      "Starting": true
+    },
+    {
+      "Id": "dagny",
+      "Name": {
+        "en-US": "Dagny",
+        "ko-KR": "다그니"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "edda",
+      "Name": {
+        "en-US": "Edda",
+        "ko-KR": "에다"
+      },
+      "JobId": null,
+      "Starting": false
     },
     {
       "Id": "ella",
@@ -23,7 +61,89 @@
         "en-US": "Ella",
         "ko-KR": "엘라"
       },
-      "JobId": "bishop"
+      "JobId": "bishop",
+      "Starting": true
+    },
+    {
+      "Id": "finn",
+      "Name": {
+        "en-US": "Finn",
+        "ko-KR": "핀"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "greta",
+      "Name": {
+        "en-US": "Greta",
+        "ko-KR": "그레타"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "gudrun",
+      "Name": {
+        "en-US": "Gudrun",
+        "ko-KR": "구드룬"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "halvar",
+      "Name": {
+        "en-US": "Halvar",
+        "ko-KR": "할바르"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "hugo",
+      "Name": {
+        "en-US": "Hugo",
+        "ko-KR": "휴고"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "ingrid",
+      "Name": {
+        "en-US": "Ingrid",
+        "ko-KR": "잉그리드"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "ivo",
+      "Name": {
+        "en-US": "Ivo",
+        "ko-KR": "이보"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "johanna",
+      "Name": {
+        "en-US": "Johanna",
+        "ko-KR": "요한나"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "jorun",
+      "Name": {
+        "en-US": "Jorun",
+        "ko-KR": "요룬"
+      },
+      "JobId": null,
+      "Starting": false
     },
     {
       "Id": "kai",
@@ -31,7 +151,62 @@
         "en-US": "Kai",
         "ko-KR": "카이"
       },
-      "JobId": "spellblade"
+      "JobId": "spellblade",
+      "Starting": true
+    },
+    {
+      "Id": "karin",
+      "Name": {
+        "en-US": "Karin",
+        "ko-KR": "카린"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "lars",
+      "Name": {
+        "en-US": "Lars",
+        "ko-KR": "라르스"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "leif",
+      "Name": {
+        "en-US": "Leif",
+        "ko-KR": "레이프"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "liv",
+      "Name": {
+        "en-US": "Liv",
+        "ko-KR": "리브"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "magda",
+      "Name": {
+        "en-US": "Magda",
+        "ko-KR": "마그다"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "maren",
+      "Name": {
+        "en-US": "Maren",
+        "ko-KR": "마렌"
+      },
+      "JobId": null,
+      "Starting": false
     },
     {
       "Id": "mira",
@@ -39,7 +214,71 @@
         "en-US": "Mira",
         "ko-KR": "미라"
       },
-      "JobId": "archmage"
+      "JobId": "archmage",
+      "Starting": true
+    },
+    {
+      "Id": "nils",
+      "Name": {
+        "en-US": "Nils",
+        "ko-KR": "닐스"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "nora",
+      "Name": {
+        "en-US": "Nora",
+        "ko-KR": "노라"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "orla",
+      "Name": {
+        "en-US": "Orla",
+        "ko-KR": "올라"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "oskar",
+      "Name": {
+        "en-US": "Oskar",
+        "ko-KR": "오스카르"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "otto",
+      "Name": {
+        "en-US": "Otto",
+        "ko-KR": "오토"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "piet",
+      "Name": {
+        "en-US": "Piet",
+        "ko-KR": "피트"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "ragna",
+      "Name": {
+        "en-US": "Ragna",
+        "ko-KR": "라그나"
+      },
+      "JobId": null,
+      "Starting": false
     },
     {
       "Id": "rowan",
@@ -47,7 +286,134 @@
         "en-US": "Rowan",
         "ko-KR": "로언"
       },
-      "JobId": "knight"
+      "JobId": "knight",
+      "Starting": true
+    },
+    {
+      "Id": "runa",
+      "Name": {
+        "en-US": "Runa",
+        "ko-KR": "루나"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "sigrid",
+      "Name": {
+        "en-US": "Sigrid",
+        "ko-KR": "시그리드"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "sven",
+      "Name": {
+        "en-US": "Sven",
+        "ko-KR": "스벤"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "teo",
+      "Name": {
+        "en-US": "Teo",
+        "ko-KR": "테오"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "thea",
+      "Name": {
+        "en-US": "Thea",
+        "ko-KR": "테아"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "tove",
+      "Name": {
+        "en-US": "Tove",
+        "ko-KR": "토베"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "ulf",
+      "Name": {
+        "en-US": "Ulf",
+        "ko-KR": "울프"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "una",
+      "Name": {
+        "en-US": "Una",
+        "ko-KR": "우나"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "vera",
+      "Name": {
+        "en-US": "Vera",
+        "ko-KR": "베라"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "viggo",
+      "Name": {
+        "en-US": "Viggo",
+        "ko-KR": "비고"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "wren",
+      "Name": {
+        "en-US": "Wren",
+        "ko-KR": "렌"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "ylva",
+      "Name": {
+        "en-US": "Ylva",
+        "ko-KR": "윌바"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "yrsa",
+      "Name": {
+        "en-US": "Yrsa",
+        "ko-KR": "위르사"
+      },
+      "JobId": null,
+      "Starting": false
+    },
+    {
+      "Id": "zelda",
+      "Name": {
+        "en-US": "Zelda",
+        "ko-KR": "젤다"
+      },
+      "JobId": null,
+      "Starting": false
     }
   ]
 }

@@ -592,8 +592,8 @@ namespace F1.UI
                 SlowFor(_moment);
             }
 
-            string mercenaryId = view.Unit.Setup.SourceId;
-            view.HoldPose(virtue ? _art.ResolutePoseOfMercenary(mercenaryId) : _art.BrokenPoseOfMercenary(mercenaryId), BreakdownLength / pace);
+            string jobId = view.Unit.Setup.JobId;
+            view.HoldPose(virtue ? _art.ResolutePoseOfJob(jobId) : _art.BrokenPoseOfJob(jobId), BreakdownLength / pace);
             if (virtue)
             {
                 view.Pulse();
@@ -985,7 +985,8 @@ namespace F1.UI
             string id = unit.Setup.SourceId;
             if (unit.Side == BattleSide.Party)
             {
-                view.Bind(unit, _art.OfMercenary(id), 1f, _art.AttackPoseOfMercenary(id), _art.HitPoseOfMercenary(id));
+                string job = unit.Setup.JobId;
+                view.Bind(unit, _art.OfJob(job), 1f, _art.AttackPoseOfJob(job), _art.HitPoseOfJob(job));
             }
             else
             {

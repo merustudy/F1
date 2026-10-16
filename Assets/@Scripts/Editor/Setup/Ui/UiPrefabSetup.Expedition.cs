@@ -40,6 +40,8 @@ namespace F1.Editor.Setup
             UiBuild.Box(UiBuild.LocalizedLabel("HeaderTitle", header.transform, UiKeys.Expedition.Title, 44f, UiPalette.Text), 40f, 20f, 600f, 60f);
             TextMeshProUGUI day = UiBuild.Label("Day", header.transform, 44f, UiPalette.Text, TextAlignmentOptions.Center);
             UiBuild.Box(day, 660f, 20f, 600f, 60f);
+            TextMeshProUGUI gold = UiBuild.Label("Gold", header.transform, 32f, UiPalette.DiabloGold, TextAlignmentOptions.Right);
+            UiBuild.Box(gold, 1340f, 26f, 280f, 48f);
             ButtonParts toLobby = UiBuild.LocalizedButton("ToLobby", header.transform, UiKeys.Expedition.ToLobby, UiPalette.ButtonQuiet, 28f);
             UiBuild.Box(toLobby.Rect, 1640f, 22f, 240f, 56f);
 
@@ -55,6 +57,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI days = DetailRow(d, "Days", UiKeys.Expedition.DaysLabel, 274f);
             TextMeshProUGUI potions = DetailRow(d, "Potions", UiKeys.Expedition.PotionsLabel, 326f);
             TextMeshProUGUI cleared = DetailRow(d, "Cleared", UiKeys.Expedition.ClearedLabel, 378f);
+            TextMeshProUGUI reward = DetailRow(d, "Reward", UiKeys.Expedition.RewardLabel, 430f);
             TextMeshProUGUI hint = UiBuild.Box(UiBuild.Label("Hint", d, 20f, UiPalette.TextDim, TextAlignmentOptions.TopLeft), 26f, 520f, 508f, 100f);
 
             // The party as the lobby formed it, and the departure
@@ -88,6 +91,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(depart.Rect, 1520f, 100f, 294f, 120f);
 
             UiBuild.SetReference(screen, "_day", day);
+            UiBuild.SetReference(screen, "_gold", gold);
             UiBuild.SetReference(screen, "_toLobby", toLobby.Button);
             UiBuild.SetReference(screen, "_map", map);
             UiBuild.SetReference(screen, "_markerTemplate", markerTemplate);
@@ -97,6 +101,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_days", days);
             UiBuild.SetReference(screen, "_potions", potions);
             UiBuild.SetReference(screen, "_cleared", cleared);
+            UiBuild.SetReference(screen, "_reward", reward);
             UiBuild.SetReference(screen, "_hint", hint);
             UiBuild.SetReferences(screen, "_cards", cards);
             UiBuild.SetReference(screen, "_status", status);
@@ -107,8 +112,8 @@ namespace F1.Editor.Setup
         /// <summary>A row of the details: the dim label at the left, and the value code fills in, right-aligned at the panel's inset.</summary>
         static TextMeshProUGUI DetailRow(Transform panel, string name, string labelKey, float y)
         {
-            UiBuild.Box(UiBuild.LocalizedLabel(name + "Label", panel, labelKey, 24f, UiPalette.TextDim), 26f, y, 200f, 40f);
-            return UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name, panel, 24f, UiPalette.Text, TextAlignmentOptions.Right)), 226f, y, 308f, 40f);
+            UiBuild.Box(UiBuild.LocalizedLabel(name + "Label", panel, labelKey, 24f, UiPalette.TextDim), 26f, y, 130f, 40f);
+            return UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name, panel, 24f, UiPalette.Text, TextAlignmentOptions.Right)), 156f, y, 378f, 40f);
         }
 
         /// <summary>The template of a dungeon's marker: the selection ring, the rim, the disc (the button) and the plate under it.</summary>

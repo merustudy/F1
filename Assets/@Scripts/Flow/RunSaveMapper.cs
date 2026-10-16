@@ -48,7 +48,21 @@ namespace F1.Flow
                 ClearedDungeons = new List<ClearRecord>(),
                 Outcome = run.Outcome.ToString(),
                 DefeatCause = run.DefeatCause.ToString(),
+                Gold = run.Gold,
+                Recruits = new List<RecruitRecord>(),
+                Dismissed = new List<string>(run.Dismissed),
+                Expeditions = new List<ExpeditionCountRecord>(),
             };
+
+            foreach (RecruitState recruit in run.Recruits)
+            {
+                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId });
+            }
+
+            foreach (KeyValuePair<string, int> visits in run.ExpeditionsByDungeon)
+            {
+                record.Expeditions.Add(new ExpeditionCountRecord { DungeonId = visits.Key, Count = visits.Value });
+            }
 
             foreach (MercenaryState mercenary in run.Roster)
             {
@@ -206,12 +220,15 @@ namespace F1.Flow
             Require(record.Day >= 1, "Day must be at least 1.");
             Require(record.ExpeditionCount >= 0, "ExpeditionCount is negative.");
             Require(record.Roster != null && record.Fallen != null && record.Party != null && record.ClearedDungeons != null, "A list of the run is missing.");
+            Require(record.Recruits != null && record.Dismissed != null && record.Expeditions != null, "A list of the run is missing.");
+            Require(record.Gold >= 0, "Gold is negative.");
 
             var run = new RunState
             {
                 Seed = Seed(record.Seed),
                 Day = record.Day,
                 ExpeditionCount = record.ExpeditionCount,
+                Gold = record.Gold,
             };
 
             var known = new HashSet<string>(StringComparer.Ordinal);
@@ -225,11 +242,30 @@ namespace F1.Flow
                 run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction });
             }
 
+            Require(run.Roster.Count <= data.Balance.RosterLimit, "The roster is over RosterLimit.");
+
             foreach (string fallen in record.Fallen)
             {
                 Require(data.Mercenaries.Contains(fallen), $"Unknown mercenary '{fallen}'.");
                 Require(known.Add(fallen), $"Mercenary '{fallen}' is listed twice.");
                 run.Fallen.Add(fallen);
+            }
+
+            foreach (string dismissed in record.Dismissed)
+            {
+                Require(data.Mercenaries.Contains(dismissed), $"Unknown mercenary '{dismissed}'.");
+                Require(known.Add(dismissed), $"Mercenary '{dismissed}' is listed twice.");
+                run.Dismissed.Add(dismissed);
+            }
+
+            // The candidates (Slice C stage 26): names of the recruit pool that are nobody's yet, each with a job, at most RecruitCount of them.
+            Require(record.Recruits.Count <= data.Balance.RecruitCount, "More candidates than RecruitCount.");
+            foreach (RecruitRecord recruit in record.Recruits)
+            {
+                Require(recruit != null && data.Mercenaries.Contains(recruit.Id) && !data.Mercenaries.Get(recruit.Id).Starting, $"Candidate '{recruit?.Id}' is not a name of the recruit pool.");
+                Require(data.Jobs.Contains(recruit.JobId), $"Unknown job '{recruit.JobId}'.");
+                Require(known.Add(recruit.Id), $"Mercenary '{recruit.Id}' is listed twice.");
+                run.Recruits.Add(new RecruitState { Id = recruit.Id, JobId = recruit.JobId });
             }
 
             var party = new List<PartySlot>();
@@ -249,6 +285,14 @@ namespace F1.Flow
                 Require(cleared.Count >= 1, $"Clear count of '{cleared.DungeonId}' must be at least 1.");
                 Require(!run.ClearedDungeons.ContainsKey(cleared.DungeonId), $"Dungeon '{cleared.DungeonId}' is listed twice.");
                 run.ClearedDungeons.Add(cleared.DungeonId, cleared.Count);
+            }
+
+            foreach (ExpeditionCountRecord visits in record.Expeditions)
+            {
+                Require(visits != null && data.Dungeons.Contains(visits.DungeonId), $"Unknown dungeon '{visits?.DungeonId}'.");
+                Require(visits.Count >= 1, $"Expedition count of '{visits.DungeonId}' must be at least 1.");
+                Require(!run.ExpeditionsByDungeon.ContainsKey(visits.DungeonId), $"Dungeon '{visits.DungeonId}' is listed twice.");
+                run.ExpeditionsByDungeon.Add(visits.DungeonId, visits.Count);
             }
 
             run.Outcome = Parse<RunOutcome>(record.Outcome);

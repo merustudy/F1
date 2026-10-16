@@ -191,9 +191,11 @@ namespace F1.Editor.Setup
                 }
             }
 
-            // The expedition map (Round 71 E2): a scene like a dungeon's background, loaded by the expedition screen into the lobby scope.
-            files.Add(new ArtFile(ArtAddress.ExpeditionMap, AssetPath(ArtAddress.ExpeditionMap), Scene,
-                new AddressEntry(AssetPath(ArtAddress.ExpeditionMap), ArtAddress.ExpeditionMap, ResourceScope.Lobby, ArtGroup)));
+            // The expedition map (Round 71 E2) and the lobby's town (Round 71, stage 26): scenes like a dungeon's background, loaded by their screens into the lobby scope.
+            foreach (string address in new[] { ArtAddress.ExpeditionMap, ArtAddress.LobbyTown })
+            {
+                files.Add(new ArtFile(address, AssetPath(address), Scene, new AddressEntry(AssetPath(address), address, ResourceScope.Lobby, ArtGroup)));
+            }
 
             foreach (UiArt.Piece piece in UiArt.All)
             {

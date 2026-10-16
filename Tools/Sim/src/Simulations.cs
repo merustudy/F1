@@ -500,23 +500,47 @@ namespace F1.Sim
         }
 
         /// <summary>
-        /// Whole runs (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md): a lobby policy picks the party (the least tired), rests when the
-        /// party is tired, goes to the final dungeon once it is open, and fights the final stand past the last day. Expeditions play as in
-        /// <see cref="Expedition"/>. Reports how runs end and when. The policy's numbers are simulator tools, not game rules.
+        /// Whole runs (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md): a lobby policy hires while the roster is under PartySize + bench and
+        /// the gold covers the price (stage 26; the first candidate, never dismissing anyone), picks the party (the least tired), treats a party member at or
+        /// over treatAbove at the inn while the gold lasts, rests when the party is still tired, goes to the final dungeon once it is open, and fights
+        /// the final stand past the last day. Expeditions play as in <see cref="Expedition"/>. Reports how runs end and when, and the gold. The policy's
+        /// numbers are simulator tools, not game rules.
         /// </summary>
-        public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove)
+        public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove, int bench, int treatAbove)
         {
             int victories = 0, wipeouts = 0, deathLimits = 0, finalStandsLost = 0, finalStands = 0, finalStandsWon = 0, unlocked = 0, earlyWins = 0;
             long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
+            long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
             {
                 RunState state = RunRules.NewRun(data, SeedDeriver.Derive(baseSeed, "run", run));
+                var hired = new HashSet<string>(StringComparer.Ordinal);
                 bool noted = false;
                 int guard = 0;
                 while (!state.IsOver && guard++ < 10000)
                 {
+                    // The stagecoach first: a fresh recruit may be the least tired of all.
+                    while (state.Roster.Count < data.Balance.PartySize + bench && RunRules.CanHire(data, state, 0) == HireCheck.Ok)
+                    {
+                        hired.Add(RunRules.Hire(data, state, 0).Id);
+                        hires++;
+                        goldHired += data.Balance.HirePrice;
+                    }
+
                     List<PartySlot> party = ChooseParty(data, state);
+                    foreach (PartySlot slot in party)
+                    {
+                        MercenaryState member = RunRules.FindMercenary(state, slot.MercenaryId);
+                        while (member.Fatigue >= treatAbove && RunRules.CanTreat(data, state, member.Id) == TreatCheck.Ok)
+                        {
+                            RunRules.Treat(data, state, member.Id);
+                            treatments++;
+                            goldTreated += data.Balance.TreatmentPrice;
+                        }
+                    }
+
+                    party = ChooseParty(data, state);
                     RunRules.SetParty(data, state, party);
                     if (RunRules.CanRest(data, state) && AverageFatigue(state, party) >= restAbove)
                     {
@@ -542,8 +566,9 @@ namespace F1.Sim
                     finalStands += expedition.FinalStand ? 1 : 0;
                     PlayExpedition(data, expedition, policy, scratch);
                     deaths += expedition.Members.Count(m => !m.Alive);
+                    hiredDeaths += expedition.Members.Count(m => !m.Alive && hired.Contains(m.MercenaryId));
                     expeditions++;
-                    RunRules.Settle(data, state, expedition);
+                    goldEarned += RunRules.Settle(data, state, expedition).GoldEarned;
                     if (expedition.FinalStand && state.Outcome == RunOutcome.Victory)
                     {
                         finalStandsWon++;
@@ -555,6 +580,8 @@ namespace F1.Sim
                 }
 
                 days += state.Day;
+                goldLeft += state.Gold;
+                rosterAtEnd += state.Roster.Count;
                 if (state.Outcome == RunOutcome.Victory)
                 {
                     victories++;
@@ -570,11 +597,13 @@ namespace F1.Sim
                 }
             }
 
-            Console.WriteLine($"runs {runs}, policy {policy.Name}, rest when the party's fatigue averages {restAbove} or more, seed {baseSeed}");
+            Console.WriteLine($"runs {runs}, policy {policy.Name}, rest when the party's fatigue averages {restAbove} or more, hire up to {data.Balance.PartySize + bench} in the roster, treat a member at {treatAbove} or more, seed {baseSeed}");
             Console.WriteLine($"  victories {BattleStats.Percent(victories, runs)} (before the last day {BattleStats.Percent(earlyWins, runs)}, at the final stand {BattleStats.Percent(finalStandsWon, runs)}); "
                 + $"defeats: final stand lost {BattleStats.Percent(finalStandsLost, runs)}, death limit {BattleStats.Percent(deathLimits, runs)}, wipeout {BattleStats.Percent(wipeouts, runs)}");
             Console.WriteLine($"  per run: days at the end {Average(days, runs)}, expeditions {Average(expeditions, runs)}, rests {Average(rests, runs)}, deaths {Average(deaths, runs)}; "
                 + $"final stands fought {BattleStats.Percent(finalStands, runs)}; the final dungeon opened in {BattleStats.Percent(unlocked, runs)} of runs, on day {Average(unlockDays, unlocked)} on average");
+            Console.WriteLine($"  gold per run: earned {Average(goldEarned, runs)}, spent on hiring {Average(goldHired, runs)} ({Average(hires, runs)} hires, of whom {Average(hiredDeaths, runs)} died), "
+                + $"on treatment {Average(goldTreated, runs)} ({Average(treatments, runs)} treatments), held at the end {Average(goldLeft, runs)}; roster at the end {Average(rosterAtEnd, runs)}");
         }
 
         /// <summary>The final dungeon once it is open (or once the final stand is due), else the first dungeon that is not final and is open.</summary>

@@ -26,28 +26,57 @@ Title.VolumeOff,Volume step: silent.,끔,Off
 Title.VolumeNotSaved,Shown when changing a volume failed because settings could not be written.,설정을 저장하지 못해 소리 크기를 바꾸지 않았습니다.,"The setting could not be saved, so the volume was not changed."
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
 Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
-Lobby.Roster,Header of the mercenary list.,로스터,Roster
+Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day counter, then that only the final stand is left. {0} = current day, {1} = total days.",{0}일차 / {1}일 — 최종 결전,Day {0} / {1} — the final stand
+Lobby.Gold,"The company's gold in the header and the windows (stage 26). {0} = gold.",금 {0},Gold {0}
 Lobby.Fatigue,{0} = fatigue (0 is fresh; it builds up on expeditions). {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
 Lobby.FatigueState,"On a roster line of a mercenary in an affliction: the fatigue words, then the affliction's name. {0} = the fatigue words (Lobby.Fatigue). {1} = the affliction.",{0} · {1},{0} · {1}
 Lobby.Remove,Takes a mercenary out of the party.,제외,Remove
+Lobby.Dismiss,"Dismisses a mercenary from the roster for good (stage 26, the barracks).",내보내기,Dismiss
 Lobby.Expedition,Header of the expedition panel.,원정,Expedition
-Lobby.Affinity,{0} = name of the dungeon's affinity.,지역 속성: {0},Affinity: {0}
-Lobby.Cost,{0} = days the dungeon takes.,{0}일 소요,Takes {0} days
-Lobby.Cleared,{0} = times this dungeon was cleared.,클리어 {0}회,Clears: {0}
-Lobby.Party,Header of the party preview.,파티,Party
 Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
 Lobby.Rest,{0} = how much fatigue comes down. {1} = days that pass.,쉬기 (피로도 -{0} · {1}일),Rest (fatigue -{0} · {1}d)
 Lobby.Depart,Opens the expedition screen (round 71 E2); the departure is there.,원정 화면으로,To the expedition
+Lobby.ToFinalStand,"The strip's button past the last day: it opens the expedition screen where only the final stand is left.",최종 결전으로,To the final stand
 Lobby.DepartOk,The party can leave.,출발할 수 있습니다,Ready to depart
 Lobby.PartyTooSmall,{0} = minimum party size.,파티에 용병을 {0}명 이상 넣으세요,The party needs at least {0}
-Lobby.Fallen,{0} = names of the dead.,전사자: {0},Fallen: {0}
 Lobby.RunOver,No mercenary is left alive.,용병단이 전멸했습니다,The company has fallen
-Lobby.RunOverDay,{0} = day the run ended.,{0}일차에 끝났습니다,It ended on day {0}
 Lobby.FinalStandDue,Past the last day: the only expedition left is the final stand against the final dungeon's boss.,기한이 지났습니다. 최종 결전으로 출발합니다,The last day has passed. Only the final stand is left
 Lobby.Victory,The run was won: the final boss fell.,최종 보스를 쓰러뜨렸습니다 — 승리,The final boss has fallen: victory
 Lobby.DefeatDeathLimit,{0} = the death limit.,전사자가 {0}명에 닿았습니다 — 패배,{0} mercenaries have fallen: defeat
 Lobby.DefeatFinalStand,The final stand was lost.,최종 결전에서 졌습니다 — 패배,The final stand was lost: defeat
 Lobby.ToTitle,Goes back to the title screen.,타이틀로,To Title
+Lobby.Barracks,"The plate of the barracks (Round 71): the roster, the party and dismissing.",막사,Barracks
+Lobby.Inn,"The plate of the inn: resting and the treatment.",쉼터,Inn
+Lobby.Coach,"The plate of the stagecoach: hiring.",역마차,Stagecoach
+Lobby.Gate,The plate of the gate: the way to the expedition screen.,원정,Expedition
+Lobby.FinalStand,"The gate's plate past the last day (Round 72).",최종 결전,Final stand
+Lobby.FinalStandSub,"The second line of the gate's plate past the last day. {0} = the final dungeon.",{0}의 보스와 싸운다,Fight the boss of {0}
+Lobby.InnClosed,"The second line of the inn's plate past the last day: no day is left to rest.",쉴 날이 없다,No day left to rest
+Lobby.BarracksHint,"The bubble over the barracks. {0} = mercenaries in the roster, {1} = the roster limit, {2} = party members.",로스터 {0}/{1} · 파티 {2}명,Roster {0}/{1} · party of {2}
+Lobby.InnHint,"The bubble over the inn. {0} = the breakdown threshold, {1} = mercenaries at or over it, {2} = the treatment's price.",피로 {0} 이상 {1}명 · 치료 금 {2},{1} at fatigue {0} or more · treatment: gold {2}
+Lobby.CoachHint,"The bubble over the stagecoach. {0} = candidates, {1} = the hire price.",후보 {0}명 · 고용 금 {1},{0} candidates · hire: gold {1}
+Lobby.DungeonLocked,"A locked dungeon in the gate's bubble. {0} = its name.",{0} 잠김,{0} locked
+Lobby.BarracksTitle,Title of the barracks window.,막사 — 로스터,Barracks — Roster
+Lobby.InnTitle,Title of the inn window.,쉼터 — 쉬기·치료,Inn — Rest and treatment
+Lobby.CoachTitle,Title of the stagecoach window.,역마차 — 고용,Stagecoach — Hiring
+Lobby.RosterCount,"In the summaries. {0} = mercenaries in the roster, {1} = the roster limit.",로스터 {0}/{1},Roster {0}/{1}
+Lobby.Deaths,"In the summaries. {0} = the dead so far, {1} = the death limit.",사망 {0}/{1},Deaths {0}/{1}
+Lobby.ClearedOf,"In the barracks summary, per open dungeon. {0} = the dungeon, {1} = its clears.",{0} 클리어 {1}회,{0} cleared {1}
+Lobby.LockedOf,"In the barracks summary, per locked dungeon. {0} = the dungeon, {1} = the dungeon whose clears open it, {2} = how many.",{0} 잠김({1} {2}회),{0} locked ({1} ×{2})
+Lobby.Hire,"The button that hires a candidate. {0} = the price.",고용 금 {0},Hire for {0} gold
+Lobby.NoCandidates,Shown in the stagecoach window when nobody is waiting.,후보가 없습니다,Nobody is waiting
+Lobby.CoachNote,Under the candidates.,귀환 정산마다 새 후보가 온다,New candidates come with every return
+Lobby.Treat,"The button that treats a mercenary at the inn. {0} = the price, {1} = how much fatigue it takes off.",치료 금 {0} · 피로 -{1},Treat · {0} gold · -{1}
+Lobby.InnNote,Under the inn's list: the treatment takes no day.,치료는 날이 가지 않는다,The treatment takes no day
+Lobby.EndedOn,Row of the result window: the day the run ended.,끝난 날,Ended on
+Lobby.DayValue,"A day as a value. {0} = the day.",{0}일차,Day {0}
+Lobby.Expeditions,Row of the result window: how many expeditions.,원정,Expeditions
+Lobby.Times,"A count of expeditions. {0} = the count.",{0}회,{0}
+Lobby.ExpeditionsValue,"The expeditions with their split by dungeon. {0} = the count, {1} = the split (Lobby.ExpeditionsOf joined by commas).",{0}회 ({1}),{0} ({1})
+Lobby.ExpeditionsOf,"One dungeon of the split. {0} = the dungeon, {1} = expeditions there.",{0} {1},{0} {1}
+Lobby.FallenLabel,Row of the result window: how many died.,전사자,Fallen
+Lobby.FallenValue,"The dead as a count. {0} = the count.",{0}명,{0}
+Lobby.Survivors,Row of the result window: who is still alive.,살아남은 용병,Still alive
 Expedition.Title,Header of the expedition screen (round 71 E2).,원정,Expedition
 Expedition.ToLobby,Back to the lobby.,로비로,To the lobby
 Expedition.Home,The company's town on the map.,본부,Home
@@ -69,6 +98,8 @@ Expedition.PotionsLabel,Row label in the details.,시작 포션,Starting potions
 Expedition.ClearedLabel,Row label in the details.,클리어,Clears
 Expedition.ClearedCount,{0} = times the dungeon was cleared.,{0}회,{0}
 Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}일을 넘기면 {1}의 보스와 강제로 싸운다,"Past day {0}, the boss of {1} must be fought"
+Expedition.RewardLabel,Row label in the details (stage 26).,보상,Reward
+Expedition.Reward,"What the settlement pays for the dungeon. {0} = gold per map floor reached, {1} = gold for a clear.",층마다 금 {0} · 클리어 금 {1},{0} gold per floor · {1} for a clear
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}
 Map.Battle,Label of a battle node.,전투,Battle
 Map.Boss,Label of the boss node.,보스,Boss
@@ -257,6 +288,7 @@ Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이
 Settle.Victory,The run was won with this expedition: the final boss fell.,최종 보스를 쓰러뜨렸습니다. 런이 끝났습니다,The final boss has fallen. The run is over
 Settle.DeathLimit,The run was lost with this expedition: the deaths reached the limit.,전사자가 한도에 닿아 런이 끝났습니다,The death limit was reached. The run is over
 Settle.FinalStandLost,The run was lost with this expedition: the final stand was lost.,최종 결전에서 져 런이 끝났습니다,The final stand was lost. The run is over
+Settle.Gold,"The gold the settlement paid (stage 26). {0} = gold earned, {1} = the floors reached, {2} = the gold held now.",얻은 금 +{0} ({1}층 도달) · 보유 금 {2},Gold +{0} ({1} floors reached) · gold held {2}
 Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
 Save.Retry,Writes the unsaved change again.,다시 시도,Retry
 Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}

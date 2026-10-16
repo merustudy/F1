@@ -73,10 +73,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864197
-    m_Localized: Roster
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864198
     m_Localized: Fatigue {0}/{1}
     m_Metadata:
@@ -88,25 +84,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 9766393864200
     m_Localized: Expedition
-    m_Metadata:
-      m_Items: []
-  - m_Id: 9766393864201
-    m_Localized: 'Affinity: {0}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 9766393864202
-    m_Localized: Takes {0} days
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 9766393864203
-    m_Localized: 'Clears: {0}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 9766393864204
-    m_Localized: Party
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864205
@@ -131,20 +108,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864211
-    m_Localized: 'Fallen: {0}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864212
     m_Localized: The company has fallen
     m_Metadata:
       m_Items: []
-  - m_Id: 9766393864213
-    m_Localized: It ended on day {0}
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864214
     m_Localized: To Title
     m_Metadata:
@@ -1247,6 +1214,182 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 5824427131396096
+    m_Localized: "Day {0} / {1} \u2014 the final stand"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979008
+    m_Localized: Gold {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979009
+    m_Localized: Dismiss
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979010
+    m_Localized: To the final stand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979011
+    m_Localized: Barracks
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979012
+    m_Localized: Inn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979013
+    m_Localized: Stagecoach
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979014
+    m_Localized: Expedition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979015
+    m_Localized: Final stand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979016
+    m_Localized: Fight the boss of {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979017
+    m_Localized: No day left to rest
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979018
+    m_Localized: "Roster {0}/{1} \xB7 party of {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979019
+    m_Localized: "{1} at fatigue {0} or more \xB7 treatment: gold {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979020
+    m_Localized: "{0} candidates \xB7 hire: gold {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979021
+    m_Localized: '{0} locked'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979022
+    m_Localized: "Barracks \u2014 Roster"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979023
+    m_Localized: "Inn \u2014 Rest and treatment"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979024
+    m_Localized: "Stagecoach \u2014 Hiring"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979025
+    m_Localized: Roster {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979026
+    m_Localized: Deaths {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979027
+    m_Localized: '{0} cleared {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979028
+    m_Localized: "{0} locked ({1} \xD7{2})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979029
+    m_Localized: Hire for {0} gold
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979030
+    m_Localized: Nobody is waiting
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979031
+    m_Localized: New candidates come with every return
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979032
+    m_Localized: "Treat \xB7 {0} gold \xB7 -{1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979033
+    m_Localized: The treatment takes no day
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979034
+    m_Localized: Ended on
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979035
+    m_Localized: Day {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979036
+    m_Localized: Expeditions
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979037
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979038
+    m_Localized: '{0} ({1})'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979039
+    m_Localized: '{0} {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979040
+    m_Localized: Fallen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979041
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427143979042
+    m_Localized: Still alive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979043
+    m_Localized: Reward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5824427143979044
+    m_Localized: "{0} gold per floor \xB7 {1} for a clear"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5824427148173312
+    m_Localized: "Gold +{0} ({1} floors reached) \xB7 gold held {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1258,13 +1401,8 @@ MonoBehaviour:
         - id: 275767302
         - id: 9766393864196
         - id: 9766393864198
-        - id: 9766393864201
-        - id: 9766393864202
-        - id: 9766393864203
         - id: 9766393864206
         - id: 9766393864209
-        - id: 9766393864211
-        - id: 9766393864213
         - id: 9766393864215
         - id: 9766393864219
         - id: 9766393864224
@@ -1383,3 +1521,23 @@ MonoBehaviour:
         - id: 5803759325143040
         - id: 5803759337725957
         - id: 5803759337725958
+        - id: 5824427131396096
+        - id: 5824427143979008
+        - id: 5824427143979016
+        - id: 5824427143979018
+        - id: 5824427143979019
+        - id: 5824427143979020
+        - id: 5824427143979021
+        - id: 5824427143979025
+        - id: 5824427143979026
+        - id: 5824427143979027
+        - id: 5824427143979028
+        - id: 5824427143979029
+        - id: 5824427143979032
+        - id: 5824427143979035
+        - id: 5824427143979037
+        - id: 5824427143979038
+        - id: 5824427143979039
+        - id: 5824427143979041
+        - id: 5824427143979044
+        - id: 5824427148173312

@@ -1388,6 +1388,7 @@ namespace F1.Gameplay
                 party.Add(new BattleUnitSetup
                 {
                     SourceId = member.MercenaryId,
+                    JobId = member.JobId,
                     Name = data.Mercenaries.Get(member.MercenaryId).Name,
                     Row = row,
                     MaxHp = member.MaxHp,

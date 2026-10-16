@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using F1.Data;
 using F1.Save;
 
@@ -29,6 +30,29 @@ namespace F1.Flow
             {
                 From12To13(save);
             }
+
+            if (save.SchemaVersion == 13)
+            {
+                From13To14(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 14 (Slice C stage 26) adds the lobby's gold, the stagecoach's candidates, the dismissed mercenaries and the expeditions per
+        /// dungeon. A version 13 run had none of them: no gold, no candidates (the next settlement draws some), nobody dismissed, and its
+        /// expeditions by dungeon are unknown (the total, ExpeditionCount, stays).
+        /// </summary>
+        static void From13To14(RunSaveData save)
+        {
+            if (save.Run != null)
+            {
+                save.Run.Gold = 0;
+                save.Run.Recruits = new List<RecruitRecord>();
+                save.Run.Dismissed = new List<string>();
+                save.Run.Expeditions = new List<ExpeditionCountRecord>();
+            }
+
+            save.SchemaVersion = 14;
         }
 
         /// <summary>

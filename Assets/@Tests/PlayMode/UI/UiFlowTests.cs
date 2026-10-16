@@ -115,9 +115,9 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             Managers.Sound.ForgetEffects();
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Strip/Depart");
             CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "The way to the expedition screen is a button like any other (round 71 E2).");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track, "The expedition screen is the lobby's still.");
@@ -165,18 +165,22 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.Lobby));
-            Assert.AreEqual(data.Mercenaries.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length);
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Expedition/Depart").interactable, "An empty party cannot depart.");
+            Assert.AreEqual(data.StartingMercenaries.Count, UiTestUtil.Views<RosterChipView>(lobby).Length, "A chip per mercenary on the strip (stage 26).");
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party cannot depart.");
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
 
-            // Party: the first mercenaries of the roster, one per row from the front.
+            // Party: in the barracks, the first mercenaries of the roster, one per row from the front.
             RunState run = Managers.Run.Run;
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
-            UiTestUtil.FillParty(lobby);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
+            Assert.AreEqual(data.StartingMercenaries.Count, entries.Length);
+            yield return UiTestUtil.FillParty(lobby);
 
             Assert.AreEqual(data.Balance.PartySize, run.Party.Count);
             Assert.IsTrue(
                 entries[data.Balance.PartySize].Rows.Where(button => button.gameObject.activeSelf).All(button => !button.interactable),
                 "The party is full.");
+            Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter, "FillParty closed the barracks.");
 
             // Lobby -> node map
             yield return UiTestUtil.DepartFromLobby();
@@ -223,8 +227,13 @@ namespace F1.Tests
             lobby = UiTestUtil.Screen<LobbyScreen>();
             Assert.IsFalse(Managers.Resource.IsScopeOpen(ResourceScope.Expedition), "The expedition's resources are released on return.");
             Assert.AreEqual(1 + data.Dungeons.Get(dungeonId).DurationDays, run.Day);
-            Assert.AreEqual(run.Roster.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length, "The dead are gone from the roster list.");
-            Assert.AreEqual(data.Mercenaries.Count - report.FallenIds.Count, run.Roster.Count);
+            Assert.AreEqual(run.Roster.Count, UiTestUtil.Views<RosterChipView>(lobby).Length, "The dead are gone from the strip.");
+            yield return UiTestUtil.OpenBarracks(lobby);
+            Assert.AreEqual(run.Roster.Count, UiTestUtil.RosterEntries(lobby).Length, "And from the barracks.");
+            UiTestUtil.CloseQuarter(lobby);
+            Assert.AreEqual(data.StartingMercenaries.Count - report.FallenIds.Count, run.Roster.Count);
+            Assert.AreEqual(report.GoldAfter, run.Gold);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Gold, run.Gold), UiTestUtil.TextAt(lobby, "Frame/Header/Gold"), "The settlement's gold is in the header (stage 26).");
 
             // A second expedition can depart, or the lobby says why not.
             if (Managers.Run.CanDepart(dungeonId) == DepartCheck.Ok)
@@ -234,8 +243,7 @@ namespace F1.Tests
             }
             else
             {
-                Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Expedition/Depart").interactable);
-                Assert.IsNotEmpty(UiTestUtil.TextAt(lobby, "Frame/Expedition/DepartStatus"));
+                Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
             }
         }
 
@@ -256,9 +264,9 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
-            Assert.AreEqual("원정 화면으로", UiTestUtil.TextAt(lobby, "Frame/Expedition/Depart/DepartLabel"), "The lobby's button opens the screen; the departure is there.");
-            UiTestUtil.FillParty(lobby);
-            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
+            Assert.AreEqual("원정 화면으로", UiTestUtil.TextAt(lobby, "Frame/Strip/Depart/DepartLabel"), "The lobby's button opens the screen; the departure is there.");
+            yield return UiTestUtil.FillParty(lobby);
+            UiTestUtil.Click(lobby, "Frame/Strip/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             ExpeditionScreen screen = UiTestUtil.Screen<ExpeditionScreen>();
             Assert.AreEqual(GamePhase.Lobby, Managers.Expedition.Phase, "Nothing has departed yet.");
@@ -292,6 +300,8 @@ namespace F1.Tests
             Assert.AreEqual($"{mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/Details/Days"));
             Assert.AreEqual("치유 포션 ×2", UiTestUtil.TextAt(screen, "Frame/Details/Potions"), "The potions by kind, with their count.");
             Assert.AreEqual("0회", UiTestUtil.TextAt(screen, "Frame/Details/Cleared"));
+            Assert.AreEqual($"층마다 금 {data.Balance.GoldPerFloor} · 클리어 금 {data.Balance.GoldClear}", UiTestUtil.TextAt(screen, "Frame/Details/Reward"), "What the settlement pays (stage 26).");
+            Assert.AreEqual("금 0", UiTestUtil.TextAt(screen, "Frame/Header/Gold"));
             Assert.AreEqual(
                 $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n{data.Balance.TotalDays}일을 넘기면 심연의 보스와 강제로 싸운다",
                 UiTestUtil.TextAt(screen, "Frame/Details/Hint"),
@@ -317,7 +327,7 @@ namespace F1.Tests
             UiTestUtil.Click(screen, "Frame/Header/ToLobby");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             Assert.AreEqual(GamePhase.Lobby, Managers.Expedition.Phase);
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Gate");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             screen = UiTestUtil.Screen<ExpeditionScreen>();
             Assert.AreEqual(mine.Id, screen.SelectedDungeonId, "The choice is made here each time.");
@@ -402,9 +412,11 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
-            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverPanel").gameObject.activeSelf);
+            StaticData data = Managers.Data.Data;
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverWindow").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
 
-            // Put the run into its end state directly; reaching it by play takes several lost expeditions.
+            // Put the run into its end state directly; reaching it by play takes several lost expeditions. Two expeditions to the cave are counted.
             RunState run = Managers.Run.Run;
             foreach (MercenaryState mercenary in run.Roster.ToList())
             {
@@ -413,21 +425,35 @@ namespace F1.Tests
 
             run.Roster.Clear();
             run.Party.Clear();
+            run.Day = 11;
+            run.ExpeditionCount = 2;
+            run.ExpeditionsByDungeon[data.Dungeons.Ordered[0].Id] = 2;
             run.Outcome = RunOutcome.Defeat;
             run.DefeatCause = DefeatCause.Wipeout;
             lobby.Refresh();
             yield return null;
 
-            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/RunOverPanel").gameObject.activeSelf);
-            Assert.AreEqual(0, UiTestUtil.Views<RosterEntryView>(lobby).Length);
+            // The result window (Round 72) over the shaded town: the title says how it ended, then the day, the expeditions by dungeon, the dead and the living.
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/RunOverWindow").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.RunOver), UiTestUtil.TextAt(lobby, "Frame/RunOverWindow/RunOverTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.DayValue, 11), UiTestUtil.TextAt(lobby, "Frame/RunOverWindow/RunOverDay"));
+            string byDungeon = UiStrings.Get(UiKeys.Lobby.ExpeditionsOf, UiText.Name(data.Dungeons.Ordered[0].Name), 2);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.ExpeditionsValue, 2, byDungeon), UiTestUtil.TextAt(lobby, "Frame/RunOverWindow/RunOverExpeditions"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.FallenValue, data.StartingMercenaries.Count), UiTestUtil.TextAt(lobby, "Frame/RunOverWindow/RunOverFallen"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Common.None), UiTestUtil.TextAt(lobby, "Frame/RunOverWindow/RunOverSurvivors"));
+            Assert.AreEqual(0, UiTestUtil.Views<RosterChipView>(lobby).Length);
+            Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks.");
 
-            UiTestUtil.Click(lobby, "Frame/RunOverPanel/RunOverBox/RunOverNewRun");
+            UiTestUtil.Click(lobby, "Frame/RunOverWindow/RunOverNewRun");
             yield return null;
             yield return null;
 
             Assert.IsFalse(Managers.Run.Run.IsOver);
-            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverPanel").gameObject.activeSelf);
-            Assert.AreEqual(Managers.Data.Data.Mercenaries.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length);
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverWindow").gameObject.activeSelf);
+            Assert.AreEqual(data.StartingMercenaries.Count, UiTestUtil.Views<RosterChipView>(lobby).Length);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            Assert.AreEqual(data.StartingMercenaries.Count, UiTestUtil.RosterEntries(lobby).Length);
         }
 
         [UnityTest]
@@ -491,8 +517,9 @@ namespace F1.Tests
             Assume.That(balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 20.");
             Assume.That(balance.FatigueBreakdown, Is.EqualTo(100));
 
-            // A fresh mercenary: ten empty pips, violet words.
-            RosterEntryView fresh = UiTestUtil.Views<RosterEntryView>(lobby)[0];
+            // A fresh mercenary: ten empty pips, violet words (the barracks' line; the strip's chip has the same pips).
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView fresh = UiTestUtil.RosterEntries(lobby)[0];
             Assert.AreEqual(10, fresh.FatiguePips.Count);
             Assert.IsTrue(fresh.FatiguePips.All(p => p.Ratio == 0f));
             Assert.AreEqual(UiPalette.Fatigue, fresh.Fatigue.color);
@@ -501,12 +528,17 @@ namespace F1.Tests
             RunRules.FindMercenary(Managers.Run.Run, Managers.Run.Run.Roster[0].Id).Fatigue = 128;
             lobby.Refresh();
             yield return null;
-            RosterEntryView tired = UiTestUtil.Views<RosterEntryView>(lobby)[0];
+            RosterEntryView tired = UiTestUtil.RosterEntries(lobby)[0];
             CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, tired.FatiguePips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f));
             Assert.IsTrue(tired.FatiguePips.Take(5).All(p => p.FillColor == UiPalette.FatigueBar));
             Assert.IsTrue(tired.FatiguePips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
             Assert.AreEqual(UiPalette.FatigueDanger, tired.Fatigue.color);
             Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Fatigue, 128, 200), tired.Fatigue.text);
+
+            UiTestUtil.CloseQuarter(lobby);
+            RosterChipView chip = UiTestUtil.Views<RosterChipView>(lobby)[0];
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, chip.Pips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f), "The strip's chip shows the same.");
+            Assert.IsTrue(chip.Pips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
         }
 
         /// <summary>A mercenary that came home in an affliction (round 36): its name after the fatigue words, and what it does at the right end of the passive's line.</summary>
@@ -525,7 +557,13 @@ namespace F1.Tests
             lobby.Refresh();
             yield return null;
 
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
+            Assert.AreEqual(UiText.JobLine(tired.JobId, fearful), chips[0].Job, "The strip's chip names the affliction after the job.");
+            Assert.AreEqual(UiPalette.FatigueDanger, UiTestUtil.At(chips[0], "ChipJob").GetComponent<TMP_Text>().color);
+            Assert.AreEqual(UiText.Job(Managers.Run.Run.Roster[1].JobId), chips[1].Job);
+
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
             string words = UiStrings.Get(UiKeys.Lobby.Fatigue, 128, data.Balance.MaxFatigue);
             Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.FatigueState, words, UiText.FatigueStateName(fearful)), entries[0].Fatigue.text);
             Assert.AreEqual(UiPalette.FatigueDanger, entries[0].Fatigue.color);
@@ -542,29 +580,27 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
-            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
             string first = UiText.Mercenary(run.Roster[0].Id);
             string second = UiText.Mercenary(run.Roster[1].Id);
-            string empty = UiStrings.Get(UiKeys.Lobby.EmptyRow);
 
             int size = Managers.Data.Data.Balance.PartySize;
             Assert.GreaterOrEqual(size, 2, "The cases below put two mercenaries in the party.");
 
-            // The party lines, one per row the party can stand in.
-            for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
-            {
-                Assert.AreEqual(row <= size, UiTestUtil.At(lobby, $"Frame/Expedition/PartyRow{row}").gameObject.activeSelf, $"Party row {row}");
-            }
-
+            // Who stands in which row, read off the strip's chips (a chip tags the row its mercenary holds; stage 26).
             string[] RowTexts()
             {
-                return Enumerable.Range(1, size).Select(row => UiTestUtil.TextAt(lobby, $"Frame/Expedition/PartyRow{row}/PartyRowNames{row}")).ToArray();
+                RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
+                return Enumerable.Range(1, size)
+                    .Select(row => chips.FirstOrDefault(c => c.Row == UiStrings.Get(UiText.RowKey(row)))?.Name ?? UiStrings.Get(UiKeys.Lobby.EmptyRow))
+                    .ToArray();
             }
 
             // The names from row 1 back; the rows after them are empty.
             string[] Lined(params string[] fromFront)
             {
-                return Enumerable.Range(0, size).Select(i => i < fromFront.Length ? fromFront[i] : empty).ToArray();
+                return Enumerable.Range(0, size).Select(i => i < fromFront.Length ? fromFront[i] : UiStrings.Get(UiKeys.Lobby.EmptyRow)).ToArray();
             }
 
             // The shown row buttons of an entry (one per row the party can stand in), by whether they can be clicked.
@@ -609,7 +645,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             PartySideView party = map.GetComponentInChildren<PartySideView>();
@@ -757,7 +793,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
             UiTestUtil.StageChampion();
             ExpeditionState expedition = Managers.Expedition.Expedition;
@@ -960,7 +996,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
             // Found on the way: a weapon and an armor cost fatigue, a support item does not; the base weapon never does.
@@ -1094,7 +1130,7 @@ namespace F1.Tests
             FatigueStateData state = Managers.Data.Data.FatigueStates.Get(down.Id);
             bool virtue = state.Kind == FatigueStateKind.Virtue;
             BattleUnitView broken = units.Single(u => u.Unit.Ref.Equals(down.Target));
-            Assert.AreEqual("valkyrie", Managers.Data.Data.Mercenaries.Get(broken.Unit.Setup.SourceId).JobId, "The valkyrie, staged in row 1, broke down.");
+            Assert.AreEqual("valkyrie", broken.Unit.Setup.JobId, "The valkyrie, staged in row 1, broke down.");
 
             // A quarter of a second in: the slow stretch, the dark and the zoom at full, the pose held, the burst and the word on.
             yield return new WaitForSecondsRealtime(0.25f);
@@ -2336,11 +2372,150 @@ namespace F1.Tests
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
+        /// <summary>
+        /// The lobby as the town (Round 71, stage 26, Docs/Design/04_Lobby_100Day_Economy.md §3·§5·§6·§7): the painting with a plate per building, the
+        /// pointer lighting a building and its bubble, the stagecoach's window where a candidate is hired for gold, the inn's where a mercenary is
+        /// treated for gold without a day passing, the barracks' where one is dismissed; and past the last day the header, the gate's plate, the
+        /// inn's plate and the strip's button all say "final stand" while the gate still opens the expedition screen (Round 72).
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Lobby_TheTown_LightsABuildingUnderThePointer_OpensItsWindows_HiresTreatsAndDismisses_AndSaysFinalStandPastTheLastDay()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            StaticData data = Managers.Data.Data;
+            BalanceData balance = data.Balance;
+            RunState run = Managers.Run.Run;
+            Assume.That(balance.HirePrice, Is.EqualTo(30));
+            Assume.That(balance.TreatmentPrice, Is.EqualTo(20));
+            Assume.That(balance.TreatmentRelief, Is.EqualTo(40));
+
+            // The town and its plates; nothing is lit, no window is open.
+            Assert.IsNotNull(UiTestUtil.At(lobby, "Frame/Town").GetComponent<Image>().sprite, "The painted town.");
+            Assert.AreEqual("막사", lobby.Barracks.Name);
+            Assert.AreEqual("쉼터", lobby.Inn.Name);
+            Assert.AreEqual("역마차", lobby.Coach.Name);
+            Assert.AreEqual("원정", lobby.Gate.Name);
+            Assert.IsFalse(lobby.Barracks.IsLit || lobby.Inn.IsLit || lobby.Coach.IsLit || lobby.Gate.IsLit);
+            Assert.IsFalse(lobby.BubbleShown);
+            Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
+            Assert.AreEqual("금 0", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Day, 1, balance.TotalDays), UiTestUtil.TextAt(lobby, "Frame/Header/Day"));
+
+            // The pointer over the stagecoach: the wash and the bubble with the candidates and the price.
+            lobby.Coach.Hover();
+            Assert.IsTrue(lobby.Coach.IsLit);
+            Assert.IsTrue(lobby.BubbleShown);
+            Assert.AreEqual("역마차", lobby.BubbleName);
+            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 30", lobby.BubbleDetail);
+            lobby.Coach.Leave();
+            Assert.IsFalse(lobby.Coach.IsLit);
+            Assert.IsFalse(lobby.BubbleShown);
+            lobby.Gate.Hover();
+            Assert.AreEqual("버려진 광산 · 심연 잠김", lobby.BubbleDetail, "The gate's bubble: the dungeons, the locked one saying so.");
+            lobby.Gate.Leave();
+
+            // The stagecoach: three candidates, none affordable with no gold; with gold the first is hired and joins the roster and the strip.
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
+            Assert.AreEqual(LobbyScreen.Quarter.Coach, lobby.OpenQuarter);
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/CoachWindow").gameObject.activeSelf);
+            Assert.AreEqual(balance.RecruitCount, run.Recruits.Count);
+            Assert.AreEqual(run.Recruits.Count, lobby.Candidates.Count);
+            Assert.IsTrue(lobby.Candidates.All(c => !c.Hire.interactable), "No gold yet.");
+            Assert.AreEqual(UiText.Mercenary(run.Recruits[0].Id), lobby.Candidates[0].Name);
+            Assert.AreEqual(UiText.Job(run.Recruits[0].JobId), lobby.Candidates[0].Job);
+            Assert.AreEqual("고용 금 30", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateHire/CandidateHireLabel"));
+            Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks while a window is open.");
+
+            run.Gold = 100;
+            lobby.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(lobby.Candidates.All(c => c.Hire.interactable));
+            string hiredId = run.Recruits[0].Id;
+            string hiredJob = run.Recruits[0].JobId;
+            int rosterBefore = run.Roster.Count;
+            UiTestUtil.Click(lobby.Candidates[0].Hire);
+            Assert.AreEqual(70, run.Gold);
+            Assert.AreEqual(rosterBefore + 1, run.Roster.Count);
+            Assert.AreEqual(hiredJob, RunRules.FindMercenary(run, hiredId).JobId);
+            Assert.AreEqual(balance.RecruitCount - 1, lobby.Candidates.Count, "The hired one left the coach.");
+            Assert.AreEqual("금 70", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
+            Assert.AreEqual("금 70 · 로스터 7/8", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachSummary"));
+            UiTestUtil.CloseQuarter(lobby);
+            Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
+            RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
+            Assert.AreEqual(run.Roster.Count, chips.Length);
+            Assert.AreEqual(UiText.Mercenary(hiredId), chips[chips.Length - 1].Name, "The hired one is last on the strip.");
+            Assert.AreEqual(UiText.Job(hiredJob), chips[chips.Length - 1].Job);
+
+            // The inn: a line per mercenary; a tired, afflicted one is treated for gold, no day passes, and the affliction ends under the threshold.
+            MercenaryState tired = run.Roster[0];
+            tired.Fatigue = 128;
+            tired.AfflictionId = "fearful";
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
+            Assert.AreEqual(LobbyScreen.Quarter.Inn, lobby.OpenQuarter);
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest").interactable);
+            PatientView[] patients = UiTestUtil.Views<PatientView>(lobby);
+            Assert.AreEqual(run.Roster.Count, patients.Length);
+            Assert.AreEqual(UiText.Mercenary(tired.Id), patients[0].Name);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.FatigueState, UiStrings.Get(UiKeys.Lobby.Fatigue, 128, balance.MaxFatigue), UiText.FatigueStateName(data.FatigueStates.Get("fearful"))), patients[0].Fatigue.text);
+            Assert.AreEqual("치료 금 20 · 피로 -40", UiTestUtil.TextAt(patients[0], "PatientTreat/PatientTreatLabel"));
+            Assert.IsTrue(patients[0].Treat.interactable);
+            Assert.IsFalse(patients[1].Treat.interactable, "Nothing to take off a fresh mercenary.");
+            UiTestUtil.Click(patients[0].Treat);
+            Assert.AreEqual(88, tired.Fatigue);
+            Assert.IsNull(tired.AfflictionId);
+            Assert.AreEqual(50, run.Gold);
+            Assert.AreEqual(1, run.Day, "The treatment takes no day.");
+            UiTestUtil.CloseQuarter(lobby);
+
+            // The barracks: the last line (not in the party) is dismissed for free and leaves the roster, the strip and the file.
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
+            Assert.AreEqual(run.Roster.Count, entries.Length);
+            Assert.IsTrue(entries.All(e => e.Dismiss.interactable), "Everyone can be dismissed while more than one is left.");
+            string dismissedId = run.Roster[run.Roster.Count - 1].Id;
+            UiTestUtil.Click(entries[entries.Length - 1].Dismiss);
+            yield return null;
+            Assert.AreEqual(50, run.Gold, "Dismissing is free.");
+            Assert.IsNull(RunRules.FindMercenary(run, dismissedId));
+            CollectionAssert.AreEqual(new[] { dismissedId }, run.Dismissed);
+            Assert.AreEqual(run.Roster.Count, UiTestUtil.Views<RosterEntryView>(lobby).Length);
+            StringAssert.Contains($"로스터 {run.Roster.Count}/8", UiTestUtil.TextAt(lobby, "Frame/BarracksWindow/BarracksSummary"));
+            StringAssert.Contains("심연 잠김(버려진 광산 2회)", UiTestUtil.TextAt(lobby, "Frame/BarracksWindow/BarracksSummary"));
+            UiTestUtil.CloseQuarter(lobby);
+            Assert.AreEqual(run.Roster.Count, UiTestUtil.Views<RosterChipView>(lobby).Length);
+            yield return UiTestUtil.FillParty(lobby);
+
+            // Past the last day (staged): the header, the gate, the inn and the strip say so; resting is off, the gate still opens the expedition screen.
+            run.Day = balance.TotalDays + 1;
+            lobby.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.DayFinalStand, balance.TotalDays + 1, balance.TotalDays), UiTestUtil.TextAt(lobby, "Frame/Header/Day"));
+            Assert.AreEqual(UiPalette.Virtue, UiTestUtil.At(lobby, "Frame/Header/Day").GetComponent<TMP_Text>().color);
+            Assert.AreEqual("최종 결전", lobby.Gate.Name);
+            Assert.AreEqual("심연의 보스와 싸운다", lobby.Gate.Sub);
+            Assert.AreEqual("쉴 날이 없다", lobby.Inn.Sub);
+            Assert.AreEqual("최종 결전으로", UiTestUtil.TextAt(lobby, "Frame/Strip/Depart/DepartLabel"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest").interactable, "No day is left to rest.");
+            Assert.AreEqual("쉴 날이 없다", UiTestUtil.TextAt(lobby, "Frame/InnWindow/InnNote"));
+            UiTestUtil.CloseQuarter(lobby);
+            UiTestUtil.Click(lobby, "Frame/Gate");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            Assert.AreEqual("abyss", UiTestUtil.Screen<ExpeditionScreen>().SelectedDungeonId, "Only the final stand is left.");
+        }
+
         static IEnumerator DepartToTheMap()
         {
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
         }
 
@@ -2367,7 +2542,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
             // The party side: every member stands as the figure of its job, and its board shows its bag in leather, its empty squares
@@ -2421,7 +2596,7 @@ namespace F1.Tests
             {
                 string id = unit.Unit.Setup.SourceId;
                 string address = unit.Unit.Side == BattleSide.Party
-                    ? data.Jobs.Get(data.Mercenaries.Get(id).JobId).Figure
+                    ? data.Jobs.Get(unit.Unit.Setup.JobId).Figure
                     : data.Enemies.Get(id).Figure;
                 AssertShows(unit.Figure, address, id);
 
@@ -2527,7 +2702,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
             ExpeditionMember front = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
@@ -2800,7 +2975,7 @@ namespace F1.Tests
             battle.Clock.Paused = true;
             yield return null;
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
-            string job = Managers.Data.Data.Mercenaries.Get(unit.Unit.Setup.SourceId).JobId;
+            string job = unit.Unit.Setup.JobId;
             Sprite figure = unit.Figure.Art;
             RectTransform art = unit.FigureArt.rectTransform;
             Vector2 size = art.sizeDelta;
@@ -3264,7 +3439,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
-            UiTestUtil.FillParty(lobby);
+            yield return UiTestUtil.FillParty(lobby);
 
             yield return UiTestUtil.DepartFromLobby();
             if (champion)

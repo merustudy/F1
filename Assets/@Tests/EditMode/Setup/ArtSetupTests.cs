@@ -40,7 +40,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Entries_AreTheArtOfTheData_InTheArtGroup_InTheExpeditionScope_ButTheMapOfTheLandsInTheLobbys()
+        public void Entries_AreTheArtOfTheData_InTheArtGroup_InTheExpeditionScope_ButTheMapOfTheLandsAndTheTownInTheLobbys()
         {
             List<AddressEntry> entries = ArtSetup.Entries();
 
@@ -60,8 +60,9 @@ namespace F1.Tests
             foreach (AddressEntry entry in entries)
             {
                 Assert.AreEqual(ArtSetup.ArtGroup, entry.Group, entry.Address);
-                // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2).
-                ResourceScope scope = entry.Address == F1.Data.ArtAddress.ExpeditionMap ? ResourceScope.Lobby : ResourceScope.Expedition;
+                // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2), and the town by the lobby itself (stage 26).
+                bool lobbys = entry.Address == F1.Data.ArtAddress.ExpeditionMap || entry.Address == F1.Data.ArtAddress.LobbyTown;
+                ResourceScope scope = lobbys ? ResourceScope.Lobby : ResourceScope.Expedition;
                 Assert.AreEqual(scope, entry.Scope, entry.Address);
                 Assert.AreEqual(ArtSetup.AssetPath(entry.Address), entry.AssetPath, entry.Address);
             }

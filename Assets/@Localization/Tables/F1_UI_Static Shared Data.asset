@@ -80,11 +80,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909189
-  - m_Id: 9766393864197
-    m_Key: Lobby.Roster
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909190
   - m_Id: 9766393864198
     m_Key: Lobby.Fatigue
     m_Metadata:
@@ -100,26 +95,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909193
-  - m_Id: 9766393864201
-    m_Key: Lobby.Affinity
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909194
-  - m_Id: 9766393864202
-    m_Key: Lobby.Cost
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909195
-  - m_Id: 9766393864203
-    m_Key: Lobby.Cleared
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909196
-  - m_Id: 9766393864204
-    m_Key: Lobby.Party
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909197
   - m_Id: 9766393864205
     m_Key: Lobby.EmptyRow
     m_Metadata:
@@ -145,21 +120,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909202
-  - m_Id: 9766393864211
-    m_Key: Lobby.Fallen
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909204
   - m_Id: 9766393864212
     m_Key: Lobby.RunOver
     m_Metadata:
       m_Items:
       - rid: 636489279218909205
-  - m_Id: 9766393864213
-    m_Key: Lobby.RunOverDay
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909206
   - m_Id: 9766393864214
     m_Key: Lobby.ToTitle
     m_Metadata:
@@ -1375,6 +1340,201 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673478542524423
+  - m_Id: 5824427131396096
+    m_Key: Lobby.DayFinalStand
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370048
+  - m_Id: 5824427143979008
+    m_Key: Lobby.Gold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370049
+  - m_Id: 5824427143979009
+    m_Key: Lobby.Dismiss
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370050
+  - m_Id: 5824427143979010
+    m_Key: Lobby.ToFinalStand
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370051
+  - m_Id: 5824427143979011
+    m_Key: Lobby.Barracks
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370052
+  - m_Id: 5824427143979012
+    m_Key: Lobby.Inn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370053
+  - m_Id: 5824427143979013
+    m_Key: Lobby.Coach
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370054
+  - m_Id: 5824427143979014
+    m_Key: Lobby.Gate
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370055
+  - m_Id: 5824427143979015
+    m_Key: Lobby.FinalStand
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370056
+  - m_Id: 5824427143979016
+    m_Key: Lobby.FinalStandSub
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370057
+  - m_Id: 5824427143979017
+    m_Key: Lobby.InnClosed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370058
+  - m_Id: 5824427143979018
+    m_Key: Lobby.BarracksHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370059
+  - m_Id: 5824427143979019
+    m_Key: Lobby.InnHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370060
+  - m_Id: 5824427143979020
+    m_Key: Lobby.CoachHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370061
+  - m_Id: 5824427143979021
+    m_Key: Lobby.DungeonLocked
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370062
+  - m_Id: 5824427143979022
+    m_Key: Lobby.BarracksTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370063
+  - m_Id: 5824427143979023
+    m_Key: Lobby.InnTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370064
+  - m_Id: 5824427143979024
+    m_Key: Lobby.CoachTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370065
+  - m_Id: 5824427143979025
+    m_Key: Lobby.RosterCount
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370066
+  - m_Id: 5824427143979026
+    m_Key: Lobby.Deaths
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370067
+  - m_Id: 5824427143979027
+    m_Key: Lobby.ClearedOf
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370068
+  - m_Id: 5824427143979028
+    m_Key: Lobby.LockedOf
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370069
+  - m_Id: 5824427143979029
+    m_Key: Lobby.Hire
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370070
+  - m_Id: 5824427143979030
+    m_Key: Lobby.NoCandidates
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370071
+  - m_Id: 5824427143979031
+    m_Key: Lobby.CoachNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370072
+  - m_Id: 5824427143979032
+    m_Key: Lobby.Treat
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370073
+  - m_Id: 5824427143979033
+    m_Key: Lobby.InnNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370074
+  - m_Id: 5824427143979034
+    m_Key: Lobby.EndedOn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370075
+  - m_Id: 5824427143979035
+    m_Key: Lobby.DayValue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370076
+  - m_Id: 5824427143979036
+    m_Key: Lobby.Expeditions
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370077
+  - m_Id: 5824427143979037
+    m_Key: Lobby.Times
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370078
+  - m_Id: 5824427143979038
+    m_Key: Lobby.ExpeditionsValue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370079
+  - m_Id: 5824427143979039
+    m_Key: Lobby.ExpeditionsOf
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370080
+  - m_Id: 5824427143979040
+    m_Key: Lobby.FallenLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370081
+  - m_Id: 5824427143979041
+    m_Key: Lobby.FallenValue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370082
+  - m_Id: 5824427143979042
+    m_Key: Lobby.Survivors
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370083
+  - m_Id: 5824427143979043
+    m_Key: Expedition.RewardLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370084
+  - m_Id: 5824427143979044
+    m_Key: Expedition.Reward
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370085
+  - m_Id: 5824427148173312
+    m_Key: Settle.Gold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673479834370086
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1439,10 +1599,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = current day. {1} = total days.'
-    - rid: 636489279218909190
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the mercenary list.
     - rid: 636489279218909191
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1456,22 +1612,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Header of the expedition panel.
-    - rid: 636489279218909194
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = name of the dungeon''s affinity.'
-    - rid: 636489279218909195
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = days the dungeon takes.'
-    - rid: 636489279218909196
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = times this dungeon was cleared.'
-    - rid: 636489279218909197
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the party preview.
     - rid: 636489279218909198
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -1493,18 +1633,10 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = minimum party size.'
-    - rid: 636489279218909204
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = names of the dead.'
     - rid: 636489279218909205
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: No mercenary is left alive.
-    - rid: 636489279218909206
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: '{0} = day the run ended.'
     - rid: 636489279218909207
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2579,3 +2711,178 @@ MonoBehaviour:
       data:
         m_CommentText: Under every open dungeon's details. {0} = the last day, {1}
           = the final dungeon.
+    - rid: 8623673479834370048
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "The header past the last day (Docs/Design/04 \xA72): the
+          day counter, then that only the final stand is left. {0} = current day,
+          {1} = total days."
+    - rid: 8623673479834370049
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The company's gold in the header and the windows (stage 26).
+          {0} = gold.
+    - rid: 8623673479834370050
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Dismisses a mercenary from the roster for good (stage 26,
+          the barracks).
+    - rid: 8623673479834370051
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The strip''s button past the last day: it opens the expedition
+          screen where only the final stand is left.'
+    - rid: 8623673479834370052
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The plate of the barracks (Round 71): the roster, the party
+          and dismissing.'
+    - rid: 8623673479834370053
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The plate of the inn: resting and the treatment.'
+    - rid: 8623673479834370054
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The plate of the stagecoach: hiring.'
+    - rid: 8623673479834370055
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The plate of the gate: the way to the expedition screen.'
+    - rid: 8623673479834370056
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The gate's plate past the last day (Round 72).
+    - rid: 8623673479834370057
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The second line of the gate's plate past the last day. {0}
+          = the final dungeon.
+    - rid: 8623673479834370058
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The second line of the inn''s plate past the last day: no
+          day is left to rest.'
+    - rid: 8623673479834370059
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The bubble over the barracks. {0} = mercenaries in the roster,
+          {1} = the roster limit, {2} = party members.
+    - rid: 8623673479834370060
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The bubble over the inn. {0} = the breakdown threshold, {1}
+          = mercenaries at or over it, {2} = the treatment's price.
+    - rid: 8623673479834370061
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The bubble over the stagecoach. {0} = candidates, {1} = the
+          hire price.
+    - rid: 8623673479834370062
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A locked dungeon in the gate's bubble. {0} = its name.
+    - rid: 8623673479834370063
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the barracks window.
+    - rid: 8623673479834370064
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the inn window.
+    - rid: 8623673479834370065
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the stagecoach window.
+    - rid: 8623673479834370066
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the summaries. {0} = mercenaries in the roster, {1} = the
+          roster limit.
+    - rid: 8623673479834370067
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the summaries. {0} = the dead so far, {1} = the death limit.
+    - rid: 8623673479834370068
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the barracks summary, per open dungeon. {0} = the dungeon,
+          {1} = its clears.
+    - rid: 8623673479834370069
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In the barracks summary, per locked dungeon. {0} = the dungeon,
+          {1} = the dungeon whose clears open it, {2} = how many.
+    - rid: 8623673479834370070
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The button that hires a candidate. {0} = the price.
+    - rid: 8623673479834370071
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Shown in the stagecoach window when nobody is waiting.
+    - rid: 8623673479834370072
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the candidates.
+    - rid: 8623673479834370073
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The button that treats a mercenary at the inn. {0} = the price,
+          {1} = how much fatigue it takes off.
+    - rid: 8623673479834370074
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the inn''s list: the treatment takes no day.'
+    - rid: 8623673479834370075
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row of the result window: the day the run ended.'
+    - rid: 8623673479834370076
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A day as a value. {0} = the day.
+    - rid: 8623673479834370077
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row of the result window: how many expeditions.'
+    - rid: 8623673479834370078
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A count of expeditions. {0} = the count.
+    - rid: 8623673479834370079
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The expeditions with their split by dungeon. {0} = the count,
+          {1} = the split (Lobby.ExpeditionsOf joined by commas).
+    - rid: 8623673479834370080
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: One dungeon of the split. {0} = the dungeon, {1} = expeditions
+          there.
+    - rid: 8623673479834370081
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row of the result window: how many died.'
+    - rid: 8623673479834370082
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The dead as a count. {0} = the count.
+    - rid: 8623673479834370083
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Row of the result window: who is still alive.'
+    - rid: 8623673479834370084
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details (stage 26).
+    - rid: 8623673479834370085
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: What the settlement pays for the dungeon. {0} = gold per map
+          floor reached, {1} = gold for a clear.
+    - rid: 8623673479834370086
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The gold the settlement paid (stage 26). {0} = gold earned,
+          {1} = the floors reached, {2} = the gold held now.

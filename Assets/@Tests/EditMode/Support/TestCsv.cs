@@ -15,7 +15,8 @@ namespace F1.Tests
             "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
-            "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n";
+            "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
+            "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
@@ -54,9 +55,11 @@ namespace F1.Tests
             "mine,광산,Mine,swift,2,2,3,2,tonic,background/dungeon/mine,2,20,0,0,0,5,10,2,0,0,2,20\n";
 
         public const string Mercenaries =
-            "Id,Name.ko-KR,Name.en-US,JobId\n" +
-            "rowan,로언,Rowan,knight\n" +
-            "ella,엘라,Ella,bishop\n";
+            "Id,Name.ko-KR,Name.en-US,JobId,Starting\n" +
+            "rowan,로언,Rowan,knight,true\n" +
+            "ella,엘라,Ella,bishop,true\n" +
+            "teo,테오,Teo,,false\n" +
+            "bran,브란,Bran,,false\n";
 
         public const string Bags =
             "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +

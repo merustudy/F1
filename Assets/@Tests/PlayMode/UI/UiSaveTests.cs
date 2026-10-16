@@ -39,7 +39,7 @@ namespace F1.Tests
         {
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
-            UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
         }
 
         [UnityTest]
@@ -47,7 +47,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return NewRunWithParty();
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Rest");
+            yield return UiTestUtil.RestAtTheInn(UiTestUtil.Screen<LobbyScreen>());
             string[] party = Managers.Run.Run.Party.Select(p => p.MercenaryId).ToArray();
 
             yield return BootTestUtil.RestartApp();
@@ -191,7 +191,8 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return NewRunWithParty();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
-            Button rest = UiTestUtil.ButtonAt(lobby, "Frame/Expedition/Rest");
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
+            Button rest = UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest");
             SaveErrorOverlay overlay = Managers.UI.SaveError;
             Assert.IsFalse(overlay.IsShown);
             Assert.IsTrue(UiTestUtil.PointerReaches(rest));

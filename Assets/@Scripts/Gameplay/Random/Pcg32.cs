@@ -79,6 +79,8 @@ namespace F1.Gameplay
         public const ulong Shop = 6UL;
         /// <summary>A weapon's damage roll and the critical hits on each unit it hits (Slice B stage 22). Separate so that it never changes death rolls.</summary>
         public const ulong Damage = 7UL;
+        /// <summary>The candidates the stagecoach draws at each settlement (Slice C stage 26): which names, and which job each gets.</summary>
+        public const ulong Recruit = 8UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

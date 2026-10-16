@@ -35,7 +35,7 @@ namespace F1.Tests
 
         static ExpeditionState AtTheCamp(StaticData data, ItemTier sabreTier = ItemTier.Tier3, int honeX = 0, ItemTier honeTier = ItemTier.Tier3)
         {
-            List<PartyMember> party = data.Mercenaries.Ordered.Take(data.Balance.PartySize)
+            List<PartyMember> party = data.StartingMercenaries.Take(data.Balance.PartySize)
                 .Select((m, index) => new PartyMember(m.Id, m.JobId, BattleRows.Front + index)).ToList();
             ExpeditionState state = ExpeditionRules.Create(data, data.Dungeons.Ordered[0].Id, 7, party);
             ExpeditionMember anna = state.Members[0];

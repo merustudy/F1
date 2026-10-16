@@ -313,16 +313,28 @@ namespace F1.Data
     }
 
     /// <summary>A mercenary of the starting roster.</summary>
+    /// <summary>
+    /// A row of MercenaryData.csv: a mercenary of the starting roster (Starting, with its job), or a name of the recruit pool (not Starting,
+    /// no job: a candidate at the stagecoach gets this name and a job rolled when it is drawn; Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §6).
+    /// </summary>
     public sealed class MercenaryData
     {
         public const string DefinitionName = "Mercenary";
 
         [JsonConstructor]
-        public MercenaryData(string id, LocalizedText name, string jobId)
+        public MercenaryData(string id, LocalizedText name, string jobId, bool starting = true)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
-            JobId = DataId.Require(jobId, $"{DefinitionName} '{id}' JobId");
+            Starting = starting;
+            if (starting)
+            {
+                JobId = DataId.Require(jobId, $"{DefinitionName} '{id}' JobId");
+            }
+            else if (jobId != null)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a name of the recruit pool has no JobId; the job is rolled when the candidate is drawn.");
+            }
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -331,7 +343,12 @@ namespace F1.Data
         [JsonProperty(Order = 2, Required = Required.Always)]
         public LocalizedText Name { get; }
 
-        [JsonProperty(Order = 3, Required = Required.Always)]
+        /// <summary>The job of a starting mercenary; null for a name of the recruit pool.</summary>
+        [JsonProperty(Order = 3)]
         public string JobId { get; }
+
+        /// <summary>True for the starting roster; false for a name the stagecoach draws candidates from.</summary>
+        [JsonProperty(Order = 4)]
+        public bool Starting { get; }
     }
 }

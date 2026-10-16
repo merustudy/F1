@@ -17,6 +17,14 @@ namespace F1.Gameplay
         public string AfflictionId;
     }
 
+    /// <summary>A candidate at the stagecoach (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §6): a name of the recruit pool and the job it was drawn with.</summary>
+    public sealed class RecruitState
+    {
+        /// <summary>Id of the MercenaryData row (of the recruit pool) that names the candidate. It is the mercenary's id once hired.</summary>
+        public string Id;
+        public string JobId;
+    }
+
     public sealed class PartySlot
     {
         public string MercenaryId;
@@ -47,6 +55,18 @@ namespace F1.Gameplay
 
         /// <summary>Dungeon id -> times cleared.</summary>
         public SortedDictionary<string, int> ClearedDungeons = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+
+        /// <summary>Dungeon id -> expeditions started there (Slice C stage 26, for the result window). The sum is <see cref="ExpeditionCount"/>.</summary>
+        public SortedDictionary<string, int> ExpeditionsByDungeon = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+
+        /// <summary>The lobby's gold (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §5): paid by the return settlement, spent on hiring and treatment. A run starts with none.</summary>
+        public int Gold;
+
+        /// <summary>The candidates at the stagecoach, drawn anew at each settlement (§6). Hiring takes one out.</summary>
+        public List<RecruitState> Recruits = new List<RecruitState>();
+
+        /// <summary>Mercenaries dismissed from the roster: they never come back, not even as candidates (§6).</summary>
+        public List<string> Dismissed = new List<string>();
 
         /// <summary>How the run stands (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §8): ongoing, won at the final boss, or lost.</summary>
         public RunOutcome Outcome;
@@ -87,11 +107,36 @@ namespace F1.Gameplay
         Locked,
     }
 
+    /// <summary>Whether a candidate can be hired now (Slice C stage 26).</summary>
+    public enum HireCheck
+    {
+        Ok,
+        RunIsOver,
+        NoCandidate,
+        RosterFull,
+        NotEnoughGold,
+    }
+
+    /// <summary>Whether a mercenary can be treated at the inn now (Slice C stage 26).</summary>
+    public enum TreatCheck
+    {
+        Ok,
+        RunIsOver,
+        NotInRoster,
+        NotTired,
+        NotEnoughGold,
+    }
+
     /// <summary>What the return settlement changed, for the result screen.</summary>
     public sealed class SettlementReport
     {
         public string DungeonId;
         public ExpeditionResult Result;
+
+        /// <summary>The gold the settlement paid (Slice C stage 26): for the map floors the party reached and for a clear, and what the company holds after it.</summary>
+        public int GoldEarned;
+        public int FloorsReached;
+        public int GoldAfter;
         public List<string> FallenIds = new List<string>();
         public List<string> SurvivorIds = new List<string>();
 

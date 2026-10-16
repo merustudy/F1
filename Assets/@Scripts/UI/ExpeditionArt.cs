@@ -118,11 +118,6 @@ namespace F1.UI
             return Of(_data.Jobs.Get(jobId).Figure);
         }
 
-        /// <summary>A mercenary is shown as its job.</summary>
-        public Sprite OfMercenary(string mercenaryId)
-        {
-            return OfJob(_data.Mercenaries.Get(mercenaryId).JobId);
-        }
 
         /// <summary>The figure of an enemy, or null when the enemy has none.</summary>
         public Sprite OfEnemy(string enemyId)
@@ -136,31 +131,31 @@ namespace F1.UI
             return _data.Enemies.Get(enemyId).FigureScale / 100f;
         }
 
-        /// <summary>A mercenary's attack pose: its job's (Docs/Design/10 §5). Null when the job has no figure.</summary>
-        public Sprite AttackPoseOfMercenary(string mercenaryId)
+        /// <summary>A mercenary's attack pose: its job's (Docs/Design/10 §5). A mercenary is shown as its job, the roster's (a hired one has no job in the data). Null when the job has no figure.</summary>
+        public Sprite AttackPoseOfJob(string jobId)
         {
-            return Of(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).AttackPose);
+            return Of(_data.Jobs.Get(jobId).AttackPose);
         }
 
         /// <summary>A mercenary's hit pose: its job's. Null when the job has no figure.</summary>
-        public Sprite HitPoseOfMercenary(string mercenaryId)
+        public Sprite HitPoseOfJob(string jobId)
         {
-            return Of(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).HitPose);
+            return Of(_data.Jobs.Get(jobId).HitPose);
         }
 
         /// <summary>
         /// A mercenary's pose for the moment of a breakdown (an affliction, or the collapse; round 38): its job's. Null when the job has
         /// no figure or the pose is not drawn yet, and the figure stands through the moment.
         /// </summary>
-        public Sprite BrokenPoseOfMercenary(string mercenaryId)
+        public Sprite BrokenPoseOfJob(string jobId)
         {
-            return OfOptional(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).BrokenPose);
+            return OfOptional(_data.Jobs.Get(jobId).BrokenPose);
         }
 
-        /// <summary>A mercenary's pose for the moment of a virtue, as <see cref="BrokenPoseOfMercenary"/>.</summary>
-        public Sprite ResolutePoseOfMercenary(string mercenaryId)
+        /// <summary>A mercenary's pose for the moment of a virtue, as <see cref="BrokenPoseOfJob"/>.</summary>
+        public Sprite ResolutePoseOfJob(string jobId)
         {
-            return OfOptional(_data.Jobs.Get(_data.Mercenaries.Get(mercenaryId).JobId).ResolutePose);
+            return OfOptional(_data.Jobs.Get(jobId).ResolutePose);
         }
 
         /// <summary>An enemy's attack pose (Docs/Design/10 §5). Null when the enemy has no figure.</summary>

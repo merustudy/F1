@@ -153,6 +153,11 @@ namespace F1.Tests
             Assert.AreEqual(300, data.Balance.TierPercent(ItemTier.Tier2));
 
             Assert.AreEqual("knight", data.Mercenaries.Get("rowan").JobId);
+            Assert.IsTrue(data.Mercenaries.Get("rowan").Starting);
+            Assert.IsFalse(data.Mercenaries.Get("teo").Starting, "A name of the recruit pool (stage 26).");
+            Assert.IsNull(data.Mercenaries.Get("teo").JobId, "Its job is rolled when it is drawn.");
+            CollectionAssert.AreEquivalent(new[] { "rowan", "ella" }, data.StartingMercenaries.Select(m => m.Id));
+            CollectionAssert.AreEquivalent(new[] { "teo", "bran" }, data.RecruitPool.Select(m => m.Id));
 
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
             Assert.AreEqual(FatigueStateKind.Affliction, fearful.Kind);

@@ -97,9 +97,17 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Roster_CannotBeLargerThanRosterLimit_AndThePoolNotSmallerThanRecruitCount()
+        {
+            StringAssert.Contains("starting roster is larger than RosterLimit", ProblemOf(p => { }, ("RosterLimit", 3)));
+            StringAssert.Contains("recruit pool (5 names) is smaller than RecruitCount", ProblemOf(p => { }, ("RecruitCount", 6)));
+            Assert.DoesNotThrow(() => TestData.Data(("RecruitCount", 5)));
+        }
+
+        [Test]
         public void Roster_CannotBeSmallerThanMinPartySize()
         {
-            string problem = ProblemOf(p => p.Mercenaries = p.Mercenaries.Take(1).ToList(), ("MinPartySize", 2));
+            string problem = ProblemOf(p => p.Mercenaries = p.Mercenaries.Where(m => !m.Starting || m.Id == "anna").ToList(), ("MinPartySize", 2));
 
             StringAssert.Contains("starting roster is smaller than MinPartySize", problem);
         }

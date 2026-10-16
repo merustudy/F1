@@ -120,6 +120,26 @@ namespace F1.Tests
             yield return Case("DefeatWithoutACause", r => { r.Outcome = "Defeat"; r.DefeatCause = "None"; });
             yield return Case("ACauseWhileOngoing", r => r.DefeatCause = "DeathLimit");
             yield return Case("NegativeExpeditionCount", r => r.ExpeditionCount = -1);
+
+            // Version 14 (stage 26): the gold, the candidates, the dismissed and the expeditions per dungeon.
+            yield return Case("NegativeGold", r => r.Gold = -1);
+            yield return Case("RecruitsMissing", r => r.Recruits = null);
+            yield return Case("RecruitUnknown", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "nobody", JobId = "tank" } });
+            yield return Case("RecruitIsAStartingMercenary", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "anna", JobId = "tank" } });
+            yield return Case("RecruitUnknownJob", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "nojob" } });
+            yield return Case("RecruitTwice", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank" }, new RecruitRecord { Id = "eve", JobId = "healer" } });
+            yield return Case("RecruitIsAlsoInTheRoster", r => { r.Roster.Add(new MercenaryRecord { Id = "eve", JobId = "tank" }); r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank" } }; });
+            yield return Case("MoreRecruitsThanRecruitCount", r => r.Recruits = new List<RecruitRecord>
+            {
+                new RecruitRecord { Id = "eve", JobId = "tank" }, new RecruitRecord { Id = "finn", JobId = "tank" }, new RecruitRecord { Id = "gil", JobId = "tank" }, new RecruitRecord { Id = "hana", JobId = "tank" },
+            });
+            yield return Case("DismissedUnknown", r => r.Dismissed.Add("nobody"));
+            yield return Case("DismissedIsAlsoAlive", r => r.Dismissed.Add(r.Roster[3].Id));
+            yield return Case("DismissedIsAlsoDead", r => { r.Dismissed.Add("eve"); r.Fallen.Add("eve"); });
+            yield return Case("RosterOverTheLimit", r => r.Roster.AddRange(new[] { "eve", "finn", "gil" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank" })));
+            yield return Case("ExpeditionsUnknownDungeon", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "nowhere", Count = 1 }));
+            yield return Case("ExpeditionsZeroTimes", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "pit", Count = 0 }));
+            yield return Case("ExpeditionsDungeonTwice", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "cave", Count = 1 }));
         }
 
         [TestCaseSource(nameof(BrokenRuns))]
@@ -372,6 +392,55 @@ namespace F1.Tests
             Assert.AreEqual("Wipeout", over.Run.DefeatCause);
             RunSaveMapper.Read(over, data, out run, out ExpeditionState _);
             Assert.IsTrue(run.IsOver);
+        }
+
+        [Test]
+        public void Migrate_From13_StartsTheGoldTheCandidatesTheDismissedAndTheExpeditionsByDungeonEmpty()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 13;
+            save.Run.Gold = 99;
+            save.Run.Recruits = null;
+            save.Run.Dismissed = null;
+            save.Run.Expeditions = null;
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.AreEqual(0, save.Run.Gold, "A version 13 run had no gold.");
+            Assert.IsEmpty(save.Run.Recruits);
+            Assert.IsEmpty(save.Run.Dismissed);
+            Assert.IsEmpty(save.Run.Expeditions);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
+            Assert.AreEqual(0, run.Gold);
+            Assert.IsEmpty(run.Recruits);
+            Assert.IsEmpty(run.ExpeditionsByDungeon);
+            Assert.AreEqual(1, run.ExpeditionCount, "The total stays.");
+        }
+
+        [Test]
+        public void Save_KeepsTheGoldTheCandidatesTheDismissedAndTheExpeditionsByDungeon()
+        {
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            RunState run = kit.Run.Run;
+            run.Gold = 100;
+            kit.Run.Hire(0);
+            kit.Run.Dismiss("dan");
+            kit.Expedition.Depart("cave");
+            RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
+
+            Assert.AreEqual(70, save.Run.Gold);
+            CollectionAssert.AreEqual(run.Recruits.Select(r => r.Id + ":" + r.JobId), save.Run.Recruits.ConvertAll(r => r.Id + ":" + r.JobId));
+            CollectionAssert.AreEqual(new[] { "dan" }, save.Run.Dismissed);
+            Assert.AreEqual("cave", save.Run.Expeditions.Single().DungeonId);
+            Assert.AreEqual(1, save.Run.Expeditions.Single().Count);
+
+            RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState _);
+            Assert.AreEqual(70, read.Gold);
+            CollectionAssert.AreEqual(run.Recruits.Select(r => r.Id), read.Recruits.Select(r => r.Id));
+            CollectionAssert.AreEqual(new[] { "dan" }, read.Dismissed);
+            Assert.AreEqual(1, read.ExpeditionsByDungeon["cave"]);
+            Assert.AreEqual(4, read.Roster.Count, "Four, one hired, one dismissed.");
         }
 
         [Test]

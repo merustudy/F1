@@ -118,6 +118,18 @@
       "Value": 14
     },
     {
+      "Key": "GoldClear",
+      "Value": 20
+    },
+    {
+      "Key": "GoldPerFloor",
+      "Value": 2
+    },
+    {
+      "Key": "HirePrice",
+      "Value": 30
+    },
+    {
       "Key": "HitMinDamage",
       "Value": 50
     },
@@ -162,6 +174,10 @@
       "Value": 3
     },
     {
+      "Key": "RecruitCount",
+      "Value": 3
+    },
+    {
       "Key": "RestDays",
       "Value": 1
     },
@@ -172,6 +188,10 @@
     {
       "Key": "RetreatCooldownMs",
       "Value": 5000
+    },
+    {
+      "Key": "RosterLimit",
+      "Value": 8
     },
     {
       "Key": "ShopPotionChancePercent",
@@ -220,6 +240,14 @@
     {
       "Key": "TotalDays",
       "Value": 100
+    },
+    {
+      "Key": "TreatmentPrice",
+      "Value": 20
+    },
+    {
+      "Key": "TreatmentRelief",
+      "Value": 40
     },
     {
       "Key": "VirtueChancePercent",

@@ -19,7 +19,7 @@ namespace F1.Gameplay
                 Day = 1,
             };
 
-            foreach (MercenaryData mercenary in data.Mercenaries.Ordered)
+            foreach (MercenaryData mercenary in data.StartingMercenaries)
             {
                 state.Roster.Add(new MercenaryState
                 {
@@ -35,7 +35,167 @@ namespace F1.Gameplay
                 state.DefeatCause = DefeatCause.Wipeout;
             }
 
+            // The stagecoach has candidates from day one (nothing to pay them with yet: a run starts with no gold).
+            DrawRecruits(data, state);
             return state;
+        }
+
+        // ---- The stagecoach, the inn and the gold (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §3·§5·§6) ----
+
+        /// <summary>
+        /// Draws the candidates of the stagecoach anew: RecruitCount names of the recruit pool that are not in the roster, dead or dismissed
+        /// (the candidates being replaced are free again), each with a job rolled among every job, level 1, fatigue 0. The stream is derived
+        /// from the run seed and the number of expeditions so far, so a draw is the same on the same run.
+        /// </summary>
+        public static void DrawRecruits(StaticData data, RunState state)
+        {
+            var taken = new HashSet<string>(StringComparer.Ordinal);
+            foreach (MercenaryState mercenary in state.Roster)
+            {
+                taken.Add(mercenary.Id);
+            }
+
+            taken.UnionWith(state.Fallen);
+            taken.UnionWith(state.Dismissed);
+
+            var pool = new List<MercenaryData>();
+            foreach (MercenaryData name in data.RecruitPool)
+            {
+                if (!taken.Contains(name.Id))
+                {
+                    pool.Add(name);
+                }
+            }
+
+            var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "recruit", state.ExpeditionCount), RngStream.Recruit);
+            var drawn = new List<RecruitState>();
+            IReadOnlyList<JobData> jobs = data.Jobs.Ordered;
+            while (drawn.Count < data.Balance.RecruitCount && pool.Count > 0)
+            {
+                MercenaryData name = pool[rng.NextInt(pool.Count)];
+                pool.Remove(name);
+                drawn.Add(new RecruitState { Id = name.Id, JobId = jobs[rng.NextInt(jobs.Count)].Id });
+            }
+
+            state.Recruits = drawn;
+        }
+
+        /// <summary>Whether the candidate at that index of <see cref="RunState.Recruits"/> can be hired now: the run goes on, the roster has room, the gold covers the price.</summary>
+        public static HireCheck CanHire(StaticData data, RunState state, int index)
+        {
+            if (state.IsOver)
+            {
+                return HireCheck.RunIsOver;
+            }
+
+            if (index < 0 || index >= state.Recruits.Count)
+            {
+                return HireCheck.NoCandidate;
+            }
+
+            if (state.Roster.Count >= data.Balance.RosterLimit)
+            {
+                return HireCheck.RosterFull;
+            }
+
+            return state.Gold >= data.Balance.HirePrice ? HireCheck.Ok : HireCheck.NotEnoughGold;
+        }
+
+        /// <summary>Hires a candidate: the price leaves the gold, the candidate joins the roster fresh (fatigue 0) and leaves the stagecoach.</summary>
+        public static MercenaryState Hire(StaticData data, RunState state, int index)
+        {
+            HireCheck check = CanHire(data, state, index);
+            if (check != HireCheck.Ok)
+            {
+                throw new InvalidOperationException($"Cannot hire: {check}.");
+            }
+
+            RecruitState candidate = state.Recruits[index];
+            state.Recruits.RemoveAt(index);
+            state.Gold -= data.Balance.HirePrice;
+            var hired = new MercenaryState { Id = candidate.Id, JobId = candidate.JobId, Fatigue = 0 };
+            state.Roster.Add(hired);
+            return hired;
+        }
+
+        /// <summary>A mercenary can be dismissed while the run goes on and it is not the last one left (the run ends only by its outcomes).</summary>
+        public static bool CanDismiss(RunState state, string mercenaryId)
+        {
+            return !state.IsOver && FindMercenary(state, mercenaryId) != null && state.Roster.Count > 1;
+        }
+
+        /// <summary>Dismisses a mercenary, for free: out of the party (those behind advance) and the roster, never to return.</summary>
+        public static void Dismiss(RunState state, string mercenaryId)
+        {
+            if (!CanDismiss(state, mercenaryId))
+            {
+                throw new InvalidOperationException($"Mercenary '{mercenaryId}' cannot be dismissed now.");
+            }
+
+            if (state.Party.RemoveAll(slot => slot.MercenaryId == mercenaryId) > 0)
+            {
+                CloseGaps(state);
+            }
+
+            state.Roster.Remove(FindMercenary(state, mercenaryId));
+            state.Dismissed.Add(mercenaryId);
+        }
+
+        /// <summary>Whether the inn can treat a mercenary now: the run goes on, the mercenary carries fatigue, the gold covers the price. No day passes for it.</summary>
+        public static TreatCheck CanTreat(StaticData data, RunState state, string mercenaryId)
+        {
+            if (state.IsOver)
+            {
+                return TreatCheck.RunIsOver;
+            }
+
+            MercenaryState mercenary = FindMercenary(state, mercenaryId);
+            if (mercenary == null)
+            {
+                return TreatCheck.NotInRoster;
+            }
+
+            if (mercenary.Fatigue <= 0)
+            {
+                return TreatCheck.NotTired;
+            }
+
+            return state.Gold >= data.Balance.TreatmentPrice ? TreatCheck.Ok : TreatCheck.NotEnoughGold;
+        }
+
+        /// <summary>Treats a mercenary at the inn: the price leaves the gold and TreatmentRelief leaves its fatigue (an affliction ends under the threshold as on a day off).</summary>
+        public static void Treat(StaticData data, RunState state, string mercenaryId)
+        {
+            TreatCheck check = CanTreat(data, state, mercenaryId);
+            if (check != TreatCheck.Ok)
+            {
+                throw new InvalidOperationException($"Cannot treat '{mercenaryId}': {check}.");
+            }
+
+            MercenaryState mercenary = FindMercenary(state, mercenaryId);
+            state.Gold -= data.Balance.TreatmentPrice;
+            mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -data.Balance.TreatmentRelief);
+            mercenary.AfflictionId = FatigueRules.StateAfter(data, mercenary.AfflictionId, mercenary.Fatigue);
+        }
+
+        /// <summary>
+        /// The map floors the party reached on an ended expedition: the floor of the node it stood on last, the boss floor counting as the last
+        /// map floor (the boss pays by the clear). The final stand has no map floors.
+        /// </summary>
+        public static int FloorsReached(StaticData data, ExpeditionState expedition)
+        {
+            if (expedition.FinalStand || expedition.CurrentNodeId < 0)
+            {
+                return 0;
+            }
+
+            return Math.Min(expedition.Map.Nodes[expedition.CurrentNodeId].Floor, data.Dungeons.Get(expedition.DungeonId).Floors);
+        }
+
+        /// <summary>What the return settlement pays for an ended expedition: GoldPerFloor for each floor reached, and GoldClear for a clear.</summary>
+        public static int GoldFor(StaticData data, ExpeditionState expedition)
+        {
+            return data.Balance.GoldPerFloor * FloorsReached(data, expedition) + (expedition.Result == ExpeditionResult.Cleared ? data.Balance.GoldClear : 0);
         }
 
         public static MercenaryState FindMercenary(RunState state, string mercenaryId)
@@ -244,13 +404,16 @@ namespace F1.Gameplay
             // Past the last day the departure is the final stand: the final dungeon's boss alone (CanDepart allowed no other dungeon).
             ExpeditionState expedition = ExpeditionRules.Create(data, dungeonId, seed, party, finalStand: IsFinalStandDue(data, state));
             state.ExpeditionCount++;
+            state.ExpeditionsByDungeon.TryGetValue(dungeonId, out int visits);
+            state.ExpeditionsByDungeon[dungeonId] = visits + 1;
             return expedition;
         }
 
         /// <summary>
         /// The return settlement, in this order: items and potions vanish (with the expedition state),
         /// the dead leave the roster for good, survivors keep the fatigue they came back with, days pass
-        /// and those who stayed home recover, and a clear is recorded.
+        /// and those who stayed home recover, a clear is recorded, the gold is paid (Slice C stage 26) and,
+        /// if the run goes on, the stagecoach draws new candidates.
         /// </summary>
         public static SettlementReport Settle(StaticData data, RunState state, ExpeditionState expedition)
         {
@@ -305,7 +468,17 @@ namespace F1.Gameplay
                 state.ClearedDungeons[dungeon.Id] = cleared + 1;
             }
 
+            report.FloorsReached = FloorsReached(data, expedition);
+            report.GoldEarned = GoldFor(data, expedition);
+            state.Gold += report.GoldEarned;
+            report.GoldAfter = state.Gold;
+
             CloseTheRun(data, state, dungeon, expedition);
+            if (!state.IsOver)
+            {
+                DrawRecruits(data, state);
+            }
+
             report.DayAfter = state.Day;
             report.Outcome = state.Outcome;
             report.DefeatCause = state.DefeatCause;
