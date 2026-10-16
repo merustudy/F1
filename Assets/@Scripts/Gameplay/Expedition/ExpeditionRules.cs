@@ -1421,6 +1421,19 @@ namespace F1.Gameplay
                 items.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
             }
 
+            // A boss's phases (stage 28): each a board of its own, carried as hard as the base one.
+            var phases = new List<BattlePhaseSetup>();
+            foreach (EnemyPhase phase in enemy.Phases)
+            {
+                var carried = new List<EquippedItem>();
+                foreach (ItemGrant grant in phase.Items)
+                {
+                    carried.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
+                }
+
+                phases.Add(new BattlePhaseSetup { HpPercent = phase.HpPercent, Items = carried, Layout = BoardLayout.Stacked(carried) });
+            }
+
             // An enemy's board is exactly what it carries, one item under another: it has no bags and no empty squares to show.
             int maxHp = (int)((long)enemy.MaxHp * (100 + deeper * dungeon.EnemyHpPerFloorPercent) / 100);
             return new BattleUnitSetup
@@ -1434,6 +1447,7 @@ namespace F1.Gameplay
                 Layout = BoardLayout.Stacked(items),
                 Passive = null,
                 HasDog = false,
+                Phases = phases,
             };
         }
 

@@ -282,6 +282,16 @@ namespace F1.Data
                 }
             }
 
+            // The enemies of the final dungeon's boss group (stage 28), which may carry the final boss's level.
+            var finalBosses = new HashSet<string>(StringComparer.Ordinal);
+            foreach (EnemyGroupData group in EnemyGroups.Ordered)
+            {
+                if (group.IsBoss && Dungeons.Contains(group.DungeonId) && Dungeons.Get(group.DungeonId).IsFinal)
+                {
+                    finalBosses.UnionWith(group.Enemies);
+                }
+            }
+
             foreach (EnemyData enemy in Enemies.Ordered)
             {
                 string what = $"{EnemyData.DefinitionName} '{enemy.Id}'";
@@ -301,9 +311,29 @@ namespace F1.Data
                     problems.Add($"{what}: its items stand {rows} squares tall, more than a board frame ({BoardFrame.Height}).");
                 }
 
-                if (enemy.Level >= Balance.FinalBossLevel)
+                // FinalBossLevel is the final boss's alone (stage 28): an enemy may carry it only in the final dungeon's boss group, and nothing is above it.
+                if (enemy.Level > Balance.FinalBossLevel || (enemy.Level == Balance.FinalBossLevel && !finalBosses.Contains(enemy.Id)))
                 {
                     problems.Add($"{what}: level {enemy.Level} is reserved for the final boss (FinalBossLevel {Balance.FinalBossLevel}).");
+                }
+
+                foreach (EnemyPhase phase in enemy.Phases)
+                {
+                    foreach (ItemGrant grant in phase.Items)
+                    {
+                        Require(Items, grant.ItemId, $"{what} Phases", problems);
+                    }
+
+                    int phaseRows = 0;
+                    foreach (ItemGrant grant in phase.Items)
+                    {
+                        phaseRows += Items.Contains(grant.ItemId) ? Items.Get(grant.ItemId).Height : 0;
+                    }
+
+                    if (phaseRows > BoardFrame.Height)
+                    {
+                        problems.Add($"{what}: the items of the phase at {phase.HpPercent}% stand {phaseRows} squares tall, more than a board frame ({BoardFrame.Height}).");
+                    }
                 }
             }
 

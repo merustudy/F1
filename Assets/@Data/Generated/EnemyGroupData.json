@@ -2,29 +2,40 @@
   "SchemaVersion": 1,
   "Items": [
     {
-      "Id": "abyss_lord_stand_in",
-      "DungeonId": "abyss",
-      "MinFloor": 0,
-      "MaxFloor": 0,
-      "IsBoss": true,
-      "Enemies": [
-        "mine_overseer",
-        "goblin_raider",
-        "goblin_shaman"
-      ],
-      "IsElite": false
-    },
-    {
-      "Id": "abyss_watch",
+      "Id": "abyss_bones",
       "DungeonId": "abyss",
       "MinFloor": 1,
       "MaxFloor": 5,
       "IsBoss": false,
       "Enemies": [
-        "goblin_raider",
-        "goblin_raider",
-        "goblin_archer",
-        "goblin_shaman"
+        "skeleton_guard",
+        "skeleton_guard"
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "abyss_bones_three",
+      "DungeonId": "abyss",
+      "MinFloor": 4,
+      "MaxFloor": 5,
+      "IsBoss": false,
+      "Enemies": [
+        "skeleton_guard",
+        "skeleton_guard",
+        "skeleton_guard"
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "abyss_lord_court",
+      "DungeonId": "abyss",
+      "MinFloor": 0,
+      "MaxFloor": 0,
+      "IsBoss": true,
+      "Enemies": [
+        "abyss_lord",
+        "skeleton_guard",
+        "skeleton_guard"
       ],
       "IsElite": false
     },

@@ -60,14 +60,26 @@ namespace F1.Tests
         }
 
         [Test]
-        public void EnemyLevel_AtOrAboveFinalBossLevel_IsRejected()
+        public void EnemyLevel_AtOrAboveFinalBossLevel_IsRejected_UnlessTheEnemyIsOfTheFinalDungeonsBossGroup()
         {
+            // The chief of the cave's lair at the final boss's level, standing nowhere in the pit: refused. Above it: refused even in the pit's boss group (stage 28).
             string problem = ProblemOf(
-                p => p.Enemies = Replace(p.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 14, 120, new List<ItemGrant> { new ItemGrant("claw", 12) })),
+                p =>
+                {
+                    p.EnemyGroups = p.EnemyGroups.Where(g => g.Id != "pit_lord").Concat(new[] { new EnemyGroupData("pit_lord", "pit", 0, 0, true, new[] { "grunt", "grunt" }) }).ToList();
+                    p.Enemies = Replace(p.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 14, 120, new List<ItemGrant> { new ItemGrant("claw", 12) }));
+                },
                 ("FinalBossLevel", 14));
-
             StringAssert.Contains("'chief'", problem);
             StringAssert.Contains("reserved for the final boss", problem);
+
+            // The pit's lord (pit_lord: chief + chief) is the final dungeon's boss group: a chief that stands only there may carry the level.
+            StaticDataParts parts = TestData.Parts(("FinalBossLevel", 14));
+            parts.EnemyGroups = parts.EnemyGroups.Where(g => g.Id != "lair").Concat(new[] { new EnemyGroupData("lair", "cave", 0, 0, true, new[] { "grunt", "grunt" }) }).ToList();
+            parts.Enemies = Replace(parts.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 14, 120, new List<ItemGrant> { new ItemGrant("claw", 12) }));
+            Assert.DoesNotThrow(() => new StaticData(parts));
+            parts.Enemies = Replace(parts.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 15, 120, new List<ItemGrant> { new ItemGrant("claw", 12) }));
+            StringAssert.Contains("reserved for the final boss", string.Join("\n", Assert.Throws<DataValidationException>(() => new StaticData(parts)).Problems));
         }
 
         [Test]

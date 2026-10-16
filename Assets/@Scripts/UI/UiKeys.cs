@@ -317,6 +317,7 @@ namespace F1.UI
             public const string RetreatFailed = "Fx.RetreatFailed";
             public const string Storm = "Fx.Storm";
             public const string Crit = "Fx.Crit";
+            public const string Phase = "Fx.Phase";
             public const string CritDamage = "Fx.CritDamage";
             public const string Collapsed = "Fx.Collapsed";
         }
@@ -350,6 +351,7 @@ namespace F1.UI
             public const string Virtue = "Log.Virtue";
             public const string Collapsed = "Log.Collapsed";
             public const string FatigueStateEnded = "Log.FatigueStateEnded";
+            public const string PhaseChanged = "Log.PhaseChanged";
             public const string FatigueDog = "Log.FatigueDog";
             public const string FatigueCritTaken = "Log.FatigueCritTaken";
             public const string FatigueAllyDog = "Log.FatigueAllyDog";

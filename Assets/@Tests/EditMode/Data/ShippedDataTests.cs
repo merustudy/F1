@@ -166,7 +166,7 @@ namespace F1.Tests
             Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "whetstone")), "No enemy carries it: shops only.");
 
             CollectionAssert.AreEquivalent(
-                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul", "gladius" },
+                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul", "gladius", "abyss_cleaver" },
                 data.Items.Ordered.Where(i => i.Melee).Select(i => i.Id));
 
             ItemData axe = data.Items.Get("greataxe");
@@ -217,6 +217,36 @@ namespace F1.Tests
                 (InventoryGridView.LaidOutWidth, InventoryGridView.LaidOutHeight),
                 (balance.InventoryWidth, balance.InventoryHeight),
                 "The inventory window is laid out for another size: change InventoryGridView.LaidOutWidth/Height and the window with the data.");
+        }
+
+        [Test]
+        public void ShippedAbyssLord_CarriesThreeFallingPhases_IntoTheBattleSetup()
+        {
+            // Slice C stage 28 (Docs/Design/02_Combat_System.md §9): the final boss starts with its cleaver and changes its items at 75, 50 and 25%.
+            StaticData data = LoadShipped();
+            EnemyData lord = data.Enemies.Get("abyss_lord");
+            Assert.AreEqual(data.Balance.FinalBossLevel, lord.Level);
+            CollectionAssert.AreEqual(new[] { 75, 50, 25 }, lord.Phases.Select(p => p.HpPercent));
+            CollectionAssert.AreEqual(new[] { "abyss_cleaver" }, lord.Items.Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "abyss_cleaver", "abyss_howl" }, lord.Phases[0].Items.Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "abyss_cleaver", "abyss_howl", "abyss_grasp" }, lord.Phases[2].Items.Select(g => g.ItemId));
+            Assert.IsTrue(lord.Phases[2].Items.All(g => g.PowerPercent > lord.Phases[0].Items[0].PowerPercent), "The last phase hits harder.");
+            Assert.IsTrue(data.Dungeons.Ordered.Single(d => d.IsFinal).Id == "abyss");
+            Assert.IsTrue(data.EnemyGroups.Ordered.Any(g => g.IsBoss && g.DungeonId == "abyss" && g.Enemies[0] == "abyss_lord"), "The lord leads the final dungeon's boss group.");
+            Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Id != "abyss_lord" && e.Level >= data.Balance.FinalBossLevel), "The level is the lord's alone.");
+
+            RunState run = RunRules.NewRun(data, 7);
+            RunRules.SetParty(data, run, F1.Tests.FlowTestKit.Party(data.StartingMercenaries.Take(data.Balance.MinPartySize).Select((m, i) => (m.Id, i + 1)).ToArray()));
+            run.ClearedDungeons["abandoned_mine"] = data.Dungeons.Get("abyss").UnlockClears;
+            ExpeditionState expedition = RunRules.BeginExpedition(data, run, "abyss");
+            BattleSetup setup = ExpeditionRules.BuildBattleSetup(data, expedition, "abyss_lord_court", 1);
+            BattleUnitSetup boss = setup.Enemies[0];
+            Assert.AreEqual("abyss_lord", boss.SourceId);
+            Assert.AreEqual(3, boss.Phases.Count);
+            CollectionAssert.AreEqual(new[] { 75, 50, 25 }, boss.Phases.Select(p => p.HpPercent));
+            CollectionAssert.AreEqual(new[] { "abyss_cleaver", "abyss_howl", "abyss_grasp" }, boss.Phases[1].Items.Select(i => i.Item.Id));
+            Assert.IsNotNull(boss.Phases[1].Layout, "The screen draws the phase's board from its layout.");
+            Assert.IsEmpty(setup.Enemies[1].Phases, "The guards have none.");
         }
 
         static StaticData LoadShipped()

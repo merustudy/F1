@@ -20,6 +20,18 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_RefusesPhases_ThatAreMalformed_OutOfRange_OrNotFalling()
+        {
+            string head = "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,Phases\n";
+            StringAssert.Contains("is not 'hp percent=item_id:power percent+...'", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,mace:200\n").Errors[0]);
+            StringAssert.Contains("HpPercent must be 1..99", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,100=mace:200\n").Errors[0]);
+            StringAssert.Contains("falling HP percents", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,50=mace:200|50=claw:200\n").Errors[0]);
+            StringAssert.Contains("is not 'item_id:power percent'", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,50=mace\n").Errors[0]);
+            DataTransformException unknown = TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,50=axe:200\n");
+            StringAssert.Contains("Phases: 'axe' does not exist", unknown.Errors[0]);
+        }
+
+        [Test]
         public void Transform_RefusesLevels_ThatDoNotRunFromOne_OrWhoseLastTakesExperience_OrWhoseBonusFalls()
         {
             StringAssert.Contains("run from 1 without a gap", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,10,0\n3,0,10\n").Errors[0]);
@@ -127,6 +139,14 @@ namespace F1.Tests
             Assert.AreEqual("potion/tonic", tonic.Icon);
 
             EnemyData ogre = data.Enemies.Get("ogre");
+            // A boss's phases (stage 28): "50=mace:200|25=mace:300+claw:300".
+            Assert.AreEqual(2, ogre.Phases.Count);
+            Assert.AreEqual(50, ogre.Phases[0].HpPercent);
+            Assert.AreEqual("mace", ogre.Phases[0].Items[0].ItemId);
+            Assert.AreEqual(200, ogre.Phases[0].Items[0].PowerPercent);
+            Assert.AreEqual(25, ogre.Phases[1].HpPercent);
+            Assert.AreEqual(2, ogre.Phases[1].Items.Count);
+            Assert.IsEmpty(data.Enemies.Get("rat").Phases, "An empty cell: no phase.");
             Assert.AreEqual(150, ogre.FigureScale, "a boss is drawn larger than the common figure place");
             Assert.AreEqual(EnemyData.DefaultFigureScale, data.Enemies.Get("rat").FigureScale);
             Assert.AreEqual(9, ogre.Level);

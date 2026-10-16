@@ -69,6 +69,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14e902bd6a2744c2b917f8fe8abd3c31
+    m_Address: item/abyss-cleaver
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19a13001e06904735970f98c25fbdd23
     m_Address: item/gladius
     m_ReadOnly: 0
@@ -89,6 +95,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23504f9eb39a942c09f1f2d36f854622
     m_Address: pose/enemy/cave-rat-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 25d251047ed4d42d3a9be342b135773c
+    m_Address: unit/enemy/abyss-lord
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -125,6 +137,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
     m_Address: potion/healing-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3eddc1588b0af4df08e0ccde4abd15a5
+    m_Address: background/dungeon/abyss
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -213,6 +231,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6ca47c34cbab342b494074dc4f262497
+    m_Address: pose/enemy/abyss-lord-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 701a0e55ee9a4464fa5c9c9fdd470c07
     m_Address: pose/enemy/cave-rat-attack
     m_ReadOnly: 0
@@ -275,6 +299,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 902321a0bffb24f91b80085aeca1afe1
     m_Address: pose/job/knight-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 95372179dad084400bfe9582ba44e451
+    m_Address: pose/enemy/abyss-lord-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -363,8 +393,26 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c5ae6265ac877410580b3cc52b8e169a
+    m_Address: item/abyss-howl
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c7cf5c32daaf14c74890ad53c46e8642
+    m_Address: item/abyss-grasp
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cad3fa1212df04eee81411be7b721fa7
     m_Address: item/buckler
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cadc08046dca3485eabb9adf7e22cd9c
+    m_Address: pose/enemy/skeleton-guard-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -401,6 +449,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e426af557a41d47d0990399ee48adefd
     m_Address: pose/enemy/goblin-archer-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e5037ffd12e3c419ea42a3c052b8f183
+    m_Address: unit/enemy/skeleton-guard
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e5bada28d3ec045eb808a134875dc3df
+    m_Address: pose/enemy/skeleton-guard-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

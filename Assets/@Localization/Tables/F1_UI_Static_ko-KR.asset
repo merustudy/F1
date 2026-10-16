@@ -1471,6 +1471,17 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
+  - m_Id: 5853680703102976
+    m_Localized: "{0}: \uD398\uC774\uC988 {1} (HP {2}%) \u2014 \uC544\uC774\uD15C\uC774
+      \uBC14\uB010\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 5853680715685888
+    m_Localized: "\uD398\uC774\uC988 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
   references:
     version: 2
     RefIds:
@@ -1627,3 +1638,5 @@ MonoBehaviour:
         - id: 5844067983286272
         - id: 5844067983286273
         - id: 5844067983286274
+        - id: 5853680703102976
+        - id: 5853680715685888

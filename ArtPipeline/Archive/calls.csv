@@ -276,3 +276,14 @@ Time,Type,Key,Name,Model,Quality,Size,TextInTokens,ImageInTokens,OutputTokens,Es
 2026-10-16T17:09:37+09:00,background,lobby_town,lobby_town,gpt-image-2.5-sunburst,medium,2304x1536,865,1508,532,0.0323
 2026-10-16T17:21:30+09:00,background,lobby_town,lobby_town_topdown,gpt-image-2.5-sunburst,medium,2304x1536,924,1508,532,0.0326
 2026-10-16T17:31:58+09:00,background,expedition_map,expedition_map,gpt-image-2.5-sunburst,medium,2304x1536,883,1508,532,0.0324
+2026-10-16T22:27:14+09:00,enemy,skeleton_guard,skeleton_guard,gpt-image-2.5-sunburst,medium,1024x1024,1201,1508,439,0.0312
+2026-10-16T22:27:40+09:00,enemy,abyss_lord,abyss_lord,gpt-image-2.5-sunburst,medium,1024x1024,1238,1508,439,0.0314
+2026-10-16T22:32:47+09:00,enemy,abyss_lord,abyss_lord,gpt-image-2.5-sunburst,medium,1024x1024,1293,1508,439,0.0317
+2026-10-16T22:33:14+09:00,background,abyss,abyss,gpt-image-2.5-sunburst,medium,2304x1536,851,1508,532,0.0323
+2026-10-16T22:33:32+09:00,item,abyss_howl,abyss_howl,gpt-image-2.5-sunburst,medium,1536x512,936,1508,134,0.0208
+2026-10-16T22:33:49+09:00,item,abyss_grasp,abyss_grasp,gpt-image-2.5-sunburst,medium,1536x512,928,1508,134,0.0207
+2026-10-16T22:35:35+09:00,enemy_attack,skeleton_guard,skeleton_guard,gpt-image-2.5-sunburst,medium,1536x1024,1478,1536,343,0.0300
+2026-10-16T22:35:57+09:00,enemy_hit,skeleton_guard,skeleton_guard,gpt-image-2.5-sunburst,medium,1536x1024,1460,1536,343,0.0299
+2026-10-16T22:36:20+09:00,enemy_attack,abyss_lord,abyss_lord,gpt-image-2.5-sunburst,medium,1536x1024,1507,1536,343,0.0301
+2026-10-16T22:36:43+09:00,enemy_hit,abyss_lord,abyss_lord,gpt-image-2.5-sunburst,medium,1536x1024,1489,1536,343,0.0300
+2026-10-16T22:36:59+09:00,item,abyss_cleaver,abyss_cleaver,gpt-image-2.5-sunburst,medium,1536x512,906,768,134,0.0147

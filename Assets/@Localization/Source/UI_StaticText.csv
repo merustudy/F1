@@ -267,6 +267,7 @@ Log.BrokeDown,"{0} = unit. {1} = the affliction. {2} = roll 0..99. {3} = virtue 
 Log.Virtue,"{0} = unit. {1} = the virtue. {2} = roll. {3} = virtue chance.",{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 각성 {1},{0}: breakdown (virtue {3}%) · rolled {2} · virtue: {1}
 Log.Collapsed,"{0} = unit. Its fatigue reached the maximum: death's door, or death if it was there already (the death is logged after).",{0}: 피로가 가득 차 쓰러짐,{0} collapsed from fatigue
 Log.FatigueStateEnded,"{0} = unit. {1} = the affliction that ended because the fatigue came back under the threshold.",{0}: {1}에서 벗어남,{0} is free of {1}
+Log.PhaseChanged,"A boss entered a phase (stage 28): its items were replaced. {0} = unit, {1} = the phase number counting the start as 1, {2} = the HP percent it starts at.",{0}: 페이즈 {1} (HP {2}%) — 아이템이 바뀐다,{0}: phase {1} (HP {2}%): its items change
 Log.FatigueDog,"Fatigue from reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 빈사로 피로 +{1} → {2},{0}: death's door · fatigue +{1} → {2}
 Log.FatigueCritTaken,"Fatigue from taking a critical hit (stage 22). {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 치명타를 맞아 피로 +{1} → {2},{0}: took a critical hit · fatigue +{1} → {2}
 Log.FatigueAllyDog,"Fatigue from an ally reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 빈사로 피로 +{1} → {2},{0}: an ally at death's door · fatigue +{1} → {2}
@@ -309,5 +310,6 @@ Fx.RetreatSucceeded,The retreat roll succeeded.,후퇴!,Retreat!
 Fx.RetreatFailed,The retreat roll failed.,후퇴 실패,Retreat failed
 Fx.Storm,{0} = damage of this storm tick. Rises from the clock.,폭풍 -{0},Storm -{0}
 Fx.Crit,"The small word over a critical hit's number (stage 22, Round 60 mock A in the damage red).",치명타,Critical
+Fx.Phase,"Rises over a boss that entered a phase (stage 28). {0} = the phase number.",페이즈 {0},Phase {0}
 Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
 Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue

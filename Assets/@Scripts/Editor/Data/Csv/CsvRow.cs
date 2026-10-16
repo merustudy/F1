@@ -119,8 +119,13 @@ namespace F1.Editor.Data
         /// <summary>An enemy's items: "id:power percent" pairs joined with '+', for example "rusty_blade:222+buckler:175" (stage 22: was id:grade).</summary>
         public List<ItemGrant> GrantList(string header)
         {
+            return Grants(header, Text(header));
+        }
+
+        List<ItemGrant> Grants(string header, string text)
+        {
             var grants = new List<ItemGrant>();
-            foreach (string part in Text(header).Split(ListSeparator))
+            foreach (string part in text.Split(ListSeparator))
             {
                 string[] pair = part.Split(':');
                 if (pair.Length != 2 || !DataId.IsValid(pair[0]) || !TryParseInt(pair[1], out int percent) || percent < 1)
@@ -132,6 +137,32 @@ namespace F1.Editor.Data
             }
 
             return grants;
+        }
+
+        /// <summary>
+        /// A boss's phases (Slice C stage 28): "75=item:100+item:100|50=item:120", each phase an HP percent and the items (as <see cref="GrantList"/>)
+        /// the boss carries from there, separated by '|'. An empty cell is no phase.
+        /// </summary>
+        public List<EnemyPhase> PhaseList(string header)
+        {
+            var phases = new List<EnemyPhase>();
+            if (!_table.TryGetColumn(header, out int _) || IsEmpty(header))
+            {
+                return phases;
+            }
+
+            foreach (string part in Text(header).Split('|'))
+            {
+                int equals = part.IndexOf('=');
+                if (equals <= 0 || !TryParseInt(part.Substring(0, equals), out int percent))
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not 'hp percent=item_id:power percent+...'.");
+                }
+
+                phases.Add(new EnemyPhase(percent, Grants(header, part.Substring(equals + 1))));
+            }
+
+            return phases;
         }
 
         /// <summary>A value with up to two decimals, read in hundredths (Slice B stage 22, <see cref="global::F1.Data.Centi"/>): "38" is 3800, "5.45" is 545.</summary>

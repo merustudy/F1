@@ -211,6 +211,13 @@ namespace F1.UI
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Died), UiPalette.Danger, true);
                     _fx.Shake(10f);
                     break;
+                case BattleEventKind.PhaseChanged:
+                    // A boss entered a phase (stage 28): its board is drawn again with the new items, the word rises over it and the stage shakes.
+                    // Phase N is the Nth threshold crossed (75% is phase 1: Docs/Design/02 §9 counts three phases).
+                    _boardView(e.Target)?.Rebind();
+                    FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Phase, e.A), UiPalette.EnemyName, true);
+                    _fx.Shake(6f);
+                    break;
                 case BattleEventKind.PotionUsed:
                     Sound(SoundEffect.Potion);
                     break;

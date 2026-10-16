@@ -36,7 +36,8 @@ def main():
     parser.add_argument("--check", action="store_true", help="report the sizes without writing")
     args = parser.parse_args()
     changed = 0
-    for path in sorted(ITEMS.glob("*.png")):
+    # A unique's glow (glow_items.py) is cut to its icon's box plus the glow's reach: trimming it would misplace the glow (round 73).
+    for path in sorted(p for p in ITEMS.glob("*.png") if not p.stem.endswith("_glow")):
         image = Image.open(path).convert("RGBA")
         out = trimmed(image)
         if out.size == image.size:

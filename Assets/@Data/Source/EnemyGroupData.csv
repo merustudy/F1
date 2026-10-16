@@ -8,5 +8,6 @@ archer_line,abandoned_mine,9,14,false,false,goblin_raider+goblin_raider+goblin_a
 veteran_guard,abandoned_mine,6,14,false,true,goblin_veteran+goblin_veteran+goblin_archer+goblin_hexer
 hexer_circle,abandoned_mine,9,14,false,true,goblin_raider+goblin_veteran+goblin_hexer+goblin_hexer
 overseer_guard,abandoned_mine,0,0,true,false,mine_overseer+goblin_veteran+goblin_hexer
-abyss_watch,abyss,1,5,false,false,goblin_raider+goblin_raider+goblin_archer+goblin_shaman
-abyss_lord_stand_in,abyss,0,0,true,false,mine_overseer+goblin_raider+goblin_shaman
+abyss_bones,abyss,1,5,false,false,skeleton_guard+skeleton_guard
+abyss_bones_three,abyss,4,5,false,false,skeleton_guard+skeleton_guard+skeleton_guard
+abyss_lord_court,abyss,0,0,true,false,abyss_lord+skeleton_guard+skeleton_guard

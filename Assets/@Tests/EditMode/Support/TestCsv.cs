@@ -35,9 +35,9 @@ namespace F1.Tests
             "tonic,강장제,Tonic,Heal,14,5,potion/tonic,8\n";
 
         public const string Enemies =
-            "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale\n" +
-            "rat,쥐,Rat,2,11,claw:200,unit/enemy/rat,100\n" +
-            "ogre,오우거,Ogre,9,54.5,claw:300+mace:150,,150\n";
+            "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,Phases\n" +
+            "rat,쥐,Rat,2,11,claw:200,unit/enemy/rat,100,\n" +
+            "ogre,오우거,Ogre,9,54.5,claw:300+mace:150,,150,50=mace:200|25=mace:300+claw:300\n";
 
         public const string EnemyGroups =
             "Id,DungeonId,MinFloor,MaxFloor,IsBoss,IsElite,Enemies\n" +

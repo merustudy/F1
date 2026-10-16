@@ -2,6 +2,102 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "abyss_cleaver",
+      "Name": {
+        "en-US": "Abyss Cleaver",
+        "ko-KR": "심연의 식칼"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 4000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 600,
+          "Max": 1400
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/abyss-cleaver",
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false
+    },
+    {
+      "Id": "abyss_grasp",
+      "Name": {
+        "en-US": "Abyss Grasp",
+        "ko-KR": "심연의 손아귀"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyBack",
+          "Reach": 1,
+          "Min": 350,
+          "Max": 800
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/abyss-grasp",
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false
+    },
+    {
+      "Id": "abyss_howl",
+      "Name": {
+        "en-US": "Abyss Howl",
+        "ko-KR": "심연의 울부짖음"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 6000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyAll",
+          "Reach": 0,
+          "Min": 250,
+          "Max": 500
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/abyss-howl",
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false
+    },
+    {
       "Id": "buckler",
       "Name": {
         "en-US": "Buckler",

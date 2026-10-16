@@ -1419,6 +1419,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 5853680703102976
+    m_Localized: '{0}: phase {1} (HP {2}%): its items change'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5853680715685888
+    m_Localized: Phase {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1575,3 +1585,5 @@ MonoBehaviour:
         - id: 5844067983286272
         - id: 5844067983286273
         - id: 5844067983286274
+        - id: 5853680703102976
+        - id: 5853680715685888

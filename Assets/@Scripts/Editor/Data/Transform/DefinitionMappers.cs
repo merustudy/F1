@@ -244,7 +244,7 @@ namespace F1.Editor.Data
     {
         public static List<EnemyData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"));
+            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"), new[] { "Phases" });
             return RowMapping.MapRows(table, errors, row => new EnemyData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -252,7 +252,8 @@ namespace F1.Editor.Data
                 row.Centi("MaxHp"),
                 row.GrantList("Items"),
                 RowMapping.ReadArt(row, RowMapping.Figure),
-                row.Int("FigureScale")));
+                row.Int("FigureScale"),
+                row.PhaseList("Phases")));
         }
     }
 

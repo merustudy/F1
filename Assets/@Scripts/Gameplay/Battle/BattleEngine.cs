@@ -334,6 +334,37 @@ namespace F1.Gameplay
             return unit;
         }
 
+        /// <summary>
+        /// Enters every phase the unit's HP has reached (Slice C stage 28): the items of the lowest phase reached replace the board, judged where the unit
+        /// stands as at the start, with every cooldown starting over from now. One event per phase entered, so the log says which were passed.
+        /// </summary>
+        void EnterPhasesReached(BattleUnit unit)
+        {
+            IReadOnlyList<BattlePhaseSetup> phases = unit.Setup.Phases;
+            if (phases == null)
+            {
+                return;
+            }
+
+            int permille = unit.Side == BattleSide.Enemy ? Setup.EnemyCooldownPermille : 0;
+            while (unit.Phase < phases.Count && (long)unit.Hp * 100 <= (long)unit.MaxHp * phases[unit.Phase].HpPercent)
+            {
+                BattlePhaseSetup phase = phases[unit.Phase];
+                int lineLength = LineLength(unit.Side == BattleSide.Party ? _party : _enemies);
+                var items = new List<BattleItemState>();
+                for (int slot = 0; slot < phase.Items.Count; slot++)
+                {
+                    EquippedItem equipped = phase.Items[slot];
+                    var state = new BattleItemState(slot, equipped, Works(equipped.Item, unit.Row, lineLength), EffectiveCooldown(equipped.Item.CooldownMs, permille), 0);
+                    state.NextFireMs = TimeMs + CooldownOf(unit, state);
+                    items.Add(state);
+                }
+
+                unit.EnterPhase(unit.Phase + 1, items);
+                Log(BattleEventKind.PhaseChanged, UnitRef.None, unit.Ref, null, unit.Phase, phase.HpPercent, unit.Hp);
+            }
+        }
+
         /// <summary>Whether an item activates where its owner stands: never for an item without effects (Slice B stage 20), else where its rows say.</summary>
         static bool Works(ItemData item, int row, int lineLength)
         {
@@ -775,6 +806,12 @@ namespace F1.Gameplay
             }
 
             Log(BattleEventKind.Damaged, source, target.Ref, cause, amount, absorbed, target.Hp);
+
+            // A boss whose HP fell through a phase's percent carries that phase's items from now on (stage 28), whether or not the damage was a hit.
+            if (!target.Setup.HasDog && target.Hp > 0)
+            {
+                EnterPhasesReached(target);
+            }
 
             // Damage that gets through under HitMinDamage is no hit (stage 22): it costs HP but tires nobody and rolls no death, unless it
             // takes the HP to 0. In hundredths a shield lets slivers through that whole numbers never had (Docs/Design/02_Combat_System.md §5).

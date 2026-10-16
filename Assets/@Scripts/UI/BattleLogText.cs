@@ -128,6 +128,8 @@ namespace F1.UI
                     return UiStrings.Get(e.C == 1 ? UiKeys.Log.RetreatSucceeded : UiKeys.Log.RetreatFailed, e.A, e.B);
                 case BattleEventKind.StormTicked:
                     return UiStrings.Get(UiKeys.Log.Storm, UiText.Amount(e.A));
+                case BattleEventKind.PhaseChanged:
+                    return UiStrings.Get(UiKeys.Log.PhaseChanged, UnitName(engine, e.Target), e.A, e.B);
                 case BattleEventKind.FatigueChanged:
                     return FatigueLine(e, engine);
                 case BattleEventKind.BrokeDown:

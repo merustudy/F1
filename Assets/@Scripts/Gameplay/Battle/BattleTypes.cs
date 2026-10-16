@@ -127,6 +127,24 @@ namespace F1.Gameplay
         /// <summary>The fatigue the unit starts with (a mercenary's, after the cost of entering; 0 for an enemy) and the state it is in, or null.</summary>
         public int Fatigue;
         public FatigueStateData FatigueState;
+
+        /// <summary>A boss's phases (Slice C stage 28), from the highest HP percent down; null or empty for a unit without any.</summary>
+        public IReadOnlyList<BattlePhaseSetup> Phases;
+    }
+
+    /// <summary>
+    /// A phase of a boss (Slice C stage 28, Docs/Design/02_Combat_System.md §9): once its HP is at or under this percent of the maximum, the
+    /// items it carries are these (its board replaced; the cooldowns start over from that moment).
+    /// </summary>
+    public sealed class BattlePhaseSetup
+    {
+        public int HpPercent;
+
+        /// <summary>The items of the phase in activation order, as <see cref="BattleUnitSetup.Items"/>.</summary>
+        public IReadOnlyList<EquippedItem> Items;
+
+        /// <summary>Where they lie, for the screen only; null when nobody draws the board.</summary>
+        public BoardLayout Layout;
     }
 
     /// <summary>
@@ -250,6 +268,8 @@ namespace F1.Gameplay
         FatigueChanged,
         /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent, C = 1 for a virtue.</summary>
         BrokeDown,
+        /// <summary>A boss entered a phase (Slice C stage 28): its items were replaced. Target, A = the phase (1 = the first after the start), B = the phase's HP percent, C = HP now.</summary>
+        PhaseChanged,
         /// <summary>The unit's fatigue reached its maximum. Target, C = 1 if it died (it was at death's door already), else it went to death's door.</summary>
         Collapsed,
         /// <summary>An affliction ended: fatigue came back under the threshold. Target, Id = the state's id.</summary>

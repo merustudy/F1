@@ -2,6 +2,72 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "abyss_lord",
+      "Name": {
+        "en-US": "Abyss Lord",
+        "ko-KR": "심연의 군주"
+      },
+      "Level": 14,
+      "MaxHp": 28000,
+      "Items": [
+        {
+          "ItemId": "abyss_cleaver",
+          "PowerPercent": 100
+        }
+      ],
+      "Figure": "unit/enemy/abyss-lord",
+      "FigureScale": 150,
+      "Phases": [
+        {
+          "HpPercent": 75,
+          "Items": [
+            {
+              "ItemId": "abyss_cleaver",
+              "PowerPercent": 100
+            },
+            {
+              "ItemId": "abyss_howl",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "HpPercent": 50,
+          "Items": [
+            {
+              "ItemId": "abyss_cleaver",
+              "PowerPercent": 115
+            },
+            {
+              "ItemId": "abyss_howl",
+              "PowerPercent": 115
+            },
+            {
+              "ItemId": "abyss_grasp",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "HpPercent": 25,
+          "Items": [
+            {
+              "ItemId": "abyss_cleaver",
+              "PowerPercent": 140
+            },
+            {
+              "ItemId": "abyss_howl",
+              "PowerPercent": 140
+            },
+            {
+              "ItemId": "abyss_grasp",
+              "PowerPercent": 140
+            }
+          ]
+        }
+      ]
+    },
+    {
       "Id": "cave_rat",
       "Name": {
         "en-US": "Cave Rat",
@@ -16,7 +82,8 @@
         }
       ],
       "Figure": "unit/enemy/cave-rat",
-      "FigureScale": 100
+      "FigureScale": 100,
+      "Phases": []
     },
     {
       "Id": "goblin_archer",
@@ -33,7 +100,8 @@
         }
       ],
       "Figure": "unit/enemy/goblin-archer",
-      "FigureScale": 100
+      "FigureScale": 100,
+      "Phases": []
     },
     {
       "Id": "goblin_hexer",
@@ -54,7 +122,8 @@
         }
       ],
       "Figure": "unit/enemy/goblin-shaman",
-      "FigureScale": 115
+      "FigureScale": 115,
+      "Phases": []
     },
     {
       "Id": "goblin_raider",
@@ -71,7 +140,8 @@
         }
       ],
       "Figure": "unit/enemy/goblin-raider",
-      "FigureScale": 100
+      "FigureScale": 100,
+      "Phases": []
     },
     {
       "Id": "goblin_shaman",
@@ -92,7 +162,8 @@
         }
       ],
       "Figure": "unit/enemy/goblin-shaman",
-      "FigureScale": 100
+      "FigureScale": 100,
+      "Phases": []
     },
     {
       "Id": "goblin_veteran",
@@ -113,7 +184,8 @@
         }
       ],
       "Figure": "unit/enemy/goblin-raider",
-      "FigureScale": 115
+      "FigureScale": 115,
+      "Phases": []
     },
     {
       "Id": "mine_overseer",
@@ -134,7 +206,30 @@
         }
       ],
       "Figure": "unit/enemy/mine-overseer",
-      "FigureScale": 150
+      "FigureScale": 150,
+      "Phases": []
+    },
+    {
+      "Id": "skeleton_guard",
+      "Name": {
+        "en-US": "Skeleton Guard",
+        "ko-KR": "스켈레톤 호위"
+      },
+      "Level": 8,
+      "MaxHp": 3200,
+      "Items": [
+        {
+          "ItemId": "rusty_blade",
+          "PowerPercent": 220
+        },
+        {
+          "ItemId": "buckler",
+          "PowerPercent": 120
+        }
+      ],
+      "Figure": "unit/enemy/skeleton-guard",
+      "FigureScale": 100,
+      "Phases": []
     }
   ]
 }

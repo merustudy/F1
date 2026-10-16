@@ -552,6 +552,89 @@ namespace F1.Tests
         }
 
         /// <summary>
+        /// From the title: a new run with the final dungeon staged as unlocked (the mine's clears written into the run), the party
+        /// filled, the abyss picked on the expedition screen, and its boss's battle entered and left paused at its start, as
+        /// <see cref="EnterTheBossBattle"/> does for the mine (stage 28: the Abyss Lord and its court).
+        /// </summary>
+        public static IEnumerator EnterTheAbyssBossBattle(int bossPowerPercent = 999)
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return WaitForScreen(ScreenId.Lobby);
+            yield return FillParty(Screen<LobbyScreen>());
+
+            StaticData data = Managers.Data.Data;
+            DungeonData abyss = data.FinalDungeon;
+            Managers.Run.Run.ClearedDungeons[abyss.UnlockDungeonId] = abyss.UnlockClears;
+            Click(Screen<LobbyScreen>(), "Frame/Strip/Depart");
+            yield return WaitForScreen(ScreenId.Expedition);
+            ExpeditionScreen expedition = Screen<ExpeditionScreen>();
+            Click(Views<DungeonMarkerView>(expedition).Single(marker => marker.DungeonId == abyss.Id).Button);
+            Assert.AreEqual(abyss.Id, expedition.SelectedDungeonId);
+            Click(expedition, "Frame/Bottom/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+            Assert.AreEqual(abyss.Id, Managers.Expedition.Expedition.DungeonId);
+
+            yield return FightThroughToTheBoss(bossPowerPercent);
+        }
+
+        /// <summary>
+        /// Wins every battle on the way with a staged champion, leaves every loot, rests at every camp, and stops paused at the start of
+        /// the boss's battle. Before the boss's node the champion's weapon is set to bossPowerPercent (999 keeps the one-blow champion; a
+        /// screenshot that wants the boss to last a few blows passes less).
+        /// </summary>
+        public static IEnumerator FightThroughToTheBoss(int bossPowerPercent = 999)
+        {
+            StageChampion();
+
+            int guard = 0;
+            while (true)
+            {
+                Assert.Less(++guard, 100, "The boss was not reached.");
+                switch (Managers.Expedition.Phase)
+                {
+                    case GamePhase.NodeMap:
+                        if (ExpeditionRules.AvailableNodes(Managers.Expedition.Expedition).Exists(node => node.Kind == MapNodeKind.Boss))
+                        {
+                            Regrade(Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front), bossPowerPercent);
+                        }
+
+                        yield return GoIntoTheFirstNode();
+                        break;
+
+                    case GamePhase.Battle:
+                        BattleScreen battle = Screen<BattleScreen>();
+                        BattleEngine engine = Managers.Expedition.Battle.Engine;
+                        battle.Clock.Paused = true;
+                        if (Managers.Expedition.Battle.Node.Kind == MapNodeKind.Boss)
+                        {
+                            yield return WaitForRedraw();
+                            yield break;
+                        }
+
+                        while (!Managers.Expedition.Battle.IsFinished)
+                        {
+                            Managers.Expedition.AdvanceBattle(250);
+                        }
+
+                        Assert.AreEqual(BattleResult.Victory, engine.Result);
+                        yield return WaitForResult(battle);
+                        ContinueAfterBattle(battle);
+                        yield return WaitForScreen(ScreenCatalog.ForPhase(Managers.Expedition.Phase));
+                        break;
+
+                    case GamePhase.Loot:
+                        Click(Screen<BattleScreen>(), "Frame/BoardPanel/LootContinue");
+                        yield return WaitForScreen(ScreenId.NodeMap);
+                        break;
+
+                    default:
+                        Assert.Fail($"Unexpected phase {Managers.Expedition.Phase}.");
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Makes the mercenary in row 1 of the expedition so strong that every battle is won and
         /// nobody falls. Staged directly: winning by play alone is a matter of luck.
         /// </summary>

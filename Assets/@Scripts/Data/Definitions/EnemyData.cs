@@ -29,6 +29,36 @@ namespace F1.Data
         public int PowerPercent { get; }
     }
 
+    /// <summary>
+    /// A phase of a boss (Slice C stage 28, Docs/Design/02_Combat_System.md §9): when the boss's HP falls to this percent of its maximum, the
+    /// items it carries are replaced by these (their cooldowns start over). Phases are listed from the highest percent down.
+    /// </summary>
+    public sealed class EnemyPhase
+    {
+        [JsonConstructor]
+        public EnemyPhase(int hpPercent, IReadOnlyList<ItemGrant> items)
+        {
+            if (hpPercent < 1 || hpPercent > 99)
+            {
+                throw new DataException($"Phase at {hpPercent}%: HpPercent must be 1..99.");
+            }
+
+            if (items == null || items.Count < 1 || items.Count > BoardFrame.Height)
+            {
+                throw new DataException($"Phase at {hpPercent}%: a phase carries 1..{BoardFrame.Height} items.");
+            }
+
+            HpPercent = hpPercent;
+            Items = items;
+        }
+
+        [JsonProperty(Order = 1, Required = Required.Always)]
+        public int HpPercent { get; }
+
+        [JsonProperty(Order = 2, Required = Required.Always)]
+        public IReadOnlyList<ItemGrant> Items { get; }
+    }
+
     public sealed class EnemyData
     {
         public const string DefinitionName = "Enemy";
@@ -39,7 +69,7 @@ namespace F1.Data
         public const int MaxFigureScale = 300;
 
         [JsonConstructor]
-        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale)
+        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale, IReadOnlyList<EnemyPhase> phases = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -63,11 +93,27 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': FigureScale must be {MinFigureScale}..{MaxFigureScale} (percent).");
             }
 
+            // The phases (stage 28) come from the highest HP percent down, each lower than the one before.
+            var ladder = new List<EnemyPhase>(phases ?? new List<EnemyPhase>());
+            for (int i = 0; i < ladder.Count; i++)
+            {
+                if (ladder[i] == null)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': a phase is missing.");
+                }
+
+                if (i > 0 && ladder[i].HpPercent >= ladder[i - 1].HpPercent)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': the phases must come at falling HP percents ({ladder[i - 1].HpPercent}% then {ladder[i].HpPercent}%).");
+                }
+            }
+
             Level = level;
             MaxHp = maxHp;
             Items = items;
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
             FigureScale = figureScale;
+            Phases = ladder;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -96,6 +142,10 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 7, Required = Required.Always)]
         public int FigureScale { get; }
+
+        /// <summary>A boss's phases (stage 28): none for most enemies.</summary>
+        [JsonProperty(Order = 8, Required = Required.Always)]
+        public IReadOnlyList<EnemyPhase> Phases { get; }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the enemy has no figure.</summary>
         [JsonIgnore]

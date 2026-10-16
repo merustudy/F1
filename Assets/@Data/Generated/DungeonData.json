@@ -55,7 +55,7 @@
         "healing_potion",
         "healing_potion"
       ],
-      "Background": null,
+      "Background": "background/dungeon/abyss",
       "EliteMinFloor": 0,
       "EliteChancePercent": 0,
       "CampMinFloor": 0,

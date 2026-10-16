@@ -199,6 +199,38 @@ namespace F1.Tests
         }
 
         /// <summary>
+        /// The final dungeon's boss battle (stage 28, round 73): the Abyss Lord at 150% between its two skeleton guards on the abyss's
+        /// background, then the moment its HP falls to 75% and it takes up its first phase's items: "페이즈 1" over its head, its board
+        /// re-bound with the cleaver and the howl, and the caption of the phase.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator AbyssBoss_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            // The champion fights the boss with a strong but not instant weapon (600%), so that the lord crosses 75% over a few blows and
+            // nobody needs luck; the engine is advanced by hand in small steps and stopped at the phase's own event, young enough for
+            // the presenter to play it (RecentMs).
+            yield return UiTestUtil.EnterTheAbyssBossBattle(600);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_63_battle_abyss_boss");
+
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            BattleUnit lord = engine.Enemies.Single(e => e.Setup.SourceId == "abyss_lord");
+            int guard = 0;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.PhaseChanged))
+            {
+                Assert.Less(++guard, 2000, "The lord never reached its first phase.");
+                Assert.IsFalse(Managers.Expedition.Battle.IsFinished, "The battle ended before the lord's first phase.");
+                Managers.Expedition.AdvanceBattle(50);
+            }
+
+            Assert.AreEqual(1, lord.Phase);
+            yield return null;
+            yield return null;
+            yield return Capture("ko_64_battle_abyss_phase");
+        }
+
+        /// <summary>
         /// The unique in battle (stage 23, round 70 follow-up 2): the gladius in the knight's place, its gold glow whole behind the icon
         /// while the item charges (half lit, a second and a half in): the glow lies outside the charge mask.
         /// </summary>

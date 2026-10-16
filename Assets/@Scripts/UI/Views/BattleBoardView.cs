@@ -32,6 +32,7 @@ namespace F1.UI
         [SerializeField] Image _squareTemplate;
 
         readonly List<BattleItemView> _items = new List<BattleItemView>();
+        readonly List<GameObject> _drawn = new List<GameObject>();
         BattleUnit _unit;
         ExpeditionArt _art;
         int _standRow;
@@ -58,8 +59,8 @@ namespace F1.UI
             _name.text = UiText.Name(unit.Setup.Name);
             _name.color = unit.Side == BattleSide.Enemy ? UiPalette.EnemyName : UiPalette.Text;
 
-            // Where the items lie: the setup's layout, or one under another (a setup made without one, as an enemy's board is).
-            BoardLayout layout = unit.Setup.Layout ?? BoardLayout.Stacked(unit.Setup.Items ?? new List<EquippedItem>());
+            // Where the items lie: the layout of the unit's current board (a boss's phase has its own; stage 28), or one under another (a setup made without one, as an enemy's board is).
+            BoardLayout layout = unit.Layout ?? BoardLayout.Stacked(unit.EquippedNow ?? new List<EquippedItem>());
             var covered = new HashSet<int>();
             for (int i = 0; i < unit.Items.Count; i++)
             {
@@ -129,7 +130,21 @@ namespace F1.UI
                 BattleItemState state = item;
                 view.RightClick.Clicked += () => ItemRightClicked?.Invoke(clicked, state);
                 _items.Add(view);
+                _drawn.Add(view.gameObject);
             }
+        }
+
+        /// <summary>Draws the board again from the unit's current items: a boss entered a phase and carries others now (stage 28).</summary>
+        public void Rebind()
+        {
+            foreach (GameObject drawn in _drawn)
+            {
+                Destroy(drawn);
+            }
+
+            _drawn.Clear();
+            _items.Clear();
+            Bind(_unit, _art);
         }
 
         /// <summary>A right click on an item's piece (round 42, right-click since round 47): the screen opens the item's card.</summary>
@@ -200,6 +215,7 @@ namespace F1.UI
         {
             Image well = Instantiate(_bagTemplate, _cells);
             well.gameObject.SetActive(true);
+            _drawn.Add(well.gameObject);
             well.transform.SetAsFirstSibling();
             GridGeometry.Lay(well.rectTransform, x, y, width, height);
             well.rectTransform.anchoredPosition += new Vector2(-BagPad, BagPad);
@@ -212,6 +228,7 @@ namespace F1.UI
         {
             Image square = Instantiate(_squareTemplate, _cells);
             square.gameObject.SetActive(true);
+            _drawn.Add(square.gameObject);
             GridGeometry.Lay(square.rectTransform, x, y, 1, 1);
         }
     }

@@ -1565,6 +1565,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673481061990405
+  - m_Id: 5853680703102976
+    m_Key: Log.PhaseChanged
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481662824448
+  - m_Id: 5853680715685888
+    m_Key: Fx.Phase
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481662824449
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2944,3 +2954,14 @@ MonoBehaviour:
       data:
         m_CommentText: One survivor that reached a new level. {0} = the name, {1}
           = the level now.
+    - rid: 8623673481662824448
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A boss entered a phase (stage 28): its items were replaced.
+          {0} = unit, {1} = the phase number counting the start as 1, {2} = the HP
+          percent it starts at.'
+    - rid: 8623673481662824449
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Rises over a boss that entered a phase (stage 28). {0} = the
+          phase number.

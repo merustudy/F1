@@ -512,6 +512,7 @@ namespace F1.Sim
             long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
             long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
             long levelsAtEnd = 0, levelUps = 0, highestLevel = 0, runsAtMaxLevel = 0, runsWithLiving = 0;
+            long finalExpeditions = 0, finalCleared = 0, finalWiped = 0, finalRetreated = 0, finalDeaths = 0, runsThatClearedFinal = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
             {
@@ -566,6 +567,17 @@ namespace F1.Sim
                     ExpeditionState expedition = RunRules.BeginExpedition(data, state, dungeon.Id);
                     finalStands += expedition.FinalStand ? 1 : 0;
                     PlayExpedition(data, expedition, policy, scratch);
+                    if (dungeon.IsFinal)
+                    {
+                        // The final dungeon on its own (stage 28): how the boss and its court fare against the roster a run brings.
+                        finalExpeditions++;
+                        finalCleared += expedition.Result == ExpeditionResult.Cleared ? 1 : 0;
+                        finalWiped += expedition.Result == ExpeditionResult.Wiped ? 1 : 0;
+                        finalRetreated += expedition.Result == ExpeditionResult.Retreated ? 1 : 0;
+                        finalDeaths += expedition.Members.Count(m => !m.Alive);
+                        runsThatClearedFinal += expedition.Result == ExpeditionResult.Cleared ? 1 : 0;
+                    }
+
                     deaths += expedition.Members.Count(m => !m.Alive);
                     hiredDeaths += expedition.Members.Count(m => !m.Alive && hired.Contains(m.MercenaryId));
                     expeditions++;
@@ -612,6 +624,9 @@ namespace F1.Sim
                 + $"final stands fought {BattleStats.Percent(finalStands, runs)}; the final dungeon opened in {BattleStats.Percent(unlocked, runs)} of runs, on day {Average(unlockDays, unlocked)} on average");
             Console.WriteLine($"  gold per run: earned {Average(goldEarned, runs)}, spent on hiring {Average(goldHired, runs)} ({Average(hires, runs)} hires, of whom {Average(hiredDeaths, runs)} died), "
                 + $"on treatment {Average(goldTreated, runs)} ({Average(treatments, runs)} treatments), held at the end {Average(goldLeft, runs)}; roster at the end {Average(rosterAtEnd, runs)}");
+            Console.WriteLine($"  final dungeon (stage 28): expeditions {Average(finalExpeditions, runs)} per run, of which cleared {BattleStats.Percent((int)finalCleared, (int)finalExpeditions)}, "
+                + $"wiped {BattleStats.Percent((int)finalWiped, (int)finalExpeditions)}, retreated {BattleStats.Percent((int)finalRetreated, (int)finalExpeditions)}, deaths per expedition {Average(finalDeaths, (int)finalExpeditions)}; "
+                + $"runs that cleared it {BattleStats.Percent((int)runsThatClearedFinal, runs)}");
             Console.WriteLine($"  levels (stage 27): level-ups per run {Average(levelUps, runs)}, the living at the end average level {Average(levelsAtEnd, (int)rosterAtEnd)}, "
                 + $"the highest {Average(highestLevel, (int)runsWithLiving)} on average (runs with someone living), at the last level ({data.MaxLevel}) in {BattleStats.Percent((int)runsAtMaxLevel, runs)} of runs");
         }

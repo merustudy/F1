@@ -40,12 +40,14 @@ namespace F1.Gameplay
     /// <summary>Runtime state of one unit during a battle. Only the engine changes it.</summary>
     public sealed class BattleUnit
     {
+        List<BattleItemState> _items;
+
         internal BattleUnit(BattleSide side, int index, BattleUnitSetup setup, List<BattleItemState> items)
         {
             Side = side;
             Index = index;
             Setup = setup;
-            Items = items;
+            _items = items;
             Row = setup.Row;
             Hp = setup.Hp;
             Alive = true;
@@ -59,7 +61,24 @@ namespace F1.Gameplay
         public int Index { get; }
 
         public BattleUnitSetup Setup { get; }
-        public IReadOnlyList<BattleItemState> Items { get; }
+
+        /// <summary>The items the unit carries now: the setup's, or the current phase's for a boss that has entered one (stage 28).</summary>
+        public IReadOnlyList<BattleItemState> Items => _items;
+
+        /// <summary>The phase a boss is in: 0 at the start, then 1.. as its HP falls through the phases' percents (stage 28).</summary>
+        public int Phase { get; internal set; }
+
+        /// <summary>Where the items lie, for the screen: the setup's layout, or the current phase's.</summary>
+        public BoardLayout Layout => Phase == 0 || Setup.Phases == null ? Setup.Layout : Setup.Phases[Phase - 1].Layout;
+
+        /// <summary>The equipped items of the unit now, as the setup lists them (for a screen that lays out a board without a layout).</summary>
+        public IReadOnlyList<EquippedItem> EquippedNow => Phase == 0 || Setup.Phases == null ? Setup.Items : Setup.Phases[Phase - 1].Items;
+
+        internal void EnterPhase(int phase, List<BattleItemState> items)
+        {
+            Phase = phase;
+            _items = items;
+        }
 
         public UnitRef Ref => new UnitRef(Side, Index);
         public int MaxHp => Setup.MaxHp;
