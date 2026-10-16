@@ -120,6 +120,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   `RestAtCamp`는 살아 있는 구성원마다 HP를 최대의 `CampHealPercent`%만큼(최대를 넘지 않게) 올리고 피로를 `CampFatigueRelief`만큼 내린 뒤(`FatigueRules.Add`) `ChoosingNode`로 돌린다. 정비는 14단계다.
 - 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템의 세기 `EnemyPowerPerFloorPercent`%만큼 올린다(22단계: 그 전에는 아이템 등급).
   보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
+- **최종 보스의 페이즈**(28단계, Design/02 §9): `EnemyData.Phases`는 `BattleUnitSetup.Phases`(`BattlePhaseSetup`: 문턱 %, 그 묶음의 `EquippedItem` 목록, 화면이 그릴 `Layout`)로 들어간다(깊은 층의 세기 배율은 묶음에도 같이 건다. 페이즈가 없는 적은 빈 목록, 아군은 null). 엔진은 피해를 적은 뒤(`ApplyDamage`의 `Damaged` 다음, 살아 있을 때) HP가 다음 문턱에 닿았으면 `EnterPhasesReached`로 그 묶음을 들게 한다: 아이템 상태를 새로 만들고(서는 자리로 `Works`를 다시 판정) 쿨다운은 그 순간부터(`NextFireMs = TimeMs + 쿨다운`), 한 타로 여러 문턱을 지나면 차례로 하나씩, 페이즈마다 `PhaseChanged`(Target 보스, A 페이즈 번호, B 문턱 %, C 남은 HP)를 적는다. `BattleUnit.Phase`·`Items`·`EquippedNow`·`Layout`이 지금의 묶음이다. 개에 든 적은 페이즈에 들지 않는다. 입력 기록의 재생은 같은 Setup으로 같은 페이즈를 지난다(결정론).
 
 ## 전리품 (Slice B 18단계)
 
@@ -300,6 +301,6 @@ dotnet run --project Tools/Sim -- items
 
 ## Deferred and Forbidden
 
-- Deferred: 유물, 전직과 STR(Slice D. 레벨·경험치·HP 보너스는 27단계에 들어왔다), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스(28단계).
+- Deferred: 유물, 전직과 STR(Slice D. 레벨·경험치·HP 보너스는 27단계에 들어왔다), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스는 28단계에 들어왔다(위 "최종 보스의 페이즈").
 - Forbidden: Domain에서 Unity/Managers/Save DTO 참조, 결과 계산에 부동소수점이나 시드 밖 난수 사용, 표현 계층이 상태를 바꾸기,
   규칙 없이 추가한 효과 어휘, 시뮬 통계를 Test 통과 조건으로 쓰기.

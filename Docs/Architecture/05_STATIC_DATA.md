@@ -60,8 +60,8 @@ Definition은 JSON으로 직접 직렬화한다(Property 순서는 Attribute로 
 ## CSV 형식
 
 ```csv
-Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale
-goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_chant:12,unit/enemy/goblin-shaman,100
+Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,Phases
+goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_chant:12,unit/enemy/goblin-shaman,100,
 ```
 
 - UTF-8, Header Row 필수. **Header 이름으로 Mapping**하고 열 순서에 의존하지 않는다.
@@ -79,6 +79,8 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   규칙은 `Weapon`인지만 본다(무기 패시브는 무기 장비의 피해에만). 전투 화면은 분류로 주인을 움직인다(`12_UI.md` "연출").
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
+- `EnemyData`의 `Phases`(28단계, 선택 열. 헤더가 없거나 비면 페이즈 없음)는 `문턱%=item_id:세기+item_id:세기|문턱%=…`다: 적의 HP가 그 %에 닿으면 그 묶음으로 바꿔 든다(`EnemyPhase`. Design/02 §9). 문턱은 1..99에서 내려가는 차례, 묶음은 아이템 하나 이상이고 높이 합은 틀의 높이 이하, 아이템은 있는 것이어야 한다(Dataset 검증).
+  `BalanceData.FinalBossLevel`은 최종 보스의 것이다: 그 레벨은 최종 던전(`DungeonData.IsFinal`)의 보스 무리에 선 적만 가질 수 있고, 그보다 높은 레벨의 적은 없다(Dataset 검증. CLAUDE.md §5-7).
 - `ItemData.csv`와 `PotionData.csv`의 `Price`는 상점의 값이다(일반 기준의 정수. 0이면 상점에 나오지 않는다. 17단계). `ShopWeight`는 상점에 나올 상대 확률이다(18단계에 `RewardWeight`에서 이름을 바꿨다: 전투는 적이 든 것을 떨어뜨린다). `DungeonData.csv`의 `ShopMinFloor`·`ShopChancePercent`는 정예·야영지의 열과 같은 방식이다.
 - `DungeonData.csv`의 선택 열(열이 없거나 비면 기본값): `IsFinal`(최종 던전, 하나까지)·`UnlockDungeonId`·`UnlockClears`(해금. Slice C 25단계), `MapX`·`MapY`(원정 지도에서 표식이 서는 자리, 그림 폭·높이의 %. Round 71 E2). 선택 열은 `CsvRow.OptionalBool`·`OptionalId`·`OptionalInt`로 읽고 Mapper가 `RequireHeaders`의 둘째 인자로 등록한다. `BalanceData`의 `DeathLimit`도 25단계.
 - `ItemData.csv`의 `Width`·`Height`는 격자에서 아이템이 차지하는 가로·세로 칸이다(19단계. 한 변 1..`BoardFrame.MaxSide` 3. 그 전의 `Size`를 대신했다). `JobData.csv`에는 칸 수가 없다(보드는 가방이 만든다).
