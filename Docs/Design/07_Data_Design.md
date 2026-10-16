@@ -45,9 +45,10 @@
 | `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급(적의 힘. 쓰러뜨리면 그 아이템이 던전의 등급으로 떨어진다: 03 §5), 그림과 그림의 크기 배율(보스는 더 크게) |
 | `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 정예 여부(Slice B), 서는 순서(앞에서부터, 넷까지) |
 | `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
-| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다) |
+| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다), 최종 던전과 해금(25단계: `IsFinal`, `UnlockDungeonId`, `UnlockClears`), 원정 지도의 표식 자리(Round 71 E2: `MapX`, `MapY`) |
 | `MercenaryData.csv` | 시작 로스터: 이름, 직업 |
 | `FatigueStateData.csv` | 피로의 붕괴 판정이 주는 상태(Slice B): 종류(고통·각성), 쿨다운·받는 회복·빈사 사망 확률의 변화, 이름과 설명 |
 
 - 【확정】 `items`와 `relics`는 반드시 별도 분류 (06_Relic_System §4). 유물은 Slice A 밖이라 파일이 없다.
+- (Slice C) 더할 데이터는 그 단계에서 만든다(미리 만들지 않는다): 런의 끝·금·고용·시설의 상수는 `BalanceData`(25·26단계), 고용 후보의 이름 풀(26단계에서 CSV 하나로 할지 `MercenaryData`의 열로 할지 정함), `LevelData.csv`(27단계: 레벨, 필요 경험치, 최대 HP 보너스 %), Abyss Lord·호위·페이즈 묶음(28단계: `EnemyData`·`EnemyGroupData`). 25단계가 미리 넣은 것: `BalanceData` `DeathLimit`, `DungeonData`의 선택 열 `IsFinal`·`UnlockDungeonId`·`UnlockClears`와 임시 행 `abyss`, `EnemyGroupData`의 임시 무리 둘(03 §1).
 - 위 3절의 "확인된 값" 가운데 Slice A가 쓰는 것은 CSV의 출발값으로 넣었다. 시뮬 결과로 바뀌면 CSV가 기준이다.
