@@ -134,7 +134,7 @@ namespace F1.UI
                 ItemSlotView piece = _pieces[_piecesShown++];
                 piece.gameObject.SetActive(true);
                 Lay(piece.Rect, item.At.X, item.At.Y, item.Width, item.Height);
-                piece.ShowItem(item.Item, art?.OfItem(item.Item.Item.Id), item.At, false, fatigueCost(item.Item), false);
+                piece.ShowItem(item.Item, art?.OfItem(item.Item.Item.Id), item.At, false, fatigueCost(item.Item), false, glow: art?.GlowOfItem(item.Item.Item.Id));
             }
 
             for (int i = _piecesShown; i < _pieces.Count; i++)

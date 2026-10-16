@@ -88,6 +88,12 @@ namespace F1.UI
             public const string MendHint = "Map.MendHint";
             public const string MendBack = "Map.MendBack";
             public const string MendConfirm = "Map.MendConfirm";
+            public const string Forge = "Map.Forge";
+            public const string ForgeBody = "Map.ForgeBody";
+            public const string ForgeTitle = "Map.ForgeTitle";
+            public const string ForgeHint = "Map.ForgeHint";
+            public const string ForgeChoose = "Map.ForgeChoose";
+            public const string ForgeConfirm = "Map.ForgeConfirm";
             public const string Shop = "Map.Shop";
             public const string ShopHint = "Map.ShopHint";
             public const string EnterShop = "Map.EnterShop";
@@ -161,6 +167,10 @@ namespace F1.UI
             public const string StarBonus = "Item.StarBonus";
             public const string StarLit = "Item.StarLit";
             public const string StarLitNone = "Item.StarLitNone";
+            public const string Unique = "Item.Unique";
+            public const string UniqueLine = "Item.UniqueLine";
+            public const string UniqueTitle = "Item.UniqueTitle";
+            public const string Recipe = "Item.Recipe";
         }
 
         public static class Effect

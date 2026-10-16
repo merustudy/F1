@@ -135,6 +135,7 @@ namespace F1.Editor.Setup
         /// <summary>Room at the card's left that round 41's tier stripe took; the lines keep its margin (R12 took the stripe's parts out).</summary>
         const float TooltipStripeRoom = 8f;
         const float TooltipRadius = 4f;
+        const float TooltipPlateHeight = 56f;
         const float TooltipNotch = 16f;
 
         /// <summary>
@@ -164,7 +165,17 @@ namespace F1.Editor.Setup
             RectTransform notchLeft = NotchClip(name + "NotchLeft", card, new Vector2(0f, 1f), new Vector2(1f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(1f, 0.5f));
             RectTransform notchRight = NotchClip(name + "NotchRight", card, new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(0f, 0.5f));
 
+            // A unique item's name sits on a plate head (stage 23; round 42's mockup 7), with "유니크 · 단계" under it; the title line is off then.
+            Image plate = KitFrame(name + "Plate", card, UiArt.PlateLabel);
+            LayoutElement plateElement = plate.gameObject.AddComponent<LayoutElement>();
+            plateElement.minHeight = TooltipPlateHeight;
+            plateElement.preferredHeight = TooltipPlateHeight;
+            TextMeshProUGUI plateTitle = UiBuild.SingleLine(UiBuild.Label(name + "PlateTitle", plate.transform, 24f, UiPalette.Unique, TextAlignmentOptions.Center));
+            UiBuild.Stretch(plateTitle.rectTransform, 24f, 4f, 24f, 4f);
+            plate.gameObject.SetActive(false);
             TextMeshProUGUI title = UiBuild.Label(name + "Title", card, 24f, UiPalette.Text, TextAlignmentOptions.Center);
+            TextMeshProUGUI uniqueLine = UiBuild.Label(name + "Unique", card, 17f, UiPalette.Unique, TextAlignmentOptions.Center);
+            uniqueLine.gameObject.SetActive(false);
             Image rule = UiBuild.Image(name + "Rule", card, UiPalette.TooltipLine);
             LayoutElement ruleElement = rule.gameObject.AddComponent<LayoutElement>();
             ruleElement.minHeight = 1f;
@@ -179,6 +190,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_notchLeft", notchLeft);
             UiBuild.SetReference(view, "_notchRight", notchRight);
             UiBuild.SetReference(view, "_title", title);
+            UiBuild.SetReference(view, "_plate", plate);
+            UiBuild.SetReference(view, "_plateTitle", plateTitle);
+            UiBuild.SetReference(view, "_uniqueLine", uniqueLine);
             UiBuild.SetReference(view, "_facts", facts);
             UiBuild.SetReference(view, "_effects", effects);
             UiBuild.SetReference(view, "_fatigue", fatigue);

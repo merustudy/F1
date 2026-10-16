@@ -67,6 +67,14 @@ Map.MendTitle,Title of the camp window while an item is chosen to mend. {0} = fl
 Map.MendHint,In the camp window while an item is chosen to mend.,왼쪽 보드에서 올릴 아이템을 고르세요.,Choose the item to raise on a board on the left.
 Map.MendBack,Leaves the mend step for the camp's two choices.,돌아가기,Back
 Map.MendConfirm,Mends the chosen item and goes on.,정비하기,Mend it
+Map.Forge,"The camp's forge (Slice B stage 23): the title of its card and of its step. Shown only while a recipe is ready on a board.",담금질,Forge
+Map.ForgeBody,"On the forge card. {0} = the mercenary. {1} = the base item with its tier. {2} = the catalyst with its tier. {3} = the unique item made.","{0}의 {1} + {2}
+→ {3}","{0}'s {1} + {2}
+→ {3}"
+Map.ForgeTitle,Title of the camp window in the forge step. {0} = floor.,{0}층 · 야영지 · 담금질,Floor {0} · Camp · Forge
+Map.ForgeHint,"In the camp window in the forge step: the price.",쉬지 않고 담금질합니다. 재료로 쓴 아이템은 사라집니다.,Forge instead of resting. The ingredient used up is gone.
+Map.ForgeChoose,"On the board panel in the forge step: which boards take a click.",왼쪽 보드에서 담금질할 무기를 고르세요.,Choose the weapon to forge on a board on the left.
+Map.ForgeConfirm,Forges the chosen item and goes on.,담금질하기,Forge it
 Map.Shop,"Label of a shop node: items for the region coins, no fight (round 44).",상점,Shop
 Map.ShopHint,Shown when a shop node is selected.,지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.,A place to buy items for region coins. No fight.
 Map.EnterShop,Goes into the selected shop node.,상점으로,Enter the shop
@@ -128,6 +136,10 @@ Item.StarDamage,The effect line of a star item (stage 20): a melee weapon on one
 Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which already count it: what the stars on it add. {0} = the star items' names. {1} = the damage they add.",(★ {0} +{1}),(★ {0} +{1})
 Item.StarLit,"On a star item's card (stage 20): how many of its stars a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons' names.",걸린 ★ {0}/{1} — {2},Stars lit {0}/{1} — {2}
 Item.StarLitNone,On a star item's card when no melee weapon lies on its stars (stage 20). {0} = its stars.,걸린 ★ 0/{0},Stars lit 0/{0}
+Item.Unique,"In a unique item's facts (stage 23), first.",유니크,Unique
+Item.UniqueLine,"Under a unique item's facts (stage 23): the party holds one.",유니크: 파티에 하나,Unique: one per party
+Item.UniqueTitle,"Under the plate of a unique item's card (stage 23). A unique has no tier.",유니크,Unique
+Item.Recipe,"On the card of a recipe's base or catalyst (stage 23). {0} = the base with its tier. {1} = the catalyst with its tier. {2} = the unique item.",담금질(야영지): {0} + {1}(★ 켜짐) → {2},Forge (camp): {0} + {1} (star lit) → {2}
 Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
 Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}

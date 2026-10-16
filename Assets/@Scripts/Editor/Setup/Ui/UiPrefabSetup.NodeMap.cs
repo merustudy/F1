@@ -173,17 +173,27 @@ namespace F1.Editor.Setup
             // What the party can do at the camp: a card each, side by side, the whole card the button (rest on the left, mend on the right).
             RectTransform choices = UiBuild.Rect("CampChoices", campBox.transform);
             UiBuild.Stretch(choices);
+            // The cards' words stretch with the card: the screen narrows the cards to three while a forge is ready (stage 23, CampCards).
             Image rest = Rounded("Rest", choices, UiPalette.Button, 8f);
-            UiBuild.Box(rest, CampSideMargin, CampCardsTop, CampCardWidth, CampCardHeight);
+            UiBuild.Box(rest, CampCards.Left(2, 0), CampCards.Top, CampCards.Width(2), CampCards.Height);
             Button restButton = UiBuild.MakeButton(rest);
-            UiBuild.Box(UiBuild.LocalizedLabel("RestTitle", rest.transform, UiKeys.Map.Rest, 30f, UiPalette.Text), 18f, 12f, CampCardWidth - 36f, 44f);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("RestTitle", rest.transform, UiKeys.Map.Rest, 30f, UiPalette.Text).rectTransform, 18f, 12f, 18f, CampCards.Height - 56f);
             TextMeshProUGUI restBody = UiBuild.Label("RestBody", rest.transform, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft);
-            UiBuild.Box(restBody, 18f, 64f, CampCardWidth - 36f, CampCardHeight - 76f);
+            UiBuild.Stretch(restBody.rectTransform, 18f, 64f, 18f, 12f);
             Image mend = Rounded("Mend", choices, UiPalette.Button, 8f);
-            UiBuild.Box(mend, CampSideMargin + CampCardWidth + CampCardGap, CampCardsTop, CampCardWidth, CampCardHeight);
+            UiBuild.Box(mend, CampCards.Left(2, 1), CampCards.Top, CampCards.Width(2), CampCards.Height);
             Button mendButton = UiBuild.MakeButton(mend);
-            UiBuild.Box(UiBuild.LocalizedLabel("MendTitle", mend.transform, UiKeys.Map.Mend, 30f, UiPalette.Text), 18f, 12f, CampCardWidth - 36f, 44f);
-            UiBuild.Box(UiBuild.LocalizedLabel("MendBody", mend.transform, UiKeys.Map.MendBody, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft), 18f, 64f, CampCardWidth - 36f, CampCardHeight - 76f);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("MendTitle", mend.transform, UiKeys.Map.Mend, 30f, UiPalette.Text).rectTransform, 18f, 12f, 18f, CampCards.Height - 56f);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("MendBody", mend.transform, UiKeys.Map.MendBody, 19f, UiPalette.Text, TextAlignmentOptions.TopLeft).rectTransform, 18f, 64f, 18f, 12f);
+
+            // The forge card (stage 23): the third, in the unique's dark gold, laid for three; on only while a recipe is ready on a board.
+            Image forge = Rounded("Forge", choices, UiPalette.ForgeCard, 8f);
+            UiBuild.Box(forge, CampCards.Left(3, 2), CampCards.Top, CampCards.Width(3), CampCards.Height);
+            Button forgeButton = UiBuild.MakeButton(forge);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("ForgeTitle", forge.transform, UiKeys.Map.Forge, 30f, UiPalette.ForgeCardText).rectTransform, 18f, 12f, 18f, CampCards.Height - 56f);
+            TextMeshProUGUI forgeBody = UiBuild.ShrinkToFit(UiBuild.Label("ForgeBody", forge.transform, 17f, UiPalette.ForgeCardText, TextAlignmentOptions.TopLeft), 12f);
+            UiBuild.Stretch(forgeBody.rectTransform, 18f, 64f, 18f, 12f);
+            forge.gameObject.SetActive(false);
 
             // The mend step (round 35): the chosen item on a plate (its icon, its tier before and after, its effects before and
             // after), then back and confirm. The plate shows once an item is chosen on the boards.
@@ -210,6 +220,30 @@ namespace F1.Editor.Setup
             UiBuild.Silence(confirmButton);
             UiBuild.Stretch(UiBuild.LocalizedLabel("MendConfirmLabel", confirm.transform, UiKeys.Map.MendConfirm, 24f, UiPalette.Text, TextAlignmentOptions.Center).rectTransform);
             mendStep.gameObject.SetActive(false);
+
+            // The forge step (stage 23), the mend step's shape: the chosen base and its catalyst on a plate (the base's icon, what they become,
+            // the result's effects), then back and the forge button in the unique's gold.
+            RectTransform forgeStep = UiBuild.Rect("CampForge", campBox.transform);
+            UiBuild.Stretch(forgeStep);
+            Image forgePlate = Rounded("ForgePlate", forgeStep, UiPalette.PanelLight, 8f);
+            UiBuild.Box(forgePlate, CampSideMargin, MendPlateTop, inner, MendPlateHeight);
+            Image forgeIcon = UiBuild.Image("ForgeIcon", forgePlate.transform, Color.white);
+            forgeIcon.preserveAspect = true;
+            UiBuild.Box(forgeIcon, 14f, 12f, 150f, MendPlateHeight - 24f);
+            TextMeshProUGUI forgeChange = UiBuild.ShrinkToFit(UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("ForgeChange", forgePlate.transform, 22f, UiPalette.Text), 184f, 12f, inner - 198f, 34f)), 14f);
+            TextMeshProUGUI forgeEffects = UiBuild.Label("ForgeEffects", forgePlate.transform, 18f, UiPalette.Text, TextAlignmentOptions.TopLeft);
+            UiBuild.Box(forgeEffects, 184f, 50f, inner - 198f, MendPlateHeight - 56f);
+            forgePlate.gameObject.SetActive(false);
+            Image forgeBack = Rounded("ForgeBack", forgeStep, UiPalette.ButtonQuiet, 8f);
+            UiBuild.Box(forgeBack, CampSideMargin, MendButtonsTop, buttonWidth, MendButtonHeight);
+            Button forgeBackButton = UiBuild.MakeButton(forgeBack);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("ForgeBackLabel", forgeBack.transform, UiKeys.Map.MendBack, 24f, UiPalette.Text, TextAlignmentOptions.Center).rectTransform);
+            Image forgeConfirm = Rounded("ForgeConfirm", forgeStep, UiPalette.ForgeCard, 8f);
+            UiBuild.Box(forgeConfirm, CampSideMargin + buttonWidth + CampCardGap, MendButtonsTop, buttonWidth, MendButtonHeight);
+            Button forgeConfirmButton = UiBuild.MakeButton(forgeConfirm);
+            UiBuild.Silence(forgeConfirmButton);
+            UiBuild.Stretch(UiBuild.LocalizedLabel("ForgeConfirmLabel", forgeConfirm.transform, UiKeys.Map.ForgeConfirm, 24f, UiPalette.ForgeCardText, TextAlignmentOptions.Center).rectTransform);
+            forgeStep.gameObject.SetActive(false);
             campCover.gameObject.SetActive(false);
 
             // The shop's window (round 44; Diablo II's stone since round 49), over the map like the camp's: the coin stack, the title and the
@@ -295,6 +329,18 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_mendEffects", mendEffects);
             UiBuild.SetReference(screen, "_mendBack", backButton);
             UiBuild.SetReference(screen, "_mendConfirm", confirmButton);
+            UiBuild.SetReference(screen, "_restCard", rest.rectTransform);
+            UiBuild.SetReference(screen, "_mendCard", mend.rectTransform);
+            UiBuild.SetReference(screen, "_forgeCard", forge.rectTransform);
+            UiBuild.SetReference(screen, "_forge", forgeButton);
+            UiBuild.SetReference(screen, "_forgeBody", forgeBody);
+            UiBuild.SetReference(screen, "_campForge", forgeStep.gameObject);
+            UiBuild.SetReference(screen, "_forgePlate", forgePlate.gameObject);
+            UiBuild.SetReference(screen, "_forgeIcon", forgeIcon);
+            UiBuild.SetReference(screen, "_forgeChange", forgeChange);
+            UiBuild.SetReference(screen, "_forgeEffects", forgeEffects);
+            UiBuild.SetReference(screen, "_forgeBack", forgeBackButton);
+            UiBuild.SetReference(screen, "_forgeConfirm", forgeConfirmButton);
             UiBuild.SetReference(screen, "_inventoryToggle", inventoryToggle.Button);
             UiBuild.SetReference(screen, "_inventoryToggleLabel", inventoryToggle.Label);
             UiBuild.SetReference(screen, "_party", party);

@@ -189,7 +189,7 @@ namespace F1.UI
                 ItemSlotView piece = NextPiece();
                 GridGeometry.Lay(piece.Rect, item.At.X, item.At.Y, item.Width, item.Height);
                 piece.ShowItem(item.Item, art?.OfItem(item.Item.Item.Id), item.At, item == picked, fatigueCost(item.Item), merges != null && merges(item),
-                    displaced != null && displaced.Contains(item));
+                    displaced != null && displaced.Contains(item), art?.GlowOfItem(item.Item.Item.Id));
             }
 
             for (int i = _piecesShown; i < _pieces.Count; i++)

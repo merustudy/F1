@@ -176,7 +176,7 @@ namespace F1.UI
 
         void BindItem(BattleItemView view, BattleItemState item, Placement at)
         {
-            view.Bind(item, at, _art.OfItem(item.Equipped.Item.Id), mirrored: _unit.Side == BattleSide.Enemy);
+            view.Bind(item, at, _art.OfItem(item.Equipped.Item.Id), _art.GlowOfItem(item.Equipped.Item.Id), mirrored: _unit.Side == BattleSide.Enemy);
         }
 
         /// <param name="targetable">True while a potion is waiting for this unit to be clicked.</param>

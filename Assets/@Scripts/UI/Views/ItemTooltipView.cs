@@ -27,6 +27,9 @@ namespace F1.UI
         [SerializeField] RectTransform _notchLeft;
         [SerializeField] RectTransform _notchRight;
         [SerializeField] TMP_Text _title;
+        [SerializeField] Image _plate;
+        [SerializeField] TMP_Text _plateTitle;
+        [SerializeField] TMP_Text _uniqueLine;
         [SerializeField] TMP_Text _facts;
         [SerializeField] TMP_Text _effects;
         [SerializeField] TMP_Text _fatigue;
@@ -46,7 +49,11 @@ namespace F1.UI
         /// <summary>The cell's box in the same space: what the card was placed against.</summary>
         public Rect Anchor { get; private set; }
 
-        public string Title => _title.text;
+        /// <summary>The name on the card: on the plate for a unique item (stage 23), on the title line otherwise.</summary>
+        public string Title => _plate.gameObject.activeSelf ? _plateTitle.text : _title.text;
+
+        /// <summary>Whether the card wears the plate head of a unique item (stage 23; round 42's mockup 7).</summary>
+        public bool PlateShown => _plate.gameObject.activeSelf;
 
         /// <summary>The notch shown, and where along its edge it stands (x from the card's left for the bottom, y from its top for a side).</summary>
         public Notch NotchShown { get; private set; }
@@ -93,13 +100,20 @@ namespace F1.UI
         Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage)
         {
             Item = item;
+            bool unique = item.Item.Unique;
             _title.text = UiText.ItemTitle(item);
+            _title.gameObject.SetActive(!unique);
+            _plate.gameObject.SetActive(unique);
+            _plateTitle.text = UiText.Name(item.Item.Name);
+            Set(_uniqueLine, unique ? UiStrings.Get(UiKeys.Item.UniqueTitle) : null);
+            string recipe = UiText.RecipeHint(item);
+            mergeHint = recipe == null ? mergeHint : string.IsNullOrEmpty(mergeHint) ? recipe : mergeHint + "\n" + recipe;
             UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage);
             Set(_facts, facts);
             Set(_effects, string.IsNullOrEmpty(starLine) ? effects : string.IsNullOrEmpty(effects) ? starLine : effects + "\n" + starLine);
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
-            _title.color = UiPalette.Rarity(item.Tier);
+            _title.color = UiText.TitleColor(item);
 
             gameObject.SetActive(true);
             transform.SetAsLastSibling();

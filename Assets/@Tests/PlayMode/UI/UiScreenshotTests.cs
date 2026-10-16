@@ -198,6 +198,45 @@ namespace F1.Tests
             yield return Capture("ko_28_battle_enemy_hit_pose");
         }
 
+        /// <summary>
+        /// The unique in battle (stage 23, round 70 follow-up 2): the gladius in the knight's place, its gold glow whole behind the icon
+        /// while the item charges (half lit, a second and a half in): the glow lies outside the charge mask.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheUniqueInBattle_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
+            RosterEntryView[] entries = UiTestUtil.Views<RosterEntryView>(lobby);
+            for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
+            {
+                int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
+                UiTestUtil.Click(entries[index].Rows[i]);
+            }
+
+            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+
+            // The row-1 weapon (the knight's longsword, 3x1) becomes the gladius, as the forge would leave it (no tier).
+            ExpeditionMember front = Managers.Expedition.Expedition.Members.OrderBy(m => m.Row).First();
+            BoardItem weapon = front.Board.ItemAt(0, 0);
+            weapon.Item = new EquippedItem(data.Items.Get("gladius"), isBase: true);
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            Managers.Expedition.AdvanceBattle(1500 - Managers.Expedition.Battle.Engine.TimeMs);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_55_battle_unique");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);
@@ -314,6 +353,21 @@ namespace F1.Tests
                             UiTestUtil.HoverSquare(party.ColumnOfRow(2).BoardView, 0, 1);
                             yield return Capture(prefix + "_35_map_tiers");
                             UiTestUtil.ClickSquare(board1, 0, 1);
+
+                            // The unique's card (stage 23): the gladius in the row-1 weapon's place, its gold rim and the plate head card.
+                            BoardItem rowOneWeapon = front.Board.ItemAt(0, 0);
+                            EquippedItem rowOneWeaponBefore = rowOneWeapon.Item;
+                            rowOneWeapon.Item = new EquippedItem(shotData.Items.Get("gladius"), isBase: true);
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            UiTestUtil.RightClickSquare(board1, 1, 0);
+                            yield return null;
+                            yield return Capture(prefix + "_54_map_unique_card");
+                            UiTestUtil.PressTheBackground();
+                            yield return null;
+                            rowOneWeapon.Item = rowOneWeaponBefore;
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
 
                             // A bag (Slice B stage 19): a pouch staged under the start bag, picked up by its empty square, held over the
                             // frame, which shows its squares while a bag is held.
@@ -436,6 +490,26 @@ namespace F1.Tests
                             yield return UiTestUtil.WaitForRedraw();
                             yield return Capture(prefix + "_34_camp_mend");
                             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
+                            yield return UiTestUtil.WaitForRedraw();
+
+                            // The forge (stage 23): a 3-star longsword with a 3-star whetstone lit under it makes the third card; its step
+                            // with the sword chosen. Then the staging is undone and the party rests as before.
+                            ExpeditionMember smith = Managers.Expedition.Expedition.Members.First(m => m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
+                            BoardItem smithsSword = smith.Board.ItemAt(0, 0);
+                            EquippedItem swordBefore = smithsSword.Item;
+                            smithsSword.Item = new EquippedItem(swordBefore.Item, isBase: true, tier: ItemTier.Tier3);
+                            UiTestUtil.Put(smith, new EquippedItem(data.Items.Get("whetstone"), tier: ItemTier.Tier3), 0, 1);
+                            map.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_52_camp_forge");
+                            UiTestUtil.Click(map, UiTestUtil.CampForge);
+                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_53_camp_forge_step");
+                            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeBack");
+                            yield return UiTestUtil.WaitForRedraw();
+                            smith.Board.Items.Remove(smith.Board.ItemAt(0, 1));
+                            smithsSword.Item = swordBefore;
+                            map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
                             UiTestUtil.Click(map, UiTestUtil.CampRest);
                             yield return UiTestUtil.WaitForRedraw();

@@ -278,8 +278,7 @@ namespace F1.Editor.Setup
 
         /// <summary>
         /// An item's piece (ItemSlotView), the board's, the inventory's and the merchant's alike: a plain piece the view colours (Diablo's
-        /// dark blue, round 49); the icon's box (turned at runtime) with the silhouette of a tier's outline behind the icon (off in Diablo's
-        /// look); the name for an item without an icon; the fatigue tag at the top-right, the merge mark and the tier's stars at the
+        /// dark blue, round 49); the icon's box (turned at runtime) with the gold glow of a unique item behind the icon (stage 23); the name for an item without an icon; the fatigue tag at the top-right, the merge mark and the tier's stars at the
         /// bottom-left; and for a bag shown as a thing, the grey and the black squares inside its rim. Takes no pointer.
         /// </summary>
         static ItemSlotView BuildItemSlot(Transform parent, string name)
@@ -301,6 +300,9 @@ namespace F1.Editor.Setup
 
             RectTransform art = UiBuild.Rect(name + "Art", frame.transform);
             UiBuild.Size(art, GridGeometry.Square - 2f * ItemSlotView.ArtMargin, GridGeometry.Square - 2f * ItemSlotView.ArtMargin);
+            // Behind the icon, the gold glow of a unique item (stage 23): the icon's silhouette widened 2px, laid by the view.
+            Image glow = UiBuild.Image(name + "Glow", art, Color.white);
+            glow.enabled = false;
             Image icon = UiBuild.Image(name + "Icon", art, Color.white);
             icon.preserveAspect = true;
             UiBuild.Stretch(icon.rectTransform);
@@ -346,6 +348,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_fatigueText", fatigueText);
             UiBuild.SetReference(view, "_tierTag", tierTag);
             UiBuild.SetReferences(view, "_pips", pips);
+            UiBuild.SetReference(view, "_glow", glow);
             UiBuild.SetReference(view, "_merge", merge.gameObject);
             UiBuild.SetReference(view, "_mergeText", mergeText);
             UiBuild.SetReference(view, "_bagWell", bagWell.gameObject);
@@ -358,7 +361,8 @@ namespace F1.Editor.Setup
         /// <summary>
         /// One item in battle (BattleItemView): its dark piece, which takes the right click (the card; round 47), and in it two copies of
         /// the icon's box (turned at runtime): the dark one, and the lit one inside a mask that grows from the piece's left as the item
-        /// charges, with the white of the brief brightening over its icon; the name for an item without an icon; the tier tag.
+        /// charges, with the white of the brief brightening over its icon; behind both the glow of a unique item (stage 23); the name for an
+        /// item without an icon; the tier tag.
         /// </summary>
         static BattleItemView BuildBattleItem(Transform parent)
         {
@@ -371,6 +375,12 @@ namespace F1.Editor.Setup
             Button button = UiBuild.MakeButton(piece);
             UiBuild.Silence(button);
             button.transition = Selectable.Transition.None;
+
+            // Behind both copies of the icon, the gold glow of a unique item (stage 23): turned and swelled with them, outside the charge
+            // mask, so it is whole while the item charges.
+            RectTransform glowArt = UiBuild.Rect("ItemGlowArt", piece.transform);
+            Image glow = UiBuild.Image("ItemGlow", glowArt, Color.white);
+            glow.enabled = false;
 
             RectTransform darkArt = UiBuild.Rect("ItemDarkArt", piece.transform);
             Image darkIcon = UiBuild.Image("ItemDarkIcon", darkArt, Color.white);
@@ -408,6 +418,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_tierTag", tierTag);
             UiBuild.SetReferences(view, "_pips", pips);
+            UiBuild.SetReference(view, "_glowArt", glowArt);
+            UiBuild.SetReference(view, "_glow", glow);
 
             piece.gameObject.SetActive(false);
             return view;

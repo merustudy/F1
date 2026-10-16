@@ -1185,6 +1185,56 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673459348865026
+  - m_Id: 5628931565674496
+    m_Key: Map.Forge
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838208
+  - m_Id: 5628931574063104
+    m_Key: Map.ForgeBody
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838209
+  - m_Id: 5628931578257408
+    m_Key: Map.ForgeTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838210
+  - m_Id: 5628931578257409
+    m_Key: Map.ForgeHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838211
+  - m_Id: 5628931578257410
+    m_Key: Map.ForgeChoose
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838212
+  - m_Id: 5628931578257411
+    m_Key: Map.ForgeConfirm
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838213
+  - m_Id: 5628931578257412
+    m_Key: Item.Unique
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838214
+  - m_Id: 5628931578257413
+    m_Key: Item.UniqueLine
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838215
+  - m_Id: 5628931578257414
+    m_Key: Item.UniqueTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838216
+  - m_Id: 5628931578257415
+    m_Key: Item.Recipe
+    m_Metadata:
+      m_Items:
+      - rid: 8623673467615838217
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2220,3 +2270,51 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The last tier of an item.
+    - rid: 8623673467615838208
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The camp''s forge (Slice B stage 23): the title of its card
+          and of its step. Shown only while a recipe is ready on a board.'
+    - rid: 8623673467615838209
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the forge card. {0} = the mercenary. {1} = the base item
+          with its tier. {2} = the catalyst with its tier. {3} = the unique item
+          made.
+    - rid: 8623673467615838210
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the camp window in the forge step. {0} = floor.
+    - rid: 8623673467615838211
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In the camp window in the forge step: the price.'
+    - rid: 8623673467615838212
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the board panel in the forge step: which boards take a
+          click.'
+    - rid: 8623673467615838213
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Forges the chosen item and goes on.
+    - rid: 8623673467615838214
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In a unique item's facts (stage 23), first.
+    - rid: 8623673467615838215
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under a unique item''s facts (stage 23): the party holds
+          one.'
+    - rid: 8623673467615838216
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the plate of a unique item's card (stage 23). A unique
+          has no tier.
+    - rid: 8623673467615838217
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the card of a recipe's base or catalyst (stage 23). {0}
+          = the base with its tier. {1} = the catalyst with its tier. {2} = the unique
+          item.

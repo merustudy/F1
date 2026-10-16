@@ -34,6 +34,7 @@ namespace F1.UI
         [SerializeField] GameObject _fatigue;
         [SerializeField] TMP_Text _fatigueText;
         [SerializeField] Image _tierTag;
+        [SerializeField] Image _glow;
         [SerializeField] Image[] _pips;
         [SerializeField] GameObject _merge;
         [SerializeField] TMP_Text _mergeText;
@@ -87,6 +88,9 @@ namespace F1.UI
         /// <summary>The pips' colour (the tier's one colour, round 69), or null while none show.</summary>
         public Color? PipColor => Pips > 0 ? _pips[0].color : (Color?)null;
 
+        /// <summary>Whether the gold glow of a unique item (stage 23) shows behind its icon.</summary>
+        public bool UniqueGlowShown => _glow.enabled;
+
         /// <summary>The words of the merge mark, or an empty string while it is hidden.</summary>
         public string MergeMark => _merge.activeSelf ? _mergeText.text : string.Empty;
 
@@ -102,7 +106,8 @@ namespace F1.UI
         /// <param name="fatigueCost">What the item adds to its owner's fatigue when a battle starts; 0 hides the tag.</param>
         /// <param name="merges">Whether the held item would merge into this one: the piece is marked with the tier the merge makes.</param>
         /// <param name="displaced">Whether a held item put where its ghost is would push this one out to the inventory.</param>
-        public void ShowItem(EquippedItem item, Sprite icon, Placement at, bool picked, int fatigueCost, bool merges, bool displaced = false)
+        /// <param name="glow">The gold glow behind a unique item's icon (stage 23), or null.</param>
+        public void ShowItem(EquippedItem item, Sprite icon, Placement at, bool picked, int fatigueCost, bool merges, bool displaced = false, Sprite glow = null)
         {
             Item = item;
             Bag = null;
@@ -129,6 +134,7 @@ namespace F1.UI
             _icon.sprite = icon;
             _icon.enabled = pictured;
             _icon.color = Color.white;
+            ShowGlow(glow);
             ShowTier(TierShown, pictured);
 
             _text.enabled = !pictured;
@@ -162,6 +168,7 @@ namespace F1.UI
             TierShown = null;
             Pips = 0;
             _tierTag.gameObject.SetActive(false);
+            _glow.enabled = false;
             _fatigue.SetActive(false);
         }
 
@@ -188,6 +195,7 @@ namespace F1.UI
             TierShown = null;
             Pips = 0;
             _tierTag.gameObject.SetActive(false);
+            _glow.enabled = false;
             _fatigue.SetActive(false);
         }
 
@@ -214,6 +222,20 @@ namespace F1.UI
         }
 
         /// <summary>The icon's box inside the piece, turned as the item lies: drawn for the unturned item, so its box swaps sides on an odd turn.</summary>
+        /// <summary>
+        /// The gold glow of a unique item (stage 23) behind its icon: the icon's silhouette widened 2px, drawn by the art pipeline, laid
+        /// over the icon at the scale the icon is shown at so that the two coincide. Always as bright; it spills a little over the piece.
+        /// </summary>
+        void ShowGlow(Sprite glow)
+        {
+            _glow.enabled = glow != null && _icon.enabled;
+            if (_glow.enabled)
+            {
+                _glow.sprite = glow;
+                GridGeometry.LayGlow(_glow.rectTransform, _art.sizeDelta, _icon.sprite, glow);
+            }
+        }
+
         void LayArt(int turns)
         {
             _art.anchorMin = new Vector2(0.5f, 0.5f);

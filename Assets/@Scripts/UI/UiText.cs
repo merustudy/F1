@@ -195,7 +195,7 @@ namespace F1.UI
         /// </summary>
         public static string TooltipLines(EquippedItem item)
         {
-            var lines = new List<string> { Colored(ItemTitle(item), UiPalette.Rarity(item.Tier)) };
+            var lines = new List<string> { Colored(ItemTitle(item), TitleColor(item)) };
             lines.AddRange(ItemFacts(item));
             foreach (string effect in ItemEffects(item))
             {
@@ -203,7 +203,54 @@ namespace F1.UI
             }
 
             AddFatigue(lines, item);
+            if (item.Item.Unique)
+            {
+                lines.Add(Colored(UiStrings.Get(UiKeys.Item.UniqueLine), UiPalette.Unique));
+            }
+
+            string recipe = RecipeHint(item);
+            if (recipe != null)
+            {
+                lines.Add(Colored(recipe, UiPalette.TextDim));
+            }
+
             return string.Join("\n", lines);
+        }
+
+        /// <summary>The colour of an item's name: Diablo's unique gold for a unique item (stage 23), the tier's colour otherwise.</summary>
+        public static Color TitleColor(EquippedItem item)
+        {
+            return item.Item.Unique ? UiPalette.Unique : UiPalette.Rarity(item.Tier);
+        }
+
+        /// <summary>
+        /// On a recipe's base or catalyst (stage 23): what it forges into at a camp, with what, or null for an item in no recipe. The recipe is
+        /// never hidden (Docs/Design/02_Combat_System.md §4 "담금질").
+        /// </summary>
+        public static string RecipeHint(EquippedItem item)
+        {
+            StaticData data = Managers.Data.Data;
+            foreach (RecipeData recipe in data.Recipes.Ordered)
+            {
+                if (recipe.BaseItem != item.Item.Id && recipe.Catalyst != item.Item.Id)
+                {
+                    continue;
+                }
+
+                string baseTitle = ItemTitle(new EquippedItem(data.Items.Get(recipe.BaseItem), tier: recipe.BaseTier));
+                string catalystTitle = ItemTitle(new EquippedItem(data.Items.Get(recipe.Catalyst), tier: recipe.CatalystTier));
+                return UiStrings.Get(UiKeys.Item.Recipe, baseTitle, catalystTitle, Name(data.Items.Get(recipe.Result).Name));
+            }
+
+            return null;
+        }
+
+        /// <summary>The forge card's words (stage 23): whose base, with which catalyst, into what.</summary>
+        public static string ForgeBody(ForgeOption option, ExpeditionMember member)
+        {
+            StaticData data = Managers.Data.Data;
+            string who = Name(data.Mercenaries.Get(member.MercenaryId).Name);
+            return UiStrings.Get(UiKeys.Map.ForgeBody, who, ItemTitle(option.BaseItem.Item), ItemTitle(option.Catalyst.Item), Name(data.Items.Get(option.Recipe.Result).Name));
         }
 
         /// <summary>An item's category, size, cooldown, where it works and its effects on one line, the fatigue last.</summary>
@@ -267,6 +314,11 @@ namespace F1.UI
             };
 
             // A melee weapon says so: the stars of a whetstone strengthen only those (stage 20).
+            if (data.Unique)
+            {
+                facts.Add(UiStrings.Get(UiKeys.Item.Unique));
+            }
+
             if (data.Melee)
             {
                 facts.Add(UiStrings.Get(UiKeys.Item.Melee));

@@ -2095,6 +2095,91 @@ namespace F1.Tests
             Assert.AreEqual(UiStrings.Get(UiKeys.Map.NodeTitle, nodes.FloorCount, "보스"), UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"));
         }
 
+        /// <summary>
+        /// Stage 23 (round 70): with a 3-star longsword and a 3-star whetstone lit under it, the camp offers the forge as a third card
+        /// (the three share the window), its step shows what the recipe makes, and forging puts the gladius in the longsword's place as the
+        /// base weapon, with the whetstone gone, the camp spent, the gold rim on its piece and the plate head on its card.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Camp_Forge_OffersTheRecipeAsAThirdCard_ShowsWhatItMakes_AndForgesTheUniqueInPlace()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMap nodes = Managers.Expedition.Expedition.Map;
+            ExpeditionMember smith = Managers.Expedition.Expedition.Members.First(m => m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
+            BoardItem sword = smith.Board.ItemAt(0, 0);
+            sword.Item = new EquippedItem(sword.Item.Item, isBase: true, tier: ItemTier.Tier3);
+            UiTestUtil.Put(smith, new EquippedItem(data.Items.Get("whetstone"), tier: ItemTier.Tier3), 0, 1);
+            ItemData gladius = data.Items.Get("gladius");
+
+            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
+            yield return StandOn(before);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            UiTestUtil.Click(map.NodeView(before.NextNodeIds[0]).Button);
+            yield return null;
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForRedraw();
+
+            // Three cards: the forge card names the smith, the recipe and the gladius; rest and mend narrowed to share the window.
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampForge).gameObject.activeSelf, "A recipe is ready on a board.");
+            Assert.AreEqual(CampCards.Width(3), ((RectTransform)UiTestUtil.At(map, UiTestUtil.CampRest)).sizeDelta.x, 0.5f);
+            Assert.AreEqual(CampCards.Left(3, 2), ((RectTransform)UiTestUtil.At(map, UiTestUtil.CampForge)).anchoredPosition.x, 0.5f);
+            string body = UiTestUtil.TextAt(map, UiTestUtil.CampForge + "/ForgeBody");
+            StringAssert.Contains(UiText.Name(data.Mercenaries.Get(smith.MercenaryId).Name), body);
+            StringAssert.Contains(UiText.Name(gladius.Name), body);
+
+            // The forge step: the smith's sword is chosen already, the plate says what goes in and what comes out, the boards wait for a click.
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyBoardView board = party.ColumnOfRow(smith.Row).BoardView;
+            UiTestUtil.Click(map, UiTestUtil.CampForge);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampForge").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.ForgeTitle, nodes.FloorCount - 1), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampTitle"));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.ForgeHint), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampHint"));
+            StringAssert.Contains(UiText.ItemTitle(sword.Item), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"), "The chosen sword's facts (the step's hint shows while nothing is chosen).");
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampForge/ForgePlate").gameObject.activeSelf, "The first ready forge is chosen.");
+            Assert.IsTrue(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampForge/ForgeConfirm").interactable);
+            Assert.IsTrue(board.PieceAt(0, 0).IsPicked, "The sword is the chosen piece.");
+            string change = UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampForge/ForgePlate/ForgeChange");
+            StringAssert.Contains(UiText.ItemTitle(sword.Item), change);
+            StringAssert.Contains(UiText.Name(gladius.Name), change);
+            var result = new EquippedItem(gladius, isBase: true);
+            StringAssert.Contains(UiText.Effect(gladius.Effects[0], result, data.Balance), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampForge/ForgePlate/ForgeEffects"));
+
+            // Back leaves the step with the three cards; forge again and confirm.
+            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeBack");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampForge).gameObject.activeSelf);
+            UiTestUtil.Click(map, UiTestUtil.CampForge);
+            yield return UiTestUtil.WaitForRedraw();
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeConfirm");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase, "The camp is spent.");
+            EquippedItem made = UiTestUtil.ItemAt(smith, 0, 0);
+            Assert.AreEqual("gladius", made.Item.Id);
+            Assert.IsTrue(made.IsBase);
+            Assert.AreEqual(ItemTier.Common, made.Tier, "A unique has no tier (round 70 follow-up 3).");
+            Assert.IsNull(smith.Board.ItemAt(0, 1), "The whetstone was used up.");
+            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.IsTrue(board.PieceAt(0, 0).UniqueGlowShown, "The unique's gold glow behind its icon.");
+            Assert.IsNull(board.PieceAt(0, 0).TierShown, "No pips: a unique has no tier.");
+
+            // Its card: the name on the plate head, "유니크" under it, the one-per-party line in Diablo's tooltip words.
+            UiTestUtil.RightClickSquare(board, 1, 0);
+            yield return null;
+            Assert.IsTrue(party.Tooltip.IsShown);
+            Assert.IsTrue(party.Tooltip.PlateShown);
+            Assert.AreEqual(UiText.Name(gladius.Name), party.Tooltip.Title);
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.UniqueTitle), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipUnique"));
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.UniqueLine), UiText.TooltipLines(made));
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(party.Tooltip.IsShown);
+        }
+
         [UnityTest]
         public IEnumerator PartySide_AWhetstonesStars_ShowWhilePointedAtOrHeld_LitOnAMeleeWeapon_AndTheCardsSaySo()
         {
@@ -2300,7 +2385,7 @@ namespace F1.Tests
 
             // An item without art: its name stands in.
             BattleItemView cell = UiTestUtil.Views<BattleItemView>(boards.Single(b => b.Unit == units[0].Unit))[0];
-            cell.Bind(units[0].Unit.Items[0], cell.At, null, mirrored: false);
+            cell.Bind(units[0].Unit.Items[0], cell.At, null, null, mirrored: false);
             Assert.IsNull(cell.Icon);
             Assert.IsTrue(cell.GetComponentInChildren<TMPro.TMP_Text>().enabled);
             Assert.AreEqual(UiText.Name(units[0].Unit.Items[0].Equipped.Item.Name), cell.GetComponentInChildren<TMPro.TMP_Text>().text);

@@ -142,6 +142,11 @@ namespace F1.UI
         public static readonly Color Bone = Rgb(0xCD, 0xC0, 0xA0);
         public static readonly Color DiabloGold = Rgb(0xC7, 0xB3, 0x77);
 
+        /// <summary>A unique item (stage 23): Diablo's unique gold for its name, its plate and the rim round its piece; the forge card's dark gold and its light words.</summary>
+        public static readonly Color Unique = DiabloGold;
+        public static readonly Color ForgeCard = Rgb(0x5A, 0x48, 0x1E);
+        public static readonly Color ForgeCardText = Rgb(0xF0, 0xE0, 0xA8);
+
         /// <summary>
         /// The one colour of a tier, for its pips and its word (round 49 Diablo II's rarity colours; round 69 the user's ladder on the pips —
         /// 1성 the magic blue, 2성 silver, 3성 the rare yellow — and the words follow the pips, so a tier reads the same everywhere). Common

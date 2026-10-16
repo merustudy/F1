@@ -107,5 +107,25 @@ namespace F1.UI
         {
             return Quaternion.Euler(0f, 0f, -90f * turns);
         }
+
+        /// <summary>
+        /// The size of a unique item's glow (stage 23) in the icon's box: the glow picture (the icon's silhouette widened, so bigger
+        /// than the icon by the same margin on every side) at the scale the icon is shown at in the box, so that the two coincide.
+        /// </summary>
+        public static Vector2 GlowSize(Vector2 artBox, Vector2 iconPixels, Vector2 glowPixels)
+        {
+            float scale = Mathf.Min(artBox.x / iconPixels.x, artBox.y / iconPixels.y);
+            return glowPixels * scale;
+        }
+
+        /// <summary>Lays a unique item's glow (stage 23) in the middle of the icon's box, at <see cref="GlowSize"/>.</summary>
+        public static void LayGlow(RectTransform glow, Vector2 artBox, Sprite icon, Sprite glowSprite)
+        {
+            glow.anchorMin = new Vector2(0.5f, 0.5f);
+            glow.anchorMax = new Vector2(0.5f, 0.5f);
+            glow.pivot = new Vector2(0.5f, 0.5f);
+            glow.anchoredPosition = Vector2.zero;
+            glow.sizeDelta = GlowSize(artBox, icon.rect.size, glowSprite.rect.size);
+        }
     }
 }

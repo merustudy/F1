@@ -37,6 +37,8 @@ namespace F1.UI
         [SerializeField] RightClick _rightClick;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _tierTag;
+        [SerializeField] RectTransform _glowArt;
+        [SerializeField] Image _glow;
         [SerializeField] Image[] _pips;
 
         BattleItemState _item;
@@ -94,6 +96,9 @@ namespace F1.UI
         /// <summary>The pips' colour (the tier's one colour, round 69), or null while none show.</summary>
         public Color? PipColor => Pips > 0 ? _pips[0].color : (Color?)null;
 
+        /// <summary>Whether the gold glow of a unique item (stage 23) shows behind its icon.</summary>
+        public bool UniqueGlowShown => _glow.enabled;
+
         /// <summary>The piece's ground colour on show: none in battle (round 49).</summary>
         public Color Ground => _frame.color;
 
@@ -101,8 +106,9 @@ namespace F1.UI
 
         /// <param name="at">Where the item lies (the piece is laid by the board; this turns the icon).</param>
         /// <param name="icon">The item's icon, or null when it has none.</param>
+        /// <param name="glow">The gold glow behind a unique item's icon (stage 23), or null.</param>
         /// <param name="mirrored">Whether the icon points the other way: the enemy's side.</param>
-        public void Bind(BattleItemState item, Placement at, Sprite icon, bool mirrored)
+        public void Bind(BattleItemState item, Placement at, Sprite icon, Sprite glow, bool mirrored)
         {
             _item = item;
             At = at;
@@ -117,8 +123,16 @@ namespace F1.UI
             _mirror = mirrored ? -1f : 1f;
             LayArt(_darkArt, at.Turns, false);
             LayArt(_litArt, at.Turns, true);
+            LayArt(_glowArt, at.Turns, false);
             ScaleArt(1f);
             ShowTier(item.Equipped.Tier, icon);
+            // The glow of a unique item lies behind both copies of the icon, outside the charge mask: whole while the item charges.
+            _glow.enabled = glow != null && icon != null;
+            if (_glow.enabled)
+            {
+                _glow.sprite = glow;
+                GridGeometry.LayGlow(_glow.rectTransform, _glowArt.sizeDelta, icon, glow);
+            }
             _passive = item.Equipped.Item.IsPassive;
             ShowActive(item.Active);
             _pulseAge = -1f;
@@ -237,6 +251,7 @@ namespace F1.UI
             var scale = new Vector3(_mirror * swell, swell, 1f);
             _litArt.localScale = scale;
             _darkArt.localScale = scale;
+            _glowArt.localScale = scale;
         }
 
         /// <summary>The tier's pips in the tier's colour on no pill (round 69; round 49 Diablo's colours on stars); nothing for Common.</summary>

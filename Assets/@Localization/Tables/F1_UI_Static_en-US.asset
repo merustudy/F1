@@ -1082,6 +1082,49 @@ MonoBehaviour:
     m_Localized: 3-star
     m_Metadata:
       m_Items: []
+  - m_Id: 5628931565674496
+    m_Localized: Forge
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931574063104
+    m_Localized: "{0}'s {1} + {2}\n\u2192 {3}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5628931578257408
+    m_Localized: "Floor {0} \xB7 Camp \xB7 Forge"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5628931578257409
+    m_Localized: Forge instead of resting. The ingredient used up is gone.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257410
+    m_Localized: Choose the weapon to forge on a board on the left.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257411
+    m_Localized: Forge it
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257412
+    m_Localized: Unique
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257413
+    m_Localized: 'Unique: one per party'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257414
+    m_Localized: Unique
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5628931578257415
+    m_Localized: "Forge (camp): {0} + {1} (star lit) \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1205,3 +1248,6 @@ MonoBehaviour:
         - id: 3903216390496256
         - id: 3903216390496257
         - id: 3937123085312000
+        - id: 5628931574063104
+        - id: 5628931578257408
+        - id: 5628931578257415

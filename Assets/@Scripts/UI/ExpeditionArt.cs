@@ -67,7 +67,7 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its two poses), then the items, then the potions, each in id order.</summary>
+        /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its two poses), then the items (a unique item's icon with its glow), then the potions, each in id order.</summary>
         public static IEnumerable<string> Addresses(StaticData data)
         {
             foreach (JobData job in data.Jobs.Ordered)
@@ -95,6 +95,11 @@ namespace F1.UI
                 if (item.Icon != null)
                 {
                     yield return item.Icon;
+                }
+
+                if (item.GlowIcon != null)
+                {
+                    yield return item.GlowIcon;
                 }
             }
 
@@ -174,6 +179,12 @@ namespace F1.UI
         public Sprite OfItem(string itemId)
         {
             return Of(_data.Items.Get(itemId).Icon);
+        }
+
+        /// <summary>The gold glow behind a unique item's icon (stage 23), or null for an item that is not unique or has no icon.</summary>
+        public Sprite GlowOfItem(string itemId)
+        {
+            return Of(_data.Items.Get(itemId).GlowIcon);
         }
 
         /// <summary>The bottle of a potion, or null when the potion has none.</summary>
