@@ -58,6 +58,7 @@ namespace F1.Editor.Data
                 Mercenaries = Map(StaticDataFiles.Mercenary, readSource, MercenaryMapper.Map, errors),
                 FatigueStates = Map(StaticDataFiles.FatigueState, readSource, FatigueStateMapper.Map, errors),
                 Recipes = Map(StaticDataFiles.Recipe, readSource, RecipeMapper.Map, errors),
+                Levels = Map(StaticDataFiles.Level, readSource, LevelMapper.Map, errors),
             };
 
             // Row errors are reported before data set checks: a broken row would only cause

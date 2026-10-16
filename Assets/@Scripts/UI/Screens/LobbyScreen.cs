@@ -306,6 +306,7 @@ namespace F1.UI
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 chip.Show(
                     UiText.Mercenary(mercenary.Id),
+                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
                     row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
                     UiText.JobLine(mercenary.JobId, affliction),
                     affliction != null,
@@ -372,6 +373,7 @@ namespace F1.UI
                     affliction == null ? null : UiText.FatigueStateName(affliction),
                     affliction == null ? null : UiText.Name(affliction.Description),
                     Managers.Run.CanDismiss(mercenary.Id));
+                entry.ShowLevel(mercenary.Level, mercenary.Exp, LevelRules.ExpToNext(data, mercenary));
                 entry.transform.SetAsLastSibling();
             }
 
@@ -464,6 +466,7 @@ namespace F1.UI
                 view.Show(
                     UiText.Mercenary(recruit.Id),
                     UiText.Name(job.Name),
+                    UiStrings.Get(UiKeys.Lobby.Level, LevelRules.FirstLevel) + " · " + UiStrings.Get(UiKeys.Lobby.Fatigue, 0, balance.MaxFatigue),
                     UiText.Passive(job),
                     UiStrings.Get(UiKeys.Lobby.Hire, balance.HirePrice),
                     Managers.Run.CanHire(i) == HireCheck.Ok);

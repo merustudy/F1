@@ -35,6 +35,29 @@ namespace F1.Flow
             {
                 From13To14(save);
             }
+
+            if (save.SchemaVersion == 14)
+            {
+                From14To15(save);
+            }
+        }
+
+        /// <summary>Version 15 (Slice C stage 27) adds a mercenary's level and experience. A version 14 mercenary is level 1 with none.</summary>
+        static void From14To15(RunSaveData save)
+        {
+            if (save.Run?.Roster != null)
+            {
+                foreach (MercenaryRecord mercenary in save.Run.Roster)
+                {
+                    if (mercenary != null)
+                    {
+                        mercenary.Level = 1;
+                        mercenary.Exp = 0;
+                    }
+                }
+            }
+
+            save.SchemaVersion = 15;
         }
 
         /// <summary>

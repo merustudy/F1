@@ -69,6 +69,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-app
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aa47a7171b63847c584987db93c49756
+    m_Address: data/app/level
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d74095c1dcabf4a09bf9a294599803ac
     m_Address: data/app/mercenary
     m_ReadOnly: 0

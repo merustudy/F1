@@ -31,6 +31,7 @@ namespace F1.Data
                 Mercenaries = Read<MercenaryData>(StaticDataFiles.Mercenary, readJson),
                 FatigueStates = Read<FatigueStateData>(StaticDataFiles.FatigueState, readJson),
                 Recipes = Read<RecipeData>(StaticDataFiles.Recipe, readJson),
+                Levels = Read<LevelData>(StaticDataFiles.Level, readJson),
             });
         }
 
@@ -51,6 +52,7 @@ namespace F1.Data
                 { StaticDataFiles.Mercenary.GeneratedFileName, StaticDataJson.Serialize(new List<MercenaryData>(data.Mercenaries.Ordered)) },
                 { StaticDataFiles.Recipe.GeneratedFileName, StaticDataJson.Serialize(new List<RecipeData>(data.Recipes.Ordered)) },
                 { StaticDataFiles.FatigueState.GeneratedFileName, StaticDataJson.Serialize(new List<FatigueStateData>(data.FatigueStates.Ordered)) },
+                { StaticDataFiles.Level.GeneratedFileName, StaticDataJson.Serialize(new List<LevelData>(data.Levels)) },
             };
         }
 

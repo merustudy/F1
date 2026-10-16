@@ -196,7 +196,7 @@ namespace F1.UI
             return string.Join(", ", parts);
         }
 
-        /// <summary>One card per row the party can stand in, as the lobby formed it: the name, the job with the member's state, the fatigue pips. An empty row says so.</summary>
+        /// <summary>One card per row the party can stand in, as the lobby formed it: the name and the level (stage 27), the job with the member's state, the fatigue pips. An empty row says so.</summary>
         void RefreshParty(StaticData data, RunState run)
         {
             BalanceData balance = data.Balance;
@@ -223,6 +223,7 @@ namespace F1.UI
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 _cards[i].Show(
                     UiText.Mercenary(slot.MercenaryId),
+                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
                     UiText.JobLine(mercenary.JobId, affliction),
                     mercenary.Fatigue,
                     balance.MaxFatigue,

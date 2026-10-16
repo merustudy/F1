@@ -233,13 +233,16 @@ namespace F1.Editor.Setup
             UiBuild.Size(background, 176f, 102f);
             Transform chip = background.transform;
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipName", chip, 20f, UiPalette.Text)), 10f, 6f, 108f, 28f);
-            TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipRow", chip, 16f, UiPalette.Brass, TextAlignmentOptions.Right)), 118f, 8f, 48f, 24f);
-            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipJob", chip, 16f, UiPalette.TextDim)), 10f, 36f, 156f, 24f);
+            // The level at the right of the name (the mock's "Lv 2", stage 27), the row the mercenary holds at the right of the job.
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipLevel", chip, 16f, UiPalette.Bone, TextAlignmentOptions.Right)), 118f, 8f, 48f, 24f);
+            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipJob", chip, 16f, UiPalette.TextDim)), 10f, 36f, 104f, 24f);
+            TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipRow", chip, 16f, UiPalette.Brass, TextAlignmentOptions.Right)), 114f, 36f, 52f, 24f);
             RectTransform pips = UiBuild.Box(UiBuild.Rect("ChipPips", chip), 10f, 72f, 156f, 10f);
             UiBar[] pipRow = FatiguePipRow("ChipPip", pips, 156f, 10f);
 
             var view = background.gameObject.AddComponent<RosterChipView>();
             UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_level", level);
             UiBuild.SetReference(view, "_row", row);
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReferences(view, "_pips", pipRow);
@@ -279,7 +282,8 @@ namespace F1.Editor.Setup
             UiBuild.Size(background, 932f, 110f);
             Transform line = background.transform;
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateName", line, 30f, UiPalette.Text)), 20f, 10f, 260f, 40f);
-            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateJob", line, 22f, UiPalette.TextDim)), 290f, 16f, 380f, 32f);
+            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateJob", line, 22f, UiPalette.TextDim)), 290f, 16f, 180f, 32f);
+            TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateDetail", line, 18f, UiPalette.Bone)), 480f, 19f, 210f, 28f);
             TextMeshProUGUI passive = UiBuild.Box(UiBuild.Label("CandidatePassive", line, 18f, UiPalette.TextDim, TextAlignmentOptions.TopLeft), 20f, 58f, 660f, 44f);
             ButtonParts hire = UiBuild.Button("CandidateHire", line, UiPalette.Button, 22f);
             UiBuild.Box(hire.Rect, 700f, 28f, 212f, 56f);
@@ -287,6 +291,7 @@ namespace F1.Editor.Setup
             var view = background.gameObject.AddComponent<CandidateView>();
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
+            UiBuild.SetReference(view, "_detail", detail);
             UiBuild.SetReference(view, "_passive", passive);
             UiBuild.SetReference(view, "_hire", hire.Button);
             UiBuild.SetReference(view, "_hireLabel", hire.Label);
@@ -358,7 +363,10 @@ namespace F1.Editor.Setup
             ButtonParts remove = UiBuild.LocalizedButton("EntryRemove", entry, UiKeys.Lobby.Remove, UiPalette.ButtonQuiet, 22f);
             UiBuild.Box(remove.Rect, 1000f, 16f, 112f, 60f);
 
-            // Dismissing (stage 26) at the far right; the room between is for the level and experience of stage 27.
+            // The level and the experience (stage 27, the mock's block: "Lv 2", "경험치 4/20" and the bar), then dismissing (stage 26) at the far right.
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("EntryLevel", entry, 28f, UiPalette.Bone)), 1140f, 8f, 110f, 40f);
+            TextMeshProUGUI exp = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("EntryExp", entry, 18f, UiPalette.TextDim)), 1250f, 16f, 230f, 30f);
+            UiBar expBar = UiBuild.Box(UiBuild.Bar("EntryExpBar", entry, UiPalette.Bone), 1140f, 56f, 340f, 8f);
             ButtonParts dismiss = UiBuild.LocalizedButton("EntryDismiss", entry, UiKeys.Lobby.Dismiss, UiPalette.ButtonQuiet, 20f);
             UiBuild.Box(dismiss.Rect, 1620f, 16f, 152f, 60f);
 
@@ -373,6 +381,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReferences(view, "_rowFrames", rowFrames);
             UiBuild.SetReference(view, "_remove", remove.Button);
             UiBuild.SetReference(view, "_dismiss", dismiss.Button);
+            UiBuild.SetReference(view, "_level", level);
+            UiBuild.SetReference(view, "_exp", exp);
+            UiBuild.SetReference(view, "_expBar", expBar);
 
             background.gameObject.SetActive(false);
             return view;

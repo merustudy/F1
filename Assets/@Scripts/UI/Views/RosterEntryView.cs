@@ -23,6 +23,9 @@ namespace F1.UI
         [SerializeField] Image[] _rowFrames;
         [SerializeField] Button _remove;
         [SerializeField] Button _dismiss;
+        [SerializeField] TMP_Text _level;
+        [SerializeField] TMP_Text _exp;
+        [SerializeField] UiBar _expBar;
 
         /// <summary>One button per battle row; index 0 is row 1.</summary>
         public IReadOnlyList<Button> Rows => _rows;
@@ -39,6 +42,11 @@ namespace F1.UI
 
         /// <summary>What the affliction does, at the right end of the passive's line; empty without one.</summary>
         public TMP_Text State => _state;
+
+        /// <summary>The level and the experience toward the next one (stage 27): "Lv 2", "경험치 4/25" and the bar.</summary>
+        public TMP_Text Level => _level;
+        public TMP_Text Exp => _exp;
+        public UiBar ExpBar => _expBar;
 
         /// <param name="row">The row the mercenary holds in the party, or 0 when it is not in the party.</param>
         /// <param name="canTake">
@@ -63,6 +71,7 @@ namespace F1.UI
         {
             _dismiss.interactable = canDismiss;
             _name.text = mercenaryName;
+            ShowLevel(1, 0, 1);
             _job.text = jobName;
             _passive.text = passive;
 
@@ -90,6 +99,15 @@ namespace F1.UI
             }
 
             _remove.gameObject.SetActive(row != 0);
+        }
+    
+
+        /// <summary>The level and the experience (stage 27): the words and the bar, which is full at the last level (expToNext 0).</summary>
+        public void ShowLevel(int level, int exp, int expToNext)
+        {
+            _level.text = UiStrings.Get(UiKeys.Lobby.Level, level);
+            _exp.text = expToNext > 0 ? UiStrings.Get(UiKeys.Lobby.Exp, exp, expToNext) : UiStrings.Get(UiKeys.Lobby.ExpMax);
+            _expBar.SetRatio(expToNext > 0 ? (float)exp / expToNext : 1f);
         }
     }
 }

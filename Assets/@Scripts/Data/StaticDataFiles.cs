@@ -42,6 +42,7 @@ namespace F1.Data
         public static readonly Entry Mercenary = new Entry(MercenaryData.DefinitionName, "mercenary");
         public static readonly Entry FatigueState = new Entry(FatigueStateData.DefinitionName, "fatigue-state");
         public static readonly Entry Recipe = new Entry(RecipeData.DefinitionName, "recipe");
+        public static readonly Entry Level = new Entry(LevelData.DefinitionName, "level");
 
         public static readonly IReadOnlyList<Entry> All = new[]
         {
@@ -57,6 +58,7 @@ namespace F1.Data
             Mercenary,
             FatigueState,
             Recipe,
+            Level,
         };
     }
 }

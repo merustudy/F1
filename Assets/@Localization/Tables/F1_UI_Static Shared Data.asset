@@ -1535,6 +1535,36 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673479834370086
+  - m_Id: 5844067966509056
+    m_Key: Lobby.Level
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990400
+  - m_Id: 5844067979091968
+    m_Key: Lobby.Exp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990401
+  - m_Id: 5844067979091969
+    m_Key: Lobby.ExpMax
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990402
+  - m_Id: 5844067983286272
+    m_Key: Settle.Exp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990403
+  - m_Id: 5844067983286273
+    m_Key: Settle.LevelUps
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990404
+  - m_Id: 5844067983286274
+    m_Key: Settle.LevelUp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673481061990405
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2886,3 +2916,31 @@ MonoBehaviour:
       data:
         m_CommentText: The gold the settlement paid (stage 26). {0} = gold earned,
           {1} = the floors reached, {2} = the gold held now.
+    - rid: 8623673481061990400
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: A mercenary's level (stage 27), on the strip's chips, the
+          barracks' lines, the candidates and the expedition cards. {0} = the level.
+    - rid: 8623673481061990401
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The experience toward the next level, on a barracks line.
+          {0} = the experience, {1} = what the next level takes.
+    - rid: 8623673481061990402
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On a barracks line at the last level.
+    - rid: 8623673481061990403
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The experience every survivor got (stage 27). {0} = the experience.
+    - rid: 8623673481061990404
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: After the experience, when survivors reached a new level.
+          {0} = Settle.LevelUp entries joined by commas.
+    - rid: 8623673481061990405
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: One survivor that reached a new level. {0} = the name, {1}
+          = the level now.

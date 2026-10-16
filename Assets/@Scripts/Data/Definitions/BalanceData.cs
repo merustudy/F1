@@ -121,6 +121,8 @@ namespace F1.Data
             new KeySpec(nameof(RosterLimit), 1, Big),
             new KeySpec(nameof(TreatmentPrice), 0, Big),
             new KeySpec(nameof(TreatmentRelief), 1, Big),
+            new KeySpec(nameof(ExpPerFloor), 0, Big),
+            new KeySpec(nameof(ExpClear), 0, Big),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -349,5 +351,12 @@ namespace F1.Data
         /// <summary>The inn's treatment (Docs/Design/04 §3): what it costs, and how much fatigue it takes off one mercenary without a day passing.</summary>
         public int TreatmentPrice => _values[nameof(TreatmentPrice)];
         public int TreatmentRelief => _values[nameof(TreatmentRelief)];
+
+        /// <summary>
+        /// The experience the return settlement gives every surviving party member (Slice C stage 27, Docs/Design/05_Mercenary_Growth.md §2):
+        /// for each map floor the party reached, and on top of that for clearing the dungeon. The levels it takes them to are LevelData.
+        /// </summary>
+        public int ExpPerFloor => _values[nameof(ExpPerFloor)];
+        public int ExpClear => _values[nameof(ExpClear)];
     }
 }

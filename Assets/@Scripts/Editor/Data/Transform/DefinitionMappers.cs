@@ -194,6 +194,19 @@ namespace F1.Editor.Data
         }
     }
 
+    /// <summary>LevelData.csv (stage 27): Level, ExpToNext, MaxHpBonusPercent; no Id and no Name (the level is the key).</summary>
+    internal static class LevelMapper
+    {
+        public static List<LevelData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[] { "Level", "ExpToNext", "MaxHpBonusPercent" });
+            return RowMapping.MapRows(table, errors, row => new LevelData(
+                row.Int("Level"),
+                row.Int("ExpToNext"),
+                row.Int("MaxHpBonusPercent")));
+        }
+    }
+
     internal static class BagMapper
     {
         public static List<BagData> Map(CsvTable table, List<string> errors)

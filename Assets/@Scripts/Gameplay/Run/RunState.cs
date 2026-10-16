@@ -15,6 +15,10 @@ namespace F1.Gameplay
 
         /// <summary>The affliction the mercenary came home with (a FatigueStateData id), or null. It ends when fatigue comes back under the threshold.</summary>
         public string AfflictionId;
+
+        /// <summary>The level (Slice C stage 27, LevelData), from 1, and the experience toward the next one (0 at the last level).</summary>
+        public int Level = LevelRules.FirstLevel;
+        public int Exp;
     }
 
     /// <summary>A candidate at the stagecoach (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §6): a name of the recruit pool and the job it was drawn with.</summary>
@@ -137,6 +141,10 @@ namespace F1.Gameplay
         public int GoldEarned;
         public int FloorsReached;
         public int GoldAfter;
+
+        /// <summary>The experience every survivor got (stage 27), and the survivors it took to a new level, in the order of <see cref="SurvivorIds"/>.</summary>
+        public int ExpEarned;
+        public List<string> LevelUps = new List<string>();
         public List<string> FallenIds = new List<string>();
         public List<string> SurvivorIds = new List<string>();
 

@@ -78,6 +78,14 @@
       "Value": 2
     },
     {
+      "Key": "ExpClear",
+      "Value": 5
+    },
+    {
+      "Key": "ExpPerFloor",
+      "Value": 1
+    },
+    {
       "Key": "FatigueBattleEntry",
       "Value": 2
     },

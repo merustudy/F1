@@ -1,0 +1,41 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "IsLast": false,
+      "Level": 1,
+      "ExpToNext": 15,
+      "MaxHpBonusPercent": 0
+    },
+    {
+      "IsLast": false,
+      "Level": 2,
+      "ExpToNext": 25,
+      "MaxHpBonusPercent": 10
+    },
+    {
+      "IsLast": false,
+      "Level": 3,
+      "ExpToNext": 40,
+      "MaxHpBonusPercent": 20
+    },
+    {
+      "IsLast": false,
+      "Level": 4,
+      "ExpToNext": 60,
+      "MaxHpBonusPercent": 30
+    },
+    {
+      "IsLast": false,
+      "Level": 5,
+      "ExpToNext": 90,
+      "MaxHpBonusPercent": 40
+    },
+    {
+      "IsLast": true,
+      "Level": 6,
+      "ExpToNext": 0,
+      "MaxHpBonusPercent": 50
+    }
+  ]
+}

@@ -221,6 +221,7 @@ namespace F1.Tests
             // Settlement -> lobby
             SettlementScreen settlement = UiTestUtil.Screen<SettlementScreen>();
             SettlementReport report = Managers.Expedition.Report;
+            string settlementExp = UiTestUtil.TextAt(settlement, "Frame/Panel/Exp");
             UiTestUtil.Click(settlement, "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
 
@@ -234,6 +235,11 @@ namespace F1.Tests
             Assert.AreEqual(data.StartingMercenaries.Count - report.FallenIds.Count, run.Roster.Count);
             Assert.AreEqual(report.GoldAfter, run.Gold);
             Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Gold, run.Gold), UiTestUtil.TextAt(lobby, "Frame/Header/Gold"), "The settlement's gold is in the header (stage 26).");
+            if (report.SurvivorIds.Count > 0)
+            {
+                StringAssert.StartsWith(UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned), settlementExp, "The settlement said what experience the survivors got (stage 27).");
+                Assert.AreEqual(report.LevelUps.Count > 0, settlementExp.Contains("레벨 업"), "And who leveled up, when someone did.");
+            }
 
             // A second expedition can depart, or the lobby says why not.
             if (Managers.Run.CanDepart(dungeonId) == DepartCheck.Ok)
@@ -315,6 +321,7 @@ namespace F1.Tests
                 ExpeditionPartyCardView card = cards[row - 1];
                 Assert.AreEqual(UiText.Mercenary(slot.MercenaryId), card.Name);
                 Assert.AreEqual(UiText.Mercenary(slot.MercenaryId), UiTestUtil.TextAt(screen, $"Frame/Bottom/PartyRow{row}/PartyRowName{row}"));
+                Assert.AreEqual("Lv 1", card.Level, "The level beside the name (stage 27).");
                 Assert.AreEqual(UiText.Job(RunRules.FindMercenary(run, slot.MercenaryId).JobId), card.Detail, "The job; nobody is in a state on day 1.");
                 Assert.AreEqual(FatiguePips.Count, card.Pips.Count, "Fatigue as the pips every screen shows.");
                 Assert.IsTrue(card.Pips.All(p => p.gameObject.activeSelf && p.Ratio == 0f), "Fresh.");
@@ -2372,6 +2379,44 @@ namespace F1.Tests
         }
 
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
+        /// <summary>The level and the experience (stage 27, Docs/Design/05_Mercenary_Growth.md §2): "Lv N" on the strip's chip, and on the barracks' line with the experience toward the next level and its bar; "경험치 최대" at the last level.</summary>
+        [UnityTest]
+        public IEnumerator Lobby_ShowsTheLevelAndExperience_OnTheChipAndTheBarracksLine()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            StaticData data = Managers.Data.Data;
+            RunState run = Managers.Run.Run;
+            Assume.That(data.MaxLevel, Is.GreaterThanOrEqualTo(3), "The cases below stage level 2 and the last level.");
+            int toLeaveTwo = data.LevelAt(2).ExpToNext;
+
+            MercenaryState second = run.Roster[0];
+            second.Level = 2;
+            second.Exp = 4;
+            MercenaryState top = run.Roster[1];
+            top.Level = data.MaxLevel;
+            top.Exp = 0;
+            lobby.Refresh();
+            yield return null;
+
+            RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
+            Assert.AreEqual("Lv 2", chips[0].Level);
+            Assert.AreEqual($"Lv {data.MaxLevel}", chips[1].Level);
+            Assert.AreEqual("Lv 1", chips[2].Level);
+
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
+            Assert.AreEqual("Lv 2", entries[0].Level.text);
+            Assert.AreEqual($"경험치 4/{toLeaveTwo}", entries[0].Exp.text);
+            Assert.AreEqual(4f / toLeaveTwo, entries[0].ExpBar.Ratio, 0.001f);
+            Assert.AreEqual("경험치 최대", entries[1].Exp.text, "The last level takes nothing more.");
+            Assert.AreEqual(1f, entries[1].ExpBar.Ratio, 0.001f);
+            Assert.AreEqual($"경험치 0/{data.LevelAt(1).ExpToNext}", entries[2].Exp.text);
+            Assert.AreEqual(0f, entries[2].ExpBar.Ratio, 0.001f);
+        }
+
         /// <summary>
         /// The lobby as the town (Round 71, stage 26, Docs/Design/04_Lobby_100Day_Economy.md §3·§5·§6·§7): the painting with a plate per building, the
         /// pointer lighting a building and its bubble, the stagecoach's window where a candidate is hired for gold, the inn's where a mercenary is
@@ -2428,6 +2473,7 @@ namespace F1.Tests
             Assert.AreEqual(UiText.Mercenary(run.Recruits[0].Id), lobby.Candidates[0].Name);
             Assert.AreEqual(UiText.Job(run.Recruits[0].JobId), lobby.Candidates[0].Job);
             Assert.AreEqual("고용 금 30", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateHire/CandidateHireLabel"));
+            Assert.AreEqual($"Lv 1 · 피로도 0/{balance.MaxFatigue}", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateDetail"), "A candidate is always level 1 and fresh.");
             Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks while a window is open.");
 
             run.Gold = 100;
@@ -2451,6 +2497,7 @@ namespace F1.Tests
             Assert.AreEqual(run.Roster.Count, chips.Length);
             Assert.AreEqual(UiText.Mercenary(hiredId), chips[chips.Length - 1].Name, "The hired one is last on the strip.");
             Assert.AreEqual(UiText.Job(hiredJob), chips[chips.Length - 1].Job);
+            Assert.AreEqual("Lv 1", chips[chips.Length - 1].Level, "Hired at level 1 (stage 27).");
 
             // The inn: a line per mercenary; a tired, afflicted one is treated for gold, no day passes, and the affliction ends under the threshold.
             MercenaryState tired = run.Roster[0];

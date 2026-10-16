@@ -93,13 +93,14 @@ namespace F1.Gameplay
     /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>
     public readonly struct PartyMember
     {
-        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null)
+        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel)
         {
             MercenaryId = mercenaryId;
             JobId = jobId;
             Row = row;
             Fatigue = fatigue;
             AfflictionId = afflictionId;
+            Level = level;
         }
 
         public string MercenaryId { get; }
@@ -111,6 +112,9 @@ namespace F1.Gameplay
 
         /// <summary>The affliction the mercenary leaves with, or null.</summary>
         public string AfflictionId { get; }
+
+        /// <summary>The mercenary's level (stage 27): it sets the maximum HP the member leaves with.</summary>
+        public int Level { get; }
     }
 
     /// <summary>

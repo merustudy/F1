@@ -7,7 +7,7 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
-    /// Version 14 (Slice C stage 26): the run's Gold, the candidates at the stagecoach (Recruits), the mercenaries Dismissed and the expeditions
+    /// Version 15 (Slice C stage 27): a mercenary's Level and Exp. Version 14 (Slice C stage 26): the run's Gold, the candidates at the stagecoach (Recruits), the mercenaries Dismissed and the expeditions
     /// started per dungeon (Expeditions). Version 13 (stage 25): the run's Outcome and DefeatCause, and whether the expedition is the final stand.
     /// Version 11 (Slice B stage 22): HP is in hundredths at the new scale (a longsword deals 2-4) and an item has no grade any more. Version 10
     /// (Slice B stage 19): a member's board is a grid: its Bags (the start bag and those added, each where it lies and how it is
@@ -22,7 +22,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 14;
+        public const int CurrentSchemaVersion = 15;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -80,6 +80,10 @@ namespace F1.Save
 
         /// <summary>The affliction the mercenary came home with (a FatigueState id), or null (version 6).</summary>
         public string Affliction;
+
+        /// <summary>The level, from 1, and the experience toward the next level, 0 at the last (version 15).</summary>
+        public int Level;
+        public int Exp;
     }
 
     public sealed class PartySlotRecord

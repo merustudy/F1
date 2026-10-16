@@ -90,6 +90,8 @@ namespace F1.Tests
                 { "RosterLimit", 6 },
                 { "TreatmentPrice", 20 },
                 { "TreatmentRelief", 40 },
+                { "ExpPerFloor", 1 },
+                { "ExpClear", 5 },
                 { "EliteCoinPercent", 200 },
                 { "ShopPotionChancePercent", 50 },
             };
@@ -336,6 +338,18 @@ namespace F1.Tests
                 },
                 FatigueStates = FatigueStates(),
                 Recipes = new List<RecipeData>(),
+                // Three levels (stage 27): 10 experience to leave the first, 20 the second; +10% and +25% HP.
+                Levels = Levels(),
+            };
+        }
+
+        public static List<LevelData> Levels()
+        {
+            return new List<LevelData>
+            {
+                new LevelData(1, 10, 0),
+                new LevelData(2, 20, 10),
+                new LevelData(3, 0, 25),
             };
         }
 

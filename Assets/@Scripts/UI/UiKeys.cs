@@ -90,6 +90,11 @@ namespace F1.UI
             public const string Treat = "Lobby.Treat";
             public const string InnNote = "Lobby.InnNote";
 
+            // Levels (stage 27).
+            public const string Level = "Lobby.Level";
+            public const string Exp = "Lobby.Exp";
+            public const string ExpMax = "Lobby.ExpMax";
+
             // The result window (Round 72).
             public const string EndedOn = "Lobby.EndedOn";
             public const string DayValue = "Lobby.DayValue";
@@ -383,6 +388,9 @@ namespace F1.UI
             public const string DeathLimit = "Settle.DeathLimit";
             public const string FinalStandLost = "Settle.FinalStandLost";
             public const string Gold = "Settle.Gold";
+            public const string Exp = "Settle.Exp";
+            public const string LevelUps = "Settle.LevelUps";
+            public const string LevelUp = "Settle.LevelUp";
         }
 
         public static class Save

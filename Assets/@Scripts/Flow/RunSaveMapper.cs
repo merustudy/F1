@@ -66,7 +66,7 @@ namespace F1.Flow
 
             foreach (MercenaryState mercenary in run.Roster)
             {
-                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId });
+                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp });
             }
 
             foreach (PartySlot slot in run.Party)
@@ -239,7 +239,11 @@ namespace F1.Flow
                 Require(known.Add(mercenary.Id), $"Mercenary '{mercenary.Id}' is listed twice.");
                 Require(mercenary.Fatigue >= 0 && mercenary.Fatigue <= data.Balance.MaxFatigue, $"Fatigue of '{mercenary.Id}' is out of range.");
                 RequireState(data, mercenary.Affliction, mercenary.Fatigue, $"'{mercenary.Id}'", atHome: true);
-                run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction });
+                // The level and the experience (stage 27): on the ladder, and the experience under what the level takes (none at the last level).
+                Require(mercenary.Level >= 1 && mercenary.Level <= data.MaxLevel, $"Level of '{mercenary.Id}' is out of range.");
+                LevelData level = data.LevelAt(mercenary.Level);
+                Require(mercenary.Exp >= 0 && (level.IsLast ? mercenary.Exp == 0 : mercenary.Exp < level.ExpToNext), $"Experience of '{mercenary.Id}' is out of range.");
+                run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction, Level = mercenary.Level, Exp = mercenary.Exp });
             }
 
             Require(run.Roster.Count <= data.Balance.RosterLimit, "The roster is over RosterLimit.");

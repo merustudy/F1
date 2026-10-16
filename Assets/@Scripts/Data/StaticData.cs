@@ -19,6 +19,7 @@ namespace F1.Data
         public IEnumerable<MercenaryData> Mercenaries;
         public IEnumerable<FatigueStateData> FatigueStates;
         public IEnumerable<RecipeData> Recipes;
+        public IEnumerable<LevelData> Levels;
     }
 
     /// <summary>
@@ -94,6 +95,7 @@ namespace F1.Data
             Mercenaries = Index(parts.Mercenaries, x => x.Id, MercenaryData.DefinitionName, problems);
             FatigueStates = Index(parts.FatigueStates, x => x.Id, FatigueStateData.DefinitionName, problems);
             Recipes = Index(parts.Recipes ?? new List<RecipeData>(), x => x.Id, RecipeData.DefinitionName, problems);
+            Levels = LevelLadder(parts.Levels, problems);
 
             if (Balance != null)
             {
@@ -130,6 +132,83 @@ namespace F1.Data
 
         /// <summary>The forge recipes (Slice B stage 23); empty until a dungeon has one.</summary>
         public DataTable<RecipeData> Recipes { get; }
+
+        /// <summary>The levels in order from 1 (Slice C stage 27): what each takes to leave and what it adds to the maximum HP.</summary>
+        public IReadOnlyList<LevelData> Levels { get; }
+
+        /// <summary>The last level a mercenary can reach.</summary>
+        public int MaxLevel => Levels.Count;
+
+        /// <summary>The row of a level, 1 being the first.</summary>
+        public LevelData LevelAt(int level)
+        {
+            if (level < 1 || level > Levels.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(level), level, $"Levels run from 1 to {Levels.Count}.");
+            }
+
+            return Levels[level - 1];
+        }
+
+        /// <summary>
+        /// The levels in order, checked as a ladder: at least one, running from 1 without a gap, each but the last taking some experience to leave
+        /// and the last none, the first adding nothing to the HP and no level adding less than the one under it.
+        /// </summary>
+        static IReadOnlyList<LevelData> LevelLadder(IEnumerable<LevelData> rows, List<string> problems)
+        {
+            var levels = new List<LevelData>();
+            if (rows == null)
+            {
+                problems.Add($"{LevelData.DefinitionName}: no data.");
+                return levels;
+            }
+
+            foreach (LevelData row in rows)
+            {
+                if (row == null)
+                {
+                    problems.Add($"{LevelData.DefinitionName}: a row is missing.");
+                    return levels;
+                }
+
+                levels.Add(row);
+            }
+
+            levels.Sort((a, b) => a.Level.CompareTo(b.Level));
+            if (levels.Count == 0)
+            {
+                problems.Add($"{LevelData.DefinitionName}: at least one level is required.");
+                return levels;
+            }
+
+            for (int i = 0; i < levels.Count; i++)
+            {
+                LevelData level = levels[i];
+                bool last = i == levels.Count - 1;
+                if (level.Level != i + 1)
+                {
+                    problems.Add($"{LevelData.DefinitionName}: the levels must run from 1 without a gap or a repeat (found {level.Level} where {i + 1} was expected).");
+                    return levels;
+                }
+
+                if (last != level.IsLast)
+                {
+                    problems.Add($"{LevelData.DefinitionName} {level.Level}: ExpToNext must be 0 at the last level and above 0 before it.");
+                }
+
+                if (i == 0 && level.MaxHpBonusPercent != 0)
+                {
+                    problems.Add($"{LevelData.DefinitionName} 1: the first level adds nothing to the maximum HP (MaxHpBonusPercent 0).");
+                }
+
+                if (i > 0 && level.MaxHpBonusPercent < levels[i - 1].MaxHpBonusPercent)
+                {
+                    problems.Add($"{LevelData.DefinitionName} {level.Level}: MaxHpBonusPercent cannot be under the level below it.");
+                }
+            }
+
+            return levels;
+        }
         public DataTable<FatigueStateData> FatigueStates { get; }
 
         /// <summary>The states of a kind, in id order: what the breakdown at the fatigue threshold picks from.</summary>

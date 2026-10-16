@@ -12,10 +12,12 @@ namespace F1.UI
     public sealed class ExpeditionPartyCardView : MonoBehaviour
     {
         [SerializeField] TMP_Text _name;
+        [SerializeField] TMP_Text _level;
         [SerializeField] TMP_Text _detail;
         [SerializeField] UiBar[] _pips;
 
         public string Name => _name.text;
+        public string Level => _level.text;
         public string Detail => _detail.text;
         public IReadOnlyList<UiBar> Pips => _pips;
 
@@ -23,6 +25,7 @@ namespace F1.UI
         {
             _name.text = words;
             _name.color = UiPalette.TextDim;
+            _level.text = string.Empty;
             _detail.text = string.Empty;
             foreach (UiBar pip in _pips)
             {
@@ -30,10 +33,11 @@ namespace F1.UI
             }
         }
 
-        public void Show(string name, string detail, int fatigue, int maxFatigue, int breakdown)
+        public void Show(string name, string level, string detail, int fatigue, int maxFatigue, int breakdown)
         {
             _name.text = name;
             _name.color = UiPalette.Text;
+            _level.text = level;
             _detail.text = detail;
             foreach (UiBar pip in _pips)
             {

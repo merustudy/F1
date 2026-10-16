@@ -511,6 +511,7 @@ namespace F1.Sim
             int victories = 0, wipeouts = 0, deathLimits = 0, finalStandsLost = 0, finalStands = 0, finalStandsWon = 0, unlocked = 0, earlyWins = 0;
             long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
             long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
+            long levelsAtEnd = 0, levelUps = 0, highestLevel = 0, runsAtMaxLevel = 0, runsWithLiving = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
             {
@@ -568,7 +569,9 @@ namespace F1.Sim
                     deaths += expedition.Members.Count(m => !m.Alive);
                     hiredDeaths += expedition.Members.Count(m => !m.Alive && hired.Contains(m.MercenaryId));
                     expeditions++;
-                    goldEarned += RunRules.Settle(data, state, expedition).GoldEarned;
+                    SettlementReport report = RunRules.Settle(data, state, expedition);
+                    goldEarned += report.GoldEarned;
+                    levelUps += report.LevelUps.Count;
                     if (expedition.FinalStand && state.Outcome == RunOutcome.Victory)
                     {
                         finalStandsWon++;
@@ -582,6 +585,11 @@ namespace F1.Sim
                 days += state.Day;
                 goldLeft += state.Gold;
                 rosterAtEnd += state.Roster.Count;
+                int highest = state.Roster.Count == 0 ? 0 : state.Roster.Max(m => m.Level);
+                levelsAtEnd += state.Roster.Sum(m => m.Level);
+                highestLevel += highest;
+                runsWithLiving += state.Roster.Count > 0 ? 1 : 0;
+                runsAtMaxLevel += highest >= data.MaxLevel ? 1 : 0;
                 if (state.Outcome == RunOutcome.Victory)
                 {
                     victories++;
@@ -604,6 +612,8 @@ namespace F1.Sim
                 + $"final stands fought {BattleStats.Percent(finalStands, runs)}; the final dungeon opened in {BattleStats.Percent(unlocked, runs)} of runs, on day {Average(unlockDays, unlocked)} on average");
             Console.WriteLine($"  gold per run: earned {Average(goldEarned, runs)}, spent on hiring {Average(goldHired, runs)} ({Average(hires, runs)} hires, of whom {Average(hiredDeaths, runs)} died), "
                 + $"on treatment {Average(goldTreated, runs)} ({Average(treatments, runs)} treatments), held at the end {Average(goldLeft, runs)}; roster at the end {Average(rosterAtEnd, runs)}");
+            Console.WriteLine($"  levels (stage 27): level-ups per run {Average(levelUps, runs)}, the living at the end average level {Average(levelsAtEnd, (int)rosterAtEnd)}, "
+                + $"the highest {Average(highestLevel, (int)runsWithLiving)} on average (runs with someone living), at the last level ({data.MaxLevel}) in {BattleStats.Percent((int)runsAtMaxLevel, runs)} of runs");
         }
 
         /// <summary>The final dungeon once it is open (or once the final stand is due), else the first dungeon that is not final and is open.</summary>

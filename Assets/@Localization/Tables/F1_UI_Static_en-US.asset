@@ -1390,6 +1390,35 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 5844067966509056
+    m_Localized: Lv {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5844067979091968
+    m_Localized: XP {0}/{1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5844067979091969
+    m_Localized: XP max
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5844067983286272
+    m_Localized: XP +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5844067983286273
+    m_Localized: 'Level up: {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5844067983286274
+    m_Localized: '{0} Lv {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1541,3 +1570,8 @@ MonoBehaviour:
         - id: 5824427143979041
         - id: 5824427143979044
         - id: 5824427148173312
+        - id: 5844067966509056
+        - id: 5844067979091968
+        - id: 5844067983286272
+        - id: 5844067983286273
+        - id: 5844067983286274

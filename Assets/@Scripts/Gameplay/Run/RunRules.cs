@@ -26,6 +26,7 @@ namespace F1.Gameplay
                     Id = mercenary.Id,
                     JobId = mercenary.JobId,
                     Fatigue = 0,
+                    Level = LevelRules.FirstLevel,
                 });
             }
 
@@ -113,7 +114,7 @@ namespace F1.Gameplay
             RecruitState candidate = state.Recruits[index];
             state.Recruits.RemoveAt(index);
             state.Gold -= data.Balance.HirePrice;
-            var hired = new MercenaryState { Id = candidate.Id, JobId = candidate.JobId, Fatigue = 0 };
+            var hired = new MercenaryState { Id = candidate.Id, JobId = candidate.JobId, Fatigue = 0, Level = LevelRules.FirstLevel };
             state.Roster.Add(hired);
             return hired;
         }
@@ -397,7 +398,7 @@ namespace F1.Gameplay
             foreach (PartySlot slot in state.Party)
             {
                 MercenaryState mercenary = FindMercenary(state, slot.MercenaryId);
-                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId));
+                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level));
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);
@@ -411,8 +412,8 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The return settlement, in this order: items and potions vanish (with the expedition state),
-        /// the dead leave the roster for good, survivors keep the fatigue they came back with, days pass
-        /// and those who stayed home recover, a clear is recorded, the gold is paid (Slice C stage 26) and,
+        /// the dead leave the roster for good, survivors keep the fatigue they came back with and gain the expedition's
+        /// experience (stage 27), days pass and those who stayed home recover, a clear is recorded, the gold is paid (Slice C stage 26) and,
         /// if the run goes on, the stagecoach draws new candidates.
         /// </summary>
         public static SettlementReport Settle(StaticData data, RunState state, ExpeditionState expedition)
@@ -431,6 +432,7 @@ namespace F1.Gameplay
             };
 
             var participants = new HashSet<string>();
+            report.ExpEarned = LevelRules.ExpFor(data, expedition);
             foreach (ExpeditionMember member in expedition.Members)
             {
                 participants.Add(member.MercenaryId);
@@ -442,12 +444,16 @@ namespace F1.Gameplay
 
                 if (member.Alive)
                 {
-                    // The fatigue comes home, and an affliction with it; a virtue ends with the expedition.
+                    // The fatigue comes home, and an affliction with it; a virtue ends with the expedition. Every survivor gets the same experience (stage 27).
                     mercenary.Fatigue = member.Fatigue;
                     mercenary.AfflictionId = member.StateId != null && data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction ? member.StateId : null;
                     report.SurvivorIds.Add(member.MercenaryId);
                     report.SurvivorFatigue.Add(member.Fatigue);
                     report.SurvivorStates.Add(mercenary.AfflictionId);
+                    if (LevelRules.Gain(data, mercenary, report.ExpEarned) > 0)
+                    {
+                        report.LevelUps.Add(member.MercenaryId);
+                    }
                 }
                 else
                 {

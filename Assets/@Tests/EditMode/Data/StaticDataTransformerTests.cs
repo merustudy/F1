@@ -20,6 +20,18 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_RefusesLevels_ThatDoNotRunFromOne_OrWhoseLastTakesExperience_OrWhoseBonusFalls()
+        {
+            StringAssert.Contains("run from 1 without a gap", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,10,0\n3,0,10\n").Errors[0]);
+            StringAssert.Contains("ExpToNext must be 0 at the last level", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,10,0\n2,20,10\n").Errors[0]);
+            StringAssert.Contains("ExpToNext must be 0 at the last level", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,0,0\n2,0,10\n").Errors[0]);
+            StringAssert.Contains("first level adds nothing", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,10,5\n2,0,10\n").Errors[0]);
+            StringAssert.Contains("cannot be under the level below it", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n1,10,0\n2,20,10\n3,0,5\n").Errors[0]);
+            StringAssert.Contains("at least one level", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n").Errors[0]);
+            StringAssert.Contains("Level 0 must be at least 1", TransformFails(StaticDataFiles.Level, "Level,ExpToNext,MaxHpBonusPercent\n0,10,0\n").Errors[0]);
+        }
+
+        [Test]
         public void Transform_RefusesARecipe_WhoseResultIsNotUnique_OrWhoseCatalystHasNoStars()
         {
             // Stage 23: RecipeData.csv maps (Id, Result, BaseItem, BaseTier, Catalyst, CatalystTier; no Name) and StaticData checks it.
@@ -158,6 +170,12 @@ namespace F1.Tests
             Assert.IsNull(data.Mercenaries.Get("teo").JobId, "Its job is rolled when it is drawn.");
             CollectionAssert.AreEquivalent(new[] { "rowan", "ella" }, data.StartingMercenaries.Select(m => m.Id));
             CollectionAssert.AreEquivalent(new[] { "teo", "bran" }, data.RecruitPool.Select(m => m.Id));
+
+            // LevelData.csv (stage 27): Level, ExpToNext, MaxHpBonusPercent; no Id and no Name.
+            Assert.AreEqual(3, data.MaxLevel);
+            Assert.AreEqual(10, data.LevelAt(1).ExpToNext);
+            Assert.AreEqual(25, data.LevelAt(3).MaxHpBonusPercent);
+            Assert.IsTrue(data.LevelAt(3).IsLast);
 
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
             Assert.AreEqual(FatigueStateKind.Affliction, fearful.Kind);

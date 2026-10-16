@@ -250,7 +250,12 @@ namespace F1.Tests
             yield return Capture(prefix + "_02_lobby_empty");
 
             // The town (stage 26): the stagecoach under the pointer with its bubble, then the barracks window where the party is formed:
-            // knight, spellblade, bishop, archmage from row 1 back, the party the balance was tuned with.
+            // knight, spellblade, bishop, archmage from row 1 back, the party the balance was tuned with. One mercenary is staged at level 2
+            // with some experience for the pictures (stage 27) and put back before the party leaves.
+            MercenaryState leveled = Managers.Run.Run.Roster[0];
+            leveled.Level = 2;
+            leveled.Exp = 4;
+            lobby.Refresh();
             lobby.Coach.Hover();
             yield return Capture(prefix + "_61_lobby_hover");
             lobby.Coach.Leave();
@@ -280,6 +285,8 @@ namespace F1.Tests
             lobby.Refresh();
             yield return Capture(prefix + "_60_lobby_final_stand");
             Managers.Run.Run.Day = 1;
+            leveled.Level = 1;
+            leveled.Exp = 0;
             lobby.Refresh();
             yield return null;
 

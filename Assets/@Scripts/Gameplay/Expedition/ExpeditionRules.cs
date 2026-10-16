@@ -47,13 +47,15 @@ namespace F1.Gameplay
                 }
 
                 JobData job = data.Jobs.Get(member.JobId);
+                // The maximum HP is the job's with the level's bonus (stage 27); every expedition starts with it full.
+                int maxHp = LevelRules.MaxHpOf(data, job.Id, member.Level);
                 state.Members.Add(new ExpeditionMember
                 {
                     MercenaryId = member.MercenaryId,
                     JobId = job.Id,
                     Row = member.Row,
-                    MaxHp = job.MaxHp,
-                    Hp = job.MaxHp,
+                    MaxHp = maxHp,
+                    Hp = maxHp,
                     Alive = true,
                     Board = ItemBoard.Starting(data.StartBag, new EquippedItem(data.Items.Get(job.WeaponItemId), isBase: true)),
                     Fatigue = member.Fatigue,

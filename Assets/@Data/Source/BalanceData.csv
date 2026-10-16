@@ -63,3 +63,5 @@ RecruitCount,3
 RosterLimit,8
 TreatmentPrice,20
 TreatmentRelief,40
+ExpPerFloor,1
+ExpClear,5

@@ -18,6 +18,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _fatigue;
         [SerializeField] TMP_Text _days;
         [SerializeField] TMP_Text _gold;
+        [SerializeField] TMP_Text _exp;
         [SerializeField] TMP_Text _runOver;
         [SerializeField] Button _confirm;
 
@@ -54,6 +55,7 @@ namespace F1.UI
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
             _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
             _gold.text = UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
+            _exp.text = ExpText(report);
             _runOver.text = RunOverText(report);
         }
 
@@ -69,6 +71,30 @@ namespace F1.UI
             }
 
             return string.Join(", ", entries);
+        }
+
+        /// <summary>The experience every survivor got (stage 27) and who reached a new level: "경험치 +20 · 레벨 업: 로언 Lv 2". Nothing without survivors.</summary>
+        static string ExpText(SettlementReport report)
+        {
+            if (report.SurvivorIds.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            string words = UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned);
+            if (report.LevelUps.Count == 0)
+            {
+                return words;
+            }
+
+            RunState run = Managers.Run.Run;
+            var ups = new List<string>();
+            foreach (string id in report.LevelUps)
+            {
+                ups.Add(UiStrings.Get(UiKeys.Settle.LevelUp, UiText.Mercenary(id), RunRules.FindMercenary(run, id).Level));
+            }
+
+            return words + " · " + UiStrings.Get(UiKeys.Settle.LevelUps, string.Join(", ", ups));
         }
 
         void OnConfirm()

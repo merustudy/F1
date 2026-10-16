@@ -140,6 +140,13 @@ namespace F1.Tests
             yield return Case("ExpeditionsUnknownDungeon", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "nowhere", Count = 1 }));
             yield return Case("ExpeditionsZeroTimes", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "pit", Count = 0 }));
             yield return Case("ExpeditionsDungeonTwice", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "cave", Count = 1 }));
+
+            // Version 15 (stage 27): the level on the ladder, the experience under what the level takes, none at the last level.
+            yield return Case("LevelZero", r => r.Roster[3].Level = 0);
+            yield return Case("LevelPastTheLast", r => r.Roster[3].Level = 4);
+            yield return Case("ExpNegative", r => r.Roster[3].Exp = -1);
+            yield return Case("ExpMeetsTheNextLevel", r => { r.Roster[3].Level = 1; r.Roster[3].Exp = 10; });
+            yield return Case("ExpAtTheLastLevel", r => { r.Roster[3].Level = 3; r.Roster[3].Exp = 1; });
         }
 
         [TestCaseSource(nameof(BrokenRuns))]
@@ -416,6 +423,41 @@ namespace F1.Tests
             Assert.IsEmpty(run.Recruits);
             Assert.IsEmpty(run.ExpeditionsByDungeon);
             Assert.AreEqual(1, run.ExpeditionCount, "The total stays.");
+        }
+
+        [Test]
+        public void Migrate_From14_StartsEveryMercenaryAtLevelOne()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 14;
+            save.Run.Roster[0].Level = 0;
+            save.Run.Roster[0].Exp = 99;
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.IsTrue(save.Run.Roster.TrueForAll(m => m.Level == 1 && m.Exp == 0));
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
+            Assert.IsTrue(run.Roster.All(m => m.Level == 1 && m.Exp == 0));
+        }
+
+        [Test]
+        public void Save_KeepsTheLevelAndTheExperience()
+        {
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            RunState run = kit.Run.Run;
+            RunRules.FindMercenary(run, "ben").Level = 2;
+            RunRules.FindMercenary(run, "ben").Exp = 7;
+            kit.Run.Rest();
+            RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
+
+            MercenaryRecord ben = save.Run.Roster.Find(m => m.Id == "ben");
+            Assert.AreEqual(2, ben.Level);
+            Assert.AreEqual(7, ben.Exp);
+            RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState _);
+            Assert.AreEqual(2, RunRules.FindMercenary(read, "ben").Level);
+            Assert.AreEqual(7, RunRules.FindMercenary(read, "ben").Exp);
+            Assert.AreEqual(1, RunRules.FindMercenary(read, "anna").Level);
         }
 
         [Test]

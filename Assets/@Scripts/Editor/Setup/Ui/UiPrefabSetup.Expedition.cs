@@ -73,12 +73,14 @@ namespace F1.Editor.Setup
                 UiBuild.Box(slot, 24f + 300f * i, 70f, 280f, 160f);
                 var card = slot.gameObject.AddComponent<ExpeditionPartyCardView>();
                 UiBuild.Box(UiBuild.LocalizedLabel("PartyRowLabel" + row, slot.transform, UiText.RowKey(row), 20f, UiPalette.TextDim), 20f, 14f, 60f, 30f);
-                TextMeshProUGUI cardName = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowName" + row, slot.transform, 26f, UiPalette.Text)), 80f, 10f, 180f, 36f);
+                TextMeshProUGUI cardName = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowName" + row, slot.transform, 26f, UiPalette.Text)), 80f, 10f, 128f, 36f);
+                TextMeshProUGUI cardLevel = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowLevel" + row, slot.transform, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), 208f, 14f, 52f, 28f);
                 TextMeshProUGUI cardDetail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowDetail" + row, slot.transform, 20f, UiPalette.TextDim)), 20f, 56f, 240f, 32f);
                 // Fatigue as the pips every screen shows (12_UI "피로도와 붕괴의 상태"), under the job.
                 RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("PartyRowPips" + row, slot.transform), 20f, 100f, 240f, 14f);
                 UiBar[] pips = FatiguePipRow("PartyRow" + row + "Pip", pipsRow, 240f, 14f);
                 UiBuild.SetReference(card, "_name", cardName);
+                UiBuild.SetReference(card, "_level", cardLevel);
                 UiBuild.SetReference(card, "_detail", cardDetail);
                 UiBuild.SetReferences(card, "_pips", pips);
                 cards[i] = card;

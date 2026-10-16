@@ -16,7 +16,7 @@ namespace F1.Tests
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
-            "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\n";
+            "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
@@ -74,6 +74,13 @@ namespace F1.Tests
         /// <summary>No recipe in the minimal set (stage 23): a test that needs one replaces this file.</summary>
         public const string Recipes = "Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier\n";
 
+        /// <summary>Three levels (stage 27): no Id and no Name, the level is the key.</summary>
+        public const string Levels =
+            "Level,ExpToNext,MaxHpBonusPercent\n" +
+            "1,10,0\n" +
+            "2,20,10\n" +
+            "3,0,25\n";
+
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()
         {
@@ -91,6 +98,7 @@ namespace F1.Tests
                 { StaticDataFiles.Mercenary.SourceFileName, Mercenaries },
                 { StaticDataFiles.FatigueState.SourceFileName, FatigueStates },
                 { StaticDataFiles.Recipe.SourceFileName, Recipes },
+                { StaticDataFiles.Level.SourceFileName, Levels },
             };
         }
 
