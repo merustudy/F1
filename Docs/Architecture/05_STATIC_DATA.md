@@ -90,6 +90,8 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
 - `RecipeData.csv`(23단계)는 담금질의 레시피다: `Result`(유니크 아이템의 id), `BaseItem`·`BaseTier`, `Catalyst`·`CatalystTier`(단계는 `ItemTier`의 이름: `Common`·`Tier1`·`Tier2`·`Tier3`). 이름 열이 없는 첫 정의다(`RecipeMapper`는 `Id`부터 직접 요구한다). 검사: 결과·바탕·촉매가 아이템에 있고, 결과는 `Unique`, 촉매는 ★이 있다.
   `ItemData.csv`의 `Unique` 열(선택, 비면 false)은 유니크 아이템이다: `ShopWeight`·`Price`가 0이어야 한다.
+- `MercenaryData.csv`(26단계)의 `Starting`(참/거짓): 참이면 시작 로스터(`JobId` 필수), 거짓이면 역마차의 이름 풀(`JobId` 비움 — 후보를 뽑을 때 직업을 굴린다). `StaticData.StartingMercenaries`·`RecruitPool`.
+- `LevelData.csv`(27단계)는 레벨의 사다리다: `Level`(1부터 빈틈없이), `ExpToNext`(다음 레벨까지의 경험치. 마지막 레벨만 0), `MaxHpBonusPercent`(직업 최대 HP에 더하는 %. 1레벨은 0, 내려가지 않음). `Id`와 이름 열이 없다(`LevelMapper`). `StaticData.Levels`·`MaxLevel`·`LevelAt`이 검사한 사다리를 준다.
 - **22단계의 수**(`Docs/Design/02_Combat_System.md` §4·§13): HP·피해·회복·보호막·폭풍은 **0.01 단위**다. CSV는 소수 둘째 자리까지 적고("38", "5.45") Generated JSON과 코드는 0.01을 1로 세는 정수다(`Centi`: 38 → 3800).
   - `ItemData.csv`의 효과 값은 `Effect1Value`·`Effect2Value`(그 전의 `…Power` 퍼센트를 대신함): 피해는 "최소-최대"("2-4", "1.5-2.5"), 회복·보호막은 값 하나("2.73"), 화상은 중첩 수(정수). 정의(`ItemEffect`)는 `Min`·`Max`를 갖고, 피해 밖은 둘이 같다.
   - `CritChancePercent`(0..100, 비우면 0): 피해 효과가 있는 `Weapon`만 0보다 크다. `StarDamage`는 0.01 단위("1"은 100).

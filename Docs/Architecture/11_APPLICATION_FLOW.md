@@ -85,6 +85,7 @@ Application 계층이 하는 일은 넷이다.
 
 ## 귀환 정산
 
+- 정산이 경험치를 준다(27단계, `LevelRules.ExpFor`·`Gain`: 살아 돌아온 파티원 모두 같게, 레벨이 오르면 `SettlementReport.LevelUps`에).
 - 정산이 금을 준다(26단계, `RunRules.Settle`의 `GoldFor`: 도달한 층과 클리어. `SettlementReport.GoldEarned`·`FloorsReached`·`GoldAfter`)와 역마차의 새 후보를 뽑는다(런이 끝나지 않았으면).
 - 정산이 런을 끝낼 수 있다(25단계, `RunRules.Settle` → `RunState.Outcome`): 최종 던전의 클리어는 승리, 최종 결전의 패배·전멸·사망 한도는 패배. `SettlementReport.Outcome`·`DefeatCause`를 정산 화면이, `RunState`의 것을 로비가 보인다. 새 런은 결과를 버린다.
 - 원정이 끝나는 순간(클리어, 전멸, 후퇴) 같은 호출 안에서 `RunRules.Settle`을 적용하고 `ExpeditionState`를 버린다.

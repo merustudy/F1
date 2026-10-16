@@ -425,6 +425,23 @@ background, and do not reproduce the background of the attached image.
 - A rusted rail track runs along the floor near the back wall. An ore cart, crates, coils of rope, a pickaxe and loose rock are what is left lying around.
 - The colors of the mine: dark brown and soot grey rock, rust orange and dull lantern yellow.
 
+## Dungeon: abyss
+
+### Creatures
+
+- This creature belongs to the abyss, a black pit under the dead woods where the dead were thrown and something below woke them.
+- Its eyes are filled with one flat pale sickly green, with no pupils.
+- It is bone-white and ash-grey, dusted with grave dirt, with cracks and chips drawn as a few scribbly marks.
+- An undead soldier wears one piece of ancient grave gear, such as a rusted iron skullcap, a cracked round shield, a tattered burial shroud or an iron collar. The lord wears more: a horned iron crown and a rotting cloak.
+- Gear and accents use the colors of the abyss: bone white, ash grey, rust brown and sickly pale green.
+
+### Place
+
+- The place is the abyss: the bottom of a black pit under dead woods, a wide cavern of dark stone where the dead were thrown.
+- Bones and skulls are heaped along the back wall in piles, drawn as plain shapes. Rusted iron chains hang from the dark above, and a few broken grave markers lean in the rubble.
+- A faint sickly green glow seeps from cracks in the floor near the back wall; the rest is lit by nothing. Black roots hang down from the edge of the pit far above.
+- The colors of the abyss: black and ash-grey stone, bone white, rust brown and sickly pale green.
+
 ## Body: hourglass
 
 - A voluptuous hourglass figure about four and a half heads tall, still with the big head the composition asks for.

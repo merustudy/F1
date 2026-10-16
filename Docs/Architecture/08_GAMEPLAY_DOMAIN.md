@@ -190,6 +190,14 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 고용·해고·치료는 기한을 넘긴 로비(최종 결전 상태)에서도 된다. 쉬기만 안 된다(04 §2).
 - `BeginExpedition`은 `ExpeditionCount`와 함께 던전별 횟수(`RunState.ExpeditionsByDungeon`)를 센다(결과 창의 "원정 N회 (광산 a, 심연 b)").
 
+## 성장: 레벨과 경험치 (Slice C 27단계)
+
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §2가 소유한다. `LevelRules`와 `RunRules.Settle`이다. 사다리는 `LevelData.csv`(`StaticData.Levels`·`MaxLevel`·`LevelAt`), 경험치의 양은 `BalanceData`(`ExpPerFloor`·`ExpClear`).
+
+- `MercenaryState.Level`(1부터)·`Exp`(다음 레벨까지 쌓인 것. 마지막 레벨은 0). 새 런의 로스터와 고용된 용병은 레벨 1. 죽은 용병의 레벨은 함께 사라진다.
+- `Settle`: 살아 돌아온 파티원 모두 같은 경험치(`LevelRules.ExpFor`: 도달한 층 × `ExpPerFloor` + 클리어 `ExpClear`)를 받고(`Gain`: `ExpToNext`를 채울 때마다 한 레벨씩, 남은 것은 이월, 마지막 레벨에서는 0), `SettlementReport.ExpEarned`·`LevelUps`(새 레벨에 닿은 용병)가 정산 화면에 간다.
+- 레벨은 최대 HP를 올린다: `BeginExpedition`이 `PartyMember.Level`을 넘기고 `ExpeditionRules.Create`가 `LevelRules.MaxHpOf`(직업 최대 HP × (100 + 그 레벨의 `MaxHpBonusPercent`)/100)로 구성원의 `MaxHp`·`Hp`를 세운다. 전투 Setup은 구성원의 값을 그대로 쓴다. 피로의 150 문턱과 무기 세기는 레벨이 바꾸지 않는다(HP 대 무기 세기의 측정은 `Docs/Design/08_Simulation_Report.md` §25).
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
@@ -277,7 +285,7 @@ dotnet run --project Tools/Sim -- items
   단계(효과 크기, 전리품의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
   전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
   상점과 지역 코인(상점 노드의 배치, 물건과 값, 사기, 새로고침, 나가기, 전투의 코인, 데이터 검증)은 `ShopRulesTests`, 상점의 명령과 저장은 `ShopFlowTests`가 고정한다.
-  런의 끝(해금, 최종 결전, 승패)은 `RunEndTests`·`RunEndFlowTests`, 금·후보·고용·해고·치료(26단계)는 `LobbyEconomyTests`·`LobbyEconomyFlowTests`가 고정한다.
+  런의 끝(해금, 최종 결전, 승패)은 `RunEndTests`·`RunEndFlowTests`, 금·후보·고용·해고·치료(26단계)는 `LobbyEconomyTests`·`LobbyEconomyFlowTests`, 레벨과 경험치(27단계: 사다리, 오르기, HP 보너스, 정산의 경험치)는 `LevelRulesTests`가 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
 ## Validation
@@ -292,6 +300,6 @@ dotnet run --project Tools/Sim -- items
 
 ## Deferred and Forbidden
 
-- Deferred: 유물, 성장과 전직(27단계), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스(28단계).
+- Deferred: 유물, 전직과 STR(Slice D. 레벨·경험치·HP 보너스는 27단계에 들어왔다), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스(28단계).
 - Forbidden: Domain에서 Unity/Managers/Save DTO 참조, 결과 계산에 부동소수점이나 시드 밖 난수 사용, 표현 계층이 상태를 바꾸기,
   규칙 없이 추가한 효과 어휘, 시뮬 통계를 Test 통과 조건으로 쓰기.
