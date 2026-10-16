@@ -357,6 +357,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c53ab71f6553e43bba7ecd46b6d3c373
+    m_Address: background/expedition/map
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cad3fa1212df04eee81411be7b721fa7
     m_Address: item/buckler
     m_ReadOnly: 0

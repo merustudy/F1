@@ -367,6 +367,15 @@ namespace F1.Tests
         /// Fills the party from the top of the roster list: the first mercenary takes row 1, the
         /// second row 2 and so on. Each click is on the only row a newcomer can take.
         /// </summary>
+        /// <summary>From the lobby to the expedition screen (round 71 E2) and off to the dungeon it offers first.</summary>
+        public static IEnumerator DepartFromLobby()
+        {
+            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return WaitForScreen(ScreenId.Expedition);
+            Click(Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
+            yield return WaitForScreen(ScreenId.NodeMap);
+        }
+
         public static void FillParty(LobbyScreen lobby)
         {
             RosterEntryView[] entries = Views<RosterEntryView>(lobby);
@@ -442,8 +451,7 @@ namespace F1.Tests
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromLobby();
 
             StageChampion();
 
@@ -527,8 +535,7 @@ namespace F1.Tests
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
@@ -564,8 +571,7 @@ namespace F1.Tests
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromLobby();
 
             BalanceData balance = Managers.Data.Data.Balance;
             Assume.That(balance.FatigueOnHit, Is.GreaterThan(0), "A hit raises fatigue.");
@@ -620,8 +626,7 @@ namespace F1.Tests
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
@@ -647,8 +652,7 @@ namespace F1.Tests
             Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return WaitForScreen(ScreenId.Lobby);
             FillParty(Screen<LobbyScreen>());
-            Click(Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromLobby();
 
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {

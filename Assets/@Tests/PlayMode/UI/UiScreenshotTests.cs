@@ -218,8 +218,7 @@ namespace F1.Tests
                 UiTestUtil.Click(entries[index].Rows[i]);
             }
 
-            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
 
             // The row-1 weapon (the knight's longsword, 3x1) becomes the gladius, as the forge would leave it (no tier).
             ExpeditionMember front = Managers.Expedition.Expedition.Members.OrderBy(m => m.Row).First();
@@ -259,7 +258,11 @@ namespace F1.Tests
 
             yield return Capture(prefix + "_03_lobby_party");
 
+            // The expedition screen (round 71 E2): the map, the first open dungeon chosen, the party as formed.
             UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            yield return Capture(prefix + "_56_expedition");
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
@@ -652,7 +655,8 @@ namespace F1.Tests
             run.Fallen.AddRange(run.Roster.Select(m => m.Id));
             run.Roster.Clear();
             run.Party.Clear();
-            run.IsOver = true;
+            run.Outcome = RunOutcome.Defeat;
+            run.DefeatCause = DefeatCause.Wipeout;
             UiTestUtil.Screen<LobbyScreen>().Refresh();
             yield return null;
             yield return Capture(prefix + "_13_run_over");

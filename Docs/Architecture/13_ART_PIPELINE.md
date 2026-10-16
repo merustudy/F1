@@ -282,6 +282,11 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
 2. CSV   -> DungeonData.csv 의 Background = "background/dungeon/<kebab-id>"
 3. Entry -> CSV의 Background에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
+원정 지도 (Round 71 E2. 데이터가 가리키지 않는 배경: 원정 화면이 깐다)
+1. PNG   -> Assets/@Art/Background/Expedition/map.png (2304x1536, 던전 배경과 같은 Import 정책)
+2. 코드  -> ArtAddress.ExpeditionMap = "background/expedition/map" (ArtSetup이 목록에 넣는다)
+3. Entry -> ArtSetup.Files (Group F1-Art, Scope Lobby)
+
 아이템의 아이콘
 1. PNG   -> Assets/@Art/Item/<Id>.png (맞춘 그림 그대로: 칸 수에 따라 320x88, 320x216, 320x344)
 2. CSV   -> ItemData.csv 의 Icon = "item/<kebab-id>"
@@ -354,7 +359,7 @@ UI의 틀과 아이콘
 
 ## Deferred and Forbidden
 
-- Deferred: 원정 화면 말고의 UI 그림, 가방의 그림(지금은 도형), 아이템 아이콘을 새 칸의 캔버스로 다시 그리는 것(지금 것이 맞아 들어가므로 필요할 때), 던전 말고의 배경(타이틀, 본부)과 그 배선, 포션의 아이콘, 노드 아이콘,
+- Deferred: 원정 화면 말고의 UI 그림, 가방의 그림(지금은 도형), 아이템 아이콘을 새 칸의 캔버스로 다시 그리는 것(지금 것이 맞아 들어가므로 필요할 때), 타이틀의 배경, 본부(로비)의 배경의 **배선**(그림은 2026-10-16 Round 71에서 `background` 타입의 시험 스타일 문서(§11을 내려다본 마을로)로 생성해 승인했다: `Archive/71-lobby-expedition/approved/lobby_town_topdown.png`, 소재 `town-topdown.csv`. 배선과 Architecture/12·13의 규칙은 26단계에서. 공유 바닥선은 쓰지 않고 로비 화면이 자리를 둔다. 원정 지도는 같은 라운드에서 생성·승인해 26단계의 첫 조각(E2)으로 배선했다: 위 "Unity 배선"), 포션의 아이콘, 노드 아이콘,
   여러 장의 애니메이션, 유닛의 색만 다른 변형. 소리는 `14_SOUND.md`가 소유한다.
 - Forbidden: 요청 없는 생성, 판정 없는 재생성, 승인 전 배선, 키를 환경 변수나 파일에 두기, 스타일 문구를 스크립트에 복사하기,
   작가나 작품의 이름을 프롬프트에 넣기, 기준 그림의 캐릭터를 승인 없이 다시 그리기, Inspector로 Import 설정 고치기.

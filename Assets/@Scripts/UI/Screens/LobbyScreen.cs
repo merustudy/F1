@@ -31,13 +31,37 @@ namespace F1.UI
         [SerializeField] TMP_Text _restLabel;
         [SerializeField] Button _depart;
         [SerializeField] GameObject _runOverPanel;
+        [SerializeField] TMP_Text _runOverTitle;
         [SerializeField] TMP_Text _runOverDay;
         [SerializeField] Button _runOverNewRun;
 
         readonly Dictionary<string, RosterEntryView> _entries = new Dictionary<string, RosterEntryView>();
 
-        /// <summary>Slice A has one dungeon. The lobby offers the first one in the data.</summary>
-        static DungeonData Dungeon => Managers.Data.Data.Dungeons.Ordered[0];
+        /// <summary>
+        /// Until the expedition screen (stage 26) the lobby offers one dungeon: the final one once the final stand is due, else the first
+        /// that is not final.
+        /// </summary>
+        static DungeonData Dungeon
+        {
+            get
+            {
+                StaticData data = Managers.Data.Data;
+                if (Managers.Run.IsFinalStandDue && data.FinalDungeon != null)
+                {
+                    return data.FinalDungeon;
+                }
+
+                foreach (DungeonData dungeon in data.Dungeons.Ordered)
+                {
+                    if (!dungeon.IsFinal)
+                    {
+                        return dungeon;
+                    }
+                }
+
+                return data.Dungeons.Ordered[0];
+            }
+        }
 
         protected override void OnOpen()
         {
@@ -73,14 +97,17 @@ namespace F1.UI
             }
 
             DepartCheck check = Managers.Run.CanDepart(dungeon.Id);
+            bool finalStand = check == DepartCheck.Ok && Managers.Run.IsFinalStandDue;
             _depart.interactable = check == DepartCheck.Ok;
-            _departStatus.text = DepartText(check, balance);
-            _departStatus.color = check == DepartCheck.Ok ? UiPalette.Good : UiPalette.Burn;
+            _departStatus.text = finalStand ? UiStrings.Get(UiKeys.Lobby.FinalStandDue) : DepartText(check, balance);
+            _departStatus.color = check != DepartCheck.Ok ? UiPalette.Burn : finalStand ? UiPalette.Virtue : UiPalette.Good;
 
-            _rest.interactable = !run.IsOver;
+            _rest.interactable = Managers.Run.CanRest;
             _restLabel.text = UiStrings.Get(UiKeys.Lobby.Rest, RunRules.FatigueRecovery(balance, balance.RestDays), balance.RestDays);
 
             _runOverPanel.SetActive(run.IsOver);
+            _runOverTitle.text = RunOverTitle(run, balance);
+            _runOverTitle.color = run.Outcome == RunOutcome.Victory ? UiPalette.Virtue : UiPalette.Danger;
             _runOverDay.text = UiStrings.Get(UiKeys.Lobby.RunOverDay, run.Day);
         }
 
@@ -174,6 +201,22 @@ namespace F1.UI
             return ids.Count == 0 ? UiStrings.Get(UiKeys.Lobby.EmptyRow) : UiText.MercenaryList(ids);
         }
 
+        /// <summary>How the run ended (Docs/Design/04_Lobby_100Day_Economy.md §8): the final boss fell, or what lost it.</summary>
+        static string RunOverTitle(RunState run, BalanceData balance)
+        {
+            if (run.Outcome == RunOutcome.Victory)
+            {
+                return UiStrings.Get(UiKeys.Lobby.Victory);
+            }
+
+            switch (run.DefeatCause)
+            {
+                case DefeatCause.DeathLimit: return UiStrings.Get(UiKeys.Lobby.DefeatDeathLimit, balance.DeathLimit);
+                case DefeatCause.FinalStandLost: return UiStrings.Get(UiKeys.Lobby.DefeatFinalStand);
+                default: return UiStrings.Get(UiKeys.Lobby.RunOver);
+            }
+        }
+
         static string DepartText(DepartCheck check, BalanceData balance)
         {
             switch (check)
@@ -206,6 +249,7 @@ namespace F1.UI
             Refresh();
         }
 
+        /// <summary>Round 71 E2: the lobby forms the party; where to go is chosen on the expedition screen, which departs.</summary>
         void OnDepart()
         {
             if (Managers.Run.CanDepart(Dungeon.Id) != DepartCheck.Ok)
@@ -213,9 +257,7 @@ namespace F1.UI
                 return;
             }
 
-            Managers.Expedition.Depart(Dungeon.Id);
-            Managers.Sound.PlayEffect(SoundEffect.Depart);
-            GoToCurrentPhase();
+            GoTo(ScreenId.Expedition);
         }
 
         void OnNewRun()

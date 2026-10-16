@@ -51,6 +51,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dc28a681edb954dd4b32bb06f14c191e
+    m_Address: ui/lobby/expedition-screen
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a299c20a8ef58429d832de7bde7daad2, type: 2}
   m_SchemaSet:

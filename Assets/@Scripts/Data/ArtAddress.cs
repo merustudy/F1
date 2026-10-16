@@ -23,6 +23,9 @@ namespace F1.Data
         /// <summary>The pose for the moment of a virtue, as <see cref="Broken"/>.</summary>
         public const string Resolute = "resolute";
 
+        /// <summary>The painted map of the lands the expedition screen shows (Round 71 E2): no definition names it, the screen does.</summary>
+        public const string ExpeditionMap = "background/expedition/map";
+
         /// <summary>Null for "no art". Anything else must be text without spaces.</summary>
         /// <param name="owner">The definition the value belongs to, for the error.</param>
         /// <param name="column">The name of the column, for the error.</param>

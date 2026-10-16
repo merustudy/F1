@@ -67,8 +67,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return NewRunWithParty();
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
 
             // Staged on the floor before the camp floor, then into a camp: entering it is saved.
             NodeMap nodes = Managers.Expedition.Expedition.Map;
@@ -94,8 +93,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return NewRunWithParty();
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             UiTestUtil.StageChampion();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
@@ -147,8 +145,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return NewRunWithParty();
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");

@@ -23,6 +23,7 @@ namespace F1.Tests
         [TestCase("pose/job/knight-attack", "Assets/@Art/Pose/Job/knight_attack.png")]
         [TestCase("pose/enemy/goblin-raider-hit", "Assets/@Art/Pose/Enemy/goblin_raider_hit.png")]
         [TestCase("background/dungeon/abandoned-mine", "Assets/@Art/Background/Dungeon/abandoned_mine.png")]
+        [TestCase("background/expedition/map", "Assets/@Art/Background/Expedition/map.png")]
         [TestCase("item/herb-pouch", "Assets/@Art/Item/herb_pouch.png")]
         [TestCase("item/small-icon/herb-pouch", "Assets/@Art/Item/SmallIcon/herb_pouch.png")]
         public void AssetPath_NamesTheFoldersAfterTheSegments_AndTheFileAfterTheDataId(string address, string expected)
@@ -39,7 +40,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Entries_AreTheArtOfTheData_InTheArtGroupAndTheExpeditionScope()
+        public void Entries_AreTheArtOfTheData_InTheArtGroup_InTheExpeditionScope_ButTheMapOfTheLandsInTheLobbys()
         {
             List<AddressEntry> entries = ArtSetup.Entries();
 
@@ -59,7 +60,9 @@ namespace F1.Tests
             foreach (AddressEntry entry in entries)
             {
                 Assert.AreEqual(ArtSetup.ArtGroup, entry.Group, entry.Address);
-                Assert.AreEqual(ResourceScope.Expedition, entry.Scope, entry.Address);
+                // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2).
+                ResourceScope scope = entry.Address == F1.Data.ArtAddress.ExpeditionMap ? ResourceScope.Lobby : ResourceScope.Expedition;
+                Assert.AreEqual(scope, entry.Scope, entry.Address);
                 Assert.AreEqual(ArtSetup.AssetPath(entry.Address), entry.AssetPath, entry.Address);
             }
         }

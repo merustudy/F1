@@ -9,12 +9,13 @@ namespace F1.UI
     {
         Title,
         Lobby,
+        Expedition,
         NodeMap,
         Battle,
         Settlement,
     }
 
-    /// <summary>Where each screen's prefab is and when it is loaded. One screen is shown at a time.</summary>
+    /// <summary>Where each screen's prefab is and when it is loaded. One screen is shown at a time. The expedition screen (Round 71 E2) belongs to the lobby's scope: the lobby opens it and it departs or goes back.</summary>
     public static class ScreenCatalog
     {
         public static readonly IReadOnlyList<ScreenId> All = (ScreenId[])Enum.GetValues(typeof(ScreenId));
@@ -25,6 +26,7 @@ namespace F1.UI
             {
                 case ScreenId.Title: return "ui/app/title-screen";
                 case ScreenId.Lobby: return "ui/lobby/lobby-screen";
+                case ScreenId.Expedition: return "ui/lobby/expedition-screen";
                 case ScreenId.NodeMap: return "ui/expedition/node-map-screen";
                 case ScreenId.Battle: return "ui/expedition/battle-screen";
                 case ScreenId.Settlement: return "ui/expedition/settlement-screen";
@@ -38,6 +40,7 @@ namespace F1.UI
             {
                 case ScreenId.Title: return ResourceScope.App;
                 case ScreenId.Lobby: return ResourceScope.Lobby;
+                case ScreenId.Expedition: return ResourceScope.Lobby;
                 default: return ResourceScope.Expedition;
             }
         }

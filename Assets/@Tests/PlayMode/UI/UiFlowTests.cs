@@ -118,6 +118,11 @@ namespace F1.Tests
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             Managers.Sound.ForgetEffects();
             UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "The way to the expedition screen is a button like any other (round 71 E2).");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track, "The expedition screen is the lobby's still.");
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
             CollectionAssert.AreEqual(new[] { SoundEffect.Depart }, Managers.Sound.Asked, "Setting out makes its own sound, not a click.");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
 
@@ -174,8 +179,7 @@ namespace F1.Tests
                 "The party is full.");
 
             // Lobby -> node map
-            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.Expedition));
             Assert.IsFalse(Managers.Resource.IsScopeOpen(ResourceScope.Lobby), "Only the scope of the shown screen stays open.");
 
@@ -225,8 +229,7 @@ namespace F1.Tests
             // A second expedition can depart, or the lobby says why not.
             if (Managers.Run.CanDepart(dungeonId) == DepartCheck.Ok)
             {
-                UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
-                yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+                yield return UiTestUtil.DepartFromLobby();
                 Assert.AreEqual(2, run.ExpeditionCount);
             }
             else
@@ -234,6 +237,98 @@ namespace F1.Tests
                 Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Expedition/Depart").interactable);
                 Assert.IsNotEmpty(UiTestUtil.TextAt(lobby, "Frame/Expedition/DepartStatus"));
             }
+        }
+
+        /// <summary>
+        /// The expedition screen (round 71 E2, Docs/Design/04_Lobby_100Day_Economy.md §7): a marker per dungeon where the data puts it on
+        /// the painted map, the locked one closed with its reason under it, the first open dungeon chosen with its details and the party
+        /// as the lobby formed it, the way back to the lobby, and the departure with its own sound to the chosen dungeon's map.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Expedition_ShowsEveryDungeonOnTheMap_KeepsTheLockedOneClosed_AndDepartsToTheChosenOne()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            DungeonData mine = data.Dungeons.Get("abandoned_mine");
+            DungeonData abyss = data.Dungeons.Get("abyss");
+            Assume.That(abyss.IsFinal && abyss.UnlockDungeonId == mine.Id, "The shipped data: clears of the mine open the final abyss.");
+
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            Assert.AreEqual("원정 화면으로", UiTestUtil.TextAt(lobby, "Frame/Expedition/Depart/DepartLabel"), "The lobby's button opens the screen; the departure is there.");
+            UiTestUtil.FillParty(lobby);
+            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            ExpeditionScreen screen = UiTestUtil.Screen<ExpeditionScreen>();
+            Assert.AreEqual(GamePhase.Lobby, Managers.Expedition.Phase, "Nothing has departed yet.");
+            Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.Lobby), "The screen and its map live in the lobby's scope.");
+            Assert.IsNotNull(UiTestUtil.At(screen, "Frame/Map").GetComponent<Image>().sprite, "The painted map.");
+
+            // One marker per dungeon, where the data puts it (percents of the map), named and stated.
+            DungeonMarkerView[] markers = UiTestUtil.Views<DungeonMarkerView>(screen);
+            Assert.AreEqual(data.Dungeons.Count, markers.Length, "The template stays hidden.");
+            DungeonMarkerView mineMarker = markers.Single(m => m.DungeonId == mine.Id);
+            DungeonMarkerView abyssMarker = markers.Single(m => m.DungeonId == abyss.Id);
+            var expected = new Vector2(
+                ExpeditionScreen.MapWidth * mine.MapX / 100f - DungeonMarkerView.DiscCenter.x,
+                -(ExpeditionScreen.MapHeight * mine.MapY / 100f - DungeonMarkerView.DiscCenter.y));
+            Assert.AreEqual(expected.x, mineMarker.Rect.anchoredPosition.x, 0.01f, "The disc's centre is at the data's point.");
+            Assert.AreEqual(expected.y, mineMarker.Rect.anchoredPosition.y, 0.01f, "The disc's centre is at the data's point.");
+            Assert.AreEqual("버려진 광산", mineMarker.Name);
+            Assert.IsFalse(mineMarker.Locked);
+            Assert.IsTrue(mineMarker.Selected, "The first open dungeon is chosen.");
+            Assert.AreEqual($"클리어 0회 · {mine.DurationDays}일", UiTestUtil.TextAt(mineMarker, "MarkerPlate/MarkerDetail"));
+            Assert.AreEqual("심연 (최종 던전)", abyssMarker.Name, "The final dungeon's marker says so.");
+            Assert.IsTrue(abyssMarker.Locked);
+            Assert.IsFalse(abyssMarker.Button.interactable, "A locked dungeon takes no click.");
+            Assert.IsFalse(abyssMarker.Selected);
+            Assert.AreEqual($"잠김 · 버려진 광산 {abyss.UnlockClears}회 클리어", UiTestUtil.TextAt(abyssMarker, "MarkerPlate/MarkerDetail"));
+
+            // The chosen dungeon's details (rows of label and value, the hints under them), and the party as the lobby formed it.
+            Assert.AreEqual("버려진 광산", UiTestUtil.TextAt(screen, "Frame/Details/Name"));
+            Assert.AreEqual(UiText.Name(data.Affinities.Get(mine.AffinityId).Name), UiTestUtil.TextAt(screen, "Frame/Details/Affinity"));
+            Assert.AreEqual($"{mine.Floors}층 + 보스", UiTestUtil.TextAt(screen, "Frame/Details/Floors"));
+            Assert.AreEqual($"{mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/Details/Days"));
+            Assert.AreEqual("치유 포션 ×2", UiTestUtil.TextAt(screen, "Frame/Details/Potions"), "The potions by kind, with their count.");
+            Assert.AreEqual("0회", UiTestUtil.TextAt(screen, "Frame/Details/Cleared"));
+            Assert.AreEqual(
+                $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n{data.Balance.TotalDays}일을 넘기면 심연의 보스와 강제로 싸운다",
+                UiTestUtil.TextAt(screen, "Frame/Details/Hint"),
+                "What this dungeon's clears open, and the final stand past the last day.");
+            RunState run = Managers.Run.Run;
+            ExpeditionPartyCardView[] cards = UiTestUtil.Views<ExpeditionPartyCardView>(screen);
+            Assert.AreEqual(data.Balance.PartySize, cards.Length);
+            for (int row = 1; row <= data.Balance.PartySize; row++)
+            {
+                PartySlot slot = run.Party.Single(s => s.Row == row);
+                ExpeditionPartyCardView card = cards[row - 1];
+                Assert.AreEqual(UiText.Mercenary(slot.MercenaryId), card.Name);
+                Assert.AreEqual(UiText.Mercenary(slot.MercenaryId), UiTestUtil.TextAt(screen, $"Frame/Bottom/PartyRow{row}/PartyRowName{row}"));
+                Assert.AreEqual(UiText.Job(RunRules.FindMercenary(run, slot.MercenaryId).JobId), card.Detail, "The job; nobody is in a state on day 1.");
+                Assert.AreEqual(FatiguePips.Count, card.Pips.Count, "Fatigue as the pips every screen shows.");
+                Assert.IsTrue(card.Pips.All(p => p.gameObject.activeSelf && p.Ratio == 0f), "Fresh.");
+            }
+
+            Assert.AreEqual("출발할 수 있습니다", UiTestUtil.TextAt(screen, "Frame/Bottom/Status"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(screen, "Frame/Bottom/Depart").interactable);
+
+            // Back to the lobby and in again.
+            UiTestUtil.Click(screen, "Frame/Header/ToLobby");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            Assert.AreEqual(GamePhase.Lobby, Managers.Expedition.Phase);
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            screen = UiTestUtil.Screen<ExpeditionScreen>();
+            Assert.AreEqual(mine.Id, screen.SelectedDungeonId, "The choice is made here each time.");
+
+            // The departure: its own sound, the chosen dungeon's map, the lobby's scope released.
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(screen, "Frame/Bottom/Depart");
+            CollectionAssert.AreEqual(new[] { SoundEffect.Depart }, Managers.Sound.Asked);
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            Assert.AreEqual(mine.Id, Managers.Expedition.Expedition.DungeonId);
+            Assert.IsFalse(Managers.Resource.IsScopeOpen(ResourceScope.Lobby), "The lobby's scope, with the map, goes with the departure.");
         }
 
         [UnityTest]
@@ -318,7 +413,8 @@ namespace F1.Tests
 
             run.Roster.Clear();
             run.Party.Clear();
-            run.IsOver = true;
+            run.Outcome = RunOutcome.Defeat;
+            run.DefeatCause = DefeatCause.Wipeout;
             lobby.Refresh();
             yield return null;
 
@@ -514,8 +610,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             PartySideView party = map.GetComponentInChildren<PartySideView>();
             ExpeditionState expedition = Managers.Expedition.Expedition;
@@ -663,8 +758,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             UiTestUtil.StageChampion();
             ExpeditionState expedition = Managers.Expedition.Expedition;
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
@@ -867,8 +961,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
 
             // Found on the way: a weapon and an armor cost fatigue, a support item does not; the base weapon never does.
             StaticData data = Managers.Data.Data;
@@ -2248,8 +2341,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
         }
 
         /// <summary>Stands the party on a node (staged: a test moves it along the map directly) and opens the node map again, as after a battle there.</summary>
@@ -2276,8 +2368,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
 
             // The party side: every member stands as the figure of its job, and its board shows its bag in leather, its empty squares
             // dark, and a piece per item as big as its squares with the item's icon, without a tier mark (Common).
@@ -2437,8 +2528,7 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
 
             ExpeditionMember front = Managers.Expedition.Expedition.Members.Single(m => m.Row == BattleRows.Front);
             BoardItem weapon = front.Board.Items[0];
@@ -3176,8 +3266,7 @@ namespace F1.Tests
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             UiTestUtil.FillParty(lobby);
 
-            UiTestUtil.Click(lobby, "Frame/Expedition/Depart");
-            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            yield return UiTestUtil.DepartFromLobby();
             if (champion)
             {
                 UiTestUtil.StageChampion();

@@ -110,6 +110,7 @@ namespace F1.Editor.Setup
             {
                 Save(BuildTitle(holder.transform), PrefabPath(ScreenId.Title));
                 Save(BuildLobby(holder.transform), PrefabPath(ScreenId.Lobby));
+                Save(BuildExpedition(holder.transform), PrefabPath(ScreenId.Expedition));
                 Save(BuildNodeMap(holder.transform), PrefabPath(ScreenId.NodeMap));
                 Save(BuildBattle(holder.transform), PrefabPath(ScreenId.Battle));
                 Save(BuildSettlement(holder.transform), PrefabPath(ScreenId.Settlement));

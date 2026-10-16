@@ -263,6 +263,7 @@ MonoBehaviour:
   _restLabel: {fileID: 9044758567095645748}
   _depart: {fileID: 714568209631156276}
   _runOverPanel: {fileID: 6615039264754292672}
+  _runOverTitle: {fileID: 5126877715288831875}
   _runOverDay: {fileID: 3875365660201133054}
   _runOverNewRun: {fileID: 4883427830741381197}
 --- !u!1 &475967893394306801
@@ -632,7 +633,6 @@ GameObject:
   - component: {fileID: 7002908967427770553}
   - component: {fileID: 3329010843239469206}
   - component: {fileID: 5126877715288831875}
-  - component: {fileID: 6053093682655797332}
   m_Layer: 5
   m_Name: RunOverTitle
   m_TagString: Untagged
@@ -687,7 +687,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Lobby.RunOver
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 6566f90288a4d41b88e8cd41f442c1d6, type: 2}
   m_sharedMaterial: {fileID: 4984318324771557996, guid: 6566f90288a4d41b88e8cd41f442c1d6, type: 2}
@@ -759,46 +759,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &6053093682655797332
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 697566581278758734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56eb0353ae6e5124bb35b17aff880f16, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Localization::UnityEngine.Localization.Components.LocalizeStringEvent
-  m_StringReference:
-    m_TableReference:
-      m_TableCollectionName: F1_UI_Static
-    m_TableEntryReference:
-      m_KeyId: 0
-      m_Key: Lobby.RunOver
-    m_FallbackState: 0
-    m_WaitForCompletion: 0
-    m_LocalVariables: []
-  m_FormatArguments: []
-  m_UpdateString:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 5126877715288831875}
-        m_TargetAssemblyTypeName: TMPro.TMP_Text, Unity.TextMeshPro
-        m_MethodName: set_text
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  references:
-    version: 2
-    RefIds: []
 --- !u!1 &708552952939057204
 GameObject:
   m_ObjectHideFlags: 0
@@ -1070,7 +1030,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23c621ceeded2476da5dbc18f7d57650, type: 3}
   m_Name: 
   m_EditorClassIdentifier: F1.Runtime::F1.UI.ButtonSound
-  _silent: 1
+  _silent: 0
 --- !u!1 &855259270022237754
 GameObject:
   m_ObjectHideFlags: 0

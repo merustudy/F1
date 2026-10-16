@@ -59,8 +59,8 @@ namespace F1.Editor.Setup
             UiBuild.Box(departStatus, 24f, 600f, 612f, 76f);
             ButtonParts rest = UiBuild.Button("Rest", panel, UiPalette.ButtonQuiet, 30f);
             UiBuild.Box(rest.Rect, 24f, 690f, 612f, 80f);
+            // Opens the expedition screen (round 71 E2): a button like any other. The departure, with its own sound, is there.
             ButtonParts depart = UiBuild.LocalizedButton("Depart", panel, UiKeys.Lobby.Depart, UiPalette.Button, 40f);
-            UiBuild.Silence(depart.Button);
             UiBuild.Box(depart.Rect, 24f, 790f, 612f, 100f);
 
             // Shown when no mercenary is left.
@@ -68,9 +68,9 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(overlay.rectTransform);
             Image overPanel = UiBuild.Panel("RunOverBox", overlay.transform, UiPalette.Panel);
             UiBuild.Box(overPanel, 510f, 330f, 900f, 420f);
-            UiBuild.Box(
-                UiBuild.LocalizedLabel("RunOverTitle", overPanel.transform, UiKeys.Lobby.RunOver, 56f, UiPalette.Danger, TextAlignmentOptions.Center),
-                0f, 50f, 900f, 80f);
+            // The title says how the run ended (victory, or what lost it): the screen sets it.
+            TextMeshProUGUI runOverTitle = UiBuild.Label("RunOverTitle", overPanel.transform, 56f, UiPalette.Danger, TextAlignmentOptions.Center);
+            UiBuild.Box(runOverTitle, 0f, 50f, 900f, 80f);
             TextMeshProUGUI runOverDay = UiBuild.Label("RunOverDay", overPanel.transform, 32f, UiPalette.Text, TextAlignmentOptions.Center);
             UiBuild.Box(runOverDay, 0f, 150f, 900f, 50f);
             ButtonParts newRun = UiBuild.LocalizedButton("RunOverNewRun", overPanel.transform, UiKeys.Title.NewRun, UiPalette.Button, 36f);
@@ -92,6 +92,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_restLabel", rest.Label);
             UiBuild.SetReference(screen, "_depart", depart.Button);
             UiBuild.SetReference(screen, "_runOverPanel", overlay.gameObject);
+            UiBuild.SetReference(screen, "_runOverTitle", runOverTitle);
             UiBuild.SetReference(screen, "_runOverDay", runOverDay);
             UiBuild.SetReference(screen, "_runOverNewRun", newRun.Button);
             return screen;
@@ -100,6 +101,25 @@ namespace F1.Editor.Setup
         /// <summary>The fatigue pips of a roster line (FatiguePips.Count of them): the gap between two, and how wide they all are.</summary>
         const float FatiguePipGap = 4f;
         const float FatiguePipsWidth = 590f;
+
+        /// <summary>
+        /// FatiguePips.Count bars side by side across a width, FatiguePipGap apart: the roster line's, and the party cards' of the
+        /// expedition screen (round 71 E2). <see cref="UI.FatiguePips.Show"/> fills them.
+        /// </summary>
+        static UiBar[] FatiguePipRow(string namePrefix, RectTransform parent, float width, float height)
+        {
+            var pips = new UiBar[FatiguePips.Count];
+            float pipWidth = (width - FatiguePipGap * (pips.Length - 1)) / pips.Length;
+            for (int i = 0; i < pips.Length; i++)
+            {
+                float left = Mathf.Round(i * (pipWidth + FatiguePipGap));
+                float right = Mathf.Round(i * (pipWidth + FatiguePipGap) + pipWidth);
+                pips[i] = UiBuild.Bar(namePrefix + i, parent, UiPalette.FatigueBar);
+                UiBuild.Box(pips[i], left, 0f, right - left, height);
+            }
+
+            return pips;
+        }
 
         /// <summary>The template of one roster line. The lobby clones it per mercenary.</summary>
         static RosterEntryView BuildRosterEntry(Transform parent)
@@ -117,15 +137,7 @@ namespace F1.Editor.Setup
             // Fatigue as pips (2026-10-06 round 33, C, Darkest Dungeon's way): FatiguePips.Count bars side by side in the bar's place,
             // each a tenth of the most fatigue; the view fills them and colours the ones past the breakdown.
             RectTransform pips = UiBuild.Box(UiBuild.Rect("EntryFatiguePips", entry), 20f, 54f, FatiguePipsWidth, 14f);
-            var fatiguePips = new UiBar[FatiguePips.Count];
-            float pipWidth = (FatiguePipsWidth - FatiguePipGap * (fatiguePips.Length - 1)) / fatiguePips.Length;
-            for (int i = 0; i < fatiguePips.Length; i++)
-            {
-                float left = Mathf.Round(i * (pipWidth + FatiguePipGap));
-                float right = Mathf.Round(i * (pipWidth + FatiguePipGap) + pipWidth);
-                fatiguePips[i] = UiBuild.Bar("EntryFatiguePip" + i, pips, UiPalette.FatigueBar);
-                UiBuild.Box(fatiguePips[i], left, 0f, right - left, 14f);
-            }
+            UiBar[] fatiguePips = FatiguePipRow("EntryFatiguePip", pips, FatiguePipsWidth, 14f);
 
             // The passive on the left of the line under the pips and, at its right end, what the mercenary's affliction does (round 36; empty without one).
             TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 20f, UiPalette.TextDim), 20f, 76f, 380f, 32f));
