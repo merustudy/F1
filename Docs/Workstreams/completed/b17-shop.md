@@ -1,6 +1,6 @@
 # Slice B 17단계: 상점 노드와 지역 코인
 
-Snapshot: 2026-10-07 (18단계 뒤)
+Snapshot: 2026-10-07 (18단계 뒤) — 2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. `completed/`로 옮김.
 
 ## Goal
 

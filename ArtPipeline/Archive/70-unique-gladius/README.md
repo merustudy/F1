@@ -134,7 +134,7 @@
 
 ## 구현 (2026-10-16, 23단계)
 
-- 기획·Owner 문서: Design/02 §4(【확정】 담금질과 유니크), 03 §1·§5, 00, 07, 08 §22; Architecture/05·07·08("담금질과 유니크")·09(구현 순서 12, Acceptance 15)·11·12("담금질", 금 테, 유니크의 카드)·13; CLAUDE.md §9; Roadmap("23단계의 승인", "임시 조치", G18 → 결정됨, 23단계 절); Handoff `Docs/Workstreams/active/b23-forge.md`.
+- 기획·Owner 문서: Design/02 §4(【확정】 담금질과 유니크), 03 §1·§5, 00, 07, 08 §22; Architecture/05·07·08("담금질과 유니크")·09(구현 순서 12, Acceptance 15)·11·12("담금질", 금 테, 유니크의 카드)·13; CLAUDE.md §9; Roadmap("23단계의 승인", "임시 조치", G18 → 결정됨, 23단계 절); Handoff `Docs/Workstreams/completed/b23-forge.md`.
 - 데이터: `RecipeData.csv`(새 정의, 이름 열 없음: `Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier`), `ItemData.csv`의 `Unique` 열(선택)과 `gladius` 행, 숫돌의 값·가중치, Generated 둘.
 - Domain: `RecipeData`, `ItemData.Unique`(유니크는 값·가중치 0), `StaticData.Recipes`와 검사(결과는 유니크, 촉매는 ★), `ForgeRules`(`Options`: 바탕이 그 단계 + `StarRules.Sources`의 촉매가 그 단계 + 결과가 바탕의 자리에 맞음, 파티에 유니크가 없을 때; `ForgeAtCamp`: 촉매 제거, 바탕을 결과로(단계·기본 무기·세기 % 그대로), `ChoosingNode`), 저장 검증(유니크 ≤ 1).
 - Application: `ExpeditionManager.ForgeOptions`·`CanForgeAtCamp`·`ForgeOptionAt`·`ForgeAtCamp`(저장).

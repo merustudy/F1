@@ -110,7 +110,7 @@
 
 ## 구현 (18단계)
 
-- 규칙·데이터·저장·Application·시뮬·화면·Test는 Roadmap 18단계와 Architecture/07·08·11·12, Handoff `Docs/Workstreams/active/b18-loot.md`에. 시뮬은 Design/08 §14.
+- 규칙·데이터·저장·Application·시뮬·화면·Test는 Roadmap 18단계와 Architecture/07·08·11·12, Handoff `Docs/Workstreams/completed/b18-loot.md`에. 시뮬은 Design/08 §14.
 - 안에서 바뀐 것(권장안으로 정했고 Roadmap "사후 검토 대기"에 올렸다):
   - §2의 "그 적이 들었던 등급 그대로·일반"은 **버렸다**(시뮬 100%). 대안 (2)에 **적 아이템의 척도 변경**을 더했다.
   - 처치의 피로 완화 `FatigueOnKill`을 5에서 3으로: 보드가 세져 처치가 늘고 붕괴가 10%로 내려가서. 16단계의 J(피격 2·처치 5)는 피격 2·처치 3이 됐다.

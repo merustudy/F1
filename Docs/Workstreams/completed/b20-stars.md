@@ -1,6 +1,6 @@
 # Slice B 20단계: ★ 닿음과 숫돌
 
-Snapshot: 2026-10-10 (구현, Round 52~55 구현, 세션 정리에서 커밋)
+Snapshot: 2026-10-10 (구현, Round 52~55 구현, 세션 정리에서 커밋) — 2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. `completed/`로 옮김.
 
 ## Goal
 

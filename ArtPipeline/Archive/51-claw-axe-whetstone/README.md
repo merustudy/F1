@@ -121,6 +121,6 @@
 ## 구현 (2026-10-10)
 
 - 그림: `Assets/@Art/Item/rat_bite.png`를 승인된 발톱(`approved/rat_claw.png`)으로 바꾸고 잘랐다. `greataxe.png`는 지금 그림을 30° 돌려 구웠다(216×140). `whetstone.png`는 도형(`whetstone_shape.py`).
-- 데이터·코드·문서·Test는 Roadmap의 20단계 절과 `Docs/Workstreams/active/b20-stars.md`. 별의 표시는 `mock-stars-bb.png`의 2~8이다(앞 안의 변의 별·조각의 +1·전투의 번쩍임은 넣지 않았다).
+- 데이터·코드·문서·Test는 Roadmap의 20단계 절과 `Docs/Workstreams/completed/b20-stars.md`. 별의 표시는 `mock-stars-bb.png`의 2~8이다(앞 안의 변의 별·조각의 +1·전투의 번쩍임은 넣지 않았다).
 - 시뮬은 Design/08 §17.
 - 검증: 체인 4차 `20261010-094851` CHAIN OK(EditMode 815/815, PlayMode 80/89), 스크린샷 `20261010-s20b` 9/9. 목업과 대조해 빈 별의 밝은 띠와 카드의 피해 줄("맨 앞 적에게 피해 12" 아래 "(★ 숫돌 +1)")을 고쳤다. 장면 넷은 `game/`.

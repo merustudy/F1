@@ -16,6 +16,7 @@
   같은 날 이어서 **Round 65**(발키리에 체인소맨 만화풍 20~80%, 네 장 생성 뒤 중단), **Round 66**(대마법사 모래시계·미형·섹시 옷 → 2차 보관, 새 모습), **Round 67**(중국·일본 서브컬처 얼굴 20~80% → 60%, 저장한 얼굴 기준 `subculture_60` "서브컬쳐_60"과 `gen_image.py`의 `Face` 열),
   10-16에 **Round 70** → **23단계(담금질과 첫 유니크 글라디우스)**를 Slice B에 더해 구현했다(사용자 판정: 3성 롱소드 + 3성 숫돌, 야영지의 담금질, 쉬기 포기, 3×1·맨 앞 적 둘·자신의 ★, 금 테 → 후속 2에서 아이콘 외곽선의 금빛 2px(숨쉬기 없음)·명패 머리, 후속 3에서 유니크의 성을 뺌, G18 결정, 숫돌 값 1 임시).
   10-15에 **Round 68**(대마법사의 새 얼굴: 실제 인물 사진은 쓰지 않음, 사용자가 AI로 만든 가상 인물을 둘째 기준 그림으로 → 6차 마법사 로브 **확정**, `Height` 75, 자세 넷 다시 그려 게임에 연결, 공격 자세 두 번 고침, 자세가 가라앉던 것을 `Boots` 열로 고침)을 했다(세션 정리: 2026-10-15 커밋·푸시). 이어서 리팩토링 **R10**(PlayMode의 새 런을 고정 시드로, 운에 기대던 Test를 운과 상관없게)을 했고(커밋 안 함), **Round 69**(단계의 이름 일반·동·은·금과 표시의 검토: 권장 로마 숫자 + 숫자 표 → 사용자 판정: N성·마름모·디아블로 색·코드까지)를 했다.
+  10-16(이어서) **Slice B를 완료했다**(사용자 "이번 슬라이스는 여기서 마무리하고 다음 단계로". 결정 1: Acceptance 2(원정 하나 15~30분)는 **미달**로 적고 닫았다 — 10-15의 플레이 기록 셋이 x1로 약 6·5·4분, 16단계의 맞추기와 마감은 하지 않음. 결정 2: 숫돌 값 1(임시)은 그대로 Slice C로. 직접 플레이·사후 검토는 Slice C의 입력). Handoff 여덟(b16~b23)을 `completed/`로 옮겼다. 같은 날 **24단계(Slice C 범위: 로비 구조 생성과 런 한 바퀴)**를 시작했다(사용자 지정 주제).
   처음의 Slice B 후보(Architecture/09의 Deferred)는 Slice C로 미뤘다. 일괄 승인과 권장안으로 정한 것은 "사후 검토 대기" 표가 모은다.
 - 이 문서는 2026-10-05에 줄였다(사용자 "권장안대로"). 날짜마다의 갱신 기록과 라운드마다의 절(지시·목업·판정·구현·검증·호출)은
   Git(커밋 `dcfaff4`의 이 파일)과 각 라운드의 `ArtPipeline/Archive/<폴더>/README.md`에 있다.
@@ -39,6 +40,7 @@
 | 10-14 (이어서) | **Round 65**(사용자 "현재 발키리 그림체에 만화 체인소맨 그림체를 섞어서 20% 40% 60% 80% 테스트 이미지 생성"): 축마다 단계를 글로 적은 시험 문서 넷, 호출 4회 — 목업 전에 사용자가 다른 요청으로 넘어가 중단(`65-valkyrie-csm-mix/README.md`). 사용자 "현재 여성 캐릭터 이미지 목록" → 발키리·주교·대마법사의 다섯 장 시트. **Round 66**(사용자 "대마법사 대기 이미지로 … 얼굴 더 미형으로 모래시계 몸매로"): 1차(기준 그림이 이겨 거의 같음) → "B, 옷차림 더 섹시하게" → 2차(코르셋·트인 치마) → 어깨 위 가닥 지움(호출 없음)과 3차(확정 시트로 새로) → 사용자 "2차를 키가 큰·모래시계·슬림·섹시 스타일로 보관 / 키 보통·모래시계·슬림·섹시로 아예 다른 스타일 생성" → 보관(`kept/`)과 새 모습(마녀 모자) → "키 비교는 인게임 기준" → 게임 배율 목업과 새 모습 2(예쁜 얼굴 기준: 콧볼 없음). **Round 67**(사용자 "얼굴 기준을 중국이나 일본의 서브컬쳐 여자캐릭터 … 20% 40% 60% 80%"): 검토(작품의 얼굴 특징을 글로)와 네 장 → "60% / 대기 / 재생성(모자 제거) / 얼굴 기준 서브컬쳐_60 으로 저장" → `STYLE_RUNTIME.md` `## Face: subculture_60`, `gen_image.py`의 `Face` 열(Design/10 §2 【확정】, Architecture/13), 다시 그림(쓰는 게임 그림 없음, 여성 셋에 같이 쓸지는 대기). 호출 Round 65~67 합 14회 |
 | 10-16 | **Round 70**(사용자 "유니크는 예제로 롱소드 3성 + 숫돌 3성 + 숫돌 3성으로 만드는 글라디우스 아이템을 만들어보자"): G18·【검토】 유니크의 설계 검토 — 시뮬 측정(지시의 레시피는 0/3,000), 제안과 목업 `mock-forge.png`, 판정할 것 열둘 → 판정 1(숫돌 하나·야영지·쉬기 포기·맞히는 적 +1과 자신의 ★·가중치 16·금 테·A + C·명패 머리·생성 1회·23단계·G18 결정, "3성 + 3성으로 변경 검토") → 재검토(그 레시피도 0, 모양 목업 `mock-gladius-stars.png`) → 판정 2 **"3성 + 3성 그대로 / 3×1 / 수치 권장안 / 숫돌 가격 1(임시)"** → **23단계** 시작과 구현(아래 "23단계의 승인", 23단계 절). 아이콘 생성 1회($0.015). 후속 1·2(같은 날): 유니크의 빛 — 금 테 → 아이콘 외곽선의 금빛 2px, 숨쉬기 없음(`tools/glow_items.py`). 후속 3: 유니크에는 성이 없다(눈금 없음, 수치 고정, 정비 안 함). `ArtPipeline/Archive/70-unique-gladius/README.md` |
 | 10-15 | **Round 68**: 사용자가 실제 인물의 사진 두 장을 주며 그 인물로 대마법사를 그리라 함 → 알아볼 수 있는 실제 인물이라 그 얼굴을 토대로 하지 않는다고 답하고 흔한 미인형 특징만 글로(1~3차: 더 가린 옷·망토 없음, 밝은 옷) → 사용자가 가상 인물(AI로 만든, 사용자 확인) 이미지를 줌 → 4차(글로만: 반영 안 됨, 사용자 지적) → `gen_image.py --extra-reference`로 그 이미지를 둘째 기준 그림으로 붙여 5차(얼굴이 옴) → "얼굴 크기·비율 재조정, 마법사 로브" → 6차 → 사용자 **"1. 확정 2. 75 3. 진행"**: 대마법사 행을 새 소재·`Height` 75로, 대기는 6차 원본 그대로, 공격·피격·붕괴·각성을 새로 그림(호출 4회, 배율은 머리로 1.11·0.89·0.92·0.92; 공격은 팔 하나가 빠지고 몸이 작아 다시 그려 1.05, 두 손이 붙어 한 번 더 그려 1.03, 호출 2회), 자세가 바닥 아래로 내려가 `fit_pose`가 부츠 대신 지팡이 나무를 잡던 것을 `Rosters/character.csv`의 `Boots` 열로 고침(호출 없음), 게임의 다섯 파일을 바꿈. 체인은 Handoff. 세션 정리: 다섯 커밋과 푸시. `ArtPipeline/Archive/68-archmage-new-face/README.md`. 이어서 **R10**(사용자 "R10 시드 고정 먼저 진행 / 검토 후 보고" → 검토와 판정할 것 넷 → **"승인"**): PlayMode의 새 런은 고정 시드 1(`AppRoot.NewRunSeedOverride`), 지도에 기대는 `Assume` 넷을 `Assert`로, 이겨야 하는 전리품·저장 Test에 승리를 꾸밈, 치명타·붕괴 캡션 Test를 운과 상관없게, 인벤토리 창의 구운 크기 검사. 체인 `20261015-210800` **CHAIN OK**(EditMode 846/846, PlayMode 83/92, inconclusive 0). 커밋 안 함. 상세 `b16-tuning.md` "리팩토링 검토". **Round 69**(사용자 "아이템 등급에 따른 금/은/동 이라는 표현 개선과 표시방식 개선안 … 검토 후 제안"): 레퍼런스 열과 문제 여섯, 이름 안 넷·표 안 셋의 목업 둘, 권장 로마 숫자(I~IV) + 숫자 표 + 금속색 하나, 판정할 것 일곱 → 사용자 **"1. n성 / 2. 제목에서 뺌 / 3. B안(별 크기, 파랑·은·노랑) / 4. 디아블로 색 유지 / 5. 코드까지 / 6. 예 / 7. 지금구현"**(위 "Round 69의 승인") → **R12**를 첫 커밋으로(`3ce9129`), 이어서 구현: 이름 일반·1성·2성·3성(코드 `ItemTier.Tier1`~`Tier3`, CSV 키, 저장 12, 문구), 마름모 눈금 `tier_pip`(별 크기), 한 팔레트 `Rarity`(1성 파랑·2성 은·3성 노랑, 글도 같은 색 — 사후 검토), 확정 목업 `mock-chosen.png`와 구현 장면 `game/impl-compare.png`. 체인 `20261015-230612` 전체(PlayMode 83/92) + EditMode 847/847, 스크린샷 9/9. 호출 없음. `ArtPipeline/Archive/69-tier-naming/README.md` |
+| 10-16 (이어서) | 상태 복구(10-15의 플레이 기록 둘: x1 원정 셋이 정산까지 약 6·5·4분). **Slice B 완료**(사용자 "이번 슬라이스는 여기서 마무리하고 다음 단계로", 결정 1·2는 권장대로: Acceptance 2 미달 기록, 숫돌 값 1 임시는 Slice C로). 16~23단계 완료, Handoff 여덟을 `completed/`로. **24단계(Slice C 범위: 로비 구조 생성과 런 한 바퀴)** 시작 |
 
 - 커밋: 세션 정리마다 주제별로 커밋하고 `origin/feature/slice-a`에 푸시했다. 2026-10-06 세션 정리에서 10단계(소리)와 Slice A 완료를
   여섯 커밋(기획, Architecture, 소리 파이프라인, 소리 코드와 Test, 소리 파일과 생성물, Roadmap과 Handoff)으로 올렸다.
@@ -352,7 +354,7 @@ Round 70(`ArtPipeline/Archive/70-unique-gladius/README.md`)의 검토·재검토
 
 | 무엇 | 값 | 정한 날 | 적힌 곳 |
 |---|---|---|---|
-| 상점의 숫돌 값 | `Price` 8 → **1** (글라디우스를 노려 보기 쉽게. 사용자 "상점에서 숫돌 가격을 1로 낮게 설정(임시)") | 2026-10-16 | `Assets/@Data/Source/ItemData.csv`(`whetstone`), Design/03 §5의 줄, 시뮬 Design/08 §22 |
+| 상점의 숫돌 값 | `Price` 8 → **1** (글라디우스를 노려 보기 쉽게. 사용자 "상점에서 숫돌 가격을 1로 낮게 설정(임시)". 2026-10-16 Slice B를 닫을 때 그대로 두고 Slice C로 넘겼다 — 사용자 결정 2. 복귀는 직접 플레이 뒤) | 2026-10-16 | `Assets/@Data/Source/ItemData.csv`(`whetstone`), Design/03 §5의 줄, 시뮬 Design/08 §22 |
 
 ## 사후 검토 대기 (일괄 승인으로 정한 것)
 
@@ -447,7 +449,7 @@ Round 70(`ArtPipeline/Archive/70-unique-gladius/README.md`)의 검토·재검토
 | 23단계의 권장안 세부 (사용자는 위 "23단계의 승인"을 정했다. 구현에서 정한 것: 글라디우스의 수치 — 피해 12-20(롱소드 2-4 + 숫돌 +1의 3성 값, 고정), 치명타 10%(단검과 같음), 쿨다운·자리는 롱소드와 같음, `StarDamage` 4(고정); 결과는 바탕의 기본 무기 여부·세기 %를 물려받고 성은 없음(후속 3: 눈금 없음, 정비 안 함, 저장은 `Common`만); 담금질 걸음은 첫 레시피를 미리 고름(다른 바탕을 누르면 바뀜); 카드 셋일 때의 폭 170(`CampCards`); 유니크의 제목은 어디서나 유니크 금(툴팁·바닥 이름판·전투 카드), 사실 줄의 첫 말 "유니크", 툴팁 끝 "유니크: 파티에 하나"; 레시피 줄은 바탕·촉매의 카드와 툴팁에; 시뮬 정책은 촉매를 먼저 사고 아무도 아프지 않으면 담금질; 유니크 둘 이상의 저장은 무효; 둘째 유니크·지역 촉매는 Slice C) | `ArtPipeline/Archive/70-unique-gladius/README.md` "구현", Design/02 §4, Architecture/08·12 |
 | Round 69의 세부 (사용자는 위 "Round 69의 승인"의 일곱을 정했다. 구현에서 권장안으로 정한 것: **한 팔레트** — 제목·정비 창·합치기 표시·툴팁·바닥 이름판의 글도 눈금과 같은 색(`UiPalette.Rarity`: 1성 `#7070FF`·2성 `#D3DBE4`·3성 `#FFFF6E`. "디아블로 색 유지"를 "희귀도 색을 글에 그대로 쓴다"로 읽되 눈금의 색이 2·3성에서 달라졌으므로 글도 따라가게 했다. Round 49의 유니크 금 `#C7B377` 제목은 뺌), 2성의 은색은 Round 41 P3의 은 글 색 `#D3DBE4`, 영어는 1-star·2-star·3-star, 코드 이름은 `Tier1`~`Tier3`(숫돌 ★의 `Star*` 코드와 안 겹치게 Star를 피함), 저장 12(`From11To12`: 아이템·전리품·상점 물건의 이름만), CSV 키 `Tier1Percent`·`Tier1Floor`, 시뮬 보고 "1-star", 제목 형식 "{0} {1}"(가운뎃점 없음), `TierText`(구리·은·금 글 색)를 뺌(각성의 금빛 `Virtue`는 제 값 그대로)) | `ArtPipeline/Archive/69-tier-naming/README.md` "판정·구현", Design/02 §4, 10 §5, Architecture/07·12 |
 | Round 66~68의 세부 (사용자는 Round 67 얼굴 60%·저장 이름 "서브컬쳐_60", Round 68 6차 확정·`Height` 75·진행을 정했다. 권장안: 얼굴 기준의 저장 방식(`## Face:` 절의 Rules·Lift·Avoid, 소재의 `Face` 열, `character`만, 영어 이름 `subculture_60`), Round 67 다시 그림에 비율·색을 함께 넣은 것, Round 68의 옷(더 가린 드레스 → 로브의 모양·색), 6차 대기를 다시 그리지 않고 확정, 자세의 배율을 머리로 잰 값(1.11·0.89·0.92·0.92), 확정 시트의 대마법사를 옛 그림 그대로 둔 것, `--extra-reference`를 시험용 선택지로 둔 것, 가상 인물 이미지를 저장소 밖에 둔 것) | `ArtPipeline/Archive/66-archmage-hourglass/`·`67-archmage-subculture-face/`·`68-archmage-new-face/README.md`, Design/10 §2, Architecture/13 |
-| R10의 세부 (사용자는 "승인"으로 판정할 것 넷을 권장안대로 정했다: 시드 1, 운에 기대던 Test 둘도 고침, `Assume`은 지도·전리품의 넷만, 문서 한 줄. 구현에서 정한 것: 시드는 `UseTemporarySaveRoot`가 켜고 `ShutdownApp`이 끔, 같은 가정을 하던 저장 Test 하나에도 승리를 꾸밈, 치명타 Test는 1열 유닛의 치명타를 20ms 걸음으로 기다림, 붕괴 Test는 Test용 캡션 기록 `BattleScreen.CaptionsPushed`를 봄, 창의 크기는 `InventoryGridView.LaidOutWidth`·`LaidOutHeight`와 `ShippedDataTests`) | `Docs/Workstreams/active/b16-tuning.md` "리팩토링 검토" R10, Architecture/10 |
+| R10의 세부 (사용자는 "승인"으로 판정할 것 넷을 권장안대로 정했다: 시드 1, 운에 기대던 Test 둘도 고침, `Assume`은 지도·전리품의 넷만, 문서 한 줄. 구현에서 정한 것: 시드는 `UseTemporarySaveRoot`가 켜고 `ShutdownApp`이 끔, 같은 가정을 하던 저장 Test 하나에도 승리를 꾸밈, 치명타 Test는 1열 유닛의 치명타를 20ms 걸음으로 기다림, 붕괴 Test는 Test용 캡션 기록 `BattleScreen.CaptionsPushed`를 봄, 창의 크기는 `InventoryGridView.LaidOutWidth`·`LaidOutHeight`와 `ShippedDataTests`) | `Docs/Workstreams/completed/b16-tuning.md` "리팩토링 검토" R10, Architecture/10 |
 
 화면은 `Tools/screenshots.sh`로 PNG를 뽑아 볼 수 있다. 직접 플레이하려면 Unity에서 `Assets/@Scenes/Boot.unity`를 열고 Play한다.
 
@@ -860,12 +862,12 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   구현하면서 권장안으로 정한 세부는 아래 "사후 검토 대기"에 올렸다.
   Handoff: `Docs/Workstreams/completed/b15-fatigue-breakdown.md`
 
-### 16. 맞추기 — 상태: 진행 중 (2026-10-06 시작, 10-07 설계 승인. 플레이 기록과 틱의 피로를 구현. 18단계의 데이터로 수치를 다시 잡음(처치 3). 사용자의 직접 플레이 대기)
+### 16. 맞추기 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. Acceptance 2는 미달로 기록. 그 전: 2026-10-06 시작, 10-07 설계 승인. 플레이 기록과 틱의 피로를 구현. 18단계의 데이터로 수치를 다시 잡음(처치 3). 사용자의 직접 플레이 대기)
 
 - 시뮬로 전체 수치, 직접 플레이로 15~30분과 재미 확인, Slice B의 Acceptance(Architecture/09).
 - 2026-10-06: 기준값을 쟀다(출고 데이터, 시드 1, 3,000회: balanced 64.0% / 0.35, safe 56.6% / 0.32, none 81.1% / 1.33. 붕괴가 난 원정 39.1%, 쓰러짐 0.01/원정, 전투 시간 x1 153초.
   여섯 파티는 Design/08 §11과 같은 자리). 세 걸음(기준 잡기 → 직접 플레이 → 맞추기와 마감)과 결정 질문 여섯(시간 재기, 목표 띠, 조합 절벽, 적 정보 숨김, 틱의 피로, 동 보상의 읽힘)을 제안했다.
-  Handoff: `Docs/Workstreams/active/b16-tuning.md`
+  Handoff: `Docs/Workstreams/completed/b16-tuning.md`
 - 2026-10-06~07 **Round 41**(사용자 "일단 ui 개선 먼저"): 아이템 칸의 등급 배지를 빼고, 합쳐서 오른 단계의 표시를 더 멋있게. 레퍼런스(The Bazaar 틀 = 단계, TFT 별, Backpack Battles 레시피)와 목업 다섯
   (금속 테·별 표·둘 다 → 사용자 제안 외곽선 2·3·4 → 색 팔레트 셋 → P3 색의 두 후보 → 외곽선 + 별). 판정: **P3**(구리·은·금. 다이아의 하늘빛이 어울리지 않아), **단계의 이름을 일반·동·은·금으로**(이름도 모두 바꿈),
   **외곽선 + 왼쪽 아래 별 표**, 기본 단계의 이름 "일반"(권장). 구현: `ItemTier` Common·Bronze·Silver·Gold와 데이터 키·문구·시뮬 보고·문서의 이름, `run.json` 7(`From6To7` 이름 변환), 실루엣 셰이더·재질과 `SilhouetteOutline`, `TierStyle`,
@@ -891,8 +893,9 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   레퍼런스(Slay the Spire 카드 제거 75+25 누적, Hades 오볼은 탈출 안에서만, Balatro $5+$1 다음 상점에 초기화, Brotato 웨이브 비례 시작값 + 리롤마다 증가, Backpack Battles 1골드 네 번 뒤 2골드, Super Auto Pets 1골드 고정)와 목업 여섯(`ArtPipeline/Archive/44-shop-node/`:
   상점 노드와 표식 셋, 창 A 지도 위의 타일 넷 / B 보상식 화면 / C 사실까지 적은 타일 셋, 사기 ㄱ 우클릭 카드 + 좌클릭 즉시 구매 / ㄴ 좌클릭 고르기 + 카드 + 칸에 놓을 때 구매, 새로고침의 증가, 코인의 자리). 호출 없음.
   권장: 코인은 원정 안에서만(귀환 정산에 소멸), 표식 A 코인 더미, 창 A, 사기 ㄴ(우클릭 없이), 새로고침은 시작값 + 증가, **범위는 17단계(16단계의 직접 플레이와 마감 뒤, Slice B에 더함)**. 판정: 사용자 **"권장안 구현"** → 17단계(아래).
+- 2026-10-16 **닫음**(Slice B 완료, 사용자 결정 1): 플레이 기록이 둘 더 있었다(10-15 18:07과 22:17 — x1 원정 셋이 정산까지 약 6·5·4분, 원정마다 5일). **Acceptance 2(15~30분)는 미달**로 적고 맞추기와 마감은 하지 않았다. 체크리스트, 레버(`DungeonData.Floors`·노드 폭·적 HP), 사후 검토 질문(피격 2·처치 3, 보스전 띠의 위 끝)은 `Docs/Workstreams/completed/b16-tuning.md` Open이 가진다 → Slice C의 입력.
 
-### 17. 상점 노드와 지역 코인 — 상태: 진행 중 (2026-10-07 시작·구현·체인 통과. 직접 플레이와 사후 검토 대기. 18단계로 포션과 던전 공통 아이템은 상점에서만 나온다)
+### 17. 상점 노드와 지역 코인 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-07 시작·구현·체인 통과. 직접 플레이와 사후 검토 대기. 18단계로 포션과 던전 공통 아이템은 상점에서만 나온다)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 6. 상점 노드, 지역 코인, 물건과 값, 사기·새로고침·나가기, 저장 버전 8, 시뮬의 정책과 보고, 화면(Round 44의 목업 A·ㄴ). 기획은 Design/03 §1·§5, 04 §5·§9.
 - 2026-10-07 구현(사용자 "권장안 구현"): Domain(`MapNodeKind.Shop`, `DungeonData.ShopCanStandOn`, `ExpeditionState.Coins`·`ShopState`·`AtShop`, `ExpeditionRules`의 `EnterShop`·`DrawStock`·`PriceOf`·`RefreshCost`·`CanBuy…`·`Buy…`·`RefreshShop`·`LeaveShop`·`CoinsFor`·`CompleteBattle`의 코인, `RngStream.Shop`),
@@ -900,10 +903,10 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   화면(상점 창과 타일 `ShopTileView`, 헤더의 코인, 패널의 "인벤토리에 넣기", 결과 창의 "지역 코인 +N", 카드의 위 꼭지 `TooltipPlacement.Below`, 표식 `node_shop`과 코인 `coin`은 그린 도형, 문구 열다섯), Test(`ShopRulesTests` 11, `ShopFlowTests` 5, 저장·카드 자리·변환 Test, PlayMode `Shop_…`, 스크린샷 `_41`~`_43`).
   시뮬(Design/08 §13): 상점 없음 64.3% / 0.35 → 코인 2/1 71.3%(띠 밖) → 레버 여덟 뒤 **코인 적마다 1 + 층마다 1**: balanced 67.5% / 0.32, 붕괴 29.0%, 상점 1.18번·산 것 1.38·코인 112 받고 34 씀. 권장안으로 정한 세부는 "사후 검토 대기".
   체인: setup OK, sim OK, EditMode **751/751**, PlayMode **76/85**(9 skipped. 처음의 실패 다섯은 모두 Test의 오류를 고친 것). 스크린샷 `20261007-r44b`(첫 장에서 타일의 값 숫자가 비어 있어 숫자 라벨을 말줄임에서 넘침으로 고침). 구현 장면은 README 44 `game/`.
-  Handoff: `Docs/Workstreams/active/b17-shop.md`. 기록: `ArtPipeline/Archive/44-shop-node/README.md` "판정·구현".
+  Handoff: `Docs/Workstreams/completed/b17-shop.md`. 기록: `ArtPipeline/Archive/44-shop-node/README.md` "판정·구현".
 - 2026-10-07 18단계: 상점의 수치(값, 코인 1/1, 15%)는 그대로다(Design/08 §14의 레버: 코인 2는 70%, 포션 값 6은 변화 없음). 던전 공통 아이템(단검·장궁·창·미늘창·버클러·수호 부적·약초 주머니·불씨 플라스크)과 포션은 이제 상점에서만 나온다. `RewardWeight`는 `ShopWeight`가 됐다.
 
-### 18. 몬스터의 전리품 — 상태: 진행 중 (2026-10-07 시작·구현·체인 통과. 2026-10-08 Round 47로 화면과 흐름을 고침: 전투 화면에서 줍는다. 직접 플레이와 사후 검토 대기)
+### 18. 몬스터의 전리품 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-07 시작·구현·체인 통과. 2026-10-08 Round 47로 화면과 흐름을 고침: 전투 화면에서 줍는다. 직접 플레이와 사후 검토 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 7, Acceptance 10. 적의 아이템을 우리 장비·아이템 스타일로(이름·척도), 보상 선택 대신 쓰러뜨린 적의 아이템이 떨어지는 전리품(집거나 두고 가기), 저장 버전 9, 시뮬의 정책과 보고, 전리품 화면(보상 화면을 고쳐 씀)과 결과 창의 줄. 기획은 Design/02 §4·§10, 03 §1·§5, 07 §4, 09 §5.
 - 2026-10-07 **Round 45**(사용자 "몬스터 아이템도 우리 장비 및 아이템 스타일로 분류. 전투 후 보상 화면 대신 그들의 아이템 중 일부 드랍(캐릭터 장착 가능), 지역 코인 일부 드랍. 유사 유명 게임 검토 후 변경 검토 및 권장안대로 구현"): 레퍼런스(The Bazaar의 몬스터 전리품 하나, Darkest Dungeon의 전리품 창, Diablo·Loop Hero의 드랍, TFT의 보물 구슬, Brotato의 상자, Slay the Spire의 보상)와 안·권장안(`ArtPipeline/Archive/45-monster-loot/README.md`). 호출 없음. 목업은 없다(화면의 틀이 그대로라 글만 바뀐다: 사후 검토).
@@ -911,9 +914,9 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   저장(`run.json` 9: `Loot`·`OfferRecord`, `From8To9`, 검증), Application(`GamePhase.Loot`, `ExpeditionManager`의 전리품 명령과 질의, `BattleLoot`), 시뮬(`SimPolicy.PickLoot`, 보고의 드랍 줄), 화면(`LootScreen`·`LootCardView`(주운 카드)·`UiPrefabSetup.Loot`, 문구 `Loot.*` 여덟과 `Battle.Loot`·`Map.ShopPotion`, 결과 창의 전리품 줄, 옛 `RewardScreen.prefab` 삭제),
   Test(EditMode의 전리품·저장·Manager Test를 고쳐 쓰고 더함, PlayMode의 루프·인벤토리 팝업·단계 카드·스크린샷 `_07_loot`). 시뮬은 Design/08 §14: 적의 등급 그대로 100% → 층의 단계 81% → 우리 척도 66.8%(붕괴 10%) → 처치 3으로 **66.1% / 0.30, 붕괴 42.5%**. 권장안으로 정한 세부는 "사후 검토 대기".
   체인: setup OK, sim OK, EditMode **753/753**, PlayMode **76/85**(9 skipped). 처음의 실패 넷은 모두 Test의 오류(옛 저장 Test가 남은 것, 상점 단계의 거부 사례 둘, 단계 카드 Test의 옛 이름)를 고친 것이다. 그 뒤 더한 PlayMode Test 하나("주움" 카드, 둘째 드랍을 꾸밈)는 혼자 돌려 통과했다. 스크린샷 `20261007-225510` 9/9, PNG 71.
-  Handoff: `Docs/Workstreams/active/b18-loot.md`. 기록: README 45 "판정·구현·시뮬".
+  Handoff: `Docs/Workstreams/completed/b18-loot.md`. 기록: README 45 "판정·구현·시뮬".
 
-### 19. 격자 보드 — 상태: 진행 중 (2026-10-08 시작·구현·체인 통과. 직접 플레이와 사후 검토 대기. 20단계(★ 닿음 효과)는 판정 대기)
+### 19. 격자 보드 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-08 시작·구현·체인 통과. 직접 플레이와 사후 검토 대기. 20단계(★ 닿음 효과)는 판정 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 8, Acceptance 11. 틀 3×8과 가방(시작 가죽 배낭 3×3), 아이템의 가로×세로 모양, 놓기·밀어내기·합치기, 돌리기(백팩 배틀즈), 읽는 순서의 발동, 가방의 데이터·상점·정예 전리품, 저장 버전 10, 시뮬, 화면(격자·손·그림자·쿨다운 안 2). 기획은 Design/02 §4, 03 §5, 10 §5.
 - 2026-10-08 **Round 48**(사용자 "용병 아이템을 정사각형 격자로, 백팩 배틀즈 형식 검토. 목업" → "B 방향" + "C 가방격자" → 크림 빼기 → 쿨다운 금빛 → 금빛 없이 가로로 → "2안으로 반영" → 합본): 목업과 판정은 `ArtPipeline/Archive/48-grid-board/README.md`. 호출 없음.
@@ -927,7 +930,7 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   스크린샷 `20261009-s19a` 9/9(PNG 75)에서 둘을 고쳤다: 가방을 든 동안의 틀 칸과 그림자가 꽉 찬 색으로 그려졌다(`Outline`이 비치는 칸을 채움 → 틀은 옅은 칠, 그림자는 비치는 칠과 둘레의 선 하나). 가방을 화면에서 다루는 PlayMode Test를 더하자 버그 하나가 나왔다:
   왼쪽 위 칸에 아이템이 있는 가방은 집혀도 놓이지 않았다(손은 가방을 왼쪽 위 칸으로 들고, 옮기기가 그 칸이 비어 있기를 바랐다 → 옮기기는 가방의 어느 칸으로도, EditMode Test 더함). 쓰이지 않게 된 문구 `Board.EmptySlot`을 뺐다. 고친 뒤 체인 EditMode **788/788**, PlayMode **79/88**(9 skipped), 스크린샷 `20261009-s19b` 9/9. 구현 장면은 README 48 `game/`.
   보고 뒤 사용자 지적("원래 이런식으로 점선을 넣어서 가방 느낌 넣기로 하지 않았나?"): 목업의 **가방 바늘땀 점선**과 **가방을 든 동안의 점선 틀 칸**을 구현에서 빠뜨렸다 → 넣었다(`DashedFrame`, 보드·전투 보드·상점 타일의 가방, 틀 칸). 검증은 Handoff.
-  Handoff: `Docs/Workstreams/active/b19-grid.md`.
+  Handoff: `Docs/Workstreams/completed/b19-grid.md`.
 - 2026-10-09 **Round 49**(사용자 "인벤토리 ui 스타일이 마음에 안들어 … 현재 ui 스타일과 무관하게 1. 디아블로 2 2. 백팩 배틀즈 3. 기타 유명 게임 조사 후 최선. 목업"): 조사(디아블로 2, 백팩 배틀즈, 바이오하자드 4, 타르코프, 드레지)와 목업 일곱(같은 장면의 세 안과 비교, 안마다 한 보드의 상태 여섯), 판정할 것 아홉. 권장 **3 원정 짐칸**(열린 원정 가방의 패널, 종류 색의 아이템 조각과 작은 이름, 놓을 수 없으면 빗금, 인벤토리는 큰 것부터의 타일과 30칸 막대). 호출 없음. 판정 대기: `ArtPipeline/Archive/49-inventory-style/README.md`.
   → 세 안의 전투 영상(5초 MP4) → 사용자가 **디아블로 2를 골라 변형**을 지시("전투 화면에서는 아이템 뒤 파란색 배경 없음, 글씨체는 기존 우리 스타일, 용병 가방 추가 시 적용될 ui"): 변형 목업(노드 맵, 전투 영상, 상점과 정예 전리품의 가방, 가방 다루기 여섯)과 판정할 것 V1~V6.
   → 사용자 **"1. 다른안으로 2. 처음 디아블로 안의 돌 테 3. 디아블로 식 4. 금색 5. 디아블로식 격자 6. 빨강 칠만 … 적용 구현"**: 이긴 뒤 남색이 돌아옴, 가방은 돌 테, 디아블로식 툴팁, 가방 이름 금, **인벤토리는 10×3 격자**(규칙: Design/03 §5 — 자리와 방향, 버튼·밀려남은 첫 빈 자리(돌리지 않은 채 먼저), 직접 놓기는 빈 칸에만), 그림자는 칠만.
@@ -940,7 +943,7 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   → 사용자 정정("정정 기본 무기(롱소드, 지팡이 등)은 3*1로 복구, 장비 무기류는 기본적으로 2*1 이상 차지하는 것으로 하자", "쥐 송곳니를 쥐 발톱으로 대체"): 기획(02 §4·분류의 18단계 줄, 00 "Round 50"), 데이터(`Width` 기본 무기 다섯 2 → 3, `rat_bite`의 이름 쥐 발톱 / Rat Claw와 `Width` 1 → 2), 시뮬(08 §16 "정정": balanced **63.8% / 0.31, 붕괴 44.2%, 보스전 91.4%** — 모두 띠 안), Architecture/12.
   체인 `20261009-235658` **CHAIN OK**(setup·sim, EditMode 798/798, PlayMode 79/88, 9 skipped. 글꼴 아틀라스에 "톱"이 더해짐), 스크린샷 `20261009-r50c` 9/9(PNG 75): 기본 무기 3×1, 전리품의 이름 "쥐 발톱"(그림은 송곳니).
 
-### 20. ★ 닿음과 숫돌 — 상태: 진행 중 (2026-10-10 시작·구현. 직접 플레이와 사후 검토 대기)
+### 20. ★ 닿음과 숫돌 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-10 시작·구현. 직접 플레이와 사후 검토 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 9, Acceptance 12. 백팩 배틀즈의 별(둘레의 별 칸, 돌리면 함께 돎, 한 아이템은 다른 아이템 하나의 별을 하나만 채움), 첫 ★ 아이템 숫돌(기타 아이템 1×1, 위·아래 별, 발동하지 않음, 별에 놓인 근접 무기의 피해 +1·단계마다 +1),
   근접 무기(`Melee`), 별의 표시(든 동안·마우스를 올린 동안, 켜짐·빈 별, 카드의 수치), 시뮬의 별 정책과 보고(Design/08 §17). 같은 단계에서 Round 51의 쥐 발톱 그림과 발키리의 전투도끼 3×2를 넣었다.
@@ -952,9 +955,9 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   체인 4차 `20261010-094851` **CHAIN OK**(EditMode 815/815, PlayMode 80/89, 9 skipped), 스크린샷 `20261010-s20b` 9/9(PNG 79). 시뮬 balanced 62.3% / 0.33, 보스전 89.4%(Design/08 §17, 띠 안).
 - 2026-10-10 Round 52(사용자 "드랍되는 아이템도 크기 재조정 / 등불지팡이 3*1 / 인벤토리는 용병 그림 칸에 / 단축키 i / 전리품 창에서도 아이템 이동" → 검토 → **"3. b안 / 나머지 권장안 구현"**): 등불 지팡이 3×1, 인벤토리 창을 용병 무대 위로(칸 50, 노드 맵·상점·이긴 뒤 화면), 단축키 I, 이긴 뒤 보드가 마지막 전리품 뒤에 굳던 버그(`ExpeditionManager.WonBattleOnShow`).
   체인 1차 `20261010-115714` **CHAIN OK**, 목업과 대조해 그늘(선형 색 공간에서 35% → 55%)과 이긴 뒤 창의 층(승리 띠 위)을 고친 뒤 체인 2차 `20261010-121320` **CHAIN OK**(EditMode 817/817, PlayMode 80/89, 9 skipped), 스크린샷 `20261010-r52b` 9/9(PNG 81). 위 "Round 52의 세부", `ArtPipeline/Archive/52-inventory-place/README.md`.
-  Handoff: `Docs/Workstreams/active/b20-stars.md`.
+  Handoff: `Docs/Workstreams/completed/b20-stars.md`.
 
-### 21. 상인 — 상태: 진행 중 (2026-10-10 시작·구현. 직접 플레이와 사후 검토 대기)
+### 21. 상인 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-10 시작·구현. 직접 플레이와 사후 검토 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 10, Acceptance 13. 디아블로 2의 상인처럼 상점의 물건 8개를 상인의 한 격자(탭 없음)에 제 모양대로 깔고, 값과 툴팁, 산 자리는 빔(포션도), 새로고침 그대로, 팔기 없음.
 - 2026-10-10 Round 55 검토(디아블로 2 상인의 조사, 상점 크기 시뮬 넷) → 2차 목업 → **"d. 포션도 사면 사라짐 / g. 확률 / 나머지 권장안대로 구현"**(위 "21단계의 승인").
@@ -962,22 +965,23 @@ Handoff: Round 11까지는 `Docs/Workstreams/completed/stage09-art.md`·`a-battl
   Test: EditMode `MerchantLayoutTests`(셋), PlayMode 상점 Test를 상인으로(8개가 한 격자, 값의 글, 툴팁, 산 자리는 비고 다른 것은 그대로, 새로고침), 스크린샷의 상점 장면.
   시뮬(Design/08 §19): balanced 63.8% / 0.32, 보스전 91.3%, safe 56.2%, 여섯 파티 66.5·59.2·49.5·31.9·6.1·0.0 — 띠 안.
   체인 `20261010-192410` **CHAIN OK**(EditMode 831/831, PlayMode 82/91, 9 skipped) 첫 실행에 통과, 스크린샷 `20261010-s21` 9/9(PNG 85), 2차 목업과 대조해 같음.
-  Handoff: `Docs/Workstreams/active/b21-merchant.md`.
+  Handoff: `Docs/Workstreams/completed/b21-merchant.md`.
 
-### 22. 피해의 범위와 수의 크기 — 상태: 진행 중 (2026-10-11 시작·구현, 치명타 표시는 "A 빨강"으로 구현. 직접 플레이와 사후 검토 대기)
+### 22. 피해의 범위와 수의 크기 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 그 전: 2026-10-11 시작·구현, 치명타 표시는 "A 빨강"으로 구현. 직접 플레이와 사후 검토 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 11, Acceptance 14. HP·피해의 0.01 단위, 롱소드 2-4 기준으로 모든 수를 옮김, 피해의 최소~최대(무기마다 폭), 공격마다 굴림과 대상마다 치명타·치명타의 피로, 피격의 최소, 등급을 뺌(적은 세기 %), 크기의 식(던전의 무기), 저장 11, 화면의 정수 표시.
 - 2026-10-11 Round 60 검토 두 차례(위 "22단계의 승인") → 구현: 기획(02·03·04·09·08 §21·00), Architecture/05·07·08·09·12, CLAUDE.md §9, 데이터(아이템의 값과 치명타 %, 직업·적 HP, 적의 세기 %, 포션, 폭풍·화상·피격의 최소·치명타의 값),
   코드(`Centi`, `ItemEffect` Min·Max, `EquippedItem`의 세기 %, `RngStream.Damage`, 엔진의 굴림·치명타·피격의 최소·화상, 등급 없는 드랍·상점·합치기, 저장 11 `From10To11`, `UiText`의 Amount·Hp·Range, 카드·전투·로그의 수, 시뮬 `items`와 치명타 수), Test(`DamageRangeTests`, `NumberDisplayTests`, 정의·데이터·저장).
   시뮬(Design/08 §21): balanced 63.9% / 0.28, 붕괴 46.6%, 보스전 91.8% — 띠 안(치명타를 맞은 피로는 +10이면 붕괴 50.7%라 +9: 사후 검토). 치명타의 떠오르는 수는 목업 셋과 다시 그린 목업(MP4) 뒤 사용자 "A에 색만 빨강으로" → "요청안으로 구현": 빨강 1.6배 "-5!"와 위의 작은 "치명타"(`FloatCritical`).
   체인 `20261011-140655` **CHAIN OK**(EditMode 846/846, PlayMode 82/91, 9 skipped), 스크린샷 `20261011-s22b` 9/9(PNG 85). 치명타 표시 뒤 체인 `20261011-154912` **CHAIN OK**(PlayMode 83/92), 스크린샷 `20261011-s22c`(PNG 86). 세션 정리(10-11): 다섯 커밋과 푸시. 목업과 대조해 카드의 사실 줄바꿈(`<nobr>`)과 로그의 "피해 0"을 고쳤다.
-  Handoff: `Docs/Workstreams/active/b22-damage.md`.
+  Handoff: `Docs/Workstreams/completed/b22-damage.md`.
 
-### 23. 담금질과 첫 유니크 — 상태: 진행 중 (2026-10-16 시작·구현. 직접 플레이와 사후 검토 대기)
+### 23. 담금질과 첫 유니크 — 상태: 완료 (2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. 숫돌 값 1(임시)은 그대로. 그 전: 2026-10-16 시작·구현. 직접 플레이와 사후 검토 대기)
 
 - 범위: Architecture/09 "Slice B" 구현 순서 12, Acceptance 15. 레시피 데이터(`RecipeData.csv`)와 유니크 아이템(`ItemData.Unique`), 야영지의 셋째 선택 담금질(두 걸음), 첫 유니크 글라디우스(롱소드 3성 + 숫돌 3성 → 3×1·맨 앞 적 둘·치명타 10%·자신의 ★), 파티에 하나, 유니크의 금빛 외곽선(후속 2)과 명패 머리 카드, 시뮬의 촉매·담금질 정책, 숫돌 값 1(임시)·가중치 16. 기획은 Design/02 §4, 03 §1·§5, 07, 08 §22.
 - 2026-10-16 Round 70 검토 둘(위 "23단계의 승인") → 구현: 기획(02·03·00·07·08 §22), CLAUDE.md §9, Architecture/05·07·08·09·11·12·13, 데이터(`RecipeData.csv`, `ItemData` `Unique`·`gladius`·숫돌), Domain(`RecipeData`·`ForgeRules`·저장 검증), Application(`ExpeditionManager`의 담금질), 시뮬(촉매 먼저 사기·담금질, 보고), 화면(카드 셋과 담금질 걸음 `CampCards`, 유니크 금 테 `unique_rim` → 후속 2에서 금빛 외곽선 `gladius_glow`(`tools/glow_items.py`), 명패 머리 카드, 레시피 줄, 문구 열), 그림(글라디우스 생성 1회 $0.015), Test(EditMode 넷에 새 Test, PlayMode 하나, 스크린샷 셋).
   시뮬(Design/08 §22): balanced 66.4% / 0.26, 보스전 92.3%(띠의 위 끝), 담금질 0.00/원정 — 레시피는 정책으로 닿지 않는다(사용자가 알고 지킴). 체인·스크린샷은 Handoff.
 - 2026-10-16 후속(README 70 "후속 1·2"): 사용자 "디아블로2의 아이템 뒤 빛" → 검토(D2에는 없음) → "금테는 삭제, 빛을 넣는데 외곽선이 전체적으로 해당 빛으로 숨쉬기" → 세 길 검토와 목업 → "폭 2px·3px 목업, 나머지 권고안" → "숨쉬기를 지우고 1px" → **"2px로 확정. 숨쉬기 제거. 구현"**: 금 테를 빼고 아이콘 외곽선의 금빛(`<icon>_glow`, `ItemData.GlowIcon`, `GridGeometry.LayGlow`).
 - 2026-10-16 후속 3(사용자 "유니크는 성이 따로 없음(마름모 표시도 삭제). 단일 아이템이라 어차피 합쳐지지 않음"): 유니크의 단계를 뺌 — `ForgeRules.Result`가 `Common`으로 만들고, 글라디우스의 수치는 데이터에 고정(12-20, ★ +4), `CanUpgradeAtCamp`가 유니크를 거르고, 저장은 `Common`만 유효, 조각의 눈금 없음, 카드 "유니크".
-  Handoff: `Docs/Workstreams/active/b23-forge.md`. 기록: `ArtPipeline/Archive/70-unique-gladius/README.md`.
+  Handoff: `Docs/Workstreams/completed/b23-forge.md`. 기록: `ArtPipeline/Archive/70-unique-gladius/README.md`.
+- 2026-10-16 **닫음**(Slice B 완료, 사용자 결정 2): 직접 플레이 없이 닫았다. 숫돌 값 1(임시)은 그대로 두고 위 "임시 조치" 표로 Slice C에 넘긴다(복귀는 직접 플레이 뒤). 레시피에 닿는 레버(야영지 수, 정비의 폭, 정예 처치의 기본 무기 단계)와 사후 검토는 `Docs/Workstreams/completed/b23-forge.md` Open이 가진다 → Slice C의 입력.

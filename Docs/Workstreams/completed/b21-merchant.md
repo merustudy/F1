@@ -1,6 +1,6 @@
 # Slice B 21단계: 상인
 
-Snapshot: 2026-10-10 (구현)
+Snapshot: 2026-10-10 (구현) — 2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. `completed/`로 옮김.
 
 ## Goal
 

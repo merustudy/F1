@@ -1,6 +1,6 @@
 # Slice B 19단계: 격자 보드
 
-Snapshot: 2026-10-10 (Round 50 구현과 정정)
+Snapshot: 2026-10-10 (Round 50 구현과 정정) — 2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. `completed/`로 옮김.
 
 ## Goal
 

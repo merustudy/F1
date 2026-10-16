@@ -107,7 +107,7 @@
 ## 21단계 판정과 구현 (2026-10-10)
 
 사용자: **"d. 포션도 사면 사라짐 / g. 확률 / 나머지 권장안대로 구현"** — d: 산 자리는 비고 포션도 사면 사라짐, g: 포션은 확률로(지금처럼 후보에 들고 빈 포션 칸이 있을 때만), 나머지(a·b·c·e·f) 권장안.
-구현과 검증은 Roadmap "21. 상인"과 `Docs/Workstreams/active/b21-merchant.md`.
+구현과 검증은 Roadmap "21. 상인"과 `Docs/Workstreams/completed/b21-merchant.md`.
 
 - 체인 `20261010-192410` **CHAIN OK**(setup, sim, EditMode 831/831, PlayMode 82/91, 9 skipped: 스크린샷) — 첫 실행에 통과(상점 Test는 건너뛰지 않고 통과). 스크린샷 `20261010-s21` 9/9(PNG 85).
 - 2차 목업과 대조(`game/impl_ko_42_shop.png`, `impl_ko_43_shop_pick.png`): 한 격자(10×5)에 물건 8개가 제 모양대로, 조각마다 오른쪽 아래에 금빛 값, 고른 미늘창은 밝은 남색이고 격자 오른쪽 툴팁에 사실과 "값 22 코인", 아래에 새로고침과 나가기. 목업과 같다.

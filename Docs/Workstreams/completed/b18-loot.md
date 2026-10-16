@@ -1,6 +1,6 @@
 # Slice B 18단계: 몬스터의 전리품
 
-Snapshot: 2026-10-07
+Snapshot: 2026-10-07 — 2026-10-16 Slice B 완료로 닫음. 직접 플레이·사후 검토는 Slice C의 입력. `completed/`로 옮김.
 
 ## Goal
 
