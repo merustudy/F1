@@ -9,7 +9,7 @@ namespace F1.Tests
     {
         public const string Balance =
             "Key,Value\n" +
-            "PartySize,3\nMinPartySize,1\nTotalDays,100\nMaxFatigue,200\nFatigueRecoveryPerDay,10\nFatigueBreakdown,100\nFatigueBattleEntry,3\nFatigueEquipment,1\nFatigueOnHit,2\nFatigueOnDog,10\nFatigueOnAllyDog,5\nFatigueOnAllyDeath,15\nFatigueOnKill,2\nVirtueChancePercent,25\nVirtueFatigue,40\nRestDays,1\n" +
+            "PartySize,3\nMinPartySize,1\nTotalDays,100\nDeathLimit,15\nMaxFatigue,200\nFatigueRecoveryPerDay,10\nFatigueBreakdown,100\nFatigueBattleEntry,3\nFatigueEquipment,1\nFatigueOnHit,2\nFatigueOnDog,10\nFatigueOnAllyDog,5\nFatigueOnAllyDeath,15\nFatigueOnKill,2\nVirtueChancePercent,25\nVirtueFatigue,40\nRestDays,1\n" +
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,0.55\nStormGrowth,0.55\n" +
             "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +

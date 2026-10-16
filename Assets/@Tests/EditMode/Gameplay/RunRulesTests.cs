@@ -190,7 +190,8 @@ namespace F1.Tests
             RunRules.FindMercenary(run, "anna").Fatigue = 200;
             Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"), "Sending a tired mercenary is the player's call.");
 
-            run.IsOver = true;
+            run.Outcome = RunOutcome.Defeat;
+            run.DefeatCause = DefeatCause.Wipeout;
             Assert.AreEqual(DepartCheck.RunIsOver, RunRules.CanDepart(data, run, "cave"));
         }
 

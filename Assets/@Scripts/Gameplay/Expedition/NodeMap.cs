@@ -98,8 +98,15 @@ namespace F1.Gameplay
     /// </summary>
     public static class MapGenerator
     {
-        public static NodeMap Generate(StaticData data, DungeonData dungeon, ulong expeditionSeed)
+        /// <param name="bossOnly">The final stand (Slice C stage 25): the boss node alone, on the only floor. The seed is not drawn from.</param>
+        public static NodeMap Generate(StaticData data, DungeonData dungeon, ulong expeditionSeed, bool bossOnly = false)
         {
+            if (bossOnly)
+            {
+                var boss = new MapNode(0, 1, 0, MapNodeKind.Boss, data.BossGroupOf(dungeon.Id).Id, new List<int>());
+                return new NodeMap(new List<MapNode> { boss }, 1);
+            }
+
             var rng = new Pcg32(SeedDeriver.Derive(expeditionSeed, "map", 0), RngStream.Map);
 
             // Decide the shape first: how many nodes each battle floor has.

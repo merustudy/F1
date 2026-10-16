@@ -20,7 +20,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 12;
+        public const int CurrentSchemaVersion = 13;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -38,7 +38,10 @@ namespace F1.Save
         public List<PartySlotRecord> Party;
         public int ExpeditionCount;
         public List<ClearRecord> ClearedDungeons;
-        public bool IsOver;
+
+        /// <summary>RunOutcome and DefeatCause by name (version 13). Version 12 had IsOver instead.</summary>
+        public string Outcome;
+        public string DefeatCause;
     }
 
     public sealed class MercenaryRecord
@@ -80,6 +83,9 @@ namespace F1.Save
         public string Phase;
         public int CurrentNodeId;
         public int BattlesWon;
+
+        /// <summary>The forced final stand (version 13): the map is the boss alone.</summary>
+        public bool FinalStand;
         /// <summary>The drops of the last won battle still being picked up (version 9): one entry per drop, null where it was taken. Empty when none is.</summary>
         public List<OfferRecord> Loot;
 

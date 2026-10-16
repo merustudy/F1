@@ -12,7 +12,8 @@ namespace F1.Gameplay
     /// </summary>
     public static class ExpeditionRules
     {
-        public static ExpeditionState Create(StaticData data, string dungeonId, ulong seed, IReadOnlyList<PartyMember> party)
+        /// <param name="finalStand">The forced final stand: the map holds the boss alone, and losing the expedition loses the run.</param>
+        public static ExpeditionState Create(StaticData data, string dungeonId, ulong seed, IReadOnlyList<PartyMember> party, bool finalStand = false)
         {
             DungeonData dungeon = data.Dungeons.Get(dungeonId);
             BalanceData balance = data.Balance;
@@ -29,6 +30,7 @@ namespace F1.Gameplay
                 Inventory = new InventoryGrid(balance.InventoryWidth, balance.InventoryHeight),
                 Phase = ExpeditionPhase.ChoosingNode,
                 Result = ExpeditionResult.None,
+                FinalStand = finalStand,
             };
 
             var seen = new HashSet<string>();
@@ -70,7 +72,7 @@ namespace F1.Gameplay
                 state.Potions[i] = dungeon.StartingPotions[i];
             }
 
-            state.Map = MapGenerator.Generate(data, dungeon, seed);
+            state.Map = MapGenerator.Generate(data, dungeon, seed, bossOnly: finalStand);
             return state;
         }
 

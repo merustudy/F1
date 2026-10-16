@@ -424,6 +424,198 @@ namespace F1.Sim
             }
         }
 
+        /// <summary>Plays one expedition to its end as the policy would, adding to the stats as it goes. True when someone broke down.</summary>
+        static bool PlayExpedition(StaticData data, ExpeditionState state, SimPolicy policy, ExpeditionStats stats)
+        {
+            BattleStats all = stats.All;
+            SortedDictionary<int, BattleStats> byFloor = stats.ByFloor;
+            bool brokeDown = false;
+            while (state.Phase != ExpeditionPhase.Finished)
+            {
+                if (state.Phase == ExpeditionPhase.PickingLoot)
+                {
+                    stats.Drops += state.Loot.Count;
+                    stats.Merges += policy.PickLoot(data, state, out int taken);
+                    stats.DropsTaken += taken;
+                    continue;
+                }
+
+                if (state.Phase == ExpeditionPhase.AtCamp)
+                {
+                    bool didAtCamp = policy.ChooseAtCamp(data, state);
+                    if (policy.LastCampForged) stats.Forges++; else if (didAtCamp) stats.Mends++;
+                    continue;
+                }
+
+                if (state.Phase == ExpeditionPhase.AtShop)
+                {
+                    int coinsBefore = state.Coins;
+                    stats.Bought += policy.ShopAt(data, state, out int refreshes, out int shopMerges);
+                    stats.Refreshes += refreshes;
+                    stats.Merges += shopMerges;
+                    stats.CoinsSpent += coinsBefore - state.Coins;
+                    continue;
+                }
+
+                MapNode node = SimPolicy.ChooseNode(ExpeditionRules.AvailableNodes(state));
+                if (node.Kind == MapNodeKind.Camp)
+                {
+                    ExpeditionRules.EnterCamp(state, node.Id);
+                    stats.Camps++;
+                    continue;
+                }
+
+                if (node.Kind == MapNodeKind.Shop)
+                {
+                    ExpeditionRules.EnterShop(data, state, node.Id);
+                    stats.Shops++;
+                    continue;
+                }
+
+                stats.Elites += node.Kind == MapNodeKind.Elite ? 1 : 0;
+                foreach (ExpeditionMember member in state.Members.Where(m => m.Alive))
+                {
+                    stats.EquipmentFatigue += FatigueRules.EquipmentCost(data.Balance, member.Board.InReadingOrder());
+                    stats.MemberBattles++;
+                }
+
+                var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, node.Id));
+                policy.RunBattle(battle);
+                stats.BattleTimeMs += battle.TimeMs;
+                brokeDown |= battle.Events.Any(e => e.Kind == BattleEventKind.BrokeDown);
+                all.Add(battle);
+                if (!byFloor.TryGetValue(node.Floor, out BattleStats floorStats))
+                {
+                    floorStats = new BattleStats();
+                    byFloor.Add(node.Floor, floorStats);
+                }
+
+                floorStats.Add(battle);
+                int coinsBeforeBattle = state.Coins;
+                ExpeditionRules.CompleteBattle(data, state, battle);
+                stats.CoinsWon += state.Coins - coinsBeforeBattle;
+            }
+
+            return brokeDown;
+        }
+
+        /// <summary>
+        /// Whole runs (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md): a lobby policy picks the party (the least tired), rests when the
+        /// party is tired, goes to the final dungeon once it is open, and fights the final stand past the last day. Expeditions play as in
+        /// <see cref="Expedition"/>. Reports how runs end and when. The policy's numbers are simulator tools, not game rules.
+        /// </summary>
+        public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove)
+        {
+            int victories = 0, wipeouts = 0, deathLimits = 0, finalStandsLost = 0, finalStands = 0, finalStandsWon = 0, unlocked = 0, earlyWins = 0;
+            long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
+            var scratch = new ExpeditionStats();
+            for (int run = 0; run < runs; run++)
+            {
+                RunState state = RunRules.NewRun(data, SeedDeriver.Derive(baseSeed, "run", run));
+                bool noted = false;
+                int guard = 0;
+                while (!state.IsOver && guard++ < 10000)
+                {
+                    List<PartySlot> party = ChooseParty(data, state);
+                    RunRules.SetParty(data, state, party);
+                    if (RunRules.CanRest(data, state) && AverageFatigue(state, party) >= restAbove)
+                    {
+                        RunRules.Rest(data, state);
+                        rests++;
+                        continue;
+                    }
+
+                    DungeonData dungeon = ChooseDungeon(data, state);
+                    if (dungeon == null)
+                    {
+                        break;
+                    }
+
+                    if (dungeon.IsFinal && !noted && !RunRules.IsFinalStandDue(data, state))
+                    {
+                        unlocked++;
+                        unlockDays += state.Day;
+                        noted = true;
+                    }
+
+                    ExpeditionState expedition = RunRules.BeginExpedition(data, state, dungeon.Id);
+                    finalStands += expedition.FinalStand ? 1 : 0;
+                    PlayExpedition(data, expedition, policy, scratch);
+                    deaths += expedition.Members.Count(m => !m.Alive);
+                    expeditions++;
+                    RunRules.Settle(data, state, expedition);
+                    if (expedition.FinalStand && state.Outcome == RunOutcome.Victory)
+                    {
+                        finalStandsWon++;
+                    }
+                    else if (state.Outcome == RunOutcome.Victory)
+                    {
+                        earlyWins++;
+                    }
+                }
+
+                days += state.Day;
+                if (state.Outcome == RunOutcome.Victory)
+                {
+                    victories++;
+                }
+                else
+                {
+                    switch (state.DefeatCause)
+                    {
+                        case DefeatCause.Wipeout: wipeouts++; break;
+                        case DefeatCause.DeathLimit: deathLimits++; break;
+                        case DefeatCause.FinalStandLost: finalStandsLost++; break;
+                    }
+                }
+            }
+
+            Console.WriteLine($"runs {runs}, policy {policy.Name}, rest when the party's fatigue averages {restAbove} or more, seed {baseSeed}");
+            Console.WriteLine($"  victories {BattleStats.Percent(victories, runs)} (before the last day {BattleStats.Percent(earlyWins, runs)}, at the final stand {BattleStats.Percent(finalStandsWon, runs)}); "
+                + $"defeats: final stand lost {BattleStats.Percent(finalStandsLost, runs)}, death limit {BattleStats.Percent(deathLimits, runs)}, wipeout {BattleStats.Percent(wipeouts, runs)}");
+            Console.WriteLine($"  per run: days at the end {Average(days, runs)}, expeditions {Average(expeditions, runs)}, rests {Average(rests, runs)}, deaths {Average(deaths, runs)}; "
+                + $"final stands fought {BattleStats.Percent(finalStands, runs)}; the final dungeon opened in {BattleStats.Percent(unlocked, runs)} of runs, on day {Average(unlockDays, unlocked)} on average");
+        }
+
+        /// <summary>The final dungeon once it is open (or once the final stand is due), else the first dungeon that is not final and is open.</summary>
+        static DungeonData ChooseDungeon(StaticData data, RunState state)
+        {
+            DungeonData final = data.FinalDungeon;
+            if (RunRules.IsFinalStandDue(data, state))
+            {
+                return final;
+            }
+
+            if (final != null && RunRules.IsUnlocked(state, final))
+            {
+                return final;
+            }
+
+            return data.Dungeons.Ordered.FirstOrDefault(d => !d.IsFinal && RunRules.IsUnlocked(state, d));
+        }
+
+        /// <summary>Up to PartySize of the living, the least tired first, lined up front to back by each job's recommended row.</summary>
+        static List<PartySlot> ChooseParty(StaticData data, RunState state)
+        {
+            List<MercenaryState> chosen = state.Roster
+                .OrderBy(m => m.Fatigue).ThenBy(m => m.Id, StringComparer.Ordinal)
+                .Take(data.Balance.PartySize)
+                .OrderBy(m => data.Jobs.Get(m.JobId).RecommendedRow).ThenBy(m => m.Id, StringComparer.Ordinal)
+                .ToList();
+            var party = new List<PartySlot>();
+            for (int i = 0; i < chosen.Count; i++)
+            {
+                party.Add(new PartySlot { MercenaryId = chosen[i].Id, Row = i + 1 });
+            }
+
+            return party;
+        }
+
+        static int AverageFatigue(RunState state, List<PartySlot> party)
+        {
+            return party.Count == 0 ? 0 : (int)party.Average(slot => RunRules.FindMercenary(state, slot.MercenaryId).Fatigue);
+        }
+
         static ExpeditionStats RunExpeditions(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
         {
             var stats = new ExpeditionStats { Runs = runs };
@@ -434,72 +626,7 @@ namespace F1.Sim
             {
                 ulong seed = SeedDeriver.Derive(baseSeed, "sim", run);
                 ExpeditionState state = ExpeditionRules.Create(data, dungeonId, seed, party);
-                bool brokeDown = false;
-                while (state.Phase != ExpeditionPhase.Finished)
-                {
-                    if (state.Phase == ExpeditionPhase.PickingLoot)
-                    {
-                        stats.Drops += state.Loot.Count;
-                        stats.Merges += policy.PickLoot(data, state, out int taken);
-                        stats.DropsTaken += taken;
-                        continue;
-                    }
-
-                    if (state.Phase == ExpeditionPhase.AtCamp)
-                    {
-                        bool didAtCamp = policy.ChooseAtCamp(data, state);
-                        if (policy.LastCampForged) stats.Forges++; else if (didAtCamp) stats.Mends++;
-                        continue;
-                    }
-
-                    if (state.Phase == ExpeditionPhase.AtShop)
-                    {
-                        int coinsBefore = state.Coins;
-                        stats.Bought += policy.ShopAt(data, state, out int refreshes, out int shopMerges);
-                        stats.Refreshes += refreshes;
-                        stats.Merges += shopMerges;
-                        stats.CoinsSpent += coinsBefore - state.Coins;
-                        continue;
-                    }
-
-                    MapNode node = SimPolicy.ChooseNode(ExpeditionRules.AvailableNodes(state));
-                    if (node.Kind == MapNodeKind.Camp)
-                    {
-                        ExpeditionRules.EnterCamp(state, node.Id);
-                        stats.Camps++;
-                        continue;
-                    }
-
-                    if (node.Kind == MapNodeKind.Shop)
-                    {
-                        ExpeditionRules.EnterShop(data, state, node.Id);
-                        stats.Shops++;
-                        continue;
-                    }
-
-                    stats.Elites += node.Kind == MapNodeKind.Elite ? 1 : 0;
-                    foreach (ExpeditionMember member in state.Members.Where(m => m.Alive))
-                    {
-                        stats.EquipmentFatigue += FatigueRules.EquipmentCost(data.Balance, member.Board.InReadingOrder());
-                        stats.MemberBattles++;
-                    }
-
-                    var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, node.Id));
-                    policy.RunBattle(battle);
-                    stats.BattleTimeMs += battle.TimeMs;
-                    brokeDown |= battle.Events.Any(e => e.Kind == BattleEventKind.BrokeDown);
-                    all.Add(battle);
-                    if (!byFloor.TryGetValue(node.Floor, out BattleStats floorStats))
-                    {
-                        floorStats = new BattleStats();
-                        byFloor.Add(node.Floor, floorStats);
-                    }
-
-                    floorStats.Add(battle);
-                    int coinsBeforeBattle = state.Coins;
-                    ExpeditionRules.CompleteBattle(data, state, battle);
-                    stats.CoinsWon += state.Coins - coinsBeforeBattle;
-                }
+                bool brokeDown = PlayExpedition(data, state, policy, stats);
 
                 stats.CoinsLeft += state.Coins;
 

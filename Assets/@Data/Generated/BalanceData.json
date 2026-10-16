@@ -46,6 +46,10 @@
       "Value": 2
     },
     {
+      "Key": "DeathLimit",
+      "Value": 15
+    },
+    {
       "Key": "DogDeathChancePercent",
       "Value": 30
     },

@@ -46,7 +46,8 @@ namespace F1.Flow
                 Party = new List<PartySlotRecord>(),
                 ExpeditionCount = run.ExpeditionCount,
                 ClearedDungeons = new List<ClearRecord>(),
-                IsOver = run.IsOver,
+                Outcome = run.Outcome.ToString(),
+                DefeatCause = run.DefeatCause.ToString(),
             };
 
             foreach (MercenaryState mercenary in run.Roster)
@@ -80,6 +81,7 @@ namespace F1.Flow
                 Phase = expedition.Phase.ToString(),
                 CurrentNodeId = expedition.CurrentNodeId,
                 BattlesWon = expedition.BattlesWon,
+                FinalStand = expedition.FinalStand,
                 Loot = new List<OfferRecord>(),
                 Coins = expedition.Coins,
                 Shop = ToRecord(expedition.Shop),
@@ -249,8 +251,11 @@ namespace F1.Flow
                 run.ClearedDungeons.Add(cleared.DungeonId, cleared.Count);
             }
 
-            Require(record.IsOver == (run.Roster.Count == 0), "IsOver does not match the roster.");
-            run.IsOver = record.IsOver;
+            run.Outcome = Parse<RunOutcome>(record.Outcome);
+            run.DefeatCause = Parse<DefeatCause>(record.DefeatCause);
+            Require((run.Outcome == RunOutcome.Defeat) == (run.DefeatCause != DefeatCause.None), "DefeatCause does not match the outcome.");
+            Require(run.Roster.Count > 0 || run.Outcome == RunOutcome.Defeat, "A run with nobody left is lost.");
+            Require(run.DefeatCause != DefeatCause.Wipeout || run.Roster.Count == 0, "A wipeout leaves nobody.");
             return run;
         }
 
@@ -268,15 +273,17 @@ namespace F1.Flow
 
             ExpeditionPhase phase = Parse<ExpeditionPhase>(record.Phase);
             Require(phase != ExpeditionPhase.Finished, "A finished expedition is never saved.");
+            Require(!record.FinalStand || data.Dungeons.Get(record.DungeonId).IsFinal, "The final stand is fought in the final dungeon.");
 
             BalanceData balance = data.Balance;
             var state = new ExpeditionState
             {
                 DungeonId = record.DungeonId,
                 Seed = seed,
-                Map = MapGenerator.Generate(data, data.Dungeons.Get(record.DungeonId), seed),
+                Map = MapGenerator.Generate(data, data.Dungeons.Get(record.DungeonId), seed, bossOnly: record.FinalStand),
                 Phase = phase,
                 Result = ExpeditionResult.None,
+                FinalStand = record.FinalStand,
                 CurrentNodeId = record.CurrentNodeId,
                 BattlesWon = record.BattlesWon,
                 Coins = record.Coins,

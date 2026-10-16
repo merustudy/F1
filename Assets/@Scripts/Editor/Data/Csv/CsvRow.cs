@@ -216,9 +216,16 @@ namespace F1.Editor.Data
             return number;
         }
 
+        /// <summary>A column a file may leave out: the default without the column or with an empty value.</summary>
         public int OptionalInt(string header, int defaultValue, int min = int.MinValue, int max = int.MaxValue)
         {
-            return IsEmpty(header) ? defaultValue : Int(header, min, max);
+            return !_table.TryGetColumn(header, out int _) || IsEmpty(header) ? defaultValue : Int(header, min, max);
+        }
+
+        /// <summary>An id a file may leave out: null without the column or with an empty value.</summary>
+        public string OptionalId(string header)
+        {
+            return !_table.TryGetColumn(header, out int _) || IsEmpty(header) ? null : Id(header);
         }
 
         /// <summary>A column a file may leave out (an optional header): the default without the column or with an empty value.</summary>

@@ -119,7 +119,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864207
-    m_Localized: Depart
+    m_Localized: To the expedition
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864208
@@ -1125,6 +1125,128 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 5780436994220032
+    m_Localized: The last day has passed. Only the final stand is left
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5780437002608640
+    m_Localized: 'The final boss has fallen: victory'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5780437002608641
+    m_Localized: '{0} mercenaries have fallen: defeat'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5780437002608642
+    m_Localized: 'The final stand was lost: defeat'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5780437006802944
+    m_Localized: The final boss has fallen. The run is over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5780437006802945
+    m_Localized: The death limit was reached. The run is over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5780437006802946
+    m_Localized: The final stand was lost. The run is over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696196022272
+    m_Localized: Expedition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605184
+    m_Localized: To the lobby
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605185
+    m_Localized: Home
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605186
+    m_Localized: "Cleared {0} \xB7 {1} days"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605187
+    m_Localized: "Locked \xB7 clear {0} \xD7{1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605188
+    m_Localized: '{0} floors + boss'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605189
+    m_Localized: "{0} days (\u2192 day {1})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605190
+    m_Localized: "{0} \xD7{1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605191
+    m_Localized: 'Opens {0}: clear this dungeon {1} times'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5786696208605192
+    m_Localized: 'The final dungeon: past the last day the party must fight its boss'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605193
+    m_Localized: Party (formed in the lobby)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605194
+    m_Localized: Depart
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5786696208605195
+    m_Localized: This dungeon is still locked
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759325143040
+    m_Localized: '{0} (final dungeon)'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5803759337725952
+    m_Localized: Affinity
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759337725953
+    m_Localized: Floors
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759337725954
+    m_Localized: Takes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759337725955
+    m_Localized: Starting potions
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759337725956
+    m_Localized: Clears
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5803759337725957
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 5803759337725958
+    m_Localized: Past day {0}, the boss of {1} must be fought
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1251,3 +1373,13 @@ MonoBehaviour:
         - id: 5628931574063104
         - id: 5628931578257408
         - id: 5628931578257415
+        - id: 5780437002608641
+        - id: 5786696208605186
+        - id: 5786696208605187
+        - id: 5786696208605188
+        - id: 5786696208605189
+        - id: 5786696208605190
+        - id: 5786696208605191
+        - id: 5803759325143040
+        - id: 5803759337725957
+        - id: 5803759337725958

@@ -60,6 +60,7 @@ namespace F1.Data
             new KeySpec(nameof(PartySize), 1, 6),
             new KeySpec(nameof(MinPartySize), 1, 6),
             new KeySpec(nameof(TotalDays), 1, Big),
+            new KeySpec(nameof(DeathLimit), 1, Big),
             new KeySpec(nameof(MaxFatigue), 1, Big),
             new KeySpec(nameof(FatigueRecoveryPerDay), 0, Big),
             new KeySpec(nameof(FatigueBreakdown), 1, Big),
@@ -204,6 +205,9 @@ namespace F1.Data
         public int PartySize => _values[nameof(PartySize)];
         public int MinPartySize => _values[nameof(MinPartySize)];
         public int TotalDays => _values[nameof(TotalDays)];
+
+        /// <summary>Deaths that lose a run (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §4).</summary>
+        public int DeathLimit => _values[nameof(DeathLimit)];
         /// <summary>The most fatigue a mercenary can carry (it builds up from 0). Reaching it is collapsing (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
         public int MaxFatigue => _values[nameof(MaxFatigue)];
         /// <summary>How much fatigue comes down for each day a mercenary stays home.</summary>

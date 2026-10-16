@@ -29,6 +29,7 @@ namespace F1.Tests
                 { "PartySize", 3 },
                 { "MinPartySize", 1 },
                 { "TotalDays", 100 },
+                { "DeathLimit", 15 },
                 { "MaxFatigue", 200 },
                 { "FatigueRecoveryPerDay", 10 },
                 { "FatigueBreakdown", 100 },
@@ -301,6 +302,8 @@ namespace F1.Tests
                     new EnemyGroupData("pair", "cave", 1, 2, false, new[] { "grunt", "grunt" }),
                     new EnemyGroupData("trio", "cave", 2, 2, false, new[] { "grunt", "grunt", "grunt" }),
                     new EnemyGroupData("lair", "cave", 0, 0, true, new[] { "chief", "grunt" }),
+                    new EnemyGroupData("pit_pair", "pit", 1, 1, false, new[] { "grunt", "grunt" }),
+                    new EnemyGroupData("pit_lord", "pit", 0, 0, true, new[] { "chief", "chief" }),
                 },
                 Affinities = new List<AffinityData>
                 {
@@ -308,7 +311,8 @@ namespace F1.Tests
                 },
                 Dungeons = new List<DungeonData>
                 {
-                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }),
+                    new DungeonData("cave", Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, mapX: 40, mapY: 30),
+                    Pit(),
                 },
                 Mercenaries = new List<MercenaryData>
                 {
@@ -329,6 +333,15 @@ namespace F1.Tests
         public static void StrongBlade(StaticDataParts parts, int value = 200)
         {
             parts.Items = parts.Items.Select(item => item.Id == "blade" ? Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, value, width: 2) : item).ToList();
+        }
+
+        /// <summary>
+        /// The final dungeon of the test data (Slice C stage 25): one floor and its boss, open after one clear of the cave. Its groups
+        /// (pit_pair, pit_lord) are in Parts(), so a test that replaces the dungeon list keeps this one or the groups point nowhere.
+        /// </summary>
+        public static DungeonData Pit()
+        {
+            return new DungeonData("pit", Text("pit"), "swift", 1, 1, 1, 1, new List<string> { "tonic" }, isFinal: true, unlockDungeonId: "cave", unlockClears: 1, mapX: 55, mapY: 10);
         }
 
         public static StaticData Data(params (string Key, int Value)[] balanceOverrides)

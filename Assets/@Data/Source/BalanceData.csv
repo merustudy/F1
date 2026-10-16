@@ -2,6 +2,7 @@ Key,Value
 PartySize,4
 MinPartySize,1
 TotalDays,100
+DeathLimit,15
 MaxFatigue,200
 FatigueRecoveryPerDay,10
 FatigueBreakdown,100

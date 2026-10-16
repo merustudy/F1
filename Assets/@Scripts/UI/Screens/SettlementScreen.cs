@@ -52,7 +52,7 @@ namespace F1.UI
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
             _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
-            _runOver.text = report.RunIsOver ? UiStrings.Get(UiKeys.Settle.RunOver) : string.Empty;
+            _runOver.text = RunOverText(report);
         }
 
         /// <summary>Each survivor with the fatigue they came back with, and the affliction they came home in: "로언 128 (공포), 카이 30".</summary>
@@ -74,5 +74,27 @@ namespace F1.UI
             Managers.Expedition.AcknowledgeReport();
             GoToCurrentPhase();
         }
+
+        /// <summary>The line that says the run ended with this expedition, and how (Docs/Design/04_Lobby_100Day_Economy.md §8).</summary>
+        static string RunOverText(SettlementReport report)
+        {
+            if (!report.RunIsOver)
+            {
+                return string.Empty;
+            }
+
+            if (report.Outcome == RunOutcome.Victory)
+            {
+                return UiStrings.Get(UiKeys.Settle.Victory);
+            }
+
+            switch (report.DefeatCause)
+            {
+                case DefeatCause.DeathLimit: return UiStrings.Get(UiKeys.Settle.DeathLimit);
+                case DefeatCause.FinalStandLost: return UiStrings.Get(UiKeys.Settle.FinalStandLost);
+                default: return UiStrings.Get(UiKeys.Settle.RunOver);
+            }
+        }
+
     }
 }

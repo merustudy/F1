@@ -60,7 +60,37 @@ namespace F1.UI
             public const string Fallen = "Lobby.Fallen";
             public const string RunOver = "Lobby.RunOver";
             public const string RunOverDay = "Lobby.RunOverDay";
+            public const string FinalStandDue = "Lobby.FinalStandDue";
+            public const string Victory = "Lobby.Victory";
+            public const string DefeatDeathLimit = "Lobby.DefeatDeathLimit";
+            public const string DefeatFinalStand = "Lobby.DefeatFinalStand";
             public const string ToTitle = "Lobby.ToTitle";
+        }
+
+        /// <summary>The expedition screen (Round 71 E2): the map, the chosen dungeon and the departure.</summary>
+        public static class Expedition
+        {
+            public const string Title = "Expedition.Title";
+            public const string ToLobby = "Expedition.ToLobby";
+            public const string Home = "Expedition.Home";
+            public const string MarkerOpen = "Expedition.MarkerOpen";
+            public const string MarkerLocked = "Expedition.MarkerLocked";
+            public const string Floors = "Expedition.Floors";
+            public const string Days = "Expedition.Days";
+            public const string Potions = "Expedition.Potions";
+            public const string UnlockHint = "Expedition.UnlockHint";
+            public const string FinalHint = "Expedition.FinalHint";
+            public const string Party = "Expedition.Party";
+            public const string Depart = "Expedition.Depart";
+            public const string Locked = "Expedition.Locked";
+            public const string FinalName = "Expedition.FinalName";
+            public const string AffinityLabel = "Expedition.AffinityLabel";
+            public const string FloorsLabel = "Expedition.FloorsLabel";
+            public const string DaysLabel = "Expedition.DaysLabel";
+            public const string PotionsLabel = "Expedition.PotionsLabel";
+            public const string ClearedLabel = "Expedition.ClearedLabel";
+            public const string ClearedCount = "Expedition.ClearedCount";
+            public const string FinalStandHint = "Expedition.FinalStandHint";
         }
 
         public static class Map
@@ -312,6 +342,9 @@ namespace F1.UI
             public const string Days = "Settle.Days";
             public const string ItemsLost = "Settle.ItemsLost";
             public const string RunOver = "Settle.RunOver";
+            public const string Victory = "Settle.Victory";
+            public const string DeathLimit = "Settle.DeathLimit";
+            public const string FinalStandLost = "Settle.FinalStandLost";
         }
 
         public static class Save

@@ -24,6 +24,7 @@ namespace F1.Tests
             TestData.StrongBlade(parts);
             parts.Dungeons = new List<DungeonData>
             {
+                TestData.Pit(),
                 new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, null, campFloor: 2),
             };
             return new StaticData(parts);

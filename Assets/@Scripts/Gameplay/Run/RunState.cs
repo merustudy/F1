@@ -48,16 +48,43 @@ namespace F1.Gameplay
         /// <summary>Dungeon id -> times cleared.</summary>
         public SortedDictionary<string, int> ClearedDungeons = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
 
-        /// <summary>True once no mercenary is left alive.</summary>
-        public bool IsOver;
+        /// <summary>How the run stands (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §8): ongoing, won at the final boss, or lost.</summary>
+        public RunOutcome Outcome;
+
+        /// <summary>Why a lost run was lost; None while it is ongoing or won.</summary>
+        public DefeatCause DefeatCause;
+
+        /// <summary>True once the run is won or lost.</summary>
+        public bool IsOver => Outcome != RunOutcome.Ongoing;
     }
 
-    /// <summary>Whether the lobby party can leave. Fatigue does not stop anyone: sending a tired mercenary is the player's call.</summary>
+    public enum RunOutcome
+    {
+        Ongoing,
+        Victory,
+        Defeat,
+    }
+
+    /// <summary>What ended a lost run: the last mercenary died, the deaths reached the limit, or the final stand after the last day was lost.</summary>
+    public enum DefeatCause
+    {
+        None,
+        Wipeout,
+        DeathLimit,
+        FinalStandLost,
+    }
+
+    /// <summary>
+    /// Whether the lobby party can leave. Fatigue does not stop anyone: sending a tired mercenary is the player's call.
+    /// Past the last day only the final stand is left (FinalStandDue), and a dungeon stays closed until the clears that open it (Locked).
+    /// </summary>
     public enum DepartCheck
     {
         Ok,
         RunIsOver,
         PartyTooSmall,
+        FinalStandDue,
+        Locked,
     }
 
     /// <summary>What the return settlement changed, for the result screen.</summary>
@@ -76,5 +103,9 @@ namespace F1.Gameplay
         public int DaysPassed;
         public int DayAfter;
         public bool RunIsOver;
+
+        /// <summary>How the run stands after this settlement, and why if it was lost.</summary>
+        public RunOutcome Outcome;
+        public DefeatCause DefeatCause;
     }
 }

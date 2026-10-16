@@ -2,6 +2,33 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "abyss_lord_stand_in",
+      "DungeonId": "abyss",
+      "MinFloor": 0,
+      "MaxFloor": 0,
+      "IsBoss": true,
+      "Enemies": [
+        "mine_overseer",
+        "goblin_raider",
+        "goblin_shaman"
+      ],
+      "IsElite": false
+    },
+    {
+      "Id": "abyss_watch",
+      "DungeonId": "abyss",
+      "MinFloor": 1,
+      "MaxFloor": 5,
+      "IsBoss": false,
+      "Enemies": [
+        "goblin_raider",
+        "goblin_raider",
+        "goblin_archer",
+        "goblin_shaman"
+      ],
+      "IsElite": false
+    },
+    {
       "Id": "ambush",
       "DungeonId": "abandoned_mine",
       "MinFloor": 3,

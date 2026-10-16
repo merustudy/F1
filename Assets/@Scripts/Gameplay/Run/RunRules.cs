@@ -29,7 +29,12 @@ namespace F1.Gameplay
                 });
             }
 
-            state.IsOver = state.Roster.Count == 0;
+            if (state.Roster.Count == 0)
+            {
+                state.Outcome = RunOutcome.Defeat;
+                state.DefeatCause = DefeatCause.Wipeout;
+            }
+
             return state;
         }
 
@@ -165,16 +170,49 @@ namespace F1.Gameplay
             }
 
             // Only a dungeon that exists can be chosen; fatigue never keeps anyone home.
-            data.Dungeons.Get(dungeonId);
-            return DepartCheck.Ok;
+            DungeonData dungeon = data.Dungeons.Get(dungeonId);
+            if (IsFinalStandDue(data, state))
+            {
+                // Past the last day only the final stand is left, and the final dungeon is open for it whether or not it was unlocked.
+                return dungeon.IsFinal ? DepartCheck.Ok : DepartCheck.FinalStandDue;
+            }
+
+            return IsUnlocked(state, dungeon) ? DepartCheck.Ok : DepartCheck.Locked;
+        }
+
+        /// <summary>
+        /// True from the day after the last one (Docs/Design/04_Lobby_100Day_Economy.md §2): the only expedition left is the final stand,
+        /// the final dungeon's boss alone. Passing the last day is not itself a defeat.
+        /// </summary>
+        public static bool IsFinalStandDue(StaticData data, RunState state)
+        {
+            return !state.IsOver && state.Day > data.Balance.TotalDays;
+        }
+
+        /// <summary>A dungeon is open from the start, or once the dungeon it names was cleared often enough (Docs/Design/03_Dungeon_Structure.md §1).</summary>
+        public static bool IsUnlocked(RunState state, DungeonData dungeon)
+        {
+            if (dungeon.UnlockDungeonId == null)
+            {
+                return true;
+            }
+
+            state.ClearedDungeons.TryGetValue(dungeon.UnlockDungeonId, out int cleared);
+            return cleared >= dungeon.UnlockClears;
+        }
+
+        /// <summary>Resting takes a day; past the last day there is none to spend, and an ended run does nothing.</summary>
+        public static bool CanRest(StaticData data, RunState state)
+        {
+            return !state.IsOver && !IsFinalStandDue(data, state);
         }
 
         /// <summary>Passes RestDays. Everyone in the roster recovers: their fatigue comes down.</summary>
         public static void Rest(StaticData data, RunState state)
         {
-            if (state.IsOver)
+            if (!CanRest(data, state))
             {
-                throw new InvalidOperationException("The run is over.");
+                throw new InvalidOperationException(state.IsOver ? "The run is over." : "The last day has passed: only the final stand is left.");
             }
 
             PassDays(data, state, data.Balance.RestDays, null);
@@ -203,7 +241,8 @@ namespace F1.Gameplay
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);
-            ExpeditionState expedition = ExpeditionRules.Create(data, dungeonId, seed, party);
+            // Past the last day the departure is the final stand: the final dungeon's boss alone (CanDepart allowed no other dungeon).
+            ExpeditionState expedition = ExpeditionRules.Create(data, dungeonId, seed, party, finalStand: IsFinalStandDue(data, state));
             state.ExpeditionCount++;
             return expedition;
         }
@@ -266,10 +305,46 @@ namespace F1.Gameplay
                 state.ClearedDungeons[dungeon.Id] = cleared + 1;
             }
 
-            state.IsOver = state.Roster.Count == 0;
+            CloseTheRun(data, state, dungeon, expedition);
             report.DayAfter = state.Day;
+            report.Outcome = state.Outcome;
+            report.DefeatCause = state.DefeatCause;
             report.RunIsOver = state.IsOver;
             return report;
+        }
+
+        /// <summary>
+        /// Whether this settlement ends the run (Docs/Design/04_Lobby_100Day_Economy.md §8): clearing the final dungeon wins; losing the final
+        /// stand, the last mercenary, or reaching the death limit loses. Passing the last day alone ends nothing: the final stand follows.
+        /// </summary>
+        static void CloseTheRun(StaticData data, RunState state, DungeonData dungeon, ExpeditionState expedition)
+        {
+            if (expedition.Result == ExpeditionResult.Cleared && dungeon.IsFinal)
+            {
+                state.Outcome = RunOutcome.Victory;
+                state.DefeatCause = DefeatCause.None;
+                return;
+            }
+
+            DefeatCause cause = DefeatCause.None;
+            if (expedition.FinalStand)
+            {
+                cause = DefeatCause.FinalStandLost;
+            }
+            else if (state.Roster.Count == 0)
+            {
+                cause = DefeatCause.Wipeout;
+            }
+            else if (state.Fallen.Count >= data.Balance.DeathLimit)
+            {
+                cause = DefeatCause.DeathLimit;
+            }
+
+            if (cause != DefeatCause.None)
+            {
+                state.Outcome = RunOutcome.Defeat;
+                state.DefeatCause = cause;
+            }
         }
 
         static int[] PartyRows(RunState state)

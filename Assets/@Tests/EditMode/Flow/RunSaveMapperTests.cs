@@ -115,7 +115,10 @@ namespace F1.Tests
             yield return Case("PartyLeavesARowEmptyInFront", r => r.Party.RemoveAt(1));
             yield return Case("ClearedUnknownDungeon", r => r.ClearedDungeons.Add(new ClearRecord { DungeonId = "nowhere", Count = 1 }));
             yield return Case("ClearedZeroTimes", r => r.ClearedDungeons.Add(new ClearRecord { DungeonId = "cave", Count = 0 }));
-            yield return Case("OverWithALivingRoster", r => r.IsOver = true);
+            yield return Case("WipedOutWithALivingRoster", r => { r.Outcome = "Defeat"; r.DefeatCause = "Wipeout"; });
+            yield return Case("OutcomeUnknown", r => r.Outcome = "Won");
+            yield return Case("DefeatWithoutACause", r => { r.Outcome = "Defeat"; r.DefeatCause = "None"; });
+            yield return Case("ACauseWhileOngoing", r => r.DefeatCause = "DeathLimit");
             yield return Case("NegativeExpeditionCount", r => r.ExpeditionCount = -1);
         }
 
@@ -300,54 +303,6 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Migrate_From2_CompactsTheBoards_AndAddsAnEmptyInventory()
-        {
-            // Version 2 stored one entry per slot, null for an empty one, and no inventory.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 2;
-            save.Expedition.Inventory = null;
-            save.Expedition.Members[0].Items = new List<ItemRecord> { null, new ItemRecord { ItemId = "blade" }, null };
-            save.Expedition.Members[1].Items = new List<ItemRecord> { null, null, null };
-            save.Run.Roster.ForEach(m => m.Fatigue = 100);
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.IsEmpty(save.Expedition.Inventory);
-            CollectionAssert.AreEqual(new[] { "blade" }, save.Expedition.Members[0].Items.ConvertAll(i => i.ItemId));
-            Assert.IsEmpty(save.Expedition.Members[1].Items);
-            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
-
-            var home = new RunSaveData { SchemaVersion = 2, Run = save.Run, Expedition = null };
-            RunSaveMigrator.Migrate(home, data);
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, home.SchemaVersion);
-            Assert.IsNull(home.Expedition);
-        }
-
-        [Test]
-        public void Migrate_From3_TurnsTheFatigueLeftIntoTheFatigueSpent_AndMarksTheJobWeaponsAsBase()
-        {
-            // Version 3 counted fatigue down from 100, members carried none, and nothing was marked as a base weapon.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 3;
-            save.Run.Roster.ForEach(m => m.Fatigue = 100);
-            save.Run.Roster.Find(m => m.Id == "anna").Fatigue = 70;
-            save.Expedition.Members.ForEach(m => { m.Fatigue = 0; m.Items.ForEach(i => i.Base = false); });
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "blade" });
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife" });
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual(30, save.Run.Roster.Find(m => m.Id == "anna").Fatigue, "70 left of 100: 30 spent.");
-            Assert.AreEqual(0, save.Run.Roster.Find(m => m.Id == "dan").Fatigue, "Fresh.");
-            Assert.AreEqual(30, save.Expedition.Members.Find(m => m.MercenaryId == "anna").Fatigue, "She carries what she left with.");
-            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items[0].Base), "Everyone's job weapon.");
-            CollectionAssert.AreEqual(new[] { true, false }, save.Expedition.Inventory.ConvertAll(i => i.Base), "A job weapon in the inventory too; the knife was found.");
-            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
-        }
-
-        [Test]
         public void Read_Refuses_ARosterWithAVirtue_OrAnAfflictionUnderTheBreakdown_AndKeepsAValidAffliction()
         {
             RunSaveData save = ValidSave(out StaticData data);
@@ -369,7 +324,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Save_KeepsTheStateOfAMemberAndTheAfflictionOfAMercenary_AndVersion5ReadsWithNone()
+        public void Save_KeepsTheStateOfAMemberAndTheAfflictionOfAMercenary()
         {
             RunSaveData save = ValidSave(out StaticData data);
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
@@ -387,100 +342,36 @@ namespace F1.Tests
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
             Assert.AreEqual("hopeless", read.Members[0].StateId);
             Assert.AreEqual("stalwart", read.Members[1].StateId);
-
-            // Version 5 knew no states.
-            RunSaveData old = ValidSave(out data);
-            old.SchemaVersion = 5;
-            old.Run.Roster.ForEach(m => m.Affliction = null);
-            old.Expedition.Members.ForEach(m => m.State = null);
-            RunSaveMigrator.Migrate(old, data);
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, old.SchemaVersion);
-            Assert.DoesNotThrow(() => RunSaveMapper.Read(old, data, out RunState _, out ExpeditionState _));
         }
 
         [Test]
-        public void Migrate_From4_MakesEveryItemBronze()
+        public void Migrate_From12_SetsTheOutcomeFromTheRoster_AndNoFinalStand()
         {
-            // Version 4 had no tiers. (Its reward choice is left behind: From8To9.)
+            // Version 12 said only IsOver (nobody left). Its conversions from 2..11 were deleted (2026-10-16): those files are refused.
             RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 4;
-            save.Expedition.Members.ForEach(m => m.Items.ForEach(i => i.Tier = null));
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Tier = null });
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.IsTrue(save.Expedition.Members.TrueForAll(m => m.Items.TrueForAll(i => i.Tier == "Common")));
-            Assert.AreEqual("Common", save.Expedition.Inventory.Single().Tier);
-            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
-        }
-
-        [Test]
-        public void Migrate_From8_LeavesTheRewardChoiceBehind_WithAnEmptyLoot()
-        {
-            // Version 8 chose a reward after a battle; a file in the middle of that choice goes on to the node choice.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 8;
-            save.Expedition.Phase = "ChoosingReward";
-            save.Expedition.Loot = null;
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual("ChoosingNode", save.Expedition.Phase);
-            Assert.IsEmpty(save.Expedition.Loot);
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
-            Assert.AreEqual(ExpeditionPhase.ChoosingNode, expedition.Phase);
-        }
-
-        [Test]
-        public void Migrate_From6_RenamesTheTiers()
-        {
-            // Version 6 named the tiers Bronze, Silver, Gold and Diamond; version 7 calls the same four Common, Bronze, Silver and Gold (round 41).
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 6;
-            ItemRecord first = save.Expedition.Members[0].Items[0];
-            first.Tier = "Bronze";
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Tier = "Silver" });
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Tier = "Gold" });
-            save.Expedition.Inventory.Add(new ItemRecord { ItemId = "knife", Tier = "Diamond" });
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual("Common", first.Tier);
-            Assert.AreEqual("Tier1", save.Expedition.Inventory[0].Tier, "Version 7's Bronze, version 12's Tier1.");
-            Assert.AreEqual("Tier2", save.Expedition.Inventory[1].Tier);
-            Assert.AreEqual("Tier3", save.Expedition.Inventory[2].Tier);
-            Assert.DoesNotThrow(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _), "The migrated file reads.");
-        }
-
-        [Test]
-        public void Migrate_From7_ReadsWithNoCoinsAndNoShop_AndTheCoinsAreKept()
-        {
-            // Version 7 had no region coins and no shop (stage 17): such a file comes back with 0 coins at no shop.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 7;
-            save.Expedition.Coins = 0;
-            save.Expedition.Shop = null;
-
+            save.SchemaVersion = 12;
+            save.Run.Outcome = null;
+            save.Run.DefeatCause = null;
             RunSaveMigrator.Migrate(save, data);
             Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.AreEqual("Ongoing", save.Run.Outcome);
+            Assert.AreEqual("None", save.Run.DefeatCause);
+            Assert.IsFalse(save.Expedition.FinalStand);
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
-            Assert.AreEqual(0, expedition.Coins);
-            Assert.IsNull(expedition.Shop);
+            Assert.AreEqual(RunOutcome.Ongoing, run.Outcome);
+            Assert.IsFalse(expedition.FinalStand);
 
-            expedition.Coins = 42;
-            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
-            Assert.AreEqual(42, again.Expedition.Coins);
-            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
-            Assert.AreEqual(42, read.Coins);
-
-            again.Expedition.Coins = -1;
-            AssertRefused(again, data);
-            again.Expedition.Coins = 0;
-            again.Expedition.Shop = new ShopRecord { Stock = new List<OfferRecord>(), Refreshes = 0 };
-            AssertRefused(again, data);
+            RunSaveData over = ValidSave(out data);
+            over.SchemaVersion = 12;
+            over.Expedition = null;
+            over.Run.Fallen.AddRange(over.Run.Roster.ConvertAll(m => m.Id));
+            over.Run.Roster.Clear();
+            over.Run.Party.Clear();
+            RunSaveMigrator.Migrate(over, data);
+            Assert.AreEqual("Defeat", over.Run.Outcome);
+            Assert.AreEqual("Wipeout", over.Run.DefeatCause);
+            RunSaveMapper.Read(over, data, out run, out ExpeditionState _);
+            Assert.IsTrue(run.IsOver);
         }
 
         [Test]
@@ -570,128 +461,11 @@ namespace F1.Tests
             StringAssert.Contains("no tier", refused.Message);
         }
 
-        [Test]
-        public void Migrate_From11_RenamesTheTiers_OnItemsAndOffers()
-        {
-            // Version 7 named the tiers Common, Bronze, Silver, Gold; version 12 (round 69) names the same four Common, Tier1, Tier2, Tier3.
-            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.PickingLoot);
-            save.SchemaVersion = 11;
-            ItemRecord first = save.Expedition.Members[0].Items[0];
-            first.Tier = "Bronze";
-            var knife = new ItemRecord { ItemId = "knife", Tier = "Silver", X = 7, Y = 2 };   // a free room of the grid, past the drop taken in
-            save.Expedition.Inventory.Add(knife);
-            OfferRecord drop = save.Expedition.Loot.First(d => d != null);
-            drop.Tier = "Gold";
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual("Tier1", first.Tier);
-            Assert.AreEqual("Tier2", knife.Tier);
-            Assert.AreEqual("Tier3", drop.Tier);
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState read);
-            Assert.AreEqual(ItemTier.Tier1, read.Members[0].Board.Items[0].Item.Tier);
-            Assert.AreEqual(ItemTier.Tier3, read.Loot.First(d => d != null).Tier);
-        }
-
-        [Test]
-        public void Migrate_From10_MovesTheHpToTheJobsMaximum_KeepingTheShare()
-        {
-            // Version 11 (Slice B stage 22): HP in hundredths at the new scale. A member keeps the share of its maximum it had.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 10;
-            MemberRecord anna = save.Expedition.Members[0];
-            int jobMax = data.Jobs.Get(anna.JobId).MaxHp;
-            anna.MaxHp = 140;
-            anna.Hp = 70;
-            MemberRecord ben = save.Expedition.Members[1];
-            ben.MaxHp = 90;
-            ben.Hp = 1;
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual(jobMax, anna.MaxHp, "The job's maximum.");
-            Assert.AreEqual(jobMax / 2, anna.Hp, "Half of it, as before.");
-            Assert.AreEqual(data.Jobs.Get(ben.JobId).MaxHp, ben.MaxHp);
-            Assert.GreaterOrEqual(ben.Hp, 1, "Some HP stays some HP.");
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _);
-        }
-
-        [Test]
-        public void Migrate_From9_LaysEachOldBoardDownTheLeftEdge_InItsOrder_AddingRowBagsAsItNeeds()
-        {
-            // Version 9 kept a board as a list of items with no squares; the grid lays them one under another, so the order stays.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 9;
-            foreach (MemberRecord member in save.Expedition.Members)
-            {
-                member.Bags = null;
-            }
-
-            MemberRecord anna = save.Expedition.Members[0];
-            anna.Items.Add(new ItemRecord { ItemId = "pike" });
-            anna.Items.Add(new ItemRecord { ItemId = "knife" });
-            anna.Items.Add(new ItemRecord { ItemId = "claw" });
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            CollectionAssert.AreEqual(new[] { "pack", "pouch", "pouch", "pouch" }, anna.Bags.ConvertAll(b => b.BagId), "The start bag holds two rows; a row bag for each row past it.");
-            CollectionAssert.AreEqual(new[] { 0, 2, 3, 4 }, anna.Bags.ConvertAll(b => b.Y));
-            CollectionAssert.AreEqual(new[] { 0, 1, 3, 4 }, anna.Items.ConvertAll(i => i.Y), "The blade, the pike two rows tall, the knife, the claw.");
-            Assert.IsTrue(anna.Items.TrueForAll(i => i.X == 0 && i.Turns == 0));
-            CollectionAssert.AreEqual(new[] { "pack" }, save.Expedition.Members[1].Bags.ConvertAll(b => b.BagId), "One weapon fits the start bag.");
-
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
-            CollectionAssert.AreEqual(new[] { "blade", "pike", "knife", "claw" }, TestBoards.Ids(expedition.Members[0]), "The battle order is the old order.");
-
-            // A board taller than the frame cannot be laid down: the file is refused.
-            RunSaveData tall = ValidSave(out StaticData _);
-            tall.SchemaVersion = 9;
-            tall.Expedition.Members.ForEach(m => m.Bags = null);
-            for (int i = 0; i < 3; i++)
-            {
-                tall.Expedition.Members[0].Items.Add(new ItemRecord { ItemId = "ballista" });
-            }
-
-            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(tall, data));
-        }
-
-        [Test]
-        public void Migrate_From9_LaysTheInventoryOnItsGrid_InItsOrder_EachAtItsFirstRoom()
-        {
-            // Up to round 49 the inventory was a list counted by area; the grid takes its items in order, each at its first room.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 9;
-            save.Expedition.Members.ForEach(m => m.Bags = null);
-            foreach (string id in new[] { "staff", "ballista", "knife", "pike" })
-            {
-                save.Expedition.Inventory.Add(new ItemRecord { ItemId = id });
-            }
-
-            RunSaveMigrator.Migrate(save, data);
-
-            CollectionAssert.AreEqual(new[] { 0, 3, 6, 7 }, save.Expedition.Inventory.ConvertAll(i => i.X), "The pike fits the top row's end, unturned.");
-            CollectionAssert.AreEqual(new[] { 0, 0, 0, 0 }, save.Expedition.Inventory.ConvertAll(i => i.Y));
-            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState expedition);
-            Assert.AreEqual(4, expedition.Inventory.Count);
-
-            // More than the grid can hold cannot be laid down: the file is refused.
-            RunSaveData full = ValidSave(out StaticData _);
-            full.SchemaVersion = 9;
-            full.Expedition.Members.ForEach(m => m.Bags = null);
-            for (int i = 0; i < 4; i++)
-            {
-                full.Expedition.Inventory.Add(new ItemRecord { ItemId = "ballista" });
-            }
-
-            Assert.Throws<RunSaveException>(() => RunSaveMigrator.Migrate(full, data));
-        }
 
         static ItemRecord Inv(string id, int x, int y, int turns = 0)
         {
             return new ItemRecord { ItemId = id, X = x, Y = y, Turns = turns };
         }
+
     }
 }

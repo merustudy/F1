@@ -21,7 +21,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 | 수명 | 상태 | 규칙 | 끝나면 |
 |---|---|---|---|
-| 런 | `RunState`: 시드, 날짜, 로스터(피로도), 파티, 원정 횟수, 클리어 기록 | `RunRules` | 용병이 하나도 없으면 `IsOver` |
+| 런 | `RunState`: 시드, 날짜, 로스터(피로도), 파티, 원정 횟수, 클리어 기록, 결과(`Outcome`·`DefeatCause`) | `RunRules` | 최종 던전을 클리어하면 승리, 최종 결전에서 지거나 사망 한도에 닿거나 용병이 하나도 없으면 패배(`IsOver` = 결과가 진행 중이 아님) |
 | 원정 | `ExpeditionState`: 던전, 시드, 맵, 구성원(HP, 보드, 피로도), 인벤토리, 포션, 단계 | `ExpeditionRules` | `RunRules.Settle`로 런에 반영하고 버린다 |
 | 전투 | `BattleEngine` 안의 유닛, 쿨다운, 포션, 이벤트 로그, 입력 기록 | `BattleEngine` | `ExpeditionRules.CompleteBattle`로 원정에 반영하고 버린다 |
 
@@ -168,6 +168,15 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - `ForgeAtCamp(data, state, 구성원, X, Y)`(단계 `AtCamp`에서만): 촉매를 보드에서 빼고, 바탕의 `EquippedItem`을 결과 아이템으로 바꾼다(`ForgeRules.Result`: 기본 무기 여부·세기 % 그대로, 단계는 `Common` — 유니크에는 성이 없다), 단계를 `ChoosingNode`로(쉬기·정비 없음). 피로는 들지 않는다(사용자 결정).
 - 유니크 아이템(`ItemData.Unique`)은 상점·전리품에 없고(`ShopWeight`·`Price` 0, 데이터 검사) 합치기 대상이 없고 정비 대상도 아니다(`CanUpgradeAtCamp`가 거른다: 성이 없다). 저장은 유니크가 `Common`일 때만 유효하다(`RunSaveMapper`). 효과가 있는 아이템도 ★을 가질 수 있다(글라디우스: 발동하는 무기이면서 자기 ★로 옆의 근접 무기를 벼린다). `StarRules`는 ★ 아이템이 발동하는지 묻지 않는다.
 - 시뮬(`Tools/Sim`): 상점에서 레시피의 촉매를 먼저 사서 바탕을 든 용병의 ★ 자리에 두고, 야영지에서 레시피가 갖춰졌고 아무도 아프지 않으면 담금질한다. 보고에 담금질 /원정과 유니크를 가지고 끝난 원정.
+
+## 런의 끝 (Slice C 25단계)
+
+규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §2·§4·§8, 최종 던전은 `03_Dungeon_Structure.md` §1. 모두 `RunRules`다.
+
+- **최종 결전**(`IsFinalStandDue`): 날이 `TotalDays`를 넘으면(101일째부터) 쉬기가 안 되고(`CanRest`), 출발은 최종 던전(`DungeonData.IsFinal`)으로만 된다(`CanDepart`: 다른 던전은 `FinalStandDue`). 그 출발은 `ExpeditionRules.Create(finalStand: true)`로, 지도가 보스 노드 하나(`MapGenerator.Generate(bossOnly)`, 시드를 쓰지 않음)이고 `ExpeditionState.FinalStand`가 참이다. 해금되지 않은 최종 던전도 최종 결전에는 열린다.
+- **해금**(`IsUnlocked`): `DungeonData.UnlockDungeonId`가 없으면 처음부터 열려 있고, 있으면 그 던전의 클리어 수가 `UnlockClears` 이상일 때 열린다(아니면 `CanDepart`가 `Locked`).
+- **끝**(`Settle` 끝의 `CloseTheRun`): 최종 던전을 클리어하면 `Victory`. 아니면 최종 결전이었으면 `FinalStandLost`, 로스터가 비었으면 `Wipeout`, 전사자가 `DeathLimit` 이상이면 `DeathLimit`로 `Defeat`. 기한을 넘긴 것 자체는 끝이 아니다. `SettlementReport`가 결과와 까닭을 담는다.
+- 최종 던전은 데이터가 하나까지 가진다(`StaticData.FinalDungeon`, 검증). 25단계의 행 `abyss`는 임시다(Roadmap "임시 조치": 28단계가 Abyss Lord와 호위로 바꾼다).
 
 ## 전투: 결정론
 

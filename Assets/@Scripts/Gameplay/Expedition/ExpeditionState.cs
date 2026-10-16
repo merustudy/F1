@@ -136,6 +136,9 @@ namespace F1.Gameplay
         public ExpeditionPhase Phase;
         public ExpeditionResult Result;
 
+        /// <summary>The forced final stand (Slice C stage 25): the final dungeon's boss alone, fought past the last day. Losing it loses the run.</summary>
+        public bool FinalStand;
+
         /// <summary>The node being fought or last cleared. -1 before the first choice.</summary>
         public int CurrentNodeId = -1;
 

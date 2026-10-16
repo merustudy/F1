@@ -1235,6 +1235,146 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673467615838217
+  - m_Id: 5780436994220032
+    m_Key: Lobby.FinalStandDue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003776
+  - m_Id: 5780437002608640
+    m_Key: Lobby.Victory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003777
+  - m_Id: 5780437002608641
+    m_Key: Lobby.DefeatDeathLimit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003778
+  - m_Id: 5780437002608642
+    m_Key: Lobby.DefeatFinalStand
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003779
+  - m_Id: 5780437006802944
+    m_Key: Settle.Victory
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003780
+  - m_Id: 5780437006802945
+    m_Key: Settle.DeathLimit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003781
+  - m_Id: 5780437006802946
+    m_Key: Settle.FinalStandLost
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477085003782
+  - m_Id: 5786696196022272
+    m_Key: Expedition.Title
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384768
+  - m_Id: 5786696208605184
+    m_Key: Expedition.ToLobby
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384769
+  - m_Id: 5786696208605185
+    m_Key: Expedition.Home
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384770
+  - m_Id: 5786696208605186
+    m_Key: Expedition.MarkerOpen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384771
+  - m_Id: 5786696208605187
+    m_Key: Expedition.MarkerLocked
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384772
+  - m_Id: 5786696208605188
+    m_Key: Expedition.Floors
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384773
+  - m_Id: 5786696208605189
+    m_Key: Expedition.Days
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384774
+  - m_Id: 5786696208605190
+    m_Key: Expedition.Potions
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384775
+  - m_Id: 5786696208605191
+    m_Key: Expedition.UnlockHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384776
+  - m_Id: 5786696208605192
+    m_Key: Expedition.FinalHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384777
+  - m_Id: 5786696208605193
+    m_Key: Expedition.Party
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384778
+  - m_Id: 5786696208605194
+    m_Key: Expedition.Depart
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384779
+  - m_Id: 5786696208605195
+    m_Key: Expedition.Locked
+    m_Metadata:
+      m_Items:
+      - rid: 8623673477476384780
+  - m_Id: 5803759325143040
+    m_Key: Expedition.FinalName
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524416
+  - m_Id: 5803759337725952
+    m_Key: Expedition.AffinityLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524417
+  - m_Id: 5803759337725953
+    m_Key: Expedition.FloorsLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524418
+  - m_Id: 5803759337725954
+    m_Key: Expedition.DaysLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524419
+  - m_Id: 5803759337725955
+    m_Key: Expedition.PotionsLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524420
+  - m_Id: 5803759337725956
+    m_Key: Expedition.ClearedLabel
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524421
+  - m_Id: 5803759337725957
+    m_Key: Expedition.ClearedCount
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524422
+  - m_Id: 5803759337725958
+    m_Key: Expedition.FinalStandHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673478542524423
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1343,7 +1483,8 @@ MonoBehaviour:
     - rid: 636489279218909200
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Starts the expedition.
+        m_CommentText: Opens the expedition screen (round 71 E2); the departure is
+          there.
     - rid: 636489279218909201
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2318,3 +2459,123 @@ MonoBehaviour:
         m_CommentText: On the card of a recipe's base or catalyst (stage 23). {0}
           = the base with its tier. {1} = the catalyst with its tier. {2} = the unique
           item.
+    - rid: 8623673477085003776
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Past the last day: the only expedition left is the final
+          stand against the final dungeon''s boss.'
+    - rid: 8623673477085003777
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The run was won: the final boss fell.'
+    - rid: 8623673477085003778
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = the death limit.'
+    - rid: 8623673477085003779
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The final stand was lost.
+    - rid: 8623673477085003780
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The run was won with this expedition: the final boss fell.'
+    - rid: 8623673477085003781
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The run was lost with this expedition: the deaths reached
+          the limit.'
+    - rid: 8623673477085003782
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The run was lost with this expedition: the final stand was
+          lost.'
+    - rid: 8623673477476384768
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the expedition screen (round 71 E2).
+    - rid: 8623673477476384769
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Back to the lobby.
+    - rid: 8623673477476384770
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The company's town on the map.
+    - rid: 8623673477476384771
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under a dungeon's marker. {0} = clears, {1} = days it takes.
+    - rid: 8623673477476384772
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under a locked dungeon's marker. {0} = the dungeon whose clears
+          open it, {1} = how many.
+    - rid: 8623673477476384773
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = map floors before the boss.'
+    - rid: 8623673477476384774
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = days the dungeon takes, {1} = the day the party is
+          back.'
+    - rid: 8623673477476384775
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: One kind of starting potion in the details. {0} = its name,
+          {1} = how many.
+    - rid: 8623673477476384776
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under an open dungeon's details, one line per dungeon its
+          clears open. {0} = that dungeon, {1} = the clears it takes.
+    - rid: 8623673477476384777
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the final dungeon's details.
+    - rid: 8623673477476384778
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Header of the party strip; the party is formed in the lobby.
+    - rid: 8623673477476384779
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Starts the expedition.
+    - rid: 8623673477476384780
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The chosen dungeon is still locked.
+    - rid: 8623673478542524416
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the final dungeon's marker. {0} = its name.
+    - rid: 8623673478542524417
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details.
+    - rid: 8623673478542524418
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details.
+    - rid: 8623673478542524419
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details.
+    - rid: 8623673478542524420
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details.
+    - rid: 8623673478542524421
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Row label in the details.
+    - rid: 8623673478542524422
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = times the dungeon was cleared.'
+    - rid: 8623673478542524423
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under every open dungeon's details. {0} = the last day, {1}
+          = the final dungeon.

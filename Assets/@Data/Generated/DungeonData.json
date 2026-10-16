@@ -2,6 +2,11 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "IsFinal": false,
+      "UnlockDungeonId": null,
+      "UnlockClears": 0,
+      "MapX": 38,
+      "MapY": 30,
       "Id": "abandoned_mine",
       "Name": {
         "en-US": "Abandoned Mine",
@@ -29,6 +34,40 @@
       "Tier3Floor": 0,
       "ShopMinFloor": 4,
       "ShopChancePercent": 15
+    },
+    {
+      "IsFinal": true,
+      "UnlockDungeonId": "abandoned_mine",
+      "UnlockClears": 2,
+      "MapX": 54,
+      "MapY": 13,
+      "Id": "abyss",
+      "Name": {
+        "en-US": "The Abyss",
+        "ko-KR": "심연"
+      },
+      "AffinityId": "swift",
+      "Floors": 5,
+      "MapMinWidth": 1,
+      "MapMaxWidth": 2,
+      "DurationDays": 3,
+      "StartingPotions": [
+        "healing_potion",
+        "healing_potion"
+      ],
+      "Background": null,
+      "EliteMinFloor": 0,
+      "EliteChancePercent": 0,
+      "CampMinFloor": 0,
+      "CampChancePercent": 0,
+      "CampFloor": 0,
+      "EnemyHpPerFloorPercent": 0,
+      "EnemyPowerPerFloorPercent": 0,
+      "Tier1Floor": 3,
+      "Tier2Floor": 0,
+      "Tier3Floor": 0,
+      "ShopMinFloor": 0,
+      "ShopChancePercent": 0
     }
   ]
 }

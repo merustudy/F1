@@ -48,7 +48,7 @@ Application 계층이 하는 일은 넷이다.
 
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
-| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기, 출발(피로도는 막지 않는다) |
+| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기(`CanRest`: 런이 끝났거나 기한을 넘겼으면 안 됨), 출발(피로도는 막지 않는다. `CanDepart`: 잠긴 던전은 `Locked`, 기한을 넘겼으면 최종 던전으로만 — 최종 결전 `IsFinalStandDue`). 25단계까지의 로비 화면은 던전 하나를 보인다(최종 결전이면 최종 던전, 아니면 첫 일반 던전); 고르는 화면은 26단계 |
 | `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로, 상점 노드는 `Shop`으로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`)나 담금질(`ForgeAtCamp`, 23단계. 셋 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 사기(`BuyToBoard`·`BuyToInventory`·`BuyToInventoryAt`(인벤토리의 한 자리, Round 55)·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |
@@ -85,6 +85,7 @@ Application 계층이 하는 일은 넷이다.
 
 ## 귀환 정산
 
+- 정산이 런을 끝낼 수 있다(25단계, `RunRules.Settle` → `RunState.Outcome`): 최종 던전의 클리어는 승리, 최종 결전의 패배·전멸·사망 한도는 패배. `SettlementReport.Outcome`·`DefeatCause`를 정산 화면이, `RunState`의 것을 로비가 보인다. 새 런은 결과를 버린다.
 - 원정이 끝나는 순간(클리어, 전멸, 후퇴) 같은 호출 안에서 `RunRules.Settle`을 적용하고 `ExpeditionState`를 버린다.
 - `SettlementReport`는 화면에 보이기 위해 남긴다. 확인(`AcknowledgeReport`)하면 버린다. 저장하지 않는다.
   살아 돌아온 용병마다 원정에서 쌓인 피로도를 담는다(`SurvivorFatigue`); 그 값이 로스터에 남는다.

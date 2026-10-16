@@ -379,7 +379,7 @@ namespace F1.Tests
         public void TheCampsRest_EndsAnAffliction_OnceTheFatigueIsUnderTheThreshold()
         {
             StaticDataParts parts = TestData.Parts();
-            parts.Dungeons = new List<DungeonData> { new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2) };
+            parts.Dungeons = new List<DungeonData> { TestData.Pit(), new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2) };
             var data = new StaticData(parts);
             var party = new[] { new PartyMember("anna", "tank", 1, 110, "fearful"), new PartyMember("ben", "healer", 2, 150, "hopeless") };
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, party);

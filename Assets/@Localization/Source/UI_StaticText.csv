@@ -37,13 +37,38 @@ Lobby.Cleared,{0} = times this dungeon was cleared.,클리어 {0}회,Clears: {0}
 Lobby.Party,Header of the party preview.,파티,Party
 Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
 Lobby.Rest,{0} = how much fatigue comes down. {1} = days that pass.,쉬기 (피로도 -{0} · {1}일),Rest (fatigue -{0} · {1}d)
-Lobby.Depart,Starts the expedition.,원정 출발,Depart
+Lobby.Depart,Opens the expedition screen (round 71 E2); the departure is there.,원정 화면으로,To the expedition
 Lobby.DepartOk,The party can leave.,출발할 수 있습니다,Ready to depart
 Lobby.PartyTooSmall,{0} = minimum party size.,파티에 용병을 {0}명 이상 넣으세요,The party needs at least {0}
 Lobby.Fallen,{0} = names of the dead.,전사자: {0},Fallen: {0}
 Lobby.RunOver,No mercenary is left alive.,용병단이 전멸했습니다,The company has fallen
 Lobby.RunOverDay,{0} = day the run ended.,{0}일차에 끝났습니다,It ended on day {0}
+Lobby.FinalStandDue,Past the last day: the only expedition left is the final stand against the final dungeon's boss.,기한이 지났습니다. 최종 결전으로 출발합니다,The last day has passed. Only the final stand is left
+Lobby.Victory,The run was won: the final boss fell.,최종 보스를 쓰러뜨렸습니다 — 승리,The final boss has fallen: victory
+Lobby.DefeatDeathLimit,{0} = the death limit.,전사자가 {0}명에 닿았습니다 — 패배,{0} mercenaries have fallen: defeat
+Lobby.DefeatFinalStand,The final stand was lost.,최종 결전에서 졌습니다 — 패배,The final stand was lost: defeat
 Lobby.ToTitle,Goes back to the title screen.,타이틀로,To Title
+Expedition.Title,Header of the expedition screen (round 71 E2).,원정,Expedition
+Expedition.ToLobby,Back to the lobby.,로비로,To the lobby
+Expedition.Home,The company's town on the map.,본부,Home
+Expedition.MarkerOpen,"Under a dungeon's marker. {0} = clears, {1} = days it takes.",클리어 {0}회 · {1}일,Cleared {0} · {1} days
+Expedition.MarkerLocked,"Under a locked dungeon's marker. {0} = the dungeon whose clears open it, {1} = how many.",잠김 · {0} {1}회 클리어,Locked · clear {0} ×{1}
+Expedition.Floors,{0} = map floors before the boss.,{0}층 + 보스,{0} floors + boss
+Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back.",{0}일 (→ {1}일차),{0} days (→ day {1})
+Expedition.Potions,"One kind of starting potion in the details. {0} = its name, {1} = how many.",{0} ×{1},{0} ×{1}
+Expedition.UnlockHint,"Under an open dungeon's details, one line per dungeon its clears open. {0} = that dungeon, {1} = the clears it takes.",{0} 해금: 이 던전을 {1}회 클리어,Opens {0}: clear this dungeon {1} times
+Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last day the party must fight its boss
+Expedition.Party,Header of the party strip; the party is formed in the lobby.,파티 (막사에서 꾸린다),Party (formed in the lobby)
+Expedition.Depart,Starts the expedition.,출발,Depart
+Expedition.Locked,The chosen dungeon is still locked.,아직 잠긴 던전입니다,This dungeon is still locked
+Expedition.FinalName,On the final dungeon's marker. {0} = its name.,{0} (최종 던전),{0} (final dungeon)
+Expedition.AffinityLabel,Row label in the details.,지역 속성,Affinity
+Expedition.FloorsLabel,Row label in the details.,층,Floors
+Expedition.DaysLabel,Row label in the details.,소요,Takes
+Expedition.PotionsLabel,Row label in the details.,시작 포션,Starting potions
+Expedition.ClearedLabel,Row label in the details.,클리어,Clears
+Expedition.ClearedCount,{0} = times the dungeon was cleared.,{0}회,{0}
+Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}일을 넘기면 {1}의 보스와 강제로 싸운다,"Past day {0}, the boss of {1} must be fought"
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}
 Map.Battle,Label of a battle node.,전투,Battle
 Map.Boss,Label of the boss node.,보스,Boss
@@ -229,6 +254,9 @@ Settle.SurvivorState,"One survivor in Settle.Fatigue who came back in an afflict
 Settle.Days,{0} = days passed. {1} = the new day.,{0}일이 지나 {1}일차가 되었습니다,{0} days passed. It is now day {1}
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
+Settle.Victory,The run was won with this expedition: the final boss fell.,최종 보스를 쓰러뜨렸습니다. 런이 끝났습니다,The final boss has fallen. The run is over
+Settle.DeathLimit,The run was lost with this expedition: the deaths reached the limit.,전사자가 한도에 닿아 런이 끝났습니다,The death limit was reached. The run is over
+Settle.FinalStandLost,The run was lost with this expedition: the final stand was lost.,최종 결전에서 져 런이 끝났습니다,The final stand was lost. The run is over
 Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
 Save.Retry,Writes the unsaved change again.,다시 시도,Retry
 Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}

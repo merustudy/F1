@@ -128,6 +128,7 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
+                TestData.Pit(),
                 new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, tier1Floor: 1),
             };
             var data = new StaticData(parts);
@@ -284,6 +285,7 @@ namespace F1.Tests
             StaticDataParts parts = TestData.Parts();
             parts.Dungeons = new List<DungeonData>
             {
+                TestData.Pit(),
                 new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2),
             };
             return new StaticData(parts);

@@ -148,6 +148,9 @@ namespace F1.Data
                 .ToList();
         }
 
+        /// <summary>The dungeon that ends the run (Slice C stage 25), or null when the data has none.</summary>
+        public DungeonData FinalDungeon => Dungeons.Ordered.FirstOrDefault(dungeon => dungeon.IsFinal);
+
         public EnemyGroupData BossGroupOf(string dungeonId)
         {
             return EnemyGroups.Ordered.First(group => group.DungeonId == dungeonId && group.IsBoss);
@@ -249,6 +252,11 @@ namespace F1.Data
                     problems.Add($"{what}: needs exactly one boss group, found {bossGroups}.");
                 }
 
+                if (dungeon.UnlockDungeonId != null)
+                {
+                    Require(Dungeons, dungeon.UnlockDungeonId, $"{what} UnlockDungeonId", problems);
+                }
+
                 // Every floor that can have a battle node needs a group for it, and every floor that can have an elite node an elite group.
                 for (int floor = 1; floor <= dungeon.Floors; floor++)
                 {
@@ -262,6 +270,11 @@ namespace F1.Data
                         problems.Add($"{what}: an elite node can stand on floor {floor} but no elite group can appear there.");
                     }
                 }
+            }
+
+            if (Dungeons.Ordered.Count(dungeon => dungeon.IsFinal) > 1)
+            {
+                problems.Add($"{DungeonData.DefinitionName}: at most one dungeon is final.");
             }
 
             foreach (MercenaryData mercenary in Mercenaries.Ordered)

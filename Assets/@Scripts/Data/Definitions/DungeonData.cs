@@ -59,11 +59,37 @@ namespace F1.Data
             int tier2Floor = 0,
             int tier3Floor = 0,
             int shopMinFloor = 0,
-            int shopChancePercent = 0)
+            int shopChancePercent = 0,
+            bool isFinal = false,
+            string unlockDungeonId = null,
+            int unlockClears = 0,
+            int mapX = 0,
+            int mapY = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
             AffinityId = DataId.Require(affinityId, $"{DefinitionName} '{id}' AffinityId");
+            IsFinal = isFinal;
+            UnlockDungeonId = string.IsNullOrEmpty(unlockDungeonId) ? null : DataId.Require(unlockDungeonId, $"{DefinitionName} '{id}' UnlockDungeonId");
+            UnlockClears = unlockClears;
+
+            if (unlockClears < 0 || (UnlockDungeonId == null && unlockClears != 0))
+            {
+                throw new DataException($"{DefinitionName} '{id}': UnlockClears counts the clears of UnlockDungeonId and cannot be negative.");
+            }
+
+            if (UnlockDungeonId == Id)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a dungeon cannot unlock itself.");
+            }
+
+            if (mapX < 0 || mapX > 100 || mapY < 0 || mapY > 100)
+            {
+                throw new DataException($"{DefinitionName} '{id}': MapX and MapY are percents of the expedition map, 0..100.");
+            }
+
+            MapX = mapX;
+            MapY = mapY;
 
             if (floors < 1)
             {
@@ -225,6 +251,22 @@ namespace F1.Data
 
         [JsonProperty(Order = 23, Required = Required.Always)]
         public int ShopChancePercent { get; }
+
+        /// <summary>
+        /// The final dungeon (Slice C stage 25, Docs/Design/03_Dungeon_Structure.md §1): clearing it wins the run, and the forced final stand
+        /// after the last day fights its boss alone.
+        /// </summary>
+        public bool IsFinal { get; }
+
+        /// <summary>The dungeon whose clears open this one, or null when it is open from the start.</summary>
+        public string UnlockDungeonId { get; }
+
+        /// <summary>How many clears of <see cref="UnlockDungeonId"/> open this dungeon.</summary>
+        public int UnlockClears { get; }
+
+        /// <summary>Where the dungeon's marker stands on the expedition map (Round 71 E2): percents of the painting's width and height from its top-left.</summary>
+        public int MapX { get; }
+        public int MapY { get; }
 
         /// <summary>Whether a node of this floor may be an elite: never on the first floor or the camp floor.</summary>
         public bool EliteCanStandOn(int floor)

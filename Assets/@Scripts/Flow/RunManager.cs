@@ -153,6 +153,16 @@ namespace F1.Flow
             return RunRules.CanDepart(_data.Data, Run, dungeonId);
         }
 
+        public bool CanRest => RunRules.CanRest(_data.Data, Run);
+
+        /// <summary>Past the last day: the only expedition left is the final stand (Docs/Design/04_Lobby_100Day_Economy.md §2).</summary>
+        public bool IsFinalStandDue => RunRules.IsFinalStandDue(_data.Data, Run);
+
+        public bool IsUnlocked(string dungeonId)
+        {
+            return RunRules.IsUnlocked(Run, _data.Data.Dungeons.Get(dungeonId));
+        }
+
         /// <summary>
         /// Writes again the snapshot that could not be saved: the same bytes, nothing newer.
         /// Returns true when saving is no longer blocked.
