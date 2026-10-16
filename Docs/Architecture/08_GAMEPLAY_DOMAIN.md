@@ -178,6 +178,18 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - **끝**(`Settle` 끝의 `CloseTheRun`): 최종 던전을 클리어하면 `Victory`. 아니면 최종 결전이었으면 `FinalStandLost`, 로스터가 비었으면 `Wipeout`, 전사자가 `DeathLimit` 이상이면 `DeathLimit`로 `Defeat`. 기한을 넘긴 것 자체는 끝이 아니다. `SettlementReport`가 결과와 까닭을 담는다.
 - 최종 던전은 데이터가 하나까지 가진다(`StaticData.FinalDungeon`, 검증). 25단계의 행 `abyss`는 임시다(Roadmap "임시 조치": 28단계가 Abyss Lord와 호위로 바꾼다).
 
+## 경제·고용·시설 (Slice C 26단계)
+
+규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §3(시설)·§5(금)·§6(고용과 해고)·§9(정산)가 소유한다. 모두 `RunRules`다. 수치는 `BalanceData`(`GoldPerFloor`·`GoldClear`·`HirePrice`·`RecruitCount`·`RosterLimit`·`TreatmentPrice`·`TreatmentRelief`)에 있다.
+
+- **금**(`RunState.Gold`): 새 런은 0. 들어오는 곳은 `Settle`뿐이다(`GoldFor`): 도달한 층(`FloorsReached`: 끝난 노드의 층, 보스 노드는 마지막 지도 층으로 셈, 최종 결전은 0) × `GoldPerFloor` + 클리어면 `GoldClear`. `SettlementReport.GoldEarned`·`FloorsReached`·`GoldAfter`가 정산 화면에 간다. 클리어와 보스 처치는 같은 사건이라 `GoldBoss`는 두지 않았다. 나가는 곳은 고용과 치료뿐이다.
+- **후보**(`RunState.Recruits`, `RecruitState`: 이름 id와 직업): `DrawRecruits`가 새 런과 끝나지 않은 런의 `Settle` 끝에서 새로 뽑는다. 이름 풀은 `MercenaryData.csv`의 `Starting`이 거짓인 행(`StaticData.RecruitPool`. 시작 로스터는 `StartingMercenaries`)이고, 로스터·전사자·해고된 이름은 뽑지 않는다(풀이 모자라면 적게). 직업은 모든 직업 가운데 균등. 난수는 `Derive(런 시드, "recruit", 원정 순번)`의 `RngStream.Recruit`라 같은 런은 같은 후보다.
+- **고용**(`CanHire`·`Hire` → `HireCheck`): 런이 끝나지 않았고, 로스터가 `RosterLimit` 아래이고, 금이 `HirePrice` 이상이면 그 후보가 피로 0·고통 없음으로 로스터에 들고 후보에서 빠진다. 고용된 용병의 id는 이름 풀의 id이고 직업은 상태(`MercenaryState.JobId`)가 가진다 — 그래서 전투 Setup은 `BattleUnitSetup.JobId`를 구성원에게서 받고, 화면은 데이터의 직업이 아니라 그것으로 그림을 고른다.
+- **해고**(`CanDismiss`·`Dismiss`): 비용 없음. 파티에서 빼고(뒤가 전진) 로스터에서 지워 `RunState.Dismissed`에 적는다(다시 뽑히지 않음). 마지막 한 명은 해고할 수 없다.
+- **치료**(`CanTreat`·`Treat` → `TreatCheck`): 금이 `TreatmentPrice` 이상이고 피로가 0보다 크면 `TreatmentPrice`를 내고 피로가 `TreatmentRelief`만큼 내려간다(`FatigueRules.Add`, 0 아래로는 안 감). 날은 가지 않는다. 고통은 문턱 아래로 내려가면 쉬는 날과 같이 풀린다(`StateAfter`).
+- 고용·해고·치료는 기한을 넘긴 로비(최종 결전 상태)에서도 된다. 쉬기만 안 된다(04 §2).
+- `BeginExpedition`은 `ExpeditionCount`와 함께 던전별 횟수(`RunState.ExpeditionsByDungeon`)를 센다(결과 창의 "원정 N회 (광산 a, 심연 b)").
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
@@ -206,6 +218,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 ```text
 런 시드 -> 원정 시드 = Derive(런 시드, "expedition", 원정 순번)
+       -> 후보 난수 = Derive(런 시드, "recruit", 원정 순번) (26단계: 역마차의 후보)
 원정 시드 -> 맵 난수 = Derive(원정 시드, "map", 0)
           -> 전리품 난수 = Derive(원정 시드, "loot", 노드 id)
           -> 상점 난수 = Derive(원정 시드, "shop", 노드 id)
@@ -228,6 +241,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 ```bash
 dotnet run --project Tools/Sim -- battle     --group <id> --party a,b,c --policy none|balanced|safe --runs n --seed n
 dotnet run --project Tools/Sim -- expedition --dungeon <id> --party a,b,c --policy ... --runs n --seed n
+dotnet run --project Tools/Sim -- run        --policy ... --runs n --seed n --rest-above 60 --bench 2 --treat-above 100
 dotnet run --project Tools/Sim -- formations --dungeon <id> --party a,b,c --policy ... --runs n --seed n
 dotnet run --project Tools/Sim -- trace      --group <id> --party a,b,c --policy ... --seed n
 dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
@@ -243,6 +257,8 @@ dotnet run --project Tools/Sim -- items
   정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13,
   전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14, 격자의 자리(`ItemBoard.FindRoom`, 가방은 가방 칸이 가장 적은 용병에게. 밀어내기·가방 옮기기는 하지 않는다)와 가방의 수는 §15.
 
+- `run`(25·26단계)은 런 하나를 끝까지 돌린다. 로비 정책(시뮬 도구이지 규칙이 아니다): 로스터가 `PartySize + bench` 아래이고 금이 되면 첫 후보를 고용(해고는 하지 않음), 파티는 피로가 낮은 넷을 직업의 권장 열 차례로,
+  파티원의 피로가 `treat-above` 이상이면 금이 되는 동안 치료, 그래도 파티의 피로 평균이 `rest-above` 이상이면 쉬기, 던전은 최종 던전이 열렸으면 그것, 기한을 넘기면 최종 결전. 보고는 승리·패배의 까닭·일수·원정·쉬기·전사자·해금과 금(번 것, 고용·치료에 쓴 것, 남은 것, 끝의 로스터). `Docs/Design/08_Simulation_Report.md` §23·§24.
 - 게임과 같은 Generated JSON을 `StaticDataLoader`로 읽고, 같은 Domain 코드를 돌린다.
 - 정책(`SimPolicy`)은 플레이어 입력을 대신한다. 게임 규칙이 아니라 시뮬 도구의 일부이고, 게임과 같은 API(`TryUsePotion`, `TryRetreat`,
   `ExpeditionRules`의 명령)만 쓴다.
@@ -261,6 +277,7 @@ dotnet run --project Tools/Sim -- items
   단계(효과 크기, 전리품의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
   전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
   상점과 지역 코인(상점 노드의 배치, 물건과 값, 사기, 새로고침, 나가기, 전투의 코인, 데이터 검증)은 `ShopRulesTests`, 상점의 명령과 저장은 `ShopFlowTests`가 고정한다.
+  런의 끝(해금, 최종 결전, 승패)은 `RunEndTests`·`RunEndFlowTests`, 금·후보·고용·해고·치료(26단계)는 `LobbyEconomyTests`·`LobbyEconomyFlowTests`가 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
 ## Validation
@@ -275,6 +292,6 @@ dotnet run --project Tools/Sim -- items
 
 ## Deferred and Forbidden
 
-- Deferred: 유물, 성장과 전직, 로비의 경제(지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스, 런의 승패, 100일 전체 시뮬.
+- Deferred: 유물, 성장과 전직(27단계), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스(28단계).
 - Forbidden: Domain에서 Unity/Managers/Save DTO 참조, 결과 계산에 부동소수점이나 시드 밖 난수 사용, 표현 계층이 상태를 바꾸기,
   규칙 없이 추가한 효과 어휘, 시뮬 통계를 Test 통과 조건으로 쓰기.
