@@ -20,8 +20,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 600,
-          "Max": 1400
+          "Min": 402,
+          "Max": 938
         }
       ],
       "ShopWeight": 0,
@@ -52,8 +52,8 @@
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 1,
-          "Min": 350,
-          "Max": 800
+          "Min": 235,
+          "Max": 536
         }
       ],
       "ShopWeight": 0,
@@ -84,8 +84,8 @@
           "Kind": "Damage",
           "Target": "EnemyAll",
           "Reach": 0,
-          "Min": 250,
-          "Max": 500
+          "Min": 168,
+          "Max": 335
         }
       ],
       "ShopWeight": 0,
@@ -148,8 +148,8 @@
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 1,
-          "Min": 170,
-          "Max": 283
+          "Min": 114,
+          "Max": 190
         }
       ],
       "ShopWeight": 0,
@@ -180,8 +180,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 100,
-          "Max": 200
+          "Min": 67,
+          "Max": 134
         }
       ],
       "ShopWeight": 10,
@@ -244,8 +244,8 @@
           "Kind": "Damage",
           "Target": "EnemyAll",
           "Reach": 0,
-          "Min": 200,
-          "Max": 400
+          "Min": 134,
+          "Max": 268
         }
       ],
       "ShopWeight": 0,
@@ -276,8 +276,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 2,
-          "Min": 1200,
-          "Max": 2000
+          "Min": 804,
+          "Max": 1340
         }
       ],
       "ShopWeight": 0,
@@ -317,8 +317,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 311,
-          "Max": 933
+          "Min": 208,
+          "Max": 625
         }
       ],
       "ShopWeight": 0,
@@ -349,8 +349,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 3,
-          "Min": 120,
-          "Max": 360
+          "Min": 80,
+          "Max": 241
         }
       ],
       "ShopWeight": 10,
@@ -477,8 +477,8 @@
           "Kind": "Damage",
           "Target": "EnemyBack",
           "Reach": 2,
-          "Min": 150,
-          "Max": 250
+          "Min": 101,
+          "Max": 168
         }
       ],
       "ShopWeight": 10,
@@ -509,8 +509,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 200,
-          "Max": 400
+          "Min": 134,
+          "Max": 268
         }
       ],
       "ShopWeight": 0,
@@ -541,8 +541,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 123,
-          "Max": 368
+          "Min": 82,
+          "Max": 247
         },
         {
           "Kind": "Shield",
@@ -612,8 +612,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 552,
-          "Max": 1657
+          "Min": 370,
+          "Max": 1110
         }
       ],
       "ShopWeight": 0,
@@ -644,8 +644,8 @@
           "Kind": "Damage",
           "Target": "EnemyAll",
           "Reach": 0,
-          "Min": 240,
-          "Max": 480
+          "Min": 161,
+          "Max": 322
         }
       ],
       "ShopWeight": 0,
@@ -676,8 +676,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 67,
-          "Max": 200
+          "Min": 45,
+          "Max": 134
         }
       ],
       "ShopWeight": 0,
@@ -708,8 +708,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 124,
-          "Max": 249
+          "Min": 83,
+          "Max": 167
         }
       ],
       "ShopWeight": 0,
@@ -740,8 +740,8 @@
           "Kind": "Damage",
           "Target": "EnemyFront",
           "Reach": 2,
-          "Min": 160,
-          "Max": 267
+          "Min": 107,
+          "Max": 179
         }
       ],
       "ShopWeight": 10,

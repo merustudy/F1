@@ -111,7 +111,7 @@
     },
     {
       "Key": "FatigueOnHit",
-      "Value": 2
+      "Value": 1
     },
     {
       "Key": "FatigueOnKill",
@@ -227,7 +227,7 @@
     },
     {
       "Key": "StormStartMs",
-      "Value": 45000
+      "Value": 70000
     },
     {
       "Key": "StormTickMs",

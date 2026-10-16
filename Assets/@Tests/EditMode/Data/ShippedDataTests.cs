@@ -197,7 +197,7 @@ namespace F1.Tests
             Assert.AreEqual(10, gladius.CritChancePercent);
             CollectionAssert.AreEqual(new[] { (1, -1), (1, 1) }, gladius.Stars.Select(s => (s.X, s.Y)), "A star above and below its centre square.");
             Assert.AreEqual(400, gladius.StarDamage, "A Tier3 whetstone's +4, flat: a unique has no tier (round 70 follow-up 3).");
-            Assert.AreEqual((1200, 2000), (gladius.Effects[0].Min, gladius.Effects[0].Max), "12-20 in hundredths: the longsword 2-4 + a whetstone, x4, flat.");
+            Assert.AreEqual((804, 1340), (gladius.Effects[0].Min, gladius.Effects[0].Max), "8.04-13.4 in hundredths: 12-20 (the longsword 2-4 + a whetstone, x4, flat) scaled by 0.67 with every damage value (2026-10-17).");
             Assert.AreEqual("item/gladius-glow", gladius.GlowIcon, "The gold glow behind its icon, made from the icon.");
             Assert.IsNull(data.Items.Get("longsword").GlowIcon, "Only a unique item glows.");
 

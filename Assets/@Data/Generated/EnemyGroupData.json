@@ -42,8 +42,8 @@
     {
       "Id": "ambush",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 3,
-      "MaxFloor": 11,
+      "MinFloor": 5,
+      "MaxFloor": 22,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -56,8 +56,8 @@
     {
       "Id": "archer_line",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 9,
-      "MaxFloor": 14,
+      "MinFloor": 18,
+      "MaxFloor": 29,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -70,8 +70,8 @@
     {
       "Id": "hexer_circle",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 9,
-      "MaxFloor": 14,
+      "MinFloor": 18,
+      "MaxFloor": 29,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -97,8 +97,8 @@
     {
       "Id": "raid_party",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 7,
-      "MaxFloor": 14,
+      "MinFloor": 13,
+      "MaxFloor": 29,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -112,7 +112,7 @@
       "Id": "raider_patrol",
       "DungeonId": "abandoned_mine",
       "MinFloor": 1,
-      "MaxFloor": 6,
+      "MaxFloor": 11,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -124,8 +124,8 @@
     {
       "Id": "raider_warband",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 3,
-      "MaxFloor": 11,
+      "MinFloor": 5,
+      "MaxFloor": 22,
       "IsBoss": false,
       "Enemies": [
         "goblin_raider",
@@ -139,7 +139,7 @@
       "Id": "rat_pack",
       "DungeonId": "abandoned_mine",
       "MinFloor": 1,
-      "MaxFloor": 9,
+      "MaxFloor": 18,
       "IsBoss": false,
       "Enemies": [
         "cave_rat",
@@ -152,8 +152,8 @@
     {
       "Id": "veteran_guard",
       "DungeonId": "abandoned_mine",
-      "MinFloor": 6,
-      "MaxFloor": 14,
+      "MinFloor": 11,
+      "MaxFloor": 29,
       "IsBoss": false,
       "Enemies": [
         "goblin_veteran",
