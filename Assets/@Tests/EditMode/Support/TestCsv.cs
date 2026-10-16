@@ -68,6 +68,9 @@ namespace F1.Tests
             "fearful,공포,Fearful,Affliction,25,0,0,느리다,Slower\n" +
             "focused,집중,Focused,Virtue,-20,0,0,빠르다,Faster\n";
 
+        /// <summary>No recipe in the minimal set (stage 23): a test that needs one replaces this file.</summary>
+        public const string Recipes = "Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier\n";
+
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()
         {
@@ -84,6 +87,7 @@ namespace F1.Tests
                 { StaticDataFiles.Dungeon.SourceFileName, Dungeons },
                 { StaticDataFiles.Mercenary.SourceFileName, Mercenaries },
                 { StaticDataFiles.FatigueState.SourceFileName, FatigueStates },
+                { StaticDataFiles.Recipe.SourceFileName, Recipes },
             };
         }
 

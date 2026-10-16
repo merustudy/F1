@@ -1,0 +1,13 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "gladius",
+      "Result": "gladius",
+      "BaseItem": "longsword",
+      "BaseTier": "Tier3",
+      "Catalyst": "whetstone",
+      "CatalystTier": "Tier3"
+    }
+  ]
+}

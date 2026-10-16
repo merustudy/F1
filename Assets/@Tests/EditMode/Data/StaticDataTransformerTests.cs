@@ -20,6 +20,16 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_RefusesARecipe_WhoseResultIsNotUnique_OrWhoseCatalystHasNoStars()
+        {
+            // Stage 23: RecipeData.csv maps (Id, Result, BaseItem, BaseTier, Catalyst, CatalystTier; no Name) and StaticData checks it.
+            DataTransformException exception = TransformFails(StaticDataFiles.Recipe, "Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier\nr,sword,mace,Tier3,claw,Tier3\n");
+            string errors = string.Join("\n", exception.Errors);
+            StringAssert.Contains("not a unique item", errors);
+            StringAssert.Contains("has no stars", errors);
+        }
+
+        [Test]
         public void Transform_WhenSourcesValid_BuildsDataAndOneFilePerDefinition()
         {
             TransformResult result = Transform();

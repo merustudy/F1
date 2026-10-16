@@ -342,6 +342,8 @@ namespace F1.Sim
             /// <summary>Items merged a tier up, items mended at camps, and the items on the boards at the end by tier.</summary>
             public int Merges;
             public int Mends;
+            public int Forges;
+            public int UniqueAtEnd;
             public readonly int[] TiersAtEnd = new int[4];
             public readonly BattleStats All = new BattleStats();
             public readonly SortedDictionary<int, BattleStats> ByFloor = new SortedDictionary<int, BattleStats>();
@@ -363,6 +365,7 @@ namespace F1.Sim
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}");
+            Console.WriteLine($"  per expedition: forges at camps {BattleStats.Ratio(stats.Forges, runs)}, expeditions ending with a unique item {BattleStats.Percent(stats.UniqueAtEnd, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
                 + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, 1-star {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, 2-star {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, 3-star {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             Console.WriteLine($"  per expedition: shops {BattleStats.Ratio(stats.Shops, runs)}, bought {BattleStats.Ratio(stats.Bought, runs)}, refreshes {BattleStats.Ratio(stats.Refreshes, runs)}; "
@@ -444,7 +447,8 @@ namespace F1.Sim
 
                     if (state.Phase == ExpeditionPhase.AtCamp)
                     {
-                        stats.Mends += policy.ChooseAtCamp(data, state) ? 1 : 0;
+                        bool didAtCamp = policy.ChooseAtCamp(data, state);
+                        if (policy.LastCampForged) stats.Forges++; else if (didAtCamp) stats.Mends++;
                         continue;
                     }
 
@@ -499,6 +503,7 @@ namespace F1.Sim
 
                 stats.CoinsLeft += state.Coins;
 
+                stats.UniqueAtEnd += ForgeRules.PartyHasUnique(state) ? 1 : 0;
                 switch (state.Result)
                 {
                     case ExpeditionResult.Cleared: stats.Cleared++; break;

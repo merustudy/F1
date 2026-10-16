@@ -166,7 +166,7 @@ namespace F1.Tests
             Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "whetstone")), "No enemy carries it: shops only.");
 
             CollectionAssert.AreEquivalent(
-                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul" },
+                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul", "gladius" },
                 data.Items.Ordered.Where(i => i.Melee).Select(i => i.Id));
 
             ItemData axe = data.Items.Get("greataxe");
@@ -179,6 +179,32 @@ namespace F1.Tests
             }
 
             Assert.AreEqual("쥐 발톱", data.Items.Get("rat_bite").Name.Resolve("ko-KR"));
+        }
+
+        [Test]
+        public void TheGladius_IsTheMinesUnique_ForgedFromTheLongswordAndAWhetstone()
+        {
+            // Stage 23 (round 70): the first unique item and its recipe.
+            StaticData data = LoadShipped();
+            ItemData gladius = data.Items.Get("gladius");
+            Assert.IsTrue(gladius.Unique);
+            Assert.AreEqual(0, gladius.ShopWeight, "Never in a shop.");
+            Assert.AreEqual(0, gladius.Price);
+            Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "gladius")), "No enemy carries it: forged only.");
+            Assert.AreEqual((3, 1), (gladius.Width, gladius.Height), "The longsword's place.");
+            Assert.IsTrue(gladius.Melee);
+            Assert.AreEqual(2, gladius.Effects[0].Reach, "Hits one enemy more than the longsword.");
+            Assert.AreEqual(10, gladius.CritChancePercent);
+            CollectionAssert.AreEqual(new[] { (1, -1), (1, 1) }, gladius.Stars.Select(s => (s.X, s.Y)), "A star above and below its centre square.");
+            Assert.AreEqual(400, gladius.StarDamage, "A Tier3 whetstone's +4, flat: a unique has no tier (round 70 follow-up 3).");
+            Assert.AreEqual((1200, 2000), (gladius.Effects[0].Min, gladius.Effects[0].Max), "12-20 in hundredths: the longsword 2-4 + a whetstone, x4, flat.");
+            Assert.AreEqual("item/gladius-glow", gladius.GlowIcon, "The gold glow behind its icon, made from the icon.");
+            Assert.IsNull(data.Items.Get("longsword").GlowIcon, "Only a unique item glows.");
+
+            RecipeData recipe = data.Recipes.Get("gladius");
+            Assert.AreEqual(("gladius", "longsword", ItemTier.Tier3, "whetstone", ItemTier.Tier3), (recipe.Result, recipe.BaseItem, recipe.BaseTier, recipe.Catalyst, recipe.CatalystTier));
+            Assert.AreEqual(1, data.Recipes.Count);
+            Assert.AreEqual(1, data.Items.Ordered.Count(i => i.Unique));
         }
 
         [Test]

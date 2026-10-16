@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
@@ -320,6 +321,15 @@ namespace F1.Flow
 
             Require(alive >= 1, "Nobody on the expedition is alive.");
             state.Inventory = ToInventory(record.Inventory, data, balance);
+            int uniques = state.Inventory.Items.Count(i => i.Item.Item.Unique);
+            foreach (ExpeditionMember member in state.Members)
+            {
+                uniques += member.Board.Items.Count(i => i.Item.Item.Unique);
+            }
+
+            Require(uniques <= 1, "A party holds one unique item at most (stage 23).");
+            Require(state.Inventory.Items.All(i => !i.Item.Item.Unique || i.Item.Tier == ItemTier.Common)
+                && state.Members.All(m => m.Board.Items.All(i => !i.Item.Item.Unique || i.Item.Tier == ItemTier.Common)), "A unique item has no tier (stage 23).");
 
             // The living stand one per row from the front, with no empty row between them.
             string formationProblem = Formation.Problem(ExpeditionRules.LivingRows(state, out _));

@@ -111,7 +111,11 @@ namespace F1.Tests
             int reach = DefaultReach,
             int width = 1,
             int height = 1,
-            int price = 0)
+            int price = 0,
+            bool melee = false,
+            bool unique = false,
+            IReadOnlyList<StarSquare> stars = null,
+            int starDamage = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
@@ -119,7 +123,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price);
+            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -274,6 +278,8 @@ namespace F1.Tests
                     Item("bow", 3000, EffectKind.Damage, TargetMode.EnemyBack, rows: RowSpan.Back(2), shopWeight: 5, width: 2, price: 10),
                     Item("pike", 3000, EffectKind.Damage, TargetMode.EnemyFront, 120, width: 3, height: 2),
                     Item("ballista", 5000, EffectKind.Damage, TargetMode.EnemyAll, 150, width: 3, height: 3),
+                    // A unique item (stage 23): never sold or dropped (no weight, no price), a melee weapon with a star above and below its first square.
+                    Item("gladius_t", 2000, EffectKind.Damage, TargetMode.EnemyFront, 30, width: 2, melee: true, unique: true, stars: new[] { new StarSquare(0, -1), new StarSquare(0, 1) }, starDamage: 100),
                 },
                 Bags = new List<BagData>
                 {
@@ -312,6 +318,7 @@ namespace F1.Tests
                     new MercenaryData("dan", Text("dan"), "tank"),
                 },
                 FatigueStates = FatigueStates(),
+                Recipes = new List<RecipeData>(),
             };
         }
 

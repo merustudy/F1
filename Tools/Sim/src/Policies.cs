@@ -194,12 +194,29 @@ namespace F1.Sim
         /// mends (a tier up) the first item below Tier3 that works where its owner stands, from the front member back. Returns
         /// true for mending.
         /// </summary>
+        /// <summary>Whether the last camp the policy decided at was spent on the forge (stage 23).</summary>
+        public bool LastCampForged { get; private set; }
+
         public bool ChooseAtCamp(StaticData data, ExpeditionState state)
         {
+            LastCampForged = false;
             bool hurt = false;
             foreach (ExpeditionMember member in state.Members)
             {
                 hurt |= member.Alive && (member.Hp * 100 < member.MaxHp * RestBelowHpPercent || member.Fatigue >= data.Balance.FatigueBreakdown);
+            }
+
+            // The forge first (stage 23): a recipe ready on a board makes the unique item, at the price of the rest and the mend.
+            if (Active && !hurt)
+            {
+                List<ForgeOption> forges = ForgeRules.Options(data, state);
+                if (forges.Count > 0)
+                {
+                    ForgeOption forge = forges[0];
+                    ForgeRules.ForgeAtCamp(data, state, forge.MemberIndex, forge.BaseItem.At.X, forge.BaseItem.At.Y);
+                    LastCampForged = true;
+                    return true;
+                }
             }
 
             if (Active && !hurt)
@@ -288,6 +305,39 @@ namespace F1.Sim
             }
 
             IReadOnlyList<ItemOffer> stock = state.Shop.Stock;
+
+            // A recipe's catalyst first (stage 23): onto a member whose board holds the recipe's base without a catalyst lit on it yet, where
+            // its stars light the most (MemberWithStarRoomFor); a player after the unique buys the whetstone before anything else.
+            for (int slot = 0; slot < stock.Count; slot++)
+            {
+                ItemOffer offer = stock[slot];
+                if (offer == null || offer.Kind != OfferKind.Item || !ExpeditionRules.CanAfford(data, state, slot))
+                {
+                    continue;
+                }
+
+                foreach (RecipeData recipe in data.Recipes.Ordered)
+                {
+                    if (offer.Id != recipe.Catalyst)
+                    {
+                        continue;
+                    }
+
+                    ItemData catalyst = data.Items.Get(offer.Id);
+                    int who = MemberWithStarRoomFor(state, catalyst, out Placement at);
+                    if (who < 0 || !state.Members[who].Board.Items.Exists(i => i.Item.Item.Id == recipe.BaseItem && !StarRules.Sources(state.Members[who].Board, i).Exists(s => s.Item.Item.Id == recipe.Catalyst)))
+                    {
+                        continue;
+                    }
+
+                    if (ExpeditionRules.CanBuyToBoard(data, state, slot, who, at))
+                    {
+                        ExpeditionRules.BuyToBoard(data, state, slot, who, at);
+                        return true;
+                    }
+                }
+            }
+
             for (int slot = 0; slot < stock.Count; slot++)
             {
                 if (stock[slot] != null && stock[slot].Kind == OfferKind.Potion && potionsHeld < 2 && ExpeditionRules.CanBuyPotion(data, state, slot))

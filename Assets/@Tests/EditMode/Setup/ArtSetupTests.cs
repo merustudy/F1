@@ -55,6 +55,7 @@ namespace F1.Tests
             }
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("background/dungeon/", StringComparison.Ordinal)), "The backgrounds of the dungeons.");
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("item/", StringComparison.Ordinal)), "The icons of the items.");
+            Assert.IsTrue(entries.Any(e => e.Address == "item/gladius-glow"), "The glow of the unique item (stage 23), with its icon.");
             foreach (AddressEntry entry in entries)
             {
                 Assert.AreEqual(ArtSetup.ArtGroup, entry.Group, entry.Address);

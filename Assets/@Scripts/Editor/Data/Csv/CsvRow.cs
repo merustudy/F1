@@ -221,6 +221,12 @@ namespace F1.Editor.Data
             return IsEmpty(header) ? defaultValue : Int(header, min, max);
         }
 
+        /// <summary>A column a file may leave out (an optional header): the default without the column or with an empty value.</summary>
+        public bool OptionalBool(string header, bool defaultValue)
+        {
+            return !_table.TryGetColumn(header, out int _) || IsEmpty(header) ? defaultValue : Bool(header);
+        }
+
         public bool Bool(string header)
         {
             string value = Text(header);

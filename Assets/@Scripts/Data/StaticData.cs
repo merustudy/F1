@@ -18,6 +18,7 @@ namespace F1.Data
         public IEnumerable<DungeonData> Dungeons;
         public IEnumerable<MercenaryData> Mercenaries;
         public IEnumerable<FatigueStateData> FatigueStates;
+        public IEnumerable<RecipeData> Recipes;
     }
 
     /// <summary>
@@ -92,6 +93,7 @@ namespace F1.Data
             Dungeons = Index(parts.Dungeons, x => x.Id, DungeonData.DefinitionName, problems);
             Mercenaries = Index(parts.Mercenaries, x => x.Id, MercenaryData.DefinitionName, problems);
             FatigueStates = Index(parts.FatigueStates, x => x.Id, FatigueStateData.DefinitionName, problems);
+            Recipes = Index(parts.Recipes ?? new List<RecipeData>(), x => x.Id, RecipeData.DefinitionName, problems);
 
             if (Balance != null)
             {
@@ -119,6 +121,9 @@ namespace F1.Data
         public DataTable<AffinityData> Affinities { get; }
         public DataTable<DungeonData> Dungeons { get; }
         public DataTable<MercenaryData> Mercenaries { get; }
+
+        /// <summary>The forge recipes (Slice B stage 23); empty until a dungeon has one.</summary>
+        public DataTable<RecipeData> Recipes { get; }
         public DataTable<FatigueStateData> FatigueStates { get; }
 
         /// <summary>The states of a kind, in id order: what the breakdown at the fatigue threshold picks from.</summary>
@@ -169,6 +174,23 @@ namespace F1.Data
                     {
                         problems.Add($"{what}: the weapon '{weapon.Id}' ({weapon.Width}x{weapon.Height}) does not fit the start bag '{StartBag.Id}' ({StartBag.Width}x{StartBag.Height}).");
                     }
+                }
+            }
+
+            foreach (RecipeData recipe in Recipes.Ordered)
+            {
+                string what = $"{RecipeData.DefinitionName} '{recipe.Id}'";
+                Require(Items, recipe.Result, what + " Result", problems);
+                Require(Items, recipe.BaseItem, what + " BaseItem", problems);
+                Require(Items, recipe.Catalyst, what + " Catalyst", problems);
+                if (Items.Contains(recipe.Result) && !Items.Get(recipe.Result).Unique)
+                {
+                    problems.Add($"{what}: the result '{recipe.Result}' is not a unique item.");
+                }
+
+                if (Items.Contains(recipe.Catalyst) && Items.Get(recipe.Catalyst).Stars.Count == 0)
+                {
+                    problems.Add($"{what}: the catalyst '{recipe.Catalyst}' has no stars to be lit on the base.");
                 }
             }
 

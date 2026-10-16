@@ -342,6 +342,33 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>The forges the boards allow at the camp (Slice B stage 23), in member and reading order; empty elsewhere.</summary>
+        public IReadOnlyList<ForgeOption> ForgeOptions()
+        {
+            return Phase == GamePhase.Camp ? ForgeRules.Options(_data.Data, Expedition) : new List<ForgeOption>();
+        }
+
+        /// <summary>Whether the item covering a square of a member's board can be forged at the camp (a recipe's base with its catalyst lit on it).</summary>
+        public bool CanForgeAtCamp(int memberIndex, int x, int y)
+        {
+            return Phase == GamePhase.Camp && ForgeRules.CanForgeAtCamp(_data.Data, Expedition, memberIndex, x, y);
+        }
+
+        /// <summary>The forge the item covering a square allows, or null.</summary>
+        public ForgeOption ForgeOptionAt(int memberIndex, int x, int y)
+        {
+            return Phase == GamePhase.Camp ? ForgeRules.OptionAt(_data.Data, Expedition, memberIndex, x, y) : null;
+        }
+
+        /// <summary>The camp's forge: the catalyst is used up, the base becomes the unique item in its place, and the party goes on without resting.</summary>
+        public void ForgeAtCamp(int memberIndex, int x, int y)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Camp);
+            ForgeRules.ForgeAtCamp(_data.Data, Expedition, memberIndex, x, y);
+            Commit();
+        }
+
         // ---- Battle --------------------------------------------------------------------------
 
         /// <summary>

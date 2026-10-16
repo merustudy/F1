@@ -31,6 +31,16 @@ namespace F1.Tests
         }
 
         [Test]
+        public void AUniquesGlow_IsItsPictureAtTheIconsScale_SoTheTwoCoincide()
+        {
+            // Stage 23: the gladius (328x92) in a 3x1 piece's art box (144x40) is shown at 40/92; its glow (356x120: 14 px round it) at the same.
+            Vector2 size = GridGeometry.GlowSize(new Vector2(144f, 40f), new Vector2(328f, 92f), new Vector2(356f, 120f));
+            Assert.AreEqual(356f * 40f / 92f, size.x, 0.001f);
+            Assert.AreEqual(120f * 40f / 92f, size.y, 0.001f);
+            Assert.AreEqual(2f * 14f * 40f / 92f, size.x - 328f * 40f / 92f, 0.001f, "The margin round the icon, at the icon's scale.");
+        }
+
+        [Test]
         public void ASquaresCentre_IsItsIndexAndAHalf_AndTheLineBetweenTwo_IsWhole()
         {
             var go = new GameObject("Squares", typeof(RectTransform));

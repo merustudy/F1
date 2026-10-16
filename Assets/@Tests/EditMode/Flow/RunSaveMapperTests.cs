@@ -543,6 +543,34 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Read_RefusesAPartyHoldingTwoUniqueItems()
+        {
+            // Stage 23: one unique per party, on the boards and in the inventory together.
+            RunSaveData save = ValidSave(out StaticData data);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            ItemData unique = data.Items.Get("gladius_t");
+            TestBoards.Put(expedition.Members[0], new EquippedItem(unique), 0, 1);
+            RunSaveData one = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.DoesNotThrow(() => RunSaveMapper.Read(one, data, out RunState _, out ExpeditionState _), "One unique reads.");
+
+            expedition.Inventory.Add(new EquippedItem(unique), new Placement(0, 0));
+            RunSaveData two = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(two, data, out RunState _, out ExpeditionState _));
+        }
+
+        [Test]
+        public void Read_RefusesAUniqueItemAtATier()
+        {
+            // Round 70 follow-up 3: a unique has no tier; the forge makes it at Common and nothing raises it.
+            RunSaveData save = ValidSave(out StaticData data);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            TestBoards.Put(expedition.Members[0], new EquippedItem(data.Items.Get("gladius_t"), tier: ItemTier.Tier3), 0, 1);
+            RunSaveData tiered = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            RunSaveException refused = Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(tiered, data, out RunState _, out ExpeditionState _));
+            StringAssert.Contains("no tier", refused.Message);
+        }
+
+        [Test]
         public void Migrate_From11_RenamesTheTiers_OnItemsAndOffers()
         {
             // Version 7 named the tiers Common, Bronze, Silver, Gold; version 12 (round 69) names the same four Common, Tier1, Tier2, Tier3.

@@ -30,6 +30,7 @@ namespace F1.Data
                 Dungeons = Read<DungeonData>(StaticDataFiles.Dungeon, readJson),
                 Mercenaries = Read<MercenaryData>(StaticDataFiles.Mercenary, readJson),
                 FatigueStates = Read<FatigueStateData>(StaticDataFiles.FatigueState, readJson),
+                Recipes = Read<RecipeData>(StaticDataFiles.Recipe, readJson),
             });
         }
 
@@ -48,6 +49,7 @@ namespace F1.Data
                 { StaticDataFiles.Affinity.GeneratedFileName, StaticDataJson.Serialize(new List<AffinityData>(data.Affinities.Ordered)) },
                 { StaticDataFiles.Dungeon.GeneratedFileName, StaticDataJson.Serialize(new List<DungeonData>(data.Dungeons.Ordered)) },
                 { StaticDataFiles.Mercenary.GeneratedFileName, StaticDataJson.Serialize(new List<MercenaryData>(data.Mercenaries.Ordered)) },
+                { StaticDataFiles.Recipe.GeneratedFileName, StaticDataJson.Serialize(new List<RecipeData>(data.Recipes.Ordered)) },
                 { StaticDataFiles.FatigueState.GeneratedFileName, StaticDataJson.Serialize(new List<FatigueStateData>(data.FatigueStates.Ordered)) },
             };
         }

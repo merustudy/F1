@@ -30,7 +30,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "crude_bow",
@@ -61,7 +62,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "dagger",
@@ -92,7 +94,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 10
+      "CritChancePercent": 10,
+      "Unique": false
     },
     {
       "Id": "ember_flask",
@@ -123,7 +126,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "fire_staff",
@@ -154,7 +158,49 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
+    },
+    {
+      "Id": "gladius",
+      "Name": {
+        "en-US": "Gladius",
+        "ko-KR": "글라디우스"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 3000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "Min": 1200,
+          "Max": 2000
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/gladius",
+      "Price": 0,
+      "Melee": true,
+      "Stars": [
+        {
+          "X": 1,
+          "Y": -1
+        },
+        {
+          "X": 1,
+          "Y": 1
+        }
+      ],
+      "StarDamage": 400,
+      "CritChancePercent": 10,
+      "Unique": true
     },
     {
       "Id": "greataxe",
@@ -185,7 +231,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "halberd",
@@ -216,7 +263,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "healing_staff",
@@ -247,7 +295,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "herb_pouch",
@@ -278,7 +327,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "lantern_staff",
@@ -309,7 +359,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "longbow",
@@ -340,7 +391,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "longsword",
@@ -371,7 +423,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "mace",
@@ -409,7 +462,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "mending_chant",
@@ -440,7 +494,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "overseer_maul",
@@ -471,7 +526,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "overseer_roar",
@@ -502,7 +558,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "rat_bite",
@@ -533,7 +590,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "rusty_blade",
@@ -564,7 +622,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "spear",
@@ -595,7 +654,8 @@
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 5
+      "CritChancePercent": 5,
+      "Unique": false
     },
     {
       "Id": "ward_charm",
@@ -626,7 +686,8 @@
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     },
     {
       "Id": "whetstone",
@@ -643,9 +704,9 @@
         "Reach": 4
       },
       "Effects": [],
-      "ShopWeight": 8,
+      "ShopWeight": 16,
       "Icon": "item/whetstone",
-      "Price": 8,
+      "Price": 1,
       "Melee": false,
       "Stars": [
         {
@@ -658,7 +719,8 @@
         }
       ],
       "StarDamage": 100,
-      "CritChancePercent": 0
+      "CritChancePercent": 0,
+      "Unique": false
     }
   ]
 }

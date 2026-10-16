@@ -117,7 +117,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"));
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -147,7 +147,8 @@ namespace F1.Editor.Data
                     row.Bool("Melee"),
                     row.StarSquares("Stars"),
                     row.IsEmpty("StarDamage") ? 0 : row.Centi("StarDamage"),
-                    row.OptionalInt("CritChancePercent", 0));
+                    row.OptionalInt("CritChancePercent", 0),
+                    row.OptionalBool("Unique", false));
             });
         }
 
@@ -174,6 +175,22 @@ namespace F1.Editor.Data
             }
 
             return new ItemEffect(kind, row.Enum<TargetMode>(prefix + "Target"), row.OptionalInt(prefix + "Reach", 0), min, max);
+        }
+    }
+
+    /// <summary>RecipeData.csv (Slice B stage 23): the forge recipes. Tiers are ItemTier names (Common, Tier1, Tier2, Tier3).</summary>
+    internal static class RecipeMapper
+    {
+        public static List<RecipeData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[] { RowMapping.Id, "Result", "BaseItem", "BaseTier", "Catalyst", "CatalystTier" });
+            return RowMapping.MapRows(table, errors, row => new RecipeData(
+                row.Id(RowMapping.Id),
+                row.Id("Result"),
+                row.Id("BaseItem"),
+                row.Enum<ItemTier>("BaseTier"),
+                row.Id("Catalyst"),
+                row.Enum<ItemTier>("CatalystTier")));
         }
     }
 

@@ -59,5 +59,15 @@ namespace F1.Data
             int slash = figure.IndexOf('/');
             return "pose" + (slash < 0 ? "/" + figure : figure.Substring(slash)) + "-" + pose;
         }
+
+        /// <summary>
+        /// The address of the gold glow behind a unique item's icon (stage 23): the icon's address with "-glow" ("item/gladius" is
+        /// "item/gladius-glow", the file gladius_glow.png). The art pipeline makes the glow from the icon (tools/glow_items.py), so the data names only the icon.
+        /// Null for an item without an icon.
+        /// </summary>
+        public static string GlowOf(string icon)
+        {
+            return icon == null ? null : icon + "-glow";
+        }
     }
 }

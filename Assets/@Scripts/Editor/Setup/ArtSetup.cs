@@ -163,6 +163,7 @@ namespace F1.Editor.Setup
                 .Concat(data.Enemies.Ordered.Select(e => (e.HitPose, Pose)))
                 .Concat(data.Dungeons.Ordered.Select(d => (d.Background, Scene)))
                 .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)))
+                .Concat(data.Items.Ordered.Select(i => (i.GlowIcon, Icon)))
                 .Concat(data.Potions.Ordered.Select(p => (p.Icon, Icon)));
 
             var files = new List<ArtFile>();
@@ -268,7 +269,7 @@ namespace F1.Editor.Setup
                     string path = file.Replace('\\', '/');
                     if (!listed.Contains(path))
                     {
-                        problems.Add($"{path}: nothing names this image: no Figure (or its poses), Background or Icon (of an item or a potion) in the static data and no piece of UiArt.");
+                        problems.Add($"{path}: nothing names this image: no Figure (or its poses), Background or Icon (of an item or a potion, or the glow of a unique item) in the static data and no piece of UiArt.");
                     }
                 }
             }

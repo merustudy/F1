@@ -143,7 +143,8 @@ namespace F1.Data
             bool melee = false,
             IReadOnlyList<StarSquare> stars = null,
             int starDamage = 0,
-            int critChancePercent = 0)
+            int critChancePercent = 0,
+            bool unique = false)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -212,6 +213,12 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': only a weapon that deals damage can have a CritChancePercent.");
             }
 
+            // A unique item (stage 23) is forged at a camp (RecipeData), never bought or dropped.
+            if (unique && (shopWeight != 0 || price != 0))
+            {
+                throw new DataException($"{DefinitionName} '{id}': a unique item has no ShopWeight and no Price.");
+            }
+
             Category = category;
             Width = width;
             Height = height;
@@ -224,6 +231,7 @@ namespace F1.Data
             Stars = stars;
             StarDamage = starDamage;
             CritChancePercent = critChancePercent;
+            Unique = unique;
         }
 
         static bool HasDamage(IReadOnlyList<ItemEffect> effects)
@@ -303,6 +311,13 @@ namespace F1.Data
         public string Icon { get; }
 
         /// <summary>
+        /// The address of the gold glow behind a unique item's icon (stage 23; <see cref="ArtAddress.GlowOf"/>), made from the icon by
+        /// the art pipeline. Null for an item that is not unique or has no icon.
+        /// </summary>
+        [JsonIgnore]
+        public string GlowIcon => Unique ? ArtAddress.GlowOf(Icon) : null;
+
+        /// <summary>
         /// What a shop sells it for at Common, in region coins (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5); a tier
         /// multiplies it as it does the effects. 0 means the shop never stocks it.
         /// </summary>
@@ -324,6 +339,10 @@ namespace F1.Data
         /// <summary>The chance in percent that the weapon's damage is a critical hit, rolled for each unit it hits (Slice B stage 22). 0 for any other item.</summary>
         [JsonProperty(Order = 15, Required = Required.Always)]
         public int CritChancePercent { get; }
+
+        /// <summary>A unique item (Slice B stage 23): made at a camp's forge by a recipe, one per party, never in a shop or a drop.</summary>
+        [JsonProperty(Order = 16, Required = Required.Always)]
+        public bool Unique { get; }
 
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]

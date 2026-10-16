@@ -1243,11 +1243,14 @@ namespace F1.Gameplay
             return state.Members[memberIndex].Board.ItemAt(x, y);
         }
 
-        /// <summary>Whether the item covering a square of a member's board can go a tier up at the camp (the camp's upkeep): any item below Tier3, a base weapon too.</summary>
+        /// <summary>
+        /// Whether the item covering a square of a member's board can go a tier up at the camp (the camp's upkeep): any item below Tier3,
+        /// a base weapon too, but never a unique item, which has no tier (stage 23).
+        /// </summary>
         public static bool CanUpgradeAtCamp(ExpeditionState state, int memberIndex, int x, int y)
         {
             BoardItem item = LivingItemAt(state, memberIndex, x, y);
-            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Item.Tier < ItemTier.Tier3;
+            return state.Phase == ExpeditionPhase.AtCamp && item != null && item.Item.Tier < ItemTier.Tier3 && !item.Item.Item.Unique;
         }
 
         /// <summary>The camp's upkeep: the item covering a square goes a tier up (a base weapon stays one). Then the party goes on to the next floor.</summary>
