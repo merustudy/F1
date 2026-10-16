@@ -69,6 +69,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 19a13001e06904735970f98c25fbdd23
+    m_Address: item/gladius
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1bfeb92e34e4d41db860ff13decf1d50
     m_Address: item/fire-staff
     m_ReadOnly: 0
@@ -119,6 +125,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3bc6fd8c78f7d4af3835e3e32a1e9144
     m_Address: potion/healing-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f429570258e349a28c6a31da4d2459c
+    m_Address: item/gladius-glow
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
