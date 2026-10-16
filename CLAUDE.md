@@ -213,7 +213,8 @@ ExpeditionManager -> DataManager, RunManager
 
 ## 9. Current Vertical Slice
 
-**Slice A: 핵심 루프 한 바퀴 + 저장/이어하기**는 2026-10-06에 완료했다. 지금은 **Slice B: 전투 시스템 완성**이다(2026-10-06 범위 승인, Roadmap 12~16단계. 17단계 상점 노드와 지역 코인, 18단계 몬스터의 전리품은 2026-10-07에, 19단계 격자 보드는 2026-10-08에, 20단계 ★ 닿음과 숫돌과 21단계 상인은 2026-10-10에, 22단계 피해의 범위와 수의 크기는 2026-10-11에, 23단계 담금질과 첫 유니크는 2026-10-16에 더했다).
+**Slice A: 핵심 루프 한 바퀴 + 저장/이어하기**는 2026-10-06에, **Slice B: 전투 시스템 완성**은 2026-10-16에 완료했다(Roadmap 12~23단계. Acceptance 2(원정 하나 15~30분)는 미달로 기록하고 닫았다. 직접 플레이·사후 검토는 Slice C의 입력).
+지금은 **Slice C: 로비 구조 생성과 런 한 바퀴**의 범위를 정하는 24단계다(2026-10-16 시작, 사용자 지정 주제. 범위는 승인 뒤 Architecture/09 "Slice C"가 소유한다).
 범위, 구현 순서, Acceptance, Deferred는 [Docs/Architecture/09_VERTICAL_SLICE.md](Docs/Architecture/09_VERTICAL_SLICE.md)가 소유한다.
 
 - 그 문서의 Deferred 항목은 현재 범위가 아니다. 코드, 데이터, Folder를 미리 만들지 않는다.
