@@ -127,7 +127,8 @@ namespace F1.Tests
             bool melee = false,
             bool unique = false,
             IReadOnlyList<StarSquare> stars = null,
-            int starDamage = 0)
+            int starDamage = 0,
+            int dropWeight = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
@@ -135,7 +136,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique);
+            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>

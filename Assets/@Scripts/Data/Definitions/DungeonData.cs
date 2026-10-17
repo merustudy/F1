@@ -64,9 +64,16 @@ namespace F1.Data
             string unlockDungeonId = null,
             int unlockClears = 0,
             int mapX = 0,
-            int mapY = 0)
+            int mapY = 0,
+            int generalDropChancePercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
+            if (generalDropChancePercent < 0 || generalDropChancePercent > 100)
+            {
+                throw new DataException($"{DefinitionName} '{id}': GeneralDropChancePercent must be 0..100.");
+            }
+
+            GeneralDropChancePercent = generalDropChancePercent;
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
             AffinityId = DataId.Require(affinityId, $"{DefinitionName} '{id}' AffinityId");
             IsFinal = isFinal;
@@ -267,6 +274,13 @@ namespace F1.Data
         /// <summary>Where the dungeon's marker stands on the expedition map (Round 71 E2): percents of the painting's width and height from its top-left.</summary>
         public int MapX { get; }
         public int MapY { get; }
+
+        /// <summary>
+        /// The chance of each drop of a won battle in this dungeon to be a general item (by ItemData.DropWeight) instead of one the
+        /// enemies carried (2026-10-17). 0: only what the enemies carried.
+        /// </summary>
+        [JsonProperty(Order = 24, Required = Required.Always)]
+        public int GeneralDropChancePercent { get; }
 
         /// <summary>Whether a node of this floor may be an elite: never on the first floor or the camp floor.</summary>
         public bool EliteCanStandOn(int floor)

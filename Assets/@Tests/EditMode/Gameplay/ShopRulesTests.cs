@@ -29,6 +29,11 @@ namespace F1.Tests
         /// </summary>
         static StaticData ShopCave(int shopPercent = 40, bool bagsOnSale = false, params (string Key, int Value)[] balance)
         {
+            return new StaticData(ShopCaveParts(shopPercent, bagsOnSale, balance));
+        }
+
+        static StaticDataParts ShopCaveParts(int shopPercent = 40, bool bagsOnSale = false, params (string Key, int Value)[] balance)
+        {
             StaticDataParts parts = TestData.Parts(balance);
             if (!bagsOnSale)
             {
@@ -48,7 +53,7 @@ namespace F1.Tests
                 new EnemyGroupData("guard", "cave", 3, 8, false, new[] { "chief", "chief" }, isElite: true),
                 new EnemyGroupData("lair", "cave", 0, 0, true, new[] { "chief", "grunt" }),
             };
-            return new StaticData(parts);
+            return parts;
         }
 
         /// <summary>An expedition whose next choice is a shop node: walked along the map directly (seeds tried in turn) until one is offered.</summary>
@@ -151,7 +156,7 @@ namespace F1.Tests
             Assert.IsEmpty(ExpeditionRules.AvailableNodes(state), "The party stays until it leaves.");
             Assert.AreEqual(0, state.Shop.Refreshes);
             List<ItemOffer> stock = state.Shop.Stock;
-            Assert.AreEqual(3, ExpeditionRules.ShopGoodsCount(data), "Three priced items for four slots: the goods are three.");
+            Assert.AreEqual(3, ExpeditionRules.ShopGoodsCount(data, state), "Three priced items for four slots: the goods are three.");
             Assert.AreEqual(4, stock.Count, "The three goods, then the potion (round 56: drawn apart, at least one).");
             CollectionAssert.AreEquivalent(new[] { "charm", "knife", "bow" }, stock.Take(3).Select(o => o.Id), "Every priced item once; never the unpriced trinket.");
             Assert.AreEqual("tonic", stock[3].Id, "The potion after the goods.");
@@ -473,6 +478,26 @@ namespace F1.Tests
             at = state.Inventory.Items[0].At;
             Assert.IsFalse(ExpeditionRules.CanSellInventoryItem(data, state, at.X, at.Y));
             Assert.Throws<InvalidOperationException>(() => ExpeditionRules.SellInventoryItem(data, state, at.X, at.Y));
+        }
+
+        [Test]
+        public void AShop_OffersAJobsBaseWeapon_OnlyWhenThatJobIsInTheParty()
+        {
+            // 2026-10-17 (the user's request): the party's own base weapons are on sale, priced and weighted like the goods; another job's is not.
+            StaticDataParts parts = ShopCaveParts();
+            parts.Items = parts.Items.Select(item => item.Id == "blade" ? TestData.Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2, shopWeight: 5, price: 12) : item).ToList();
+            StaticData data = new StaticData(parts);
+
+            // anna (tank) and cora (striker) carry blades: the blade is a candidate, a fourth good for four slots.
+            ExpeditionState withTank = InAShop(data, out MapNode _);
+            Assert.AreEqual(4, ExpeditionRules.ShopGoodsCount(data, withTank), "charm, knife, bow and the party's blade.");
+            Assert.IsTrue(withTank.Shop.Stock.Any(o => o != null && o.Kind == OfferKind.Item && o.Id == "blade"), "The blade is on sale.");
+            int slot = SlotOf(withTank, OfferKind.Item, "blade");
+            Assert.AreEqual(12 * data.Balance.TierPercent(withTank.Shop.Stock[slot].Tier) / 100, ExpeditionRules.PriceOf(data, withTank.Shop.Stock[slot]));
+
+            // ben alone (healer, a staff): the blade is nobody's weapon here, so it is not a candidate.
+            ExpeditionState healerOnly = ExpeditionRules.Create(data, "cave", 1, new[] { new PartyMember("ben", "healer", 1) });
+            Assert.AreEqual(3, ExpeditionRules.ShopGoodsCount(data, healerOnly), "Only the three goods: the blade stays off a shop the tank is not at.");
         }
 
         [Test]

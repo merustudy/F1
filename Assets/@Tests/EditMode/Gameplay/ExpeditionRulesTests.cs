@@ -355,6 +355,36 @@ namespace F1.Tests
             Assert.IsTrue(first.Loot.All(d => d.Tier == ItemTier.Common), "Common on floor 1. A drop is the item's own values, not the power the grunt carried it at (stage 22).");
         }
 
+        /// <summary>The test cave with a chance of general drops (2026-10-17): the cave of TestData.Parts otherwise.</summary>
+        static DungeonData CaveWithGeneralDrops(int chance)
+        {
+            return new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, mapX: 40, mapY: 30, generalDropChancePercent: chance);
+        }
+
+        [Test]
+        public void Loot_DropsAGeneralItem_ByItsDropWeight_WithTheChance_ElseWhatTheEnemiesCarried()
+        {
+            // 2026-10-17 (the user's request): with the chance at 100 every drop is a general item (the knife, the one with a drop weight), at the
+            // floor's tier; at 0 the drops are the claws as before; without any drop weight the stream is read as before.
+            StaticDataParts always = TestData.Parts();
+            always.Dungeons = always.Dungeons.Select(d => d.Id == "cave" ? CaveWithGeneralDrops(100) : d).ToList();
+            always.Items = always.Items.Select(item => item.Id == "knife" ? TestData.Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, shopWeight: 5, price: 10, dropWeight: 10) : item).ToList();
+            ExpeditionState general = AtLoot(new StaticData(always), 9);
+            Assert.IsNotEmpty(general.Loot);
+            Assert.IsTrue(general.Loot.All(d => d.Id == "knife" && d.Tier == ItemTier.Common), "General drops: the knife at Common on floor 1.");
+
+            StaticDataParts never = TestData.Parts();
+            never.Items = always.Items;
+            ExpeditionState carried = AtLoot(new StaticData(never), 9);
+            Assert.IsTrue(carried.Loot.All(d => d.Id == "claw"), "No general drop at the cave's chance 0.");
+
+            StaticDataParts plainParts = TestData.Parts();
+            plainParts.Dungeons = plainParts.Dungeons.Select(d => d.Id == "cave" ? CaveWithGeneralDrops(100) : d).ToList();
+            ExpeditionState plain = AtLoot(new StaticData(plainParts), 9);
+            Assert.IsTrue(plain.Loot.All(d => d.Id == "claw"), "No item has a drop weight: the claws, as before.");
+            CollectionAssert.AreEqual(carried.Loot.Select(d => d.Id), plain.Loot.Select(d => d.Id), "The same stream read the same way.");
+        }
+
         [Test]
         public void Loot_IsAsManyAsTheDropCount_OrAllOfFewerItems()
         {

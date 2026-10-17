@@ -144,9 +144,16 @@ namespace F1.Data
             IReadOnlyList<StarSquare> stars = null,
             int starDamage = 0,
             int critChancePercent = 0,
-            bool unique = false)
+            bool unique = false,
+            int dropWeight = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
+            if (dropWeight < 0)
+            {
+                throw new DataException($"{DefinitionName} '{id}': DropWeight cannot be negative.");
+            }
+
+            DropWeight = dropWeight;
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
             if (width < 1 || width > BoardFrame.MaxSide || height < 1 || height > BoardFrame.MaxSide)
             {
@@ -217,6 +224,11 @@ namespace F1.Data
             if (unique && (shopWeight != 0 || price != 0))
             {
                 throw new DataException($"{DefinitionName} '{id}': a unique item has no ShopWeight and no Price.");
+            }
+
+            if (unique && dropWeight > 0)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a unique item has no DropWeight.");
             }
 
             Category = category;
@@ -343,6 +355,13 @@ namespace F1.Data
         /// <summary>A unique item (Slice B stage 23): made at a camp's forge by a recipe, one per party, never in a shop or a drop.</summary>
         [JsonProperty(Order = 16, Required = Required.Always)]
         public bool Unique { get; }
+
+        /// <summary>
+        /// Relative chance to drop from a won battle as a general item, beside what the enemies carried (2026-10-17): 0 means it never
+        /// drops that way (the whetstone and the base weapons come from shops; an enemy's item drops as the enemy's).
+        /// </summary>
+        [JsonProperty(Order = 17, Required = Required.Always)]
+        public int DropWeight { get; }
 
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]

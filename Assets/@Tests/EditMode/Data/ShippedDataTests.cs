@@ -267,6 +267,34 @@ namespace F1.Tests
             Assert.AreEqual(0, data.Items.Get("gladius").Price, "A unique has no price (and cannot be sold).");
         }
 
+        [Test]
+        public void ShippedBaseWeapons_AreOnSale_AndTheGeneralItems_DropByWeight()
+        {
+            // 2026-10-17: the jobs' base weapons priced and weighted for the shop (the party's own only: ExpeditionRules), the shop's general
+            // items with a drop weight, and nothing else dropping as a general item (the whetstone and the base weapons come from shops).
+            StaticData data = LoadShipped();
+            Assert.AreEqual(30, data.Dungeons.Get("abandoned_mine").GeneralDropChancePercent);
+            Assert.AreEqual(0, data.Dungeons.Get("abyss").GeneralDropChancePercent, "The pit drops only bones: a general item there made it twice as easy (Design/08 §32).");
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                ItemData weapon = data.Items.Get(job.WeaponItemId);
+                Assert.Greater(weapon.Price, 0, job.Id);
+                Assert.Greater(weapon.ShopWeight, 0, job.Id);
+                Assert.AreEqual(0, weapon.DropWeight, job.Id + ": a base weapon comes from a shop or a camp, never a drop.");
+            }
+
+            foreach (string id in new[] { "dagger", "longbow", "spear", "halberd", "buckler", "ward_charm", "herb_pouch", "ember_flask" })
+            {
+                Assert.Greater(data.Items.Get(id).DropWeight, 0, id);
+            }
+
+            Assert.AreEqual(0, data.Items.Get("whetstone").DropWeight, "Shops only (round 51).");
+            Assert.AreEqual(0, data.Items.Get("gladius").DropWeight);
+            Assert.IsTrue(data.Items.Ordered.All(i => i.DropWeight == 0 || i.ShopWeight > 0), "A general drop is one of the shop's general items.");
+            Assert.IsTrue(data.Enemies.Ordered.SelectMany(e => e.Items).Select(g => data.Items.Get(g.ItemId)).All(i => i.ShopWeight > 0 || i.DropWeight == 0),
+                "An enemy's own item (one no shop sells) drops only as the enemy's; the buckler is both a shop's general item and the veteran's.");
+        }
+
         static StaticData LoadShipped()
         {
             StaticDataFileStore store = DataTransformMenu.CreateStore();

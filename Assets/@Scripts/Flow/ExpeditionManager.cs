@@ -274,7 +274,7 @@ namespace F1.Flow
         }
 
         /// <summary>How many goods the shop's stock begins with, before its potions (round 56: the merchant's goods and its potion column).</summary>
-        public int ShopGoodsCount => ExpeditionRules.ShopGoodsCount(_data.Data);
+        public int ShopGoodsCount => ExpeditionRules.ShopGoodsCount(_data.Data, Expedition);
 
         /// <summary>True when the item in a slot could be bought onto a placement of the inventory's grid now (round 55): over no item there.</summary>
         public bool CanBuyToInventoryAt(int slot, Placement at)

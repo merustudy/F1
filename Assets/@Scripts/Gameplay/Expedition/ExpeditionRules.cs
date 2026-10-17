@@ -314,8 +314,19 @@ namespace F1.Gameplay
 
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "loot", node.Id), RngStream.Loot);
             int count = node.Kind == MapNodeKind.Elite ? data.Balance.EliteDropCount : data.Balance.DropCount;
-            while (drops.Count < count && carried.Count > 0)
+            // 2026-10-17 (the user's request): a drop is a general item (by DropWeight, at the floor's tier) with the dungeon's GeneralDropChancePercent,
+            // else one the enemies carried; a general one when nothing carried is left, a carried one when no item has a drop weight
+            // (then the stream is read as before). The same general item may drop twice.
+            bool generals = HasGeneralDrops(data);
+            while (drops.Count < count && (carried.Count > 0 || generals))
             {
+                bool general = generals && (carried.Count == 0 || rng.NextInt(100) < dungeon.GeneralDropChancePercent);
+                if (general)
+                {
+                    drops.Add(new ItemOffer(OfferKind.Item, DrawGeneralDrop(data, rng).Id, tier));
+                    continue;
+                }
+
                 int index = rng.NextInt(carried.Count);
                 drops.Add(carried[index]);
                 carried.RemoveAt(index);
@@ -342,6 +353,42 @@ namespace F1.Gameplay
         }
 
         /// <summary>A bag drawn by loot weight, or null when no bag drops.</summary>
+        static bool HasGeneralDrops(StaticData data)
+        {
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                if (item.DropWeight > 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>A general item by drop weight (2026-10-17): what a won battle drops beside the enemies' own items.</summary>
+        static ItemData DrawGeneralDrop(StaticData data, Pcg32 rng)
+        {
+            int total = 0;
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                total += item.DropWeight;
+            }
+
+            int pick = rng.NextInt(total);
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                if (pick < item.DropWeight)
+                {
+                    return item;
+                }
+
+                pick -= item.DropWeight;
+            }
+
+            throw new InvalidOperationException("No item has a drop weight.");
+        }
+
         static BagData DrawBag(StaticData data, Pcg32 rng)
         {
             int total = 0;
@@ -928,10 +975,11 @@ namespace F1.Gameplay
             DungeonData dungeon = data.Dungeons.Get(state.DungeonId);
             ItemTier tier = dungeon.ItemTierAt(shop.Floor, false);
             List<ItemOffer> potions = DrawPotions(data, rng);
+            HashSet<string> partyWeapons = PartyWeaponIds(data, state);
             List<ItemOffer> stock = null;
             for (int draw = 0; draw <= refreshes; draw++)
             {
-                stock = DrawOffers(data, rng, data.Balance.ShopSlots, tier);
+                stock = DrawOffers(data, rng, data.Balance.ShopSlots, tier, partyWeapons);
             }
 
             stock.AddRange(potions);
@@ -943,6 +991,43 @@ namespace F1.Gameplay
         /// none does, one of them by its weight, so that a shop has at least one. They come whether or not a potion slot is empty (one
         /// cannot be bought without an empty slot).
         /// </summary>
+        /// <summary>
+        /// Whether a shop may stock an item: it has a shop weight and a price, and a job's base weapon only when a living member of the
+        /// party has that job (2026-10-17, the user's request: the shop offers the party's own base weapons).
+        /// </summary>
+        static bool IsShopCandidate(StaticData data, ItemData item, HashSet<string> partyWeapons)
+        {
+            return item.ShopWeight > 0 && item.Price > 0 && (!IsJobWeapon(data, item.Id) || partyWeapons.Contains(item.Id));
+        }
+
+        static bool IsJobWeapon(StaticData data, string itemId)
+        {
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                if (job.WeaponItemId == itemId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>The base weapons of the living party members' jobs.</summary>
+        static HashSet<string> PartyWeaponIds(StaticData data, ExpeditionState state)
+        {
+            var weapons = new HashSet<string>(StringComparer.Ordinal);
+            foreach (ExpeditionMember member in state.Members)
+            {
+                if (member.Alive)
+                {
+                    weapons.Add(data.Jobs.Get(member.JobId).WeaponItemId);
+                }
+            }
+
+            return weapons;
+        }
+
         static List<ItemOffer> DrawPotions(StaticData data, Pcg32 rng)
         {
             var kinds = new List<PotionData>();
@@ -1246,7 +1331,7 @@ namespace F1.Gameplay
 
             // Round 56 ("포션은 그대로"): the goods are drawn anew; the potions stay as they are (one bought stays gone).
             List<ItemOffer> fresh = DrawStock(data, state, state.Map.Get(state.CurrentNodeId), state.Shop.Refreshes);
-            int goods = ShopGoodsCount(data);
+            int goods = ShopGoodsCount(data, state);
             var stock = new List<ItemOffer>();
             for (int i = 0; i < fresh.Count; i++)
             {
@@ -1260,12 +1345,13 @@ namespace F1.Gameplay
         /// How many goods (items and bags) a shop's stock begins with, before its potions (Slice B stage 21, round 56): `ShopSlots`, or fewer
         /// when the data has fewer priced items and bags. It depends on the data alone.
         /// </summary>
-        public static int ShopGoodsCount(StaticData data)
+        public static int ShopGoodsCount(StaticData data, ExpeditionState state)
         {
+            HashSet<string> partyWeapons = PartyWeaponIds(data, state);
             int candidates = 0;
             foreach (ItemData item in data.Items.Ordered)
             {
-                if (item.ShopWeight > 0 && item.Price > 0)
+                if (IsShopCandidate(data, item, partyWeapons))
                 {
                     candidates++;
                 }
@@ -1444,13 +1530,13 @@ namespace F1.Gameplay
         /// Draws a shop's goods without repetition, by shop weight: the items with a weight and a price at the tier given, and
         /// the bags with a weight and a price (Slice B stage 19). The potions are drawn apart (round 56: <see cref="DrawPotions"/>).
         /// </summary>
-        static List<ItemOffer> DrawOffers(StaticData data, Pcg32 rng, int count, ItemTier tier)
+        static List<ItemOffer> DrawOffers(StaticData data, Pcg32 rng, int count, ItemTier tier, HashSet<string> partyWeapons)
         {
             var candidates = new List<ItemOffer>();
             var weights = new List<int>();
             foreach (ItemData item in data.Items.Ordered)
             {
-                if (item.ShopWeight > 0 && item.Price > 0)
+                if (IsShopCandidate(data, item, partyWeapons))
                 {
                     candidates.Add(new ItemOffer(OfferKind.Item, item.Id, tier));
                     weights.Add(item.ShopWeight);

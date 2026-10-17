@@ -117,7 +117,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique" });
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -148,7 +148,8 @@ namespace F1.Editor.Data
                     row.StarSquares("Stars"),
                     row.IsEmpty("StarDamage") ? 0 : row.Centi("StarDamage"),
                     row.OptionalInt("CritChancePercent", 0),
-                    row.OptionalBool("Unique", false));
+                    row.OptionalBool("Unique", false),
+                    row.OptionalInt("DropWeight", 0, 0));
             });
         }
 
@@ -294,7 +295,7 @@ namespace F1.Editor.Data
                 "StartingPotions", RowMapping.Background,
                 "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
                 "EnemyHpPerFloorPercent", "EnemyPowerPerFloorPercent", "Tier1Floor", "Tier2Floor", "Tier3Floor", "ShopMinFloor", "ShopChancePercent"),
-                new[] { "IsFinal", "UnlockDungeonId", "UnlockClears", "MapX", "MapY" });
+                new[] { "IsFinal", "UnlockDungeonId", "UnlockClears", "MapX", "MapY", "GeneralDropChancePercent" });
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -322,7 +323,8 @@ namespace F1.Editor.Data
                 row.OptionalId("UnlockDungeonId"),
                 row.OptionalInt("UnlockClears", 0, 0),
                 row.OptionalInt("MapX", 0, 0, 100),
-                row.OptionalInt("MapY", 0, 0, 100)));
+                row.OptionalInt("MapY", 0, 0, 100),
+                row.OptionalInt("GeneralDropChancePercent", 0, 0, 100)));
         }
     }
 

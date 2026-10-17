@@ -31,7 +31,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "abyss_grasp",
@@ -63,7 +64,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "abyss_howl",
@@ -95,7 +97,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "buckler",
@@ -127,7 +130,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "crude_bow",
@@ -159,7 +163,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "dagger",
@@ -191,7 +196,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 10,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "ember_flask",
@@ -223,7 +229,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 8
     },
     {
       "Id": "fire_staff",
@@ -248,14 +255,15 @@
           "Max": 268
         }
       ],
-      "ShopWeight": 0,
+      "ShopWeight": 3,
       "Icon": "item/fire-staff",
-      "Price": 0,
+      "Price": 16,
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "gladius",
@@ -296,7 +304,8 @@
       ],
       "StarDamage": 400,
       "CritChancePercent": 10,
-      "Unique": true
+      "Unique": true,
+      "DropWeight": 0
     },
     {
       "Id": "greataxe",
@@ -321,14 +330,15 @@
           "Max": 625
         }
       ],
-      "ShopWeight": 0,
+      "ShopWeight": 3,
       "Icon": "item/greataxe",
-      "Price": 0,
+      "Price": 24,
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "halberd",
@@ -360,7 +370,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 8
     },
     {
       "Id": "healing_staff",
@@ -385,14 +396,15 @@
           "Max": 273
         }
       ],
-      "ShopWeight": 0,
+      "ShopWeight": 3,
       "Icon": "item/healing-staff",
-      "Price": 0,
+      "Price": 16,
       "Melee": false,
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "herb_pouch",
@@ -424,7 +436,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "lantern_staff",
@@ -456,7 +469,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "longbow",
@@ -488,7 +502,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "longsword",
@@ -513,14 +528,15 @@
           "Max": 268
         }
       ],
-      "ShopWeight": 0,
+      "ShopWeight": 3,
       "Icon": "item/longsword",
-      "Price": 0,
+      "Price": 16,
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "mace",
@@ -552,14 +568,15 @@
           "Max": 98
         }
       ],
-      "ShopWeight": 0,
+      "ShopWeight": 3,
       "Icon": "item/mace",
-      "Price": 0,
+      "Price": 16,
       "Melee": true,
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "mending_chant",
@@ -591,7 +608,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "overseer_maul",
@@ -623,7 +641,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "overseer_roar",
@@ -655,7 +674,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "rat_bite",
@@ -687,7 +707,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "rusty_blade",
@@ -719,7 +740,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     },
     {
       "Id": "spear",
@@ -751,7 +773,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 5,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "ward_charm",
@@ -783,7 +806,8 @@
       "Stars": [],
       "StarDamage": 0,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 10
     },
     {
       "Id": "whetstone",
@@ -816,7 +840,8 @@
       ],
       "StarDamage": 100,
       "CritChancePercent": 0,
-      "Unique": false
+      "Unique": false,
+      "DropWeight": 0
     }
   ]
 }

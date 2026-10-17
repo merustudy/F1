@@ -335,6 +335,10 @@ namespace F1.Sim
             public long CoinsSpent;
             public long CoinsLeft;
 
+            /// <summary>2026-10-17: the party's own base weapons on the shops' grids, and the general items among the drops.</summary>
+            public int BaseWeaponsOffered;
+            public int GeneralDrops;
+
             /// <summary>The loot (Slice B stage 18): drops the won battles left, and how many of them were picked up.</summary>
             public int Drops;
             public int DropsTaken;
@@ -364,6 +368,7 @@ namespace F1.Sim
             Console.WriteLine($"  fatigue per expedition: afflictions {BattleStats.Ratio(stats.All.Afflictions, runs)}, virtues {BattleStats.Ratio(stats.All.Virtues, runs)}, collapses {BattleStats.Ratio(stats.All.Collapses, runs)}; "
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
+            Console.WriteLine($"  per expedition (2026-10-17): general drops {BattleStats.Ratio(stats.GeneralDrops, runs)} of the drops, the party's base weapons on offer {BattleStats.Ratio(stats.BaseWeaponsOffered, runs)} (per shop {(stats.Shops > 0 ? (double)stats.BaseWeaponsOffered / stats.Shops : 0):F2})");
             Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}");
             Console.WriteLine($"  per expedition: forges at camps {BattleStats.Ratio(stats.Forges, runs)}, expeditions ending with a unique item {BattleStats.Percent(stats.UniqueAtEnd, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
@@ -435,6 +440,16 @@ namespace F1.Sim
                 if (state.Phase == ExpeditionPhase.PickingLoot)
                 {
                     stats.Drops += state.Loot.Count;
+                    var carried = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (string enemyId in data.EnemyGroups.Get(state.Map.Get(state.CurrentNodeId).EnemyGroupId).Enemies)
+                    {
+                        foreach (ItemGrant grant in data.Enemies.Get(enemyId).Items)
+                        {
+                            carried.Add(grant.ItemId);
+                        }
+                    }
+
+                    stats.GeneralDrops += state.Loot.Count(d => d != null && d.Kind == OfferKind.Item && !carried.Contains(d.Id));
                     stats.Merges += policy.PickLoot(data, state, out int taken);
                     stats.DropsTaken += taken;
                     continue;
@@ -449,6 +464,8 @@ namespace F1.Sim
 
                 if (state.Phase == ExpeditionPhase.AtShop)
                 {
+                    var partyWeapons = new HashSet<string>(state.Members.Where(m => m.Alive).Select(m => data.Jobs.Get(m.JobId).WeaponItemId), StringComparer.Ordinal);
+                    stats.BaseWeaponsOffered += state.Shop.Stock.Count(o => o != null && o.Kind == OfferKind.Item && partyWeapons.Contains(o.Id));
                     int coinsBefore = state.Coins;
                     stats.Bought += policy.ShopAt(data, state, out int refreshes, out int shopMerges);
                     stats.Refreshes += refreshes;

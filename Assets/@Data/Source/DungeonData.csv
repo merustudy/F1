@@ -1,3 +1,3 @@
-Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,StartingPotions,Background,EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyPowerPerFloorPercent,Tier1Floor,Tier2Floor,Tier3Floor,ShopMinFloor,ShopChancePercent,IsFinal,UnlockDungeonId,UnlockClears,MapX,MapY
-abandoned_mine,버려진 광산,Abandoned Mine,swift,30,2,4,5,healing_potion+healing_potion,background/dungeon/abandoned-mine,11,15,11,15,30,5,0,9,20,0,7,15,false,,0,38,30
-abyss,심연,The Abyss,swift,5,1,2,3,healing_potion+healing_potion,background/dungeon/abyss,0,0,0,0,0,0,0,3,0,0,0,0,true,abandoned_mine,2,54,13
+Id,Name.ko-KR,Name.en-US,AffinityId,Floors,MapMinWidth,MapMaxWidth,DurationDays,StartingPotions,Background,EliteMinFloor,EliteChancePercent,CampMinFloor,CampChancePercent,CampFloor,EnemyHpPerFloorPercent,EnemyPowerPerFloorPercent,Tier1Floor,Tier2Floor,Tier3Floor,ShopMinFloor,ShopChancePercent,IsFinal,UnlockDungeonId,UnlockClears,MapX,MapY,GeneralDropChancePercent
+abandoned_mine,버려진 광산,Abandoned Mine,swift,30,2,4,5,healing_potion+healing_potion,background/dungeon/abandoned-mine,11,15,11,15,30,5,0,9,20,0,7,15,false,,0,38,30,30
+abyss,심연,The Abyss,swift,5,1,2,3,healing_potion+healing_potion,background/dungeon/abyss,0,0,0,0,0,0,0,3,0,0,0,0,true,abandoned_mine,2,54,13,0
