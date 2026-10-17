@@ -208,11 +208,27 @@ namespace F1.Editor.Data
         }
     }
 
+    /// <summary>BuildingData.csv (Slice C stage 30): Id (a building of the town), Level, Price, Days, Bonus; no Name (the plates are UI text).</summary>
+    internal static class BuildingMapper
+    {
+        public static List<BuildingData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[] { RowMapping.Id, "Level", "Price", "Days", "Bonus" });
+            return RowMapping.MapRows(table, errors, row => new BuildingData(
+                row.Id(RowMapping.Id),
+                row.Int("Level"),
+                row.Int("Price"),
+                row.Int("Days"),
+                row.Int("Bonus")));
+        }
+    }
+
     internal static class BagMapper
     {
         public static List<BagData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Width", "Height", "Start", "Price", "ShopWeight", "LootWeight"));
+            // Icon (round 79) is optional: a bag without one shows as the well where it is a thing.
+            table.RequireHeaders(RowMapping.Headers("Width", "Height", "Start", "Price", "ShopWeight", "LootWeight"), new[] { RowMapping.Icon });
             return RowMapping.MapRows(table, errors, row => new BagData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -221,7 +237,8 @@ namespace F1.Editor.Data
                 row.Bool("Start"),
                 row.Int("Price"),
                 row.Int("ShopWeight"),
-                row.Int("LootWeight")));
+                row.Int("LootWeight"),
+                System.Linq.Enumerable.Contains(table.Headers, RowMapping.Icon) ? RowMapping.ReadArt(row, RowMapping.Icon) : null));
         }
     }
 

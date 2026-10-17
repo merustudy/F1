@@ -343,6 +343,24 @@ namespace F1.Tests
                 Recipes = new List<RecipeData>(),
                 // Three levels (stage 27): 10 experience to leave the first, 20 the second; +10% and +25% HP.
                 Levels = Levels(),
+                // The town's buildings (stage 30): two levels each; the second costs 40 gold and 3 days (the inn 2 days) and adds 2 to the roster limit,
+                // 1 candidate, 20 relief, 10% gold.
+                Buildings = Buildings(),
+            };
+        }
+
+        public static List<BuildingData> Buildings()
+        {
+            return new List<BuildingData>
+            {
+                new BuildingData(BuildingId.Barracks, 1, 0, 0, 0),
+                new BuildingData(BuildingId.Barracks, 2, 40, 3, 2),
+                new BuildingData(BuildingId.Inn, 1, 0, 0, 0),
+                new BuildingData(BuildingId.Inn, 2, 40, 2, 20),
+                new BuildingData(BuildingId.Coach, 1, 0, 0, 0),
+                new BuildingData(BuildingId.Coach, 2, 40, 3, 1),
+                new BuildingData(BuildingId.Gate, 1, 0, 0, 0),
+                new BuildingData(BuildingId.Gate, 2, 40, 3, 10),
             };
         }
 

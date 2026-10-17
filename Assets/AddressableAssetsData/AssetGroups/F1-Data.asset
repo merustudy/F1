@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: F1-Data
   m_GUID: 03abbd2b47e32490184befb84e2c4ba2
   m_SerializeEntries:
+  - m_GUID: 31ff8c8608dd144d3be280db3e53072b
+    m_Address: data/app/building
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 34794c07b6c4942af93bb3edc17f92a1
     m_Address: data/app/affinity
     m_ReadOnly: 0

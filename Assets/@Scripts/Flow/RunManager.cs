@@ -141,11 +141,13 @@ namespace F1.Flow
             Save(null);
         }
 
-        public void Rest()
+        /// <summary>Rests a day; the buildings whose construction the day finished come back (stage 30).</summary>
+        public List<string> Rest()
         {
             RequireAtHome();
-            RunRules.Rest(_data.Data, _run);
+            List<string> finished = RunRules.Rest(_data.Data, _run);
             Save(null);
+            return finished;
         }
 
         public DepartCheck CanDepart(string dungeonId)
@@ -170,13 +172,13 @@ namespace F1.Flow
 
         public bool CanDismiss(string mercenaryId)
         {
-            return HasRun && !IsAway && RunRules.CanDismiss(_run, mercenaryId);
+            return HasRun && !IsAway && RunRules.CanDismiss(_data.Data, _run, mercenaryId);
         }
 
         public void Dismiss(string mercenaryId)
         {
             RequireAtHome();
-            RunRules.Dismiss(_run, mercenaryId);
+            RunRules.Dismiss(_data.Data, _run, mercenaryId);
             Save(null);
         }
 
@@ -193,6 +195,38 @@ namespace F1.Flow
         }
 
         public bool CanRest => RunRules.CanRest(_data.Data, Run);
+
+        // ---- The town's buildings (Slice C stage 30, BuildingRules) ----
+
+        public int BuildingLevel(string buildingId)
+        {
+            return BuildingRules.LevelOf(Run, buildingId);
+        }
+
+        /// <summary>The construction going on at the building, or null.</summary>
+        public ConstructionState ConstructionOf(string buildingId)
+        {
+            return BuildingRules.ConstructionOf(Run, buildingId);
+        }
+
+        /// <summary>Whether the building is locked by its construction (past the last day nothing is locked).</summary>
+        public bool IsBuildingLocked(string buildingId)
+        {
+            return BuildingRules.IsLocked(_data.Data, Run, buildingId);
+        }
+
+        public UpgradeCheck CanUpgrade(string buildingId)
+        {
+            return !HasRun || IsAway ? UpgradeCheck.RunIsOver : BuildingRules.CanUpgrade(_data.Data, _run, buildingId);
+        }
+
+        /// <summary>Starts the building's next level: the price leaves the gold and the construction runs for its days.</summary>
+        public void Upgrade(string buildingId)
+        {
+            RequireAtHome();
+            BuildingRules.Upgrade(_data.Data, _run, buildingId);
+            Save(null);
+        }
 
         /// <summary>Past the last day: the only expedition left is the final stand (Docs/Design/04_Lobby_100Day_Economy.md §2).</summary>
         public bool IsFinalStandDue => RunRules.IsFinalStandDue(_data.Data, Run);

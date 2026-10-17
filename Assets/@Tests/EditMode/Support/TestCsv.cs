@@ -81,6 +81,14 @@ namespace F1.Tests
             "2,20,10\n" +
             "3,0,25\n";
 
+        /// <summary>The town's buildings (stage 30): two levels each, as TestData.Buildings.</summary>
+        public const string Buildings =
+            "Id,Level,Price,Days,Bonus\n" +
+            "barracks,1,0,0,0\nbarracks,2,40,3,2\n" +
+            "inn,1,0,0,0\ninn,2,40,2,20\n" +
+            "coach,1,0,0,0\ncoach,2,40,3,1\n" +
+            "gate,1,0,0,0\ngate,2,40,3,10\n";
+
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()
         {
@@ -99,6 +107,7 @@ namespace F1.Tests
                 { StaticDataFiles.FatigueState.SourceFileName, FatigueStates },
                 { StaticDataFiles.Recipe.SourceFileName, Recipes },
                 { StaticDataFiles.Level.SourceFileName, Levels },
+                { StaticDataFiles.Building.SourceFileName, Buildings },
             };
         }
 

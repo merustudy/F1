@@ -29,6 +29,16 @@ namespace F1.Gameplay
         public string JobId;
     }
 
+    /// <summary>A construction going on at a building of the town (Slice C stage 30): the level it builds and the day it is done.</summary>
+    public sealed class ConstructionState
+    {
+        public string BuildingId;
+        public int ToLevel;
+
+        /// <summary>The run day the level arrives: the construction ends the moment the day counter reaches it.</summary>
+        public int FinishDay;
+    }
+
     public sealed class PartySlot
     {
         public string MercenaryId;
@@ -72,6 +82,12 @@ namespace F1.Gameplay
         /// <summary>Mercenaries dismissed from the roster: they never come back, not even as candidates (§6).</summary>
         public List<string> Dismissed = new List<string>();
 
+        /// <summary>The town's buildings and their levels (Slice C stage 30, BuildingRules): building id -> level. A building not listed is at level 1.</summary>
+        public SortedDictionary<string, int> BuildingLevels = new SortedDictionary<string, int>(System.StringComparer.Ordinal);
+
+        /// <summary>The constructions going on, at most one per building (stage 30).</summary>
+        public List<ConstructionState> Constructions = new List<ConstructionState>();
+
         /// <summary>How the run stands (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §8): ongoing, won at the final boss, or lost.</summary>
         public RunOutcome Outcome;
 
@@ -109,6 +125,9 @@ namespace F1.Gameplay
         PartyTooSmall,
         FinalStandDue,
         Locked,
+
+        /// <summary>The gate is under construction (stage 30): nobody leaves until it is done.</summary>
+        GateLocked,
     }
 
     /// <summary>Whether a candidate can be hired now (Slice C stage 26).</summary>
@@ -119,6 +138,9 @@ namespace F1.Gameplay
         NoCandidate,
         RosterFull,
         NotEnoughGold,
+
+        /// <summary>The stagecoach is under construction (stage 30).</summary>
+        CoachLocked,
     }
 
     /// <summary>Whether a mercenary can be treated at the inn now (Slice C stage 26).</summary>
@@ -129,6 +151,9 @@ namespace F1.Gameplay
         NotInRoster,
         NotTired,
         NotEnoughGold,
+
+        /// <summary>The inn is under construction (stage 30): no treatment, resting goes on.</summary>
+        InnLocked,
     }
 
     /// <summary>What the return settlement changed, for the result screen.</summary>
@@ -149,6 +174,10 @@ namespace F1.Gameplay
         public int CoinsFromItems;
         public int CoinsConverted;
         public int GoldFromCoins;
+
+        /// <summary>The gate's bonus on the gold, in percent (stage 30; counted in GoldEarned), and the buildings whose construction the passing days finished.</summary>
+        public int GateBonusPercent;
+        public List<string> BuildingsCompleted = new List<string>();
 
         /// <summary>The experience every survivor got (stage 27), and the survivors it took to a new level, in the order of <see cref="SurvivorIds"/>.</summary>
         public int ExpEarned;

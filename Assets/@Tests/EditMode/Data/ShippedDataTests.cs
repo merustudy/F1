@@ -269,6 +269,37 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ShippedBags_EachHaveAPicture_AtTheirSquares()
+        {
+            // Round 79: every bag has its picture (bag/<kebab-id>), shown where the bag is a thing.
+            StaticData data = LoadShipped();
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                Assert.AreEqual("bag/" + bag.Id.Replace('_', '-'), bag.Icon, bag.Id);
+            }
+        }
+
+        [Test]
+        public void ShippedBuildings_HaveThreeLevelsEach_ForFortyAndEightyGold_OverThreeAndFiveDays()
+        {
+            // Stage 30 (Round 78): four buildings, level 2 for 40 gold and 3 days, level 3 for 80 gold and 5 days; the bonuses grow.
+            StaticData data = LoadShipped();
+            foreach (string id in BuildingId.All)
+            {
+                Assert.AreEqual(3, data.MaxBuildingLevel(id), id);
+                Assert.AreEqual(0, data.BuildingAt(id, 1).Bonus, id);
+                Assert.AreEqual((40, 3), (data.BuildingAt(id, 2).Price, data.BuildingAt(id, 2).Days), id);
+                Assert.AreEqual((80, 5), (data.BuildingAt(id, 3).Price, data.BuildingAt(id, 3).Days), id);
+                Assert.Greater(data.BuildingAt(id, 3).Bonus, data.BuildingAt(id, 2).Bonus, id);
+            }
+
+            Assert.AreEqual(4, data.BuildingAt(BuildingId.Barracks, 3).Bonus, "Roster limit 8 -> 12.");
+            Assert.AreEqual(2, data.BuildingAt(BuildingId.Coach, 3).Bonus, "Candidates 3 -> 5.");
+            Assert.AreEqual(40, data.BuildingAt(BuildingId.Inn, 3).Bonus, "Relief 40 -> 80.");
+            Assert.AreEqual(20, data.BuildingAt(BuildingId.Gate, 3).Bonus, "Settlement gold +20%.");
+        }
+
+        [Test]
         public void ShippedBaseWeapons_AreOnSale_AndTheGeneralItems_DropByWeight()
         {
             // 2026-10-17: the jobs' base weapons priced and weighted for the shop (the party's own only: ExpeditionRules), the shop's general

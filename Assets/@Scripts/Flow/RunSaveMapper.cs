@@ -52,7 +52,19 @@ namespace F1.Flow
                 Recruits = new List<RecruitRecord>(),
                 Dismissed = new List<string>(run.Dismissed),
                 Expeditions = new List<ExpeditionCountRecord>(),
+                Buildings = new List<BuildingLevelRecord>(),
+                Constructions = new List<ConstructionRecord>(),
             };
+
+            foreach (KeyValuePair<string, int> building in run.BuildingLevels)
+            {
+                record.Buildings.Add(new BuildingLevelRecord { BuildingId = building.Key, Level = building.Value });
+            }
+
+            foreach (ConstructionState construction in run.Constructions)
+            {
+                record.Constructions.Add(new ConstructionRecord { BuildingId = construction.BuildingId, ToLevel = construction.ToLevel, FinishDay = construction.FinishDay });
+            }
 
             foreach (RecruitState recruit in run.Recruits)
             {
@@ -221,6 +233,7 @@ namespace F1.Flow
             Require(record.ExpeditionCount >= 0, "ExpeditionCount is negative.");
             Require(record.Roster != null && record.Fallen != null && record.Party != null && record.ClearedDungeons != null, "A list of the run is missing.");
             Require(record.Recruits != null && record.Dismissed != null && record.Expeditions != null, "A list of the run is missing.");
+            Require(record.Buildings != null && record.Constructions != null, "A list of the run is missing.");
             Require(record.Gold >= 0, "Gold is negative.");
 
             var run = new RunState
@@ -230,6 +243,24 @@ namespace F1.Flow
                 ExpeditionCount = record.ExpeditionCount,
                 Gold = record.Gold,
             };
+
+            // The buildings (stage 30) come first: what they give (the roster limit, the candidates) bounds the lists below.
+            foreach (BuildingLevelRecord building in record.Buildings)
+            {
+                Require(building != null && BuildingId.IsKnown(building.BuildingId), $"Unknown building '{building?.BuildingId}'.");
+                Require(building.Level >= BuildingRules.FirstLevel && building.Level <= data.MaxBuildingLevel(building.BuildingId), $"Level of '{building.BuildingId}' is out of range.");
+                Require(!run.BuildingLevels.ContainsKey(building.BuildingId), $"Building '{building.BuildingId}' is listed twice.");
+                run.BuildingLevels.Add(building.BuildingId, building.Level);
+            }
+
+            foreach (ConstructionRecord construction in record.Constructions)
+            {
+                Require(construction != null && BuildingId.IsKnown(construction.BuildingId), $"Unknown building '{construction?.BuildingId}'.");
+                Require(BuildingRules.ConstructionOf(run, construction.BuildingId) == null, $"Building '{construction.BuildingId}' is under construction twice.");
+                Require(construction.ToLevel == BuildingRules.LevelOf(run, construction.BuildingId) + 1 && construction.ToLevel <= data.MaxBuildingLevel(construction.BuildingId), $"Construction of '{construction.BuildingId}' does not build the next level.");
+                Require(construction.FinishDay > run.Day, $"Construction of '{construction.BuildingId}' would already be done.");
+                run.Constructions.Add(new ConstructionState { BuildingId = construction.BuildingId, ToLevel = construction.ToLevel, FinishDay = construction.FinishDay });
+            }
 
             var known = new HashSet<string>(StringComparer.Ordinal);
             foreach (MercenaryRecord mercenary in record.Roster)
@@ -246,7 +277,7 @@ namespace F1.Flow
                 run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction, Level = mercenary.Level, Exp = mercenary.Exp });
             }
 
-            Require(run.Roster.Count <= data.Balance.RosterLimit, "The roster is over RosterLimit.");
+            Require(run.Roster.Count <= BuildingRules.RosterLimit(data, run), "The roster is over RosterLimit.");
 
             foreach (string fallen in record.Fallen)
             {
@@ -263,7 +294,7 @@ namespace F1.Flow
             }
 
             // The candidates (Slice C stage 26): names of the recruit pool that are nobody's yet, each with a job, at most RecruitCount of them.
-            Require(record.Recruits.Count <= data.Balance.RecruitCount, "More candidates than RecruitCount.");
+            Require(record.Recruits.Count <= BuildingRules.RecruitCount(data, run), "More candidates than RecruitCount.");
             foreach (RecruitRecord recruit in record.Recruits)
             {
                 Require(recruit != null && data.Mercenaries.Contains(recruit.Id) && !data.Mercenaries.Get(recruit.Id).Starting, $"Candidate '{recruit?.Id}' is not a name of the recruit pool.");

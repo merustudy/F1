@@ -20,6 +20,7 @@ namespace F1.Data
         public IEnumerable<FatigueStateData> FatigueStates;
         public IEnumerable<RecipeData> Recipes;
         public IEnumerable<LevelData> Levels;
+        public IEnumerable<BuildingData> Buildings;
     }
 
     /// <summary>
@@ -96,6 +97,7 @@ namespace F1.Data
             FatigueStates = Index(parts.FatigueStates, x => x.Id, FatigueStateData.DefinitionName, problems);
             Recipes = Index(parts.Recipes ?? new List<RecipeData>(), x => x.Id, RecipeData.DefinitionName, problems);
             Levels = LevelLadder(parts.Levels, problems);
+            Buildings = BuildingLadders(parts.Buildings, problems);
 
             if (Balance != null)
             {
@@ -139,6 +141,43 @@ namespace F1.Data
         /// <summary>The last level a mercenary can reach.</summary>
         public int MaxLevel => Levels.Count;
 
+        /// <summary>The levels of the town's buildings (Slice C stage 30), every building of <see cref="BuildingId.All"/> from level 1 up, in id then level order.</summary>
+        public IReadOnlyList<BuildingData> Buildings { get; }
+
+        /// <summary>The last level a building can reach.</summary>
+        public int MaxBuildingLevel(string buildingId)
+        {
+            int max = 0;
+            foreach (BuildingData row in Buildings)
+            {
+                if (row.Id == buildingId)
+                {
+                    max = Math.Max(max, row.Level);
+                }
+            }
+
+            if (max == 0)
+            {
+                throw new KeyNotFoundException($"{BuildingData.DefinitionName} '{buildingId}' does not exist.");
+            }
+
+            return max;
+        }
+
+        /// <summary>The row of a building's level, 1 being the start.</summary>
+        public BuildingData BuildingAt(string buildingId, int level)
+        {
+            foreach (BuildingData row in Buildings)
+            {
+                if (row.Id == buildingId && row.Level == level)
+                {
+                    return row;
+                }
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(level), level, $"{BuildingData.DefinitionName} '{buildingId}' has no level {level}.");
+        }
+
         /// <summary>The row of a level, 1 being the first.</summary>
         public LevelData LevelAt(int level)
         {
@@ -148,6 +187,58 @@ namespace F1.Data
             }
 
             return Levels[level - 1];
+        }
+
+        /// <summary>
+        /// The buildings' levels (stage 30), checked as a ladder per building: every building of the town has its rows, they run from 1 without
+        /// a gap or a repeat, and the bonus never falls from one level to the next (the row's constructor checked the first level's zeros).
+        /// </summary>
+        static IReadOnlyList<BuildingData> BuildingLadders(IEnumerable<BuildingData> rows, List<string> problems)
+        {
+            var all = new List<BuildingData>();
+            if (rows == null)
+            {
+                problems.Add($"{BuildingData.DefinitionName}: no data.");
+                return all;
+            }
+
+            foreach (BuildingData row in rows)
+            {
+                if (row == null)
+                {
+                    problems.Add($"{BuildingData.DefinitionName}: a row is missing.");
+                    return all;
+                }
+
+                all.Add(row);
+            }
+
+            all.Sort((a, b) => a.Id != b.Id ? string.CompareOrdinal(a.Id, b.Id) : a.Level.CompareTo(b.Level));
+            foreach (string id in BuildingId.All)
+            {
+                List<BuildingData> ladder = all.FindAll(row => row.Id == id);
+                if (ladder.Count == 0)
+                {
+                    problems.Add($"{BuildingData.DefinitionName}: '{id}' has no level (every building of the town needs its level 1).");
+                    continue;
+                }
+
+                for (int i = 0; i < ladder.Count; i++)
+                {
+                    if (ladder[i].Level != i + 1)
+                    {
+                        problems.Add($"{BuildingData.DefinitionName} {id}: the levels must run from 1 without a gap or a repeat (found {ladder[i].Level} where {i + 1} was expected).");
+                        break;
+                    }
+
+                    if (i > 0 && ladder[i].Bonus < ladder[i - 1].Bonus)
+                    {
+                        problems.Add($"{BuildingData.DefinitionName} {id} {ladder[i].Level}: Bonus cannot be under the level below it.");
+                    }
+                }
+            }
+
+            return all;
         }
 
         /// <summary>

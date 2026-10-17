@@ -1,0 +1,89 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "barracks",
+      "Level": 1,
+      "Price": 0,
+      "Days": 0,
+      "Bonus": 0
+    },
+    {
+      "Id": "barracks",
+      "Level": 2,
+      "Price": 40,
+      "Days": 3,
+      "Bonus": 2
+    },
+    {
+      "Id": "barracks",
+      "Level": 3,
+      "Price": 80,
+      "Days": 5,
+      "Bonus": 4
+    },
+    {
+      "Id": "coach",
+      "Level": 1,
+      "Price": 0,
+      "Days": 0,
+      "Bonus": 0
+    },
+    {
+      "Id": "coach",
+      "Level": 2,
+      "Price": 40,
+      "Days": 3,
+      "Bonus": 1
+    },
+    {
+      "Id": "coach",
+      "Level": 3,
+      "Price": 80,
+      "Days": 5,
+      "Bonus": 2
+    },
+    {
+      "Id": "gate",
+      "Level": 1,
+      "Price": 0,
+      "Days": 0,
+      "Bonus": 0
+    },
+    {
+      "Id": "gate",
+      "Level": 2,
+      "Price": 40,
+      "Days": 3,
+      "Bonus": 10
+    },
+    {
+      "Id": "gate",
+      "Level": 3,
+      "Price": 80,
+      "Days": 5,
+      "Bonus": 20
+    },
+    {
+      "Id": "inn",
+      "Level": 1,
+      "Price": 0,
+      "Days": 0,
+      "Bonus": 0
+    },
+    {
+      "Id": "inn",
+      "Level": 2,
+      "Price": 40,
+      "Days": 3,
+      "Bonus": 20
+    },
+    {
+      "Id": "inn",
+      "Level": 3,
+      "Price": 80,
+      "Days": 5,
+      "Bonus": 40
+    }
+  ]
+}

@@ -291,22 +291,22 @@ namespace F1.Tests
             RunState run = RunWithParty(data);
             run.Gold = 5;
 
-            Assert.IsTrue(RunRules.CanDismiss(run, "anna"));
-            RunRules.Dismiss(run, "anna");
+            Assert.IsTrue(RunRules.CanDismiss(data, run, "anna"));
+            RunRules.Dismiss(data, run, "anna");
 
             Assert.AreEqual(5, run.Gold);
             Assert.IsNull(RunRules.FindMercenary(run, "anna"));
             CollectionAssert.AreEqual(new[] { "anna" }, run.Dismissed);
             Assert.IsEmpty(run.Fallen, "Dismissed, not dead.");
             Assert.AreEqual("ben:1 cora:2", string.Join(" ", run.Party.Select(s => s.MercenaryId + ":" + s.Row)), "Those behind advance.");
-            Assert.IsFalse(RunRules.CanDismiss(run, "anna"));
-            Assert.Throws<InvalidOperationException>(() => RunRules.Dismiss(run, "anna"));
+            Assert.IsFalse(RunRules.CanDismiss(data, run, "anna"));
+            Assert.Throws<InvalidOperationException>(() => RunRules.Dismiss(data, run, "anna"));
 
-            RunRules.Dismiss(run, "ben");
-            RunRules.Dismiss(run, "dan");
+            RunRules.Dismiss(data, run, "ben");
+            RunRules.Dismiss(data, run, "dan");
             Assert.AreEqual(1, run.Roster.Count);
-            Assert.IsFalse(RunRules.CanDismiss(run, "cora"), "The last mercenary stays: the run ends only by its outcomes.");
-            Assert.Throws<InvalidOperationException>(() => RunRules.Dismiss(run, "cora"));
+            Assert.IsFalse(RunRules.CanDismiss(data, run, "cora"), "The last mercenary stays: the run ends only by its outcomes.");
+            Assert.Throws<InvalidOperationException>(() => RunRules.Dismiss(data, run, "cora"));
         }
 
         [Test]
@@ -315,7 +315,7 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             RunState run = RunWithParty(data);
             run.Roster.Add(new MercenaryState { Id = "eve", JobId = "healer" });
-            RunRules.Dismiss(run, "eve");
+            RunRules.Dismiss(data, run, "eve");
 
             for (int draw = 0; draw < 20; draw++)
             {
@@ -376,8 +376,8 @@ namespace F1.Tests
             RunRules.Treat(data, run, "dan");
             Assert.AreEqual(HireCheck.Ok, RunRules.CanHire(data, run, 0));
             RunRules.Hire(data, run, 0);
-            Assert.IsTrue(RunRules.CanDismiss(run, "dan"));
-            RunRules.Dismiss(run, "dan");
+            Assert.IsTrue(RunRules.CanDismiss(data, run, "dan"));
+            RunRules.Dismiss(data, run, "dan");
             Assert.AreEqual(4, run.Roster.Count);
         }
     }

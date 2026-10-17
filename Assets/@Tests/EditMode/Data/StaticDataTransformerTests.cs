@@ -44,6 +44,20 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_RefusesBuildings_ThatAreUnknown_SkipALevel_StartWithAPrice_OrWhoseBonusFalls()
+        {
+            // Stage 30: BuildingData.csv (Id, Level, Price, Days, Bonus) and StaticData's ladder per building.
+            const string head = "Id,Level,Price,Days,Bonus\n";
+            const string rest = "inn,1,0,0,0\ncoach,1,0,0,0\ngate,1,0,0,0\n";
+            StringAssert.Contains("is not a building of the town", TransformFails(StaticDataFiles.Building, head + "tower,1,0,0,0\n" + rest).Errors[0]);
+            StringAssert.Contains("'barracks' has no level", TransformFails(StaticDataFiles.Building, head + rest).Errors[0]);
+            StringAssert.Contains("run from 1 without a gap", TransformFails(StaticDataFiles.Building, head + "barracks,1,0,0,0\nbarracks,3,40,3,2\n" + rest).Errors[0]);
+            StringAssert.Contains("the first level is the start", TransformFails(StaticDataFiles.Building, head + "barracks,1,10,0,0\n" + rest).Errors[0]);
+            StringAssert.Contains("takes a Price and Days above 0", TransformFails(StaticDataFiles.Building, head + "barracks,1,0,0,0\nbarracks,2,40,0,2\n" + rest).Errors[0]);
+            StringAssert.Contains("Bonus cannot be under the level below it", TransformFails(StaticDataFiles.Building, head + "barracks,1,0,0,0\nbarracks,2,40,3,2\nbarracks,3,80,5,1\n" + rest).Errors[0]);
+        }
+
+        [Test]
         public void Transform_RefusesARecipe_WhoseResultIsNotUnique_OrWhoseCatalystHasNoStars()
         {
             // Stage 23: RecipeData.csv maps (Id, Result, BaseItem, BaseTier, Catalyst, CatalystTier; no Name) and StaticData checks it.
@@ -196,6 +210,12 @@ namespace F1.Tests
             Assert.AreEqual(10, data.LevelAt(1).ExpToNext);
             Assert.AreEqual(25, data.LevelAt(3).MaxHpBonusPercent);
             Assert.IsTrue(data.LevelAt(3).IsLast);
+            // BuildingData.csv (stage 30): two levels per building; the second of the barracks costs 40 gold and 3 days for +2.
+            Assert.AreEqual(2, data.MaxBuildingLevel("barracks"));
+            Assert.AreEqual(40, data.BuildingAt("barracks", 2).Price);
+            Assert.AreEqual(3, data.BuildingAt("barracks", 2).Days);
+            Assert.AreEqual(2, data.BuildingAt("barracks", 2).Bonus);
+            Assert.AreEqual(0, data.BuildingAt("gate", 1).Bonus);
 
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
             Assert.AreEqual(FatigueStateKind.Affliction, fearful.Kind);

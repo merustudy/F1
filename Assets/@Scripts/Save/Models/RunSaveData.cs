@@ -7,6 +7,7 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 16 (Slice C stage 30): the town's building levels (Buildings) and the constructions going on (Constructions).
     /// Version 15 (Slice C stage 27): a mercenary's Level and Exp. Version 14 (Slice C stage 26): the run's Gold, the candidates at the stagecoach (Recruits), the mercenaries Dismissed and the expeditions
     /// started per dungeon (Expeditions). Version 13 (stage 25): the run's Outcome and DefeatCause, and whether the expedition is the final stand.
     /// Version 11 (Slice B stage 22): HP is in hundredths at the new scale (a longsword deals 2-4) and an item has no grade any more. Version 10
@@ -22,7 +23,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 15;
+        public const int CurrentSchemaVersion = 16;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -56,6 +57,25 @@ namespace F1.Save
 
         /// <summary>Expeditions started per dungeon (version 14). A version 13 file knows none.</summary>
         public List<ExpeditionCountRecord> Expeditions;
+
+        /// <summary>The town's buildings above level 1 (version 16): a building not listed is at level 1.</summary>
+        public List<BuildingLevelRecord> Buildings;
+
+        /// <summary>The constructions going on (version 16), at most one per building.</summary>
+        public List<ConstructionRecord> Constructions;
+    }
+
+    public sealed class BuildingLevelRecord
+    {
+        public string BuildingId;
+        public int Level;
+    }
+
+    public sealed class ConstructionRecord
+    {
+        public string BuildingId;
+        public int ToLevel;
+        public int FinishDay;
     }
 
     public sealed class RecruitRecord

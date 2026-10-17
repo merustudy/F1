@@ -523,8 +523,17 @@ namespace F1.Sim
         /// the final stand past the last day. Expeditions play as in <see cref="Expedition"/>. Reports how runs end and when, and the gold. The policy's
         /// numbers are simulator tools, not game rules.
         /// </summary>
-        public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove, int bench, int treatAbove)
+        /// <param name="build">Whether the lobby policy upgrades the town's buildings (stage 30): the cheapest next level whose price leaves the hire price in hand, the gate first on a tie, then the stagecoach, the barracks, the inn.</param>
+        public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove, int bench, int treatAbove, bool build = true)
         {
+            string[] buildOrder = { BuildingId.Gate, BuildingId.Coach, BuildingId.Barracks, BuildingId.Inn };
+            long upgrades = 0, goldBuilt = 0, finished = 0;
+            var levelsAtEndBy = new Dictionary<string, long>(StringComparer.Ordinal);
+            foreach (string id in BuildingId.All)
+            {
+                levelsAtEndBy[id] = 0;
+            }
+
             int victories = 0, wipeouts = 0, deathLimits = 0, finalStandsLost = 0, finalStands = 0, finalStandsWon = 0, unlocked = 0, earlyWins = 0;
             long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
             long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
@@ -559,11 +568,36 @@ namespace F1.Sim
                         }
                     }
 
+                    // The buildings (stage 30): the cheapest next level the gold covers with a hire's price to spare, until none does.
+                    while (build)
+                    {
+                        string pick = null;
+                        int pickPrice = int.MaxValue;
+                        foreach (string id in buildOrder)
+                        {
+                            BuildingData next = BuildingRules.NextLevel(data, state, id);
+                            if (next != null && BuildingRules.CanUpgrade(data, state, id) == UpgradeCheck.Ok && state.Gold - next.Price >= data.Balance.HirePrice && next.Price < pickPrice)
+                            {
+                                pick = id;
+                                pickPrice = next.Price;
+                            }
+                        }
+
+                        if (pick == null)
+                        {
+                            break;
+                        }
+
+                        BuildingRules.Upgrade(data, state, pick);
+                        upgrades++;
+                        goldBuilt += pickPrice;
+                    }
+
                     party = ChooseParty(data, state);
                     RunRules.SetParty(data, state, party);
                     if (RunRules.CanRest(data, state) && AverageFatigue(state, party) >= restAbove)
                     {
-                        RunRules.Rest(data, state);
+                        finished += RunRules.Rest(data, state).Count;
                         rests++;
                         continue;
                     }
@@ -572,6 +606,14 @@ namespace F1.Sim
                     if (dungeon == null)
                     {
                         break;
+                    }
+
+                    // The gate under construction keeps the party home (stage 30): a day of rest passes the days until it is done.
+                    if (RunRules.CanDepart(data, state, dungeon.Id) == DepartCheck.GateLocked)
+                    {
+                        finished += RunRules.Rest(data, state).Count;
+                        rests++;
+                        continue;
                     }
 
                     if (dungeon.IsFinal && !noted && !RunRules.IsFinalStandDue(data, state))
@@ -600,6 +642,7 @@ namespace F1.Sim
                     expeditions++;
                     SettlementReport report = RunRules.Settle(data, state, expedition);
                     goldEarned += report.GoldEarned;
+                    finished += report.BuildingsCompleted.Count;
                     levelUps += report.LevelUps.Count;
                     if (expedition.FinalStand && state.Outcome == RunOutcome.Victory)
                     {
@@ -613,6 +656,11 @@ namespace F1.Sim
 
                 days += state.Day;
                 goldLeft += state.Gold;
+                foreach (string id in BuildingId.All)
+                {
+                    levelsAtEndBy[id] += BuildingRules.LevelOf(state, id);
+                }
+
                 rosterAtEnd += state.Roster.Count;
                 int highest = state.Roster.Count == 0 ? 0 : state.Roster.Max(m => m.Level);
                 levelsAtEnd += state.Roster.Sum(m => m.Level);
@@ -644,6 +692,8 @@ namespace F1.Sim
             Console.WriteLine($"  final dungeon (stage 28): expeditions {Average(finalExpeditions, runs)} per run, of which cleared {BattleStats.Percent((int)finalCleared, (int)finalExpeditions)}, "
                 + $"wiped {BattleStats.Percent((int)finalWiped, (int)finalExpeditions)}, retreated {BattleStats.Percent((int)finalRetreated, (int)finalExpeditions)}, deaths per expedition {Average(finalDeaths, (int)finalExpeditions)}; "
                 + $"runs that cleared it {BattleStats.Percent((int)runsThatClearedFinal, runs)}");
+            Console.WriteLine($"  buildings (stage 30): {(build ? "built" : "not built")}; upgrades per run {Average(upgrades, runs)} (finished {Average(finished, runs)}), gold spent {Average(goldBuilt, runs)}; "
+                + "levels at the end " + string.Join(", ", BuildingId.All.Select(id => $"{id} {Average(levelsAtEndBy[id], runs)}")));
             Console.WriteLine($"  levels (stage 27): level-ups per run {Average(levelUps, runs)}, the living at the end average level {Average(levelsAtEnd, (int)rosterAtEnd)}, "
                 + $"the highest {Average(highestLevel, (int)runsWithLiving)} on average (runs with someone living), at the last level ({data.MaxLevel}) in {BattleStats.Percent((int)runsAtMaxLevel, runs)} of runs");
         }

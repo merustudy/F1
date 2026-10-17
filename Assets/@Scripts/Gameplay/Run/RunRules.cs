@@ -71,7 +71,7 @@ namespace F1.Gameplay
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "recruit", state.ExpeditionCount), RngStream.Recruit);
             var drawn = new List<RecruitState>();
             IReadOnlyList<JobData> jobs = data.Jobs.Ordered;
-            while (drawn.Count < data.Balance.RecruitCount && pool.Count > 0)
+            while (drawn.Count < BuildingRules.RecruitCount(data, state) && pool.Count > 0)
             {
                 MercenaryData name = pool[rng.NextInt(pool.Count)];
                 pool.Remove(name);
@@ -89,12 +89,17 @@ namespace F1.Gameplay
                 return HireCheck.RunIsOver;
             }
 
+            if (BuildingRules.IsLocked(data, state, BuildingId.Coach))
+            {
+                return HireCheck.CoachLocked;
+            }
+
             if (index < 0 || index >= state.Recruits.Count)
             {
                 return HireCheck.NoCandidate;
             }
 
-            if (state.Roster.Count >= data.Balance.RosterLimit)
+            if (state.Roster.Count >= BuildingRules.RosterLimit(data, state))
             {
                 return HireCheck.RosterFull;
             }
@@ -119,16 +124,16 @@ namespace F1.Gameplay
             return hired;
         }
 
-        /// <summary>A mercenary can be dismissed while the run goes on and it is not the last one left (the run ends only by its outcomes).</summary>
-        public static bool CanDismiss(RunState state, string mercenaryId)
+        /// <summary>A mercenary can be dismissed while the run goes on, the barracks is not under construction (stage 30) and it is not the last one left (the run ends only by its outcomes).</summary>
+        public static bool CanDismiss(StaticData data, RunState state, string mercenaryId)
         {
-            return !state.IsOver && FindMercenary(state, mercenaryId) != null && state.Roster.Count > 1;
+            return !state.IsOver && !BuildingRules.IsLocked(data, state, BuildingId.Barracks) && FindMercenary(state, mercenaryId) != null && state.Roster.Count > 1;
         }
 
         /// <summary>Dismisses a mercenary, for free: out of the party (those behind advance) and the roster, never to return.</summary>
-        public static void Dismiss(RunState state, string mercenaryId)
+        public static void Dismiss(StaticData data, RunState state, string mercenaryId)
         {
-            if (!CanDismiss(state, mercenaryId))
+            if (!CanDismiss(data, state, mercenaryId))
             {
                 throw new InvalidOperationException($"Mercenary '{mercenaryId}' cannot be dismissed now.");
             }
@@ -148,6 +153,11 @@ namespace F1.Gameplay
             if (state.IsOver)
             {
                 return TreatCheck.RunIsOver;
+            }
+
+            if (BuildingRules.IsLocked(data, state, BuildingId.Inn))
+            {
+                return TreatCheck.InnLocked;
             }
 
             MercenaryState mercenary = FindMercenary(state, mercenaryId);
@@ -175,7 +185,7 @@ namespace F1.Gameplay
 
             MercenaryState mercenary = FindMercenary(state, mercenaryId);
             state.Gold -= data.Balance.TreatmentPrice;
-            mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -data.Balance.TreatmentRelief);
+            mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -BuildingRules.TreatmentRelief(data, state));
             mercenary.AfflictionId = FatigueRules.StateAfter(data, mercenary.AfflictionId, mercenary.Fatigue);
         }
 
@@ -359,6 +369,12 @@ namespace F1.Gameplay
                 return DepartCheck.RunIsOver;
             }
 
+            // The gate under construction keeps everyone home (stage 30); past the last day it does not (BuildingRules.IsLocked).
+            if (BuildingRules.IsLocked(data, state, BuildingId.Gate))
+            {
+                return DepartCheck.GateLocked;
+            }
+
             if (state.Party.Count < data.Balance.MinPartySize)
             {
                 return DepartCheck.PartyTooSmall;
@@ -402,15 +418,15 @@ namespace F1.Gameplay
             return !state.IsOver && !IsFinalStandDue(data, state);
         }
 
-        /// <summary>Passes RestDays. Everyone in the roster recovers: their fatigue comes down.</summary>
-        public static void Rest(StaticData data, RunState state)
+        /// <summary>Passes RestDays. Everyone in the roster recovers: their fatigue comes down. Returns the buildings whose construction the days finished (stage 30).</summary>
+        public static List<string> Rest(StaticData data, RunState state)
         {
             if (!CanRest(data, state))
             {
                 throw new InvalidOperationException(state.IsOver ? "The run is over." : "The last day has passed: only the final stand is left.");
             }
 
-            PassDays(data, state, data.Balance.RestDays, null);
+            return PassDays(data, state, data.Balance.RestDays, null);
         }
 
         /// <summary>How much fatigue comes down over a number of days at home. The lobby shows it on the rest button.</summary>
@@ -500,7 +516,7 @@ namespace F1.Gameplay
 
             // The lobby party keeps the formation chosen before leaving; those behind the dead advance.
             CloseGaps(state);
-            PassDays(data, state, dungeon.DurationDays, participants);
+            report.BuildingsCompleted = PassDays(data, state, dungeon.DurationDays, participants);
 
             if (expedition.Result == ExpeditionResult.Cleared)
             {
@@ -520,6 +536,9 @@ namespace F1.Gameplay
                 report.GoldEarned += report.GoldFromCoins;
             }
 
+            // The gate's levels add to everything the settlement pays (stage 30), rounded down.
+            report.GateBonusPercent = BuildingRules.GoldBonusPercent(data, state);
+            report.GoldEarned = BuildingRules.WithGateBonus(data, state, report.GoldEarned);
             state.Gold += report.GoldEarned;
             report.GoldAfter = state.Gold;
 
@@ -596,8 +615,11 @@ namespace F1.Gameplay
             SetPartyRows(state, rows);
         }
 
-        /// <summary>Advances the day counter. Mercenaries not in <paramref name="away"/> recover: their fatigue comes down for each day.</summary>
-        static void PassDays(StaticData data, RunState state, int days, HashSet<string> away)
+        /// <summary>
+        /// Advances the day counter. Mercenaries not in <paramref name="away"/> recover: their fatigue comes down for each day. The constructions
+        /// whose finish day is reached end (stage 30): the buildings finished are returned.
+        /// </summary>
+        static List<string> PassDays(StaticData data, RunState state, int days, HashSet<string> away)
         {
             state.Day += days;
             int recovery = FatigueRecovery(data.Balance, days);
@@ -611,6 +633,8 @@ namespace F1.Gameplay
                 mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -recovery);
                 mercenary.AfflictionId = FatigueRules.StateAfter(data, mercenary.AfflictionId, mercenary.Fatigue);
             }
+
+            return BuildingRules.Complete(state);
         }
     }
 }

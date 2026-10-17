@@ -40,6 +40,23 @@ namespace F1.Flow
             {
                 From14To15(save);
             }
+
+            if (save.SchemaVersion == 15)
+            {
+                From15To16(save);
+            }
+        }
+
+        /// <summary>Version 16 (Slice C stage 30) adds the town's building levels and constructions. A version 15 town is all at level 1 with nothing being built.</summary>
+        static void From15To16(RunSaveData save)
+        {
+            if (save.Run != null)
+            {
+                save.Run.Buildings = new List<BuildingLevelRecord>();
+                save.Run.Constructions = new List<ConstructionRecord>();
+            }
+
+            save.SchemaVersion = 16;
         }
 
         /// <summary>Version 15 (Slice C stage 27) adds a mercenary's level and experience. A version 14 mercenary is level 1 with none.</summary>

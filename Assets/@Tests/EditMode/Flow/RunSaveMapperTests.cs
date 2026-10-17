@@ -147,6 +147,19 @@ namespace F1.Tests
             yield return Case("ExpNegative", r => r.Roster[3].Exp = -1);
             yield return Case("ExpMeetsTheNextLevel", r => { r.Roster[3].Level = 1; r.Roster[3].Exp = 10; });
             yield return Case("ExpAtTheLastLevel", r => { r.Roster[3].Level = 3; r.Roster[3].Exp = 1; });
+
+            // Version 16 (stage 30): the buildings' levels on their ladders, one construction per building building the next level, not yet due.
+            yield return Case("BuildingsMissing", r => r.Buildings = null);
+            yield return Case("BuildingUnknown", r => r.Buildings.Add(new BuildingLevelRecord { BuildingId = "tower", Level = 2 }));
+            yield return Case("BuildingLevelZero", r => r.Buildings.Add(new BuildingLevelRecord { BuildingId = "barracks", Level = 0 }));
+            yield return Case("BuildingLevelPastTheLast", r => r.Buildings.Add(new BuildingLevelRecord { BuildingId = "barracks", Level = 3 }));
+            yield return Case("BuildingTwice", r => r.Buildings.AddRange(new[] { new BuildingLevelRecord { BuildingId = "inn", Level = 2 }, new BuildingLevelRecord { BuildingId = "inn", Level = 2 } }));
+            yield return Case("ConstructionUnknownBuilding", r => r.Constructions.Add(new ConstructionRecord { BuildingId = "tower", ToLevel = 2, FinishDay = 9 }));
+            yield return Case("ConstructionTwice", r => r.Constructions.AddRange(new[] { new ConstructionRecord { BuildingId = "gate", ToLevel = 2, FinishDay = 9 }, new ConstructionRecord { BuildingId = "gate", ToLevel = 2, FinishDay = 9 } }));
+            yield return Case("ConstructionSkipsALevel", r => r.Constructions.Add(new ConstructionRecord { BuildingId = "gate", ToLevel = 3, FinishDay = 9 }));
+            yield return Case("ConstructionOfTheLevelHeld", r => { r.Buildings.Add(new BuildingLevelRecord { BuildingId = "gate", Level = 2 }); r.Constructions.Add(new ConstructionRecord { BuildingId = "gate", ToLevel = 2, FinishDay = 9 }); });
+            yield return Case("ConstructionAlreadyDue", r => r.Constructions.Add(new ConstructionRecord { BuildingId = "gate", ToLevel = 2, FinishDay = r.Day }));
+            yield return Case("RosterOverTheRaisedLimit", r => { r.Buildings.Add(new BuildingLevelRecord { BuildingId = "barracks", Level = 2 }); r.Roster.AddRange(new[] { "eve", "finn", "gil", "hana", "ivo" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank", Level = 1 })); });
         }
 
         [TestCaseSource(nameof(BrokenRuns))]
@@ -439,6 +452,46 @@ namespace F1.Tests
             Assert.IsTrue(save.Run.Roster.TrueForAll(m => m.Level == 1 && m.Exp == 0));
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
             Assert.IsTrue(run.Roster.All(m => m.Level == 1 && m.Exp == 0));
+        }
+
+        [Test]
+        public void Migrate_From15_StartsTheTownAtLevelOne_WithNothingBeingBuilt()
+        {
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 15;
+            save.Run.Buildings = null;
+            save.Run.Constructions = null;
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            Assert.IsEmpty(save.Run.Buildings);
+            Assert.IsEmpty(save.Run.Constructions);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
+            Assert.IsTrue(BuildingId.All.All(id => BuildingRules.LevelOf(run, id) == 1));
+            Assert.IsEmpty(run.Constructions);
+        }
+
+        [Test]
+        public void Save_KeepsTheBuildingsLevels_AndTheConstructions_WithTheRosterTheyAllow()
+        {
+            // Stage 30: the barracks at level 2 holds a roster over the base limit; the gate is being built, due on day 9.
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            RunState run = kit.Run.Run;
+            run.Gold = 100;
+            run.BuildingLevels[BuildingId.Barracks] = 2;
+            kit.Run.Upgrade(BuildingId.Gate);
+            RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
+
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
+            CollectionAssert.AreEqual(new[] { "barracks:2" }, save.Run.Buildings.Select(b => b.BuildingId + ":" + b.Level).ToList());
+            Assert.AreEqual(1, save.Run.Constructions.Count);
+            Assert.AreEqual(("gate", 2, run.Day + 3), (save.Run.Constructions[0].BuildingId, save.Run.Constructions[0].ToLevel, save.Run.Constructions[0].FinishDay));
+            RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState _);
+            Assert.AreEqual(2, BuildingRules.LevelOf(read, BuildingId.Barracks));
+            Assert.AreEqual(1, BuildingRules.LevelOf(read, BuildingId.Inn));
+            Assert.AreEqual(run.Day + 3, BuildingRules.ConstructionOf(read, BuildingId.Gate).FinishDay);
+            Assert.AreEqual(60, read.Gold);
         }
 
         [Test]
