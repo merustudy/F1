@@ -1645,6 +1645,86 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673497738018817
+  - m_Id: 6151713168809984
+    m_Key: Lobby.BuildingPlate
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990656
+  - m_Id: 6151713177198592
+    m_Key: Lobby.Construction
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990657
+  - m_Id: 6151713181392896
+    m_Key: Lobby.UpgradeHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990658
+  - m_Id: 6151713181392897
+    m_Key: Lobby.UpgradeLine
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990659
+  - m_Id: 6151713181392898
+    m_Key: Lobby.UpgradeButton
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990660
+  - m_Id: 6151713181392899
+    m_Key: Lobby.MaxLevelLine
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990661
+  - m_Id: 6151713181392900
+    m_Key: Lobby.ConstructionLine
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990662
+  - m_Id: 6151713181392901
+    m_Key: Lobby.LockedNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990663
+  - m_Id: 6151713181392902
+    m_Key: Lobby.EffectBarracks
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990664
+  - m_Id: 6151713181392903
+    m_Key: Lobby.EffectInn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990665
+  - m_Id: 6151713181392904
+    m_Key: Lobby.EffectCoach
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990666
+  - m_Id: 6151713181392905
+    m_Key: Lobby.EffectGate
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990667
+  - m_Id: 6151713181392906
+    m_Key: Lobby.GateTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990668
+  - m_Id: 6151713181392907
+    m_Key: Lobby.GateNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990669
+  - m_Id: 6151713181392908
+    m_Key: Lobby.GateLocked
+    m_Metadata:
+      m_Items:
+      - rid: 8623673500289990670
+  - m_Id: 6172991850274816
+    m_Key: Battle.BagTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673501619585024
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3104,3 +3184,85 @@ MonoBehaviour:
       data:
         m_CommentText: Before the status under the details (round 77). {0} = party
           size.
+    - rid: 8623673500289990656
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The plate of a building with its level (stage 30, Round 78).
+          {0} = the building's name, {1} = its level.
+    - rid: 8623673500289990657
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The badge under a building under construction, and its bubble's
+          second line. {0} = the days left.
+    - rid: 8623673500289990658
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The end of a building's bubble when it can be upgraded. {0}
+          = the next level's price.
+    - rid: 8623673500289990659
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The building line of a window: the level and what the next
+          level gives. {0} = the level, {1} = the next level, {2} = the effect (Lobby.Effect*),
+          {3} = the price, {4} = the days.'
+    - rid: 8623673500289990660
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The button that starts a building's next level. {0} = the
+          price, {1} = the days.
+    - rid: 8623673500289990661
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The building line of a window at the last level. {0} = the
+          level, {1} = the effect at this level (Lobby.Effect* with the same value
+          twice).
+    - rid: 8623673500289990662
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The building line of a window while its level is being built.
+          {0} = the level, {1} = the level being built, {2} = the days left.
+    - rid: 8623673500289990663
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the lists of a window whose building is under construction:
+          its commands are off.'
+    - rid: 8623673500289990664
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: What the barracks' level gives. {0} = the roster limit now,
+          {1} = at the next level.
+    - rid: 8623673500289990665
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: What the inn's level gives. {0} = the treatment's relief now,
+          {1} = at the next level.
+    - rid: 8623673500289990666
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: What the stagecoach's level gives. {0} = the candidates now,
+          {1} = at the next level.
+    - rid: 8623673500289990667
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: What the gate's level gives. {0} = the gold bonus now in percent,
+          {1} = at the next level.
+    - rid: 8623673500289990668
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Title of the gate window (stage 30): the way out and the
+          gate''s level.'
+    - rid: 8623673500289990669
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the gate window''s button: the gate''s levels add to
+          the settlement''s gold.'
+    - rid: 8623673500289990670
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The depart status while the gate is under construction (lobby
+          and expedition screen). {0} = the days left.
+    - rid: 8623673501619585024
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The plate of a bag lying on the floor (round 79): its name
+          and its squares. {0} = the name, {1} = squares across, {2} = squares down.'

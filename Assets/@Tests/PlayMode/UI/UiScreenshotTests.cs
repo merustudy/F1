@@ -288,6 +288,15 @@ namespace F1.Tests
             leveled.Level = 2;
             leveled.Exp = 4;
             lobby.Refresh();
+            // The town's buildings (stage 30, Round 78): with gold staged, the barracks is put under construction (the scaffold, the badge, the
+            // bubble) and stays so for the lap: it is done when the party comes home (3 days against the mine's 5), and the lobby after shows it grown.
+            Managers.Run.Run.Gold = 120;
+            lobby.Refresh();
+            Managers.Run.Upgrade(BuildingId.Barracks);
+            lobby.Refresh();
+            lobby.Barracks.Hover();
+            yield return Capture(prefix + "_67_lobby_construction");
+            lobby.Barracks.Leave();
             lobby.Coach.Hover();
             yield return Capture(prefix + "_61_lobby_hover");
             lobby.Coach.Leave();
@@ -440,15 +449,12 @@ namespace F1.Tests
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
 
-                            // A bag (Slice B stage 19): a pouch staged under the start bag, picked up by its empty square, held over the
-                            // frame, which shows its squares while a bag is held.
+                            // A bag (Slice B stage 19; round 79): a pouch staged under the start bag as Diablo's well. It stays put: a placed
+                            // bag is never picked up, so the picture shows the board with the two bags.
                             front.Board.Bags.Add(new BoardBag(shotData.Bags.Get("leather_pouch"), new Placement(0, 3)));
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
-                            UiTestUtil.ClickSquare(board1, 1, 3);
-                            UiTestUtil.HoverSquare(board1, 1, 5);
-                            yield return Capture(prefix + "_45_map_bag_held");
-                            UiTestUtil.ClickSquare(board1, 0, 3);
+                            yield return Capture(prefix + "_45_map_bag_placed");
                             front.Board.Bags.RemoveAt(front.Board.Bags.Count - 1);
 
                             // The whetstone's stars (Slice B stage 20, Backpack Battles' way): in the buckler's square, under the job weapon's
@@ -528,6 +534,27 @@ namespace F1.Tests
                                 }
 
                                 yield return Capture(prefix + "_42_shop");
+
+                                // Round 79: the merchant's bag row with the bags' pictures (staged: the last two goods become the two bags on sale,
+                                // put back after the picture).
+                                List<ItemOffer> shopStock = Managers.Expedition.Expedition.Shop.Stock;
+                                int goods = Managers.Expedition.ShopGoodsCount;
+                                if (goods >= 2)
+                                {
+                                    ItemOffer[] stagedGoods = { shopStock[goods - 2], shopStock[goods - 1] };
+                                    shopStock[goods - 2] = new ItemOffer(OfferKind.Bag, "leather_pouch");
+                                    shopStock[goods - 1] = new ItemOffer(OfferKind.Bag, "belt_pouch");
+                                    // The screen remembers a stock's layout by the node and the refresh count: a staged stock needs a new count to be laid out anew.
+                                    Managers.Expedition.Expedition.Shop.Refreshes++;
+                                    map.Refresh();
+                                    yield return UiTestUtil.WaitForRedraw();
+                                    yield return Capture(prefix + "_69_shop_bags");
+                                    shopStock[goods - 2] = stagedGoods[0];
+                                    shopStock[goods - 1] = stagedGoods[1];
+                                    Managers.Expedition.Expedition.Shop.Refreshes--;
+                                    map.Refresh();
+                                    yield return UiTestUtil.WaitForRedraw();
+                                }
                                 if (pick >= 0)
                                 {
                                     UiTestUtil.ClickGood(map.Merchant, pick);
@@ -657,6 +684,20 @@ namespace F1.Tests
                             // The last blows' numbers and the fallen's ghosts fade first, so the picture shows the win as it settles.
                             yield return new WaitForSecondsRealtime(1.5f);
                             yield return Capture(prefix + "_06_battle_won");
+                        }
+
+                        if (!capturedLoot && Managers.Expedition.Expedition.Loot.Count > 0 && Managers.Expedition.Expedition.Loot[0] != null)
+                        {
+                            // Round 79: a bag lying on the floor (staged in the first drop's place: an elite's bag), its picture at its squares'
+                            // size and its name with its squares on the plate; the drop is put back before the lap goes on.
+                            ItemOffer stagedDrop = Managers.Expedition.Expedition.Loot[0];
+                            Managers.Expedition.Expedition.Loot[0] = new ItemOffer(OfferKind.Bag, "leather_pouch");
+                            battle.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_68_loot_bag");
+                            Managers.Expedition.Expedition.Loot[0] = stagedDrop;
+                            battle.Refresh();
+                            yield return UiTestUtil.WaitForRedraw();
                         }
 
                         int rowOne = Managers.Expedition.Expedition.Members.FindIndex(m => m.Alive && m.Row == 1);

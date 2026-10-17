@@ -326,7 +326,7 @@ namespace F1.Tests
             UiTestUtil.Click(screen, "Frame/Header/ToLobby");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             Assert.AreEqual(GamePhase.Lobby, Managers.Expedition.Phase);
-            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Gate");
+            UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Strip/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             screen = UiTestUtil.Screen<ExpeditionScreen>();
             Assert.AreEqual(mine.Id, screen.SelectedDungeonId, "The choice is made here each time.");
@@ -370,7 +370,7 @@ namespace F1.Tests
             Assert.AreEqual(0, run.Party.Count);
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party no longer keeps the screen shut: the party is formed there.");
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
-            UiTestUtil.Click(lobby, "Frame/Gate");
+            UiTestUtil.Click(lobby, "Frame/Strip/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             ExpeditionScreen screen = UiTestUtil.Screen<ExpeditionScreen>();
             Assert.AreEqual($"파티 0명 · 파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/Details/Status"), "No strip any more (round 77): the party's size and the status under the details.");
@@ -1517,6 +1517,14 @@ namespace F1.Tests
             var cost = UiTestUtil.At(map, UiTestUtil.ShopRefreshCost).GetComponent<TMP_Text>();
             Assert.AreEqual(cost.text.Length, cost.textInfo.characterCount, "The refresh cost is drawn whole.");
 
+            // Round 79: a bag on offer shows its picture over a tile of its leather's colour, not the well (the shipped bags all have one).
+            foreach (int bagSlot in Enumerable.Range(0, goodsCount).Where(i => stock[i].Kind == OfferKind.Bag))
+            {
+                ItemSlotView bagPiece = map.Merchant.PieceOf(bagSlot);
+                Assert.IsNotNull(bagPiece.Icon, "The bag's picture.");
+                Assert.AreEqual(UiPalette.BagRim(stock[bagSlot].Id), bagPiece.Ground, "On a tile of its leather's colour.");
+            }
+
             // Round 57: the pointer over a good shows Diablo's tooltip over it (its facts without the grade, and its price), centred on its
             // piece; it takes no pointer, and goes when the pointer leaves. An item picked: its piece is the held one's lighter blue, and no
             // tooltip shows (it rides the pointer); no card opens; the panel says how to buy.
@@ -1775,11 +1783,11 @@ namespace F1.Tests
         }
 
         /// <summary>
-        /// A bag on the party side (Slice B stage 19): picked up by an empty square of it, the frame shows while it is held, its ghost says
-        /// where it goes, and put down it carries the items wholly inside it; turned, they turn with it. The start bag is never picked up.
+        /// A bag on the party side (Slice B stage 19; round 79, 2026-10-17): drawn as Diablo's well, and once put down it stays: its empty
+        /// square picks nothing up (as the start bag's never did), no frame shows, and the items in it still move.
         /// </summary>
         [UnityTest]
-        public IEnumerator PartySide_ABagIsPickedByAnEmptySquare_ShowsTheFrameWhileHeld_AndCarriesItsItems_TurnedWithIt()
+        public IEnumerator PartySide_ABagOnTheBoard_StaysPut_AndItsEmptySquarePicksNothing()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
@@ -1796,53 +1804,28 @@ namespace F1.Tests
             Assert.AreEqual(2, board.Grid.BagsShown);
             Assert.AreEqual(2, board.Grid.GetComponentsInChildren<Image>().Count(i => i.name.EndsWith("BagTemplateWell")), "Each bag is Diablo's well (round 49): a rim round the grey of its squares.");
             Assert.AreEqual(GridSquareLook.Empty, board.Grid.SquareAt(2, 3).Look, "The pouch's empty square.");
-            Assert.IsFalse(board.Grid.SquareAt(0, 5).ShowsDashes, "No frame while no bag is held.");
             Assert.AreEqual(GridSquareLook.Hidden, board.Grid.SquareAt(0, 5).Look, "Outside every bag: nothing shows.");
 
-            // The start bag's empty square picks nothing up; the pouch's does, and the frame shows.
+            // Neither bag's empty square picks it up; the frame never shows for a placed bag.
             UiTestUtil.ClickSquare(board, 2, 1);
             yield return null;
             Assert.IsFalse(party.Hand.Holding, "The start bag never moves.");
             UiTestUtil.ClickSquare(board, 2, 3);
             yield return null;
-            Assert.AreEqual(row1.Member, party.Hand.BagMember);
-            Assert.AreEqual(GridSquareLook.Frame, board.Grid.SquareAt(0, 5).Look, "While a bag is held the frame shows where it can go.");
-            Assert.IsTrue(board.Grid.SquareAt(0, 5).ShowsDashes, "As dashed squares.");
-            StringAssert.Contains(UiText.Name(data.Bags.Get("leather_pouch").Name), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
-            UiTestUtil.HoverSquare(board, 0, 2);
-            yield return null;
-            Assert.AreEqual(GhostKind.Refused, board.Grid.GhostShown, "Over the start bag.");
-            UiTestUtil.HoverSquare(board, 0, 5);
-            yield return null;
-            Assert.AreEqual(GhostKind.Fits, board.Grid.GhostShown);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Board.GhostBag), board.Grid.GhostLabel);
+            Assert.IsFalse(party.Hand.Holding, "Nor does a placed bag (round 79).");
+            Assert.IsFalse(board.Grid.SquareAt(0, 5).ShowsDashes, "No frame: nothing is held.");
+            Assert.AreEqual(new Placement(0, 3), front.Board.BagAt(1, 3).At);
 
-            // Put down two rows lower, the dagger goes with it.
-            Managers.Sound.ForgetEffects();
-            UiTestUtil.ClickSquare(board, 0, 5);
+            // The dagger in it still moves: picked by its square, put down two rows lower on the pack's free row.
+            UiTestUtil.ClickSquare(board, 0, 3);
             yield return null;
-            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.IsTrue(party.Hand.Holding);
+            Assert.AreEqual(row1.Member, party.Hand.ItemMember);
+            UiTestUtil.ClickSquare(board, 0, 1);
+            yield return null;
             Assert.IsFalse(party.Hand.Holding);
-            Assert.AreEqual(new Placement(0, 5), front.Board.BagAt(1, 5).At);
-            Assert.AreEqual(new Placement(0, 5), front.Board.ItemAt(0, 5).At, "The dagger kept its place in the pouch.");
-            Assert.IsNull(front.Board.BagAt(0, 3));
-            Assert.AreEqual(GridSquareLook.Hidden, board.Grid.SquareAt(2, 3).Look);
-            Assert.IsFalse(board.Grid.SquareAt(2, 3).ShowsDashes, "Let go: the frame is gone.");
-
-            // Picked again and turned a quarter: the pouch stands up in the first column and the dagger turns with it. Its centre rides the
-            // pointer (round 54), so the pointer on the first column's row 6 stands it from row 5.
-            UiTestUtil.ClickSquare(board, 2, 5);
-            yield return null;
-            party.TurnHeld(1);
-            UiTestUtil.HoverSquare(board, 0, 6);
-            yield return null;
-            Assert.AreEqual(GhostKind.Fits, board.Grid.GhostShown);
-            UiTestUtil.ClickSquare(board, 0, 6);
-            yield return null;
-            Assert.AreEqual(new Placement(0, 5, 1), front.Board.BagAt(0, 7).At, "One square across and three down.");
-            BoardItem dagger = front.Board.ItemAt(0, 6);
-            Assert.AreEqual(new Placement(0, 5, 1), dagger.At, "The dagger stands up with the pouch.");
-            Assert.AreEqual(1, board.PieceAt(0, 5).ArtTurns);
+            Assert.IsNotNull(front.Board.ItemAt(0, 1), "The dagger moved up into the pack.");
+            Assert.AreEqual(new Placement(0, 3), front.Board.BagAt(0, 3).At, "The pouch stayed.");
         }
 
         [UnityTest]
@@ -2657,10 +2640,17 @@ namespace F1.Tests
 
             // The town and its plates; nothing is lit, no window is open.
             Assert.IsNotNull(UiTestUtil.At(lobby, "Frame/Town").GetComponent<Image>().sprite, "The painted town.");
-            Assert.AreEqual("막사", lobby.Barracks.Name);
-            Assert.AreEqual("쉼터", lobby.Inn.Name);
-            Assert.AreEqual("역마차", lobby.Coach.Name);
-            Assert.AreEqual("원정", lobby.Gate.Name);
+            Assert.AreEqual("막사  Lv 1", lobby.Barracks.Name, "The plate carries the level (stage 30).");
+            Assert.AreEqual("쉼터  Lv 1", lobby.Inn.Name);
+            Assert.AreEqual("역마차  Lv 1", lobby.Coach.Name);
+            Assert.AreEqual("원정  Lv 1", lobby.Gate.Name);
+            foreach (BuildingView building in new[] { lobby.Barracks, lobby.Inn, lobby.Coach, lobby.Gate })
+            {
+                Assert.IsNotNull(building.Picture, "A picture of its own at its level (Round 78).");
+                Assert.IsFalse(building.ScaffoldShown || building.BadgeShown, "Nothing is being built.");
+            }
+
+            Assert.Greater(lobby.Barracks.Rect.sizeDelta.x, lobby.Inn.Rect.sizeDelta.x, "The barracks' plot is the widest.");
             Assert.IsFalse(lobby.Barracks.IsLit || lobby.Inn.IsLit || lobby.Coach.IsLit || lobby.Gate.IsLit);
             Assert.IsFalse(lobby.BubbleShown);
             Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
@@ -2671,8 +2661,8 @@ namespace F1.Tests
             lobby.Coach.Hover();
             Assert.IsTrue(lobby.Coach.IsLit);
             Assert.IsTrue(lobby.BubbleShown);
-            Assert.AreEqual("역마차", lobby.BubbleName);
-            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 20", lobby.BubbleDetail);
+            Assert.AreEqual("역마차  Lv 1", lobby.BubbleName);
+            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 20", lobby.BubbleDetail, "No gold: no upgrade hint.");
             lobby.Coach.Leave();
             Assert.IsFalse(lobby.Coach.IsLit);
             Assert.IsFalse(lobby.BubbleShown);
@@ -2771,9 +2761,92 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest").interactable, "No day is left to rest.");
             Assert.AreEqual("쉴 날이 없다", UiTestUtil.TextAt(lobby, "Frame/InnWindow/InnNote"));
             UiTestUtil.CloseQuarter(lobby);
-            UiTestUtil.Click(lobby, "Frame/Gate");
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Gate);
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/GateWindow").gameObject.activeSelf, "The gate opens its window (stage 30): the level, the dungeons, the way out.");
+            Assert.AreEqual("심연의 보스와 싸운다", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDungeons"));
+            Assert.AreEqual("최종 결전으로", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDepart/GateDepartLabel"));
+            UiTestUtil.Click(lobby, "Frame/GateWindow/GateDepart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             Assert.AreEqual("abyss", UiTestUtil.Screen<ExpeditionScreen>().SelectedDungeonId, "Only the final stand is left.");
+        }
+
+        [UnityTest]
+        public IEnumerator Lobby_TheTown_UpgradesABuilding_ForGoldAndDays_LocksItWhileItIsBuilt_AndGrowsItWhenTheDaysPass()
+        {
+            // Stage 30 (Round 78): the stagecoach's window carries the building line; [업그레이드] pays 40 gold and puts the scaffold and the badge
+            // on the stagecoach for 3 days, during which it does not hire; a gate being built keeps the party home; three days of rest finish both.
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            StaticData data = Managers.Data.Data;
+            RunState run = Managers.Run.Run;
+            Assume.That(data.BuildingAt(BuildingId.Coach, 2).Price, Is.EqualTo(40));
+            Assume.That(data.BuildingAt(BuildingId.Coach, 2).Days, Is.EqualTo(3));
+            run.Gold = 100;
+            lobby.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+
+            lobby.Coach.Hover();
+            Assert.AreEqual($"후보 {run.Recruits.Count}명 · 고용 금 20 · 업그레이드 금 40", lobby.BubbleDetail, "With the gold, the bubble names the upgrade.");
+            lobby.Coach.Leave();
+
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
+            Assert.AreEqual("Lv 1", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachLevel"));
+            Assert.AreEqual("Lv 1 → Lv 2: 후보 3명 → 4명 · 금 40 · 3일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.AreEqual("업그레이드 금 40 · 3일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade/CoachUpgradeLabel"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable);
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLocked").gameObject.activeSelf);
+            UiTestUtil.Click(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(60, run.Gold);
+            Assert.AreEqual(1, Managers.Run.BuildingLevel(BuildingId.Coach), "The level comes with the days.");
+            Assert.AreEqual("Lv 1 → Lv 2 건설 중 · 3일 남음", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.IsFalse(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").gameObject.activeSelf, "No second upgrade while one is built.");
+            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLocked").gameObject.activeSelf, "Closed while under construction.");
+            Assert.IsTrue(lobby.Candidates.All(c => !c.Hire.interactable), "No hiring at a stagecoach being built.");
+            Assert.AreEqual(HireCheck.CoachLocked, Managers.Run.CanHire(0));
+            UiTestUtil.CloseQuarter(lobby);
+
+            // The town: the scaffold and the badge on the stagecoach, its plate dimmed, its bubble saying the days.
+            Assert.IsTrue(lobby.Coach.ScaffoldShown);
+            Assert.IsTrue(lobby.Coach.BadgeShown);
+            Assert.AreEqual("건설 중 · 3일 남음", lobby.Coach.BadgeWords);
+            Assert.IsFalse(lobby.Barracks.ScaffoldShown);
+            lobby.Coach.Hover();
+            Assert.AreEqual("건설 중 · 3일 남음", lobby.BubbleDetail);
+            lobby.Coach.Leave();
+
+            // The gate too: the strip's button and the gate window's way out close until it is done; the expedition screen would say so as well.
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Gate);
+            UiTestUtil.Click(lobby, "Frame/GateWindow/GateLine/GateUpgrade");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(20, run.Gold);
+            Assert.AreEqual(DepartCheck.GateLocked, Managers.Run.CanDepart(data.Dungeons.Ordered[0].Id));
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/GateWindow/GateDepart").interactable);
+            Assert.AreEqual("성문이 건설 중입니다 · 3일 남음", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDepart/GateDepartLabel"));
+            UiTestUtil.CloseQuarter(lobby);
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
+
+            // Three days of rest at the inn (open while it is not the one being built): the badge counts down, then both are done and grown.
+            for (int day = 0; day < 3; day++)
+            {
+                yield return UiTestUtil.RestAtTheInn(lobby);
+            }
+
+            Assert.AreEqual(4, run.Day);
+            Assert.AreEqual(2, Managers.Run.BuildingLevel(BuildingId.Coach));
+            Assert.AreEqual(2, Managers.Run.BuildingLevel(BuildingId.Gate));
+            Assert.IsFalse(lobby.Coach.ScaffoldShown || lobby.Coach.BadgeShown || lobby.Gate.ScaffoldShown);
+            Assert.AreEqual("역마차  Lv 2", lobby.Coach.Name);
+            Assert.AreEqual("원정  Lv 2", lobby.Gate.Name);
+            Assert.Greater(lobby.Coach.Rect.sizeDelta.x, LobbyScreen.Plots[BuildingId.Coach].Width * LobbyScreen.LevelScale(1), "The picture grew with the level.");
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
+            Assert.AreEqual(HireCheck.Ok, Managers.Run.CanHire(0));
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
+            Assert.AreEqual("Lv 2 → Lv 3: 후보 4명 → 5명 · 금 80 · 5일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable, "20 gold does not cover level 3.");
+            UiTestUtil.CloseQuarter(lobby);
         }
 
         static IEnumerator DepartToTheMap()

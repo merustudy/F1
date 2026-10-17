@@ -57,11 +57,16 @@ namespace F1.Tests
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("background/dungeon/", StringComparison.Ordinal)), "The backgrounds of the dungeons.");
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("item/", StringComparison.Ordinal)), "The icons of the items.");
             Assert.IsTrue(entries.Any(e => e.Address == "item/gladius-glow"), "The glow of the unique item (stage 23), with its icon.");
+            Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Building(F1.Data.BuildingId.Gate, 3)), "The buildings at their levels (stage 30).");
+            Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Scaffold), "The scaffold (stage 30).");
+            Assert.IsTrue(entries.Any(e => e.Address == "bag/leather-pouch"), "The bags' pictures (round 79), in the expedition scope like an item's icon.");
             foreach (AddressEntry entry in entries)
             {
                 Assert.AreEqual(ArtSetup.ArtGroup, entry.Group, entry.Address);
-                // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2), and the town by the lobby itself (stage 26).
-                bool lobbys = entry.Address == F1.Data.ArtAddress.ExpeditionMap || entry.Address == F1.Data.ArtAddress.LobbyTown;
+                // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2), the town by the lobby itself (stage 26),
+                // and the town's buildings and the scaffold stand on it (round 78, stage 30).
+                bool lobbys = entry.Address == F1.Data.ArtAddress.ExpeditionMap || entry.Address == F1.Data.ArtAddress.LobbyTown
+                    || entry.Address.StartsWith("building/", StringComparison.Ordinal);
                 ResourceScope scope = lobbys ? ResourceScope.Lobby : ResourceScope.Expedition;
                 Assert.AreEqual(scope, entry.Scope, entry.Address);
                 Assert.AreEqual(ArtSetup.AssetPath(entry.Address), entry.AssetPath, entry.Address);

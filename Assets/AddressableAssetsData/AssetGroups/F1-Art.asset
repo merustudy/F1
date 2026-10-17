@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 05f245f675c49497eb3d46669db69892
+    m_Address: building/barracks-1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 06be297a7fc8248258ee9d5b07dd0f39
     m_Address: pose/job/knight-resolute
     m_ReadOnly: 0
@@ -75,6 +81,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1770aae3b9d94403e9209dd6fe55c0e3
+    m_Address: building/gate-2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19a13001e06904735970f98c25fbdd23
     m_Address: item/gladius
     m_ReadOnly: 0
@@ -87,11 +99,23 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1e5a34ccf390844589b885fc29f61533
+    m_Address: building/scaffold
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 1e7d3e6c0ae9041f8a0144fe6ce203ae
     m_Address: pose/job/knight-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 21074666c7c8e487bb9aa7894fe56153
+    m_Address: building/inn-1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23504f9eb39a942c09f1f2d36f854622
     m_Address: pose/enemy/cave-rat-hit
@@ -225,8 +249,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65d78c98ebe0c44f892f1a8563e4089a
+    m_Address: building/coach-1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 66eca0ab6a3634e129c0e08845f047a2
     m_Address: pose/enemy/mine-overseer-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 697cd94e323bb42c29acf2bd42e71a70
+    m_Address: bag/leather-pouch
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -267,6 +303,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8354a9d8c919445ee938b630481fdad2
+    m_Address: building/gate-3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -284,6 +326,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 88272b3a22b4a472faa8fc36967b19f9
+    m_Address: building/coach-3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ef6459b91f264e388f97a10281d294d
     m_Address: item/longbow
@@ -309,6 +357,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 99fd9a6044a5144caad129e3af8ebaf4
+    m_Address: building/coach-2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9e5bf5ff7950f439fa56d1d1b76592ab
     m_Address: pose/job/valkyrie-resolute
     m_ReadOnly: 0
@@ -317,6 +371,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a3023d20283bb42a2b4c0e75497dd2bc
     m_Address: unit/enemy/cave-rat
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a334ee4345d544a6da26b11feafb7680
+    m_Address: building/inn-3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a48ada23d84b5496b82fd1efcbeb7c77
+    m_Address: bag/belt-pouch
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -374,6 +440,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b82d6af4f693c4edc8761a2d4824345d
+    m_Address: building/gate-1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bd819f93ad5824e9cb91d8e2230a3325
     m_Address: pose/enemy/goblin-raider-hit
@@ -465,6 +537,24 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e62b589c0f8f74c69b01ee304619d5e6
+    m_Address: building/barracks-3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e73faa3166dad4cfe8e7aa0c3908bd54
+    m_Address: bag/leather-pack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e84c446a1f4714c7eb0d8fc34c7eb44a
+    m_Address: building/barracks-2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e92e1c7de97174586bcb155d2bb4e10d
     m_Address: unit/job/knight
     m_ReadOnly: 0
@@ -512,6 +602,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd6a16b0eef884df382f399ecc117f8c
+    m_Address: building/inn-2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a299c20a8ef58429d832de7bde7daad2, type: 2}

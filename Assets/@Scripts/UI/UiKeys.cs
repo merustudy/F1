@@ -105,6 +105,23 @@ namespace F1.UI
             public const string FallenLabel = "Lobby.FallenLabel";
             public const string FallenValue = "Lobby.FallenValue";
             public const string Survivors = "Lobby.Survivors";
+
+            // The town's buildings, their levels and their construction (stage 30, Round 78).
+            public const string BuildingPlate = "Lobby.BuildingPlate";
+            public const string Construction = "Lobby.Construction";
+            public const string UpgradeHint = "Lobby.UpgradeHint";
+            public const string UpgradeLine = "Lobby.UpgradeLine";
+            public const string UpgradeButton = "Lobby.UpgradeButton";
+            public const string MaxLevelLine = "Lobby.MaxLevelLine";
+            public const string ConstructionLine = "Lobby.ConstructionLine";
+            public const string LockedNote = "Lobby.LockedNote";
+            public const string EffectBarracks = "Lobby.EffectBarracks";
+            public const string EffectInn = "Lobby.EffectInn";
+            public const string EffectCoach = "Lobby.EffectCoach";
+            public const string EffectGate = "Lobby.EffectGate";
+            public const string GateTitle = "Lobby.GateTitle";
+            public const string GateNote = "Lobby.GateNote";
+            public const string GateLocked = "Lobby.GateLocked";
         }
 
         /// <summary>The expedition screen (Round 71 E2): the map, the chosen dungeon and the departure.</summary>
@@ -314,6 +331,7 @@ namespace F1.UI
             public const string LootCount = "Battle.LootCount";
             public const string LootHint = "Battle.LootHint";
             public const string LootPickedHint = "Battle.LootPickedHint";
+            public const string BagTitle = "Battle.BagTitle";
             public const string ShowLog = "Battle.ShowLog";
             public const string LogTitle = "Battle.LogTitle";
             public const string FigurePlaceholder = "Battle.FigurePlaceholder";

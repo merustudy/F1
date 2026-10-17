@@ -80,6 +80,21 @@ Lobby.ExpeditionsOf,"One dungeon of the split. {0} = the dungeon, {1} = expediti
 Lobby.FallenLabel,Row of the result window: how many died.,전사자,Fallen
 Lobby.FallenValue,"The dead as a count. {0} = the count.",{0}명,{0}
 Lobby.Survivors,Row of the result window: who is still alive.,살아남은 용병,Still alive
+Lobby.BuildingPlate,"The plate of a building with its level (stage 30, Round 78). {0} = the building's name, {1} = its level.",{0}  Lv {1},{0}  Lv {1}
+Lobby.Construction,"The badge under a building under construction, and its bubble's second line. {0} = the days left.",건설 중 · {0}일 남음,Under construction · {0} days left
+Lobby.UpgradeHint,"The end of a building's bubble when it can be upgraded. {0} = the next level's price.",업그레이드 금 {0},upgrade: gold {0}
+Lobby.UpgradeLine,"The building line of a window: the level and what the next level gives. {0} = the level, {1} = the next level, {2} = the effect (Lobby.Effect*), {3} = the price, {4} = the days.",Lv {0} → Lv {1}: {2} · 금 {3} · {4}일,Lv {0} → Lv {1}: {2} · gold {3} · {4} days
+Lobby.UpgradeButton,"The button that starts a building's next level. {0} = the price, {1} = the days.",업그레이드 금 {0} · {1}일,Upgrade · gold {0} · {1} days
+Lobby.MaxLevelLine,"The building line of a window at the last level. {0} = the level, {1} = the effect at this level (Lobby.Effect* with the same value twice).",Lv {0} · 최고 레벨 · {1},Lv {0} · top level · {1}
+Lobby.ConstructionLine,"The building line of a window while its level is being built. {0} = the level, {1} = the level being built, {2} = the days left.",Lv {0} → Lv {1} 건설 중 · {2}일 남음,Lv {0} → Lv {1} under construction · {2} days left
+Lobby.LockedNote,"Under the lists of a window whose building is under construction: its commands are off.",건설 중이라 쓸 수 없다,Closed while under construction
+Lobby.EffectBarracks,"What the barracks' level gives. {0} = the roster limit now, {1} = at the next level.",로스터 상한 {0} → {1},roster limit {0} → {1}
+Lobby.EffectInn,"What the inn's level gives. {0} = the treatment's relief now, {1} = at the next level.",치료 피로 -{0} → -{1},treatment -{0} → -{1}
+Lobby.EffectCoach,"What the stagecoach's level gives. {0} = the candidates now, {1} = at the next level.",후보 {0}명 → {1}명,{0} → {1} candidates
+Lobby.EffectGate,"What the gate's level gives. {0} = the gold bonus now in percent, {1} = at the next level.",정산 금 +{0}% → +{1}%,settlement gold +{0}% → +{1}%
+Lobby.GateTitle,Title of the gate window (stage 30): the way out and the gate's level.,성문 — 원정,Gate — Expedition
+Lobby.GateNote,"Under the gate window's button: the gate's levels add to the settlement's gold.",성문의 레벨은 귀환 정산의 금을 더한다,The gate's levels add to the settlement's gold
+Lobby.GateLocked,"The depart status while the gate is under construction (lobby and expedition screen). {0} = the days left.",성문이 건설 중입니다 · {0}일 남음,The gate is under construction · {0} days left
 Expedition.Title,Header of the expedition screen (round 71 E2).,원정,Expedition
 Expedition.ToLobby,Back to the lobby.,로비로,To the lobby
 Expedition.Home,The company's town on the map.,본부,Home
@@ -165,7 +180,7 @@ Map.OfferPrice,The price line of a good in the merchant's tooltip (Slice B stage
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Board.Forward,Moves a mercenary one row forward (towards row 1); the one standing there moves back.,앞으로,Forward
 Board.Back,Moves a mercenary one row back; the one standing there moves forward.,뒤로,Back
-Board.Hint,How to use the boards on the party side (Slice B stage 19).,"아이템을 누르면 집고, 칸을 누르면 놓습니다(겹친 하나는 인벤토리로). 든 채로 우클릭·휠·R: 돌리기. 가방의 빈 칸을 누르면 가방을 집습니다. 앞으로와 뒤로는 옆 열의 용병과 자리를 바꿉니다.","Click an item to pick it up, then a square to put it down (one item in the way goes to the inventory). While holding: right-click, wheel or R turns it. Click an empty square of a bag to pick the bag. Forward and Back swap with the next row."
+Board.Hint,How to use the boards on the party side (Slice B stage 19).,"아이템을 누르면 집고, 칸을 누르면 놓습니다(겹친 하나는 인벤토리로). 든 채로 우클릭·휠·R: 돌리기. 앞으로와 뒤로는 옆 열의 용병과 자리를 바꿉니다.","Click an item to pick it up, then a square to put it down (one item in the way goes to the inventory). While holding: right-click, wheel or R turns it. Forward and Back swap with the next row."
 Board.InventoryShow,Opens the inventory window; I does too (round 52).,인벤토리 보기 (I),Show inventory (I)
 Board.InventoryHide,Closes the inventory window; I does too (round 52).,인벤토리 닫기 (I),Close inventory (I)
 Board.InventoryHeading,The heading of the inventory popup (round 49).,인벤토리,Inventory
@@ -250,6 +265,7 @@ Battle.Coins,On the result window: the region coins the victory brought (round 4
 Battle.LootCount,"On the band over the stage after a win (round 47): how many drops lie on the floor. {0} = the count.",전리품 {0},Loot {0}
 Battle.LootHint,"On the board panel after a win, while no drop is picked (round 47; the A key 2026-10-17).",전리품을 누르면 고릅니다. A: 남은 전리품을 모두 인벤토리에 넣습니다. 남은 것은 계속을 누르면 두고 갑니다. 우클릭은 아이템 정보입니다.,Click a drop to pick it. A takes every drop left into the inventory. Continue leaves the rest. Right-click for an item's facts.
 Battle.LootPickedHint,"On the board panel after a win, while a drop is picked (round 47, stage 19).",고른 전리품을 왼쪽 보드의 칸에 놓으세요. 든 채로 우클릭·휠·R: 돌리기.,"Click a square on the left to put the drop there. While holding: right-click, wheel or R turns it."
+Battle.BagTitle,"The plate of a bag lying on the floor (round 79): its name and its squares. {0} = the name, {1} = squares across, {2} = squares down.",{0}  {1}×{2},{0}  {1}×{2}
 Battle.ShowLog,Opens the log of the finished battle from the result panel.,로그 보기,View log
 Battle.LogTitle,Title of the battle log viewer.,전투 로그,Battle log
 Battle.FigurePlaceholder,Shown in the figure placeholder of a unit until there is art.,전신 이미지 자리,Full-body art here

@@ -66,6 +66,12 @@ namespace F1.Editor.Setup
         /// </summary>
         static readonly ImportPolicy Figure = new ImportPolicy(cutOut: true, mipMaps: true, compressed: false, maxTextureSize: 1024, pixelsPerUnit: 100f);
 
+        /// <summary>
+        /// A building of the town (Round 78, stage 30): a cut-out picture up to about 1500 px wide, shown at about a third of that (the level's
+        /// width on the screen). Uncompressed like a figure: its sizes are not powers of two. MaxSize 1024 halves it, which is still above its screen size.
+        /// </summary>
+        static readonly ImportPolicy Building = new ImportPolicy(cutOut: true, mipMaps: true, compressed: false, maxTextureSize: 1024, pixelsPerUnit: 100f);
+
         /// <summary>A background: its canvas is 2304x1536 and it is shown at about that size, so it is not scaled down.</summary>
         static readonly ImportPolicy Scene = new ImportPolicy(cutOut: false, mipMaps: false, compressed: true, maxTextureSize: 4096, pixelsPerUnit: 100f);
 
@@ -163,6 +169,7 @@ namespace F1.Editor.Setup
                 .Concat(data.Enemies.Ordered.Select(e => (e.HitPose, Pose)))
                 .Concat(data.Dungeons.Ordered.Select(d => (d.Background, Scene)))
                 .Concat(data.Items.Ordered.Select(i => (i.Icon, Icon)))
+                .Concat(data.Bags.Ordered.Select(b => (b.Icon, Icon)))
                 .Concat(data.Items.Ordered.Select(i => (i.GlowIcon, Icon)))
                 .Concat(data.Potions.Ordered.Select(p => (p.Icon, Icon)));
 
@@ -195,6 +202,21 @@ namespace F1.Editor.Setup
             foreach (string address in new[] { ArtAddress.ExpeditionMap, ArtAddress.LobbyTown })
             {
                 files.Add(new ArtFile(address, AssetPath(address), Scene, new AddressEntry(AssetPath(address), address, ResourceScope.Lobby, ArtGroup)));
+            }
+
+            // The town's buildings at their levels and the scaffold (Round 78, stage 30): cut-out pictures the lobby stands on the town, in its scope.
+            var buildings = new List<string> { ArtAddress.Scaffold };
+            foreach (string buildingId in BuildingId.All)
+            {
+                for (int level = 1; level <= data.MaxBuildingLevel(buildingId); level++)
+                {
+                    buildings.Add(ArtAddress.Building(buildingId, level));
+                }
+            }
+
+            foreach (string address in buildings)
+            {
+                files.Add(new ArtFile(address, AssetPath(address), Building, new AddressEntry(AssetPath(address), address, ResourceScope.Lobby, ArtGroup)));
             }
 
             foreach (UiArt.Piece piece in UiArt.All)

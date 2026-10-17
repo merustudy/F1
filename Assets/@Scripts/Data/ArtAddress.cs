@@ -26,8 +26,17 @@ namespace F1.Data
         /// <summary>The painted map of the lands the expedition screen shows (Round 71 E2): no definition names it, the screen does.</summary>
         public const string ExpeditionMap = "background/expedition/map";
 
-        /// <summary>The painted town the lobby lays under its buildings (Round 71, the three-quarter view): no definition names it, the lobby does.</summary>
+        /// <summary>The painted town grounds the lobby lays under its buildings (Round 71, the three-quarter view; Round 78: seen from farther away, the plots empty): no definition names it, the lobby does.</summary>
         public const string LobbyTown = "background/lobby/town";
+
+        /// <summary>The scaffold that stands over a building under construction (Round 78, stage 30): one picture for every building.</summary>
+        public const string Scaffold = "building/scaffold";
+
+        /// <summary>The picture of a building of the town at a level (Round 78, stage 30): "building/barracks-2" is Assets/@Art/Building/barracks_2.png.</summary>
+        public static string Building(string buildingId, int level)
+        {
+            return "building/" + buildingId + "-" + level;
+        }
 
         /// <summary>Null for "no art". Anything else must be text without spaces.</summary>
         /// <param name="owner">The definition the value belongs to, for the error.</param>

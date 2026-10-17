@@ -411,6 +411,7 @@ namespace F1.UI
                 case DepartCheck.PartyTooSmall: return UiStrings.Get(UiKeys.Lobby.PartyTooSmall, balance.MinPartySize);
                 case DepartCheck.Locked: return UiStrings.Get(UiKeys.Expedition.Locked);
                 case DepartCheck.FinalStandDue: return UiStrings.Get(UiKeys.Lobby.FinalStandDue);
+                case DepartCheck.GateLocked: return UiStrings.Get(UiKeys.Lobby.GateLocked, BuildingRules.DaysLeft(Managers.Run.Run, Managers.Run.ConstructionOf(BuildingId.Gate)));
                 default: return UiStrings.Get(UiKeys.Lobby.RunOver);
             }
         }

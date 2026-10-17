@@ -29,11 +29,12 @@ namespace F1.Editor.Setup
             town.preserveAspect = false;
             UiBuild.Box(town, 0f, 0f, LobbyScreen.TownWidth, LobbyScreen.TownHeight);
 
-            // The buildings where the painting put them (ArtPipeline/Archive/71-lobby-expedition/README.md, the fourth ask), each plate under its building.
-            BuildingView barracks = BuildBuilding(frame, "Barracks", new Rect(20f, 260f, 780f, 440f), new Vector2(413f, 740f));
-            BuildingView inn = BuildBuilding(frame, "Inn", new Rect(815f, 160f, 465f, 425f), new Vector2(1046f, 628f));
-            BuildingView coach = BuildBuilding(frame, "Coach", new Rect(1275f, 470f, 315f, 250f), new Vector2(1432f, 760f));
-            BuildingView gate = BuildBuilding(frame, "Gate", new Rect(1590f, 205f, 330f, 435f), new Vector2(1755f, 684f));
+            // The buildings (Round 78, stage 30): pictures of their own that the screen stands on the empty plots of the far town at their level's
+            // size (LobbyScreen.Plots), the farther ones first so that the nearer ones draw over them: the inn at the back, the gate, the barracks, the stagecoach.
+            BuildingView inn = BuildBuilding(frame, "Inn");
+            BuildingView gate = BuildBuilding(frame, "Gate");
+            BuildingView barracks = BuildBuilding(frame, "Barracks");
+            BuildingView coach = BuildBuilding(frame, "Coach");
 
             // Header: the title, the day (past the last day: "— 최종 결전", the screen sets it), the gold, the way to the title.
             Image header = UiBuild.Panel("Header", frame, UiPalette.Background);
@@ -71,30 +72,39 @@ namespace F1.Editor.Setup
             UiBuild.Box(shade, 0f, 100f, 1920f, 980f);
             shade.gameObject.SetActive(false);
 
-            // The barracks: the roster with the rows, the party commands and dismissing; a summary line under it.
+            // The barracks: the building line (stage 30), the roster with the rows, the party commands and dismissing (a scrolling list: the barracks'
+            // levels let the roster outgrow the window), a summary line under it.
             Image barracksWindow = Window(frame, "BarracksWindow", new Rect(40f, 130f, 1840f, 910f), UiKeys.Lobby.BarracksTitle, "BarracksClose", out ButtonParts barracksClose);
-            RectTransform entries = UiBuild.Box(UiBuild.Rect("Entries", barracksWindow.transform), 24f, 72f, 1792f, 796f);
-            UiBuild.Vertical(entries, 8f);
+            BuildingLineView barracksLine = BuildBuildingLine(barracksWindow.transform, "Barracks", 1792f, 832f);
+            RectTransform entries = ListScroll("Entries", barracksWindow.transform, 24f, 136f, 1792f, 688f, 8f);
             RosterEntryView entryTemplate = BuildRosterEntry(entries);
             TextMeshProUGUI barracksSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("BarracksSummary", barracksWindow.transform, 22f, UiPalette.TextDim)), 24f, 868f, 1792f, 32f);
 
-            // The inn: resting (a day for everyone), and the treatment of one mercenary for gold.
+            // The inn: the building line, resting (a day for everyone, even while the inn is built), and the treatment of one mercenary for gold.
             Image innWindow = Window(frame, "InnWindow", new Rect(360f, 150f, 1200f, 860f), UiKeys.Lobby.InnTitle, "InnClose", out ButtonParts innClose);
+            BuildingLineView innLine = BuildBuildingLine(innWindow.transform, "Inn", 1152f, 780f);
             ButtonParts rest = UiBuild.Button("Rest", innWindow.transform, UiPalette.ButtonQuiet, 26f);
-            UiBuild.Box(rest.Rect, 24f, 76f, 1152f, 64f);
-            RectTransform patients = UiBuild.Box(UiBuild.Rect("Patients", innWindow.transform), 24f, 156f, 1152f, 650f);
-            UiBuild.Vertical(patients, 6f);
+            UiBuild.Box(rest.Rect, 24f, 140f, 1152f, 64f);
+            RectTransform patients = ListScroll("Patients", innWindow.transform, 24f, 216f, 1152f, 556f, 6f);
             PatientView patientTemplate = BuildPatient(patients);
             TextMeshProUGUI innNote = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("InnNote", innWindow.transform, 20f, UiPalette.TextDim)), 24f, 814f, 1152f, 30f);
 
-            // The stagecoach: the candidates with their hire buttons.
-            Image coachWindow = Window(frame, "CoachWindow", new Rect(470f, 250f, 980f, 560f), UiKeys.Lobby.CoachTitle, "CoachClose", out ButtonParts coachClose);
-            TextMeshProUGUI coachSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CoachSummary", coachWindow.transform, 22f, UiPalette.TextDim)), 24f, 74f, 932f, 32f);
-            RectTransform candidates = UiBuild.Box(UiBuild.Rect("Candidates", coachWindow.transform), 24f, 116f, 932f, 370f);
-            UiBuild.Vertical(candidates, 8f);
+            // The stagecoach: the building line, the candidates with their hire buttons (a scrolling list: the stagecoach's levels bring more).
+            Image coachWindow = Window(frame, "CoachWindow", new Rect(470f, 160f, 980f, 760f), UiKeys.Lobby.CoachTitle, "CoachClose", out ButtonParts coachClose);
+            BuildingLineView coachLine = BuildBuildingLine(coachWindow.transform, "Coach", 932f, 672f);
+            TextMeshProUGUI coachSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CoachSummary", coachWindow.transform, 22f, UiPalette.TextDim)), 24f, 138f, 932f, 32f);
+            RectTransform candidates = ListScroll("Candidates", coachWindow.transform, 24f, 178f, 932f, 486f, 8f);
             CandidateView candidateTemplate = BuildCandidate(candidates);
-            TextMeshProUGUI noCandidates = UiBuild.Box(UiBuild.LocalizedLabel("NoCandidates", coachWindow.transform, UiKeys.Lobby.NoCandidates, 24f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 240f, 932f, 40f);
-            UiBuild.Box(UiBuild.LocalizedLabel("CoachNote", coachWindow.transform, UiKeys.Lobby.CoachNote, 20f, UiPalette.TextDim), 24f, 502f, 932f, 30f);
+            TextMeshProUGUI noCandidates = UiBuild.Box(UiBuild.LocalizedLabel("NoCandidates", coachWindow.transform, UiKeys.Lobby.NoCandidates, 24f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 400f, 932f, 40f);
+            UiBuild.Box(UiBuild.LocalizedLabel("CoachNote", coachWindow.transform, UiKeys.Lobby.CoachNote, 20f, UiPalette.TextDim), 24f, 706f, 932f, 30f);
+
+            // The gate (stage 30): the building line, the dungeons, the way to the expedition screen and the gate's note.
+            Image gateWindow = Window(frame, "GateWindow", new Rect(470f, 300f, 980f, 440f), UiKeys.Lobby.GateTitle, "GateClose", out ButtonParts gateClose);
+            BuildingLineView gateLine = BuildBuildingLine(gateWindow.transform, "Gate", 932f, 352f);
+            TextMeshProUGUI gateDungeons = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("GateDungeons", gateWindow.transform, 24f, UiPalette.Text, TextAlignmentOptions.Center)), 24f, 144f, 932f, 36f);
+            ButtonParts gateDepart = UiBuild.Button("GateDepart", gateWindow.transform, UiPalette.Button, 30f);
+            UiBuild.Box(gateDepart.Rect, 24f, 196f, 932f, 80f);
+            UiBuild.Box(UiBuild.LocalizedLabel("GateNote", gateWindow.transform, UiKeys.Lobby.GateNote, 20f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 292f, 932f, 30f);
 
             // The result window (Round 72): the title says how the run ended, four rows, and the new run.
             Image runOverWindow = UiBuild.Panel("RunOverWindow", frame, UiPalette.Panel);
@@ -127,6 +137,15 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_depart", depart.Button);
             UiBuild.SetReference(screen, "_departLabel", depart.Label);
             UiBuild.SetReference(screen, "_shade", shade.gameObject);
+            UiBuild.SetReference(screen, "_barracksLine", barracksLine);
+            UiBuild.SetReference(screen, "_innLine", innLine);
+            UiBuild.SetReference(screen, "_coachLine", coachLine);
+            UiBuild.SetReference(screen, "_gateLine", gateLine);
+            UiBuild.SetReference(screen, "_gateWindow", gateWindow.gameObject);
+            UiBuild.SetReference(screen, "_gateClose", gateClose.Button);
+            UiBuild.SetReference(screen, "_gateDungeons", gateDungeons);
+            UiBuild.SetReference(screen, "_gateDepart", gateDepart.Button);
+            UiBuild.SetReference(screen, "_gateDepartLabel", gateDepart.Label);
             UiBuild.SetReference(screen, "_barracksWindow", barracksWindow.gameObject);
             UiBuild.SetReference(screen, "_barracksClose", barracksClose.Button);
             UiBuild.SetReference(screen, "_entryTemplate", entryTemplate);
@@ -156,36 +175,109 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>
-        /// A building of the town: the hotspot over the painting (an invisible button), the wash with its brass rim shown under the pointer,
-        /// and the plate (a stone box with a line, the name and a second line the screen fills) centred where the mock put it.
+        /// A building of the town (Round 78): the picture of the building at its level (its box is the hotspot, a button; the screen places and
+        /// sizes it), the scaffold over it while it is built, the wash with its brass rim shown under the pointer, the plate (a stone box with a
+        /// line, the name with the level and a second line the screen fills) under the picture's foot, and under the plate the badge of a
+        /// construction (the days left over a bar).
         /// </summary>
-        static BuildingView BuildBuilding(Transform frame, string name, Rect hotspot, Vector2 plateCenter)
+        static BuildingView BuildBuilding(Transform frame, string name)
         {
-            Image spot = UiBuild.Image(name, frame, Color.clear, raycastTarget: true);
-            UiBuild.Box(spot, hotspot.x, hotspot.y, hotspot.width, hotspot.height);
-            Button button = UiBuild.MakeButton(spot);
-            var view = spot.gameObject.AddComponent<BuildingView>();
+            Image picture = UiBuild.Image(name, frame, Color.white, raycastTarget: true);
+            UiBuild.Box(picture, 0f, 0f, 400f, 280f);
+            Button button = UiBuild.MakeButton(picture);
+            var view = picture.gameObject.AddComponent<BuildingView>();
+
+            Image scaffold = UiBuild.Image(name + "Scaffold", picture.transform, Color.white);
+            UiBuild.Box(scaffold, 0f, 0f, 400f, 280f);
+            scaffold.gameObject.SetActive(false);
 
             // The wash cannot carry an Outline: the effect's offset copies of a translucent rect fill it. The rim is four thin images inside its edges.
-            Image wash = UiBuild.Image(name + "Wash", spot.transform, BuildingWash);
+            Image wash = UiBuild.Image(name + "Wash", picture.transform, BuildingWash);
             UiBuild.Stretch(wash.rectTransform);
             Rim(name + "Rim", wash.transform, BuildingRim, UiPalette.Brass);
             wash.gameObject.SetActive(false);
 
-            Image plate = UiBuild.Panel(name + "Plate", spot.transform, UiPalette.StonePlate);
-            UiBuild.Box(plate, plateCenter.x - hotspot.x - BuildingView.PlateWidth / 2f, plateCenter.y - hotspot.y - BuildingView.PlateHeight / 2f, BuildingView.PlateWidth, BuildingView.PlateHeight);
+            Image plate = UiBuild.Panel(name + "Plate", picture.transform, UiPalette.StonePlate);
+            UiBuild.Box(plate, 0f, 0f, BuildingView.PlateWidth, BuildingView.PlateHeight);
             Outline plateLine = AddLine(plate, UiPalette.Line, 2f);
             TextMeshProUGUI plateName = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name + "Name", plate.transform, 26f, UiPalette.Text, TextAlignmentOptions.Center)), 0f, 6f, BuildingView.PlateWidth, 38f);
             TextMeshProUGUI plateSub = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name + "Sub", plate.transform, 20f, UiPalette.TextDim, TextAlignmentOptions.Center)), 0f, 44f, BuildingView.PlateWidth, 30f);
             plateSub.gameObject.SetActive(false);
 
+            // The badge of a construction (the mock: "건설 중 · 2일 남음" in brass over a thin brass bar), a brass line round it.
+            Image badge = UiBuild.Panel(name + "Badge", picture.transform, UiPalette.StonePlate);
+            UiBuild.Box(badge, 0f, 0f, BuildingView.BadgeWidth, BuildingView.BadgeHeight);
+            AddLine(badge, UiPalette.Brass, 2f);
+            TextMeshProUGUI badgeWords = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name + "BadgeWords", badge.transform, 22f, UiPalette.Brass, TextAlignmentOptions.Center)), 0f, 6f, BuildingView.BadgeWidth, 30f);
+            UiBar badgeBar = UiBuild.Bar(name + "BadgeBar", badge.transform, UiPalette.Brass);
+            UiBuild.Box(badgeBar, 16f, 42f, BuildingView.BadgeWidth - 32f, 8f);
+            badge.gameObject.SetActive(false);
+
             UiBuild.SetReference(view, "_button", button);
+            UiBuild.SetReference(view, "_picture", picture);
+            UiBuild.SetReference(view, "_scaffold", scaffold);
             UiBuild.SetReference(view, "_wash", wash.gameObject);
             UiBuild.SetReference(view, "_plate", plate.rectTransform);
             UiBuild.SetReference(view, "_plateLine", plateLine);
             UiBuild.SetReference(view, "_name", plateName);
             UiBuild.SetReference(view, "_sub", plateSub);
+            UiBuild.SetReference(view, "_badge", badge.rectTransform);
+            UiBuild.SetReference(view, "_badgeWords", badgeWords);
+            UiBuild.SetReference(view, "_badgeBar", badgeBar);
             return view;
+        }
+
+        /// <summary>
+        /// The building line of a window (stage 30): a light panel under the title with the level (bone), what the next level gives (dim) and the
+        /// [업그레이드] button at the right; and, at <paramref name="lockedY"/>, the note that the building is closed while under construction.
+        /// </summary>
+        static BuildingLineView BuildBuildingLine(Transform window, string prefix, float width, float lockedY)
+        {
+            Image line = UiBuild.Panel(prefix + "Line", window, UiPalette.PanelLight);
+            UiBuild.Box(line, 24f, 72f, width, 56f);
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(prefix + "Level", line.transform, 26f, UiPalette.Bone)), 20f, 11f, 150f, 34f);
+            TextMeshProUGUI effect = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(prefix + "Effect", line.transform, 22f, UiPalette.TextDim)), 170f, 13f, width - 480f, 32f);
+            ButtonParts upgrade = UiBuild.Button(prefix + "Upgrade", line.transform, UiPalette.Button, 22f);
+            UiBuild.Box(upgrade.Rect, width - 296f, 7f, 276f, 42f);
+            TextMeshProUGUI locked = UiBuild.Box(UiBuild.LocalizedLabel(prefix + "Locked", window, UiKeys.Lobby.LockedNote, 22f, UiPalette.Burn, TextAlignmentOptions.Center), 24f, lockedY, width, 32f);
+            locked.gameObject.SetActive(false);
+
+            var view = line.gameObject.AddComponent<BuildingLineView>();
+            UiBuild.SetReference(view, "_level", level);
+            UiBuild.SetReference(view, "_effect", effect);
+            UiBuild.SetReference(view, "_upgrade", upgrade.Button);
+            UiBuild.SetReference(view, "_upgradeLabel", upgrade.Label);
+            UiBuild.SetReference(view, "_locked", locked);
+            return view;
+        }
+
+        /// <summary>
+        /// A scrolling list of a window (stage 30: the lists outgrow their windows as the buildings level): the box is the viewport (a mask that
+        /// takes the wheel), the content stacks the rows the screen clones from a template with the given spacing and grows to fit them.
+        /// </summary>
+        static RectTransform ListScroll(string name, Transform window, float x, float y, float width, float height, float spacing)
+        {
+            RectTransform root = UiBuild.Box(UiBuild.Rect(name + "Scroll", window), x, y, width, height);
+            var scroll = root.gameObject.AddComponent<ScrollRect>();
+            Image viewport = UiBuild.Image(name + "Viewport", root, Color.clear, raycastTarget: true);
+            UiBuild.Stretch(viewport.rectTransform);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            RectTransform content = UiBuild.Rect(name, viewport.transform);
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.offsetMin = Vector2.zero;
+            content.offsetMax = Vector2.zero;
+            UiBuild.Vertical(content, spacing);
+            var fitter = content.gameObject.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            scroll.viewport = viewport.rectTransform;
+            scroll.content = content;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.movementType = ScrollRect.MovementType.Clamped;
+            scroll.scrollSensitivity = 40f;
+            return content;
         }
 
         /// <summary>A rim of four thin images along the inside of the parent's edges.</summary>

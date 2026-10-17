@@ -150,8 +150,7 @@ MonoBehaviour:
   - m_Id: 9766393864229
     m_Localized: 'Click an item to pick it up, then a square to put it down (one
       item in the way goes to the inventory). While holding: right-click, wheel or
-      R turns it. Click an empty square of a bag to pick the bag. Forward and Back
-      swap with the next row.'
+      R turns it. Forward and Back swap with the next row.'
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864231
@@ -1493,6 +1492,83 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 6151713168809984
+    m_Localized: '{0}  Lv {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713177198592
+    m_Localized: "Under construction \xB7 {0} days left"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392896
+    m_Localized: 'upgrade: gold {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392897
+    m_Localized: "Lv {0} \u2192 Lv {1}: {2} \xB7 gold {3} \xB7 {4} days"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392898
+    m_Localized: "Upgrade \xB7 gold {0} \xB7 {1} days"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392899
+    m_Localized: "Lv {0} \xB7 top level \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392900
+    m_Localized: "Lv {0} \u2192 Lv {1} under construction \xB7 {2} days left"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392901
+    m_Localized: Closed while under construction
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6151713181392902
+    m_Localized: "roster limit {0} \u2192 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392903
+    m_Localized: "treatment -{0} \u2192 -{1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392904
+    m_Localized: "{0} \u2192 {1} candidates"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392905
+    m_Localized: "settlement gold +{0}% \u2192 +{1}%"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6151713181392906
+    m_Localized: "Gate \u2014 Expedition"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6151713181392907
+    m_Localized: The gate's levels add to the settlement's gold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6151713181392908
+    m_Localized: "The gate is under construction \xB7 {0} days left"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6172991850274816
+    m_Localized: "{0}  {1}\xD7{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1657,3 +1733,16 @@ MonoBehaviour:
         - id: 6078818543460352
         - id: 6078818543460353
         - id: 6110886518317056
+        - id: 6151713168809984
+        - id: 6151713177198592
+        - id: 6151713181392896
+        - id: 6151713181392897
+        - id: 6151713181392898
+        - id: 6151713181392899
+        - id: 6151713181392900
+        - id: 6151713181392902
+        - id: 6151713181392903
+        - id: 6151713181392904
+        - id: 6151713181392905
+        - id: 6151713181392908
+        - id: 6172991850274816
