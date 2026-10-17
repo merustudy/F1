@@ -1575,6 +1575,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673481662824449
+  - m_Id: 6039611447959552
+    m_Key: Map.Sell
+    m_Metadata:
+      m_Items:
+      - rid: 8623673493283405824
+  - m_Id: 6039611456348160
+    m_Key: Map.CannotSell
+    m_Metadata:
+      m_Items:
+      - rid: 8623673493283405825
+  - m_Id: 6039611456348161
+    m_Key: Map.ShopSold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673493283405826
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2965,3 +2980,18 @@ MonoBehaviour:
       data:
         m_CommentText: Rises over a boss that entered a phase (stage 28). {0} = the
           phase number.
+    - rid: 8623673493283405824
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The sell button on an item's card while at a shop (2026-10-17,
+          Round 74 B). {0} = the coins the shop pays.
+    - rid: 8623673493283405825
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The sell button of an item that cannot be sold (the base weapon,
+          a unique), off.
+    - rid: 8623673493283405826
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: On the detail line after a sale. {0} = what was sold. {1}
+          = coins before. {2} = coins after.

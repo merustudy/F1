@@ -114,6 +114,7 @@ namespace F1.Data
             new KeySpec(nameof(CoinsPerEnemy), 0, Big),
             new KeySpec(nameof(CoinsPerFloor), 0, Big),
             new KeySpec(nameof(EliteCoinPercent), 100, Big),
+            new KeySpec(nameof(SellPercent), 0, 100),
             new KeySpec(nameof(GoldPerFloor), 0, Big),
             new KeySpec(nameof(GoldClear), 0, Big),
             new KeySpec(nameof(HirePrice), 0, Big),
@@ -324,6 +325,9 @@ namespace F1.Data
         public int ShopPotionChancePercent => _values[nameof(ShopPotionChancePercent)];
         public int ShopRefreshBase => _values[nameof(ShopRefreshBase)];
         public int ShopRefreshStep => _values[nameof(ShopRefreshStep)];
+
+        /// <summary>What a shop pays for an item of the party's, as a percent of what it would sell it for at its tier (2026-10-17, Round 74).</summary>
+        public int SellPercent => _values[nameof(SellPercent)];
 
         /// <summary>
         /// The region coins a won battle brings: for each enemy of the group, and for each floor below the first; an elite's are

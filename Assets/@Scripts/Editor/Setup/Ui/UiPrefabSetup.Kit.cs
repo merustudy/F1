@@ -144,6 +144,8 @@ namespace F1.Editor.Setup
         /// in the magic blue); notches (two diamonds clipped to what lies outside the edge) under its bottom edge for the party side and
         /// on its side edges for the battle. Hidden until a click opens it.
         /// </summary>
+        const float TooltipSellHeight = 38f;
+
         static ItemTooltipView BuildItemTooltip(Transform frame, string name)
         {
             RectTransform card = UiBuild.Rect(name, frame);
@@ -185,7 +187,20 @@ namespace F1.Editor.Setup
             TextMeshProUGUI fatigue = UiBuild.Label(name + "Fatigue", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
             TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
 
+            // Round 74 (2026-10-17, the user's B): a sell button at the card's foot while at a shop (what the shop pays, or that it cannot be
+            // sold, off); off everywhere else. The one part of the card that takes the pointer.
+            Image sellBack = Rounded(name + "Sell", card, UiPalette.Button, 6f);
+            LayoutElement sellElement = sellBack.gameObject.AddComponent<LayoutElement>();
+            sellElement.minHeight = TooltipSellHeight;
+            sellElement.preferredHeight = TooltipSellHeight;
+            Button sell = UiBuild.MakeButton(sellBack);
+            TextMeshProUGUI sellLabel = UiBuild.SingleLine(UiBuild.Label(name + "SellLabel", sellBack.transform, 19f, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Stretch(sellLabel.rectTransform);
+            sellBack.gameObject.SetActive(false);
+
             var view = card.gameObject.AddComponent<ItemTooltipView>();
+            UiBuild.SetReference(view, "_sell", sell);
+            UiBuild.SetReference(view, "_sellLabel", sellLabel);
             UiBuild.SetReference(view, "_notchBottom", notch);
             UiBuild.SetReference(view, "_notchLeft", notchLeft);
             UiBuild.SetReference(view, "_notchRight", notchRight);

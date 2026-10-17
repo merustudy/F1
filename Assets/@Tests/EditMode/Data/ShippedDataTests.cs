@@ -249,6 +249,24 @@ namespace F1.Tests
             Assert.IsEmpty(setup.Enemies[1].Phases, "The guards have none.");
         }
 
+        [Test]
+        public void ShippedEnemyItems_HaveAPriceToSellFor_ButNoShopWeight_AndSellForHalf()
+        {
+            // Round 74 (2026-10-17): the enemies' items got a price so that they sell at a shop; their weight 0 keeps them off the shop's grid.
+            StaticData data = LoadShipped();
+            Assert.AreEqual(50, data.Balance.SellPercent);
+            foreach (string id in new[] { "rat_bite", "rusty_blade", "crude_bow", "lantern_staff", "mending_chant", "overseer_roar", "overseer_maul", "abyss_howl", "abyss_grasp", "abyss_cleaver" })
+            {
+                ItemData item = data.Items.Get(id);
+                Assert.Greater(item.Price, 0, id);
+                Assert.AreEqual(0, item.ShopWeight, id + " never on a shop's grid");
+            }
+
+            Assert.AreEqual(3, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rusty_blade"))), "6 at Common, half.");
+            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("whetstone"))), "1 at Common: at least 1.");
+            Assert.AreEqual(0, data.Items.Get("gladius").Price, "A unique has no price (and cannot be sold).");
+        }
+
         static StaticData LoadShipped()
         {
             StaticDataFileStore store = DataTransformMenu.CreateStore();

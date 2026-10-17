@@ -81,6 +81,7 @@ namespace F1.Tests
                 { "ShopSlots", 4 },
                 { "ShopRefreshBase", 3 },
                 { "ShopRefreshStep", 2 },
+                { "SellPercent", 50 },
                 { "CoinsPerEnemy", 2 },
                 { "CoinsPerFloor", 1 },
                 { "GoldPerFloor", 2 },

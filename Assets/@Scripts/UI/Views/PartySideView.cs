@@ -80,6 +80,17 @@ namespace F1.UI
         /// <summary>Raised when the hand lets go by itself (Escape), so that a screen holding something of its own can follow.</summary>
         public event Action HandReleased;
 
+        /// <summary>
+        /// Round 74 B (2026-10-17): what the owning screen offers for selling the item whose card is shown (a board square: member, x, y;
+        /// or an inventory square: member -1, x, y): the button's words and whether it can be pressed; null when selling is not on (not at a shop).
+        /// </summary>
+        public Func<int, int, int, (string Label, bool Enabled)?> SellOption { get; set; }
+
+        /// <summary>The card's sell button was pressed for the item on a member's board square (member, x, y) or of the inventory (member -1).</summary>
+        public event Action<int, int, int> SellRequested;
+
+        int _cardMember = -1, _cardX, _cardY;
+
         /// <summary>Whether the inventory popup is open.</summary>
         public bool InventoryOpen { get; private set; }
 
@@ -150,6 +161,7 @@ namespace F1.UI
             _inventory.Grid.SquareExited += OnInventorySquareExited;
             _inventory.SetOpen(false);
             _tooltip.Hide();
+            _tooltip.SellClicked += () => SellRequested?.Invoke(_cardMember, _cardX, _cardY);
             LetThroughWhileHeld(_toInventory);
             _heldPointer.Pressed += OnHeldPressed;
             _heldPointer.Hide();
@@ -198,7 +210,8 @@ namespace F1.UI
         void Update()
         {
             PointerPress.Poll();
-            if (_tooltip.IsShown && PointerPress.PressedSince(_tooltip.ShownFrame))
+            // Round 74: a press over the card itself (its sell button) is the card's own, not the one that closes it.
+            if (_tooltip.IsShown && PointerPress.PressedSince(_tooltip.ShownFrame) && !_tooltip.PointerIsOver())
             {
                 _tooltip.Hide();
             }
@@ -326,7 +339,11 @@ namespace F1.UI
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
             ItemBoard board = expedition.Members[member].Board;
-            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item));
+            (string Label, bool Enabled)? sell = SellOption?.Invoke(member, x, y);
+            _cardMember = member;
+            _cardX = x;
+            _cardY = y;
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item), sell?.Label, sell?.Enabled ?? false);
         }
 
         /// <summary>Round 47 (a grid since round 49): the card of the item on a square of the inventory, beside its piece inside the popup, while nothing is held.</summary>
@@ -341,7 +358,11 @@ namespace F1.UI
             }
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
-            _tooltip.ShowBeside(item.Item, piece.Rect, true, _inventory.Rect, true, merge);
+            (string Label, bool Enabled)? sell = SellOption?.Invoke(-1, x, y);
+            _cardMember = -1;
+            _cardX = x;
+            _cardY = y;
+            _tooltip.ShowBeside(item.Item, piece.Rect, true, _inventory.Rect, true, merge, null, 0, sell?.Label, sell?.Enabled ?? false);
         }
 
         /// <summary>

@@ -1003,6 +1003,79 @@ namespace F1.Gameplay
             return (int)Math.Min(int.MaxValue, (long)data.Items.Get(offer.Id).Price * data.Balance.TierPercent(offer.Tier) / 100);
         }
 
+        /// <summary>
+        /// What a shop pays for an item of the party's (2026-10-17, Round 74 B): SellPercent of what it would sell that item for at its tier,
+        /// and at least 1. Price 0 (an item no shop sells) still fetches 1.
+        /// </summary>
+        public static int SellPriceOf(StaticData data, EquippedItem item)
+        {
+            long full = (long)item.Item.Price * data.Balance.TierPercent(item.Tier) / 100;
+            return (int)Math.Max(1, full * data.Balance.SellPercent / 100);
+        }
+
+        /// <summary>
+        /// Whether the item covering a square of a living member's board can be sold now: at a shop, and neither the member's base weapon
+        /// (nobody goes without a weapon) nor a unique item. A bag is not an item and is never sold (Round 74: the party's bags stay).
+        /// </summary>
+        public static bool CanSellBoardItem(StaticData data, ExpeditionState state, int memberIndex, int x, int y)
+        {
+            if (state.Phase != ExpeditionPhase.AtShop)
+            {
+                return false;
+            }
+
+            BoardItem item = LivingItemAt(state, memberIndex, x, y);
+            return item != null && IsSellable(item.Item);
+        }
+
+        /// <summary>Sells the item covering a square of a member's board: it leaves the board, the coins come. Returns what was paid.</summary>
+        public static int SellBoardItem(StaticData data, ExpeditionState state, int memberIndex, int x, int y)
+        {
+            if (!CanSellBoardItem(data, state, memberIndex, x, y))
+            {
+                throw new InvalidOperationException($"Square ({x},{y}) of member {memberIndex} holds nothing that can be sold now.");
+            }
+
+            ItemBoard board = state.Members[memberIndex].Board;
+            BoardItem item = board.ItemAt(x, y);
+            int price = SellPriceOf(data, item.Item);
+            board.Items.Remove(item);
+            state.Coins += price;
+            return price;
+        }
+
+        /// <summary>Whether the item covering a square of the inventory's grid can be sold now: at a shop, and not a unique item.</summary>
+        public static bool CanSellInventoryItem(StaticData data, ExpeditionState state, int x, int y)
+        {
+            if (state.Phase != ExpeditionPhase.AtShop)
+            {
+                return false;
+            }
+
+            BoardItem item = state.Inventory.ItemAt(x, y);
+            return item != null && IsSellable(item.Item);
+        }
+
+        /// <summary>Sells the item covering a square of the inventory: it leaves the inventory, the coins come. Returns what was paid.</summary>
+        public static int SellInventoryItem(StaticData data, ExpeditionState state, int x, int y)
+        {
+            if (!CanSellInventoryItem(data, state, x, y))
+            {
+                throw new InvalidOperationException($"Square ({x},{y}) of the inventory holds nothing that can be sold now.");
+            }
+
+            BoardItem item = state.Inventory.ItemAt(x, y);
+            int price = SellPriceOf(data, item.Item);
+            state.Inventory.RemoveAt(state.Inventory.Items.IndexOf(item));
+            state.Coins += price;
+            return price;
+        }
+
+        static bool IsSellable(EquippedItem item)
+        {
+            return !item.IsBase && !item.Item.Unique;
+        }
+
         /// <summary>What the next refresh costs at the shop the party is at: <c>ShopRefreshBase</c>, and <c>ShopRefreshStep</c> more for every refresh made here.</summary>
         public static int RefreshCost(StaticData data, ExpeditionState state)
         {

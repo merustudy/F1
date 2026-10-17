@@ -181,6 +181,9 @@ namespace F1.UI
 
             /// <summary>Under the name of a bag on offer or of a bag dropped (Slice B stage 19). {0} x {1} = its squares, {2} = how many.</summary>
             public const string ShopBagSub = "Map.ShopBagSub";
+            public const string Sell = "Map.Sell";
+            public const string CannotSell = "Map.CannotSell";
+            public const string ShopSold = "Map.ShopSold";
             public const string BagFacts = "Map.BagFacts";
             public const string OfferPrice = "Map.OfferPrice";
         }

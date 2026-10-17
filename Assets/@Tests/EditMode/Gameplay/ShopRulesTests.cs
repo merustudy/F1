@@ -427,6 +427,55 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Selling_PaysSellPercentOfThePriceAtTheTier_AtLeastOne_TakesTheItemOff_AndNeverTheBaseWeaponOrAUnique()
+        {
+            // Round 74 B (2026-10-17): at the shop, an item of the party's sells for half of what the shop would sell it for at its tier.
+            StaticData data = ShopCave();
+            ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
+            ExpeditionMember anna = state.Members[0];
+            int slot = SlotOf(state, OfferKind.Item, "knife");
+            ItemOffer knife = state.Shop.Stock[slot];
+            ExpeditionRules.BuyToBoard(data, state, slot, 0, TestBoards.At(2, 0));
+            EquippedItem bought = TestBoards.ItemAt(anna, 2, 0);
+            int full = ExpeditionRules.PriceOf(data, knife);
+
+            Assert.AreEqual(Math.Max(1, full * data.Balance.SellPercent / 100), ExpeditionRules.SellPriceOf(data, bought));
+            Assert.AreEqual(10 * data.Balance.TierPercent(knife.Tier + 1) / 100 * 50 / 100, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("knife"), tier: knife.Tier + 1)), "A tier up sells for more.");
+            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("claw"))), "Price 0 still fetches 1.");
+
+            Assert.IsTrue(ExpeditionRules.CanSellBoardItem(data, state, 0, 2, 0));
+            int coins = state.Coins;
+            int paid = ExpeditionRules.SellBoardItem(data, state, 0, 2, 0);
+            Assert.AreEqual(ExpeditionRules.SellPriceOf(data, bought), paid);
+            Assert.AreEqual(coins + paid, state.Coins);
+            Assert.IsNull(TestBoards.ItemAt(anna, 2, 0), "Sold: gone from the board.");
+            Assert.AreEqual(1, anna.Board.Items.Count, "Only the blade is left.");
+            Assert.IsFalse(ExpeditionRules.CanSellBoardItem(data, state, 0, 2, 0), "An empty square sells nothing.");
+
+            Assert.IsTrue(TestBoards.ItemAt(anna, 0, 0).IsBase);
+            Assert.IsFalse(ExpeditionRules.CanSellBoardItem(data, state, 0, 0, 0), "The base weapon stays.");
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.SellBoardItem(data, state, 0, 0, 0));
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get("gladius_t")), 2, 0);
+            Assert.IsFalse(ExpeditionRules.CanSellBoardItem(data, state, 0, 2, 0), "A unique stays.");
+
+            // The inventory's items sell the same way.
+            state.Inventory.Add(new EquippedItem(data.Items.Get("bow")));
+            Placement at = state.Inventory.Items[0].At;
+            Assert.IsTrue(ExpeditionRules.CanSellInventoryItem(data, state, at.X, at.Y));
+            coins = state.Coins;
+            Assert.AreEqual(5, ExpeditionRules.SellInventoryItem(data, state, at.X, at.Y), "10 at Common, half.");
+            Assert.AreEqual(coins + 5, state.Coins);
+            Assert.AreEqual(0, state.Inventory.Count);
+
+            // Outside the shop nothing sells.
+            ExpeditionRules.LeaveShop(state);
+            state.Inventory.Add(new EquippedItem(data.Items.Get("bow")));
+            at = state.Inventory.Items[0].At;
+            Assert.IsFalse(ExpeditionRules.CanSellInventoryItem(data, state, at.X, at.Y));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.SellInventoryItem(data, state, at.X, at.Y));
+        }
+
+        [Test]
         public void Leaving_DropsTheStock_AndThePartyGoesOnFromTheShop()
         {
             StaticData data = ShopCave();

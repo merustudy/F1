@@ -1448,6 +1448,34 @@ namespace F1.Tests
             Assert.AreEqual((100 - price).ToString(), UiTestUtil.TextAt(map, "Frame/Header/Coins"));
             Assert.AreEqual((100 - price).ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
 
+            // Round 74 B (2026-10-17): at the shop, the card of an item of the party's carries the sell button with what the shop pays (half
+            // of its price at its tier); pressed, the coins come, the item goes and the card closes. The base weapon's card says it cannot be sold.
+            UiTestUtil.RightClickSquare(row1.BoardView, 0, 1);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(party.Tooltip.IsShown, "The bought item's card.");
+            Assert.IsTrue(party.Tooltip.SellShown);
+            int sellPrice = Managers.Expedition.SellPriceOf(UiTestUtil.ItemAt(front, 0, 1));
+            Assert.AreEqual(Mathf.Max(1, price * data.Balance.SellPercent / 100), sellPrice);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.Sell, sellPrice), party.Tooltip.SellLabel);
+            Assert.IsTrue(party.Tooltip.SellButton.interactable);
+            int coinsBeforeSale = Managers.Expedition.Expedition.Coins;
+            UiTestUtil.Click(party.Tooltip.SellButton);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(coinsBeforeSale + sellPrice, Managers.Expedition.Expedition.Coins);
+            Assert.IsNull(UiTestUtil.ItemAt(front, 0, 1), "Sold: gone from the board.");
+            Assert.IsFalse(party.Tooltip.IsShown, "The card closed with the sale.");
+            Assert.AreEqual((coinsBeforeSale + sellPrice).ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
+            Assert.AreEqual((coinsBeforeSale + sellPrice).ToString(), UiTestUtil.TextAt(map, "Frame/Header/Coins"));
+            UiTestUtil.RightClickSquare(row1.BoardView, 0, 0);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(party.Tooltip.IsShown, "The base weapon's card.");
+            Assert.IsTrue(party.Tooltip.SellShown);
+            Assert.IsFalse(party.Tooltip.SellButton.interactable, "The base weapon cannot be sold.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Map.CannotSell), party.Tooltip.SellLabel);
+            PointerPress.Simulate();
+            yield return null;
+            Assert.IsFalse(party.Tooltip.IsShown, "A press elsewhere closes it.");
+
             // The refresh: every slot is drawn anew (the sold one too), the coins pay its cost, and the next one costs more.
             int before = Managers.Expedition.Expedition.Coins;
             UiTestUtil.Click(map, UiTestUtil.ShopRefresh);

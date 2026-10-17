@@ -1,6 +1,8 @@
+using System;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace F1.UI
@@ -34,8 +36,40 @@ namespace F1.UI
         [SerializeField] TMP_Text _effects;
         [SerializeField] TMP_Text _fatigue;
         [SerializeField] TMP_Text _merge;
+        [SerializeField] Button _sell;
+        [SerializeField] TMP_Text _sellLabel;
+
+        /// <summary>The sell button at the card's foot was clicked (Round 74 B, 2026-10-17: selling at a shop).</summary>
+        public event Action SellClicked;
 
         public bool IsShown => gameObject.activeSelf;
+
+        /// <summary>Whether the card carries the sell button now (at a shop: what the shop pays, or that it cannot be sold).</summary>
+        public bool SellShown => _sell != null && _sell.gameObject.activeSelf;
+        public Button SellButton => _sell;
+        public string SellLabel => _sellLabel != null ? _sellLabel.text : string.Empty;
+
+        void Awake()
+        {
+            if (_sell != null)
+            {
+                _sell.onClick.AddListener(() => SellClicked?.Invoke());
+            }
+        }
+
+        /// <summary>Whether the pointer is over the card now: a press there is the card's own (its sell button), not the press that closes it.</summary>
+        public bool PointerIsOver()
+        {
+            Mouse mouse = Mouse.current;
+            if (!IsShown || mouse == null)
+            {
+                return false;
+            }
+
+            Canvas canvas = GetComponentInParent<Canvas>();
+            Camera camera = canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+            return RectTransformUtility.RectangleContainsScreenPoint((RectTransform)transform, mouse.position.ReadValue(), camera);
+        }
 
         /// <summary>The item on the card, or null when hidden.</summary>
         public EquippedItem Item { get; private set; }
@@ -63,10 +97,13 @@ namespace F1.UI
         /// <summary>The party side: above the panel, over the cell's column, the notch pointing down at the cell.</summary>
         /// <param name="starLine">What the stars on the board say of the item (stage 20, <see cref="UiText.StarLine"/>), or null.</param>
         /// <param name="starDamage">What they add to its weapon damage, which its damage line counts (<see cref="StarRules.DamageOn"/>).</param>
-        public void ShowAbove(EquippedItem item, string mergeHint, RectTransform cell, RectTransform panel, string starLine = null, int starDamage = 0)
+        /// <param name="sellLabel">Round 74 B: the sell button's words while at a shop (what the shop pays, or that it cannot be sold); null hides the button.</param>
+        /// <param name="sellEnabled">Whether the sell button can be pressed.</param>
+        public void ShowAbove(EquippedItem item, string mergeHint, RectTransform cell, RectTransform panel, string starLine = null, int starDamage = 0,
+            string sellLabel = null, bool sellEnabled = false)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, true, starLine, starDamage);
+            Vector2 size = Fill(item, mergeHint, true, starLine, starDamage, sellLabel, sellEnabled);
             Rect anchor = TooltipPlacement.In(cell, parent);
             Rect placed = TooltipPlacement.Above(anchor, size, TooltipPlacement.In(panel, parent).yMin, Screen(parent), out float notchX);
             ShowNotch(Notch.Bottom, notchX);
@@ -79,10 +116,10 @@ namespace F1.UI
         /// false): the enemy has no fatigue.
         /// </summary>
         public void ShowBeside(EquippedItem item, RectTransform cell, bool left, RectTransform panel, bool withFatigue, string mergeHint = null,
-            string starLine = null, int starDamage = 0)
+            string starLine = null, int starDamage = 0, string sellLabel = null, bool sellEnabled = false)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage);
+            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage, sellLabel, sellEnabled);
             Rect anchor = TooltipPlacement.In(cell, parent);
             Rect placed = TooltipPlacement.Beside(anchor, size, left, TooltipPlacement.In(panel, parent), Screen(parent), out float notchY, out bool cardIsLeftOfCell);
             ShowNotch(cardIsLeftOfCell ? Notch.Right : Notch.Left, notchY);
@@ -97,8 +134,16 @@ namespace F1.UI
         }
 
         /// <summary>Writes the card and measures it. The card is active and on top afterwards: the layout needs it active.</summary>
-        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage)
+        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage, string sellLabel = null, bool sellEnabled = false)
         {
+            if (_sell != null)
+            {
+                bool selling = !string.IsNullOrEmpty(sellLabel);
+                _sell.gameObject.SetActive(selling);
+                _sell.interactable = selling && sellEnabled;
+                _sellLabel.text = selling ? sellLabel : string.Empty;
+            }
+
             Item = item;
             bool unique = item.Item.Unique;
             _title.text = UiText.ItemTitle(item);

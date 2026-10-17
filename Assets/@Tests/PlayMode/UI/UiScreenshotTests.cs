@@ -533,6 +533,23 @@ namespace F1.Tests
                                     // Round 54: the picked offer rides the pointer; a press elsewhere (its tile again) sends it back first.
                                     UiTestUtil.ClickGood(map.Merchant, pick);
                                     yield return UiTestUtil.WaitForRedraw();
+
+                                    // Round 74 (2026-10-17): the good bought onto row 1's free row, then its card at the shop with the sell button.
+                                    PartySideView shopParty = map.GetComponentInChildren<PartySideView>();
+                                    PartyColumnView shopRow1 = shopParty.ColumnOfRow(1);
+                                    int shopFront = Managers.Expedition.Expedition.Members.ToList().FindIndex(m => m.Row == BattleRows.Front);
+                                    if (Managers.Expedition.CanBuyToBoard(pick, shopFront, new Placement(0, 1)))
+                                    {
+                                        UiTestUtil.ClickGood(map.Merchant, pick);
+                                        yield return UiTestUtil.WaitForRedraw();
+                                        UiTestUtil.ClickSquare(shopRow1.BoardView, 0, 1);
+                                        yield return UiTestUtil.WaitForRedraw();
+                                        UiTestUtil.RightClickSquare(shopRow1.BoardView, 0, 1);
+                                        yield return UiTestUtil.WaitForRedraw();
+                                        yield return Capture(prefix + "_65_shop_sell_card");
+                                        PointerPress.Simulate();
+                                        yield return null;
+                                    }
                                 }
 
                                 UiTestUtil.PressTheBackground();

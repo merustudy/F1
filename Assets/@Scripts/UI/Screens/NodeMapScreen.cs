@@ -160,6 +160,8 @@ namespace F1.UI
 
             _refresh.onClick.AddListener(OnRefreshShop);
             _leave.onClick.AddListener(OnLeaveShop);
+            _party.SellOption = SellOptionFor;
+            _party.SellRequested += OnSellRequested;
             _buyToInventory.onClick.AddListener(OnBuyToInventory);
             _inventoryToggle.onClick.AddListener(OnInventoryToggle);
             _party.Open(_art);
@@ -891,6 +893,56 @@ namespace F1.UI
         string BoughtNote(string what, int coinsBefore)
         {
             return UiStrings.Get(UiKeys.Map.ShopBought, what, coinsBefore, Managers.Expedition.Expedition.Coins);
+        }
+
+        /// <summary>
+        /// Round 74 B (2026-10-17): at the shop, the card of an item of the party's (a board square, or the inventory's at member -1) carries
+        /// the sell button with what the shop pays, or "cannot sell", off, for the base weapon and a unique; elsewhere the card has none.
+        /// </summary>
+        (string Label, bool Enabled)? SellOptionFor(int member, int x, int y)
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (manager.Phase != GamePhase.Shop)
+            {
+                return null;
+            }
+
+            BoardItem item = member < 0 ? manager.Expedition.Inventory.ItemAt(x, y) : manager.Expedition.Members[member].Board.ItemAt(x, y);
+            if (item == null)
+            {
+                return null;
+            }
+
+            bool can = member < 0 ? manager.CanSellInventoryItem(x, y) : manager.CanSellBoardItem(member, x, y);
+            return can ? (UiStrings.Get(UiKeys.Map.Sell, manager.SellPriceOf(item.Item)), true) : (UiStrings.Get(UiKeys.Map.CannotSell), false);
+        }
+
+        /// <summary>Sells the item whose card is open: the coins come, the item goes, the detail line says what was sold for what.</summary>
+        void OnSellRequested(int member, int x, int y)
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            bool can = member < 0 ? manager.CanSellInventoryItem(x, y) : manager.CanSellBoardItem(member, x, y);
+            if (!can)
+            {
+                return;
+            }
+
+            BoardItem item = member < 0 ? manager.Expedition.Inventory.ItemAt(x, y) : manager.Expedition.Members[member].Board.ItemAt(x, y);
+            string what = UiText.ItemTitle(item.Item);
+            int before = manager.Expedition.Coins;
+            if (member < 0)
+            {
+                manager.SellInventoryItem(x, y);
+            }
+            else
+            {
+                manager.SellBoardItem(member, x, y);
+            }
+
+            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+            _shopNote = UiStrings.Get(UiKeys.Map.ShopSold, what, before, manager.Expedition.Coins);
+            _party.Tooltip.Hide();
+            Refresh();
         }
 
         /// <summary>Pays the refresh and shows the new stock; whatever was picked is gone with the old one.</summary>

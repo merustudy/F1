@@ -227,6 +227,44 @@ namespace F1.Flow
             return Phase == GamePhase.Shop && ExpeditionRules.CanBuyToInventory(_data.Data, Expedition, slot);
         }
 
+        /// <summary>What the shop pays for an item of the party's (2026-10-17, Round 74): SellPercent of its price at its tier, at least 1.</summary>
+        public int SellPriceOf(EquippedItem item)
+        {
+            return ExpeditionRules.SellPriceOf(_data.Data, item);
+        }
+
+        /// <summary>True when the item on a square of a member's board can be sold now: at a shop, not the base weapon, not a unique.</summary>
+        public bool CanSellBoardItem(int memberIndex, int x, int y)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanSellBoardItem(_data.Data, Expedition, memberIndex, x, y);
+        }
+
+        /// <summary>Sells the item on a square of a member's board and saves; returns what was paid.</summary>
+        public int SellBoardItem(int memberIndex, int x, int y)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            int paid = ExpeditionRules.SellBoardItem(_data.Data, Expedition, memberIndex, x, y);
+            Commit();
+            return paid;
+        }
+
+        /// <summary>True when the item on a square of the inventory can be sold now: at a shop, not a unique.</summary>
+        public bool CanSellInventoryItem(int x, int y)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.CanSellInventoryItem(_data.Data, Expedition, x, y);
+        }
+
+        /// <summary>Sells the item on a square of the inventory and saves; returns what was paid.</summary>
+        public int SellInventoryItem(int x, int y)
+        {
+            _run.RequireWritable();
+            Require(GamePhase.Shop);
+            int paid = ExpeditionRules.SellInventoryItem(_data.Data, Expedition, x, y);
+            Commit();
+            return paid;
+        }
+
         public void BuyToInventory(int slot)
         {
             _run.RequireWritable();

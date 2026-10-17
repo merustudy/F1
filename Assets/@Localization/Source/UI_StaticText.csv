@@ -147,6 +147,9 @@ Map.ShopBought,On the detail line after a purchase. {0} = what was bought. {1} =
 Map.Coins,A number of region coins beside the coin mark (the header; an offer's price; the refresh cost). {0} = coins.,{0},{0}
 Map.ShopPotion,Under the name of a potion on offer in the shop.,포션,Potion
 Map.ShopBagSub,Under the name of a bag on offer or dropped (Slice B stage 19). {0} x {1} = its squares across and down.,가방 · {0}×{1},Bag · {0}×{1}
+Map.Sell,"The sell button on an item's card while at a shop (2026-10-17, Round 74 B). {0} = the coins the shop pays.",팔기 · {0} 코인,Sell · {0} coins
+Map.CannotSell,"The sell button of an item that cannot be sold (the base weapon, a unique), off.",팔 수 없음,Cannot sell
+Map.ShopSold,"On the detail line after a sale. {0} = what was sold. {1} = coins before. {2} = coins after.",판매: {0} · 코인 {1} → {2},Sold: {0} · coins {1} → {2}
 Map.BagFacts,The facts of a bag on a tile (Slice B stage 19). {0} = the squares it adds.,칸 +{0}. 틀의 빈 자리에 놓습니다. 안의 아이템과 함께 옮길 수 있습니다.,+{0} squares. Lay it in an empty part of the frame; it moves with what lies in it.
 Map.OfferPrice,The price line of a good in the merchant's tooltip (Slice B stage 21). {0} = the coins.,값 {0} 코인,Price: {0} coins
 Board.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}

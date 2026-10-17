@@ -1429,6 +1429,20 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 6039611447959552
+    m_Localized: "Sell \xB7 {0} coins"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6039611456348160
+    m_Localized: Cannot sell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6039611456348161
+    m_Localized: "Sold: {0} \xB7 coins {1} \u2192 {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1587,3 +1601,5 @@ MonoBehaviour:
         - id: 5844067983286274
         - id: 5853680703102976
         - id: 5853680715685888
+        - id: 6039611447959552
+        - id: 6039611456348161
