@@ -32,6 +32,7 @@
 | `hit` | 확정한 용병 그림의 피격 자세: 맞아서 뒤로 밀리는 순간 | 같은 원본을 가운데에 | `1536x1024` | `medium` | `transparent` | §25 | §26 | `pose` (`tools/fit_pose.py`) |
 | `enemy_attack` | 확정한 몬스터 그림의 공격 자세: 무기를 휘둘러 왼쪽(파티)으로 돌진하는 순간(2026-10-05 Round 26~28의 규칙). 눈동자 없는 눈과 장비는 그대로, 무기는 바닥선 아래로 내려가도 된다 | 그 몬스터의 확정 원본(`output/enemy/<key>.raw.png`, 눈동자를 지운 것)을 1536x1024에 앉힌 것: 발바닥이 높이의 3/4, 오른쪽 3분의 1에(gen_image.py가 만든다) | `1536x1024` | `medium` | `transparent` | §27 | §28 | `pose` (`tools/fit_pose.py`) |
 | `enemy_hit` | 확정한 몬스터 그림의 피격 자세: 맞아서 오른쪽으로 밀리는 순간 | 같은 원본을 가운데에 | `1536x1024` | `medium` | `transparent` | §27 | §28 | `pose` (`tools/fit_pose.py`) |
+| `building` | 로비 마을의 건물 한 채(2026-10-17 Round 78, 30단계): 막사·쉼터·역마차·성문의 레벨 1·2·3과 공용 비계. 마을 그림과 같은 내려다본 시점, 밤, 투명 배경. 레벨 2·3는 그 건물의 레벨 1 결과를 둘째 기준 그림으로 붙인다(`--extra-reference`) | `References/Character/style_ref_roster.png` (그대로 붙인다) + 레벨 2·3는 그 건물의 낮은 레벨 그림 | `1536x1024` | `medium` | `transparent` | §29 | §30 | `trim` (투명 여백만 잘라 낸다) |
 
 ## 1. Shared Style Rule
 
@@ -406,6 +407,50 @@ the expression the subject asks for: the same creature with the same gear and
 the same weapon, not a new design. The creature faces toward the viewer's left,
 where the party stands. Draw one figure only, alone, on a transparent
 background, and do not reproduce the background of the attached image.
+```
+
+## 29. Building
+
+For one building of the company's town (Round 78, 2026-10-17): the barracks, the inn, the stagecoach and the gate, each at three levels, and the shared scaffold. The town background is drawn separately and the buildings stand on it as cut-out pictures, so every building is drawn alone on a transparent background, from the same viewpoint and under the same night light as the town painting.
+
+- Draw one building alone, the whole of it from the top of its roof, chimney, flag or banner down to the ground it stands on, seen from a raised three-quarter view a little from above, as if from a balcony: the viewer looks down at an angle of about thirty degrees, so the roof and the front wall are both visible. The front of the building faces the lower left of the image.
+- It is night: the walls and the roof are dark muted colours, and the building has a few small warm window lights and one or two lanterns, each with a small flat pool of light around it. These are the brightest spots and they are small. Nothing glows.
+- The building stands on a small flat patch of trodden earth of its own that is part of the picture: a little ground around the foot of the walls, a step, a fence post or a barrel may stand on it. Nothing else: no road, no hills, no sky, no neighbour, no tree beyond a bush at a wall.
+- Draw it in the same hand as the town: the wobbly hand-drawn ink line around the big shapes, thinner lines inside them, a few scribbly marks for grain and cracks, flat muted fills with hard-edged darker and lighter tones. Low detail: a few big plain shapes and three or four ornaments at most.
+- The level is the size and the richness of the building, as the subject says: a low level is small and plain, a high level is bigger, taller and richer in parts. The same building keeps its kind, its roof colour, its banner or sign and its door from one level to the next; it grows, it is not replaced.
+- Keep the whole building inside the canvas with a clear empty margin on all four sides. Never crop the roof, the flag or the ground at its foot.
+- Draw no character, no creature, no animal unless the subject names one, no shadow cast on the ground beyond the building's own foot, no glow, no fog, no text, no letters, no numbers, no name on a sign (every sign is blank) and no logo. Output a transparent PNG with all four corner pixels at alpha 0.
+
+## 30. Building Reference Rule
+
+The last part of a `building` prompt. For level 2 and 3 the building's own lower level (`output/building/<id>_<level-1>.png`) is attached after the style sheet (`--extra-reference`); the rule says what each image is for.
+
+```text
+The first attached image is a sheet of three characters of our game, drawn in our
+style. Use it only as a style reference for the hand-drawn wobbly ink line, the
+scribbly marks, the shape simplification, the flat muted color range and the
+shading amount. Do not draw any character or any part of one, and do not
+reproduce the sheet's white background. If a second image is attached, it is
+this same building of our town at the level just below the one to draw, already
+approved: keep its kind, its viewpoint, its roof colour, its door, its banner or
+sign and its colours, and draw the same building grown to the new level as the
+subject says, bigger and richer, not a new design. Draw only the described
+building, as a new standalone picture in the same drawing style on a transparent
+background.
+```
+
+## 31. Building Forbidden
+
+Paste as the AVOID block of a `building` prompt, in place of §2 (a building has its own patch of ground and is not a figure).
+
+```text
+avoid: realistic, photorealistic, 3D render, CGI, painterly, watercolor, oil painting,
+soft shading, gradients, airbrush, textured fills, glossy highlights, neon, glow,
+bloom, lens flare, bright saturated colors, pastel, clean vector line, uniform line
+weight, sparkles, fog, drop shadow, a road, hills, sky, a horizon, neighbouring
+buildings, a whole town, people, characters, creatures, faces, text, letters,
+numbers, a name on a sign, logo, title, watermark, frame, border, user interface,
+cropped roof, cropped ground
 ```
 
 ## Dungeon: abandoned_mine

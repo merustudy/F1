@@ -141,6 +141,22 @@ TYPES = {
         # An item is drawn for the cells it takes on a board: the data says how many.
         "fit": "cell",
     },
+    "bag": {
+        # A bag as a thing (Round 79, 2026-10-17): the extra inventory an elite drops and the merchant sells. Drawn like an
+        # item's icon in the shape of its squares (the item's sections and the cell sections), but named by BagData.csv,
+        # whose Width and Height give the shape. On the board the bag stays Diablo's well; the picture shows where the
+        # bag is a thing (the floor, the merchant's tile, the hand).
+        "section": 7,
+        "reference_section": 8,
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
+        "mirror_references": False,
+        "data": "BagData.csv",
+        "shapes": "BagData.csv",
+        "dungeon_theme": None,
+        "quality": "medium",
+        "tail": "Draw this one bag as an icon.",
+        "fit": "cell",
+    },
     "background": {
         # A background is an opaque scene: it has its own style rule and its own list of what to avoid.
         "shared_section": 10,
@@ -200,6 +216,24 @@ TYPES = {
         "quality": "medium",
         "tail": "Draw this one prop.",
         "fit": "figure",
+    },
+    "building": {
+        # A building of the company's town (Round 78, 2026-10-17; stage 30): the barracks, the inn, the stagecoach
+        # and the gate at their levels, and the shared scaffold. Drawn alone on a transparent background from the
+        # town painting's viewpoint; the game stands it on the far town background. Nothing is scaled or stood on a
+        # floor line here: the transparent margin is cut off and the screen sizes it (fit "trim"). Level 2 and 3
+        # attach the building's lower level with --extra-reference (STYLE_RUNTIME.md §30).
+        "section": 29,
+        "forbidden_section": 31,
+        "reference_section": 30,
+        "references": [ROOT / "References" / "Character" / "style_ref_roster.png"],
+        "mirror_references": False,
+        "data": None,
+        "dungeon_theme": None,
+        "quality": "medium",
+        "size": "1536x1024",
+        "tail": "Draw this one building.",
+        "fit": "trim",
     },
     "attack": {
         # A mercenary's attack pose, drawn after its approved figure (2026-10-04, round 23; Docs/Design/10 §2, §5): the
@@ -470,7 +504,7 @@ def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
     # An item is drawn for as many cells as the data gives it.
     cells = 0
     if spec["fit"] == "cell":
-        cells = read_item_cells(key)
+        cells = read_item_cells(key, spec.get("shapes", "ItemData.csv"))
 
     # A piece of the user interface names the size it is fitted to and the outline it is given.
     ui = None
@@ -519,27 +553,47 @@ def read_roster_row(kind: str, key: str, roster: Path = None) -> dict:
                 f"  파일: {path}\n  있는 얼굴 기준: {', '.join(known) or '(없음)'}"
             )
 
+    shape = read_shape(key, spec["shapes"]) if spec.get("shapes") else None
     return {"subject": subject, "height": height, "flip": flip == "true", "floor_line": floor_line,
-            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells, "body": body, "face": face}
+            "dungeon": dungeon, "reference": reference, "ui": ui, "cells": cells, "body": body, "face": face, "shape": shape}
 
 
-def read_item_cells(key: str) -> int:
+def read_item_cells(key: str, file_name: str = "ItemData.csv") -> int:
     """The composition an item's icon is drawn in (a key of ITEM_CELLS): the one whose fitted canvas is
     closest in proportion to the item's piece on the board, from its Width and Height in the game's data
-    (Slice B stage 19 replaced Size with a grid shape; round 50)."""
-    path = GAME_DATA / "ItemData.csv"
-    require_file(path, "Game Data ItemData.csv")
+    (Slice B stage 19 replaced Size with a grid shape; round 50). A bag's shape comes from BagData.csv (round 79)."""
+    path = GAME_DATA / file_name
+    require_file(path, f"Game Data {file_name}")
     with path.open(encoding="utf-8-sig", newline="") as handle:
         shapes = {row.get("Id"): (row.get("Width"), row.get("Height")) for row in csv.DictReader(handle)}
 
     try:
         width, height = (int(v or "") for v in shapes.get(key, ("", "")))
     except ValueError as error:
-        raise PipelineError(f"ItemData.csv 의 '{key}' 의 Width·Height 가 정수가 아니다.\n  파일: {path}") from error
+        raise PipelineError(f"{file_name} 의 '{key}' 의 Width·Height 가 정수가 아니다.\n  파일: {path}") from error
     if not (1 <= width <= 3 and 1 <= height <= 3):
-        raise PipelineError(f"ItemData.csv 의 '{key}' 의 모양 {width}x{height} 가 격자의 한 변 1~3 밖이다.")
+        raise PipelineError(f"{file_name} 의 '{key}' 의 모양 {width}x{height} 가 격자의 한 변 1~3 밖이다.")
     box = (piece_side(width) - 2 * PIECE_ART_MARGIN) / (piece_side(height) - 2 * PIECE_ART_MARGIN)
     return min(ITEM_CELLS, key=lambda cells: abs(math.log(ITEM_CELLS[cells]["canvas"][0] / ITEM_CELLS[cells]["canvas"][1] / box)))
+
+
+def read_shape(key: str, file_name: str):
+    """A piece's squares across and down from the game's data (Width, Height), for a canvas in the piece's proportions."""
+    path = GAME_DATA / file_name
+    require_file(path, f"Game Data {file_name}")
+    with path.open(encoding="utf-8-sig", newline="") as handle:
+        shapes = {row.get("Id"): (row.get("Width"), row.get("Height")) for row in csv.DictReader(handle)}
+    try:
+        return tuple(int(v or "") for v in shapes.get(key, ("", "")))
+    except ValueError as error:
+        raise PipelineError(f"{file_name} 의 '{key}' 의 Width·Height 가 정수가 아니다.\n  파일: {path}") from error
+
+
+def bag_canvas(shape) -> tuple:
+    """The canvas of a bag's picture (round 79): the piece's proportions at twice the screen size, 328 along the longer side."""
+    width, height = shape
+    pw, ph = piece_side(width), piece_side(height)
+    return (328, round(328 * ph / pw)) if pw >= ph else (round(328 * pw / ph), 328)
 
 
 def piece_side(squares: int) -> int:
@@ -954,6 +1008,27 @@ def fit_figure(png_bytes: bytes, height_percent: int, flip: bool):
     return buffer.getvalue(), report
 
 
+def fit_trim(png_bytes: bytes, margin: int = 8):
+    """Cuts the transparent margin off a cut-out picture that the screen sizes itself (a building of the town, round 78).
+
+    Nothing is scaled and nothing is stood on a floor line: the subject is cut on its alpha with a small margin left
+    around it, so that pictures of the same thing at different levels keep their relative sizes.
+    """
+    image = Image.open(BytesIO(png_bytes)).convert("RGBA")
+    box = subject_box(image)
+    if box is None:
+        raise PipelineError("이미지가 전부 투명하다. 피사체를 찾지 못했다.")
+
+    left, top, right, bottom = box
+    touches_edge = left <= 1 or top <= 1 or right >= image.width - 1 or bottom >= image.height - 1
+    subject = image.crop((max(0, left - margin), max(0, top - margin), min(image.width, right + margin), min(image.height, bottom + margin)))
+    buffer = BytesIO()
+    subject.save(buffer, format="PNG")
+    report = {"trim": True, "raw_size": (right - left, bottom - top), "raw_fill": max((right - left) / image.width, (bottom - top) / image.height),
+              "size": subject.size, "touches_edge": touches_edge}
+    return buffer.getvalue(), report
+
+
 def fit_scene(png_bytes: bytes, floor_line: int):
     """Puts a background's floor on the floor line every background shares.
 
@@ -1204,9 +1279,14 @@ def fit(kind: str, png_bytes: bytes, row: dict):
     if TYPES[kind]["fit"] in ("frame", "glyph"):
         return fit_ui(png_bytes, row["ui"]["size"], row["ui"]["outline"], stretch=TYPES[kind]["fit"] == "frame", flatten=row["ui"]["flat"])
     if TYPES[kind]["fit"] == "cell":
-        png, report = fit_ui(png_bytes, ITEM_CELLS[row["cells"]]["canvas"], ITEM_OUTLINE, stretch=False, fill=ITEM_FILL)
+        # A bag's picture (round 79) fills its piece: its canvas has the piece's own proportions (twice the screen size, like an icon's),
+        # so that the picture, drawn with the icon's margin, lies over the bag's squares with a little room at the edges.
+        canvas = bag_canvas(row["shape"]) if kind == "bag" else ITEM_CELLS[row["cells"]]["canvas"]
+        png, report = fit_ui(png_bytes, canvas, ITEM_OUTLINE, stretch=False, fill=ITEM_FILL)
         report["cells"] = row["cells"]
         return png, report
+    if TYPES[kind]["fit"] == "trim":
+        return fit_trim(png_bytes)
     return fit_figure(png_bytes, row["height"], row["flip"])
 
 
@@ -1218,6 +1298,13 @@ def print_fit(report: dict) -> None:
                   f"{report['window'][0]}x{report['window'][1]} 창을 잘라 캔버스 크기로 맞췄다.")
         else:
             print(f"      발 높이 {report['floor_line']}% 가 바닥선과 같다. 그린 대로 뒀다.")
+        return
+
+    if report.get("trim"):
+        print(f"      잘라 냄: 피사체 {report['raw_size'][0]}x{report['raw_size'][1]} (생성 캔버스의 {report['raw_fill']:.0%}) "
+              f"-> {report['size'][0]}x{report['size'][1]} (투명 여백 8px). 크기는 화면이 정한다.")
+        if report["touches_edge"]:
+            print("      경고: 피사체가 생성 캔버스의 가장자리에 닿았다. 잘렸을 수 있다.", file=sys.stderr)
         return
 
     if report.get("ui"):
