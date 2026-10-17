@@ -9,37 +9,12 @@ using UnityEngine.UI;
 
 namespace F1.UI
 {
-    /// <summary>An item lying in a held bag, for drawing it on the pointer: where it lies in the bag's squares and how it is turned.</summary>
-    public readonly struct HeldBagItem
-    {
-        public HeldBagItem(Sprite icon, int x, int y, int width, int height, int turns)
-        {
-            Icon = icon;
-            X = x;
-            Y = y;
-            Width = width;
-            Height = height;
-            Turns = turns;
-        }
-
-        public Sprite Icon { get; }
-
-        /// <summary>Its top-left square in the bag's squares as the bag lies on its board.</summary>
-        public int X { get; }
-        public int Y { get; }
-
-        /// <summary>Its squares across and down as it lies (turned).</summary>
-        public int Width { get; }
-        public int Height { get; }
-        public int Turns { get; }
-    }
-
     /// <summary>
     /// What is held, on the pointer (round 54, Diablo II's inventory; Docs/Architecture/12_UI.md "격자 보드"). While the hand holds
     /// something, a clear layer over the whole screen takes every press first and says where (<see cref="Pressed"/>): the screen then
     /// puts what is held there, lets a button that works on it through, or lets go so that it is back where it was. The held thing is
-    /// drawn in place of the pointer, which is hidden: an item's icon at its squares' size (no ground), a bag's well with the items in it,
-    /// turned as held, its centre on the pointer. The screen shows and hides it with the hand; it moves with the mouse by itself.
+    /// drawn in place of the pointer, which is hidden: an item's icon at its squares' size (no ground), a bag from the floor or the merchant
+    /// as its picture (round 79; its well without one), turned as held, its centre on the pointer. A placed bag is never held (round 79). The screen shows and hides it with the hand; it moves with the mouse by itself.
     /// </summary>
     public sealed class HeldPointerView : MonoBehaviour, IPointerClickHandler
     {
@@ -49,13 +24,11 @@ namespace F1.UI
         [SerializeField] GameObject _bagRim;
         [SerializeField] Image[] _bagRimEdges;
         [SerializeField] SquareGrid _squares;
-        [SerializeField] Image _bagItemTemplate;
 
-        /// <summary>A bag on the pointer is see-through (its rim a frame, its squares dim) so that the colour where it would land shows under it; its items are not.</summary>
+        /// <summary>A bag on the pointer is see-through (its rim a frame, its squares dim) so that the colour where it would land shows under it.</summary>
         const float BagRimAlpha = 0.85f;
         const float BagSquaresAlpha = 0.45f;
 
-        readonly List<Image> _bagItems = new List<Image>();
         Vector2 _lastPointer;
         bool _primed;
         Vector2 _lastDrawn;
@@ -108,22 +81,19 @@ namespace F1.UI
                 return;
             }
 
-            BoardBag boardBag = hand.HeldBag(expedition);
-            if (boardBag != null)
-            {
-                var items = new List<HeldBagItem>();
-                foreach (BoardItem item in expedition.Members[hand.BagMember].Board.ItemsIn(boardBag))
-                {
-                    items.Add(new HeldBagItem(art?.OfItem(item.Item.Item.Id), item.At.X - boardBag.At.X, item.At.Y - boardBag.At.Y, item.Width, item.Height, item.At.Turns));
-                }
-
-                ShowBag(boardBag.Bag, boardBag.At.Turns, hand.Turns, items);
-                return;
-            }
-
             if (hand.Outside?.Bag != null)
             {
-                ShowBag(hand.Outside.Bag, 0, hand.Turns, null);
+                // A bag from the floor or the merchant rides the pointer as its picture (round 79) when it has one, else as its well.
+                Sprite picture = art?.OfBag(hand.Outside.Bag.Id);
+                if (picture != null)
+                {
+                    ShowItem(picture, hand.Outside.Bag.Width, hand.Outside.Bag.Height, hand.Turns, edgeToEdge: true);
+                }
+                else
+                {
+                    ShowBag(hand.Outside.Bag, hand.Turns);
+                }
+
                 return;
             }
 
@@ -138,14 +108,14 @@ namespace F1.UI
         }
 
         /// <summary>An item on the pointer: its icon over its squares (unturned across and down), turned so many quarters.</summary>
-        public void ShowItem(Sprite icon, int width, int height, int turns)
+        /// <param name="edgeToEdge">A bag's picture (round 79) fills its squares with no margin, stretched to them.</param>
+        public void ShowItem(Sprite icon, int width, int height, int turns, bool edgeToEdge = false)
         {
             Open();
             Vector2 size = new Vector2(GridGeometry.Span(width), GridGeometry.Span(height));
             _shape.sizeDelta = size;
             _shape.localRotation = GridGeometry.ArtTurn(turns);
             _bagRim.SetActive(false);
-            HideBagItems();
 
             // An item without an icon shows its squares in the held blue instead.
             bool pictured = icon != null;
@@ -153,8 +123,9 @@ namespace F1.UI
             _squares.gameObject.SetActive(!pictured);
             if (pictured)
             {
-                _art.sizeDelta = GridGeometry.ArtBox(size, 0, ItemSlotView.ArtMargin);
+                _art.sizeDelta = edgeToEdge ? size : GridGeometry.ArtBox(size, 0, ItemSlotView.ArtMargin);
                 _icon.sprite = icon;
+                _icon.preserveAspect = !edgeToEdge;
             }
             else
             {
@@ -163,18 +134,14 @@ namespace F1.UI
             }
         }
 
-        /// <summary>
-        /// A bag on the pointer: its well (the stone rim tinted by its leather round its black squares) with the items in it, drawn as it
-        /// lay on its board (<paramref name="baseTurns"/>; across and down as it lay) and turned on to <paramref name="turns"/>.
-        /// </summary>
-        public void ShowBag(BagData bag, int baseTurns, int turns, IReadOnlyList<HeldBagItem> items)
+        /// <summary>A bag without a picture on the pointer: its well (the stone rim tinted by its leather round its black squares), turned so many quarters.</summary>
+        public void ShowBag(BagData bag, int turns)
         {
             Open();
-            var lay = new Placement(0, 0, baseTurns);
-            int width = lay.WidthOf(bag.Width, bag.Height);
-            int height = lay.HeightOf(bag.Width, bag.Height);
+            int width = bag.Width;
+            int height = bag.Height;
             _shape.sizeDelta = new Vector2(GridGeometry.Span(width), GridGeometry.Span(height));
-            _shape.localRotation = GridGeometry.ArtTurn(turns - baseTurns);
+            _shape.localRotation = GridGeometry.ArtTurn(turns);
             _art.gameObject.SetActive(false);
             _bagRim.SetActive(true);
             Color rim = UiPalette.BagRim(bag.Id);
@@ -185,38 +152,6 @@ namespace F1.UI
             _squares.gameObject.SetActive(true);
             _squares.color = new Color(UiPalette.GridSquare.r, UiPalette.GridSquare.g, UiPalette.GridSquare.b, BagSquaresAlpha);
             _squares.Shape(width, height, GridGeometry.Gap);
-
-            int shown = 0;
-            foreach (HeldBagItem item in items ?? Array.Empty<HeldBagItem>())
-            {
-                if (item.Icon == null)
-                {
-                    continue;
-                }
-
-                if (shown == _bagItems.Count)
-                {
-                    _bagItems.Add(Instantiate(_bagItemTemplate, _shape));
-                }
-
-                Image image = _bagItems[shown++];
-                image.gameObject.SetActive(true);
-                Vector2 piece = new Vector2(GridGeometry.Span(item.Width), GridGeometry.Span(item.Height));
-                Vector2 corner = GridGeometry.Corner(item.X, item.Y);
-                RectTransform rect = image.rectTransform;
-                rect.anchorMin = new Vector2(0f, 1f);
-                rect.anchorMax = new Vector2(0f, 1f);
-                rect.pivot = new Vector2(0.5f, 0.5f);
-                rect.anchoredPosition = new Vector2(corner.x + piece.x / 2f, corner.y - piece.y / 2f);
-                rect.sizeDelta = GridGeometry.ArtBox(piece, item.Turns, ItemSlotView.ArtMargin);
-                rect.localRotation = GridGeometry.ArtTurn(item.Turns);
-                image.sprite = item.Icon;
-            }
-
-            for (int i = shown; i < _bagItems.Count; i++)
-            {
-                _bagItems[i].gameObject.SetActive(false);
-            }
         }
 
         /// <summary>Nothing held: the layer and the drawing go, and the pointer comes back.</summary>
@@ -303,14 +238,6 @@ namespace F1.UI
             {
                 gameObject.SetActive(true);
                 transform.SetAsLastSibling();
-            }
-        }
-
-        void HideBagItems()
-        {
-            foreach (Image image in _bagItems)
-            {
-                image.gameObject.SetActive(false);
             }
         }
 

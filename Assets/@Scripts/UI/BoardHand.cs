@@ -96,11 +96,6 @@ namespace F1.UI
         public int ItemX { get; private set; }
         public int ItemY { get; private set; }
 
-        /// <summary>The member whose bag is held, or -1; the bag lies from (<see cref="BagX"/>, <see cref="BagY"/>).</summary>
-        public int BagMember { get; private set; } = -1;
-        public int BagX { get; private set; }
-        public int BagY { get; private set; }
-
         /// <summary>The inventory entry held, or -1.</summary>
         public int InventoryIndex { get; private set; } = -1;
 
@@ -110,7 +105,7 @@ namespace F1.UI
         /// <summary>Quarter turns clockwise of what is held.</summary>
         public int Turns { get; private set; }
 
-        public bool Holding => ItemMember >= 0 || BagMember >= 0 || InventoryIndex >= 0 || Outside != null;
+        public bool Holding => ItemMember >= 0 || InventoryIndex >= 0 || Outside != null;
 
         /// <summary>The member whose board the pointer is over, or -1.</summary>
         public int HoverMember => _hoverMember;
@@ -118,7 +113,6 @@ namespace F1.UI
         public void Clear()
         {
             ItemMember = -1;
-            BagMember = -1;
             InventoryIndex = -1;
             Outside = null;
             Turns = 0;
@@ -235,7 +229,7 @@ namespace F1.UI
         public bool InventoryAnchor(ExpeditionState expedition, out Placement at)
         {
             at = default;
-            EquippedItem item = BagMember >= 0 || Outside?.Bag != null ? null : HeldItem(expedition);
+            EquippedItem item = Outside?.Bag != null ? null : HeldItem(expedition);
             if (item == null)
             {
                 return false;
@@ -376,12 +370,6 @@ namespace F1.UI
             return ItemMember >= 0 && ItemMember < expedition.Members.Count ? expedition.Members[ItemMember].Board.ItemAt(ItemX, ItemY) : null;
         }
 
-        /// <summary>The board bag held, or null.</summary>
-        public BoardBag HeldBag(ExpeditionState expedition)
-        {
-            return BagMember >= 0 && BagMember < expedition.Members.Count ? expedition.Members[BagMember].Board.BagAt(BagX, BagY) : null;
-        }
-
         /// <summary>The item held (of a board, of the inventory or from outside), or null.</summary>
         public EquippedItem HeldItem(ExpeditionState expedition)
         {
@@ -401,7 +389,7 @@ namespace F1.UI
         /// <summary>The unturned squares of what is held across and down; false when nothing (or nothing left) is held.</summary>
         bool Shape(ExpeditionState expedition, out int width, out int height, out BagData bag)
         {
-            bag = BagMember >= 0 ? HeldBag(expedition)?.Bag : Outside?.Bag;
+            bag = Outside?.Bag;
             if (bag != null)
             {
                 width = bag.Width;
@@ -450,10 +438,9 @@ namespace F1.UI
 
             if (bag != null)
             {
-                BoardBag held = HeldBag(expedition);
-                bool same = held != null && member == BagMember && held.At.Equals(at);
-                bool fits = held != null ? manager.CanMoveBag(BagMember, BagX, BagY, member, at) : Outside.CanPlace(member, at);
-                ghost.Kind = same ? GhostKind.Same : fits ? GhostKind.Fits : GhostKind.Refused;
+                // A bag comes only from outside (the floor, the merchant): a placed bag is never held (round 79).
+                bool fits = Outside.CanPlace(member, at);
+                ghost.Kind = fits ? GhostKind.Fits : GhostKind.Refused;
                 ghost.Label = fits ? UiStrings.Get(UiKeys.Board.GhostBag) : null;
                 return ghost;
             }
@@ -506,7 +493,7 @@ namespace F1.UI
             ItemBoard board = expedition.Members[member].Board;
             if (Holding)
             {
-                EquippedItem held = BagMember >= 0 || Outside?.Bag != null ? null : HeldItem(expedition);
+                EquippedItem held = Outside?.Bag != null ? null : HeldItem(expedition);
                 if (held == null || held.Item.Stars.Count == 0)
                 {
                     return null;
@@ -542,24 +529,16 @@ namespace F1.UI
             ExpeditionState expedition = manager.Expedition;
             if (!Holding)
             {
-                ItemBoard board = expedition.Members[member].Board;
                 if (manager.CanPickItem(member, x, y))
                 {
-                    BoardItem item = board.ItemAt(x, y);
+                    BoardItem item = expedition.Members[member].Board.ItemAt(x, y);
                     ItemMember = member;
                     ItemX = item.At.X;
                     ItemY = item.At.Y;
                     Turns = item.At.Turns;
                 }
-                else if (manager.CanPickBag(member, x, y))
-                {
-                    BoardBag bag = board.BagAt(x, y);
-                    BagMember = member;
-                    BagX = bag.At.X;
-                    BagY = bag.At.Y;
-                    Turns = bag.At.Turns;
-                }
 
+                // A bag's empty square picks nothing: a placed bag stays put (round 79).
                 return SoundEffect.Button;
             }
 
@@ -588,25 +567,6 @@ namespace F1.UI
                 if (manager.CanMoveItem(ItemMember, ItemX, ItemY, member, at))
                 {
                     manager.MoveItem(ItemMember, ItemX, ItemY, member, at);
-                    Clear();
-                    return SoundEffect.ItemPlace;
-                }
-
-                return SoundEffect.Button;
-            }
-
-            if (BagMember >= 0)
-            {
-                BoardBag held = HeldBag(expedition);
-                if (held == null || (member == BagMember && held.At.Equals(at)))
-                {
-                    Clear();
-                    return SoundEffect.Button;
-                }
-
-                if (manager.CanMoveBag(BagMember, BagX, BagY, member, at))
-                {
-                    manager.MoveBag(BagMember, BagX, BagY, member, at);
                     Clear();
                     return SoundEffect.ItemPlace;
                 }

@@ -313,14 +313,10 @@ namespace F1.Tests
             Assert.AreEqual(weapon, TestBoards.Items(state.Members[0]).Single().Item.Id);
             Assert.IsEmpty(state.Inventory);
 
-            // A bag (Slice B stage 19): picked by an empty square of it, moved across the frame and to another board.
+            // A bag (Slice B stage 19; round 79): put on a board it stays there, like the start bag — the manager has no command to move one.
             TestBoards.AddBag(kit.Data, state.Members[0], "pouch", 0, 2);
-            Assert.IsTrue(kit.Expedition.CanPickBag(0, 1, 2));
-            Assert.IsFalse(kit.Expedition.CanPickBag(0, 2, 1), "The start bag never moves.");
-            Assert.IsTrue(kit.Expedition.CanMoveBag(0, 1, 2, 2, At(0, 4)));
-            kit.Expedition.MoveBag(0, 1, 2, 2, At(0, 4));
-            Assert.AreEqual(1, state.Members[0].Board.Bags.Count);
-            Assert.AreEqual("pouch", state.Members[2].Board.BagAt(2, 4).Bag.Id);
+            Assert.AreEqual(2, state.Members[0].Board.Bags.Count);
+            Assert.IsNull(typeof(ExpeditionManager).GetMethod("MoveBag"));
 
             Assert.IsTrue(kit.Expedition.CanMoveToRow(1, 1));
             Assert.IsFalse(kit.Expedition.CanMoveToRow(1, 2), "Already there.");
@@ -334,13 +330,10 @@ namespace F1.Tests
             Assert.IsFalse(kit.Expedition.CanPickItem(0, 0, 0));
             Assert.IsFalse(kit.Expedition.CanMoveToInventory(0, 0, 0));
             Assert.IsFalse(kit.Expedition.CanPlaceFromInventory(0, 0, At(2, 0)));
-            Assert.IsFalse(kit.Expedition.CanPickBag(2, 0, 4));
-            Assert.IsFalse(kit.Expedition.CanMoveBag(2, 0, 4, 2, At(0, 5)));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToRow(1, 2));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveItem(0, 0, 0, 1, At(0, 1)));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToInventory(0, 0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.PlaceFromInventory(0, 0, At(2, 0)));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveBag(2, 0, 4, 2, At(0, 5)));
         }
 
         [Test]
@@ -402,13 +395,11 @@ namespace F1.Tests
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveItem(0, 0, 0, 1, At(0, 0)));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveToInventory(0, 0, 0));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.PlaceFromInventory(0, 0, At(0, 0)));
-            Assert.Throws<InvalidOperationException>(() => kit.Expedition.MoveBag(0, 0, 0, 1, At(0, 2)));
             Assert.Throws<InvalidOperationException>(() => kit.Expedition.AcknowledgeReport());
             Assert.IsFalse(kit.Expedition.CanTakeLoot(0, 0, At(0, 0)));
             Assert.IsFalse(kit.Expedition.CanMoveItem(0, 0, 0, 1, At(0, 0)));
             Assert.IsFalse(kit.Expedition.CanMoveToInventory(0, 0, 0));
             Assert.IsFalse(kit.Expedition.CanPlaceFromInventory(0, 0, At(0, 0)));
-            Assert.IsFalse(kit.Expedition.CanPickBag(0, 0, 0));
         }
     }
 }

@@ -948,66 +948,19 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheStartBag_StaysPut_AndABagIsPickedByAnEmptySquare_WithNothingAcrossIt()
+        public void ABagOnABoard_StaysWhereItWasPut()
         {
-            StaticData data = TestData.Data();
-            ExpeditionState state = Create(data);
-            ExpeditionMember tank = state.Members[0];
-            TestBoards.AddBag(data, tank, "pouch", 0, 2);
-
-            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 2, 0), "The start bag never moves.");
-            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 1, 2), "An empty square of the pouch.");
-            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 1, 4), "No bag there.");
-
-            TestBoards.Put(tank, Big(data, "knife"), 0, 2);
-            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 0, 2), "A square holding an item picks the item.");
-            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 2, 2));
-
-            tank.Board.Items.Add(new BoardItem(Big(data, "bow"), At(2, 1, 1)));
-            Assert.IsFalse(ExpeditionRules.CanPickBag(state, 0, 2, 2), "The bow lies across the pack and the pouch: move it first.");
-        }
-
-        [Test]
-        public void ABagPickedUp_MovesByAnyOfItsSquares_EvenOneUnderAnItem()
-        {
-            // The screen holds a picked bag by its top-left square, which may hold an item: the bag still moves (a bug found in stage 19).
+            // Round 79 (2026-10-17): no rule picks up or moves a placed bag (the start bag never moved). Items in it move as before.
             StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
             ExpeditionMember tank = state.Members[0];
             TestBoards.AddBag(data, tank, "pouch", 0, 2);
             TestBoards.Put(tank, Big(data, "knife"), 0, 2);
-            Assert.IsTrue(ExpeditionRules.CanPickBag(state, 0, 2, 2), "Picked by its empty square.");
-
-            Assert.IsTrue(ExpeditionRules.CanMoveBag(state, 0, 0, 2, 0, At(0, 4)), "Then held by its top-left square, under the knife.");
-            ExpeditionRules.MoveBag(state, 0, 0, 2, 0, At(0, 4));
-            Assert.AreEqual("knife", TestBoards.ItemAt(tank, 0, 4).Item.Id);
-            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 0, 0, At(0, 5)), "The start bag never moves, by any square.");
-        }
-
-        [Test]
-        public void MoveBag_CarriesItsItems_TurnsThemWithIt_AndGoesToAnotherBoard()
-        {
-            StaticData data = TestData.Data();
-            ExpeditionState state = Create(data);
-            ExpeditionMember tank = state.Members[0];
-            TestBoards.AddBag(data, tank, "pouch", 0, 2);
-            TestBoards.Put(tank, Big(data, "knife"), 2, 2);
-
-            ExpeditionRules.MoveBag(state, 0, 0, 2, 0, At(0, 4));
-            Assert.AreEqual(At(0, 4), tank.Board.BagAt(0, 4).At);
-            Assert.AreEqual("knife", TestBoards.ItemAt(tank, 2, 4).Item.Id, "The knife kept its place in the pouch.");
-
-            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 4, 0, At(0, 4)), "Where it lies already.");
-            Assert.IsFalse(ExpeditionRules.CanMoveBag(state, 0, 0, 4, 0, At(0, 1)), "Over the pack.");
-
-            ExpeditionRules.MoveBag(state, 0, 0, 4, 0, At(2, 3, 1));
-            BoardItem knife = tank.Board.ItemAt(2, 5);
-            Assert.IsNotNull(knife, "Turned a quarter clockwise, the pouch's last square is its bottom one.");
-            Assert.AreEqual(1, knife.At.Turns, "The knife turned with it.");
-
-            ExpeditionRules.MoveBag(state, 0, 2, 3, 1, At(0, 2));
-            Assert.AreEqual(1, tank.Board.Bags.Count, "The pouch left the tank...");
-            Assert.AreEqual("staff knife", Board(state.Members[1]), "...and the knife went with it to the healer.");
+            Assert.IsNull(typeof(ExpeditionRules).GetMethod("CanPickBag"), "Nothing picks a bag up.");
+            Assert.IsNull(typeof(ExpeditionRules).GetMethod("MoveBag"), "Nothing moves one.");
+            Assert.IsTrue(ExpeditionRules.CanMoveItem(data, state, 0, 0, 2, 0, At(1, 2)), "The knife still moves inside the pouch.");
+            ExpeditionRules.MoveItem(data, state, 0, 0, 2, 0, At(1, 2));
+            Assert.AreEqual(At(0, 2), tank.Board.BagAt(0, 2).At, "The pouch did not.");
         }
 
         [Test]

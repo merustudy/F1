@@ -387,7 +387,7 @@ namespace F1.UI
             StaticData data = Managers.Data.Data;
 
             EquippedItem held = _hand.HeldItem(expedition);
-            bool bagHeld = _hand.BagMember >= 0 || _hand.Outside?.Bag != null;
+            bool bagHeld = _hand.Outside?.Bag != null;
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
                 PartyColumnView column = ColumnOfRow(row);
@@ -402,7 +402,6 @@ namespace F1.UI
                 ExpeditionMember shown = expedition.Members[m];
                 BoardItem picked = m == _hand.ItemMember ? _hand.HeldBoardItem(expedition)
                     : m == ExternalSelectedMember ? shown.Board.ItemAt(ExternalSelectedX, ExternalSelectedY) : null;
-                BoardBag pickedBag = m == _hand.BagMember ? _hand.HeldBag(expedition) : null;
                 Func<BoardItem, bool> merges = null;
                 if (_hand.Outside != null && _hand.Outside.Item != null)
                 {
@@ -420,12 +419,12 @@ namespace F1.UI
                     manager.CanMoveToRow(m, row - 1),
                     manager.CanMoveToRow(m, row + 1),
                     picked,
-                    pickedBag,
+                    null,
                     merges,
                     _hand.GhostFor(m, manager, _art),
                     bagHeld,
                     _hand.StarsFor(m, manager),
-                    m == _hand.ItemMember || m == _hand.BagMember);
+                    m == _hand.ItemMember);
             }
 
             for (int i = 0; i < _potions.Count; i++)
@@ -445,7 +444,7 @@ namespace F1.UI
             _toInventory.interactable = _hand.ItemMember >= 0 && manager.CanMoveToInventory(_hand.ItemMember, _hand.ItemX, _hand.ItemY);
 
             EquippedItem selected = held ?? ExternalSelectedItem(expedition);
-            BagData heldBag = _hand.BagMember >= 0 ? _hand.HeldBag(expedition)?.Bag : _hand.Outside?.Bag;
+            BagData heldBag = _hand.Outside?.Bag;
             string chosenPotion = _selectedPotion >= 0 ? expedition.Potions[_selectedPotion] : null;
             string chosenState = _selectedState >= 0 && _selectedState < expedition.Members.Count ? expedition.Members[_selectedState].StateId : null;
             if (chosenPotion != null)

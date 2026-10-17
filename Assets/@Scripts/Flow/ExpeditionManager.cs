@@ -620,26 +620,6 @@ namespace F1.Flow
             Commit();
         }
 
-        /// <summary>True when the square holds a bag that can be picked up now (Slice B stage 19): not the start bag, the square empty, no item lying across it and another bag.</summary>
-        public bool CanPickBag(int memberIndex, int x, int y)
-        {
-            return IsBetweenBattles && ExpeditionRules.CanPickBag(Expedition, memberIndex, x, y);
-        }
-
-        /// <summary>True when the bag at a square can go to a placement in a frame now, carrying its items.</summary>
-        public bool CanMoveBag(int fromMember, int fromX, int fromY, int toMember, Placement to)
-        {
-            return IsBetweenBattles && ExpeditionRules.CanMoveBag(Expedition, fromMember, fromX, fromY, toMember, to);
-        }
-
-        public void MoveBag(int fromMember, int fromX, int fromY, int toMember, Placement to)
-        {
-            _run.RequireWritable();
-            RequireBetweenBattles();
-            ExpeditionRules.MoveBag(Expedition, fromMember, fromX, fromY, toMember, to);
-            Commit();
-        }
-
         /// <summary>True when the member can move to that row now: between battles, to a row where another living member stands.</summary>
         public bool CanMoveToRow(int memberIndex, int row)
         {

@@ -1468,7 +1468,7 @@ namespace F1.UI
                 remaining++;
                 if (offer.Kind == OfferKind.Bag)
                 {
-                    _drops[slot].ShowBag(data.Bags.Get(offer.Id), slot == _pickedDrop);
+                    _drops[slot].ShowBag(data.Bags.Get(offer.Id), _art.OfBag(offer.Id), slot == _pickedDrop);
                 }
                 else
                 {
@@ -1480,7 +1480,7 @@ namespace F1.UI
             _bandLoot.text = UiStrings.Get(UiKeys.Battle.LootCount, remaining);
 
             EquippedItem held = _lootHand.HeldItem(expedition);
-            bool bagHeld = _lootHand.BagMember >= 0 || _lootHand.Outside?.Bag != null;
+            bool bagHeld = _lootHand.Outside?.Bag != null;
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
                 PartyBoardView board = LootBoardOfRow(row);
@@ -1506,7 +1506,7 @@ namespace F1.UI
                     expedition.Members[m],
                     _art,
                     m == _lootHand.ItemMember ? _lootHand.HeldBoardItem(expedition) : null,
-                    m == _lootHand.BagMember ? _lootHand.HeldBag(expedition) : null,
+                    null,
                     merges,
                     _lootHand.GhostFor(m, manager, _art),
                     bagHeld,
@@ -1524,7 +1524,7 @@ namespace F1.UI
             }
 
             _lootInventoryToggleLabel.text = UiStrings.Get(_inventoryOpen ? UiKeys.Board.InventoryHide : UiKeys.Board.InventoryShow);
-            BagData heldBag = _lootHand.BagMember >= 0 ? _lootHand.HeldBag(expedition)?.Bag : null;
+            BagData heldBag = null;
             if (_pickedDrop >= 0)
             {
                 _lootHint.text = UiStrings.Get(UiKeys.Battle.LootPickedHint);

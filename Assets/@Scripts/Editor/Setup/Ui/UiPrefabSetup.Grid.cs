@@ -254,10 +254,6 @@ namespace F1.Editor.Setup
             squares.Shape(1, 1, GridGeometry.Gap);
             squaresRect.gameObject.SetActive(false);
 
-            Image bagItem = UiBuild.Image("HeldBagItem", shape, Color.white);
-            bagItem.preserveAspect = true;
-            bagItem.gameObject.SetActive(false);
-
             RectTransform art = UiBuild.Rect("HeldArt", shape);
             UiBuild.Place(art, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(GridGeometry.Square, GridGeometry.Square));
             Image icon = UiBuild.Image("HeldIcon", art, Color.white);
@@ -271,7 +267,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_bagRim", rim.gameObject);
             UiBuild.SetReferences(view, "_bagRimEdges", rimEdges);
             UiBuild.SetReference(view, "_squares", squares);
-            UiBuild.SetReference(view, "_bagItemTemplate", bagItem);
             layer.gameObject.SetActive(false);
             return view;
         }
