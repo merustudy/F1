@@ -378,7 +378,7 @@ namespace F1.Tests
         /// <summary>Sets out from the expedition screen: [출발] opens the party popup (round 75 B), whose own [출발] departs with the party as formed.</summary>
         public static IEnumerator DepartFromExpedition(ExpeditionScreen screen)
         {
-            Click(screen, "Frame/Bottom/Depart");
+            Click(screen, "Frame/Details/Depart");
             yield return WaitForRedraw();
             Click(screen, "Frame/PartyWindow/PartyDepart");
             yield return WaitForScreen(ScreenId.NodeMap);

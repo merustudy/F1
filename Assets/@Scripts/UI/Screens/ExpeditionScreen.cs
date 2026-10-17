@@ -12,8 +12,8 @@ namespace F1.UI
 {
     /// <summary>
     /// Where to go (Round 71 E2, Docs/Design/04_Lobby_100Day_Economy.md §7): the painted map of the lands with a marker per dungeon,
-    /// the chosen dungeon's details, the party on the strip, and the departure. [출발] opens the party popup over the map (Round 75 B,
-    /// 2026-10-17): the party is formed there — on the stage at the left the members stand as the node map's party side stands them,
+    /// the chosen dungeon's details with the status under them, and the departure. [출발] (and [용병 목록], Round 77: the strip that
+    /// showed the party is gone) opens the party popup over the map (Round 75 B, 2026-10-17): the party is formed there — on the stage at the left the members stand as the node map's party side stands them,
     /// with the moves that trade rows under their feet; the roster's list at the right puts mercenaries in and takes them out (Round 76
     /// D) — and the popup's own [출발] sets out. Past the last day only the final dungeon can be chosen: the final stand
     /// (Docs/Design/04 §2). The lobby opens this screen; it goes back to the lobby or on to the node map.
@@ -41,8 +41,8 @@ namespace F1.UI
         [SerializeField] TMP_Text _cleared;
         [SerializeField] TMP_Text _reward;
         [SerializeField] TMP_Text _hint;
-        [SerializeField] ExpeditionPartyCardView[] _cards;
         [SerializeField] TMP_Text _status;
+        [SerializeField] Button _roster;
         [SerializeField] Button _depart;
 
         // The party popup (Round 75 B; the stage and the list, Round 76 D).
@@ -95,6 +95,7 @@ namespace F1.UI
             _map.sprite = _mapArt;
             _toLobby.onClick.AddListener(() => GoTo(ScreenId.Lobby));
             _depart.onClick.AddListener(OpenParty);
+            _roster.onClick.AddListener(OpenParty);
             _partyClose.onClick.AddListener(CloseParty);
             _partyDepart.onClick.AddListener(OnDepart);
             for (int i = 0; i < _slots.Length; i++)
@@ -166,15 +167,17 @@ namespace F1.UI
             }
 
             RefreshDetails(data, run);
-            RefreshParty(data, run);
 
             DepartCheck chosen = Managers.Run.CanDepart(_selectedId);
             bool finalStand = chosen == DepartCheck.Ok && Managers.Run.IsFinalStandDue;
-            // [출발] opens the party popup (Round 75 B), so a party still short does not keep it off: the popup fills the party.
-            _depart.interactable = chosen == DepartCheck.Ok || chosen == DepartCheck.PartyTooSmall;
+            // [출발] and [용병 목록] open the party popup (Rounds 75 B, 77), so a party still short does not keep them off: the popup fills the party.
+            bool canOpen = chosen == DepartCheck.Ok || chosen == DepartCheck.PartyTooSmall;
+            _depart.interactable = canOpen;
+            _roster.interactable = canOpen;
             string status = finalStand ? UiStrings.Get(UiKeys.Lobby.FinalStandDue) : StatusText(chosen, balance);
             Color statusColor = chosen != DepartCheck.Ok ? UiPalette.Burn : finalStand ? UiPalette.Virtue : UiPalette.Good;
-            _status.text = status;
+            // Under the details (Round 77): the party's size first, then the status.
+            _status.text = UiStrings.Get(UiKeys.Expedition.PartyCount, run.Party.Count) + " · " + status;
             _status.color = statusColor;
 
             RefreshPartyWindow(data, run, chosen, status, statusColor);
@@ -246,33 +249,6 @@ namespace F1.UI
             }
 
             return string.Join(", ", parts);
-        }
-
-        /// <summary>One card per row the party can stand in, as the party is formed: the name and the level (stage 27), the job with the member's state, the fatigue pips. An empty row says so.</summary>
-        void RefreshParty(StaticData data, RunState run)
-        {
-            BalanceData balance = data.Balance;
-            for (int i = 0; i < _cards.Length; i++)
-            {
-                int row = i + 1;
-                _cards[i].gameObject.SetActive(i < balance.PartySize);
-                PartySlot slot = SlotInRow(run, row);
-                if (slot == null)
-                {
-                    _cards[i].ShowEmpty(UiStrings.Get(UiKeys.Lobby.EmptyRow));
-                    continue;
-                }
-
-                MercenaryState mercenary = RunRules.FindMercenary(run, slot.MercenaryId);
-                FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
-                _cards[i].Show(
-                    UiText.Mercenary(slot.MercenaryId),
-                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
-                    UiText.JobLine(mercenary.JobId, affliction),
-                    mercenary.Fatigue,
-                    balance.MaxFatigue,
-                    balance.FatigueBreakdown);
-            }
         }
 
         // ---- The party popup (Round 75 B; the stage and the list, Round 76 D) ---------------

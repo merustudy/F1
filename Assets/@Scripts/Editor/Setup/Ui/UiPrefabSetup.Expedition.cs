@@ -10,8 +10,9 @@ namespace F1.Editor.Setup
     {
         /// <summary>
         /// The expedition screen (Round 71 E2): the painted map at the left with a marker per dungeon (cloned from a template at
-        /// runtime) and the home marker, the header, the details of the chosen dungeon over the painting's dark right third, and the
-        /// party strip with the departure at the bottom. The map's sprite is loaded at runtime (ArtAddress.ExpeditionMap).
+        /// runtime) and the home marker, the header, the details of the chosen dungeon over the painting's dark right third with the
+        /// status and the way into the party popup under them (Round 77: no strip), and the party popup (Rounds 75 B and 76 D). The
+        /// map's sprite is loaded at runtime (ArtAddress.ExpeditionMap).
         /// </summary>
         static UIScreen BuildExpedition(Transform holder)
         {
@@ -48,7 +49,7 @@ namespace F1.Editor.Setup
             // Details of the chosen dungeon: the name, then rows of a dim label at the left and the value at the right (the mock),
             // and the hints under them.
             Image details = UiBuild.Panel("Details", frame, Tinted(UiPalette.Panel, 0.9f));
-            UiBuild.Box(details, 1320f, 120f, 560f, 640f);
+            UiBuild.Box(details, 1320f, 120f, 560f, 920f);
             Transform d = details.transform;
             UiBuild.Box(UiBuild.LocalizedLabel("DetailsHeader", d, UiKeys.Lobby.Expedition, 30f, UiPalette.TextDim), 26f, 24f, 300f, 40f);
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("Name", d, 40f, UiPalette.Text)), 26f, 86f, 508f, 52f);
@@ -60,38 +61,15 @@ namespace F1.Editor.Setup
             TextMeshProUGUI reward = DetailRow(d, "Reward", UiKeys.Expedition.RewardLabel, 430f);
             TextMeshProUGUI hint = UiBuild.Box(UiBuild.Label("Hint", d, 20f, UiPalette.TextDim, TextAlignmentOptions.TopLeft), 26f, 520f, 508f, 100f);
 
-            // The party as the lobby formed it, and the departure
-            Image bottom = UiBuild.Panel("Bottom", frame, Tinted(UiPalette.Panel, 0.9f));
-            UiBuild.Box(bottom, 40f, 780f, 1840f, 260f);
-            Transform b = bottom.transform;
-            UiBuild.Box(UiBuild.LocalizedLabel("PartyHeader", b, UiKeys.Expedition.Party, 24f, UiPalette.TextDim), 24f, 22f, 900f, 36f);
-            var cards = new ExpeditionPartyCardView[BattleRows.Count];
-            for (int i = 0; i < cards.Length; i++)
-            {
-                int row = i + 1;
-                // In the node map's order (Round 76 D): 4열 at the left, 1열 at the right, as the popup's stage stands the party.
-                Image slot = UiBuild.Panel("PartyRow" + row, b, UiPalette.PanelLight);
-                UiBuild.Box(slot, 24f + 300f * (BattleRows.Count - row), 70f, 280f, 160f);
-                var card = slot.gameObject.AddComponent<ExpeditionPartyCardView>();
-                UiBuild.Box(UiBuild.LocalizedLabel("PartyRowLabel" + row, slot.transform, UiText.RowKey(row), 20f, UiPalette.TextDim), 20f, 14f, 60f, 30f);
-                TextMeshProUGUI cardName = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowName" + row, slot.transform, 26f, UiPalette.Text)), 80f, 10f, 128f, 36f);
-                TextMeshProUGUI cardLevel = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowLevel" + row, slot.transform, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), 208f, 14f, 52f, 28f);
-                TextMeshProUGUI cardDetail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowDetail" + row, slot.transform, 20f, UiPalette.TextDim)), 20f, 56f, 240f, 32f);
-                // Fatigue as the pips every screen shows (12_UI "피로도와 붕괴의 상태"), under the job.
-                RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("PartyRowPips" + row, slot.transform), 20f, 100f, 240f, 14f);
-                UiBar[] pips = FatiguePipRow("PartyRow" + row + "Pip", pipsRow, 240f, 14f);
-                UiBuild.SetReference(card, "_name", cardName);
-                UiBuild.SetReference(card, "_level", cardLevel);
-                UiBuild.SetReference(card, "_detail", cardDetail);
-                UiBuild.SetReferences(card, "_pips", pips);
-                cards[i] = card;
-            }
-
-            TextMeshProUGUI status = UiBuild.Label("Status", b, 22f, UiPalette.Text);
-            UiBuild.Box(status, 1520f, 52f, 300f, 36f);
-            // [출발] opens the party popup (Round 75 B): a click like any other. The departure, with its own sound, is the popup's button.
-            ButtonParts depart = UiBuild.LocalizedButton("Depart", b, UiKeys.Expedition.Depart, UiPalette.Button, 34f);
-            UiBuild.Box(depart.Rect, 1520f, 100f, 294f, 120f);
+            // Round 77 (2026-10-17, the user: the strip is not needed): the party is seen and formed in the popup. Under the details a
+            // line, the status with the party's size first, and the two buttons that open the popup — [용병 목록] to look and form,
+            // [출발] to set out (the popup's own [출발] departs). Both are clicks like any other.
+            UiBuild.Box(UiBuild.Image("DetailsLine", d, UiPalette.Line), 26f, 670f, 508f, 1f);
+            TextMeshProUGUI status = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("Status", d, 22f, UiPalette.Text)), 26f, 692f, 508f, 34f);
+            ButtonParts roster = UiBuild.LocalizedButton("Roster", d, UiKeys.Expedition.Roster, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Box(roster.Rect, 26f, 740f, 254f, 140f);
+            ButtonParts depart = UiBuild.LocalizedButton("Depart", d, UiKeys.Expedition.Depart, UiPalette.Button, 34f);
+            UiBuild.Box(depart.Rect, 300f, 740f, 234f, 140f);
 
             // The shade over the map (the header stays clear) while the party popup is open, and the popup over it (Round 75 B, Round 76 D,
             // ArtPipeline/Archive/76-party-figures/mock-figures-D-stage-list.png): the title with the chosen dungeon's line, the stage at
@@ -138,8 +116,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_cleared", cleared);
             UiBuild.SetReference(screen, "_reward", reward);
             UiBuild.SetReference(screen, "_hint", hint);
-            UiBuild.SetReferences(screen, "_cards", cards);
             UiBuild.SetReference(screen, "_status", status);
+            UiBuild.SetReference(screen, "_roster", roster.Button);
             UiBuild.SetReference(screen, "_depart", depart.Button);
             UiBuild.SetReference(screen, "_shade", shade.gameObject);
             UiBuild.SetReference(screen, "_partyWindow", partyWindow.gameObject);

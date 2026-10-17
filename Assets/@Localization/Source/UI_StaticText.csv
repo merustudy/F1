@@ -90,7 +90,6 @@ Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back."
 Expedition.Potions,"One kind of starting potion in the details. {0} = its name, {1} = how many.",{0} ×{1},{0} ×{1}
 Expedition.UnlockHint,"Under an open dungeon's details, one line per dungeon its clears open. {0} = that dungeon, {1} = the clears it takes.",{0} 해금: 이 던전을 {1}회 클리어,Opens {0}: clear this dungeon {1} times
 Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last day the party must fight its boss
-Expedition.Party,Header of the party strip; the party is formed in the popup the departure opens (round 75 B).,파티 — 출발을 누르면 편성한다,Party — formed on departure
 Expedition.Depart,Starts the expedition.,출발,Depart
 Expedition.Locked,The chosen dungeon is still locked.,아직 잠긴 던전입니다,This dungeon is still locked
 Expedition.FinalName,On the final dungeon's marker. {0} = its name.,{0} (최종 던전),{0} (final dungeon)
@@ -110,6 +109,8 @@ Expedition.EmptyRowHint,Under an empty row of the popup's stage (round 76 D).,�
 Expedition.Join,The list's button that puts a mercenary in the party (round 76 D).,넣기,In
 Expedition.Leave,The list's button that takes a mercenary out of the party (round 76 D).,빼기,Out
 Expedition.EmptySlot,An empty line of the popup's list: room in the roster (round 76 D).,빈 자리 (역마차에서 고용),Empty (hire at the coach)
+Expedition.Roster,The button under the details that opens the party popup to look and form (round 77).,용병 목록,Mercenaries
+Expedition.PartyCount,Before the status under the details (round 77). {0} = party size.,파티 {0}명,Party of {0}
 Expedition.Forward,Moves a party member one row to the front (trading places).,앞으로,Forward
 Expedition.Back,Moves a party member one row to the back (trading places).,뒤로,Back
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}

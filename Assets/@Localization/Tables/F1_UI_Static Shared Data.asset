@@ -1285,11 +1285,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673477476384777
-  - m_Id: 5786696208605193
-    m_Key: Expedition.Party
-    m_Metadata:
-      m_Items:
-      - rid: 8623673477476384778
   - m_Id: 5786696208605194
     m_Key: Expedition.Depart
     m_Metadata:
@@ -1640,6 +1635,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673497099698178
+  - m_Id: 6110886505734144
+    m_Key: Expedition.Roster
+    m_Metadata:
+      m_Items:
+      - rid: 8623673497738018816
+  - m_Id: 6110886518317056
+    m_Key: Expedition.PartyCount
+    m_Metadata:
+      m_Items:
+      - rid: 8623673497738018817
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2771,11 +2776,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Under the final dungeon's details.
-    - rid: 8623673477476384778
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Header of the party strip; the party is formed in the popup
-          the departure opens (round 75 B).
     - rid: 8623673477476384779
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3094,3 +3094,13 @@ MonoBehaviour:
       data:
         m_CommentText: 'An empty line of the popup''s list: room in the roster (round
           76 D).'
+    - rid: 8623673497738018816
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The button under the details that opens the party popup to
+          look and form (round 77).
+    - rid: 8623673497738018817
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Before the status under the details (round 77). {0} = party
+          size.

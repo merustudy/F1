@@ -120,7 +120,6 @@ namespace F1.UI
             public const string Potions = "Expedition.Potions";
             public const string UnlockHint = "Expedition.UnlockHint";
             public const string FinalHint = "Expedition.FinalHint";
-            public const string Party = "Expedition.Party";
             public const string Depart = "Expedition.Depart";
             public const string Locked = "Expedition.Locked";
             public const string FinalName = "Expedition.FinalName";
@@ -144,6 +143,10 @@ namespace F1.UI
             public const string Join = "Expedition.Join";
             public const string Leave = "Expedition.Leave";
             public const string EmptySlot = "Expedition.EmptySlot";
+
+            // Under the details, in the strip's stead (Round 77, 2026-10-17).
+            public const string Roster = "Expedition.Roster";
+            public const string PartyCount = "Expedition.PartyCount";
         }
 
         public static class Map

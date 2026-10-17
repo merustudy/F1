@@ -1167,10 +1167,6 @@ MonoBehaviour:
     m_Localized: 'The final dungeon: past the last day the party must fight its boss'
     m_Metadata:
       m_Items: []
-  - m_Id: 5786696208605193
-    m_Localized: "Party \u2014 formed on departure"
-    m_Metadata:
-      m_Items: []
   - m_Id: 5786696208605194
     m_Localized: Depart
     m_Metadata:
@@ -1488,6 +1484,15 @@ MonoBehaviour:
     m_Localized: Empty (hire at the coach)
     m_Metadata:
       m_Items: []
+  - m_Id: 6110886505734144
+    m_Localized: Mercenaries
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6110886518317056
+    m_Localized: Party of {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1651,3 +1656,4 @@ MonoBehaviour:
         - id: 6046622701051904
         - id: 6078818543460352
         - id: 6078818543460353
+        - id: 6110886518317056
