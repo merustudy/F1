@@ -1,4 +1,6 @@
-# Round 76 — 출발 전 파티의 그림 (2026-10-17 사용자 "파티 구성 이미지 개선 — 현재 출발 전 파티 구성 캐릭터 등을 볼 수 있는 창 추가(전투 선택 시 처럼)") — 판정 대기
+# Round 76 — 출발 전 파티의 그림 (2026-10-17 사용자 "파티 구성 이미지 개선 — 현재 출발 전 파티 구성 캐릭터 등을 볼 수 있는 창 추가(전투 선택 시 처럼)") — 판정됨: 사용자 안 D, 세부는 권장안
+
+판정(2026-10-17): 사용자가 안 D를 내고("노드맵 전투선택 화면 용병 구성 창(서있는 것)을 왼쪽에 배치하고 오른쪽에 용병 목록 제공 — 목업 제공해줘") 목업을 본 뒤 **"권장안 구현"** — D, 목록의 [넣기]·[빼기] 버튼, 무대의 [앞으로][뒤로]는 발밑에. 구현은 아래 "구현"과 Architecture/12 "원정 화면".
 
 Round 75 B의 파티 팝업은 열 칸이 글(이름·Lv·직업·피로 칸)뿐이다. 노드 맵의 파티 쪽(전투를 고를 때)은 열마다 용병의 **그림 자리**(직업 그림 225x300, 발밑 그림자, 그 아래 HP·직업·앞으로·뒤로)를 보인다. 사용자는 출발 전에도 그렇게 보이기를 원한다. 사용자 규칙(배치는 목업으로 승인 뒤 구현)에 따라 안 셋을 그렸다: `mock-figures-compare.png`(지금 / A / B / C).
 
@@ -28,7 +30,7 @@ A는 작은 창에 들어가는 대신 그림이 작고(224) 칩에 패시브가
 - 그림은 직업의 것(`JobData.Figure`, `Assets/@Art/Unit/Job`)이다. 원정 화면이 열리기 전에 `PrepareAsync`가 Lobby Scope로 직업 그림 여섯을 읽는다(`ResourceManager.LoadAsync`, 노드 맵의 `ExpeditionArt`와 같은 주소). 그림 자리는 전투·노드 맵의 `BuildFigure`(`FigureView`: 발밑 그림자, 숨쉬기)를 쓰고 팝업의 칸에 맞게 줄인다(`FigureView.SetScale` 또는 작은 자리).
 - `PartyRowSlotView`에 `FigureView`를 더하고(빈 열은 그림 없이 "비어 있음"), `PartyPickChipView`에 작은 그림 자리를 더한다. 팝업 창은 1400x890(260,110).
 - B·C면 띠의 `ExpeditionPartyCardView`에도 그림 자리(150)와 띠의 높이 270.
-- D면 팝업 창을 1840x900으로 넓히고, 왼쪽 무대는 노드 맵의 `PartySideView`와 같은 공식(`FieldLayout`)으로 열의 자리를 두되 보드 없이 그림·발밑 표시·앞으로·뒤로만(`PartyColumnView`를 쓰지 않고 작은 `PartyStageColumnView`), 오른쪽 목록은 막사의 `RosterEntryView`와 비슷한 줄(`PartyListRowView`: 작은 그림 자리, 이름·직업·Lv, 패시브, 피로 칸, [넣기]/[빼기]). 띠의 글 칸은 4열 → 1열로 맞춘다.
+- D(구현함): 팝업 창 1840x900(40,110). 왼쪽 무대(`Stage`, 1080x792)는 네 Column(270 폭, 4열 → 1열)에 전투·노드 맵의 그림 자리(`BuildFigure`, 225x300)를 바닥선(356)에 세우고 발밑에 이름·Lv·직업·피로 칸·[앞으로][뒤로](`PartyRowSlotView`를 무대 Column으로 고쳐 씀; `FieldLayout`의 공식은 쓰지 않았다 — 무대 폭이 다르다). 오른쪽 목록(`List`, 688 폭)은 `PartyListRowView`(688x86: 작은 그림 56x72, 이름·직업·Lv, 패시브, 피로 칸, "N열"과 [넣기]/[빼기])와 빈 줄 `EmptyTemplate`(남은 자리). 직업 그림은 `ExpeditionScreen.PrepareAsync`가 Lobby Scope로 읽는다(Architecture/04 "Scope"의 예외). 띠의 글 칸도 4열 → 1열. Round 75의 `PartyPickChipView`는 지웠다.
 - Test: 팝업 Test에 그림의 Sprite(직업 그림)와 순서 단정, 스크린샷 `_66_expedition_party` 갱신. 문서: Architecture/12 "원정 화면", Design/04 §7, Roadmap.
 
 파일: `mock_figures.py`(A·B·C), `mock_d.py`(D), `base-expedition.png`·`base-popup.png`(2026-10-17 Round 75 뒤의 스크린샷), `mock-figures-A-popup.png`, `mock-figures-B-strip.png`, `mock-figures-C-both.png`, `mock-figures-D-stage-list.png`, `mock-figures-compare.png`(지금/A/B/C), `mock-figures-compare-AD.png`(A/D).

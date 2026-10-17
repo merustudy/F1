@@ -45,6 +45,7 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 
 - 기획의 "런"(100일 전체)은 Scope가 아니다. 런의 Static Data는 작아서 `App`에 둔다.
 - 여러 Scope가 쓰는 Asset은 더 긴 수명의 Scope로 올린다.
+  - 예외(2026-10-17 Round 76 D): 원정 화면의 파티 팝업은 직업의 그림(`unit/job/*`, Label `scope-expedition`)을 **Lobby Scope로도** 주소로 읽는다(`ExpeditionScreen.PrepareAsync`). Lobby와 Expedition은 겹치지 않고 번갈아 열려 어느 쪽도 더 길지 않고, 그림 여섯은 작다. `LoadAsync`는 주소로 읽고 Handle은 Scope가 가지므로 Label은 Group의 것이다.
 - 개별 Release가 아니라 **Scope Release**가 기본이다.
 
 ## ResourceManager API
