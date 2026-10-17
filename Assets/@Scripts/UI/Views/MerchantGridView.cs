@@ -4,6 +4,7 @@ using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace F1.UI
 {
@@ -58,11 +59,15 @@ namespace F1.UI
         [SerializeField] RectTransform _priceLayer;
         [SerializeField] GridSquareView _squareTemplate;
         [SerializeField] ItemSlotView _pieceTemplate;
-        [SerializeField] TMP_Text _priceTemplate;
+        [SerializeField] Image _priceTemplate;
 
         readonly List<GridSquareView> _squares = new List<GridSquareView>();
         readonly List<ItemSlotView> _pieces = new List<ItemSlotView>();
-        readonly List<TMP_Text> _prices = new List<TMP_Text>();
+        readonly List<Image> _prices = new List<Image>();
+
+        /// <summary>The plate round a price's words (round 79): how much it reaches past them on each side, and its height.</summary>
+        const float PricePlatePad = 3f;
+        const float PricePlateHeight = 18f;
         readonly Dictionary<int, int> _shownIndex = new Dictionary<int, int>();
         readonly List<MerchantPiece> _shown = new List<MerchantPiece>();
         int _rows;
@@ -86,7 +91,7 @@ namespace F1.UI
         /// <summary>The price label of a good on show, or null.</summary>
         public TMP_Text PriceLabelOf(int slot)
         {
-            return _shownIndex.TryGetValue(slot, out int i) ? _prices[i] : null;
+            return _shownIndex.TryGetValue(slot, out int i) ? _prices[i].GetComponentInChildren<TMP_Text>(true) : null;
         }
 
         /// <summary>Where a good on show lies, or null.</summary>
@@ -140,7 +145,7 @@ namespace F1.UI
                 }
                 else if (good.Bag != null)
                 {
-                    piece.ShowBag(good.Bag, picked);
+                    piece.ShowBag(good.Bag, good.Icon, picked);
                 }
                 else
                 {
@@ -149,16 +154,19 @@ namespace F1.UI
 
                 piece.ShowUnaffordable(good.State == MerchantGoodState.Unaffordable);
 
-                TMP_Text price = _prices[i];
-                price.gameObject.SetActive(true);
+                // The price on its small dark plate at the piece's bottom-right (round 79): the plate sized to the words.
+                Image plate = _prices[i];
+                TMP_Text price = plate.GetComponentInChildren<TMP_Text>(true);
+                plate.gameObject.SetActive(true);
                 Vector2 corner = GridGeometry.Corner(good.At.X, good.At.Y);
-                RectTransform rect = price.rectTransform;
+                RectTransform rect = plate.rectTransform;
                 rect.anchorMin = new Vector2(0f, 1f);
                 rect.anchorMax = new Vector2(0f, 1f);
                 rect.pivot = new Vector2(1f, 0f);
                 rect.anchoredPosition = new Vector2(corner.x + GridGeometry.Span(good.Width) - PricePad, corner.y - GridGeometry.Span(good.Height) + PricePad - 1f);
                 price.text = good.Price.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 price.color = UiPalette.DiabloGold;
+                rect.sizeDelta = new Vector2(price.preferredWidth + 2f * PricePlatePad, PricePlateHeight);
 
                 _shownIndex[good.Slot] = i;
                 _shown.Add(good);

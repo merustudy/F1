@@ -11,7 +11,7 @@ namespace F1.Data
         public const string DefinitionName = "Bag";
 
         [JsonConstructor]
-        public BagData(string id, LocalizedText name, int width, int height, bool start, int price, int shopWeight, int lootWeight)
+        public BagData(string id, LocalizedText name, int width, int height, bool start, int price, int shopWeight, int lootWeight, string icon = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -36,6 +36,7 @@ namespace F1.Data
             Price = price;
             ShopWeight = shopWeight;
             LootWeight = lootWeight;
+            Icon = ArtAddress.Optional(icon, $"{DefinitionName} '{id}'", nameof(Icon));
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -69,6 +70,14 @@ namespace F1.Data
         /// <summary>Relative chance to be the bag an elite's loot holds (<c>BalanceData.EliteBagPercent</c>). 0 means it never drops.</summary>
         [JsonProperty(Order = 8, Required = Required.Always)]
         public int LootWeight { get; }
+
+        /// <summary>
+        /// The logical address of the bag's picture (Round 79, 2026-10-17): shown where the bag is a thing (the loot on the floor, the
+        /// merchant's tile, the hand), filling the bag's squares. Null when it has none: those places show Diablo's well. On the board a bag
+        /// is always the well.
+        /// </summary>
+        [JsonProperty(Order = 9, Required = Required.AllowNull)]
+        public string Icon { get; }
 
         [JsonIgnore]
         public int Area => Width * Height;

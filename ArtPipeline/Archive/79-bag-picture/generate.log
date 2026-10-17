@@ -1,0 +1,99 @@
+[19:33:43] bag leather_pouch look1
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,914 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look1.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=leather_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 948 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.20)
+[5/6] 후처리: 원본은 leather_pouch_look1.raw.png, 맞춘 그림은 leather_pouch_look1.png.
+      조각: 원본 1339x476 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 254x90 (폭의 77%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/leather_pouch_look1.png
+      크기:   328x100, 29,174 bytes
+      여백:   좌 32 우 33 상 0 하 0 px
+      알파:   완전투명 56.7% 반투명 2.3% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:33:59] bag leather_pouch look2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (4,010 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look2.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=leather_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 963 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.22)
+[5/6] 후처리: 원본은 leather_pouch_look2.raw.png, 맞춘 그림은 leather_pouch_look2.png.
+      조각: 원본 1264x461 (생성 캔버스의 90%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 247x90 (폭의 75%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/leather_pouch_look2.png
+      크기:   328x100, 34,744 bytes
+      여백:   좌 36 우 36 상 0 하 0 px
+      알파:   완전투명 36.3% 반투명 2.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:34:13] bag leather_pouch look3
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,944 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look3.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=leather_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 951 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.24)
+[5/6] 후처리: 원본은 leather_pouch_look3.raw.png, 맞춘 그림은 leather_pouch_look3.png.
+      조각: 원본 1440x437 (생성 캔버스의 94%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 297x90 (폭의 91%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/leather_pouch_look3.png
+      크기:   328x100, 39,743 bytes
+      여백:   좌 11 우 11 상 0 하 0 px
+      알파:   완전투명 26.7% 반투명 2.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:34:30] bag belt_pouch look2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,979 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look2.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=belt_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 958 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.26)
+[5/6] 후처리: 원본은 belt_pouch_look2.raw.png, 맞춘 그림은 belt_pouch_look2.png.
+      조각: 원본 849x479 (생성 캔버스의 94%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 160x90 (폭의 49%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/belt_pouch_look2.png
+      크기:   328x100, 22,740 bytes
+      여백:   좌 79 우 80 상 0 하 0 px
+      알파:   완전투명 58.6% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:34:47] bag belt_pouch look3
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,932 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look3.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=belt_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 949 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.28)
+[5/6] 후처리: 원본은 belt_pouch_look3.raw.png, 맞춘 그림은 belt_pouch_look3.png.
+      조각: 원본 1471x357 (생성 캔버스의 96%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x76 (폭의 96%, 높이의 76%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/belt_pouch_look3.png
+      크기:   328x100, 31,801 bytes
+      여백:   좌 2 우 3 상 7 하 7 px
+      알파:   완전투명 43.4% 반투명 2.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:35:03] bag leather_pack look2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,797 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look2.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=leather_pack, quality=medium, size=1024x1024.
+      사용량: 입력 text 898 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $8.31)
+[5/6] 후처리: 원본은 leather_pack_look2.raw.png, 맞춘 그림은 leather_pack_look2.png.
+      조각: 원본 926x962 (생성 캔버스의 94%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x326 (폭의 96%, 높이의 94%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/leather_pack_look2.png
+      크기:   328x348, 130,622 bytes
+      여백:   좌 2 우 3 상 6 하 7 px
+      알파:   완전투명 30.3% 반투명 1.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:35:26] bag leather_pack look3
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,739 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/79-bag-picture/look3.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=leather_pack, quality=medium, size=1024x1024.
+      사용량: 입력 text 889 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $8.34)
+[5/6] 후처리: 원본은 leather_pack_look3.raw.png, 맞춘 그림은 leather_pack_look3.png.
+      조각: 원본 987x990 (생성 캔버스의 97%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x315 (폭의 96%, 높이의 91%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/leather_pack_look3.png
+      크기:   328x348, 129,631 bytes
+      여백:   좌 2 우 3 상 12 하 12 px
+      알파:   완전투명 39.1% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:35:49] done

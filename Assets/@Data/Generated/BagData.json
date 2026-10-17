@@ -12,7 +12,8 @@
       "Start": false,
       "Price": 8,
       "ShopWeight": 6,
-      "LootWeight": 3
+      "LootWeight": 3,
+      "Icon": "bag/belt-pouch"
     },
     {
       "Id": "leather_pack",
@@ -25,7 +26,8 @@
       "Start": true,
       "Price": 0,
       "ShopWeight": 0,
-      "LootWeight": 0
+      "LootWeight": 0,
+      "Icon": "bag/leather-pack"
     },
     {
       "Id": "leather_pouch",
@@ -38,7 +40,8 @@
       "Start": false,
       "Price": 12,
       "ShopWeight": 6,
-      "LootWeight": 2
+      "LootWeight": 2,
+      "Icon": "bag/leather-pouch"
     }
   ]
 }

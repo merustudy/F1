@@ -381,6 +381,10 @@ namespace F1.Tests
             Assert.Throws<DataException>(() => new BagData("x", name, 1, 1, false, 1, -1, 1), "A weight below 0.");
             Assert.Throws<DataException>(() => new BagData("x", name, 3, 3, true, 0, 5, 0), "The start bag is never sold.");
             Assert.Throws<DataException>(() => new BagData("x", name, 3, 3, true, 0, 0, 1), "Nor dropped.");
+            // Round 79: a bag may have a picture (an address), or none (null: the well stands in).
+            Assert.AreEqual("bag/x", new BagData("x", name, 1, 1, false, 10, 5, 1, "bag/x").Icon);
+            Assert.IsNull(new BagData("x", name, 1, 1, false, 10, 5, 1).Icon);
+            Assert.Throws<DataException>(() => new BagData("x", name, 1, 1, false, 10, 5, 1, "bag x"), "An address has no spaces.");
             Assert.Throws<DataException>(() => new BagData("Bad Id", name, 1, 1, false, 1, 1, 1));
         }
 

@@ -447,6 +447,7 @@ namespace F1.UI
                 else if (offer.Kind == OfferKind.Bag)
                 {
                     piece.Bag = data.Bags.Get(offer.Id);
+                    piece.Icon = _art.OfBag(offer.Id);
                 }
                 else
                 {

@@ -62,6 +62,9 @@ namespace F1.Editor.Setup
         const float ShopCoinsWidth = 70f;
         const float ShopRefreshCoinSize = 22f;
         const float MerchantPriceSize = 15f;
+
+        /// <summary>The plate under a good's price (round 79): the stone plate's dark, a little see-through so the piece shows round the words.</summary>
+        static readonly Color MerchantPricePlate = new Color(UiPalette.StonePlate.r, UiPalette.StonePlate.g, UiPalette.StonePlate.b, 0.8f);
         const float HeaderCoinX = 1560f;
         const float HeaderCoinSize = 26f;
 
@@ -441,9 +444,12 @@ namespace F1.Editor.Setup
             squareTemplate.gameObject.SetActive(false);
             ItemSlotView pieceTemplate = BuildItemSlot(pieces, "MerchantPieceTemplate");
             pieceTemplate.gameObject.SetActive(false);
-            TextMeshProUGUI priceTemplate = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label("MerchantPriceTemplate", prices, MerchantPriceSize, UiPalette.DiabloGold, TextAlignmentOptions.BottomRight)));
-            priceTemplate.raycastTarget = false;
+            // The price on a small dark plate (2026-10-17 round 79 "작은 판 깔기"): the plate is sized to the words by the view.
+            Image priceTemplate = UiBuild.Image("MerchantPriceTemplate", prices, MerchantPricePlate);
             UiBuild.Size(priceTemplate, 60f, 20f);
+            TextMeshProUGUI priceLabel = UiBuild.Outlined(UiBuild.SingleLine(UiBuild.Label("MerchantPriceLabel", priceTemplate.transform, MerchantPriceSize, UiPalette.DiabloGold, TextAlignmentOptions.Center)));
+            priceLabel.raycastTarget = false;
+            UiBuild.Stretch(priceLabel.rectTransform);
             priceTemplate.gameObject.SetActive(false);
 
             var view = stone.gameObject.AddComponent<MerchantGridView>();

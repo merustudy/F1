@@ -110,6 +110,21 @@ namespace F1.UI
                     yield return potion.Icon;
                 }
             }
+
+            // The bags' pictures (round 79): shown where a bag is a thing (the floor, the merchant's tile, the hand).
+            foreach (BagData bag in data.Bags.Ordered)
+            {
+                if (bag.Icon != null)
+                {
+                    yield return bag.Icon;
+                }
+            }
+        }
+
+        /// <summary>The picture of a bag (round 79), or null when it has none: the well stands in.</summary>
+        public Sprite OfBag(string bagId)
+        {
+            return Of(_data.Bags.Get(bagId).Icon);
         }
 
         /// <summary>The figure of a job, or null when the job has none.</summary>

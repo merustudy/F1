@@ -132,6 +132,7 @@ namespace F1.UI
 
             LayArt(at.Turns);
             _icon.sprite = icon;
+            _icon.preserveAspect = true;
             _icon.enabled = pictured;
             _icon.color = Color.white;
             ShowGlow(glow);
@@ -148,22 +149,31 @@ namespace F1.UI
         /// A bag on a tile: Diablo's well (round 49), its stone rim tinted by its leather round its black squares, nothing on them. A bag
         /// the hand holds from the merchant (stage 21) has the gold line round it.
         /// </summary>
-        public void ShowBag(BagData bag, bool picked = false)
+        /// <param name="icon">The bag's picture (round 79), or null: then the well. With a picture the tile is the leather's colour under the picture, drawn like an item's icon.</param>
+        public void ShowBag(BagData bag, Sprite icon = null, bool picked = false)
         {
             Item = null;
             Bag = bag;
             At = default;
             IsDisplaced = false;
+            bool pictured = icon != null;
             _frame.color = UiPalette.BagRim(bag.Id);
-            _ground.enabled = false;
-            _bagWell.SetActive(true);
+            _ground.enabled = pictured;
+            _ground.color = UiPalette.BagRim(bag.Id);
+            _ground.Shape(bag.Width, bag.Height, GridGeometry.Gap);
+            _bagWell.SetActive(!pictured);
             _bagSquares.Shape(bag.Width, bag.Height, GridGeometry.Gap);
             _frameLine.enabled = picked;
             _frameLine.effectColor = UiPalette.Virtue;
+            // The picture fills the piece edge to edge (2026-10-17 "여백 0"): the bag's own outline is the tile's edge.
+            LayArt(0);
+            _art.sizeDelta = Rect.sizeDelta;
+            _icon.sprite = icon;
+            _icon.preserveAspect = false;
             _icon.color = Color.white;
             _picked.enabled = false;
             _merge.SetActive(false);
-            _icon.enabled = false;
+            _icon.enabled = pictured;
             _text.enabled = false;
             TierShown = null;
             Pips = 0;
@@ -188,6 +198,7 @@ namespace F1.UI
             _picked.enabled = false;
             _merge.SetActive(false);
             LayArt(0);
+            _icon.preserveAspect = true;
             _icon.sprite = icon;
             _icon.enabled = icon != null;
             _icon.color = Color.white;

@@ -72,25 +72,40 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// A bag lying here (Slice B stage 19): Diablo's well in the icon's place (round 49: its stone rim tinted by its leather round its
-        /// black squares, at a board's size) and its name on the plate in gold.
+        /// A bag lying here (Slice B stage 19): its picture (round 79: the open bag seen from above with its squares, at its squares' size
+        /// like an item's icon) and its name with its squares on the plate in gold; without a picture, Diablo's well in the icon's place
+        /// (round 49: its stone rim tinted by its leather round its black squares, at a board's size).
         /// </summary>
-        public void ShowBag(BagData bag, bool picked)
+        /// <param name="icon">The bag's picture, or null when it has none.</param>
+        public void ShowBag(BagData bag, Sprite icon, bool picked)
         {
             gameObject.SetActive(true);
             Item = null;
             Bag = bag;
             IsPicked = picked;
             RestoreIcon();
-            // At a board's size (round 55), as the bag lies on a board.
-            _icon.rectTransform.sizeDelta = new Vector2(GridGeometry.Span(bag.Width), GridGeometry.Span(bag.Height)) + 2f * GridGeometry.BagRim * Vector2.one;
-            _icon.sprite = null;
-            _icon.preserveAspect = false;
-            _icon.color = UiPalette.BagRim(bag.Id);
-            _icon.enabled = true;
-            _bagWell.SetActive(true);
-            _bagSquares.Shape(bag.Width, bag.Height, GridGeometry.Gap);
-            _title.text = UiText.Name(bag.Name);
+            if (icon != null)
+            {
+                // The picture at the bag's squares' size, edge to edge (2026-10-17 "여백 0", as on the merchant's tile).
+                _icon.rectTransform.sizeDelta = new Vector2(GridGeometry.Span(bag.Width), GridGeometry.Span(bag.Height));
+                _icon.sprite = icon;
+                _icon.preserveAspect = false;
+                _icon.color = Color.white;
+                _icon.enabled = true;
+            }
+            else
+            {
+                // At a board's size (round 55), as the bag lies on a board.
+                _icon.rectTransform.sizeDelta = new Vector2(GridGeometry.Span(bag.Width), GridGeometry.Span(bag.Height)) + 2f * GridGeometry.BagRim * Vector2.one;
+                _icon.sprite = null;
+                _icon.preserveAspect = false;
+                _icon.color = UiPalette.BagRim(bag.Id);
+                _icon.enabled = true;
+                _bagWell.SetActive(true);
+                _bagSquares.Shape(bag.Width, bag.Height, GridGeometry.Gap);
+            }
+
+            _title.text = UiStrings.Get(UiKeys.Battle.BagTitle, UiText.Name(bag.Name), bag.Width, bag.Height);
             _title.color = UiPalette.BagName;
             ShowPicked(picked);
         }
