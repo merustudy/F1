@@ -140,7 +140,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 `DungeonData`(`ShopMinFloor`, `ShopChancePercent`), `ItemData`·`PotionData`의 `Price`에 있다.
 
 - 코인은 `ExpeditionState.Coins`(정수)다. 런 상태에는 없다. `ExpeditionRules.CompleteBattle`이 이긴 전투의 코인(`CoinsFor(노드)`: 적마다 + 층마다, 정예는 배, 보스와 싸우지 않는 노드는 0)을 더한다.
-  원정이 끝나면 `ExpeditionState`와 함께 버려진다(정산은 코인을 모른다).
+  원정이 끝나면 `ExpeditionState`와 함께 버려진다 — 다만 **클리어**면 정산(`RunRules.Settle`)이 먼저 남은 코인과 `ItemCoinsFor`(살아 돌아온 구성원의 보드와 인벤토리의 팔 수 있는 아이템의 `SellPriceOf` 합)를 `CoinsPerGold`로 나눠 금에 더한다(2026-10-17: `SettlementReport.CoinsFromItems`·`CoinsConverted`·`GoldFromCoins`, `GoldEarned`에 포함). 후퇴·전멸은 0.
 - 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
 - 물건(`Stock`)은 **물건 다음에 포션**이다(Round 56). 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 겹침 없음, `ShopGoodsCount` = `ShopSlots`나 후보 수 중 작은 것).

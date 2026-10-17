@@ -78,7 +78,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
 - `ItemData.Category`는 아이템의 분류 다섯이다: `Weapon`(무기 장비), `Armor`(방어 장비), `Attack`(공격 아이템), `Support`(지원 아이템: 회복·버프), `Other`(기타 아이템) (Design/02 §4).
   규칙은 `Weapon`인지만 본다(무기 패시브는 무기 장비의 피해에만). 전투 화면은 분류로 주인을 움직인다(`12_UI.md` "연출").
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
-- `BalanceData`의 `SellPercent`(Round 74, 2026-10-17)는 상점이 파티의 아이템을 사 주는 값의 비율(살 값의 %)이다. `ItemData`의 `Price`는 상점에서 살 값이자 팔 값의 밑이고, `ShopWeight`가 0이면 값이 있어도 상점에 나오지 않는다(적의 아이템).
+- `BalanceData`의 `SellPercent`(Round 74, 2026-10-17)는 상점이 파티의 아이템을 사 주는 값의 비율(살 값의 %)이다. `CoinsPerGold`(2026-10-17)는 클리어한 원정의 지역 코인(남은 것 + 아이템의 파는 값)이 금 1이 되는 코인 수다. `ItemData`의 `Price`는 상점에서 살 값이자 팔 값의 밑이고, `ShopWeight`가 0이면 값이 있어도 상점에 나오지 않는다(적의 아이템).
 - `DungeonData`의 `EnemyHpPerFloorPercent`는 1층보다 한 층 깊어질 때마다 적의 최대 HP에 **곱하는** 비율이다(복리, 2026-10-17. 0이면 자람 없음. `08_GAMEPLAY_DOMAIN.md` "깊은 층의 적"). `EnemyPowerPerFloorPercent`는 층마다 더하는 아이템 세기 %다.
 - `EnemyData`의 `FigureScale`은 그림을 그리는 크기의 백분율이다(100이 보통, 보스는 더 크게. 50..300). 표현만 바꾸고 규칙과 자리는 바꾸지 않는다(`12_UI.md` "유닛의 그림").
 - `EnemyData`의 `Phases`(28단계, 선택 열. 헤더가 없거나 비면 페이즈 없음)는 `문턱%=item_id:세기+item_id:세기|문턱%=…`다: 적의 HP가 그 %에 닿으면 그 묶음으로 바꿔 든다(`EnemyPhase`. Design/02 §9). 문턱은 1..99에서 내려가는 차례, 묶음은 아이템 하나 이상이고 높이 합은 틀의 높이 이하, 아이템은 있는 것이어야 한다(Dataset 검증).

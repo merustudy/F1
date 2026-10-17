@@ -14,6 +14,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 
 ## Done
 
+- 2026-10-17 사용자 "원정 클리어시 가지고 있는 물건가치 > 지역화폐 환산 / 지역화폐를 금화로 환산하여 금화 보상 — 사안 검토 후 권장안 구현": `RunRules.ItemCoinsFor`(살아 돌아온 구성원의 보드·인벤토리의 팔 수 있는 아이템의 `SellPriceOf` 합), `Settle`의 클리어 환산(`CoinsPerGold`로 나눔, `GoldEarned`에 포함), `SettlementReport.CoinsFromItems`·`CoinsConverted`·`GoldFromCoins`, `BalanceData` `CoinsPerGold` 10, 정산 화면의 줄 `Settle.GoldWithCoins`, Test(`LobbyEconomyTests` 환산·후퇴). 비율은 시뮬(08 §31)로 정했다. 시뮬의 `run`은 `Settle`을 쓰므로 자동으로 반영된다.
 - 2026-10-17 사용자 "전리품 드랍된 남은 것을 단축키를 눌러 바로 인벤에 넣기 신설 추가": `ExpeditionRules.CanTakeAllLootToInventory`·`TakeAllLootToInventory`, `ExpeditionManager`의 같은 명령(저장 한 번), `TakeAllKey`(A)와 `BattleScreen.PressTakeAllKey`, `Battle.LootHint`의 안내, Test(`ExpeditionRulesTests` 둘, `UiFlowTests.Loot_TheAKey_…`). 문서 Architecture/08·11·12, Design/03 §5·00. 같은 턴의 "상점 아이템 판매 기능 추가"는 Round 74(목업 여섯, 규칙 권장안)로 판정 → 사용자 "안 b, 50%, 권장안 수용" → 구현: `BalanceData` `SellPercent` 50, 적 아이템의 `Price`, `ExpeditionRules.SellPriceOf`·`CanSellBoardItem`·`SellBoardItem`·`CanSellInventoryItem`·`SellInventoryItem`, Manager의 명령 넷, `ItemTooltipView`의 팔기 버튼(`_sell`, `SellClicked`, `PointerIsOver`), `PartySideView.SellOption`·`SellRequested`, `NodeMapScreen.SellOptionFor`·`OnSellRequested`, 문구 셋(`Map.Sell`·`CannotSell`·`ShopSold`), Test(`ShopRulesTests` 팔기, `ShippedDataTests` 적 아이템의 값, `UiFlowTests` 상점 Test의 팔기, 스크린샷 `_65_shop_sell_card`). 문서 Design/03 §5·07 §4·00, Architecture/05·08·11·12, README 74.
 - 2026-10-17 사용자 "보스도 깊이 보정 적용"과 "용병 단순 피격시에는 피로+0(치명타만 피로 추가 적용)": `ExpeditionRules.FloorsBelowTheFirst`가 보스에도 층을 줌(최종 결전은 1층), `BalanceData.csv` `FatigueOnHit` 0(치명타 피로 `CritFatigueTaken` 9는 그대로), `LongExpeditionTests`의 보스 줄, PlayMode의 붕괴 연출 Test는 피격 대신 **동료의 빈사**(1 HP의 미끼를 1열에, 발키리는 2열)로 다시 무대를 꾸밈. 전후와 치명타 피로의 후보는 Design/08 §30.
 - 2026-10-17 사용자 "층당 적 hp 점차적 추가 증가 검토" → "권장안 반영": `ExpeditionRules.DeeperMaxHp`(층마다 ×(100+p)/100를 정수로 거듭), `DungeonData.csv` 광산 `EnemyHpPerFloorPercent` 5, `EnemyData.csv` 군주 364·호위 42, Generated, `LongExpeditionTests`(복리 단위 Test와 깊은 층 Test). 검토·전후·남은 결정(보스의 깊이 보정)은 Design/08 §29. 복사본 시뮬은 scratchpad의 `simcopy`(Git에 올리지 않음).
@@ -42,6 +43,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 - 2026-10-17 보스의 깊이 보정과 피격 피로 0: 체인 `20261017-092453`(setup·sim OK, EditMode **918/918**, PlayMode **87/98**), 그래픽 스크린샷 `~/Library/Caches/F1/screenshots/20261017-093500-boss-hit`(11/11, PNG 109장: 붕괴 연출 `ko_38`이 새 무대 — 2열의 발키리가 "강인", 1열의 미끼가 빈사 — 에서 찍힘). 치명타 피로 15/3(데이터만): 체인 `20261017-094417`(setup·sim OK, EditMode 918/918, PlayMode 87/98).
 - 2026-10-17 전리품의 A 키: 체인 `20261017-101301`(setup·sim OK, EditMode **920/920**, PlayMode **88/99** — 건너뜀 11은 그래픽 스크린샷 Test). 화면의 배치는 바뀌지 않아 스크린샷은 찍지 않았다.
 - 2026-10-17 상점 판매(Round 74 B): 체인 `20261017-110345`(setup·sim OK, EditMode **922/922**, PlayMode **88/99**), 그래픽 스크린샷 `~/Library/Caches/F1/screenshots/20261017-111500-shop-sell`(11/11, PNG 111장: `ko_65_shop_sell_card` — 산 버클러의 카드에 "팔기 · 6 코인").
+- 2026-10-17 클리어의 코인 → 금: 체인 `20261017-113133`(setup·sim OK, EditMode **923/923**, PlayMode **88/99**). 화면은 정산 줄의 글자만 바뀌어 스크린샷은 찍지 않았다.
 
 ## Next Action (제안)
 
