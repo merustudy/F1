@@ -129,7 +129,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
   `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
-- `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
+- `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `TakeAllLootToInventory`(2026-10-17: 남은 것 가운데 인벤토리에 자리가 있는 아이템을 놓인 차례대로 모두, 각각 첫 빈 자리에; 가방과 자리 없는 것은 남고, 다 넣으면 끝남. 넣은 수를 돌려줌), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `CanTakeAllLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
 - 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
   마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
 - 적의 아이템은 용병의 아이템과 같은 척도로 적는다(`Docs/Design/02_Combat_System.md` §4): 아이템의 값은 떨어지는 것의 값이고 적의 힘은 세기 %(`ItemGrant.PowerPercent`, 22단계: 그 전에는 등급)가 말한다. 그래서 떨어진 것이 상점의 물건과 비슷한 힘이다.

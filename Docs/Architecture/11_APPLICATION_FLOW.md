@@ -71,7 +71,7 @@ Application 계층이 하는 일은 넷이다.
 - 상점 노드면 `EnterNode`는 상점에 들어가 물건을 뽑고(`ExpeditionRules.EnterShop`) 저장한다. 상점의 명령마다 끝에서 저장하고, `LeaveShop`이 `NodeMap`으로 돌린다. 상점의 화면도 노드 맵이다(`12_UI.md` "상점").
   이긴 전투가 가져온 코인은 `CompleteBattle` 안에서 원정에 더해지고, 결과 창을 위해 `BattleCoins`가 그 전투의 것을 말한다(보스와 진 전투는 0).
   이긴 전투의 전리품도 `CompleteBattle` 안에서 뽑혀 놓이고(18단계), `BattleLoot`가 아직 놓인 것을 말한다(보스와 진 전투는 없음). 전리품은 **그 전투 화면에서** 줍는다(Round 47):
-  `LootOpen`인 동안 전리품의 명령이 되고, 화면의 [계속]은 남은 것을 두고(`LeaveLoot`) 전투를 닫는다(`CloseBattle`). 마지막 것을 주우면 원정은 노드 고르기로 가지만 화면은 [계속]까지 머문다.
+  `LootOpen`인 동안 전리품의 명령이 되고(`TakeAllLootToInventory`는 저장 한 번에 여럿을 넣는다: 2026-10-17의 A 키), 화면의 [계속]은 남은 것을 두고(`LeaveLoot`) 전투를 닫는다(`CloseBattle`). 마지막 것을 주우면 원정은 노드 고르기로 가지만 화면은 [계속]까지 머문다.
 
 ```text
 화면의 Frame -> BattleClock.Step(deltaSeconds) -> ExpeditionManager.AdvanceBattle(ms) -> BattleEngine.AdvanceTo
