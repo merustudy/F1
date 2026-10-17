@@ -150,6 +150,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션과 가방은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
 - 사는 명령은 전리품의 것과 짝이다: `BuyToBoard(자리, 구성원, Placement)`(합쳐지면 합치고, 아니면 놓기. 가방은 틀에), `BuyToInventory`(아이템만), `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
   `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.
+- **팔기**(Round 74, 2026-10-17): `SellPriceOf(EquippedItem)` = `Price` × 단계 % × `SellPercent` / 100, 적어도 1. `CanSellBoardItem(구성원, X, Y)`·`SellBoardItem`(보드에서 빼고 코인을 더함, 판 값을 돌려줌), `CanSellInventoryItem(X, Y)`·`SellInventoryItem`. `AtShop`에서만, 기본 무기(`IsBase`)와 유니크는 안 된다. 가방은 아이템이 아니라 팔리지 않는다. 판 아이템은 사라진다.
 
 ## 단계와 합치기 (Slice B 14단계)
 
