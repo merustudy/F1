@@ -263,7 +263,8 @@ namespace F1.Tests
             }
 
             Assert.AreEqual(3, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rusty_blade"))), "6 at Common, half.");
-            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("whetstone"))), "1 at Common: at least 1.");
+            Assert.AreEqual(4, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("whetstone"))), "8 at Common (restored 2026-10-17), half.");
+            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rat_bite"))), "2 at Common: half is 1, the least.");
             Assert.AreEqual(0, data.Items.Get("gladius").Price, "A unique has no price (and cannot be sold).");
         }
 

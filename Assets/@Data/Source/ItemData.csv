@@ -19,7 +19,7 @@ lantern_staff,등불 지팡이,Lantern Staff,Weapon,3,1,3800,back:3,Burn,EnemyFr
 mending_chant,치유의 부적,Mending Charm,Support,2,1,5500,back:3,Heal,AllyLowestHp,,2.18,,,,,0,item/mending-chant,8,false,,,,,0
 overseer_maul,감독관의 망치,Overseer's Maul,Weapon,2,1,4500,front:2,Damage,EnemyFront,1,3.7-11.1,,,,,0,item/overseer-maul,14,true,,,5,,0
 overseer_roar,감독관의 포효,Overseer's Roar,Weapon,2,1,6000,front:2,Damage,EnemyAll,,1.61-3.22,,,,,0,item/overseer-roar,12,false,,,5,,0
-whetstone,숫돌,Whetstone,Other,1,1,0,all,,,,,,,,,16,item/whetstone,1,false,0:-1+0:1,1,,,0
+whetstone,숫돌,Whetstone,Other,1,1,0,all,,,,,,,,,16,item/whetstone,8,false,0:-1+0:1,1,,,0
 gladius,글라디우스,Gladius,Weapon,3,1,3000,front:2,Damage,EnemyFront,2,8.04-13.4,,,,,0,item/gladius,0,true,1:-1+1:1,4,10,true,0
 abyss_cleaver,심연의 식칼,Abyss Cleaver,Weapon,2,1,4000,front:2,Damage,EnemyFront,1,4.02-9.38,,,,,0,item/abyss-cleaver,16,true,,,5,,0
 abyss_howl,심연의 울부짖음,Abyss Howl,Weapon,2,1,6000,front:2,Damage,EnemyAll,,1.68-3.35,,,,,0,item/abyss-howl,12,false,,,5,,0
