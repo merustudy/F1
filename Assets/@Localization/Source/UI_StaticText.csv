@@ -235,7 +235,7 @@ Battle.Retreated,Battle result.,후퇴 성공,Retreated
 Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
 Battle.Coins,On the result window: the region coins the victory brought (round 44). {0} = coins.,지역 코인 +{0},Region coins +{0}
 Battle.LootCount,"On the band over the stage after a win (round 47): how many drops lie on the floor. {0} = the count.",전리품 {0},Loot {0}
-Battle.LootHint,"On the board panel after a win, while no drop is picked (round 47).",전리품을 누르면 고릅니다. 남은 것은 계속을 누르면 두고 갑니다. 우클릭은 아이템 정보입니다.,Click a drop to pick it. Continue leaves the rest. Right-click for an item's facts.
+Battle.LootHint,"On the board panel after a win, while no drop is picked (round 47; the A key 2026-10-17).",전리품을 누르면 고릅니다. A: 남은 전리품을 모두 인벤토리에 넣습니다. 남은 것은 계속을 누르면 두고 갑니다. 우클릭은 아이템 정보입니다.,Click a drop to pick it. A takes every drop left into the inventory. Continue leaves the rest. Right-click for an item's facts.
 Battle.LootPickedHint,"On the board panel after a win, while a drop is picked (round 47, stage 19).",고른 전리품을 왼쪽 보드의 칸에 놓으세요. 든 채로 우클릭·휠·R: 돌리기.,"Click a square on the left to put the drop there. While holding: right-click, wheel or R turns it."
 Battle.ShowLog,Opens the log of the finished battle from the result panel.,로그 보기,View log
 Battle.LogTitle,Title of the battle log viewer.,전투 로그,Battle log

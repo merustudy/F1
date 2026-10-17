@@ -485,6 +485,19 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>True when a drop still lying there could go to the inventory now (2026-10-17: the key that takes them all).</summary>
+        public bool CanTakeAllLootToInventory => LootOpen && ExpeditionRules.CanTakeAllLootToInventory(_data.Data, Expedition);
+
+        /// <summary>Takes every drop the inventory has room for, in their order, and saves once; returns how many were taken.</summary>
+        public int TakeAllLootToInventory()
+        {
+            _run.RequireWritable();
+            RequireLoot();
+            int taken = ExpeditionRules.TakeAllLootToInventory(_data.Data, Expedition);
+            Commit();
+            return taken;
+        }
+
         /// <summary>Leaves whatever loot still lies there and goes on to the node map.</summary>
         public void LeaveLoot()
         {

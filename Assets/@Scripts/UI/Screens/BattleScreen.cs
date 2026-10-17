@@ -793,6 +793,12 @@ namespace F1.UI
                 PressInventoryKey();
             }
 
+            // 2026-10-17: after a win, A takes every drop left on the floor into the inventory (those it has room for).
+            if (_afterWin && TakeAllKey.Pressed())
+            {
+                PressTakeAllKey();
+            }
+
             // Stage 19: after a win, while the hand holds something, the right button, the wheel or R turns it and Escape lets go.
             if (_afterWin && _lootHand.Holding)
             {
@@ -1751,6 +1757,31 @@ namespace F1.UI
             }
 
             _tooltip.Hide();
+            RefreshLoot();
+        }
+
+        /// <summary>
+        /// What the A key does after a win (2026-10-17): every drop still on the floor that the inventory has room for goes in, in the
+        /// order they lie, with the sound of one put in; a drop picked up is let go of first. A bag or an item without room stays, and
+        /// the key only clicks. Tests call it in place of the key.
+        /// </summary>
+        public void PressTakeAllKey()
+        {
+            ExpeditionManager manager = Managers.Expedition;
+            if (!_afterWin || !manager.LootOpen)
+            {
+                return;
+            }
+
+            if (!manager.CanTakeAllLootToInventory)
+            {
+                Managers.Sound.PlayEffect(SoundEffect.Button);
+                return;
+            }
+
+            _pickedDrop = -1;
+            manager.TakeAllLootToInventory();
+            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
             RefreshLoot();
         }
 

@@ -932,8 +932,8 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 2894741283790848
-    m_Localized: Click a drop to pick it. Continue leaves the rest. Right-click for
-      an item's facts.
+    m_Localized: Click a drop to pick it. A takes every drop left into the inventory.
+      Continue leaves the rest. Right-click for an item's facts.
     m_Metadata:
       m_Items: []
   - m_Id: 2894741283790849

@@ -2004,6 +2004,44 @@ namespace F1.Tests
             Assert.IsEmpty(expedition.Loot);
         }
 
+        /// <summary>The A key after a win (2026-10-17): every drop left on the floor goes into the inventory and the loot ends, the screen staying for [계속].</summary>
+        [UnityTest]
+        public IEnumerator Loot_TheAKey_TakesEveryDropLeft_IntoTheInventory_AndEndsTheLoot()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return EnterFirstBattle(champion: true);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            while (!Managers.Expedition.Battle.IsFinished)
+            {
+                Managers.Expedition.AdvanceBattle(250);
+            }
+
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, expedition.Phase);
+            ItemOffer first = expedition.Loot[0];
+            expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Tier));
+            yield return UiTestUtil.WaitForResult(battle);
+            Assert.AreEqual(2, battle.Drops.Count);
+            Assert.IsEmpty(expedition.Inventory.Items);
+            int asked = Managers.Sound.Asked.Count;
+
+            battle.PressTakeAllKey();
+            yield return UiTestUtil.WaitForRedraw();
+
+            Assert.AreEqual(2, expedition.Inventory.Count, "Both drops went in.");
+            Assert.IsFalse(Managers.Expedition.LootOpen, "Nothing is left: the loot ended.");
+            Assert.IsTrue(battle.Drops.All(d => !d.gameObject.activeSelf), "The floor is empty.");
+            Assert.AreEqual(1, Managers.Sound.Asked.Skip(asked).Count(e => e == SoundEffect.ItemPlace), "One sound of a drop put in.");
+            Assert.IsTrue(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootContinue").interactable, "The screen stays for [계속].");
+
+            // Pressed again with nothing on the floor: only a click.
+            asked = Managers.Sound.Asked.Count;
+            battle.PressTakeAllKey();
+            yield return null;
+            Assert.IsFalse(Managers.Sound.Asked.Skip(asked).Contains(SoundEffect.ItemPlace));
+        }
+
         [UnityTest]
         public IEnumerator Loot_AfterTheWin_ItemsMoveBetweenTheBoards_AndContinuingLeavesTheRest()
         {

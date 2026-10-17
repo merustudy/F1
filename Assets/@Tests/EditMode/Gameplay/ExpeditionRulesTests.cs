@@ -515,6 +515,41 @@ namespace F1.Tests
         }
 
         [Test]
+        public void TakeAllLootToInventory_TakesEveryDropWithRoom_InOrder_AndEndsTheLootWhenNothingIsLeft()
+        {
+            // 2026-10-17 (the A key): both drops go in, the loot ends as when the last drop is picked.
+            StaticData data = TestData.Data();
+            ExpeditionState state = AtLoot(data);
+            string first = state.Loot[0].Id, second = state.Loot[1].Id;
+            Assert.IsTrue(ExpeditionRules.CanTakeAllLootToInventory(data, state));
+
+            Assert.AreEqual(2, ExpeditionRules.TakeAllLootToInventory(data, state));
+
+            CollectionAssert.AreEqual(new[] { first, second }, state.Inventory.Items.Select(i => i.Item.Item.Id), "In the order they lay.");
+            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase, "Nothing is left: the loot ended.");
+            Assert.IsEmpty(state.Loot);
+            Assert.IsFalse(ExpeditionRules.CanTakeAllLootToInventory(data, state));
+            Assert.Throws<InvalidOperationException>(() => ExpeditionRules.TakeAllLootToInventory(data, state));
+        }
+
+        [Test]
+        public void TakeAllLootToInventory_LeavesABag_AndTheLootStaysOpenForIt()
+        {
+            StaticData data = TestData.Data();
+            ExpeditionState state = AtLoot(data);
+            state.Loot.Insert(0, new ItemOffer(OfferKind.Bag, data.Bags.Ordered.First().Id, ItemTier.Common));
+
+            Assert.AreEqual(2, ExpeditionRules.TakeAllLootToInventory(data, state));
+
+            Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase, "The bag still lies there: a bag never goes to the inventory.");
+            Assert.IsNotNull(state.Loot[0]);
+            Assert.IsNull(state.Loot[1]);
+            Assert.IsNull(state.Loot[2]);
+            Assert.AreEqual(2, state.Inventory.Count);
+            Assert.IsFalse(ExpeditionRules.CanTakeAllLootToInventory(data, state), "Nothing left that could go in.");
+        }
+
+        [Test]
         public void ADrop_CanBeLaidOnFreeSquaresOfTheInventory_NotOverAnItem()
         {
             StaticData data = TestData.Data();

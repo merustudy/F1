@@ -478,6 +478,46 @@ namespace F1.Gameplay
             Pick(state, slot);
         }
 
+        /// <summary>Whether any drop still lying there is an item the inventory has room for (2026-10-17: the key that takes them all).</summary>
+        public static bool CanTakeAllLootToInventory(StaticData data, ExpeditionState state)
+        {
+            if (state.Phase != ExpeditionPhase.PickingLoot)
+            {
+                return false;
+            }
+
+            for (int slot = 0; slot < state.Loot.Count; slot++)
+            {
+                if (CanTakeLootToInventory(data, state, slot))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Takes every drop still lying there that the inventory has room for, in the order they lie, each at its first room
+        /// (2026-10-17, the user's request: one key for what is left). A bag or an item without room stays on the floor; when
+        /// nothing is left the loot ends as it does when the last drop is picked. Returns how many were taken.
+        /// </summary>
+        public static int TakeAllLootToInventory(StaticData data, ExpeditionState state)
+        {
+            RequirePhase(state, ExpeditionPhase.PickingLoot);
+            int taken = 0;
+            for (int slot = 0; slot < state.Loot.Count && state.Phase == ExpeditionPhase.PickingLoot; slot++)
+            {
+                if (CanTakeLootToInventory(data, state, slot))
+                {
+                    TakeLootToInventory(data, state, slot);
+                    taken++;
+                }
+            }
+
+            return taken;
+        }
+
         /// <summary>Leaves whatever loot still lies there and goes on to choosing the next node.</summary>
         public static void LeaveLoot(ExpeditionState state)
         {

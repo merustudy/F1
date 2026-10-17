@@ -2459,7 +2459,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: On the board panel after a win, while no drop is picked (round
-          47).
+          47; the A key 2026-10-17).
     - rid: 8623673296729145346
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
