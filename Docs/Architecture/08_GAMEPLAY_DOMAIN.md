@@ -127,6 +127,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
 
+- 일반 아이템 드랍(2026-10-17): `DropLoot`은 드랍 자리마다 던전의 `GeneralDropChancePercent`를 굴려 `DropWeight`로 뽑은 일반 아이템(그 층의 단계)을 두고, 아니면 적의 아이템을 둔다(적의 것이 다 떨어지면 일반, 가중치 있는 아이템이 없으면 전과 같이 굴리지 않고 적의 것만 — 난수열이 그대로다).
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
   `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
 - `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `TakeAllLootToInventory`(2026-10-17: 남은 것 가운데 인벤토리에 자리가 있는 아이템을 놓인 차례대로 모두, 각각 첫 빈 자리에; 가방과 자리 없는 것은 남고, 다 넣으면 끝남. 넣은 수를 돌려줌), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `CanTakeAllLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
@@ -144,6 +145,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 상점은 `ExpeditionState.Shop`(`ShopState`: 물건 `Stock`은 `ItemOffer`의 목록이고 판 자리는 null, `Refreshes`)이고 `ExpeditionPhase.AtShop` 동안만 있다.
   `EnterShop`이 상점 노드로 옮겨 물건을 뽑고(`DrawStock`), `LeaveShop`이 버리고 `ChoosingNode`로 돌린다. 피로는 더하지 않는다. 상점에서도 보드와 자리는 바꿀 수 있다(`IsBetweenBattles`).
 - 물건(`Stock`)은 **물건 다음에 포션**이다(Round 56). 물건은 `DrawOffers`가 뽑는다(상점 가중치 `ShopWeight`가 있고 값이 있는 아이템과 가방, 겹침 없음, `ShopGoodsCount` = `ShopSlots`나 후보 수 중 작은 것).
+  물건의 후보(`IsShopCandidate`, 2026-10-17): 가중치와 값이 있는 아이템 가운데 **직업의 기본 무기는 살아 있는 파티원의 직업 것만**(`PartyWeaponIds`). `ShopGoodsCount(data, state)`도 같은 후보를 센다.
   포션은 `DrawPotions`가 상점마다 한 번 뽑는다(종류마다 `ShopPotionChancePercent`, 하나도 없으면 가중치로 하나: 늘 하나 이상. 빈 포션 칸과 상관없이). 단계는 그 층의 것(`DungeonData.ItemTierAt`: 전리품과 같은 셈, 정예의 한 단계는 없다)이다.
   난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열어 포션을 먼저 뽑고, 새로고침 k번째의 물건은 그 뒤를 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
   새로고침은 물건 자리만 새로 채우고 포션 자리(판 것은 null 그대로)는 둔다(`RefreshShop`).
