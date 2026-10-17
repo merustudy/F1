@@ -91,11 +91,12 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   비우면 별이 없다), `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준. 비우면 0). 정의(`ItemData`)의 검사: 별 칸은 모양 밖이고 모양에서 한 칸 안(대각선 포함)이며 겹치지 않는다,
   별이 있으면 `StarDamage` 1 이상이고 없으면 0이다. **효과가 없는 아이템**(Effect1을 모두 비움)은 발동하지 않는다(`IsPassive`): 별이 있어야 하고 `CooldownMs`는 0이다. 효과가 있으면 지금처럼 `CooldownMs` 100 이상.
   별 칸은 `StarSquare`(X·Y)의 목록으로 Generated JSON에 들어간다.
-- `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률).
+- `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률), `Icon`(선택, Round 79: 가방의 그림 `bag/<kebab-id>`. 비면 우물).
   틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
 - `RecipeData.csv`(23단계)는 담금질의 레시피다: `Result`(유니크 아이템의 id), `BaseItem`·`BaseTier`, `Catalyst`·`CatalystTier`(단계는 `ItemTier`의 이름: `Common`·`Tier1`·`Tier2`·`Tier3`). 이름 열이 없는 첫 정의다(`RecipeMapper`는 `Id`부터 직접 요구한다). 검사: 결과·바탕·촉매가 아이템에 있고, 결과는 `Unique`, 촉매는 ★이 있다.
   `ItemData.csv`의 `Unique` 열(선택, 비면 false)은 유니크 아이템이다: `ShopWeight`·`Price`가 0이어야 한다.
 - `MercenaryData.csv`(26단계)의 `Starting`(참/거짓): 참이면 시작 로스터(`JobId` 필수), 거짓이면 역마차의 이름 풀(`JobId` 비움 — 후보를 뽑을 때 직업을 굴린다). `StaticData.StartingMercenaries`·`RecruitPool`.
+- `BuildingData.csv`(30단계)는 마을 건물의 레벨 사다리다: `Id`(`BuildingId`의 넷: `barracks`·`inn`·`coach`·`gate` — 이름 열이 없는 정의, 이름표는 UI 문구), `Level`(건물마다 1부터 빈틈없이), `Price`·`Days`(업그레이드의 금과 공사 일수. 1레벨은 0, 그 뒤는 0보다 큼), `Bonus`(그 레벨이 `BalanceData`의 기본값에 더하는 것: 막사 `RosterLimit`, 역마차 `RecruitCount`, 쉼터 `TreatmentRelief`, 성문은 정산 금의 %. 1레벨은 0, 내려가지 않음). `StaticData.Buildings`·`MaxBuildingLevel`·`BuildingAt`이 검사한 사다리를 준다(`BuildingMapper`).
 - `LevelData.csv`(27단계)는 레벨의 사다리다: `Level`(1부터 빈틈없이), `ExpToNext`(다음 레벨까지의 경험치. 마지막 레벨만 0), `MaxHpBonusPercent`(직업 최대 HP에 더하는 %. 1레벨은 0, 내려가지 않음). `Id`와 이름 열이 없다(`LevelMapper`). `StaticData.Levels`·`MaxLevel`·`LevelAt`이 검사한 사다리를 준다.
 - **22단계의 수**(`Docs/Design/02_Combat_System.md` §4·§13): HP·피해·회복·보호막·폭풍은 **0.01 단위**다. CSV는 소수 둘째 자리까지 적고("38", "5.45") Generated JSON과 코드는 0.01을 1로 세는 정수다(`Centi`: 38 → 3800).
   - `ItemData.csv`의 효과 값은 `Effect1Value`·`Effect2Value`(그 전의 `…Power` 퍼센트를 대신함): 피해는 "최소-최대"("2-4", "1.5-2.5"), 회복·보호막은 값 하나("2.73"), 화상은 중첩 수(정수). 정의(`ItemEffect`)는 `Min`·`Max`를 갖고, 피해 밖은 둘이 같다.

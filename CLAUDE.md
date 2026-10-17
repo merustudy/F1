@@ -214,7 +214,7 @@ ExpeditionManager -> DataManager, RunManager
 ## 9. Current Vertical Slice
 
 **Slice A: 핵심 루프 한 바퀴 + 저장/이어하기**는 2026-10-06에, **Slice B: 전투 시스템 완성**은 2026-10-16에 완료했다(Roadmap 12~23단계. Acceptance 2(원정 하나 15~30분)는 미달로 기록하고 닫았다. 직접 플레이·사후 검토는 Slice C의 입력).
-지금은 **Slice C: 로비 구조 생성과 런 한 바퀴**다(2026-10-16 범위 승인, Roadmap 25~29단계. 구현 전에 로비·원정 화면의 목업을 승인받는다).
+지금은 **Slice C: 로비 구조 생성과 런 한 바퀴**다(2026-10-16 범위 승인, Roadmap 25~30단계 — 30단계 "건물의 단계와 건설"은 2026-10-17 Round 78로 더했다. 구현 전에 로비·원정 화면의 목업을 승인받는다).
 범위, 구현 순서, Acceptance, Deferred는 [Docs/Architecture/09_VERTICAL_SLICE.md](Docs/Architecture/09_VERTICAL_SLICE.md)가 소유한다.
 
 - 그 문서의 Deferred 항목은 현재 범위가 아니다. 코드, 데이터, Folder를 미리 만들지 않는다.

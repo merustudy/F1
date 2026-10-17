@@ -71,9 +71,9 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   자리가 있는지(`HasRoomFor`), 쓴 칸(`UsedSquares`). 목록으로 읽으면 들어온 차례의 `EquippedItem`이고(인벤토리 번호 = `Items`의 번호), `Add(아이템)`은 첫 빈 자리에 놓는다. 가방은 들어가지 않는다.
 - 명령은 `ExpeditionRules`에 있고 자리를 받는다: 전리품을 보드에 넣기(`TakeLoot(자리, 구성원, Placement)`)와 인벤토리로 줍기(`TakeLootToInventory`), 옮기기(`MoveItem(구성원, X, Y, 구성원, Placement)`: 같은 보드 안, 보드 사이),
   인벤토리로 빼기(`MoveToInventory(구성원, X, Y)`: 첫 빈 자리로; `MoveToInventoryAt(구성원, X, Y, Placement)`: 고른 빈 자리로), 인벤토리 안에서 옮기기(`MoveInInventory(번호, Placement)`: 빈 칸에만, 바꾸기 없음),
-  인벤토리에서 넣기(`PlaceFromInventory(번호, 구성원, Placement)`), 가방 옮기기(`MoveBag(구성원, X, Y, 구성원, Placement)`). 각각 `Can...` 질의가 있고 화면은 그림자를 그리려고 묻는다.
+  인벤토리에서 넣기(`PlaceFromInventory(번호, 구성원, Placement)`). 각각 `Can...` 질의가 있고 화면은 그림자를 그리려고 묻는다. **가방은 놓으면 옮기지 못한다**(Round 79, 2026-10-17: `CanPickBag`·`CanMoveBag`·`MoveBag`을 지웠다. 시작 가방의 규칙이 모든 가방의 규칙).
   버튼과 밀려남으로 인벤토리에 들어가는 길(전리품·상점의 "인벤토리에 넣기", "인벤토리로", 밀려난 아이템)은 모두 `FindRoom`의 자리에 놓고, 자리가 없으면 막힌다.
-  아이템은 그 아이템이 덮은 어느 칸으로도 가리킨다. 가방은 그 가방의 칸으로 가리킨다: 집는 것(`CanPickBag`)은 아이템이 없는 칸으로만(아이템이 있는 칸은 그 아이템을 집는다), 옮기는 것(`CanMoveBag`·`MoveBag`)은 어느 칸으로도. 둘 다 시작 가방이 아니고 걸친 아이템이 없어야 한다.
+  아이템은 그 아이템이 덮은 어느 칸으로도 가리킨다. 가방은 놓는 것(`CanPlaceBag`: 전리품·상점에서 틀의 빈 자리에)뿐이다.
 - 놓기는 한 곳(`CanPut`·`Put`)이다: 자리가 모두 가방의 칸이고, 겹치는 아이템이 없거나 **하나**면 놓인다. 하나면 그것이 인벤토리의 첫 빈 자리로 간다(자리가 있을 때. 인벤토리에서 넣을 때는 나가는 아이템의 자리를 빈 것으로 친다). 둘 이상이면 안 된다.
   옮기는 아이템 자신은 겹침에서 빠진다. 같은 아이템의 왼쪽 위 칸에 왼쪽 위를 맞추면(`MergesAt`) 놓는 대신 합친다(아래 "단계와 합치기").
 - 가방을 옮기면 그 안에 온전히 든 아이템이 가방 안의 자리를 지키며 함께 가고, 돌리면 함께 돈다(가방의 상자 안에서 시계 방향으로: (x, y) → (높이 − y − h, x)). 가방은 틀 안의 다른 가방이 없는 자리에만 놓인다. 시작 가방은 옮기지 않는다.
@@ -202,6 +202,18 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - `MercenaryState.Level`(1부터)·`Exp`(다음 레벨까지 쌓인 것. 마지막 레벨은 0). 새 런의 로스터와 고용된 용병은 레벨 1. 죽은 용병의 레벨은 함께 사라진다.
 - `Settle`: 살아 돌아온 파티원 모두 같은 경험치(`LevelRules.ExpFor`: 도달한 층 × `ExpPerFloor` + 클리어 `ExpClear`)를 받고(`Gain`: `ExpToNext`를 채울 때마다 한 레벨씩, 남은 것은 이월, 마지막 레벨에서는 0), `SettlementReport.ExpEarned`·`LevelUps`(새 레벨에 닿은 용병)가 정산 화면에 간다.
 - 레벨은 최대 HP를 올린다: `BeginExpedition`이 `PartyMember.Level`을 넘기고 `ExpeditionRules.Create`가 `LevelRules.MaxHpOf`(직업 최대 HP × (100 + 그 레벨의 `MaxHpBonusPercent`)/100)로 구성원의 `MaxHp`·`Hp`를 세운다. 전투 Setup은 구성원의 값을 그대로 쓴다. 피로의 150 문턱과 무기 세기는 레벨이 바꾸지 않는다(HP 대 무기 세기의 측정은 `Docs/Design/08_Simulation_Report.md` §25).
+
+## 건물과 건설 (Slice C 30단계, Round 78)
+
+규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §7(건물의 단계와 건설)이 소유한다. `BuildingRules`와 `RunRules`다. 사다리는 `BuildingData.csv`(`StaticData.Buildings`·`MaxBuildingLevel`·`BuildingAt`), 기본값은 `BalanceData`(`RosterLimit`·`RecruitCount`·`TreatmentRelief`).
+
+- 상태: `RunState.BuildingLevels`(건물 id → 레벨. 없으면 1)와 `Constructions`(`ConstructionState`: 건물·짓는 레벨·끝나는 날, 건물마다 하나). `BuildingRules.LevelOf`·`ConstructionOf`·`DaysLeft`(끝나는 날 − 오늘, 최소 1).
+- 업그레이드(`CanUpgrade`·`Upgrade` → `UpgradeCheck`): 런이 끝나지 않았고 기한을 넘기지 않았고(`FinalStandDue`), 다음 레벨이 있고(`MaxLevel`), 공사 중이 아니고(`UnderConstruction`), 금이 `Price` 이상이면 금을 내고 `FinishDay = 오늘 + Days`의 공사를 더한다. 동시에 몇 채든.
+- 완성: 날이 가는 곳은 `RunRules.PassDays`(정산과 쉬기)뿐이고, 그 끝에서 `BuildingRules.Complete`가 끝나는 날에 닿은 공사를 레벨로 바꾼다. 끝난 건물은 `Rest`의 반환값과 `SettlementReport.BuildingsCompleted`로 돌아온다.
+- 잠금(`IsLocked`): 공사 중이면 잠긴다 — `CanHire`는 `CoachLocked`, `CanTreat`는 `InnLocked`, `CanDismiss`는 거짓, `CanDepart`는 `GateLocked`(파티 수보다 먼저). 쉬기는 잠기지 않는다(날이 가는 길). 기한을 넘기면(`IsFinalStandDue`) 날이 가지 않으므로 잠금이 없고 짓지도 못한다: 최종 결전은 공사 중인 성문을 지난다.
+- 효과: `RosterLimit`·`RecruitCount`·`TreatmentRelief`(기본값 + 그 레벨의 `Bonus`)와 `GoldBonusPercent`(성문)·`WithGateBonus`(정산의 금 전체 — 층·클리어·코인의 금 — 에 %를 더해 내림, `SettlementReport.GateBonusPercent`). `DrawRecruits`·`CanHire`·`Treat`·`Settle`·저장 검증이 이 값을 읽는다. 밸런스 상수는 데이터에만 있다.
+- 시뮬 `run`의 정책(`--build 0|1`): 고용·치료 뒤 금이 "다음 레벨의 값 + 고용비" 이상이면 가장 싼 다음 레벨부터(같으면 성문 → 역마차 → 막사 → 쉼터), 성문이 공사 중이면 쉬어서 날을 보낸다. 전후는 `Docs/Design/08_Simulation_Report.md` §34.
+- Test: `BuildingRulesTests`(시작 레벨, 값과 공사, 쉬기·정산의 완성, 동시 건설과 금, 잠금 넷과 쉬기, 성문의 잠금과 해제, 기한 뒤, 효과 넷과 정산의 보너스, 같은 시드), `RunSaveMapperTests`(16, 15 → 16), `StaticDataTransformerTests`·`ShippedDataTests`(사다리).
 
 ## 전투: 결정론
 

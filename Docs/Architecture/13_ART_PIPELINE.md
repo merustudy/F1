@@ -77,6 +77,8 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 | `ui_icon` | UI의 작은 기호: 상태 아이콘 | `Rosters/ui_icon.csv` (쓰임새의 이름) | `glyph` |
 | `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21, C 채택). 전신 그림처럼 바닥선에 세운다 | `Rosters/prop.csv` (쓰임새의 이름. 데이터가 가리키지 않는다) | `figure` |
 | `attack`, `hit` | 용병의 공격 자세와 피격 자세(Round 19·23). 확정 그림을 보고 같은 인물로, 자세와 표정만 바꾼다 | `Rosters/attack.csv`, `Rosters/hit.csv` (`JobData.Id`. `Body`는 그 용병의 `character` 행과 같게) | `pose` (`tools/fit_pose.py`) |
+| `bag` | 가방의 그림(Round 79, 2026-10-17): 위에서 본 열린 가방, 입 안에 칸 수만큼의 칸. 아이템의 §7과 칸 섹션(§19~§21)으로 그리고 데이터·모양은 `BagData.csv`. 맞추기는 가방 조각의 비율의 캔버스(`bag_canvas`: 긴 변 328, 3×1은 328x106·2×1은 328x161·3×3은 328x328)에 아이콘처럼 | `Rosters/bag.csv` (`BagData.Id`) | `cell` (가방의 캔버스) |
+| `building` | 로비 마을의 건물 한 채(Round 78, 30단계): 막사·쉼터·역마차·성문의 레벨 1·2·3과 공용 비계. 마을 터와 같은 내려다본 시점, 밤, 투명 배경. 레벨 2·3는 그 건물의 레벨 1 결과를 `--extra-reference`로 붙여 "같은 건물이 자란" 그림 | `Rosters/building.csv` (`<건물>_<레벨>`과 `scaffold`. 데이터가 가리키지 않는다) | `trim` (투명 여백만 잘라 냄. 크기는 화면이 정한다: `LobbyScreen.Plots`·`LevelScale`) |
 | `enemy_attack`, `enemy_hit` | 몬스터의 공격 자세와 피격 자세(2026-10-05 Round 26~28). 확정 그림을 보고 같은 몬스터로, 자세와 표정만. 왼쪽을 보고 눈동자 없는 눈 그대로 | `Rosters/enemy_attack.csv`, `Rosters/enemy_hit.csv` (`EnemyData.Id`, 잰 배율 `Scale`) | `pose` (`tools/fit_pose.py`) |
 
 - **공격·피격 자세**는 용병의 기본 그림이 확정될 때마다 더한다(규칙, Design/10 §2. Round 23에서 정식 타입이 됐다): `gen_image.py --type attack|hit --key <job>`.
@@ -287,11 +289,17 @@ UI의 조각은 전부 같은 굵기의 외곽선을 갖는다. 모델이 그린
 2. 코드  -> ArtAddress.ExpeditionMap = "background/expedition/map" (ArtSetup이 목록에 넣는다)
 3. Entry -> ArtSetup.Files (Group F1-Art, Scope Lobby)
 
-로비의 마을 (Round 71 내려다본 시점, 26단계. 데이터가 가리키지 않는 배경: 로비 화면이 깐다)
-1. PNG   -> Assets/@Art/Background/Lobby/town.png (2304x1536, 던전 배경과 같은 Import 정책. 승인 원본 Archive/71-lobby-expedition/approved/lobby_town_topdown.png)
+로비의 마을 터 (Round 71 내려다본 시점, 26단계 → Round 78 더 먼 시점의 빈 터, 30단계. 데이터가 가리키지 않는 배경: 로비 화면이 깐다)
+1. PNG   -> Assets/@Art/Background/Lobby/town.png (2304x1536, 던전 배경과 같은 Import 정책. 승인 원본 Archive/78-town-buildings/approved/lobby_town_far.png — 그 전의 건물이 든 그림은 Archive/71-lobby-expedition/approved/)
 2. 코드  -> ArtAddress.LobbyTown = "background/lobby/town" (ArtSetup이 목록에 넣는다)
 3. Entry -> ArtSetup.Files (Group F1-Art, Scope Lobby)
-   화면은 그림을 1920 폭(1920x1280)으로 줄여 위 0px부터 깐다: 공유 바닥선(57%)을 쓰지 않고 그린 대로 둔다(Round 71 권장안). 건물의 자리는 12_UI "로비: 마을"
+   화면은 그림을 1920 폭(1920x1280)으로 줄여 위 0px부터 깐다: 공유 바닥선(57%)을 쓰지 않고 그린 대로 둔다(Round 71 권장안). 건물의 자리(빈 터)는 12_UI "로비: 마을"
+
+로비의 건물과 비계 (Round 78, 30단계. 데이터가 가리키지 않는다: 건물 id와 레벨이 주소를 만든다)
+1. PNG   -> Assets/@Art/Building/<id>_<level>.png (맞춘 그림 그대로: 투명 여백을 자른 약 1100~1500 x 900~1020), Assets/@Art/Building/scaffold.png
+2. 코드  -> ArtAddress.Building(id, level) = "building/<id>-<level>", ArtAddress.Scaffold = "building/scaffold" (ArtSetup이 BuildingId.All × MaxBuildingLevel과 비계를 목록에 넣는다)
+3. Entry -> ArtSetup.Files (Group F1-Art, Scope Lobby. Import 정책 Building: 전신 그림처럼 잘라 낸 투명 그림, MaxSize 1024)
+   화면은 건물마다의 터(발치 x·y, 2레벨의 폭)에 레벨의 배율(82·100·122%)로 세운다(LobbyScreen.Plots·LevelScale). 비계는 건물의 상자에 맞춰 늘인다
 
 아이템의 아이콘
 1. PNG   -> Assets/@Art/Item/<Id>.png (맞춘 그림 그대로: 칸 수에 따라 320x88, 320x216, 320x344)
@@ -322,6 +330,11 @@ UI의 틀과 아이콘
 1. PNG   -> Assets/@Art/Pose/Enemy/<Id>_attack.png, <Id>_hit.png (fit_pose.py의 산출물 그대로, 2048x1024)
 2. CSV   -> 없다. Figure가 있는 적마다 "pose/enemy/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf, EnemyData.AttackPose/HitPose)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 용병의 자세와 같다)
+
+가방의 그림 (Round 79)
+1. PNG   -> Assets/@Art/Bag/<Id>.png (맞춘 그림 그대로: 328x106 · 328x161 · 328x328)
+2. CSV   -> BagData.csv 의 Icon = "bag/<kebab-id>"
+3. Entry -> CSV의 Icon에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 아이템 아이콘과 같다)
 
 포션의 병 아이콘
 1. PNG   -> Assets/@Art/Potion/<Id>.png (ui_icon으로 생성한 96x96)
