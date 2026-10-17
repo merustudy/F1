@@ -10,18 +10,25 @@ Round 75 B의 파티 팝업은 열 칸이 글(이름·Lv·직업·피로 칸)뿐
 | B | **원정 화면의 띠** | 띠(270 높이)의 칸마다 그림(150 높이)과 "N열 이름 Lv", 직업, 피로 칸. 팝업은 그대로 | 팝업을 열지 않아도 보인다. 그러나 그림이 작고(노드 맵의 절반), 띠가 지도를 더 가린다. 짜는 자리(팝업)에는 그림이 없다 |
 | C | 둘 다 | A의 팝업 + B의 띠 | 둘 다 보이지만 같은 그림이 두 번이고 띠의 작은 그림은 덤이다 |
 
-권장은 **A**다. "전투 선택 시 처럼"의 핵심은 열에 선 용병이 **그림으로** 보이는 것이고, 그 그림이 가장 쓸모 있는 곳은 파티를 짜고 자리를 바꾸는 팝업이다. 순서를 노드 맵과 같게 두면 전투에서 보는 줄과 같다(지금 띠와 Round 75 팝업은 1열이 왼쪽이었다 — A를 고르면 띠의 글 칸도 4열 → 1열로 맞추는 것을 권장).
+## 안 D — 사용자 안 (2026-10-17 "노드맵 전투선택 화면 용병 구성 창(서있는 것)을 왼쪽에 배치하고 오른쪽에 용병 목록 제공") — `mock-figures-D-stage-list.png`, A와 나란히 `mock-figures-compare-AD.png`
+
+| 안 | 어디에 그림 | 모습 | 장단 |
+|---|---|---|---|
+| **D (권장)** | **왼쪽 무대 + 오른쪽 목록** | 큰 창(40,110 — 1840x900). 왼쪽 무대에 노드 맵의 파티 쪽처럼 **서 있는 네 명**(그림 300, 발밑 그림자, 바닥선, 4열 → 1열)과 발밑에 "N열 이름 Lv"·직업·피로 칸·[앞으로][뒤로]. 오른쪽에 **용병 목록**(막사의 줄처럼 여덟 줄: 작은 그림, 이름·직업·Lv, 패시브, 피로 칸; 파티 안은 금빛에 "N열"과 [빼기], 밖은 [넣기] — 가득 차면 꺼짐; 빈 줄은 "빈 자리 (역마차에서 고용)"). 무대 아래에 안내와 [출발] | 그림이 노드 맵과 같은 크기라 전투에서 보는 줄 그대로다. 목록에 패시브·고통이 들어가 누굴 넣을지 보고 고른다(A의 칩은 이름·직업뿐). 창이 거의 화면 전체다(지도는 가려짐). 무대 아래가 비는데, 뒤에 노드 맵처럼 보드를 둘 자리로 남는다 |
+
+A는 작은 창에 들어가는 대신 그림이 작고(224) 칩에 패시브가 없다. **권장을 D로 바꾼다**: 사용자의 안이 노드 맵의 모습 그대로이고, 목록이 막사의 줄과 같아 배울 것이 없다.
 
 결정 셋(권장을 앞에):
-1. 안: **A** / B / C.
-2. 열의 순서: **노드 맵처럼 4열 → 1열**(띠도 같이) / 지금처럼 1열 → 4열.
-3. 로스터 칩의 작은 그림: **넣는다** / 뺀다(글만).
+1. 안: **D** / A / B / C.
+2. 목록의 명령: **[넣기]·[빼기] 버튼**(줄은 그대로) / 줄 전체를 눌러 넣고 빼기.
+3. 무대의 [앞으로][뒤로]: **발밑에**(노드 맵과 같이) / 두지 않고 목록의 순서로만.
 
 ## 구현 (판정 뒤)
 
 - 그림은 직업의 것(`JobData.Figure`, `Assets/@Art/Unit/Job`)이다. 원정 화면이 열리기 전에 `PrepareAsync`가 Lobby Scope로 직업 그림 여섯을 읽는다(`ResourceManager.LoadAsync`, 노드 맵의 `ExpeditionArt`와 같은 주소). 그림 자리는 전투·노드 맵의 `BuildFigure`(`FigureView`: 발밑 그림자, 숨쉬기)를 쓰고 팝업의 칸에 맞게 줄인다(`FigureView.SetScale` 또는 작은 자리).
 - `PartyRowSlotView`에 `FigureView`를 더하고(빈 열은 그림 없이 "비어 있음"), `PartyPickChipView`에 작은 그림 자리를 더한다. 팝업 창은 1400x890(260,110).
 - B·C면 띠의 `ExpeditionPartyCardView`에도 그림 자리(150)와 띠의 높이 270.
+- D면 팝업 창을 1840x900으로 넓히고, 왼쪽 무대는 노드 맵의 `PartySideView`와 같은 공식(`FieldLayout`)으로 열의 자리를 두되 보드 없이 그림·발밑 표시·앞으로·뒤로만(`PartyColumnView`를 쓰지 않고 작은 `PartyStageColumnView`), 오른쪽 목록은 막사의 `RosterEntryView`와 비슷한 줄(`PartyListRowView`: 작은 그림 자리, 이름·직업·Lv, 패시브, 피로 칸, [넣기]/[빼기]). 띠의 글 칸은 4열 → 1열로 맞춘다.
 - Test: 팝업 Test에 그림의 Sprite(직업 그림)와 순서 단정, 스크린샷 `_66_expedition_party` 갱신. 문서: Architecture/12 "원정 화면", Design/04 §7, Roadmap.
 
-파일: `mock_figures.py`(그림), `base-expedition.png`·`base-popup.png`(2026-10-17 Round 75 뒤의 스크린샷), `mock-figures-A-popup.png`, `mock-figures-B-strip.png`, `mock-figures-C-both.png`, `mock-figures-compare.png`.
+파일: `mock_figures.py`(A·B·C), `mock_d.py`(D), `base-expedition.png`·`base-popup.png`(2026-10-17 Round 75 뒤의 스크린샷), `mock-figures-A-popup.png`, `mock-figures-B-strip.png`, `mock-figures-C-both.png`, `mock-figures-D-stage-list.png`, `mock-figures-compare.png`(지금/A/B/C), `mock-figures-compare-AD.png`(A/D).
