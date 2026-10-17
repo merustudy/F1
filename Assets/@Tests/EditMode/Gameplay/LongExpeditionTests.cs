@@ -108,6 +108,17 @@ namespace F1.Tests
         // ---- The deeper floors ---------------------------------------------------------------
 
         [Test]
+        public void DeeperMaxHp_CompoundsThePercentFloorByFloor_InWholeHundredths()
+        {
+            Assert.AreEqual(10000, ExpeditionRules.DeeperMaxHp(10000, 0, 10), "The first floor is the data's HP.");
+            Assert.AreEqual(11000, ExpeditionRules.DeeperMaxHp(10000, 1, 10));
+            Assert.AreEqual(14641, ExpeditionRules.DeeperMaxHp(10000, 4, 10), "1.1 to the fourth, not 1.4.");
+            Assert.AreEqual(10000, ExpeditionRules.DeeperMaxHp(10000, 29, 0), "No growth without a percent.");
+            Assert.AreEqual(3200 * 105 / 100 * 105 / 100, ExpeditionRules.DeeperMaxHp(3200, 2, 5), "Whole hundredths at every step.");
+            Assert.Greater(ExpeditionRules.DeeperMaxHp(10000, 29, 5), 40000, "Five percent compounded over 29 floors is more than four times.");
+        }
+
+        [Test]
         public void TheEnemiesOfADeeperFloor_HaveMoreHpAndBetterItems_ButTheBossIsAsItsDataSays()
         {
             StaticData data = DeepCave(hpPerFloor: 10, powerPerFloor: 20);
@@ -119,7 +130,13 @@ namespace F1.Tests
             BattleSetup boss = ExpeditionRules.BuildBattleSetup(data, state, "lair", 1, floor: 9);
 
             Assert.AreEqual(grunt.MaxHp, first.Enemies[0].MaxHp);
-            Assert.AreEqual(grunt.MaxHp * 140 / 100, fifth.Enemies[0].MaxHp, "Four floors deeper: +40%.");
+            long compounded = grunt.MaxHp;
+            for (int i = 0; i < 4; i++)
+            {
+                compounded = compounded * 110 / 100;
+            }
+
+            Assert.AreEqual((int)compounded, fifth.Enemies[0].MaxHp, "Four floors deeper: +10% compounded four times in whole hundredths (2026-10-17: x1.4641, not +40%).");
             Assert.AreEqual(fifth.Enemies[0].MaxHp, fifth.Enemies[0].Hp);
             Assert.AreEqual(grunt.Items[0].PowerPercent + 80, fifth.Enemies[0].Items[0].PowerPercent, "Four floors deeper: +80% power (stage 22: was +8 grades).");
             Assert.AreEqual(data.Enemies.Get("chief").MaxHp, boss.Enemies[0].MaxHp, "The boss is not scaled.");

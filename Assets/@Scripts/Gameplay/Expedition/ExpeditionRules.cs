@@ -1412,6 +1412,22 @@ namespace F1.Gameplay
             return group.IsBoss ? 0 : Math.Max(0, floor - 1);
         }
 
+        /// <summary>
+        /// An enemy's max HP so many floors below the first: the dungeon's per-floor percent compounds, floor by floor, in whole
+        /// hundredths (2026-10-17: a steeper end than the same percent added each floor, so that a long dungeon keeps a wall at
+        /// its depth while the party grows on its loot; Docs/Design/03_Dungeon_Structure.md §1). Integer arithmetic keeps it deterministic.
+        /// </summary>
+        public static int DeeperMaxHp(int baseHp, int deeper, int perFloorPercent)
+        {
+            long hp = baseHp;
+            for (int i = 0; i < deeper; i++)
+            {
+                hp = hp * (100 + perFloorPercent) / 100;
+            }
+
+            return (int)hp;
+        }
+
         /// <param name="deeper">How many floors below the first the enemy stands: its HP and the power of its items grow by the dungeon's share for each.</param>
         static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data, DungeonData dungeon, int deeper)
         {
@@ -1435,7 +1451,7 @@ namespace F1.Gameplay
             }
 
             // An enemy's board is exactly what it carries, one item under another: it has no bags and no empty squares to show.
-            int maxHp = (int)((long)enemy.MaxHp * (100 + deeper * dungeon.EnemyHpPerFloorPercent) / 100);
+            int maxHp = DeeperMaxHp(enemy.MaxHp, deeper, dungeon.EnemyHpPerFloorPercent);
             return new BattleUnitSetup
             {
                 SourceId = enemy.Id,

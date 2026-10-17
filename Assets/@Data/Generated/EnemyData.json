@@ -8,7 +8,7 @@
         "ko-KR": "심연의 군주"
       },
       "Level": 14,
-      "MaxHp": 28000,
+      "MaxHp": 36400,
       "Items": [
         {
           "ItemId": "abyss_cleaver",
@@ -216,7 +216,7 @@
         "ko-KR": "스켈레톤 호위"
       },
       "Level": 8,
-      "MaxHp": 3200,
+      "MaxHp": 4200,
       "Items": [
         {
           "ItemId": "rusty_blade",

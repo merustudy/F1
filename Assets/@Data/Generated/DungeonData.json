@@ -27,7 +27,7 @@
       "CampMinFloor": 11,
       "CampChancePercent": 15,
       "CampFloor": 30,
-      "EnemyHpPerFloorPercent": 2,
+      "EnemyHpPerFloorPercent": 5,
       "EnemyPowerPerFloorPercent": 0,
       "Tier1Floor": 9,
       "Tier2Floor": 20,
