@@ -119,6 +119,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 야영지: `ExpeditionRules.EnterCamp`가 야영지 노드로 옮겨 `ExpeditionPhase.AtCamp`로 둔다(피로를 더하지 않는다). 그동안 고를 노드는 없고(`AvailableNodes`가 빈다) 보드와 자리는 바꿀 수 있다.
   `RestAtCamp`는 살아 있는 구성원마다 HP를 최대의 `CampHealPercent`%만큼(최대를 넘지 않게) 올리고 피로를 `CampFatigueRelief`만큼 내린 뒤(`FatigueRules.Add`) `ChoosingNode`로 돌린다. 정비는 14단계다.
 - 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템의 세기 `EnemyPowerPerFloorPercent`%만큼 올린다(22단계: 그 전에는 아이템 등급).
+  HP는 **복리**다(2026-10-17, Design/03 §1): `ExpeditionRules.DeeperMaxHp`가 층마다 `×(100 + p)/100`를 정수(0.01 단위)로 거듭한다 — 29층 아래에서 5%는 ×4.1(더하기였다면 ×2.45). 아이템의 세기는 더하기 그대로. 정수 연산이라 결정론을 지킨다.
   보스 무리는 데이터 그대로다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
 - **최종 보스의 페이즈**(28단계, Design/02 §9): `EnemyData.Phases`는 `BattleUnitSetup.Phases`(`BattlePhaseSetup`: 문턱 %, 그 묶음의 `EquippedItem` 목록, 화면이 그릴 `Layout`)로 들어간다(깊은 층의 세기 배율은 묶음에도 같이 건다. 페이즈가 없는 적은 빈 목록, 아군은 null). 엔진은 피해를 적은 뒤(`ApplyDamage`의 `Damaged` 다음, 살아 있을 때) HP가 다음 문턱에 닿았으면 `EnterPhasesReached`로 그 묶음을 들게 한다: 아이템 상태를 새로 만들고(서는 자리로 `Works`를 다시 판정) 쿨다운은 그 순간부터(`NextFireMs = TimeMs + 쿨다운`), 한 타로 여러 문턱을 지나면 차례로 하나씩, 페이즈마다 `PhaseChanged`(Target 보스, A 페이즈 번호, B 문턱 %, C 남은 HP)를 적는다. `BattleUnit.Phase`·`Items`·`EquippedNow`·`Layout`이 지금의 묶음이다. 개에 든 적은 페이즈에 들지 않는다. 입력 기록의 재생은 같은 Setup으로 같은 페이즈를 지난다(결정론).
 

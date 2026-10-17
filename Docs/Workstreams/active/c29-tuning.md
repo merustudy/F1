@@ -14,6 +14,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 
 ## Done
 
+- 2026-10-17 사용자 "층당 적 hp 점차적 추가 증가 검토" → "권장안 반영": `ExpeditionRules.DeeperMaxHp`(층마다 ×(100+p)/100를 정수로 거듭), `DungeonData.csv` 광산 `EnemyHpPerFloorPercent` 5, `EnemyData.csv` 군주 364·호위 42, Generated, `LongExpeditionTests`(복리 단위 Test와 깊은 층 Test). 검토·전후·남은 결정(보스의 깊이 보정)은 Design/08 §29. 복사본 시뮬은 scratchpad의 `simcopy`(Git에 올리지 않음).
 - 2026-10-17 사용자 결정 "깊이 ×2 + 피해 ×0.67 + 피격 1 + 폭풍 70초로 구현"(원정 하나 15~30분): `DungeonData.csv` 광산 30층(정예·야영지 11, 상점 7, 단계 9·20, 야영지 층 30, 층당 HP 2%), `EnemyGroupData.csv` 광산 무리의 층 범위 두 배, `ItemData.csv` 모든 피해 ×0.67(글라디우스 8.04-13.4, 별 +4 유지), `BalanceData.csv` `FatigueOnHit` 1·`StormStartMs` 70000, Generated 넷, `ShippedDataTests`의 글라디우스 값. 전후와 검토한 안은 Design/08 §28. 판이 쉬워졌다(런 92%): 되돌릴 레버를 재어 둠(08 §28 "다시 맞추기"), 고르는 것은 사용자.
 
 - 측정(Design/08 §27): 균형형 300런 시드 1·2·3과 1,000런(52.7~61.3%, 1,000런 54.9%), 안전형(63.7%, 최종 결전 12%). 패배는 거의 전부 고용할 금이 모자란 전멸(41%), 기한과 사망 한도에는 닿지 않음.
@@ -35,6 +36,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 - `transform`·`validate` OK. 시뮬 Design/08 §27.
 - 체인 `20261016-233306`(고용비 20의 데이터와 로비 Test: setup·sim OK, EditMode **917/917**, PlayMode **87/98** — 건너뜀 11은 그래픽이 있어야 하는 스크린샷 Test).
 - 2026-10-17 깊이 ×2의 데이터: 체인 `20261017-073612`(setup·sim OK, EditMode **917/917**, PlayMode **87/98**), 그래픽 스크린샷 `~/Library/Caches/F1/screenshots/20261017-074500-depth`(11/11, PNG 109장: 30층 지도의 스크롤, 전투의 "폭풍까지 70.0초").
+- 2026-10-17 복리와 심연 HP: 체인 `20261017-084458`(setup·sim OK, EditMode **918/918** — `DeeperMaxHp` 단위 Test를 더함, PlayMode **87/98**). 화면은 바뀌지 않아 스크린샷은 다시 찍지 않았다. 시뮬은 `dotnet build Tools/Sim` 뒤에 다시 잰 값(08 §29).
 
 ## Next Action (제안)
 
