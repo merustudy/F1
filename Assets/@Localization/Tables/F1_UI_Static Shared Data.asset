@@ -1595,6 +1595,36 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673493721710592
+  - m_Id: 6078818526683136
+    m_Key: Expedition.PartyTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927936
+  - m_Id: 6078818543460352
+    m_Key: Expedition.PartyDungeon
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927937
+  - m_Id: 6078818543460353
+    m_Key: Expedition.RosterHeader
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927938
+  - m_Id: 6078818543460354
+    m_Key: Expedition.EmptyRowHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927939
+  - m_Id: 6078818543460355
+    m_Key: Expedition.Forward
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927940
+  - m_Id: 6078818543460356
+    m_Key: Expedition.Back
+    m_Metadata:
+      m_Items:
+      - rid: 8623673495733927941
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2729,7 +2759,8 @@ MonoBehaviour:
     - rid: 8623673477476384778
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Header of the party strip; the party is formed in the lobby.
+        m_CommentText: Header of the party strip; the party is formed in the popup
+          the departure opens (round 75 B).
     - rid: 8623673477476384779
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3007,3 +3038,29 @@ MonoBehaviour:
           came home as gold (2026-10-17). {0} = gold earned in all, {1} = the floors
           reached, {2} = the coins converted (those left and the items' worth), {3}
           = the gold they made, {4} = the gold held now.
+    - rid: 8623673495733927936
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Title of the party popup the departure opens (round 75 B).
+    - rid: 8623673495733927937
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Under the popup's title. {0} = the chosen dungeon, {1} = days
+          it takes, {2} = the day the party is back.
+    - rid: 8623673495733927938
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Over the roster's chips in the popup. {0} = roster size, {1}
+          = its limit.
+    - rid: 8623673495733927939
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: In an empty row of the popup.
+    - rid: 8623673495733927940
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Moves a party member one row to the front (trading places).
+    - rid: 8623673495733927941
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Moves a party member one row to the back (trading places).

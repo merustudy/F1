@@ -326,7 +326,11 @@ namespace F1.Tests
             UiTestUtil.Click(lobby, "Frame/Strip/Depart");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             yield return Capture(prefix + "_56_expedition");
+            // The party popup (round 75 B): [출발] opens it over the shaded map; its own [출발] sets out.
             UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture(prefix + "_66_expedition_party");
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/PartyWindow/PartyDepart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);

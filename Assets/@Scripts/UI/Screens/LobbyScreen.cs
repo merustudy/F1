@@ -198,7 +198,8 @@ namespace F1.UI
         void RefreshTown(StaticData data, RunState run, bool due)
         {
             DepartCheck check = Managers.Run.CanDepart(Dungeon.Id);
-            bool canGo = check == DepartCheck.Ok;
+            // The party is formed on the expedition screen (Round 75 B, 2026-10-17): a party still short does not keep the gate shut.
+            bool canGo = check == DepartCheck.Ok || check == DepartCheck.PartyTooSmall;
             _barracks.ShowPlate(UiStrings.Get(UiKeys.Lobby.Barracks), null, dim: false);
             _inn.ShowPlate(UiStrings.Get(UiKeys.Lobby.Inn), due && !run.IsOver ? UiStrings.Get(UiKeys.Lobby.InnClosed) : null, dim: due);
             _coach.ShowPlate(UiStrings.Get(UiKeys.Lobby.Coach), null, dim: false);
@@ -320,7 +321,7 @@ namespace F1.UI
 
             _stripStatus.text = UiStrings.Get(UiKeys.Lobby.RosterCount, run.Roster.Count, balance.RosterLimit) + " · " + UiStrings.Get(UiKeys.Lobby.Deaths, run.Fallen.Count, balance.DeathLimit);
             DepartCheck check = Managers.Run.CanDepart(Dungeon.Id);
-            _depart.interactable = check == DepartCheck.Ok;
+            _depart.interactable = check == DepartCheck.Ok || check == DepartCheck.PartyTooSmall;
             _departLabel.text = UiStrings.Get(due ? UiKeys.Lobby.ToFinalStand : UiKeys.Lobby.Depart);
         }
 
@@ -615,7 +616,8 @@ namespace F1.UI
         /// <summary>Round 71 E2: the lobby forms the party; where to go is chosen on the expedition screen, which departs.</summary>
         void OnDepart()
         {
-            if (Managers.Run.CanDepart(Dungeon.Id) != DepartCheck.Ok)
+            DepartCheck check = Managers.Run.CanDepart(Dungeon.Id);
+            if (check != DepartCheck.Ok && check != DepartCheck.PartyTooSmall)
             {
                 return;
             }

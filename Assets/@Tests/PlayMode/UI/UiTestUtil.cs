@@ -372,7 +372,15 @@ namespace F1.Tests
         {
             Click(Screen<LobbyScreen>(), "Frame/Strip/Depart");
             yield return WaitForScreen(ScreenId.Expedition);
-            Click(Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
+            yield return DepartFromExpedition(Screen<ExpeditionScreen>());
+        }
+
+        /// <summary>Sets out from the expedition screen: [출발] opens the party popup (round 75 B), whose own [출발] departs with the party as formed.</summary>
+        public static IEnumerator DepartFromExpedition(ExpeditionScreen screen)
+        {
+            Click(screen, "Frame/Bottom/Depart");
+            yield return WaitForRedraw();
+            Click(screen, "Frame/PartyWindow/PartyDepart");
             yield return WaitForScreen(ScreenId.NodeMap);
         }
 
@@ -570,8 +578,7 @@ namespace F1.Tests
             ExpeditionScreen expedition = Screen<ExpeditionScreen>();
             Click(Views<DungeonMarkerView>(expedition).Single(marker => marker.DungeonId == abyss.Id).Button);
             Assert.AreEqual(abyss.Id, expedition.SelectedDungeonId);
-            Click(expedition, "Frame/Bottom/Depart");
-            yield return WaitForScreen(ScreenId.NodeMap);
+            yield return DepartFromExpedition(expedition);
             Assert.AreEqual(abyss.Id, Managers.Expedition.Expedition.DungeonId);
 
             yield return FightThroughToTheBoss(bossPowerPercent);

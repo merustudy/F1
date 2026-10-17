@@ -123,6 +123,10 @@ namespace F1.Tests
             Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track, "The expedition screen is the lobby's still.");
             Managers.Sound.ForgetEffects();
             UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Bottom/Depart");
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "The screen's [출발] opens the party popup (round 75 B): a click like any other.");
+            yield return UiTestUtil.WaitForRedraw();
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/PartyWindow/PartyDepart");
             CollectionAssert.AreEqual(new[] { SoundEffect.Depart }, Managers.Sound.Asked, "Setting out makes its own sound, not a click.");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
 
@@ -166,8 +170,8 @@ namespace F1.Tests
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.Lobby));
             Assert.AreEqual(data.StartingMercenaries.Count, UiTestUtil.Views<RosterChipView>(lobby).Length, "A chip per mercenary on the strip (stage 26).");
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party cannot depart.");
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party no longer keeps the expedition screen shut: the party is formed there (round 75 B).");
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
 
             // Party: in the barracks, the first mercenaries of the roster, one per row from the front.
             RunState run = Managers.Run.Run;
@@ -249,7 +253,7 @@ namespace F1.Tests
             }
             else
             {
-                Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
+                Assert.AreEqual(!run.IsOver, UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "The expedition screen opens unless the run is over (round 75 B: a short party is filled there).");
             }
         }
 
@@ -339,13 +343,151 @@ namespace F1.Tests
             screen = UiTestUtil.Screen<ExpeditionScreen>();
             Assert.AreEqual(mine.Id, screen.SelectedDungeonId, "The choice is made here each time.");
 
-            // The departure: its own sound, the chosen dungeon's map, the lobby's scope released.
+            // The departure (round 75 B): [출발] opens the party popup over the map with a click; the popup's own [출발] sets out with its
+            // own sound, to the chosen dungeon's map, the lobby's scope released.
             Managers.Sound.ForgetEffects();
             UiTestUtil.Click(screen, "Frame/Bottom/Depart");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(screen.IsPartyOpen);
+            Assert.IsTrue(UiTestUtil.At(screen, "Frame/PartyWindow").gameObject.activeSelf);
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "Opening the popup is a click.");
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(screen, "Frame/PartyWindow/PartyDepart");
             CollectionAssert.AreEqual(new[] { SoundEffect.Depart }, Managers.Sound.Asked);
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             Assert.AreEqual(mine.Id, Managers.Expedition.Expedition.DungeonId);
             Assert.IsFalse(Managers.Resource.IsScopeOpen(ResourceScope.Lobby), "The lobby's scope, with the map, goes with the departure.");
+        }
+
+        /// <summary>
+        /// Round 75 B (2026-10-17, the user: the party is formed in a popup the expedition button opens): the lobby opens the screen with
+        /// an empty party, [출발] opens the popup, the roster's chips put mercenaries in (the next row from the front) and take them out,
+        /// the moves trade rows and those behind one taken out advance, closing keeps the party on the strip, and the popup's [출발] departs.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Expedition_FormsThePartyInThePopup_WithTheRosterChipsAndTheMoves_AndDepartsFromIt()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            BalanceData balance = data.Balance;
+            DungeonData mine = data.Dungeons.Get("abandoned_mine");
+            Assume.That(data.StartingMercenaries.Count > balance.PartySize, "The shipped roster is larger than a party.");
+
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            RunState run = Managers.Run.Run;
+            Assert.AreEqual(0, run.Party.Count);
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party no longer keeps the screen shut: the party is formed there.");
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
+            UiTestUtil.Click(lobby, "Frame/Gate");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            ExpeditionScreen screen = UiTestUtil.Screen<ExpeditionScreen>();
+            Assert.AreEqual($"파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/Bottom/Status"));
+            Assert.AreEqual("비어 있음", UiTestUtil.Views<ExpeditionPartyCardView>(screen)[0].Name);
+            Assert.AreEqual("파티 — 출발을 누르면 편성한다", UiTestUtil.TextAt(screen, "Frame/Bottom/PartyHeader"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(screen, "Frame/Bottom/Depart").interactable, "[출발] opens the popup even while the party is short.");
+            Assert.IsFalse(screen.IsPartyOpen);
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/PartyWindow").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf);
+
+            // The popup: the dungeon's line, a slot per row (empty, with the hint and no moves), a chip per mercenary of the roster.
+            UiTestUtil.Click(screen, "Frame/Bottom/Depart");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsTrue(screen.IsPartyOpen);
+            Assert.IsTrue(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf, "The map is shaded under the popup.");
+            Assert.AreEqual("원정 파티", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyWindowTitle"));
+            Assert.AreEqual($"버려진 광산 · {mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
+            PartyRowSlotView[] slots = UiTestUtil.Views<PartyRowSlotView>(screen);
+            Assert.AreEqual(balance.PartySize, slots.Length);
+            Assert.AreEqual("비어 있음", slots[0].Name);
+            Assert.AreEqual("로스터에서 용병을 누르세요", slots[0].Hint);
+            Assert.IsFalse(slots[0].Remove.gameObject.activeSelf, "An empty row has no moves.");
+            Assert.AreEqual("1열", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartySlot1/SlotRowLabel1"));
+            PartyPickChipView[] chips = UiTestUtil.Views<PartyPickChipView>(screen);
+            Assert.AreEqual(run.Roster.Count, chips.Length, "A chip per mercenary of the roster; the template stays hidden.");
+            Assert.AreEqual($"로스터 {run.Roster.Count}/{balance.RosterLimit} — 눌러서 파티에 넣고 뺀다", UiTestUtil.TextAt(screen, "Frame/PartyWindow/RosterHeader"));
+            Assert.IsTrue(chips.All(c => !c.InParty && c.Row == string.Empty && c.FrameColor == UiPalette.PanelLight));
+            Assert.AreEqual(UiText.Mercenary(run.Roster[0].Id), chips[0].Name, "In the roster's order.");
+            Assert.AreEqual(UiText.Job(run.Roster[0].JobId), chips[0].Job);
+            Assert.AreEqual("Lv 1", chips[0].Level);
+            Assert.AreEqual(FatiguePips.Count, chips[0].Pips.Count);
+            Assert.AreEqual($"파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyStatus"));
+            Assert.IsFalse(UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable, "Nobody to set out with.");
+
+            // A chip puts its mercenary in the next row from the front and is lit with the row's tag; a full party takes nobody more.
+            for (int i = 0; i < balance.PartySize; i++)
+            {
+                UiTestUtil.Click(chips[i].Button);
+                Assert.AreEqual(i + 1, run.Party.Single(s => s.MercenaryId == chips[i].MercenaryId).Row);
+                Assert.IsTrue(chips[i].InParty);
+                Assert.AreEqual($"{i + 1}열", chips[i].Row);
+                Assert.AreEqual(UiPalette.Selected, chips[i].FrameColor);
+            }
+
+            // The rows' buttons were turned on by the clicks: they take a click (and a raycast) once the canvas has drawn them.
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.AreEqual(chips[0].MercenaryId, slots[0].MercenaryId);
+            Assert.AreEqual(UiText.Mercenary(chips[0].MercenaryId), slots[0].Name);
+            Assert.AreEqual(UiText.Job(run.Roster[0].JobId), slots[0].Detail);
+            Assert.IsTrue(slots[0].Remove.gameObject.activeSelf);
+            Assert.IsFalse(slots[0].Forward.interactable, "The front row has no row before it.");
+            Assert.IsTrue(slots[0].Back.interactable);
+            Assert.IsTrue(slots[balance.PartySize - 1].Forward.interactable);
+            Assert.IsFalse(slots[balance.PartySize - 1].Back.interactable, "The last row has nobody behind.");
+            UiTestUtil.Click(chips[balance.PartySize].Button);
+            Assert.AreEqual(balance.PartySize, run.Party.Count, "The party is full: the chip does nothing.");
+            Assert.IsFalse(chips[balance.PartySize].InParty);
+            Assert.AreEqual("출발할 수 있습니다", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyStatus"));
+            Assert.IsTrue(UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable);
+
+            // The moves: back trades places with the row behind, forward with the row before; out of the party, those behind advance.
+            string first = chips[0].MercenaryId;
+            string second = chips[1].MercenaryId;
+            UiTestUtil.Click(slots[0].Back);
+            Assert.AreEqual(2, run.Party.Single(s => s.MercenaryId == first).Row);
+            Assert.AreEqual(1, run.Party.Single(s => s.MercenaryId == second).Row);
+            Assert.AreEqual(UiText.Mercenary(second), slots[0].Name);
+            Assert.AreEqual("1열", chips[1].Row);
+            UiTestUtil.Click(slots[1].Forward);
+            Assert.AreEqual(1, run.Party.Single(s => s.MercenaryId == first).Row);
+            Assert.AreEqual(2, run.Party.Single(s => s.MercenaryId == second).Row);
+            UiTestUtil.Click(slots[1].Remove);
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsFalse(run.Party.Any(s => s.MercenaryId == second));
+            Assert.AreEqual(balance.PartySize - 1, run.Party.Count);
+            Assert.AreEqual(UiText.Mercenary(chips[2].MercenaryId), slots[1].Name, "Those behind advanced a row.");
+            Assert.AreEqual("비어 있음", slots[balance.PartySize - 1].Name);
+            Assert.IsFalse(chips[1].InParty);
+            Assert.AreEqual(string.Empty, chips[1].Row);
+            Assert.AreEqual(balance.PartySize - 1 >= balance.MinPartySize, UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable, "The departure follows the party's size.");
+
+            // A chip in the party takes its mercenary out; a chip outside puts it at the back.
+            UiTestUtil.Click(chips[0].Button);
+            Assert.IsFalse(run.Party.Any(s => s.MercenaryId == first));
+            UiTestUtil.Click(chips[0].Button);
+            Assert.AreEqual(balance.PartySize - 1, run.Party.Single(s => s.MercenaryId == first).Row, "Back in, at the back.");
+            UiTestUtil.Click(chips[1].Button);
+            Assert.AreEqual(balance.PartySize, run.Party.Count);
+            Assert.AreEqual(balance.PartySize, run.Party.Single(s => s.MercenaryId == second).Row);
+
+            // Closing keeps the party and the strip shows it; [출발] opens the popup again, and its own [출발] sets out with the party as formed.
+            UiTestUtil.Click(screen, "Frame/PartyWindow/PartyClose");
+            yield return UiTestUtil.WaitForRedraw();
+            Assert.IsFalse(screen.IsPartyOpen);
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf);
+            Assert.IsFalse(UiTestUtil.At(screen, "Frame/PartyWindow").gameObject.activeSelf);
+            ExpeditionPartyCardView[] cards = UiTestUtil.Views<ExpeditionPartyCardView>(screen);
+            for (int row = 1; row <= balance.PartySize; row++)
+            {
+                Assert.AreEqual(UiText.Mercenary(run.Party.Single(s => s.Row == row).MercenaryId), cards[row - 1].Name, $"Row {row} on the strip.");
+            }
+
+            Assert.AreEqual("출발할 수 있습니다", UiTestUtil.TextAt(screen, "Frame/Bottom/Status"));
+            var formed = run.Party.OrderBy(s => s.Row).Select(s => s.MercenaryId).ToList();
+            yield return UiTestUtil.DepartFromExpedition(screen);
+            Assert.AreEqual(mine.Id, Managers.Expedition.Expedition.DungeonId);
+            CollectionAssert.AreEqual(formed, Managers.Expedition.Expedition.Members.OrderBy(m => m.Row).Select(m => m.MercenaryId).ToList(), "The party as formed set out.");
         }
 
         [UnityTest]

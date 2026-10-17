@@ -12,9 +12,10 @@ namespace F1.UI
 {
     /// <summary>
     /// Where to go (Round 71 E2, Docs/Design/04_Lobby_100Day_Economy.md §7): the painted map of the lands with a marker per dungeon,
-    /// the chosen dungeon's details, the party as the lobby formed it (read only here), and the departure. Past the last day only the
-    /// final dungeon can be chosen: the final stand (Docs/Design/04 §2). The lobby opens this screen; it goes back to the lobby or on
-    /// to the node map.
+    /// the chosen dungeon's details, the party on the strip, and the departure. [출발] opens the party popup over the map (Round 75 B,
+    /// 2026-10-17): the party is formed there — the roster's chips put mercenaries in and take them out, the moves trade rows — and
+    /// the popup's own [출발] sets out. Past the last day only the final dungeon can be chosen: the final stand (Docs/Design/04 §2).
+    /// The lobby opens this screen; it goes back to the lobby or on to the node map.
     /// </summary>
     public sealed class ExpeditionScreen : UIScreen
     {
@@ -43,11 +44,27 @@ namespace F1.UI
         [SerializeField] TMP_Text _status;
         [SerializeField] Button _depart;
 
+        // The party popup (Round 75 B).
+        [SerializeField] GameObject _shade;
+        [SerializeField] GameObject _partyWindow;
+        [SerializeField] TMP_Text _partyDungeon;
+        [SerializeField] PartyRowSlotView[] _slots;
+        [SerializeField] TMP_Text _rosterHeader;
+        [SerializeField] PartyPickChipView _chipTemplate;
+        [SerializeField] TMP_Text _partyStatus;
+        [SerializeField] Button _partyDepart;
+        [SerializeField] Button _partyClose;
+
         readonly List<DungeonMarkerView> _markers = new List<DungeonMarkerView>();
+        readonly Dictionary<string, PartyPickChipView> _chips = new Dictionary<string, PartyPickChipView>();
         Sprite _mapArt;
         string _selectedId;
+        bool _partyOpen;
 
         public string SelectedDungeonId => _selectedId;
+
+        /// <summary>True while the party popup is over the map.</summary>
+        public bool IsPartyOpen => _partyOpen;
 
         /// <summary>The map is loaded before the screen opens, into the lobby's scope: the lobby and this screen share it.</summary>
         public override async Task PrepareAsync()
@@ -59,7 +76,17 @@ namespace F1.UI
         {
             _map.sprite = _mapArt;
             _toLobby.onClick.AddListener(() => GoTo(ScreenId.Lobby));
-            _depart.onClick.AddListener(OnDepart);
+            _depart.onClick.AddListener(OpenParty);
+            _partyClose.onClick.AddListener(CloseParty);
+            _partyDepart.onClick.AddListener(OnDepart);
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                int row = i + 1;
+                PartyRowSlotView slot = _slots[i];
+                slot.Forward.onClick.AddListener(() => MoveInParty(slot.MercenaryId, row - 1));
+                slot.Back.onClick.AddListener(() => MoveInParty(slot.MercenaryId, row + 1));
+                slot.Remove.onClick.AddListener(() => RemoveFromParty(slot.MercenaryId));
+            }
 
             StaticData data = Managers.Data.Data;
             foreach (DungeonData dungeon in data.Dungeons.Ordered)
@@ -75,6 +102,7 @@ namespace F1.UI
             }
 
             _selectedId = DefaultDungeon(data).Id;
+            _partyOpen = false;
             Managers.Sound.PlayMusic(MusicTrack.Lobby);
         }
 
@@ -125,9 +153,16 @@ namespace F1.UI
 
             DepartCheck chosen = Managers.Run.CanDepart(_selectedId);
             bool finalStand = chosen == DepartCheck.Ok && Managers.Run.IsFinalStandDue;
-            _depart.interactable = chosen == DepartCheck.Ok;
-            _status.text = finalStand ? UiStrings.Get(UiKeys.Lobby.FinalStandDue) : StatusText(chosen, balance);
-            _status.color = chosen != DepartCheck.Ok ? UiPalette.Burn : finalStand ? UiPalette.Virtue : UiPalette.Good;
+            // [출발] opens the party popup (Round 75 B), so a party still short does not keep it off: the popup fills the party.
+            _depart.interactable = chosen == DepartCheck.Ok || chosen == DepartCheck.PartyTooSmall;
+            string status = finalStand ? UiStrings.Get(UiKeys.Lobby.FinalStandDue) : StatusText(chosen, balance);
+            Color statusColor = chosen != DepartCheck.Ok ? UiPalette.Burn : finalStand ? UiPalette.Virtue : UiPalette.Good;
+            _status.text = status;
+            _status.color = statusColor;
+
+            RefreshPartyWindow(data, run, chosen, status, statusColor);
+            _shade.SetActive(_partyOpen);
+            _partyWindow.SetActive(_partyOpen);
         }
 
         /// <summary>
@@ -196,7 +231,7 @@ namespace F1.UI
             return string.Join(", ", parts);
         }
 
-        /// <summary>One card per row the party can stand in, as the lobby formed it: the name and the level (stage 27), the job with the member's state, the fatigue pips. An empty row says so.</summary>
+        /// <summary>One card per row the party can stand in, as the party is formed: the name and the level (stage 27), the job with the member's state, the fatigue pips. An empty row says so.</summary>
         void RefreshParty(StaticData data, RunState run)
         {
             BalanceData balance = data.Balance;
@@ -204,15 +239,7 @@ namespace F1.UI
             {
                 int row = i + 1;
                 _cards[i].gameObject.SetActive(i < balance.PartySize);
-                PartySlot slot = null;
-                foreach (PartySlot candidate in run.Party)
-                {
-                    if (candidate.Row == row)
-                    {
-                        slot = candidate;
-                    }
-                }
-
+                PartySlot slot = SlotInRow(run, row);
                 if (slot == null)
                 {
                     _cards[i].ShowEmpty(UiStrings.Get(UiKeys.Lobby.EmptyRow));
@@ -229,6 +256,123 @@ namespace F1.UI
                     balance.MaxFatigue,
                     balance.FatigueBreakdown);
             }
+        }
+
+        // ---- The party popup (Round 75 B) ----------------------------------------------------
+
+        /// <summary>
+        /// The popup: the chosen dungeon's line, a slot per row (the member and its moves, or the empty row and its hint), a chip per
+        /// mercenary of the roster (lit and tagged with its row while in the party), the status and the departure, which only a party
+        /// that can set out enables.
+        /// </summary>
+        void RefreshPartyWindow(StaticData data, RunState run, DepartCheck chosen, string status, Color statusColor)
+        {
+            BalanceData balance = data.Balance;
+            DungeonData dungeon = data.Dungeons.Get(_selectedId);
+            string dungeonName = dungeon.IsFinal ? UiStrings.Get(UiKeys.Expedition.FinalName, UiText.Name(dungeon.Name)) : UiText.Name(dungeon.Name);
+            _partyDungeon.text = UiStrings.Get(UiKeys.Expedition.PartyDungeon, dungeonName, dungeon.DurationDays, run.Day + dungeon.DurationDays);
+
+            for (int i = 0; i < _slots.Length; i++)
+            {
+                int row = i + 1;
+                _slots[i].gameObject.SetActive(i < balance.PartySize);
+                PartySlot slot = SlotInRow(run, row);
+                if (slot == null)
+                {
+                    _slots[i].ShowEmpty(UiStrings.Get(UiKeys.Lobby.EmptyRow), UiStrings.Get(UiKeys.Expedition.EmptyRowHint));
+                    continue;
+                }
+
+                MercenaryState mercenary = RunRules.FindMercenary(run, slot.MercenaryId);
+                FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
+                _slots[i].Show(
+                    slot.MercenaryId,
+                    UiText.Mercenary(slot.MercenaryId),
+                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
+                    UiText.JobLine(mercenary.JobId, affliction),
+                    mercenary.Fatigue,
+                    balance.MaxFatigue,
+                    balance.FatigueBreakdown,
+                    canForward: Managers.Run.CanPlaceInParty(slot.MercenaryId, row - 1),
+                    canBack: Managers.Run.CanPlaceInParty(slot.MercenaryId, row + 1));
+            }
+
+            var alive = new HashSet<string>();
+            foreach (MercenaryState mercenary in run.Roster)
+            {
+                alive.Add(mercenary.Id);
+                if (!_chips.TryGetValue(mercenary.Id, out PartyPickChipView chip))
+                {
+                    chip = Instantiate(_chipTemplate, _chipTemplate.transform.parent);
+                    chip.gameObject.SetActive(true);
+                    chip.name = "Chip_" + mercenary.Id;
+                    chip.MercenaryId = mercenary.Id;
+                    string id = mercenary.Id;
+                    chip.Button.onClick.AddListener(() => OnChip(id));
+                    _chips.Add(mercenary.Id, chip);
+                }
+
+                int row = RowOf(run, mercenary.Id);
+                FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
+                chip.Show(
+                    UiText.Mercenary(mercenary.Id),
+                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
+                    row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
+                    UiText.JobLine(mercenary.JobId, affliction),
+                    affliction != null,
+                    row != 0,
+                    mercenary.Fatigue,
+                    balance.MaxFatigue,
+                    balance.FatigueBreakdown);
+                chip.transform.SetAsLastSibling();
+            }
+
+            var gone = new List<string>();
+            foreach (KeyValuePair<string, PartyPickChipView> pair in _chips)
+            {
+                if (!alive.Contains(pair.Key))
+                {
+                    gone.Add(pair.Key);
+                }
+            }
+
+            foreach (string id in gone)
+            {
+                Destroy(_chips[id].gameObject);
+                _chips.Remove(id);
+            }
+
+            _rosterHeader.text = UiStrings.Get(UiKeys.Expedition.RosterHeader, run.Roster.Count, balance.RosterLimit);
+            _partyStatus.text = status;
+            _partyStatus.color = statusColor;
+            _partyDepart.interactable = chosen == DepartCheck.Ok;
+        }
+
+        static PartySlot SlotInRow(RunState run, int row)
+        {
+            foreach (PartySlot candidate in run.Party)
+            {
+                if (candidate.Row == row)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>The row a mercenary holds in the party, or 0 outside it.</summary>
+        static int RowOf(RunState run, string mercenaryId)
+        {
+            foreach (PartySlot slot in run.Party)
+            {
+                if (slot.MercenaryId == mercenaryId)
+                {
+                    return slot.Row;
+                }
+            }
+
+            return 0;
         }
 
         static string StatusText(DepartCheck check, BalanceData balance)
@@ -255,6 +399,70 @@ namespace F1.UI
             Refresh();
         }
 
+        void OpenParty()
+        {
+            DepartCheck check = Managers.Run.CanDepart(_selectedId);
+            if (check != DepartCheck.Ok && check != DepartCheck.PartyTooSmall)
+            {
+                return;
+            }
+
+            _partyOpen = true;
+            Refresh();
+        }
+
+        void CloseParty()
+        {
+            _partyOpen = false;
+            Refresh();
+        }
+
+        /// <summary>A chip: in the party, its mercenary comes out; outside it, the mercenary takes the next row from the front (nobody more once the party is full).</summary>
+        void OnChip(string mercenaryId)
+        {
+            RunState run = Managers.Run.Run;
+            if (RowOf(run, mercenaryId) != 0)
+            {
+                Managers.Run.RemoveFromParty(mercenaryId);
+            }
+            else
+            {
+                int next = run.Party.Count + 1;
+                if (!Managers.Run.CanPlaceInParty(mercenaryId, next))
+                {
+                    return;
+                }
+
+                Managers.Run.PlaceInParty(mercenaryId, next);
+            }
+
+            Refresh();
+        }
+
+        /// <summary>A move: the member trades places with whoever stands in that row (the buttons are off when nobody does).</summary>
+        void MoveInParty(string mercenaryId, int row)
+        {
+            if (mercenaryId == null || !Managers.Run.CanPlaceInParty(mercenaryId, row))
+            {
+                return;
+            }
+
+            Managers.Run.PlaceInParty(mercenaryId, row);
+            Refresh();
+        }
+
+        void RemoveFromParty(string mercenaryId)
+        {
+            if (mercenaryId == null)
+            {
+                return;
+            }
+
+            Managers.Run.RemoveFromParty(mercenaryId);
+            Refresh();
+        }
+
+        /// <summary>The popup's [출발]: the party as formed sets out for the chosen dungeon.</summary>
         void OnDepart()
         {
             if (Managers.Run.CanDepart(_selectedId) != DepartCheck.Ok)

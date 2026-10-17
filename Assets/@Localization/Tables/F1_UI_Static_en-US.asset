@@ -1168,7 +1168,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 5786696208605193
-    m_Localized: Party (formed in the lobby)
+    m_Localized: "Party \u2014 formed on departure"
     m_Metadata:
       m_Items: []
   - m_Id: 5786696208605194
@@ -1449,6 +1449,32 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 6078818526683136
+    m_Localized: Expedition party
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6078818543460352
+    m_Localized: "{0} \xB7 {1} days (\u2192 day {2})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6078818543460353
+    m_Localized: "Roster {0}/{1} \u2014 click to add or remove"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6078818543460354
+    m_Localized: Pick a mercenary from the roster
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6078818543460355
+    m_Localized: Forward
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6078818543460356
+    m_Localized: Back
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1610,3 +1636,5 @@ MonoBehaviour:
         - id: 6039611447959552
         - id: 6039611456348161
         - id: 6046622701051904
+        - id: 6078818543460352
+        - id: 6078818543460353

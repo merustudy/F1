@@ -88,9 +88,38 @@ namespace F1.Editor.Setup
 
             TextMeshProUGUI status = UiBuild.Label("Status", b, 22f, UiPalette.Text);
             UiBuild.Box(status, 1520f, 52f, 300f, 36f);
+            // [출발] opens the party popup (Round 75 B): a click like any other. The departure, with its own sound, is the popup's button.
             ButtonParts depart = UiBuild.LocalizedButton("Depart", b, UiKeys.Expedition.Depart, UiPalette.Button, 34f);
-            UiBuild.Silence(depart.Button);
             UiBuild.Box(depart.Rect, 1520f, 100f, 294f, 120f);
+
+            // The shade over the map (the header stays clear) while the party popup is open, and the popup over it (Round 75 B,
+            // 2026-10-17, ArtPipeline/Archive/75-party-popup/mock-party-B-depart.png): the chosen dungeon's line, a slot per row with
+            // the moves, the roster's chips in a grid of four, the status and the departure.
+            Image shade = UiBuild.Image("Shade", frame, TownShade, raycastTarget: true);
+            UiBuild.Box(shade, 0f, 100f, 1920f, 980f);
+            shade.gameObject.SetActive(false);
+            Image partyWindow = Window(frame, "PartyWindow", new Rect(260f, 140f, 1400f, 800f), UiKeys.Expedition.PartyTitle, "PartyClose", out ButtonParts partyClose);
+            Transform w = partyWindow.transform;
+            TextMeshProUGUI partyDungeon = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyDungeon", w, 22f, UiPalette.Text)), 24f, 70f, 1000f, 32f);
+            var slots = new PartyRowSlotView[BattleRows.Count];
+            for (int i = 0; i < slots.Length; i++)
+            {
+                slots[i] = BuildPartyRowSlot(w, i + 1, 24f + 340f * i, 110f);
+            }
+
+            TextMeshProUGUI rosterHeader = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RosterHeader", w, 24f, UiPalette.TextDim)), 24f, 330f, 1000f, 34f);
+            RectTransform chips = UiBuild.Box(UiBuild.Rect("Chips", w), 24f, 372f, 1352f, 240f);
+            var grid = chips.gameObject.AddComponent<GridLayoutGroup>();
+            grid.cellSize = new Vector2(320f, 110f);
+            grid.spacing = new Vector2(24f, 20f);
+            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            grid.constraintCount = 4;
+            grid.childAlignment = TextAnchor.UpperLeft;
+            PartyPickChipView chipTemplate = BuildPartyPickChip(chips);
+            TextMeshProUGUI partyStatus = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyStatus", w, 24f, UiPalette.Text)), 24f, 728f, 900f, 40f);
+            ButtonParts partyDepart = UiBuild.LocalizedButton("PartyDepart", w, UiKeys.Expedition.Depart, UiPalette.Button, 30f);
+            UiBuild.Silence(partyDepart.Button);
+            UiBuild.Box(partyDepart.Rect, 1082f, 712f, 294f, 64f);
 
             UiBuild.SetReference(screen, "_day", day);
             UiBuild.SetReference(screen, "_gold", gold);
@@ -108,7 +137,77 @@ namespace F1.Editor.Setup
             UiBuild.SetReferences(screen, "_cards", cards);
             UiBuild.SetReference(screen, "_status", status);
             UiBuild.SetReference(screen, "_depart", depart.Button);
+            UiBuild.SetReference(screen, "_shade", shade.gameObject);
+            UiBuild.SetReference(screen, "_partyWindow", partyWindow.gameObject);
+            UiBuild.SetReference(screen, "_partyDungeon", partyDungeon);
+            UiBuild.SetReferences(screen, "_slots", slots);
+            UiBuild.SetReference(screen, "_rosterHeader", rosterHeader);
+            UiBuild.SetReference(screen, "_chipTemplate", chipTemplate);
+            UiBuild.SetReference(screen, "_partyStatus", partyStatus);
+            UiBuild.SetReference(screen, "_partyDepart", partyDepart.Button);
+            UiBuild.SetReference(screen, "_partyClose", partyClose.Button);
             return screen;
+        }
+
+        /// <summary>
+        /// A row of the party in the popup (the mock's card): the row label, the name and the level, the job line (the empty row's hint
+        /// in its place), the fatigue pips, and the moves — forward, back, out.
+        /// </summary>
+        static PartyRowSlotView BuildPartyRowSlot(Transform parent, int row, float x, float y)
+        {
+            Image card = UiBuild.Panel("PartySlot" + row, parent, UiPalette.PanelLight);
+            UiBuild.Box(card, x, y, 320f, 200f);
+            Transform c = card.transform;
+            UiBuild.Box(UiBuild.LocalizedLabel("SlotRowLabel" + row, c, UiText.RowKey(row), 20f, UiPalette.TextDim), 16f, 14f, 60f, 28f);
+            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotName" + row, c, 26f, UiPalette.Text)), 76f, 10f, 150f, 36f);
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotLevel" + row, c, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), 230f, 14f, 74f, 28f);
+            TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotDetail" + row, c, 20f, UiPalette.TextDim)), 16f, 52f, 290f, 30f);
+            TextMeshProUGUI hint = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotHint" + row, c, 20f, UiPalette.TextDim)), 16f, 52f, 290f, 30f);
+            RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("SlotPips" + row, c), 16f, 92f, 288f, 12f);
+            UiBar[] pips = FatiguePipRow("Slot" + row + "Pip", pipsRow, 288f, 12f);
+            ButtonParts forward = UiBuild.LocalizedButton("SlotForward" + row, c, UiKeys.Expedition.Forward, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(forward.Rect, 16f, 136f, 96f, 44f);
+            ButtonParts back = UiBuild.LocalizedButton("SlotBack" + row, c, UiKeys.Expedition.Back, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(back.Rect, 120f, 136f, 96f, 44f);
+            ButtonParts remove = UiBuild.LocalizedButton("SlotRemove" + row, c, UiKeys.Lobby.Remove, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(remove.Rect, 224f, 136f, 80f, 44f);
+
+            var view = card.gameObject.AddComponent<PartyRowSlotView>();
+            UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_level", level);
+            UiBuild.SetReference(view, "_detail", detail);
+            UiBuild.SetReference(view, "_hint", hint);
+            UiBuild.SetReferences(view, "_pips", pips);
+            UiBuild.SetReference(view, "_forward", forward.Button);
+            UiBuild.SetReference(view, "_back", back.Button);
+            UiBuild.SetReference(view, "_remove", remove.Button);
+            return view;
+        }
+
+        /// <summary>The template of a chip of the popup's roster: a button with the name, the level, the row tag, the job line and the pips. The screen clones it per mercenary.</summary>
+        static PartyPickChipView BuildPartyPickChip(Transform parent)
+        {
+            Image background = UiBuild.Panel("PickTemplate", parent, UiPalette.PanelLight);
+            UiBuild.Size(background, 320f, 110f);
+            Button button = UiBuild.MakeButton(background);
+            Transform chip = background.transform;
+            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickName", chip, 22f, UiPalette.Text)), 12f, 8f, 180f, 30f);
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickLevel", chip, 16f, UiPalette.Bone, TextAlignmentOptions.Right)), 200f, 10f, 108f, 26f);
+            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickJob", chip, 16f, UiPalette.TextDim)), 12f, 42f, 220f, 26f);
+            TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickRow", chip, 16f, UiPalette.Brass, TextAlignmentOptions.Right)), 240f, 42f, 68f, 26f);
+            RectTransform pips = UiBuild.Box(UiBuild.Rect("PickPips", chip), 12f, 80f, 296f, 10f);
+            UiBar[] pipRow = FatiguePipRow("PickPip", pips, 296f, 10f);
+
+            var view = background.gameObject.AddComponent<PartyPickChipView>();
+            UiBuild.SetReference(view, "_frame", background);
+            UiBuild.SetReference(view, "_button", button);
+            UiBuild.SetReference(view, "_name", name);
+            UiBuild.SetReference(view, "_level", level);
+            UiBuild.SetReference(view, "_row", row);
+            UiBuild.SetReference(view, "_job", job);
+            UiBuild.SetReferences(view, "_pips", pipRow);
+            background.gameObject.SetActive(false);
+            return view;
         }
 
         /// <summary>A row of the details: the dim label at the left, and the value code fills in, right-aligned at the panel's inset.</summary>

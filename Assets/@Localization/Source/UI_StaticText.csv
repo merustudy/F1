@@ -90,7 +90,7 @@ Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back."
 Expedition.Potions,"One kind of starting potion in the details. {0} = its name, {1} = how many.",{0} ×{1},{0} ×{1}
 Expedition.UnlockHint,"Under an open dungeon's details, one line per dungeon its clears open. {0} = that dungeon, {1} = the clears it takes.",{0} 해금: 이 던전을 {1}회 클리어,Opens {0}: clear this dungeon {1} times
 Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last day the party must fight its boss
-Expedition.Party,Header of the party strip; the party is formed in the lobby.,파티 (막사에서 꾸린다),Party (formed in the lobby)
+Expedition.Party,Header of the party strip; the party is formed in the popup the departure opens (round 75 B).,파티 — 출발을 누르면 편성한다,Party — formed on departure
 Expedition.Depart,Starts the expedition.,출발,Depart
 Expedition.Locked,The chosen dungeon is still locked.,아직 잠긴 던전입니다,This dungeon is still locked
 Expedition.FinalName,On the final dungeon's marker. {0} = its name.,{0} (최종 던전),{0} (final dungeon)
@@ -103,6 +103,12 @@ Expedition.ClearedCount,{0} = times the dungeon was cleared.,{0}회,{0}
 Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}일을 넘기면 {1}의 보스와 강제로 싸운다,"Past day {0}, the boss of {1} must be fought"
 Expedition.RewardLabel,Row label in the details (stage 26).,보상,Reward
 Expedition.Reward,"What the settlement pays for the dungeon. {0} = gold per map floor reached, {1} = gold for a clear.",층마다 금 {0} · 클리어 금 {1},{0} gold per floor · {1} for a clear
+Expedition.PartyTitle,Title of the party popup the departure opens (round 75 B).,원정 파티,Expedition party
+Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = days it takes, {2} = the day the party is back.",{0} · {1}일 (→ {2}일차),"{0} · {1} days (→ day {2})"
+Expedition.RosterHeader,"Over the roster's chips in the popup. {0} = roster size, {1} = its limit.",로스터 {0}/{1} — 눌러서 파티에 넣고 뺀다,Roster {0}/{1} — click to add or remove
+Expedition.EmptyRowHint,In an empty row of the popup.,로스터에서 용병을 누르세요,Pick a mercenary from the roster
+Expedition.Forward,Moves a party member one row to the front (trading places).,앞으로,Forward
+Expedition.Back,Moves a party member one row to the back (trading places).,뒤로,Back
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}
 Map.Battle,Label of a battle node.,전투,Battle
 Map.Boss,Label of the boss node.,보스,Boss
