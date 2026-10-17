@@ -393,6 +393,7 @@ namespace F1.UI
             public const string DeathLimit = "Settle.DeathLimit";
             public const string FinalStandLost = "Settle.FinalStandLost";
             public const string Gold = "Settle.Gold";
+            public const string GoldWithCoins = "Settle.GoldWithCoins";
             public const string Exp = "Settle.Exp";
             public const string LevelUps = "Settle.LevelUps";
             public const string LevelUp = "Settle.LevelUp";

@@ -54,7 +54,9 @@ namespace F1.UI
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
             _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
-            _gold.text = UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
+            _gold.text = report.CoinsConverted > 0
+                ? UiStrings.Get(UiKeys.Settle.GoldWithCoins, report.GoldEarned, report.FloorsReached, report.CoinsConverted, report.GoldFromCoins, report.GoldAfter)
+                : UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
             _exp.text = ExpText(report);
             _runOver.text = RunOverText(report);
         }

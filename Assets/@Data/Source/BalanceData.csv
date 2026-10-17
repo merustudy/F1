@@ -50,6 +50,7 @@ CoinsPerEnemy,1
 CoinsPerFloor,1
 EliteCoinPercent,200
 SellPercent,50
+CoinsPerGold,10
 BurnDamagePerStack,0.27
 HitMinDamage,0.5
 CritDamagePercent,150

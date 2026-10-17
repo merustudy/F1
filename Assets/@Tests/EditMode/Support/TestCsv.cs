@@ -15,7 +15,7 @@ namespace F1.Tests
             "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
-            "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nSellPercent,50\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
+            "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nSellPercent,50\nCoinsPerGold,20\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
             "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n";
 
         public const string Jobs =

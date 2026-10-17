@@ -59,6 +59,43 @@ namespace F1.Tests
             Assert.AreEqual(2, report.FloorsReached);
             Assert.AreEqual(24, report.GoldEarned, "2 floors x 2, and GoldClear 20.");
             Assert.AreEqual(28, run.Gold);
+            Assert.AreEqual(0, report.CoinsConverted, "No coins and nothing but base weapons: nothing to turn into gold.");
+        }
+
+        [Test]
+        public void AClearedExpeditionsCoins_AndTheItemsWorth_ComeHomeAsGold_CoinsPerGoldToOne_ButNotFromARetreat()
+        {
+            // 2026-10-17 (the user's request): the coins left plus what the shop would pay for the items brought home, 20 coins to a gold.
+            StaticData data = TestData.Data();
+            RunState run = RunWithParty(data);
+            ExpeditionState cleared = Ended(data, run, ExpeditionResult.Cleared, 3);
+            cleared.Coins = 45;
+            TestBoards.Put(cleared.Members[0], new EquippedItem(data.Items.Get("knife")), 2, 0);
+            cleared.Inventory.Add(new EquippedItem(data.Items.Get("bow"), tier: ItemTier.Common + 1));
+            int knife = ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("knife")));
+            int bow = ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("bow"), tier: ItemTier.Common + 1));
+            Assert.AreEqual(knife + bow, RunRules.ItemCoinsFor(data, cleared), "The base weapons count for nothing.");
+
+            SettlementReport report = RunRules.Settle(data, run, cleared);
+
+            Assert.AreEqual(knife + bow, report.CoinsFromItems);
+            Assert.AreEqual(45 + knife + bow, report.CoinsConverted);
+            Assert.AreEqual((45 + knife + bow) / data.Balance.CoinsPerGold, report.GoldFromCoins, "Whole gold; the remainder is lost with the expedition.");
+            Assert.Greater(report.GoldFromCoins, 0);
+            Assert.AreEqual(24 + report.GoldFromCoins, report.GoldEarned, "On top of the floors and the clear.");
+            Assert.AreEqual(report.GoldEarned, run.Gold);
+
+            // A retreat brings nothing home: the coins and the items are lost.
+            RunRules.SetParty(data, run, FlowTestKit.Party(("anna", 1), ("ben", 2), ("cora", 3)));
+            ExpeditionState retreated = Ended(data, run, ExpeditionResult.Retreated, 2);
+            retreated.Coins = 400;
+            TestBoards.Put(retreated.Members[0], new EquippedItem(data.Items.Get("knife")), 2, 0);
+            int gold = run.Gold;
+            report = RunRules.Settle(data, run, retreated);
+            Assert.AreEqual(0, report.CoinsConverted);
+            Assert.AreEqual(0, report.GoldFromCoins);
+            Assert.AreEqual(4, report.GoldEarned);
+            Assert.AreEqual(gold + 4, run.Gold);
         }
 
         [Test]

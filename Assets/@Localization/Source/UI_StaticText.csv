@@ -296,6 +296,7 @@ Settle.Victory,The run was won with this expedition: the final boss fell.,최종
 Settle.DeathLimit,The run was lost with this expedition: the deaths reached the limit.,전사자가 한도에 닿아 런이 끝났습니다,The death limit was reached. The run is over
 Settle.FinalStandLost,The run was lost with this expedition: the final stand was lost.,최종 결전에서 져 런이 끝났습니다,The final stand was lost. The run is over
 Settle.Gold,"The gold the settlement paid (stage 26). {0} = gold earned, {1} = the floors reached, {2} = the gold held now.",얻은 금 +{0} ({1}층 도달) · 보유 금 {2},Gold +{0} ({1} floors reached) · gold held {2}
+Settle.GoldWithCoins,"The gold the settlement paid when a cleared expedition's coins came home as gold (2026-10-17). {0} = gold earned in all, {1} = the floors reached, {2} = the coins converted (those left and the items' worth), {3} = the gold they made, {4} = the gold held now.",얻은 금 +{0} ({1}층 도달 · 지역 코인 {2} → 금 +{3}) · 보유 금 {4},Gold +{0} ({1} floors reached · {2} region coins → gold +{3}) · gold held {4}
 Settle.Exp,"The experience every survivor got (stage 27). {0} = the experience.",경험치 +{0},XP +{0}
 Settle.LevelUps,"After the experience, when survivors reached a new level. {0} = Settle.LevelUp entries joined by commas.",레벨 업: {0},Level up: {0}
 Settle.LevelUp,"One survivor that reached a new level. {0} = the name, {1} = the level now.",{0} Lv {1},{0} Lv {1}

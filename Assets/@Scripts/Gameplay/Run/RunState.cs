@@ -142,6 +142,14 @@ namespace F1.Gameplay
         public int FloorsReached;
         public int GoldAfter;
 
+        /// <summary>
+        /// A cleared expedition's region coins turned into gold (2026-10-17): what the shop would have paid for the items brought home,
+        /// the coins converted (those left plus the items'), and the gold they made (counted in GoldEarned). All 0 unless cleared.
+        /// </summary>
+        public int CoinsFromItems;
+        public int CoinsConverted;
+        public int GoldFromCoins;
+
         /// <summary>The experience every survivor got (stage 27), and the survivors it took to a new level, in the order of <see cref="SurvivorIds"/>.</summary>
         public int ExpEarned;
         public List<string> LevelUps = new List<string>();

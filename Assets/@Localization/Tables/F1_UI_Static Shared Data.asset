@@ -1590,6 +1590,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673493283405826
+  - m_Id: 6046622701051904
+    m_Key: Settle.GoldWithCoins
+    m_Metadata:
+      m_Items:
+      - rid: 8623673493721710592
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2995,3 +3000,10 @@ MonoBehaviour:
       data:
         m_CommentText: On the detail line after a sale. {0} = what was sold. {1}
           = coins before. {2} = coins after.
+    - rid: 8623673493721710592
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The gold the settlement paid when a cleared expedition's coins
+          came home as gold (2026-10-17). {0} = gold earned in all, {1} = the floors
+          reached, {2} = the coins converted (those left and the items' worth), {3}
+          = the gold they made, {4} = the gold held now.

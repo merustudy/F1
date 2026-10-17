@@ -26,6 +26,10 @@
       "Value": 1
     },
     {
+      "Key": "CoinsPerGold",
+      "Value": 10
+    },
+    {
       "Key": "CritDamagePercent",
       "Value": 150
     },

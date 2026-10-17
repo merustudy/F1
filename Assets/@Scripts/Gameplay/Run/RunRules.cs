@@ -194,6 +194,40 @@ namespace F1.Gameplay
         }
 
         /// <summary>What the return settlement pays for an ended expedition: GoldPerFloor for each floor reached, and GoldClear for a clear.</summary>
+        /// <summary>
+        /// What the shop would pay for the items the party brings home (2026-10-17): every item on the living members' boards and in the
+        /// inventory that could be sold (not a base weapon, not a unique; bags and potions are not items), at <see cref="ExpeditionRules.SellPriceOf"/>.
+        /// </summary>
+        public static int ItemCoinsFor(StaticData data, ExpeditionState expedition)
+        {
+            int coins = 0;
+            foreach (ExpeditionMember member in expedition.Members)
+            {
+                if (!member.Alive)
+                {
+                    continue;
+                }
+
+                foreach (BoardItem item in member.Board.Items)
+                {
+                    if (!item.Item.IsBase && !item.Item.Item.Unique)
+                    {
+                        coins += ExpeditionRules.SellPriceOf(data, item.Item);
+                    }
+                }
+            }
+
+            foreach (BoardItem item in expedition.Inventory.Items)
+            {
+                if (!item.Item.IsBase && !item.Item.Item.Unique)
+                {
+                    coins += ExpeditionRules.SellPriceOf(data, item.Item);
+                }
+            }
+
+            return coins;
+        }
+
         public static int GoldFor(StaticData data, ExpeditionState expedition)
         {
             return data.Balance.GoldPerFloor * FloorsReached(data, expedition) + (expedition.Result == ExpeditionResult.Cleared ? data.Balance.GoldClear : 0);
@@ -476,6 +510,16 @@ namespace F1.Gameplay
 
             report.FloorsReached = FloorsReached(data, expedition);
             report.GoldEarned = GoldFor(data, expedition);
+            if (expedition.Result == ExpeditionResult.Cleared)
+            {
+                // 2026-10-17 (the user's request): a cleared expedition's region coins come home as gold — the coins left plus what the shop
+                // would pay for the items the party brings back, CoinsPerGold to one, the remainder lost with the expedition.
+                report.CoinsFromItems = ItemCoinsFor(data, expedition);
+                report.CoinsConverted = expedition.Coins + report.CoinsFromItems;
+                report.GoldFromCoins = report.CoinsConverted / data.Balance.CoinsPerGold;
+                report.GoldEarned += report.GoldFromCoins;
+            }
+
             state.Gold += report.GoldEarned;
             report.GoldAfter = state.Gold;
 
