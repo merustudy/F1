@@ -49,7 +49,7 @@ ShopPotionChancePercent,50
 CoinsPerEnemy,1
 CoinsPerFloor,1
 EliteCoinPercent,200
-SellPercent,50
+SellPercent,25
 CoinsPerGold,10
 BurnDamagePerStack,0.27
 HitMinDamage,0.5

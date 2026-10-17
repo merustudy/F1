@@ -250,11 +250,12 @@ namespace F1.Tests
         }
 
         [Test]
-        public void ShippedEnemyItems_HaveAPriceToSellFor_ButNoShopWeight_AndSellForHalf()
+        public void ShippedEnemyItems_HaveAPriceToSellFor_ButNoShopWeight_AndSellForAQuarter()
         {
             // Round 74 (2026-10-17): the enemies' items got a price so that they sell at a shop; their weight 0 keeps them off the shop's grid.
+            // 2026-10-18 (the user's play feedback): the shop pays a quarter, half of what it paid.
             StaticData data = LoadShipped();
-            Assert.AreEqual(50, data.Balance.SellPercent);
+            Assert.AreEqual(25, data.Balance.SellPercent);
             foreach (string id in new[] { "rat_bite", "rusty_blade", "crude_bow", "lantern_staff", "mending_chant", "overseer_roar", "overseer_maul", "abyss_howl", "abyss_grasp", "abyss_cleaver" })
             {
                 ItemData item = data.Items.Get(id);
@@ -262,9 +263,9 @@ namespace F1.Tests
                 Assert.AreEqual(0, item.ShopWeight, id + " never on a shop's grid");
             }
 
-            Assert.AreEqual(3, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rusty_blade"))), "6 at Common, half.");
-            Assert.AreEqual(4, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("whetstone"))), "8 at Common (restored 2026-10-17), half.");
-            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rat_bite"))), "2 at Common: half is 1, the least.");
+            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rusty_blade"))), "6 at Common, a quarter rounded down.");
+            Assert.AreEqual(2, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("whetstone"))), "8 at Common (restored 2026-10-17), a quarter.");
+            Assert.AreEqual(1, ExpeditionRules.SellPriceOf(data, new EquippedItem(data.Items.Get("rat_bite"))), "2 at Common: a quarter is 0, so the least, 1.");
             Assert.AreEqual(0, data.Items.Get("gladius").Price, "A unique has no price (and cannot be sold).");
         }
 
@@ -282,7 +283,7 @@ namespace F1.Tests
         [Test]
         public void ShippedBuildings_HaveThreeLevelsEach_ForFortyAndEightyGold_OverThreeAndFiveDays()
         {
-            // Stage 30 (Round 78): four buildings, level 2 for 40 gold and 3 days, level 3 for 80 gold and 5 days; the bonuses grow.
+            // Stage 30 (Round 78): three buildings (the gate has no level since 2026-10-18), level 2 for 40 gold and 3 days, level 3 for 80 gold and 5 days; the bonuses grow.
             StaticData data = LoadShipped();
             foreach (string id in BuildingId.All)
             {
@@ -296,7 +297,7 @@ namespace F1.Tests
             Assert.AreEqual(4, data.BuildingAt(BuildingId.Barracks, 3).Bonus, "Roster limit 8 -> 12.");
             Assert.AreEqual(2, data.BuildingAt(BuildingId.Coach, 3).Bonus, "Candidates 3 -> 5.");
             Assert.AreEqual(40, data.BuildingAt(BuildingId.Inn, 3).Bonus, "Relief 40 -> 80.");
-            Assert.AreEqual(20, data.BuildingAt(BuildingId.Gate, 3).Bonus, "Settlement gold +20%.");
+            Assert.AreEqual(3, data.Buildings.Count(row => row.Level == 1), "No gate among the buildings.");
         }
 
         [Test]
