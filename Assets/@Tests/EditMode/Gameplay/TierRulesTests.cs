@@ -277,6 +277,53 @@ namespace F1.Tests
             Assert.IsFalse(ExpeditionRules.LootMergesAt(state, 5, 1, 0, 1), "No such drop.");
         }
 
+        [Test]
+        public void TheInventory_MergesToo_FromABoard_InsideItself_AndFromADrop()
+        {
+            // 2026-10-18 (the user: "인벤창에서도 합치기 가능하게"): the inventory merges as a board does — the top-left on the same item at the same tier.
+            StaticData data = TestData.Data();
+            ExpeditionState state = Expedition(data);
+            ExpeditionMember ben = state.Members[1];
+            state.Inventory.Add(Item(data, "knife", ItemTier.Common), new Placement(2, 0));
+            TestBoards.Put(ben, Item(data, "knife", ItemTier.Common), 0, 1);
+            EquippedItem knife = Item(data, "knife", ItemTier.Common);
+
+            Assert.IsTrue(ExpeditionRules.MergesInInventoryAt(state, knife, 2, 0));
+            Assert.IsFalse(ExpeditionRules.MergesInInventoryAt(state, knife, 3, 0), "Nothing there.");
+            Assert.IsFalse(ExpeditionRules.MergesInInventoryAt(state, Item(data, "knife", ItemTier.Tier1), 2, 0), "Another tier.");
+            Assert.IsFalse(ExpeditionRules.MergesInInventoryAt(state, state.Inventory[0], 2, 0), "Not into itself.");
+            Assert.IsTrue(ExpeditionRules.HasMergeTarget(state, knife), "The inventory holds a target.");
+
+            // The board's knife laid with its top-left on the inventory's: one Tier1 knife in the inventory where it lay, none on the board.
+            Assert.IsTrue(ExpeditionRules.CanMoveToInventoryAt(state, 1, 0, 1, new Placement(2, 0)));
+            ExpeditionRules.MoveToInventoryAt(state, 1, 0, 1, new Placement(2, 0));
+            Assert.AreEqual(1, state.Inventory.Count);
+            Assert.AreEqual(ItemTier.Tier1, state.Inventory[0].Tier);
+            Assert.AreEqual(new Placement(2, 0), state.Inventory.Items[0].At);
+            Assert.IsNull(TestBoards.ItemAt(ben, 0, 1));
+
+            // Inside the inventory: a second Tier1 knife moved onto the first makes a Tier2 one; an item never merges into itself.
+            state.Inventory.Add(Item(data, "knife", ItemTier.Tier1), new Placement(5, 1));
+            Assert.IsTrue(ExpeditionRules.CanMoveInInventory(state, 1, new Placement(2, 0)));
+            ExpeditionRules.MoveInInventory(state, 1, new Placement(2, 0));
+            Assert.AreEqual(1, state.Inventory.Count);
+            Assert.AreEqual(ItemTier.Tier2, state.Inventory[0].Tier);
+            Assert.IsFalse(ExpeditionRules.CanMoveInInventory(state, 0, new Placement(2, 0)), "Where it lies already.");
+
+            // A drop laid on it: Tier2 and Tier2 make Tier3, which merges no further; over an item it does not merge into, a drop cannot go.
+            state.Phase = ExpeditionPhase.PickingLoot;
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", ItemTier.Tier2));
+            state.Loot.Add(new ItemOffer(OfferKind.Item, "knife", ItemTier.Tier2));
+            Assert.IsTrue(ExpeditionRules.LootMergesInInventoryAt(state, 0, 2, 0));
+            Assert.IsTrue(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 0, new Placement(2, 0)));
+            ExpeditionRules.TakeLootToInventoryAt(data, state, 0, new Placement(2, 0));
+            Assert.AreEqual(1, state.Inventory.Count);
+            Assert.AreEqual(ItemTier.Tier3, state.Inventory[0].Tier);
+            Assert.IsNull(state.Loot[0], "Taken off the floor.");
+            Assert.IsFalse(ExpeditionRules.LootMergesInInventoryAt(state, 1, 2, 0), "Tier3 merges no further.");
+            Assert.IsFalse(ExpeditionRules.CanTakeLootToInventoryAt(data, state, 1, new Placement(2, 0)), "Over an item it does not merge into.");
+        }
+
         // ---- The camp's upkeep ---------------------------------------------------------------
 
         /// <summary>The test cave whose second floor is all camps; the boss on the third.</summary>

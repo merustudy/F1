@@ -850,6 +850,11 @@ namespace F1.UI
                 return Managers.Expedition.CanBuyToInventoryAt(Slot, at);
             }
 
+            public bool MergesInInventoryAt(int x, int y)
+            {
+                return Managers.Expedition.ShopMergesInInventoryAt(Slot, x, y);
+            }
+
             public void PlaceInInventory(Placement at)
             {
                 int slot = Slot;

@@ -380,6 +380,14 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(ghostIcon.rectTransform);
             ghostArt.gameObject.SetActive(false);
 
+            // The ghost's words (2026-10-18: "합치기 → 1성" over the same item), the board's label box.
+            Image ghostLabelPlate = UiBuild.Image("InventoryGhostLabel", ghosts, UiPalette.LabelBox);
+            AddLine(ghostLabelPlate, UiPalette.LabelLine, 1f);
+            TextMeshProUGUI ghostLabel = UiBuild.SingleLine(UiBuild.Label("InventoryGhostLabelText", ghostLabelPlate.transform, GhostLabelFontSize, UiPalette.Text, TextAlignmentOptions.Center));
+            ghostLabel.overflowMode = TextOverflowModes.Overflow;
+            UiBuild.Stretch(ghostLabel.rectTransform);
+            ghostLabelPlate.gameObject.SetActive(false);
+
             var view = stone.gameObject.AddComponent<InventoryGridView>();
             UiBuild.SetReference(view, "_squareLayer", squares);
             UiBuild.SetReference(view, "_pieceLayer", pieces);
@@ -390,6 +398,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_ghostFloor", ghostFloor);
             UiBuild.SetReference(view, "_ghostArt", ghostArt);
             UiBuild.SetReference(view, "_ghostIcon", ghostIcon);
+            UiBuild.SetReference(view, "_ghostLabelPlate", ghostLabelPlate.rectTransform);
+            UiBuild.SetReference(view, "_ghostLabel", ghostLabel);
             return view;
         }
     }

@@ -70,7 +70,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   칸의 계산은 `InventoryGrid` 한 곳에 있다: 그 칸의 아이템(`ItemAt`), 격자 안에 다른 아이템 없이 놓이는지(`IsFree`, 하나를 빼고 셀 수 있다), 첫 빈 자리(`FindRoom`: 돌리지 않은 모양으로 읽는 순서의 첫 자리, 없으면 돌린 모양으로),
   자리가 있는지(`HasRoomFor`), 쓴 칸(`UsedSquares`). 목록으로 읽으면 들어온 차례의 `EquippedItem`이고(인벤토리 번호 = `Items`의 번호), `Add(아이템)`은 첫 빈 자리에 놓는다. 가방은 들어가지 않는다.
 - 명령은 `ExpeditionRules`에 있고 자리를 받는다: 전리품을 보드에 넣기(`TakeLoot(자리, 구성원, Placement)`)와 인벤토리로 줍기(`TakeLootToInventory`), 옮기기(`MoveItem(구성원, X, Y, 구성원, Placement)`: 같은 보드 안, 보드 사이),
-  인벤토리로 빼기(`MoveToInventory(구성원, X, Y)`: 첫 빈 자리로; `MoveToInventoryAt(구성원, X, Y, Placement)`: 고른 빈 자리로), 인벤토리 안에서 옮기기(`MoveInInventory(번호, Placement)`: 빈 칸에만, 바꾸기 없음),
+  인벤토리로 빼기(`MoveToInventory(구성원, X, Y)`: 첫 빈 자리로; `MoveToInventoryAt(구성원, X, Y, Placement)`: 고른 빈 자리로, 또는 같은 아이템 위에 합치기(2026-10-18)), 인벤토리 안에서 옮기기(`MoveInInventory(번호, Placement)`: 빈 칸에만(바꾸기 없음), 또는 같은 아이템 위에 합치기),
   인벤토리에서 넣기(`PlaceFromInventory(번호, 구성원, Placement)`). 각각 `Can...` 질의가 있고 화면은 그림자를 그리려고 묻는다. **가방은 놓으면 옮기지 못한다**(Round 79, 2026-10-17: `CanPickBag`·`CanMoveBag`·`MoveBag`을 지웠다. 시작 가방의 규칙이 모든 가방의 규칙).
   버튼과 밀려남으로 인벤토리에 들어가는 길(전리품·상점의 "인벤토리에 넣기", "인벤토리로", 밀려난 아이템)은 모두 `FindRoom`의 자리에 놓고, 자리가 없으면 막힌다.
   아이템은 그 아이템이 덮은 어느 칸으로도 가리킨다. 가방은 놓는 것(`CanPlaceBag`: 전리품·상점에서 틀의 빈 자리에)뿐이다.
@@ -164,6 +164,8 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드에 놓는 명령
   (`MoveItem`, `PlaceFromInventory`, `TakeLoot`, `BuyToBoard`)은 놓을 자리의 왼쪽 위 칸이 합쳐질 아이템의 왼쪽 위 칸이면 합친다(`MergesAt`): 그 아이템이 그 자리·방향 그대로 한 단계 위(`TierUp`)가 되고, 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
+  **인벤토리에 놓는 명령도 같다**(2026-10-18 사용자 "인벤창에서도 합치기 가능하게": `MoveInInventory`, `MoveToInventoryAt`, `TakeLootToInventoryAt`, `BuyToInventoryAt`): 놓을 자리의 왼쪽 위 칸을 덮은 인벤토리의 아이템(`InventoryGrid.ItemAt`)이 합쳐질 것이면 그 자리에서 `TierUp`한다.
+  질의는 `MergesInInventoryAt(아이템, X, Y)`·`LootMergesInInventoryAt(칸, X, Y)`·`ShopMergesInInventoryAt(칸, X, Y)`이고, `HasMergeTarget`은 보드와 인벤토리를 함께 본다. 자기 자신에는 합쳐지지 않는다(`CanMerge`의 같은 인스턴스 검사).
 - 정비는 `ExpeditionRules.CanUpgradeAtCamp`·`UpgradeAtCamp(구성원, X, Y)`다: 야영지에서 살아 있는 구성원 보드의 아이템 하나(덮은 칸 어디로든)를 `EquippedItem.TierUp`(기본 무기는 기본 무기로)하고 `ChoosingNode`로 돌린다.
 
 ## 담금질과 유니크 (Slice B 23단계)
@@ -206,14 +208,15 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 ## 건물과 건설 (Slice C 30단계, Round 78)
 
 규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §7(건물의 단계와 건설)이 소유한다. `BuildingRules`와 `RunRules`다. 사다리는 `BuildingData.csv`(`StaticData.Buildings`·`MaxBuildingLevel`·`BuildingAt`), 기본값은 `BalanceData`(`RosterLimit`·`RecruitCount`·`TreatmentRelief`).
+건물은 **셋**(`BuildingId.All`: 막사·쉼터·역마차)이다. 성문은 건물이 아니다(2026-10-18 사용자 "성문은 업그레이드 없음(원정)": 로비의 그림과 단추일 뿐이고 레벨·공사·효과·잠금이 없다).
 
 - 상태: `RunState.BuildingLevels`(건물 id → 레벨. 없으면 1)와 `Constructions`(`ConstructionState`: 건물·짓는 레벨·끝나는 날, 건물마다 하나). `BuildingRules.LevelOf`·`ConstructionOf`·`DaysLeft`(끝나는 날 − 오늘, 최소 1).
 - 업그레이드(`CanUpgrade`·`Upgrade` → `UpgradeCheck`): 런이 끝나지 않았고 기한을 넘기지 않았고(`FinalStandDue`), 다음 레벨이 있고(`MaxLevel`), 공사 중이 아니고(`UnderConstruction`), 금이 `Price` 이상이면 금을 내고 `FinishDay = 오늘 + Days`의 공사를 더한다. 동시에 몇 채든.
 - 완성: 날이 가는 곳은 `RunRules.PassDays`(정산과 쉬기)뿐이고, 그 끝에서 `BuildingRules.Complete`가 끝나는 날에 닿은 공사를 레벨로 바꾼다. 끝난 건물은 `Rest`의 반환값과 `SettlementReport.BuildingsCompleted`로 돌아온다.
-- 잠금(`IsLocked`): 공사 중이면 잠긴다 — `CanHire`는 `CoachLocked`, `CanTreat`는 `InnLocked`, `CanDismiss`는 거짓, `CanDepart`는 `GateLocked`(파티 수보다 먼저). 쉬기는 잠기지 않는다(날이 가는 길). 기한을 넘기면(`IsFinalStandDue`) 날이 가지 않으므로 잠금이 없고 짓지도 못한다: 최종 결전은 공사 중인 성문을 지난다.
-- 효과: `RosterLimit`·`RecruitCount`·`TreatmentRelief`(기본값 + 그 레벨의 `Bonus`)와 `GoldBonusPercent`(성문)·`WithGateBonus`(정산의 금 전체 — 층·클리어·코인의 금 — 에 %를 더해 내림, `SettlementReport.GateBonusPercent`). `DrawRecruits`·`CanHire`·`Treat`·`Settle`·저장 검증이 이 값을 읽는다. 밸런스 상수는 데이터에만 있다.
-- 시뮬 `run`의 정책(`--build 0|1`): 고용·치료 뒤 금이 "다음 레벨의 값 + 고용비" 이상이면 가장 싼 다음 레벨부터(같으면 성문 → 역마차 → 막사 → 쉼터), 성문이 공사 중이면 쉬어서 날을 보낸다. 전후는 `Docs/Design/08_Simulation_Report.md` §34.
-- Test: `BuildingRulesTests`(시작 레벨, 값과 공사, 쉬기·정산의 완성, 동시 건설과 금, 잠금 넷과 쉬기, 성문의 잠금과 해제, 기한 뒤, 효과 넷과 정산의 보너스, 같은 시드), `RunSaveMapperTests`(16, 15 → 16), `StaticDataTransformerTests`·`ShippedDataTests`(사다리).
+- 잠금(`IsLocked`): 공사 중이면 잠긴다 — `CanHire`는 `CoachLocked`, `CanTreat`는 `InnLocked`, `CanDismiss`는 거짓. 출발은 잠기지 않는다(성문은 짓지 않는다). 쉬기는 잠기지 않는다(날이 가는 길). 기한을 넘기면(`IsFinalStandDue`) 날이 가지 않으므로 잠금이 없고 짓지도 못한다.
+- 효과: `RosterLimit`·`RecruitCount`·`TreatmentRelief`(기본값 + 그 레벨의 `Bonus`). `DrawRecruits`·`CanHire`·`Treat`·저장 검증이 이 값을 읽는다. 밸런스 상수는 데이터에만 있다. (성문의 정산 금 %는 2026-10-18에 뺐다.)
+- 시뮬 `run`의 정책(`--build 0|1`): 고용·치료 뒤 금이 "다음 레벨의 값 + 고용비" 이상이면 가장 싼 다음 레벨부터(같으면 역마차 → 막사 → 쉼터). 전후는 `Docs/Design/08_Simulation_Report.md` §34·§35.
+- Test: `BuildingRulesTests`(시작 레벨, 값과 공사, 쉬기·정산의 완성, 동시 건설과 금, 잠금 셋과 쉬기·출발, 기한 뒤, 효과 셋, 같은 시드), `RunSaveMapperTests`(17, 15 → 16, 16 → 17: 성문을 버림, 17의 성문은 거름), `StaticDataTransformerTests`·`ShippedDataTests`(사다리).
 
 ## 전투: 결정론
 

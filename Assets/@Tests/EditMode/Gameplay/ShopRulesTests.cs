@@ -248,6 +248,32 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Buying_OntoTheSameItemInTheInventory_MergesIt()
+        {
+            // 2026-10-18: an offer bought with its top-left on the same item at the same tier in the inventory merges into it, a tier up, for the price.
+            StaticData data = ShopCave();
+            ExpeditionState state = InAShop(data, out MapNode _, coins: 100);
+            int slot = SlotOf(state, OfferKind.Item, "knife");
+            ItemOffer knife = state.Shop.Stock[slot];
+            int price = ExpeditionRules.PriceOf(data, knife);
+            ExpeditionRules.BuyToInventoryAt(data, state, slot, TestBoards.At(1, 1));
+            Assume.That(state.Inventory.Items[0].At, Is.EqualTo(TestBoards.At(1, 1)));
+
+            ExpeditionRules.RefreshShop(data, state);
+            int again = SlotOf(state, OfferKind.Item, "knife");
+            Assume.That(again, Is.GreaterThanOrEqualTo(0), "The knife is on offer again.");
+            Assert.IsTrue(ExpeditionRules.ShopMergesInInventoryAt(state, again, 1, 1));
+            Assert.IsFalse(ExpeditionRules.ShopMergesInInventoryAt(state, again, 0, 0), "Nothing there.");
+            Assert.IsTrue(ExpeditionRules.CanBuyToInventoryAt(data, state, again, TestBoards.At(1, 1)));
+            int before = state.Coins;
+            ExpeditionRules.BuyToInventoryAt(data, state, again, TestBoards.At(1, 1));
+            Assert.AreEqual(1, state.Inventory.Count, "Merged: still one knife.");
+            Assert.AreEqual(knife.Tier + 1, state.Inventory[0].Tier);
+            Assert.AreEqual(before - price, state.Coins);
+            Assert.IsNull(state.Shop.Stock[again], "Sold.");
+        }
+
+        [Test]
         public void Buying_IntoTheInventory_AndAPotion_WhileTheyHaveRoom()
         {
             StaticData data = ShopCave();

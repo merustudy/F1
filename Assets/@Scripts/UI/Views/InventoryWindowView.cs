@@ -1,6 +1,7 @@
 using System.Globalization;
 using F1.Core;
 using F1.Data;
+using F1.Flow;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
@@ -35,16 +36,28 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Fills the window: the squares used of the grid's, the coins, the grid with the hand's ghost where the pointer is, and the item the
-        /// hand holds (of a board, of the inventory or from outside) in Diablo's tooltip. An item in the inventory costs no fatigue (its tag is off).
+        /// Fills the window: the squares used of the grid's, the coins, the grid with the hand's ghost where the pointer is (and the pieces the
+        /// held item would merge into marked, 2026-10-18), and the item the hand holds (of a board, of the inventory or from outside) in
+        /// Diablo's tooltip. An item in the inventory costs no fatigue (its tag is off).
         /// </summary>
         public void Show(ExpeditionState expedition, ExpeditionArt art, BoardHand hand)
         {
             InventoryGrid grid = expedition.Inventory;
             _title.text = UiStrings.Get(UiKeys.Board.InventoryTitle, grid.UsedSquares, grid.Width * grid.Height);
             _coins.text = expedition.Coins.ToString(CultureInfo.InvariantCulture);
-            _grid.Show(grid, art, hand.InventoryIndex, _ => 0, hand.InventoryGhost(Managers.Expedition, art));
             EquippedItem held = hand.HeldItem(expedition);
+            ExpeditionManager manager = Managers.Expedition;
+            System.Func<BoardItem, bool> merges = null;
+            if (hand.Outside != null && hand.Outside.Item != null)
+            {
+                merges = item => hand.Outside.MergesInInventoryAt(item.At.X, item.At.Y);
+            }
+            else if (held != null)
+            {
+                merges = item => manager.MergesInInventoryAt(held, item.At.X, item.At.Y);
+            }
+
+            _grid.Show(grid, art, hand.InventoryIndex, _ => 0, hand.InventoryGhost(manager, art), merges);
             _infoBox.SetActive(held != null);
             if (held != null)
             {

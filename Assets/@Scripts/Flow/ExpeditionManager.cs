@@ -359,7 +359,23 @@ namespace F1.Flow
             return LootOpen && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, x, y);
         }
 
-        /// <summary>Whether some board holds what the item would merge into.</summary>
+        /// <summary>Whether putting the item with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
+        public bool MergesInInventoryAt(EquippedItem item, int x, int y)
+        {
+            return IsBetweenBattles && ExpeditionRules.MergesInInventoryAt(Expedition, item, x, y);
+        }
+
+        public bool LootMergesInInventoryAt(int slot, int x, int y)
+        {
+            return LootOpen && ExpeditionRules.LootMergesInInventoryAt(Expedition, slot, x, y);
+        }
+
+        public bool ShopMergesInInventoryAt(int slot, int x, int y)
+        {
+            return Phase == GamePhase.Shop && ExpeditionRules.ShopMergesInInventoryAt(Expedition, slot, x, y);
+        }
+
+        /// <summary>Whether some board, or the inventory, holds what the item would merge into.</summary>
         public bool HasMergeTarget(EquippedItem item)
         {
             return IsBetweenBattles && ExpeditionRules.HasMergeTarget(Expedition, item);

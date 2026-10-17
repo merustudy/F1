@@ -499,7 +499,10 @@ namespace F1.Gameplay
             Pick(state, slot);
         }
 
-        /// <summary>Whether a drop could be laid on a placement of the inventory's grid (round 55): an item (a bag never goes there) over no item there.</summary>
+        /// <summary>
+        /// Whether a drop could be laid on a placement of the inventory's grid (round 55): an item (a bag never goes there) over no item there,
+        /// or (2026-10-18) with its top-left on the same item at the same tier, to merge into it.
+        /// </summary>
         public static bool CanTakeLootToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
         {
             ItemOffer drop = DropAt(state, slot);
@@ -508,11 +511,16 @@ namespace F1.Gameplay
                 return false;
             }
 
+            if (LootMergesInInventoryAt(state, slot, at.X, at.Y))
+            {
+                return true;
+            }
+
             ItemData item = data.Items.Get(drop.Id);
             return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
         }
 
-        /// <summary>Takes a drop onto a placement of the inventory's grid (round 55).</summary>
+        /// <summary>Takes a drop onto a placement of the inventory's grid (round 55), or merges it into the same item there.</summary>
         public static void TakeLootToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
         {
             if (!CanTakeLootToInventoryAt(data, state, slot, at))
@@ -521,8 +529,24 @@ namespace F1.Gameplay
             }
 
             ItemOffer drop = state.Loot[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier), at);
+            BoardItem into = InventoryItemAt(state, at.X, at.Y);
+            if (MergesInto(drop.Id, drop.Tier, into?.Item))
+            {
+                MergeInto(null, into);
+            }
+            else
+            {
+                state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier), at);
+            }
+
             Pick(state, slot);
+        }
+
+        /// <summary>Whether taking the drop in a slot with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
+        public static bool LootMergesInInventoryAt(ExpeditionState state, int slot, int x, int y)
+        {
+            ItemOffer drop = DropAt(state, slot);
+            return drop != null && drop.Kind == OfferKind.Item && MergesInto(drop.Id, drop.Tier, InventoryItemAt(state, x, y)?.Item);
         }
 
         /// <summary>Whether any drop still lying there is an item the inventory has room for (2026-10-17: the key that takes them all).</summary>
@@ -755,7 +779,7 @@ namespace F1.Gameplay
         /// <summary>
         /// Whether an item of the inventory could be laid elsewhere on the inventory's grid now (round 49, Docs/Design/03_Dungeon_Structure.md
         /// §5): between battles, inside the grid over no other item (Diablo II's swap is not made: the hand holds one thing), and not
-        /// where and as it lies already.
+        /// where and as it lies already; or (2026-10-18) with its top-left on another, the same item at the same tier, to merge into it.
         /// </summary>
         public static bool CanMoveInInventory(ExpeditionState state, int inventoryIndex, Placement to)
         {
@@ -765,6 +789,11 @@ namespace F1.Gameplay
             }
 
             BoardItem moving = state.Inventory.Items[inventoryIndex];
+            if (MergesInInventoryAt(state, moving.Item, to.X, to.Y))
+            {
+                return true;
+            }
+
             ItemData item = moving.Item.Item;
             return !moving.At.Equals(to) && state.Inventory.IsFree(to.X, to.Y, to.WidthOf(item.Width, item.Height), to.HeightOf(item.Width, item.Height), moving);
         }
@@ -776,12 +805,21 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"Inventory item {inventoryIndex} cannot go to {to} of the inventory now.");
             }
 
-            state.Inventory.Items[inventoryIndex].At = to;
+            BoardItem moving = state.Inventory.Items[inventoryIndex];
+            BoardItem into = InventoryItemAt(state, to.X, to.Y);
+            if (CanMerge(moving.Item, into?.Item))
+            {
+                state.Inventory.RemoveAt(inventoryIndex);
+                MergeInto(moving.Item, into);
+                return;
+            }
+
+            moving.At = to;
         }
 
         /// <summary>
         /// Whether the item covering a square of a member's board could be laid at a placement of the inventory's grid now (round 49): it
-        /// can be picked, and the placement is inside the grid over no item.
+        /// can be picked, and the placement is inside the grid over no item, or (2026-10-18) its top-left on the same item at the same tier, to merge.
         /// </summary>
         public static bool CanMoveToInventoryAt(ExpeditionState state, int memberIndex, int x, int y, Placement to)
         {
@@ -791,11 +829,16 @@ namespace F1.Gameplay
                 return false;
             }
 
+            if (MergesInInventoryAt(state, item.Item, to.X, to.Y))
+            {
+                return true;
+            }
+
             ItemData data = item.Item.Item;
             return state.Inventory.IsFree(to.X, to.Y, to.WidthOf(data.Width, data.Height), to.HeightOf(data.Width, data.Height), null);
         }
 
-        /// <summary>Takes the item covering a square off the board onto a placement of the inventory. Its squares on the board are left empty.</summary>
+        /// <summary>Takes the item covering a square off the board onto a placement of the inventory, or merges it into the same item there. Its squares on the board are left empty.</summary>
         public static void MoveToInventoryAt(ExpeditionState state, int memberIndex, int x, int y, Placement to)
         {
             if (!CanMoveToInventoryAt(state, memberIndex, x, y, to))
@@ -806,6 +849,13 @@ namespace F1.Gameplay
             ItemBoard board = state.Members[memberIndex].Board;
             BoardItem item = board.ItemAt(x, y);
             board.Items.Remove(item);
+            BoardItem into = InventoryItemAt(state, to.X, to.Y);
+            if (CanMerge(item.Item, into?.Item))
+            {
+                MergeInto(item.Item, into);
+                return;
+            }
+
             state.Inventory.Add(item.Item, to);
         }
 
@@ -1174,7 +1224,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Whether the item in a slot could be bought onto a placement of the inventory's grid (round 55): the coins cover it and there it
-        /// lies over no item (a bag never goes there).
+        /// lies over no item (a bag never goes there), or (2026-10-18) its top-left on the same item at the same tier, to merge into it.
         /// </summary>
         public static bool CanBuyToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
         {
@@ -1182,6 +1232,11 @@ namespace F1.Gameplay
             if (offer == null || offer.Kind != OfferKind.Item || state.Coins < PriceOf(data, offer))
             {
                 return false;
+            }
+
+            if (ShopMergesInInventoryAt(state, slot, at.X, at.Y))
+            {
+                return true;
             }
 
             ItemData item = data.Items.Get(offer.Id);
@@ -1196,7 +1251,16 @@ namespace F1.Gameplay
             }
 
             ItemOffer offer = state.Shop.Stock[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), at);
+            BoardItem into = InventoryItemAt(state, at.X, at.Y);
+            if (MergesInto(offer.Id, offer.Tier, into?.Item))
+            {
+                MergeInto(null, into);
+            }
+            else
+            {
+                state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), at);
+            }
+
             Pay(data, state, slot);
         }
 
@@ -1223,6 +1287,13 @@ namespace F1.Gameplay
         {
             ItemOffer offer = OfferAt(state, slot);
             return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
+        }
+
+        /// <summary>Whether buying the item in a slot with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
+        public static bool ShopMergesInInventoryAt(ExpeditionState state, int slot, int x, int y)
+        {
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, InventoryItemAt(state, x, y)?.Item);
         }
 
         /// <summary>Whether the stock can be refreshed now: at a shop, with the coins to pay the next refresh.</summary>
@@ -1312,7 +1383,16 @@ namespace F1.Gameplay
             return CanMerge(item, LivingItemAt(state, memberIndex, x, y)?.Item);
         }
 
-        /// <summary>Whether some living member's board holds what the item would merge into.</summary>
+        /// <summary>
+        /// Whether putting an item (of a board or the inventory) with its top-left on a square of the inventory would merge it into the item there
+        /// (2026-10-18, the user: "인벤창에서도 합치기 가능하게": the inventory merges as a board does).
+        /// </summary>
+        public static bool MergesInInventoryAt(ExpeditionState state, EquippedItem item, int x, int y)
+        {
+            return CanMerge(item, InventoryItemAt(state, x, y)?.Item);
+        }
+
+        /// <summary>Whether some living member's board, or the inventory, holds what the item would merge into.</summary>
         public static bool HasMergeTarget(ExpeditionState state, EquippedItem item)
         {
             foreach (ExpeditionMember member in state.Members)
@@ -1331,6 +1411,14 @@ namespace F1.Gameplay
                 }
             }
 
+            foreach (BoardItem there in state.Inventory.Items)
+            {
+                if (CanMerge(item, there.Item))
+                {
+                    return true;
+                }
+            }
+
             return false;
         }
 
@@ -1341,11 +1429,17 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Merges an item into another lying on a board: the board's item becomes the merge, a tier up, where it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer).
+        /// Merges an item into another lying on a board or in the inventory: that item becomes the merge, a tier up, where it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer: null).
         /// </summary>
         static void MergeInto(EquippedItem item, BoardItem into)
         {
             into.Item = into.Item.TierUp();
+        }
+
+        /// <summary>The item covering a square of the inventory between battles, or null.</summary>
+        static BoardItem InventoryItemAt(ExpeditionState state, int x, int y)
+        {
+            return IsBetweenBattles(state) ? state.Inventory.ItemAt(x, y) : null;
         }
 
         /// <summary>The item covering a square of a living member's board between battles, or null.</summary>

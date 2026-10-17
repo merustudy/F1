@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using F1.Gameplay;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -29,6 +30,8 @@ namespace F1.UI
         public const int LaidOutHeight = 3;
 
         const float GhostAlpha = 0.45f;
+        const float LabelHeight = 22f;
+        const float LabelPadX = 6f;
 
         [SerializeField] RectTransform _squareLayer;
         [SerializeField] RectTransform _pieceLayer;
@@ -39,6 +42,8 @@ namespace F1.UI
         [SerializeField] Image _ghostFloor;
         [SerializeField] RectTransform _ghostArt;
         [SerializeField] Image _ghostIcon;
+        [SerializeField] RectTransform _ghostLabelPlate;
+        [SerializeField] TMP_Text _ghostLabel;
 
         readonly List<GridSquareView> _squares = new List<GridSquareView>();
         readonly List<ItemSlotView> _pieces = new List<ItemSlotView>();
@@ -103,7 +108,11 @@ namespace F1.UI
         /// <param name="picked">The inventory index held now, or -1: lifted off the grid (round 54), its squares empty.</param>
         /// <param name="fatigueCost">What an item adds to its owner's fatigue when a battle starts (its tag).</param>
         /// <param name="ghost">The held item's ghost on the inventory, or null.</param>
-        public void Show(InventoryGrid grid, ExpeditionArt art, int picked, Func<EquippedItem, int> fatigueCost, GridGhost ghost)
+        /// <summary>The ghost's words over the grid ("합치기 → 1성"), or an empty string.</summary>
+        public string GhostLabel => _ghostLabelPlate != null && _ghostLabelPlate.gameObject.activeSelf ? _ghostLabel.text : string.Empty;
+
+        /// <param name="merges">Whether the held item would merge into an item of the inventory (its piece is marked; 2026-10-18); null for none.</param>
+        public void Show(InventoryGrid grid, ExpeditionArt art, int picked, Func<EquippedItem, int> fatigueCost, GridGhost ghost, Func<BoardItem, bool> merges = null)
         {
             EnsureSquares(grid.Width, grid.Height);
             ((RectTransform)transform).sizeDelta = Size(grid.Width, grid.Height) + 2f * Rim * Vector2.one;
@@ -134,7 +143,7 @@ namespace F1.UI
                 ItemSlotView piece = _pieces[_piecesShown++];
                 piece.gameObject.SetActive(true);
                 Lay(piece.Rect, item.At.X, item.At.Y, item.Width, item.Height);
-                piece.ShowItem(item.Item, art?.OfItem(item.Item.Item.Id), item.At, false, fatigueCost(item.Item), false, glow: art?.GlowOfItem(item.Item.Item.Id));
+                piece.ShowItem(item.Item, art?.OfItem(item.Item.Item.Id), item.At, false, fatigueCost(item.Item), merges != null && merges(item), glow: art?.GlowOfItem(item.Item.Item.Id));
             }
 
             for (int i = _piecesShown; i < _pieces.Count; i++)
@@ -167,6 +176,24 @@ namespace F1.UI
                 _ghostFill.color = new Color(colour.r, colour.g, colour.b, GhostAlpha);
                 Lay(_ghostFloor.rectTransform, x0, y0, x1 - x0, y1 - y0);
                 _ghostFloor.transform.SetAsLastSibling();
+            }
+
+            // The ghost's words (2026-10-18: "합치기 → 1성" where it would merge), as on a board, over the block's top edge.
+            bool labelled = block && !string.IsNullOrEmpty(ghost.Label) && _ghostLabelPlate != null;
+            _ghostLabelPlate?.gameObject.SetActive(labelled);
+            if (labelled)
+            {
+                _ghostLabel.text = ghost.Label;
+                _ghostLabel.color = ghost.Kind == GhostKind.Refused ? UiPalette.GhostRefused : UiPalette.Text;
+                float width = Mathf.Ceil(_ghostLabel.GetPreferredValues(ghost.Label).x) + 2f * LabelPadX;
+                Vector2 corner = GridGeometry.Corner(x0, y0);
+                float x = Mathf.Clamp(corner.x + GridGeometry.Span(x1 - x0) / 2f - width / 2f, -8f, Size(_width, _height).x + 8f - width);
+                _ghostLabelPlate.anchorMin = new Vector2(0f, 1f);
+                _ghostLabelPlate.anchorMax = new Vector2(0f, 1f);
+                _ghostLabelPlate.pivot = new Vector2(0f, 0f);
+                _ghostLabelPlate.anchoredPosition = new Vector2(x, corner.y + 2f);
+                _ghostLabelPlate.sizeDelta = new Vector2(width, LabelHeight);
+                _ghostLabelPlate.SetAsLastSibling();
             }
 
             // Round 54 (Diablo II): the colour only; the held item's icon is on the pointer.

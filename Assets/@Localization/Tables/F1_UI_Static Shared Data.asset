@@ -1700,26 +1700,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673500289990666
-  - m_Id: 6151713181392905
-    m_Key: Lobby.EffectGate
-    m_Metadata:
-      m_Items:
-      - rid: 8623673500289990667
-  - m_Id: 6151713181392906
-    m_Key: Lobby.GateTitle
-    m_Metadata:
-      m_Items:
-      - rid: 8623673500289990668
-  - m_Id: 6151713181392907
-    m_Key: Lobby.GateNote
-    m_Metadata:
-      m_Items:
-      - rid: 8623673500289990669
-  - m_Id: 6151713181392908
-    m_Key: Lobby.GateLocked
-    m_Metadata:
-      m_Items:
-      - rid: 8623673500289990670
   - m_Id: 6172991850274816
     m_Key: Battle.BagTitle
     m_Metadata:
@@ -1862,7 +1842,9 @@ MonoBehaviour:
     - rid: 636489279218909222
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: How to use the boards on the party side (Slice B stage 19).
+        m_CommentText: 'How to use the boards on the party side (Slice B stage 19;
+          2026-10-18: a press elsewhere sends a board''s item to the inventory, the
+          right button puts it back).'
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2554,7 +2536,8 @@ MonoBehaviour:
     - rid: 8623673275332689925
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: In the panel while an offer of the shop is picked.
+        m_CommentText: 'In the panel while an offer of the shop is picked (2026-10-18:
+          the right button puts it back).'
     - rid: 8623673275332689926
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2613,8 +2596,8 @@ MonoBehaviour:
     - rid: 8623673296729145346
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: On the board panel after a win, while a drop is picked (round
-          47, stage 19).
+        m_CommentText: 'On the board panel after a win, while a drop is picked (round
+          47, stage 19; 2026-10-18: the right button puts it back).'
     - rid: 8623673301822865408
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2643,7 +2626,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'Under a held item''s tooltip in the inventory popup (round
-          49): how to turn it and let go.'
+          49; 2026-10-18: the right button lets go).'
     - rid: 8623673318725910528
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2934,7 +2917,8 @@ MonoBehaviour:
     - rid: 8623673479834370055
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'The plate of the gate: the way to the expedition screen.'
+        m_CommentText: 'The plate of the gate: the way to the expedition screen (no
+          level: the gate is not upgraded, 2026-10-18).'
     - rid: 8623673479834370056
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3241,26 +3225,6 @@ MonoBehaviour:
       data:
         m_CommentText: What the stagecoach's level gives. {0} = the candidates now,
           {1} = at the next level.
-    - rid: 8623673500289990667
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: What the gate's level gives. {0} = the gold bonus now in percent,
-          {1} = at the next level.
-    - rid: 8623673500289990668
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'Title of the gate window (stage 30): the way out and the
-          gate''s level.'
-    - rid: 8623673500289990669
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'Under the gate window''s button: the gate''s levels add to
-          the settlement''s gold.'
-    - rid: 8623673500289990670
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: The depart status while the gate is under construction (lobby
-          and expedition screen). {0} = the days left.
     - rid: 8623673501619585024
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:

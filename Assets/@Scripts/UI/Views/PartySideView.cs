@@ -205,7 +205,7 @@ namespace F1.UI
 
         /// <summary>
         /// Round 42: the next press anywhere closes the picked item's card; the press's own click still does what it does. Stage 19: while
-        /// something is held, the right button, the wheel or R turns it and Escape lets go.
+        /// something is held, the wheel or R turns it; Escape and (2026-10-18) the right button let go, and it is back where it was.
         /// </summary>
         void Update()
         {
@@ -224,9 +224,7 @@ namespace F1.UI
             int step = TurnInput.Poll(out bool cancel);
             if (cancel)
             {
-                _hand.Clear();
-                HandReleased?.Invoke();
-                Refresh();
+                LetGo();
                 return;
             }
 
@@ -270,10 +268,25 @@ namespace F1.UI
             _hand.AimNowhere();
         }
 
+        /// <summary>Lets go of what is held: it is back where it was (Escape, the right button, a test). The screen is told and redrawn.</summary>
+        public void LetGo()
+        {
+            if (!_hand.Holding)
+            {
+                return;
+            }
+
+            _hand.Clear();
+            HandReleased?.Invoke();
+            Refresh();
+        }
+
         /// <summary>
-        /// A press while something is held (round 54; "아이템 이동 이벤트가 우선", "이상한 곳 클릭시 다시 아이템 복귀"): on a button that works on
-        /// what is held, that button; over a board or the inventory's grid, the hand puts it there (or keeps it where it cannot go);
-        /// anywhere else the hand lets go and it is back where it was, and the press does nothing more.
+        /// A press while something is held (round 54; "아이템 이동 이벤트가 우선"): on a button that works on what is held, that button; over a
+        /// board or the inventory's grid, the hand puts it there (or keeps it where it cannot go); anywhere else (2026-10-18, the user: "이상한
+        /// 곳에 클릭 시 인벤창으로 자동으로") an item of a board goes into the inventory, at its first room, when there is one — otherwise, and
+        /// for anything else held (an item of the inventory, a drop, an offer, a bag), the hand lets go and it is back where it was. The
+        /// press does nothing more.
         /// </summary>
         void OnHeldPressed(Vector2 screen)
         {
@@ -299,6 +312,17 @@ namespace F1.UI
             if (_hand.HoverMember >= 0 || _hand.OverInventory)
             {
                 Managers.Sound.PlayEffect(_hand.Commit(Managers.Expedition));
+                Refresh();
+                return;
+            }
+
+            ExpeditionManager manager = Managers.Expedition;
+            if (_hand.ItemMember >= 0 && manager.CanMoveToInventory(_hand.ItemMember, _hand.ItemX, _hand.ItemY))
+            {
+                manager.MoveToInventory(_hand.ItemMember, _hand.ItemX, _hand.ItemY);
+                Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+                _hand.Clear();
+                HandReleased?.Invoke();
                 Refresh();
                 return;
             }

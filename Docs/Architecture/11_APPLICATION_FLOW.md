@@ -28,7 +28,7 @@ Application 계층이 하는 일은 넷이다.
   `CanTakeLoot`, `CanTakeLootToInventory`, `CanPickItem`, `CanMoveItem`, `CanMoveToInventory`, `CanPlaceFromInventory`, `CanPickBag`, `CanMoveBag`, `MergesAt` 등)를 Manager가 내놓는다.
 - 보드의 명령과 질의(19단계, 격자)는 아이템을 그 아이템이 덮은 칸(구성원, X, Y)으로 가리키고 놓을 자리를 `Placement`(왼쪽 위 칸과 돌린 횟수)로 받는다:
   `MoveItem(구성원, X, Y, 구성원, Placement)`, `MoveToInventory(구성원, X, Y)`, `PlaceFromInventory(번호, 구성원, Placement)`, `TakeLoot(자리, 구성원, Placement)`, `BuyToBoard(자리, 구성원, Placement)`, `MoveBag(구성원, X, Y, 구성원, Placement)`,
-  `UpgradeAtCamp(구성원, X, Y)`. 합침의 질의는 왼쪽 위 칸(`MergesAt`·`LootMergesAt`·`ShopMergesAt`(…, 구성원, X, Y)). 돌리기와 그림자는 화면의 일이고 Manager는 놓인 자리만 받는다.
+  `UpgradeAtCamp(구성원, X, Y)`. 합침의 질의는 왼쪽 위 칸(`MergesAt`·`LootMergesAt`·`ShopMergesAt`(…, 구성원, X, Y); 인벤토리는 `MergesInInventoryAt`·`LootMergesInInventoryAt`·`ShopMergesInInventoryAt`(…, X, Y), 2026-10-18). 돌리기와 그림자는 화면의 일이고 Manager는 놓인 자리만 받는다.
 - Application 계층은 `UnityEngine`의 시간, Scene, GameObject를 모른다. EditMode Test로 루프 전체를 돌린다.
 
 ## 주인
@@ -48,7 +48,7 @@ Application 계층이 하는 일은 넷이다.
 
 | `GamePhase` | 조건 | 할 수 있는 명령 |
 |---|---|---|
-| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기(`CanRest`: 런이 끝났거나 기한을 넘겼으면 안 됨), 출발(피로도는 막지 않는다. `CanDepart`: 잠긴 던전은 `Locked`, 기한을 넘겼으면 최종 던전으로만 — 최종 결전 `IsFinalStandDue`. 어디로 갈지는 원정 화면이 고른다), 26단계의 고용(`CanHire`·`Hire(후보 번호)` → `HireCheck`), 해고(`CanDismiss`·`Dismiss`), 치료(`CanTreat`·`Treat` → `TreatCheck`). 셋은 기한을 넘긴 로비에서도 된다. 30단계의 건물: `BuildingLevel`·`ConstructionOf`·`IsBuildingLocked`·`CanUpgrade`·`Upgrade(건물 id)` → `UpgradeCheck`(저장 한 번). 공사 중의 잠금은 위 명령의 Check에 `CoachLocked`·`InnLocked`·`GateLocked`로 나오고 `CanDismiss`는 거짓. `Rest`는 끝난 건물의 목록을 돌려준다 |
+| `Lobby` | 원정도, 전투도, 확인할 보고도 없다 | 파티에 넣기와 빼기, 자리 바꾸기, 쉬기(`CanRest`: 런이 끝났거나 기한을 넘겼으면 안 됨), 출발(피로도는 막지 않는다. `CanDepart`: 잠긴 던전은 `Locked`, 기한을 넘겼으면 최종 던전으로만 — 최종 결전 `IsFinalStandDue`. 어디로 갈지는 원정 화면이 고른다), 26단계의 고용(`CanHire`·`Hire(후보 번호)` → `HireCheck`), 해고(`CanDismiss`·`Dismiss`), 치료(`CanTreat`·`Treat` → `TreatCheck`). 셋은 기한을 넘긴 로비에서도 된다. 30단계의 건물: `BuildingLevel`·`ConstructionOf`·`IsBuildingLocked`·`CanUpgrade`·`Upgrade(건물 id)` → `UpgradeCheck`(저장 한 번). 공사 중의 잠금은 위 명령의 Check에 `CoachLocked`·`InnLocked`로 나오고 `CanDismiss`는 거짓(성문은 짓지 않는다, 2026-10-18). `Rest`는 끝난 건물의 목록을 돌려준다 |
 | `NodeMap` | 원정 중이고 노드를 고를 차례 | 노드 들어가기(전투 노드는 `Battle`로, 야영지 노드는 `Camp`로, 상점 노드는 `Shop`으로), 아이템과 가방 옮기기(보드 사이, 보드와 인벤토리 사이: `MoveToInventory`·`MoveToInventoryAt`·`PlaceFromInventory`, 인벤토리 격자 안: `MoveInInventory`. Round 49), 자리 바꾸기 |
 | `Camp` | 원정 중이고 야영지에 있다(`ExpeditionPhase.AtCamp`) | 쉬기(`RestAtCamp`)나 정비(`UpgradeAtCamp`)나 담금질(`ForgeAtCamp`, 23단계. 셋 다 그 뒤 `NodeMap`), 아이템과 가방 옮기기, 자리 바꾸기 |
 | `Shop` | 원정 중이고 상점에 있다(`ExpeditionPhase.AtShop`, 17단계) | 팔기(`SellBoardItem(구성원, X, Y)`·`SellInventoryItem(X, Y)`, 2026-10-17 Round 74; `SellPriceOf`·`CanSell…`은 질의), 사기(`BuyToBoard`·`BuyToInventory`·`BuyToInventoryAt`(인벤토리의 한 자리, Round 55)·`BuyPotion`), 새로고침(`RefreshShop`), 나가기(`LeaveShop`. 그 뒤 `NodeMap`), 아이템 옮기기, 자리 바꾸기. 질의는 `ShopStock`·`PriceOf`·`RefreshCost`·`CanAfford`·`CanBuy...`·`ShopMergesAt`·`CanRefreshShop` |

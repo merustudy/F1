@@ -1829,7 +1829,7 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator PartySide_AHeldItem_LeavesItsPlace_RidesThePointer_AndAPressElsewhereSendsItBack()
+        public IEnumerator PartySide_AHeldItem_LeavesItsPlace_RidesThePointer_TheRightButtonSendsItBack_AndAPressElsewhereSendsItToTheInventory()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
@@ -1879,26 +1879,96 @@ namespace F1.Tests
             party.TurnHeld(-1);
             yield return null;
 
-            // A press on a potion's slot is no place for it: it goes back where it was and the press does nothing more (no potion chosen).
-            string potion = UiText.Name(data.Potions.Get(expedition.Potions.First(p => p != null)).Name);
-            Managers.Sound.ForgetEffects();
-            UiTestUtil.Click(UiTestUtil.Views<PotionSlotView>(map).First(v => v.Icon != null).Button);
+            // The right button (or Escape) lets go: it is back where it was (2026-10-18; the right button turned it before).
+            party.LetGo();
             yield return null;
             Assert.IsFalse(party.Hand.Holding, "Let go.");
             Assert.IsFalse(party.HeldPointer.Shown, "The pointer is back.");
             Assert.AreSame(weapon, front.Board.ItemAt(0, 0));
             Assert.IsNotNull(board.PieceAt(0, 0), "Back on its place.");
-            CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "A click, once.");
-            StringAssert.DoesNotContain(potion, UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"), "The potion was not chosen.");
+            Assert.IsEmpty(expedition.Inventory, "Nothing went to the inventory.");
 
-            // A button that works on what is held takes the press: "to inventory" puts it away.
+            // A press on a potion's slot is no place for it (2026-10-18, the user: "이상한 곳에 클릭 시 인벤창으로 자동으로"): a board's item goes
+            // into the inventory, at its first room, and the press does nothing more (no potion chosen).
+            string potion = UiText.Name(data.Potions.Get(expedition.Potions.First(p => p != null)).Name);
             UiTestUtil.ClickSquare(board, 0, 0);
             yield return null;
-            UiTestUtil.Click(party.ToInventory);
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(UiTestUtil.Views<PotionSlotView>(map).First(v => v.Icon != null).Button);
+            yield return null;
+            Assert.IsFalse(party.Hand.Holding, "Let go.");
+            Assert.IsFalse(party.HeldPointer.Shown, "The pointer is back.");
+            Assert.IsNull(front.Board.ItemAt(0, 0), "Off the board.");
+            Assert.AreSame(weapon.Item, expedition.Inventory.Single(), "Into the inventory, at its first room.");
+            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked, "Put in, once.");
+            StringAssert.DoesNotContain(potion, UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"), "The potion was not chosen.");
+
+            // An item of the inventory pressed elsewhere is back where it lay (there is nowhere else for it to go).
+            UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
+            yield return UiTestUtil.WaitForRedraw();
+            Placement lay = expedition.Inventory.Items[0].At;
+            UiTestUtil.ClickSquare(party.InventoryGrid, lay.X, lay.Y);
+            yield return null;
+            Assert.AreEqual(0, party.Hand.InventoryIndex);
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.Click(UiTestUtil.Views<PotionSlotView>(map).First(v => v.Icon != null).Button);
             yield return null;
             Assert.IsFalse(party.Hand.Holding);
-            Assert.IsNull(front.Board.ItemAt(0, 0));
-            Assert.IsTrue(expedition.Inventory.Any(i => i.Item.Id == weapon.Item.Item.Id), "Put away by its button.");
+            Assert.AreEqual(lay, expedition.Inventory.Items[0].At, "Where it lay.");
+            Assert.AreEqual(1, expedition.Inventory.Count);
+            CollectionAssert.AreEqual(new[] { SoundEffect.Button }, Managers.Sound.Asked, "A click, once.");
+        }
+
+        [UnityTest]
+        public IEnumerator PartySide_AHeldItem_OverTheSameItemInTheInventory_SaysMerge_AndMergesThere()
+        {
+            // 2026-10-18 (the user: "인벤창에서도 합치기 가능하게"): the inventory's grid merges as a board's does — the piece it would merge
+            // into is marked, the ghost says the tier, and putting it there merges.
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            ExpeditionMember first = expedition.Members[row1.Member];
+            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger")), 0, 1);
+            expedition.Inventory.Add(new EquippedItem(data.Items.Get("dagger")), new Placement(3, 1));
+            UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
+            yield return UiTestUtil.WaitForRedraw();
+            map.Refresh();
+            yield return null;
+            PartyBoardView board1 = row1.BoardView;
+            InventoryGridView grid = party.InventoryGrid;
+            Assert.AreEqual(string.Empty, grid.PieceAt(3, 1).MergeMark, "Nothing is held.");
+
+            // The board's dagger held: the inventory's dagger is marked with the tier the merge makes, and the card would say so.
+            EquippedItem chosen = UiTestUtil.ItemAt(first, 0, 1);
+            Assert.IsTrue(Managers.Expedition.HasMergeTarget(chosen), "The inventory holds a target.");
+            UiTestUtil.ClickSquare(board1, 0, 1);
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierName(ItemTier.Tier1)), grid.PieceAt(3, 1).MergeMark);
+            UiTestUtil.HoverSquare(grid, 3, 1);
+            yield return null;
+            Assert.AreEqual(GhostKind.Merges, grid.GhostShown);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierWord(ItemTier.Tier1)), grid.GhostLabel);
+            UiTestUtil.HoverSquare(grid, 7, 0);
+            yield return null;
+            Assert.AreEqual(GhostKind.Fits, grid.GhostShown, "A free place is just green.");
+            Assert.AreEqual(string.Empty, grid.GhostLabel);
+
+            // Put there, they merge: one Tier1 dagger in the inventory where it lay; none on the board.
+            Managers.Sound.ForgetEffects();
+            UiTestUtil.ClickSquare(grid, 3, 1);
+            yield return null;
+            Assert.IsFalse(party.Hand.Holding);
+            Assert.AreEqual(1, expedition.Inventory.Count);
+            Assert.AreEqual(ItemTier.Tier1, expedition.Inventory[0].Tier);
+            Assert.AreEqual(new Placement(3, 1), expedition.Inventory.Items[0].At);
+            Assert.IsNull(first.Board.ItemAt(0, 1), "The dagger left the board.");
+            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.AreEqual(ItemTier.Tier1, grid.PieceAt(3, 1).TierShown);
+            Assert.AreEqual(string.Empty, grid.PieceAt(3, 1).MergeMark);
         }
 
         [UnityTest]
@@ -2643,10 +2713,16 @@ namespace F1.Tests
             Assert.AreEqual("막사  Lv 1", lobby.Barracks.Name, "The plate carries the level (stage 30).");
             Assert.AreEqual("쉼터  Lv 1", lobby.Inn.Name);
             Assert.AreEqual("역마차  Lv 1", lobby.Coach.Name);
-            Assert.AreEqual("원정  Lv 1", lobby.Gate.Name);
-            foreach (BuildingView building in new[] { lobby.Barracks, lobby.Inn, lobby.Coach, lobby.Gate })
+            Assert.AreEqual("원정", lobby.Gate.Name, "The gate has no level (2026-10-18).");
+            Assert.IsNull(lobby.Gate.Picture, "The gate is the arch painted on the town (2026-10-18): a hotspot without a picture.");
+            Assert.AreEqual(LobbyScreen.GatePlot.Width, lobby.Gate.Rect.sizeDelta.x);
+            foreach (BuildingView building in new[] { lobby.Barracks, lobby.Inn, lobby.Coach })
             {
                 Assert.IsNotNull(building.Picture, "A picture of its own at its level (Round 78).");
+            }
+
+            foreach (BuildingView building in new[] { lobby.Barracks, lobby.Inn, lobby.Coach, lobby.Gate })
+            {
                 Assert.IsFalse(building.ScaffoldShown || building.BadgeShown, "Nothing is being built.");
             }
 
@@ -2668,6 +2744,7 @@ namespace F1.Tests
             Assert.IsFalse(lobby.BubbleShown);
             lobby.Gate.Hover();
             Assert.AreEqual("버려진 광산 · 심연 잠김", lobby.BubbleDetail, "The gate's bubble: the dungeons, the locked one saying so.");
+            Assert.IsFalse(lobby.Gate.IsLit, "No picture, no wash: the plate's brass line alone says the pointer is on the gate.");
             lobby.Gate.Leave();
 
             // The stagecoach: three candidates, none affordable with no gold; with gold the first is hired and joins the roster and the strip.
@@ -2761,11 +2838,11 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest").interactable, "No day is left to rest.");
             Assert.AreEqual("쉴 날이 없다", UiTestUtil.TextAt(lobby, "Frame/InnWindow/InnNote"));
             UiTestUtil.CloseQuarter(lobby);
-            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Gate);
-            Assert.IsTrue(UiTestUtil.At(lobby, "Frame/GateWindow").gameObject.activeSelf, "The gate opens its window (stage 30): the level, the dungeons, the way out.");
-            Assert.AreEqual("심연의 보스와 싸운다", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDungeons"));
-            Assert.AreEqual("최종 결전으로", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDepart/GateDepartLabel"));
-            UiTestUtil.Click(lobby, "Frame/GateWindow/GateDepart");
+            Assert.IsNull(lobby.transform.Find("Frame/GateWindow"), "The gate has no window (2026-10-18): it is the way out, nothing to upgrade.");
+            lobby.Gate.Hover();
+            Assert.AreEqual("심연의 보스와 싸운다", lobby.BubbleDetail);
+            lobby.Gate.Leave();
+            UiTestUtil.Click(lobby, "Frame/Gate");
             yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
             Assert.AreEqual("abyss", UiTestUtil.Screen<ExpeditionScreen>().SelectedDungeonId, "Only the final stand is left.");
         }
@@ -2817,18 +2894,13 @@ namespace F1.Tests
             Assert.AreEqual("건설 중 · 3일 남음", lobby.BubbleDetail);
             lobby.Coach.Leave();
 
-            // The gate too: the strip's button and the gate window's way out close until it is done; the expedition screen would say so as well.
-            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Gate);
-            UiTestUtil.Click(lobby, "Frame/GateWindow/GateLine/GateUpgrade");
-            yield return UiTestUtil.WaitForRedraw();
-            Assert.AreEqual(20, run.Gold);
-            Assert.AreEqual(DepartCheck.GateLocked, Managers.Run.CanDepart(data.Dungeons.Ordered[0].Id));
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/GateWindow/GateDepart").interactable);
-            Assert.AreEqual("성문이 건설 중입니다 · 3일 남음", UiTestUtil.TextAt(lobby, "Frame/GateWindow/GateDepart/GateDepartLabel"));
-            UiTestUtil.CloseQuarter(lobby);
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
+            // The gate is never built (2026-10-18): no scaffold, no level, and the way out stays open while the stagecoach is built.
+            Assert.IsFalse(lobby.Gate.ScaffoldShown || lobby.Gate.BadgeShown);
+            Assert.AreEqual("원정", lobby.Gate.Name);
+            Assert.AreEqual(DepartCheck.PartyTooSmall, Managers.Run.CanDepart(data.Dungeons.Ordered[0].Id), "No construction locks the way out: only the party is still empty.");
+            Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
 
-            // Three days of rest at the inn (open while it is not the one being built): the badge counts down, then both are done and grown.
+            // Three days of rest at the inn (open while it is not the one being built): the badge counts down, then the stagecoach is done and grown.
             for (int day = 0; day < 3; day++)
             {
                 yield return UiTestUtil.RestAtTheInn(lobby);
@@ -2836,16 +2908,15 @@ namespace F1.Tests
 
             Assert.AreEqual(4, run.Day);
             Assert.AreEqual(2, Managers.Run.BuildingLevel(BuildingId.Coach));
-            Assert.AreEqual(2, Managers.Run.BuildingLevel(BuildingId.Gate));
             Assert.IsFalse(lobby.Coach.ScaffoldShown || lobby.Coach.BadgeShown || lobby.Gate.ScaffoldShown);
             Assert.AreEqual("역마차  Lv 2", lobby.Coach.Name);
-            Assert.AreEqual("원정  Lv 2", lobby.Gate.Name);
+            Assert.AreEqual("원정", lobby.Gate.Name);
             Assert.Greater(lobby.Coach.Rect.sizeDelta.x, LobbyScreen.Plots[BuildingId.Coach].Width * LobbyScreen.LevelScale(1), "The picture grew with the level.");
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
             Assert.AreEqual(HireCheck.Ok, Managers.Run.CanHire(0));
             yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
             Assert.AreEqual("Lv 2 → Lv 3: 후보 4명 → 5명 · 금 80 · 5일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
-            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable, "20 gold does not cover level 3.");
+            Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable, "60 gold does not cover level 3.");
             UiTestUtil.CloseQuarter(lobby);
         }
 

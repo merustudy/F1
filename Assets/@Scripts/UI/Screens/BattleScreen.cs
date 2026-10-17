@@ -799,15 +799,13 @@ namespace F1.UI
                 PressTakeAllKey();
             }
 
-            // Stage 19: after a win, while the hand holds something, the right button, the wheel or R turns it and Escape lets go.
+            // Stage 19: after a win, while the hand holds something, the wheel or R turns it; Escape and the right button (2026-10-18) let go.
             if (_afterWin && _lootHand.Holding)
             {
                 int step = TurnInput.Poll(out bool cancel);
                 if (cancel)
                 {
-                    _lootHand.Clear();
-                    _pickedDrop = -1;
-                    RefreshLoot();
+                    LetGo();
                 }
                 else
                 {
@@ -1589,6 +1587,11 @@ namespace F1.UI
                 return Managers.Expedition.CanTakeLootToInventoryAt(Slot, at);
             }
 
+            public bool MergesInInventoryAt(int x, int y)
+            {
+                return Managers.Expedition.LootMergesInInventoryAt(Slot, x, y);
+            }
+
             public void PlaceInInventory(Placement at)
             {
                 Managers.Expedition.TakeLootToInventoryAt(Slot, at);
@@ -1876,10 +1879,23 @@ namespace F1.UI
             _lootHand.AimNowhere();
         }
 
+        /// <summary>Lets go of what is held after a win: a drop lies on the floor again, an item is back where it was (Escape, the right button, a test).</summary>
+        public void LetGo()
+        {
+            if (!_lootHand.Holding)
+            {
+                return;
+            }
+
+            _lootHand.Clear();
+            _pickedDrop = -1;
+            RefreshLoot();
+        }
+
         /// <summary>
         /// A press while something is held after a win (round 54), as on the node map: on "to inventory" or the inventory's button, that
-        /// button; over a board or the inventory's grid, the hand puts it there (a drop goes to the inventory by its button only, so the
-        /// grid keeps it held); anywhere else the hand lets go, the drop lies on the floor again, and the press does nothing more.
+        /// button; over a board or the inventory's grid, the hand puts it there; anywhere else (2026-10-18) an item of a board goes into the
+        /// inventory when it has room, and otherwise — as for a drop, which lies on the floor again — the hand lets go. The press does nothing more.
         /// </summary>
         void OnHeldPressed(Vector2 screen)
         {
@@ -1903,6 +1919,16 @@ namespace F1.UI
             if (_lootHand.HoverMember >= 0 || _lootHand.OverInventory)
             {
                 Managers.Sound.PlayEffect(_lootHand.Commit(Managers.Expedition));
+                RefreshLoot();
+                return;
+            }
+
+            ExpeditionManager manager = Managers.Expedition;
+            if (_lootHand.ItemMember >= 0 && manager.CanMoveToInventory(_lootHand.ItemMember, _lootHand.ItemX, _lootHand.ItemY))
+            {
+                manager.MoveToInventory(_lootHand.ItemMember, _lootHand.ItemX, _lootHand.ItemY);
+                Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+                _lootHand.Clear();
                 RefreshLoot();
                 return;
             }

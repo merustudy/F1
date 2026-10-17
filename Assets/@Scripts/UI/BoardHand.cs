@@ -64,8 +64,9 @@ namespace F1.UI
         bool MergesAt(int member, int x, int y);
         void Place(int member, Placement at);
 
-        /// <summary>Whether it could be laid on a placement of the inventory's grid now (round 55: a drop taken, an offer bought there).</summary>
+        /// <summary>Whether it could be laid on a placement of the inventory's grid now (round 55: a drop taken, an offer bought there; 2026-10-18: or merged into the same item there).</summary>
         bool CanPlaceInInventory(Placement at);
+        bool MergesInInventoryAt(int x, int y);
         void PlaceInInventory(Placement at);
     }
 
@@ -242,8 +243,8 @@ namespace F1.UI
 
         /// <summary>
         /// Where and how the held item would land on the inventory's grid with the pointer over it (round 49): green where it can go (an
-        /// item of a board, of the inventory or, since round 55, a drop or an offer, to free squares), red where it cannot (over another
-        /// item; a bag). Null when the pointer is not over the grid or no item is held.
+        /// item of a board, of the inventory or, since round 55, a drop or an offer, to free squares), green with the words where it merges
+        /// into the same item (2026-10-18), red where it cannot (over another item; a bag). Null when the pointer is not over the grid or no item is held.
         /// </summary>
         public GridGhost InventoryGhost(ExpeditionManager manager, ExpeditionArt art)
         {
@@ -267,6 +268,14 @@ namespace F1.UI
             if (InventoryIndex >= 0 && expedition.Inventory.Items[InventoryIndex].At.Equals(at))
             {
                 ghost.Kind = GhostKind.Same;
+                return ghost;
+            }
+
+            bool merges = Outside != null ? Outside.MergesInInventoryAt(at.X, at.Y) : manager.MergesInInventoryAt(item, at.X, at.Y);
+            if (merges)
+            {
+                ghost.Kind = GhostKind.Merges;
+                ghost.Label = UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierWord(item.Tier + 1));
                 return ghost;
             }
 

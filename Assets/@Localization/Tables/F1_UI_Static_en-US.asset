@@ -148,9 +148,10 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864229
-    m_Localized: 'Click an item to pick it up, then a square to put it down (one
-      item in the way goes to the inventory). While holding: right-click, wheel or
-      R turns it. Forward and Back swap with the next row.'
+    m_Localized: "Click an item to pick it up, then a square to put it down (one
+      item in the way goes to the inventory). While holding: wheel or R turns it
+      \xB7 click elsewhere sends it to the inventory \xB7 right-click puts it back.
+      Forward and Back swap with the next row."
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864231
@@ -878,8 +879,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580996
-    m_Localized: 'Click a square to put it there and buy it. While holding: right-click,
-      wheel or R turns it. Or take it straight into the inventory.'
+    m_Localized: "Click a square to put it there and buy it. While holding: wheel
+      or R turns it \xB7 right-click puts it back. Or take it straight into the inventory."
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580997
@@ -936,8 +937,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2894741283790849
-    m_Localized: 'Click a square on the left to put the drop there. While holding:
-      right-click, wheel or R turns it.'
+    m_Localized: "Click a square on the left to put the drop there. While holding:
+      wheel or R turns it \xB7 right-click puts it back."
     m_Metadata:
       m_Items: []
   - m_Id: 2976244533551104
@@ -965,7 +966,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 3219372028977152
-    m_Localized: "R \xB7 right-click \xB7 wheel: turn   Esc: let go"
+    m_Localized: "R \xB7 wheel: turn   right-click \xB7 Esc: put back"
     m_Metadata:
       m_Items: []
   - m_Id: 3246693813313536
@@ -1546,24 +1547,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 6151713181392905
-    m_Localized: "settlement gold +{0}% \u2192 +{1}%"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 6151713181392906
-    m_Localized: "Gate \u2014 Expedition"
-    m_Metadata:
-      m_Items: []
-  - m_Id: 6151713181392907
-    m_Localized: The gate's levels add to the settlement's gold
-    m_Metadata:
-      m_Items: []
-  - m_Id: 6151713181392908
-    m_Localized: "The gate is under construction \xB7 {0} days left"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 6172991850274816
     m_Localized: "{0}  {1}\xD7{2}"
     m_Metadata:
@@ -1743,6 +1726,4 @@ MonoBehaviour:
         - id: 6151713181392902
         - id: 6151713181392903
         - id: 6151713181392904
-        - id: 6151713181392905
-        - id: 6151713181392908
         - id: 6172991850274816
