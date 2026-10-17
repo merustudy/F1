@@ -10,11 +10,12 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 
 - 2026-10-16 사용자 "이어서 … 슬라이스 완성을 위한 나머지 절차를 네 권장안에 따라 완성할 때까지 알아서 진행(필요시 이미지 api 사용)" → Roadmap "27~29단계의 일괄 승인": 띠도 권장안으로 정해 적는다.
 - 띠와 조정은 Design/04 §6·§8, 08 §27, Roadmap "사후 검토 대기"의 "29단계의 권장안 세부".
-- **사용자의 몫(남김)**: 직접 플레이(Acceptance 7: 런 하나를 끝까지, `completed/b16-tuning.md`의 체크리스트, 원정 15~30분), 그 피드백에 따른 조정, 숫돌 값의 복귀(임시 조치: "복귀는 직접 플레이 뒤"), Slice C 완료의 선언(CLAUDE.md §9·Architecture/09의 상태 줄 갱신).
+- **사용자의 몫(남김)**: 직접 플레이(Acceptance 7: 런 하나를 끝까지, `completed/b16-tuning.md`의 체크리스트, 원정 15~30분), 그 피드백에 따른 조정, Slice C 완료의 선언(CLAUDE.md §9·Architecture/09의 상태 줄 갱신).
 
 ## Done
 
 - 2026-10-17 사용자 "상점에서 현재 용병들 기본 무기도 제공 / 적 드랍에 일반 아이템 드랍 추가 — 검토 후 권장안 구현": `ItemData.DropWeight`(선택 열, 유니크는 0), `DungeonData.GeneralDropChancePercent`(선택 열, 광산 30·심연 0), 기본 무기의 `Price`·`ShopWeight`, `ExpeditionRules.IsShopCandidate`·`IsJobWeapon`·`PartyWeaponIds`(파티 직업의 기본 무기만)·`ShopGoodsCount(data, state)`·`HasGeneralDrops`·`DrawGeneralDrop`·`DropLoot`의 굴림, Manager의 `ShopGoodsCount`, 시뮬의 줄(기본 무기 제공·일반 드랍), Test(`ShopRulesTests` 기본 무기, `ExpeditionRulesTests` 일반 드랍, `ShippedDataTests`). 심연의 확률을 낮춘 까닭과 수치는 08 §32.
+- 2026-10-17 사용자 "숫돌값은 지금 복귀": 숫돌 `Price` 1 → 8(`ItemData.csv`·Generated), `ShippedDataTests`의 파는 값(4), Roadmap "임시 조치" 비움, Design/03 §5·08 §22·§33, 00. 시뮬 전후(같은 시드, 복사본에 값 1): 광산 85.0 → 83.7%(산 것 12.1 → 10.5, 합치기 10.5 → 9.8), 심연 11.2%, 런 80.7 → 82.0%(300런의 흔들림 안).
 - 2026-10-17 사용자 "원정 클리어시 가지고 있는 물건가치 > 지역화폐 환산 / 지역화폐를 금화로 환산하여 금화 보상 — 사안 검토 후 권장안 구현": `RunRules.ItemCoinsFor`(살아 돌아온 구성원의 보드·인벤토리의 팔 수 있는 아이템의 `SellPriceOf` 합), `Settle`의 클리어 환산(`CoinsPerGold`로 나눔, `GoldEarned`에 포함), `SettlementReport.CoinsFromItems`·`CoinsConverted`·`GoldFromCoins`, `BalanceData` `CoinsPerGold` 10, 정산 화면의 줄 `Settle.GoldWithCoins`, Test(`LobbyEconomyTests` 환산·후퇴). 비율은 시뮬(08 §31)로 정했다. 시뮬의 `run`은 `Settle`을 쓰므로 자동으로 반영된다.
 - 2026-10-17 사용자 "전리품 드랍된 남은 것을 단축키를 눌러 바로 인벤에 넣기 신설 추가": `ExpeditionRules.CanTakeAllLootToInventory`·`TakeAllLootToInventory`, `ExpeditionManager`의 같은 명령(저장 한 번), `TakeAllKey`(A)와 `BattleScreen.PressTakeAllKey`, `Battle.LootHint`의 안내, Test(`ExpeditionRulesTests` 둘, `UiFlowTests.Loot_TheAKey_…`). 문서 Architecture/08·11·12, Design/03 §5·00. 같은 턴의 "상점 아이템 판매 기능 추가"는 Round 74(목업 여섯, 규칙 권장안)로 판정 → 사용자 "안 b, 50%, 권장안 수용" → 구현: `BalanceData` `SellPercent` 50, 적 아이템의 `Price`, `ExpeditionRules.SellPriceOf`·`CanSellBoardItem`·`SellBoardItem`·`CanSellInventoryItem`·`SellInventoryItem`, Manager의 명령 넷, `ItemTooltipView`의 팔기 버튼(`_sell`, `SellClicked`, `PointerIsOver`), `PartySideView.SellOption`·`SellRequested`, `NodeMapScreen.SellOptionFor`·`OnSellRequested`, 문구 셋(`Map.Sell`·`CannotSell`·`ShopSold`), Test(`ShopRulesTests` 팔기, `ShippedDataTests` 적 아이템의 값, `UiFlowTests` 상점 Test의 팔기, 스크린샷 `_65_shop_sell_card`). 문서 Design/03 §5·07 §4·00, Architecture/05·08·11·12, README 74.
 - 2026-10-17 사용자 "보스도 깊이 보정 적용"과 "용병 단순 피격시에는 피로+0(치명타만 피로 추가 적용)": `ExpeditionRules.FloorsBelowTheFirst`가 보스에도 층을 줌(최종 결전은 1층), `BalanceData.csv` `FatigueOnHit` 0(치명타 피로 `CritFatigueTaken` 9는 그대로), `LongExpeditionTests`의 보스 줄, PlayMode의 붕괴 연출 Test는 피격 대신 **동료의 빈사**(1 HP의 미끼를 1열에, 발키리는 2열)로 다시 무대를 꾸밈. 전후와 치명타 피로의 후보는 Design/08 §30.
@@ -31,7 +32,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 
 ## Open
 
-- 사용자: 직접 플레이 → 피드백 조정 → 숫돌 1 → 8 복귀(Roadmap "임시 조치") → Slice C 완료 선언.
+- 사용자: 직접 플레이 → 피드백 조정 → Slice C 완료 선언. (숫돌 1 → 8 복귀는 2026-10-17 사용자 지시로 끝냈다.)
 - 기한(100일)은 균형형 시뮬에서 닿지 않는다(1% 아래). 플레이의 속도를 본 뒤 속도 레버(08 §27)를 다시 본다.
 - 사후 검토: 띠의 값, 고용비 20, 옛 결론 82%/75%를 띠 안의 목표로 둔 것.
 
@@ -46,6 +47,7 @@ Architecture/09 "Slice C" 구현 순서 5가 참이다: 100일 런의 띠가 정
 - 2026-10-17 상점 판매(Round 74 B): 체인 `20261017-110345`(setup·sim OK, EditMode **922/922**, PlayMode **88/99**), 그래픽 스크린샷 `~/Library/Caches/F1/screenshots/20261017-111500-shop-sell`(11/11, PNG 111장: `ko_65_shop_sell_card` — 산 버클러의 카드에 "팔기 · 6 코인").
 - 2026-10-17 클리어의 코인 → 금: 체인 `20261017-113133`(setup·sim OK, EditMode **923/923**, PlayMode **88/99**). 화면은 정산 줄의 글자만 바뀌어 스크린샷은 찍지 않았다.
 - 2026-10-17 기본 무기 제공·일반 아이템 드랍: 체인 `20261017-123326`(setup·sim OK, EditMode **926/926**, PlayMode **88/99**). 이 체인은 끝에 `leftover`(Assets/InitTestScene*)를 보고했는데, 그 파일은 앞서 EditMode 실패로 내가 중단한 체인 `20261017-122023`의 PlayMode가 남긴 것(12:20)이라 지우고 기록한다. 화면은 바뀌지 않아 스크린샷은 찍지 않았다.
+- 2026-10-17 숫돌 값의 복귀: 체인 `20261017-125751`(**CHAIN OK**: setup·sim OK, EditMode **926/926**, PlayMode **88/99**). 화면은 바뀌지 않아 스크린샷은 찍지 않았다.
 
 ## Next Action (제안)
 
