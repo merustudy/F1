@@ -132,8 +132,9 @@ Primary가 무효면 `.bak`을 같은 방식으로 검증해 쓴다. 둘 다 무
 
 - `RunSaveData.SchemaVersion`은 구조가 바뀔 때 올린다. `RunSaveMigrator`가 옛 버전을 한 단계씩 올린 뒤 검증한다.
 - 지금 버전보다 새로운 파일은 읽지 않는다(무효).
-- 지금 버전은 **16**이다(2026-10-17, Slice C 30단계: 런의 `Buildings`(`BuildingId`·`Level`, 1레벨은 적지 않음)와 `Constructions`(`BuildingId`·`ToLevel`·`FinishDay`, 건물마다 하나). `Docs/Design/04_Lobby_100Day_Economy.md` §7). 15는 `From15To16`이 올린다: 모두 레벨 1, 공사 없음.
-  검증: 건물 id가 넷 중 하나, 레벨이 사다리 안, 공사는 건물마다 하나이고 지금 레벨 + 1을 지으며 끝나는 날이 지금 날보다 뒤(닿았으면 이미 끝났어야 한다). 로스터 상한과 후보 수의 검증은 건물의 효과를 더한 값으로 한다(`BuildingRules.RosterLimit`·`RecruitCount`).
+- 지금 버전은 **17**이다(2026-10-18, 사용자 "성문은 업그레이드 없음": `Buildings`·`Constructions`에 `gate`가 없다 — 성문은 레벨이 없는 그림이다. `Docs/Design/04_Lobby_100Day_Economy.md` §7). 16은 `From16To17`이 올린다: 성문의 레벨과 공사를 버린다(공사에 낸 금은 돌려주지 않는다. 이미 쓴 금이다). 17 파일에 `gate`가 있으면 검증이 거른다.
+- 16(2026-10-17, Slice C 30단계: 런의 `Buildings`(`BuildingId`·`Level`, 1레벨은 적지 않음)와 `Constructions`(`BuildingId`·`ToLevel`·`FinishDay`, 건물마다 하나)). 15는 `From15To16`이 올린다: 모두 레벨 1, 공사 없음.
+  검증: 건물 id가 셋 중 하나(17부터), 레벨이 사다리 안, 공사는 건물마다 하나이고 지금 레벨 + 1을 지으며 끝나는 날이 지금 날보다 뒤(닿았으면 이미 끝났어야 한다). 로스터 상한과 후보 수의 검증은 건물의 효과를 더한 값으로 한다(`BuildingRules.RosterLimit`·`RecruitCount`).
 - 15(2026-10-16, Slice C 27단계: 로스터의 용병마다 `Level`·`Exp`. `Docs/Design/05_Mercenary_Growth.md` §2). 14는 `From14To15`가 올린다: 모두 레벨 1, 경험치 0.
 - 14(2026-10-16, Slice C 26단계: 런의 `Gold`, 역마차의 후보 `Recruits`(`Id`·`JobId`), 해고된 용병 `Dismissed`, 던전별 원정 횟수 `Expeditions`(`DungeonId`·`Count`). `Docs/Design/04_Lobby_100Day_Economy.md` §5·§6).
   13은 `From13To14`가 올린다: 금 0, 후보 없음(다음 정산이 뽑는다), 해고 없음, 던전별 횟수는 모름(비움. 합계 `ExpeditionCount`는 그대로).

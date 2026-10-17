@@ -8,10 +8,10 @@ namespace F1.Gameplay
     /// The town's buildings and their construction (Slice C stage 30, Docs/Design/04_Lobby_100Day_Economy.md §7): every building starts
     /// at level 1, an upgrade pays the next level's price and puts the building under construction for its days, the days pass only as the
     /// run's days do (an expedition's settlement, a day of rest) and the level arrives when the finish day is reached. While a building is
-    /// under construction it is locked: the stagecoach does not hire, the inn does not treat (resting goes on), the barracks does not dismiss
-    /// and the gate does not let the party leave. Past the last day no lock holds and nothing can be built: the days do not pass any more.
-    /// What a level gives is the BuildingData row's Bonus over the BalanceData base: the roster limit (barracks), the candidates (stagecoach),
-    /// the treatment's relief (inn) and the settlement's gold in percent (gate). Pure functions over <see cref="RunState"/>.
+    /// under construction it is locked: the stagecoach does not hire, the inn does not treat (resting goes on) and the barracks does not dismiss.
+    /// Past the last day no lock holds and nothing can be built: the days do not pass any more. What a level gives is the BuildingData row's
+    /// Bonus over the BalanceData base: the roster limit (barracks), the candidates (stagecoach) and the treatment's relief (inn). The gate has
+    /// no level (2026-10-18, the user): it is the way out and nothing more. Pure functions over <see cref="RunState"/>.
     /// </summary>
     public static class BuildingRules
     {
@@ -80,18 +80,6 @@ namespace F1.Gameplay
         public static int TreatmentRelief(StaticData data, RunState state)
         {
             return data.Balance.TreatmentRelief + BonusOf(data, state, BuildingId.Inn);
-        }
-
-        /// <summary>The gate's bonus on the settlement's gold, in percent (0 at the first level).</summary>
-        public static int GoldBonusPercent(StaticData data, RunState state)
-        {
-            return BonusOf(data, state, BuildingId.Gate);
-        }
-
-        /// <summary>Gold with the gate's bonus on it, rounded down.</summary>
-        public static int WithGateBonus(StaticData data, RunState state, int gold)
-        {
-            return gold * (100 + GoldBonusPercent(data, state)) / 100;
         }
 
         // ---- Upgrading ---------------------------------------------------------------------

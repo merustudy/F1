@@ -44,27 +44,6 @@
       "Bonus": 2
     },
     {
-      "Id": "gate",
-      "Level": 1,
-      "Price": 0,
-      "Days": 0,
-      "Bonus": 0
-    },
-    {
-      "Id": "gate",
-      "Level": 2,
-      "Price": 40,
-      "Days": 3,
-      "Bonus": 10
-    },
-    {
-      "Id": "gate",
-      "Level": 3,
-      "Price": 80,
-      "Days": 5,
-      "Bonus": 20
-    },
-    {
       "Id": "inn",
       "Level": 1,
       "Price": 0,

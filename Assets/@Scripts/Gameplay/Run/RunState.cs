@@ -125,9 +125,6 @@ namespace F1.Gameplay
         PartyTooSmall,
         FinalStandDue,
         Locked,
-
-        /// <summary>The gate is under construction (stage 30): nobody leaves until it is done.</summary>
-        GateLocked,
     }
 
     /// <summary>Whether a candidate can be hired now (Slice C stage 26).</summary>
@@ -175,8 +172,7 @@ namespace F1.Gameplay
         public int CoinsConverted;
         public int GoldFromCoins;
 
-        /// <summary>The gate's bonus on the gold, in percent (stage 30; counted in GoldEarned), and the buildings whose construction the passing days finished.</summary>
-        public int GateBonusPercent;
+        /// <summary>The buildings whose construction the passing days finished (stage 30).</summary>
         public List<string> BuildingsCompleted = new List<string>();
 
         /// <summary>The experience every survivor got (stage 27), and the survivors it took to a new level, in the order of <see cref="SurvivorIds"/>.</summary>

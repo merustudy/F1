@@ -118,10 +118,6 @@ namespace F1.UI
             public const string EffectBarracks = "Lobby.EffectBarracks";
             public const string EffectInn = "Lobby.EffectInn";
             public const string EffectCoach = "Lobby.EffectCoach";
-            public const string EffectGate = "Lobby.EffectGate";
-            public const string GateTitle = "Lobby.GateTitle";
-            public const string GateNote = "Lobby.GateNote";
-            public const string GateLocked = "Lobby.GateLocked";
         }
 
         /// <summary>The expedition screen (Round 71 E2): the map, the chosen dungeon and the departure.</summary>

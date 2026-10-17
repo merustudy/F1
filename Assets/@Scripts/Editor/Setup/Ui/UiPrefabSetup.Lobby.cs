@@ -30,7 +30,7 @@ namespace F1.Editor.Setup
             UiBuild.Box(town, 0f, 0f, LobbyScreen.TownWidth, LobbyScreen.TownHeight);
 
             // The buildings (Round 78, stage 30): pictures of their own that the screen stands on the empty plots of the far town at their level's
-            // size (LobbyScreen.Plots), the farther ones first so that the nearer ones draw over them: the inn at the back, the gate, the barracks, the stagecoach.
+            // size (LobbyScreen.Plots; the gate's one picture at LobbyScreen.GatePlot), the farther ones first so that the nearer ones draw over them: the inn at the back, the gate, the barracks, the stagecoach.
             BuildingView inn = BuildBuilding(frame, "Inn");
             BuildingView gate = BuildBuilding(frame, "Gate");
             BuildingView barracks = BuildBuilding(frame, "Barracks");
@@ -98,14 +98,6 @@ namespace F1.Editor.Setup
             TextMeshProUGUI noCandidates = UiBuild.Box(UiBuild.LocalizedLabel("NoCandidates", coachWindow.transform, UiKeys.Lobby.NoCandidates, 24f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 400f, 932f, 40f);
             UiBuild.Box(UiBuild.LocalizedLabel("CoachNote", coachWindow.transform, UiKeys.Lobby.CoachNote, 20f, UiPalette.TextDim), 24f, 706f, 932f, 30f);
 
-            // The gate (stage 30): the building line, the dungeons, the way to the expedition screen and the gate's note.
-            Image gateWindow = Window(frame, "GateWindow", new Rect(470f, 300f, 980f, 440f), UiKeys.Lobby.GateTitle, "GateClose", out ButtonParts gateClose);
-            BuildingLineView gateLine = BuildBuildingLine(gateWindow.transform, "Gate", 932f, 352f);
-            TextMeshProUGUI gateDungeons = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("GateDungeons", gateWindow.transform, 24f, UiPalette.Text, TextAlignmentOptions.Center)), 24f, 144f, 932f, 36f);
-            ButtonParts gateDepart = UiBuild.Button("GateDepart", gateWindow.transform, UiPalette.Button, 30f);
-            UiBuild.Box(gateDepart.Rect, 24f, 196f, 932f, 80f);
-            UiBuild.Box(UiBuild.LocalizedLabel("GateNote", gateWindow.transform, UiKeys.Lobby.GateNote, 20f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 292f, 932f, 30f);
-
             // The result window (Round 72): the title says how the run ended, four rows, and the new run.
             Image runOverWindow = UiBuild.Panel("RunOverWindow", frame, UiPalette.Panel);
             UiBuild.Box(runOverWindow, 510f, 290f, 900f, 500f);
@@ -140,12 +132,6 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_barracksLine", barracksLine);
             UiBuild.SetReference(screen, "_innLine", innLine);
             UiBuild.SetReference(screen, "_coachLine", coachLine);
-            UiBuild.SetReference(screen, "_gateLine", gateLine);
-            UiBuild.SetReference(screen, "_gateWindow", gateWindow.gameObject);
-            UiBuild.SetReference(screen, "_gateClose", gateClose.Button);
-            UiBuild.SetReference(screen, "_gateDungeons", gateDungeons);
-            UiBuild.SetReference(screen, "_gateDepart", gateDepart.Button);
-            UiBuild.SetReference(screen, "_gateDepartLabel", gateDepart.Label);
             UiBuild.SetReference(screen, "_barracksWindow", barracksWindow.gameObject);
             UiBuild.SetReference(screen, "_barracksClose", barracksClose.Button);
             UiBuild.SetReference(screen, "_entryTemplate", entryTemplate);

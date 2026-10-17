@@ -395,7 +395,7 @@ namespace F1.Tests
                 yield break;
             }
 
-            string building = quarter == LobbyScreen.Quarter.Barracks ? "Frame/Barracks" : quarter == LobbyScreen.Quarter.Inn ? "Frame/Inn" : quarter == LobbyScreen.Quarter.Gate ? "Frame/Gate" : "Frame/Coach";
+            string building = quarter == LobbyScreen.Quarter.Barracks ? "Frame/Barracks" : quarter == LobbyScreen.Quarter.Inn ? "Frame/Inn" : "Frame/Coach";
             Click(lobby, building);
             yield return WaitForRedraw();
         }
@@ -414,7 +414,6 @@ namespace F1.Tests
                 case LobbyScreen.Quarter.Barracks: Click(lobby, "Frame/BarracksWindow/BarracksClose"); break;
                 case LobbyScreen.Quarter.Inn: Click(lobby, "Frame/InnWindow/InnClose"); break;
                 case LobbyScreen.Quarter.Coach: Click(lobby, "Frame/CoachWindow/CoachClose"); break;
-                case LobbyScreen.Quarter.Gate: Click(lobby, "Frame/GateWindow/GateClose"); break;
             }
         }
 

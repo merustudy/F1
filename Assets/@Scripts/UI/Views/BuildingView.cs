@@ -54,12 +54,22 @@ namespace F1.UI
 
         /// <summary>
         /// Stands the building's picture on the town: its foot at (footX, footY) of the frame (UI coordinates, y down), at the given width,
-        /// as tall as the picture's shape makes it. The hotspot is the picture; the plate is centred under the foot.
+        /// as tall as the picture's shape makes it. The hotspot is the picture; the plate is centred under the foot. With no picture (the gate,
+        /// 2026-10-18: the arch painted on the town is the gate) the box is a transparent hotspot of the given height, lit by its plate only.
         /// </summary>
-        public void Place(Sprite picture, float footX, float footY, float width)
+        public void Place(Sprite picture, float footX, float footY, float width, float height = 0f)
         {
             _picture.sprite = picture;
-            float height = picture == null || picture.rect.width <= 0f ? width * 0.66f : width * picture.rect.height / picture.rect.width;
+            _picture.color = picture == null ? Color.clear : Color.white;
+            if (picture != null && picture.rect.width > 0f)
+            {
+                height = width * picture.rect.height / picture.rect.width;
+            }
+            else if (height <= 0f)
+            {
+                height = width * 0.66f;
+            }
+
             Rect.anchoredPosition = new Vector2(footX - width / 2f, -(footY - height));
             Rect.sizeDelta = new Vector2(width, height);
             // The scaffold is laid over the picture's box: a little wider than the walls and as tall as the roof.
@@ -102,7 +112,7 @@ namespace F1.UI
 
         public void SetLit(bool lit)
         {
-            _wash.SetActive(lit);
+            _wash.SetActive(lit && _picture.sprite != null);
             _plateLine.effectColor = lit ? UiPalette.Brass : UiPalette.Line;
         }
 

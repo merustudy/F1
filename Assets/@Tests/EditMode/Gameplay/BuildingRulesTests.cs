@@ -127,23 +127,7 @@ namespace F1.Tests
             Assert.Throws<InvalidOperationException>(() => RunRules.Treat(data, run, "anna"));
             Assert.Throws<InvalidOperationException>(() => RunRules.Dismiss(data, run, "dan"));
             Assert.IsTrue(RunRules.CanRest(data, run), "Resting goes on while the inn is built: that is how the days pass.");
-            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"), "The gate is not being built.");
-        }
-
-        [Test]
-        public void AGateUnderConstruction_KeepsThePartyHome_UntilItIsDone()
-        {
-            StaticData data = TestData.Data();
-            RunState run = RunWithParty(data);
-            BuildingRules.Upgrade(data, run, BuildingId.Gate);
-            Assert.AreEqual(DepartCheck.GateLocked, RunRules.CanDepart(data, run, "cave"));
-            Assert.Throws<InvalidOperationException>(() => RunRules.BeginExpedition(data, run, "cave"));
-
-            RunRules.Rest(data, run);
-            RunRules.Rest(data, run);
-            RunRules.Rest(data, run);
-            Assert.AreEqual(2, BuildingRules.LevelOf(run, BuildingId.Gate));
-            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"));
+            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "cave"), "No construction keeps the party home: the gate has no level (2026-10-18).");
         }
 
         [Test]
@@ -151,17 +135,18 @@ namespace F1.Tests
         {
             StaticData data = TestData.Data();
             RunState run = RunWithParty(data);
-            BuildingRules.Upgrade(data, run, BuildingId.Gate);
+            BuildingRules.Upgrade(data, run, BuildingId.Coach);
             run.Day = data.Balance.TotalDays + 1;
             Assert.IsTrue(RunRules.IsFinalStandDue(data, run));
-            Assert.IsFalse(BuildingRules.IsLocked(data, run, BuildingId.Gate), "The days do not pass any more: the lock would never lift.");
-            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "pit"), "The final stand goes through the gate being built.");
+            Assert.IsFalse(BuildingRules.IsLocked(data, run, BuildingId.Coach), "The days do not pass any more: the lock would never lift.");
+            Assert.AreEqual(HireCheck.Ok, RunRules.CanHire(data, run, 0), "The stagecoach being built does not lock past the last day.");
+            Assert.AreEqual(DepartCheck.Ok, RunRules.CanDepart(data, run, "pit"));
             Assert.AreEqual(UpgradeCheck.FinalStandDue, BuildingRules.CanUpgrade(data, run, BuildingId.Barracks));
-            Assert.IsNotNull(BuildingRules.ConstructionOf(run, BuildingId.Gate), "The construction stays, unfinished.");
+            Assert.IsNotNull(BuildingRules.ConstructionOf(run, BuildingId.Coach), "The construction stays, unfinished.");
         }
 
         [Test]
-        public void TheLevels_AddTheirBonus_ToTheRosterLimit_TheCandidates_TheRelief_AndTheSettlementsGold()
+        public void TheLevels_AddTheirBonus_ToTheRosterLimit_TheCandidates_AndTheRelief()
         {
             StaticData data = TestData.Data();
             BalanceData balance = data.Balance;
@@ -169,7 +154,6 @@ namespace F1.Tests
             Assert.AreEqual(balance.RosterLimit, BuildingRules.RosterLimit(data, run));
             Assert.AreEqual(balance.RecruitCount, BuildingRules.RecruitCount(data, run));
             Assert.AreEqual(balance.TreatmentRelief, BuildingRules.TreatmentRelief(data, run));
-            Assert.AreEqual(0, BuildingRules.GoldBonusPercent(data, run));
 
             foreach (string id in BuildingId.All)
             {
@@ -179,10 +163,8 @@ namespace F1.Tests
             Assert.AreEqual(balance.RosterLimit + 2, BuildingRules.RosterLimit(data, run));
             Assert.AreEqual(balance.RecruitCount + 1, BuildingRules.RecruitCount(data, run));
             Assert.AreEqual(balance.TreatmentRelief + 20, BuildingRules.TreatmentRelief(data, run));
-            Assert.AreEqual(10, BuildingRules.GoldBonusPercent(data, run));
-            Assert.AreEqual(26, BuildingRules.WithGateBonus(data, run, 24), "24 gold plus 10%, rounded down.");
 
-            // The treatment takes the inn's relief; the stagecoach draws the extra candidate; the settlement pays the gate's bonus.
+            // The treatment takes the inn's relief; the stagecoach draws the extra candidate; the settlement's gold is the base (no gate bonus since 2026-10-18).
             run.Roster[0].Fatigue = 100;
             RunRules.Treat(data, run, "anna");
             Assert.AreEqual(100 - balance.TreatmentRelief - 20, run.Roster[0].Fatigue);
@@ -190,9 +172,8 @@ namespace F1.Tests
             Assert.AreEqual(balance.RecruitCount + 1, run.Recruits.Count);
             int goldBefore = run.Gold;
             SettlementReport report = RunRules.Settle(data, run, Ended(data, run, ExpeditionResult.Cleared, 3));
-            Assert.AreEqual(10, report.GateBonusPercent);
-            Assert.AreEqual(26, report.GoldEarned, "2 floors x 2 and the clear's 20, plus 10%.");
-            Assert.AreEqual(goldBefore + 26, run.Gold);
+            Assert.AreEqual(24, report.GoldEarned, "2 floors x 2 and the clear's 20.");
+            Assert.AreEqual(goldBefore + 24, run.Gold);
 
             // The roster grows to the raised limit.
             run.Gold = 500;

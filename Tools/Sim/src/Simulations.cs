@@ -523,10 +523,10 @@ namespace F1.Sim
         /// the final stand past the last day. Expeditions play as in <see cref="Expedition"/>. Reports how runs end and when, and the gold. The policy's
         /// numbers are simulator tools, not game rules.
         /// </summary>
-        /// <param name="build">Whether the lobby policy upgrades the town's buildings (stage 30): the cheapest next level whose price leaves the hire price in hand, the gate first on a tie, then the stagecoach, the barracks, the inn.</param>
+        /// <param name="build">Whether the lobby policy upgrades the town's buildings (stage 30): the cheapest next level whose price leaves the hire price in hand, the stagecoach first on a tie, then the barracks, the inn (the gate has no level since 2026-10-18).</param>
         public static void Run(StaticData data, SimPolicy policy, int runs, ulong baseSeed, int restAbove, int bench, int treatAbove, bool build = true)
         {
-            string[] buildOrder = { BuildingId.Gate, BuildingId.Coach, BuildingId.Barracks, BuildingId.Inn };
+            string[] buildOrder = { BuildingId.Coach, BuildingId.Barracks, BuildingId.Inn };
             long upgrades = 0, goldBuilt = 0, finished = 0;
             var levelsAtEndBy = new Dictionary<string, long>(StringComparer.Ordinal);
             foreach (string id in BuildingId.All)
@@ -606,14 +606,6 @@ namespace F1.Sim
                     if (dungeon == null)
                     {
                         break;
-                    }
-
-                    // The gate under construction keeps the party home (stage 30): a day of rest passes the days until it is done.
-                    if (RunRules.CanDepart(data, state, dungeon.Id) == DepartCheck.GateLocked)
-                    {
-                        finished += RunRules.Rest(data, state).Count;
-                        rests++;
-                        continue;
                     }
 
                     if (dungeon.IsFinal && !noted && !RunRules.IsFinalStandDue(data, state))

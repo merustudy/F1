@@ -57,7 +57,8 @@ namespace F1.Tests
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("background/dungeon/", StringComparison.Ordinal)), "The backgrounds of the dungeons.");
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("item/", StringComparison.Ordinal)), "The icons of the items.");
             Assert.IsTrue(entries.Any(e => e.Address == "item/gladius-glow"), "The glow of the unique item (stage 23), with its icon.");
-            Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Building(F1.Data.BuildingId.Gate, 3)), "The buildings at their levels (stage 30).");
+            Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Building(F1.Data.BuildingId.Coach, 3)), "The buildings at their levels (stage 30).");
+            Assert.IsFalse(entries.Any(e => e.Address.StartsWith("building/gate", StringComparison.Ordinal)), "The gate is painted on the town (2026-10-18): no picture of its own.");
             Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Scaffold), "The scaffold (stage 30).");
             Assert.IsTrue(entries.Any(e => e.Address == "bag/leather-pouch"), "The bags' pictures (round 79), in the expedition scope like an item's icon.");
             foreach (AddressEntry entry in entries)

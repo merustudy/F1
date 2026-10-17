@@ -204,7 +204,7 @@ namespace F1.Editor.Setup
                 files.Add(new ArtFile(address, AssetPath(address), Scene, new AddressEntry(AssetPath(address), address, ResourceScope.Lobby, ArtGroup)));
             }
 
-            // The town's buildings at their levels and the scaffold (Round 78, stage 30): cut-out pictures the lobby stands on the town, in its scope.
+            // The town's buildings at their levels and the scaffold (Round 78, stage 30): cut-out pictures the lobby stands on the town, in its scope. The gate is painted on the town (2026-10-18).
             var buildings = new List<string> { ArtAddress.Scaffold };
             foreach (string buildingId in BuildingId.All)
             {

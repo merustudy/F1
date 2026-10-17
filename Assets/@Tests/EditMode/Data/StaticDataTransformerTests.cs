@@ -48,7 +48,7 @@ namespace F1.Tests
         {
             // Stage 30: BuildingData.csv (Id, Level, Price, Days, Bonus) and StaticData's ladder per building.
             const string head = "Id,Level,Price,Days,Bonus\n";
-            const string rest = "inn,1,0,0,0\ncoach,1,0,0,0\ngate,1,0,0,0\n";
+            const string rest = "inn,1,0,0,0\ncoach,1,0,0,0\n";
             StringAssert.Contains("is not a building of the town", TransformFails(StaticDataFiles.Building, head + "tower,1,0,0,0\n" + rest).Errors[0]);
             StringAssert.Contains("'barracks' has no level", TransformFails(StaticDataFiles.Building, head + rest).Errors[0]);
             StringAssert.Contains("run from 1 without a gap", TransformFails(StaticDataFiles.Building, head + "barracks,1,0,0,0\nbarracks,3,40,3,2\n" + rest).Errors[0]);
@@ -215,7 +215,8 @@ namespace F1.Tests
             Assert.AreEqual(40, data.BuildingAt("barracks", 2).Price);
             Assert.AreEqual(3, data.BuildingAt("barracks", 2).Days);
             Assert.AreEqual(2, data.BuildingAt("barracks", 2).Bonus);
-            Assert.AreEqual(0, data.BuildingAt("gate", 1).Bonus);
+            Assert.AreEqual(0, data.BuildingAt("coach", 1).Bonus);
+            Assert.Throws<ArgumentOutOfRangeException>(() => data.BuildingAt("gate", 1), "The gate is no building (2026-10-18).");
 
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
             Assert.AreEqual(FatigueStateKind.Affliction, fearful.Kind);

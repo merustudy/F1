@@ -45,6 +45,26 @@ namespace F1.Flow
             {
                 From15To16(save);
             }
+
+            if (save.SchemaVersion == 16)
+            {
+                From16To17(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 17 (2026-10-18, the user: the gate has no upgrade) lists no gate among the buildings: a version 16 gate's level and its
+        /// construction are dropped (the gold paid for a construction going on is not given back; it was already spent).
+        /// </summary>
+        static void From16To17(RunSaveData save)
+        {
+            if (save.Run != null)
+            {
+                save.Run.Buildings?.RemoveAll(building => building != null && building.BuildingId == "gate");
+                save.Run.Constructions?.RemoveAll(construction => construction != null && construction.BuildingId == "gate");
+            }
+
+            save.SchemaVersion = 17;
         }
 
         /// <summary>Version 16 (Slice C stage 30) adds the town's building levels and constructions. A version 15 town is all at level 1 with nothing being built.</summary>

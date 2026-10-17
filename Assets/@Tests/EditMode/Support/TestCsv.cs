@@ -86,8 +86,7 @@ namespace F1.Tests
             "Id,Level,Price,Days,Bonus\n" +
             "barracks,1,0,0,0\nbarracks,2,40,3,2\n" +
             "inn,1,0,0,0\ninn,2,40,2,20\n" +
-            "coach,1,0,0,0\ncoach,2,40,3,1\n" +
-            "gate,1,0,0,0\ngate,2,40,3,10\n";
+            "coach,1,0,0,0\ncoach,2,40,3,1\n";
 
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()

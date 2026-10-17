@@ -17,8 +17,9 @@ namespace F1.UI
     /// roster strip with [원정 화면으로]. A building opens its window over the darkened town. Past the last day the gate is the final stand and
     /// the inn is closed to resting (stage 25). Once the run is over the result window (Round 72) stands over the town with [새 런].
     /// Round 78 (stage 30): the town is seen from farther away with empty plots, and each building is a picture of its own that stands on its
-    /// plot at its level's size, with a scaffold and a badge while it is built; the windows carry the building line with [업그레이드], and the
-    /// gate has a window of its own (its level, the dungeons, the way out).
+    /// plot at its level's size, with a scaffold and a badge while it is built; the windows carry the building line with [업그레이드]. The gate
+    /// has no level (2026-10-18, the user: "성문은 업그레이드 없음(원정)" and "이전 배경 성문 이용"): it is the stone arch painted on the town, a
+    /// transparent hotspot with a plate, and clicking it goes to the expedition screen.
     /// The screen shows the state and sends commands; what can be done is asked of the run manager.
     /// </summary>
     public sealed class LobbyScreen : UIScreen
@@ -50,8 +51,14 @@ namespace F1.UI
             { BuildingId.Barracks, new Plot(420f, 690f, 520f) },
             { BuildingId.Inn, new Plot(963f, 508f, 380f) },
             { BuildingId.Coach, new Plot(1330f, 728f, 360f) },
-            { BuildingId.Gate, new Plot(1680f, 575f, 380f) },
         };
+
+        /// <summary>
+        /// The gate's hotspot (2026-10-18, the user: the arch painted on the town is the gate — no picture of its own): the box over the arch at the
+        /// town's right edge, its foot on the road under the arch, as wide as the plate so that the plate stays on the screen.
+        /// </summary>
+        public static readonly Plot GatePlot = new Plot(1780f, 505f, 280f);
+        public const float GateHeight = 170f;
 
         /// <summary>How much of the plot's width a building's picture takes at each level (the mock of Round 78: 82%, 100%, 122%).</summary>
         public static float LevelScale(int level)
@@ -68,7 +75,6 @@ namespace F1.UI
             Barracks,
             Inn,
             Coach,
-            Gate,
         }
 
         [SerializeField] Image _town;
@@ -109,12 +115,6 @@ namespace F1.UI
         [SerializeField] BuildingLineView _barracksLine;
         [SerializeField] BuildingLineView _innLine;
         [SerializeField] BuildingLineView _coachLine;
-        [SerializeField] BuildingLineView _gateLine;
-        [SerializeField] GameObject _gateWindow;
-        [SerializeField] Button _gateClose;
-        [SerializeField] TMP_Text _gateDungeons;
-        [SerializeField] Button _gateDepart;
-        [SerializeField] TMP_Text _gateDepartLabel;
         [SerializeField] GameObject _runOverWindow;
         [SerializeField] TMP_Text _runOverTitle;
         [SerializeField] TMP_Text _runOverDay;
@@ -188,15 +188,14 @@ namespace F1.UI
             }
         }
 
-        /// <summary>The building view of a building id.</summary>
+        /// <summary>The building view of a building id (one of <see cref="BuildingId.All"/>).</summary>
         public BuildingView Building(string buildingId)
         {
             switch (buildingId)
             {
                 case BuildingId.Barracks: return _barracks;
                 case BuildingId.Inn: return _inn;
-                case BuildingId.Coach: return _coach;
-                default: return _gate;
+                default: return _coach;
             }
         }
 
@@ -206,8 +205,7 @@ namespace F1.UI
             {
                 case BuildingId.Barracks: return _barracksLine;
                 case BuildingId.Inn: return _innLine;
-                case BuildingId.Coach: return _coachLine;
-                default: return _gateLine;
+                default: return _coachLine;
             }
         }
 
@@ -218,13 +216,12 @@ namespace F1.UI
             _barracks.Button.onClick.AddListener(() => Open(Quarter.Barracks));
             _inn.Button.onClick.AddListener(() => Open(Quarter.Inn));
             _coach.Button.onClick.AddListener(() => Open(Quarter.Coach));
-            _gate.Button.onClick.AddListener(() => Open(Quarter.Gate));
+            // The gate goes straight to the expedition screen (as before Round 78; 2026-10-18: no gate window, nothing to upgrade there).
+            _gate.Button.onClick.AddListener(OnDepart);
             _depart.onClick.AddListener(OnDepart);
-            _gateDepart.onClick.AddListener(OnDepart);
             _barracksClose.onClick.AddListener(() => Open(Quarter.None));
             _innClose.onClick.AddListener(() => Open(Quarter.None));
             _coachClose.onClick.AddListener(() => Open(Quarter.None));
-            _gateClose.onClick.AddListener(() => Open(Quarter.None));
             _rest.onClick.AddListener(OnRest);
             _runOverNewRun.onClick.AddListener(OnNewRun);
             foreach (string buildingId in BuildingId.All)
@@ -239,6 +236,10 @@ namespace F1.UI
                 building.Entered += ShowBubble;
                 building.Exited += HideBubble;
             }
+
+            // The gate is the arch painted on the town: a transparent hotspot over it, placed once; it never grows and is never built.
+            _gate.Place(null, GatePlot.FootX, GatePlot.FootY, GatePlot.Width, GateHeight);
+            _gate.HideConstruction();
 
             _bubble.gameObject.SetActive(false);
             Managers.Sound.PlayMusic(MusicTrack.Lobby);
@@ -272,22 +273,20 @@ namespace F1.UI
             RefreshBarracks(data, run);
             RefreshInn(data, run, due);
             RefreshCoach(data, run);
-            RefreshGate(data, run, due);
             RefreshRunOver(data, run);
 
             _shade.SetActive(_open != Quarter.None || run.IsOver);
             _barracksWindow.SetActive(_open == Quarter.Barracks);
             _innWindow.SetActive(_open == Quarter.Inn);
             _coachWindow.SetActive(_open == Quarter.Coach);
-            _gateWindow.SetActive(_open == Quarter.Gate);
             _runOverWindow.SetActive(run.IsOver);
         }
 
         // ---- The town ------------------------------------------------------------------------
 
         /// <summary>
-        /// The buildings on their plots at their levels (Round 78), the plates with the levels (the gate reads "final stand" past the last day and
-        /// says whose boss; the inn says no day is left to rest), the scaffold and the badge of a building under construction (its plate dimmed).
+        /// The buildings on their plots at their levels (Round 78), the plates with the levels (the gate has none; it reads "final stand" past the
+        /// last day and says whose boss; the inn says no day is left to rest), the scaffold and the badge of a building under construction (its plate dimmed).
         /// </summary>
         void RefreshTown(StaticData data, RunState run, bool due)
         {
@@ -326,10 +325,10 @@ namespace F1.UI
             }
             else
             {
-                _gate.ShowPlate(Plate(UiKeys.Lobby.Gate, BuildingId.Gate), null, dim: Managers.Run.IsBuildingLocked(BuildingId.Gate));
+                _gate.ShowPlate(UiStrings.Get(UiKeys.Lobby.Gate), null, dim: false);
             }
 
-            // Every building opens its window while the run goes on (a locked one shows its construction there); the gate's window holds the way out.
+            // Every building opens its window while the run goes on (a locked one shows its construction there); the gate is the way out.
             _gate.Button.interactable = !run.IsOver;
             _barracks.Button.interactable = !run.IsOver;
             _inn.Button.interactable = !run.IsOver;
@@ -375,22 +374,8 @@ namespace F1.UI
             {
                 case BuildingId.Barracks: return UiStrings.Get(UiKeys.Lobby.EffectBarracks, balance.RosterLimit + bonus, balance.RosterLimit + other);
                 case BuildingId.Inn: return UiStrings.Get(UiKeys.Lobby.EffectInn, balance.TreatmentRelief + bonus, balance.TreatmentRelief + other);
-                case BuildingId.Coach: return UiStrings.Get(UiKeys.Lobby.EffectCoach, balance.RecruitCount + bonus, balance.RecruitCount + other);
-                default: return UiStrings.Get(UiKeys.Lobby.EffectGate, bonus, other);
+                default: return UiStrings.Get(UiKeys.Lobby.EffectCoach, balance.RecruitCount + bonus, balance.RecruitCount + other);
             }
-        }
-
-        /// <summary>The gate's window (stage 30): its building line, the dungeons (the locked ones saying so), the way to the expedition screen.</summary>
-        void RefreshGate(StaticData data, RunState run, bool due)
-        {
-            RefreshLine(data, run, BuildingId.Gate);
-            _gateDungeons.text = GateWords(data);
-            DepartCheck check = Managers.Run.CanDepart(Dungeon.Id);
-            // The party is formed on the expedition screen (Round 75 B, 2026-10-17): a party still short does not keep the gate shut.
-            _gateDepart.interactable = check == DepartCheck.Ok || check == DepartCheck.PartyTooSmall;
-            _gateDepartLabel.text = check == DepartCheck.GateLocked
-                ? UiStrings.Get(UiKeys.Lobby.GateLocked, BuildingRules.DaysLeft(run, Managers.Run.ConstructionOf(BuildingId.Gate)))
-                : UiStrings.Get(due ? UiKeys.Lobby.ToFinalStand : UiKeys.Lobby.Depart);
         }
 
         /// <summary>The dungeons, the locked ones saying so; past the last day, whose boss the final stand is against.</summary>
@@ -439,10 +424,15 @@ namespace F1.UI
             _bubble.gameObject.SetActive(false);
         }
 
-        /// <summary>What the bubble says under the name: the construction going on, or what the building holds now and, if it can be upgraded, the price.</summary>
+        /// <summary>What the bubble says under the name: the construction going on, or what the building holds now and, if it can be upgraded, the price. The gate names the dungeons.</summary>
         string BubbleDetailOf(BuildingView building, StaticData data, BalanceData balance, RunState run)
         {
-            string buildingId = building == _barracks ? BuildingId.Barracks : building == _inn ? BuildingId.Inn : building == _coach ? BuildingId.Coach : BuildingId.Gate;
+            if (building == _gate)
+            {
+                return GateWords(data);
+            }
+
+            string buildingId = building == _barracks ? BuildingId.Barracks : building == _inn ? BuildingId.Inn : BuildingId.Coach;
             ConstructionState construction = Managers.Run.ConstructionOf(buildingId);
             if (construction != null)
             {
@@ -464,13 +454,9 @@ namespace F1.UI
 
                 detail = UiStrings.Get(UiKeys.Lobby.InnHint, balance.FatigueBreakdown, tired, balance.TreatmentPrice);
             }
-            else if (building == _coach)
-            {
-                detail = UiStrings.Get(UiKeys.Lobby.CoachHint, run.Recruits.Count, balance.HirePrice);
-            }
             else
             {
-                detail = GateWords(data);
+                detail = UiStrings.Get(UiKeys.Lobby.CoachHint, run.Recruits.Count, balance.HirePrice);
             }
 
             BuildingData next = BuildingRules.NextLevel(data, run, buildingId);

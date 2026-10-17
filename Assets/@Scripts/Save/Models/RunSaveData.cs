@@ -23,7 +23,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 16;
+        public const int CurrentSchemaVersion = 17;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -58,7 +58,7 @@ namespace F1.Save
         /// <summary>Expeditions started per dungeon (version 14). A version 13 file knows none.</summary>
         public List<ExpeditionCountRecord> Expeditions;
 
-        /// <summary>The town's buildings above level 1 (version 16): a building not listed is at level 1.</summary>
+        /// <summary>The town's buildings above level 1 (version 16; version 17 lists no gate): a building not listed is at level 1.</summary>
         public List<BuildingLevelRecord> Buildings;
 
         /// <summary>The constructions going on (version 16), at most one per building.</summary>

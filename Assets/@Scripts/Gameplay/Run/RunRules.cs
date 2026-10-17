@@ -369,12 +369,6 @@ namespace F1.Gameplay
                 return DepartCheck.RunIsOver;
             }
 
-            // The gate under construction keeps everyone home (stage 30); past the last day it does not (BuildingRules.IsLocked).
-            if (BuildingRules.IsLocked(data, state, BuildingId.Gate))
-            {
-                return DepartCheck.GateLocked;
-            }
-
             if (state.Party.Count < data.Balance.MinPartySize)
             {
                 return DepartCheck.PartyTooSmall;
@@ -536,9 +530,6 @@ namespace F1.Gameplay
                 report.GoldEarned += report.GoldFromCoins;
             }
 
-            // The gate's levels add to everything the settlement pays (stage 30), rounded down.
-            report.GateBonusPercent = BuildingRules.GoldBonusPercent(data, state);
-            report.GoldEarned = BuildingRules.WithGateBonus(data, state, report.GoldEarned);
             state.Gold += report.GoldEarned;
             report.GoldAfter = state.Gold;
 

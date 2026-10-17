@@ -81,12 +81,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 1770aae3b9d94403e9209dd6fe55c0e3
-    m_Address: building/gate-2
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-lobby
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19a13001e06904735970f98c25fbdd23
     m_Address: item/gladius
     m_ReadOnly: 0
@@ -303,12 +297,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8354a9d8c919445ee938b630481fdad2
-    m_Address: building/gate-3
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-lobby
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -440,12 +428,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b82d6af4f693c4edc8761a2d4824345d
-    m_Address: building/gate-1
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bd819f93ad5824e9cb91d8e2230a3325
     m_Address: pose/enemy/goblin-raider-hit

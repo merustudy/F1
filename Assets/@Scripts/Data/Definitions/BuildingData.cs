@@ -80,14 +80,15 @@ namespace F1.Data
         /// <summary>The stagecoach: its levels raise the number of candidates.</summary>
         public const string Coach = "coach";
 
-        /// <summary>The gate: its levels raise the settlement's gold, in percent.</summary>
-        public const string Gate = "gate";
-
-        public static readonly string[] All = { Barracks, Inn, Coach, Gate };
+        /// <summary>
+        /// The three buildings with levels. The gate is not one of them (2026-10-18, the user: "성문은 업그레이드 없음(원정)"): it is the
+        /// fixed way to the expedition screen, a picture of the town with nothing to raise.
+        /// </summary>
+        public static readonly string[] All = { Barracks, Inn, Coach };
 
         public static bool IsKnown(string id)
         {
-            return id == Barracks || id == Inn || id == Coach || id == Gate;
+            return id == Barracks || id == Inn || id == Coach;
         }
     }
 }

@@ -359,8 +359,6 @@ namespace F1.Tests
                 new BuildingData(BuildingId.Inn, 2, 40, 2, 20),
                 new BuildingData(BuildingId.Coach, 1, 0, 0, 0),
                 new BuildingData(BuildingId.Coach, 2, 40, 3, 1),
-                new BuildingData(BuildingId.Gate, 1, 0, 0, 0),
-                new BuildingData(BuildingId.Gate, 2, 40, 3, 10),
             };
         }
 
