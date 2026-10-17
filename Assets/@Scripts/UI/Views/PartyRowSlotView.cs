@@ -6,42 +6,42 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// A row of the party in the expedition screen's party popup (Round 75 B, 2026-10-17): the member's name and level, the job with
-    /// the member's state, the fatigue pips every screen shows, and the moves — a row to the front, a row to the back (trading places
-    /// with whoever stands there), out of the party. An empty row says so and how to fill it, and has no moves.
+    /// A row of the party on the party popup's stage (Round 76 D, 2026-10-17): the member's figure standing on the floor as the node
+    /// map's party side stands it, and under the feet the row with the name and the level, the job with the member's state, the
+    /// fatigue pips every screen shows, and the moves — a row to the front, a row to the back (trading places with whoever stands
+    /// there). An empty row shows a dim place with the words and, under it, how to fill the row; it has no moves.
     /// </summary>
     public sealed class PartyRowSlotView : MonoBehaviour
     {
+        [SerializeField] FigureView _figure;
+        [SerializeField] GameObject _empty;
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _level;
         [SerializeField] TMP_Text _detail;
-        [SerializeField] TMP_Text _hint;
         [SerializeField] UiBar[] _pips;
         [SerializeField] Button _forward;
         [SerializeField] Button _back;
-        [SerializeField] Button _remove;
 
         /// <summary>Who stands in the row, or null while it is empty.</summary>
         public string MercenaryId { get; private set; }
 
+        public FigureView Figure => _figure;
+        public bool IsEmpty => _empty.activeSelf;
         public string Name => _name.text;
         public string Level => _level.text;
         public string Detail => _detail.text;
-        public string Hint => _hint.text;
         public IReadOnlyList<UiBar> Pips => _pips;
         public Button Forward => _forward;
         public Button Back => _back;
-        public Button Remove => _remove;
 
-        public void ShowEmpty(string words, string hint)
+        public void ShowEmpty(string hint)
         {
             MercenaryId = null;
-            _name.text = words;
-            _name.color = UiPalette.TextDim;
+            _figure.gameObject.SetActive(false);
+            _empty.SetActive(true);
+            _name.text = string.Empty;
             _level.text = string.Empty;
-            _detail.text = string.Empty;
-            _hint.text = hint;
-            _hint.gameObject.SetActive(true);
+            _detail.text = hint;
             foreach (UiBar pip in _pips)
             {
                 pip.gameObject.SetActive(false);
@@ -49,18 +49,18 @@ namespace F1.UI
 
             _forward.gameObject.SetActive(false);
             _back.gameObject.SetActive(false);
-            _remove.gameObject.SetActive(false);
         }
 
-        public void Show(string mercenaryId, string name, string level, string detail, int fatigue, int maxFatigue, int breakdown, bool canForward, bool canBack)
+        /// <param name="art">The job's figure, or null for a job without one (the placeholder stands in).</param>
+        public void Show(string mercenaryId, Sprite art, string name, string level, string detail, int fatigue, int maxFatigue, int breakdown, bool canForward, bool canBack)
         {
             MercenaryId = mercenaryId;
+            _empty.SetActive(false);
+            _figure.gameObject.SetActive(true);
+            _figure.Show(art);
             _name.text = name;
-            _name.color = UiPalette.Text;
             _level.text = level;
             _detail.text = detail;
-            _hint.text = string.Empty;
-            _hint.gameObject.SetActive(false);
             foreach (UiBar pip in _pips)
             {
                 pip.gameObject.SetActive(true);
@@ -69,7 +69,6 @@ namespace F1.UI
             FatiguePips.Show(_pips, fatigue, maxFatigue, breakdown);
             _forward.gameObject.SetActive(true);
             _back.gameObject.SetActive(true);
-            _remove.gameObject.SetActive(true);
             _forward.interactable = canForward;
             _back.interactable = canBack;
         }

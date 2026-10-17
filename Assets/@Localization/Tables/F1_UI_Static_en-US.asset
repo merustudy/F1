@@ -1459,12 +1459,13 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6078818543460353
-    m_Localized: "Roster {0}/{1} \u2014 click to add or remove"
+    m_Localized: "Roster {0}/{1} \u2014 In takes the next row; take one out and those
+      behind advance"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6078818543460354
-    m_Localized: Pick a mercenary from the roster
+    m_Localized: Add from the list at the right
     m_Metadata:
       m_Items: []
   - m_Id: 6078818543460355
@@ -1473,6 +1474,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6078818543460356
     m_Localized: Back
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6100672578576384
+    m_Localized: In
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6100672591159296
+    m_Localized: Out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6100672591159297
+    m_Localized: Empty (hire at the coach)
     m_Metadata:
       m_Items: []
   references:

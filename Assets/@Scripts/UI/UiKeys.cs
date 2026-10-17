@@ -134,13 +134,16 @@ namespace F1.UI
             public const string RewardLabel = "Expedition.RewardLabel";
             public const string Reward = "Expedition.Reward";
 
-            // The party popup (Round 75 B, 2026-10-17).
+            // The party popup (Round 75 B, 2026-10-17; the stage and the list, Round 76 D).
             public const string PartyTitle = "Expedition.PartyTitle";
             public const string PartyDungeon = "Expedition.PartyDungeon";
             public const string RosterHeader = "Expedition.RosterHeader";
             public const string EmptyRowHint = "Expedition.EmptyRowHint";
             public const string Forward = "Expedition.Forward";
             public const string Back = "Expedition.Back";
+            public const string Join = "Expedition.Join";
+            public const string Leave = "Expedition.Leave";
+            public const string EmptySlot = "Expedition.EmptySlot";
         }
 
         public static class Map

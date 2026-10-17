@@ -69,8 +69,9 @@ namespace F1.Editor.Setup
             for (int i = 0; i < cards.Length; i++)
             {
                 int row = i + 1;
+                // In the node map's order (Round 76 D): 4열 at the left, 1열 at the right, as the popup's stage stands the party.
                 Image slot = UiBuild.Panel("PartyRow" + row, b, UiPalette.PanelLight);
-                UiBuild.Box(slot, 24f + 300f * i, 70f, 280f, 160f);
+                UiBuild.Box(slot, 24f + 300f * (BattleRows.Count - row), 70f, 280f, 160f);
                 var card = slot.gameObject.AddComponent<ExpeditionPartyCardView>();
                 UiBuild.Box(UiBuild.LocalizedLabel("PartyRowLabel" + row, slot.transform, UiText.RowKey(row), 20f, UiPalette.TextDim), 20f, 14f, 60f, 30f);
                 TextMeshProUGUI cardName = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyRowName" + row, slot.transform, 26f, UiPalette.Text)), 80f, 10f, 128f, 36f);
@@ -92,34 +93,37 @@ namespace F1.Editor.Setup
             ButtonParts depart = UiBuild.LocalizedButton("Depart", b, UiKeys.Expedition.Depart, UiPalette.Button, 34f);
             UiBuild.Box(depart.Rect, 1520f, 100f, 294f, 120f);
 
-            // The shade over the map (the header stays clear) while the party popup is open, and the popup over it (Round 75 B,
-            // 2026-10-17, ArtPipeline/Archive/75-party-popup/mock-party-B-depart.png): the chosen dungeon's line, a slot per row with
-            // the moves, the roster's chips in a grid of four, the status and the departure.
+            // The shade over the map (the header stays clear) while the party popup is open, and the popup over it (Round 75 B, Round 76 D,
+            // ArtPipeline/Archive/76-party-figures/mock-figures-D-stage-list.png): the title with the chosen dungeon's line, the stage at
+            // the left with the party standing as the node map's party side stands it, the roster's list at the right, the status and the
+            // departure under the stage.
             Image shade = UiBuild.Image("Shade", frame, TownShade, raycastTarget: true);
             UiBuild.Box(shade, 0f, 100f, 1920f, 980f);
             shade.gameObject.SetActive(false);
-            Image partyWindow = Window(frame, "PartyWindow", new Rect(260f, 140f, 1400f, 800f), UiKeys.Expedition.PartyTitle, "PartyClose", out ButtonParts partyClose);
+            Image partyWindow = Window(frame, "PartyWindow", new Rect(PartyWindowX, PartyWindowY, PartyWindowWidth, PartyWindowHeight), UiKeys.Expedition.PartyTitle, "PartyClose", out ButtonParts partyClose);
             Transform w = partyWindow.transform;
-            TextMeshProUGUI partyDungeon = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyDungeon", w, 22f, UiPalette.Text)), 24f, 70f, 1000f, 32f);
+            TextMeshProUGUI partyDungeon = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyDungeon", w, 22f, UiPalette.Text)), 170f, 24f, 900f, 34f);
+
+            Image stage = UiBuild.Panel("Stage", w, UiPalette.Slot);
+            UiBuild.Box(stage, PartyStageX, PartyStageY, PartyStageWidth, PartyStageHeight);
+            UiBuild.Box(UiBuild.Image("StageFloorLine", stage.transform, UiPalette.Line), 20f, PartyStageFoot + 1f, PartyStageWidth - 40f, 2f);
             var slots = new PartyRowSlotView[BattleRows.Count];
             for (int i = 0; i < slots.Length; i++)
             {
-                slots[i] = BuildPartyRowSlot(w, i + 1, 24f + 340f * i, 110f);
+                int row = i + 1;
+                slots[i] = BuildPartyStageColumn(stage.transform, row, PartyStageColumnWidth * (BattleRows.Count - row));
             }
 
-            TextMeshProUGUI rosterHeader = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RosterHeader", w, 24f, UiPalette.TextDim)), 24f, 330f, 1000f, 34f);
-            RectTransform chips = UiBuild.Box(UiBuild.Rect("Chips", w), 24f, 372f, 1352f, 240f);
-            var grid = chips.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(320f, 110f);
-            grid.spacing = new Vector2(24f, 20f);
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 4;
-            grid.childAlignment = TextAnchor.UpperLeft;
-            PartyPickChipView chipTemplate = BuildPartyPickChip(chips);
-            TextMeshProUGUI partyStatus = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyStatus", w, 24f, UiPalette.Text)), 24f, 728f, 900f, 40f);
+            TextMeshProUGUI partyStatus = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyStatus", w, 24f, UiPalette.Text)), PartyStageX + 24f, PartyStageY + PartyStageHeight - 68f, 600f, 40f);
             ButtonParts partyDepart = UiBuild.LocalizedButton("PartyDepart", w, UiKeys.Expedition.Depart, UiPalette.Button, 30f);
             UiBuild.Silence(partyDepart.Button);
-            UiBuild.Box(partyDepart.Rect, 1082f, 712f, 294f, 64f);
+            UiBuild.Box(partyDepart.Rect, PartyStageX + PartyStageWidth - 24f - 294f, PartyStageY + PartyStageHeight - 80f - 24f, 294f, 64f);
+
+            TextMeshProUGUI rosterHeader = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RosterHeader", w, 20f, UiPalette.TextDim)), PartyListX, 86f, PartyListWidth, 30f);
+            RectTransform list = UiBuild.Box(UiBuild.Rect("List", w), PartyListX, 120f, PartyListWidth, PartyWindowHeight - 120f - 24f);
+            UiBuild.Vertical(list, 8f);
+            PartyListRowView rowTemplate = BuildPartyListRow(list);
+            GameObject emptyTemplate = BuildEmptySlot(list);
 
             UiBuild.SetReference(screen, "_day", day);
             UiBuild.SetReference(screen, "_gold", gold);
@@ -142,72 +146,118 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_partyDungeon", partyDungeon);
             UiBuild.SetReferences(screen, "_slots", slots);
             UiBuild.SetReference(screen, "_rosterHeader", rosterHeader);
-            UiBuild.SetReference(screen, "_chipTemplate", chipTemplate);
+            UiBuild.SetReference(screen, "_rowTemplate", rowTemplate);
+            UiBuild.SetReference(screen, "_emptyTemplate", emptyTemplate);
             UiBuild.SetReference(screen, "_partyStatus", partyStatus);
             UiBuild.SetReference(screen, "_partyDepart", partyDepart.Button);
             UiBuild.SetReference(screen, "_partyClose", partyClose.Button);
             return screen;
         }
 
-        /// <summary>
-        /// A row of the party in the popup (the mock's card): the row label, the name and the level, the job line (the empty row's hint
-        /// in its place), the fatigue pips, and the moves — forward, back, out.
-        /// </summary>
-        static PartyRowSlotView BuildPartyRowSlot(Transform parent, int row, float x, float y)
-        {
-            Image card = UiBuild.Panel("PartySlot" + row, parent, UiPalette.PanelLight);
-            UiBuild.Box(card, x, y, 320f, 200f);
-            Transform c = card.transform;
-            UiBuild.Box(UiBuild.LocalizedLabel("SlotRowLabel" + row, c, UiText.RowKey(row), 20f, UiPalette.TextDim), 16f, 14f, 60f, 28f);
-            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotName" + row, c, 26f, UiPalette.Text)), 76f, 10f, 150f, 36f);
-            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotLevel" + row, c, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), 230f, 14f, 74f, 28f);
-            TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotDetail" + row, c, 20f, UiPalette.TextDim)), 16f, 52f, 290f, 30f);
-            TextMeshProUGUI hint = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotHint" + row, c, 20f, UiPalette.TextDim)), 16f, 52f, 290f, 30f);
-            RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("SlotPips" + row, c), 16f, 92f, 288f, 12f);
-            UiBar[] pips = FatiguePipRow("Slot" + row + "Pip", pipsRow, 288f, 12f);
-            ButtonParts forward = UiBuild.LocalizedButton("SlotForward" + row, c, UiKeys.Expedition.Forward, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(forward.Rect, 16f, 136f, 96f, 44f);
-            ButtonParts back = UiBuild.LocalizedButton("SlotBack" + row, c, UiKeys.Expedition.Back, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(back.Rect, 120f, 136f, 96f, 44f);
-            ButtonParts remove = UiBuild.LocalizedButton("SlotRemove" + row, c, UiKeys.Lobby.Remove, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(remove.Rect, 224f, 136f, 80f, 44f);
+        // The party popup (Round 76 D): the window, its stage at the left and its list at the right.
+        const float PartyWindowX = 40f;
+        const float PartyWindowY = 110f;
+        const float PartyWindowWidth = 1840f;
+        const float PartyWindowHeight = 900f;
+        const float PartyStageX = 24f;
+        const float PartyStageY = 84f;
+        const float PartyStageWidth = 1080f;
+        const float PartyStageHeight = PartyWindowHeight - PartyStageY - 24f;
+        const float PartyStageColumnWidth = PartyStageWidth / BattleRows.Count;
+        /// <summary>The floor line of the stage, where the figures' feet stand (the mock: 440 under the window's top).</summary>
+        const float PartyStageFoot = 356f;
+        const float PartyListX = 1128f;
+        const float PartyListWidth = PartyWindowWidth - PartyListX - 24f;
+        const float PartyListRowHeight = 86f;
 
-            var view = card.gameObject.AddComponent<PartyRowSlotView>();
+        /// <summary>
+        /// A column of the popup's stage (the mock): the figure place of the battle and the node map (225x300, the shadow, the
+        /// placeholder) standing on the floor line, or the dim empty place with its words; under the feet the row label, the name and
+        /// the level, the job line (the empty row's hint in its place), the fatigue pips, and the moves — forward, back.
+        /// </summary>
+        static PartyRowSlotView BuildPartyStageColumn(Transform parent, int row, float x)
+        {
+            float w = PartyStageColumnWidth;
+            RectTransform column = UiBuild.Box(UiBuild.Rect("PartySlot" + row, parent), x, 0f, w, PartyStageHeight);
+            float cx = w / 2f;
+            RectTransform figure = BuildFigure(column, "SlotFigure" + row, takesClicks: false, out FigureView figureView);
+            UiBuild.Box(figure, cx - BattleFigureWidth / 2f, PartyStageFoot - BattleFigureHeight, BattleFigureWidth, BattleFigureHeight);
+            Image empty = UiBuild.Panel("SlotEmpty" + row, column, Tinted(UiPalette.Slot, 0.5f));
+            UiBuild.Box(empty, cx - 90f, PartyStageFoot - BattleFigureHeight, 180f, BattleFigureHeight);
+            UiBuild.Box(UiBuild.LocalizedLabel("SlotEmptyLabel" + row, empty.transform, UiKeys.Lobby.EmptyRow, 24f, UiPalette.TextDim, TextAlignmentOptions.Center), 0f, 136f, 180f, 32f);
+
+            float top = PartyStageFoot + 16f;
+            UiBuild.Box(UiBuild.LocalizedLabel("SlotRowLabel" + row, column, UiText.RowKey(row), 20f, UiPalette.TextDim), cx - 110f, top, 44f, 28f);
+            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotName" + row, column, 26f, UiPalette.Text)), cx - 66f, top - 3f, 126f, 34f);
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotLevel" + row, column, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), cx + 60f, top + 2f, 50f, 26f);
+            TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotDetail" + row, column, 20f, UiPalette.TextDim)), cx - 110f, top + 34f, 220f, 28f);
+            RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("SlotPips" + row, column), cx - 110f, top + 66f, 220f, 12f);
+            UiBar[] pips = FatiguePipRow("Slot" + row + "Pip", pipsRow, 220f, 12f);
+            ButtonParts forward = UiBuild.LocalizedButton("SlotForward" + row, column, UiKeys.Expedition.Forward, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(forward.Rect, cx - 110f, top + 88f, 106f, 40f);
+            ButtonParts back = UiBuild.LocalizedButton("SlotBack" + row, column, UiKeys.Expedition.Back, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(back.Rect, cx + 4f, top + 88f, 106f, 40f);
+
+            var view = column.gameObject.AddComponent<PartyRowSlotView>();
+            UiBuild.SetReference(view, "_figure", figureView);
+            UiBuild.SetReference(view, "_empty", empty.gameObject);
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_level", level);
             UiBuild.SetReference(view, "_detail", detail);
-            UiBuild.SetReference(view, "_hint", hint);
             UiBuild.SetReferences(view, "_pips", pips);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
-            UiBuild.SetReference(view, "_remove", remove.Button);
             return view;
         }
 
-        /// <summary>The template of a chip of the popup's roster: a button with the name, the level, the row tag, the job line and the pips. The screen clones it per mercenary.</summary>
-        static PartyPickChipView BuildPartyPickChip(Transform parent)
+        /// <summary>
+        /// The template of a line of the popup's list (the mock, as the barracks lists the roster): a small figure, the name, the job,
+        /// the level, the passive, the pips, the row tag and the party button. The screen clones it per mercenary.
+        /// </summary>
+        static PartyListRowView BuildPartyListRow(Transform parent)
         {
-            Image background = UiBuild.Panel("PickTemplate", parent, UiPalette.PanelLight);
-            UiBuild.Size(background, 320f, 110f);
-            Button button = UiBuild.MakeButton(background);
-            Transform chip = background.transform;
-            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickName", chip, 22f, UiPalette.Text)), 12f, 8f, 180f, 30f);
-            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickLevel", chip, 16f, UiPalette.Bone, TextAlignmentOptions.Right)), 200f, 10f, 108f, 26f);
-            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickJob", chip, 16f, UiPalette.TextDim)), 12f, 42f, 220f, 26f);
-            TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PickRow", chip, 16f, UiPalette.Brass, TextAlignmentOptions.Right)), 240f, 42f, 68f, 26f);
-            RectTransform pips = UiBuild.Box(UiBuild.Rect("PickPips", chip), 12f, 80f, 296f, 10f);
-            UiBar[] pipRow = FatiguePipRow("PickPip", pips, 296f, 10f);
+            Image background = UiBuild.Panel("RowTemplate", parent, UiPalette.PanelLight);
+            UiBuild.Size(background, PartyListWidth, PartyListRowHeight);
+            Transform line = background.transform;
+            UiBuild.Box(UiBuild.Panel("RowPortraitBox", line, UiPalette.Slot), 10f, 7f, 56f, 72f);
+            Image portrait = UiBuild.Image("RowPortrait", line, Color.white);
+            UiBuild.Box(portrait, 10f, 7f, 56f, 72f);
+            portrait.preserveAspect = true;
+            portrait.enabled = false;
+            TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowName", line, 24f, UiPalette.Text)), 80f, 6f, 126f, 32f);
+            TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowJob", line, 18f, UiPalette.TextDim)), 210f, 11f, 96f, 26f);
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowLevel", line, 17f, UiPalette.Bone)), 310f, 11f, 70f, 26f);
+            TextMeshProUGUI passive = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowPassive", line, 15f, UiPalette.TextDim)), 80f, 38f, 440f, 24f);
+            RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("RowPips", line), 80f, 66f, 320f, 9f);
+            UiBar[] pips = FatiguePipRow("RowPip", pipsRow, 320f, 9f);
+            TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowTag", line, 20f, UiPalette.Brass, TextAlignmentOptions.Right)), PartyListWidth - 200f, 30f, 60f, 28f);
+            ButtonParts button = UiBuild.Button("RowButton", line, UiPalette.ButtonQuiet, 20f);
+            UiBuild.Box(button.Rect, PartyListWidth - 124f, 23f, 112f, 40f);
 
-            var view = background.gameObject.AddComponent<PartyPickChipView>();
+            var view = background.gameObject.AddComponent<PartyListRowView>();
             UiBuild.SetReference(view, "_frame", background);
-            UiBuild.SetReference(view, "_button", button);
+            UiBuild.SetReference(view, "_portrait", portrait);
             UiBuild.SetReference(view, "_name", name);
-            UiBuild.SetReference(view, "_level", level);
-            UiBuild.SetReference(view, "_row", row);
             UiBuild.SetReference(view, "_job", job);
-            UiBuild.SetReferences(view, "_pips", pipRow);
+            UiBuild.SetReference(view, "_level", level);
+            UiBuild.SetReference(view, "_passive", passive);
+            UiBuild.SetReference(view, "_row", row);
+            UiBuild.SetReferences(view, "_pips", pips);
+            UiBuild.SetReference(view, "_button", button.Button);
+            UiBuild.SetReference(view, "_buttonLabel", button.Label);
             background.gameObject.SetActive(false);
             return view;
+        }
+
+        /// <summary>The template of an empty line of the list: a thin rim and the words. The screen clones one per place left in the roster.</summary>
+        static GameObject BuildEmptySlot(Transform parent)
+        {
+            RectTransform slot = UiBuild.Rect("EmptyTemplate", parent);
+            UiBuild.Size(slot, PartyListWidth, PartyListRowHeight);
+            Rim("EmptyRim", slot, 1f, UiPalette.Line);
+            UiBuild.Box(UiBuild.LocalizedLabel("EmptyLabel", slot, UiKeys.Expedition.EmptySlot, 18f, UiPalette.TextDim, TextAlignmentOptions.Center), 0f, 0f, PartyListWidth, PartyListRowHeight);
+            slot.gameObject.SetActive(false);
+            return slot.gameObject;
         }
 
         /// <summary>A row of the details: the dim label at the left, and the value code fills in, right-aligned at the panel's inset.</summary>

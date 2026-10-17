@@ -1625,6 +1625,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673495733927941
+  - m_Id: 6100672578576384
+    m_Key: Expedition.Join
+    m_Metadata:
+      m_Items:
+      - rid: 8623673497099698176
+  - m_Id: 6100672591159296
+    m_Key: Expedition.Leave
+    m_Metadata:
+      m_Items:
+      - rid: 8623673497099698177
+  - m_Id: 6100672591159297
+    m_Key: Expedition.EmptySlot
+    m_Metadata:
+      m_Items:
+      - rid: 8623673497099698178
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3050,12 +3065,12 @@ MonoBehaviour:
     - rid: 8623673495733927938
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Over the roster's chips in the popup. {0} = roster size, {1}
-          = its limit.
+        m_CommentText: Over the roster's list in the popup (round 76 D). {0} = roster
+          size, {1} = its limit.
     - rid: 8623673495733927939
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: In an empty row of the popup.
+        m_CommentText: Under an empty row of the popup's stage (round 76 D).
     - rid: 8623673495733927940
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3064,3 +3079,18 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Moves a party member one row to the back (trading places).
+    - rid: 8623673497099698176
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The list's button that puts a mercenary in the party (round
+          76 D).
+    - rid: 8623673497099698177
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The list's button that takes a mercenary out of the party
+          (round 76 D).
+    - rid: 8623673497099698178
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'An empty line of the popup''s list: room in the roster (round
+          76 D).'

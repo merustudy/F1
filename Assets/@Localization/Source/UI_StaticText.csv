@@ -105,8 +105,11 @@ Expedition.RewardLabel,Row label in the details (stage 26).,보상,Reward
 Expedition.Reward,"What the settlement pays for the dungeon. {0} = gold per map floor reached, {1} = gold for a clear.",층마다 금 {0} · 클리어 금 {1},{0} gold per floor · {1} for a clear
 Expedition.PartyTitle,Title of the party popup the departure opens (round 75 B).,원정 파티,Expedition party
 Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = days it takes, {2} = the day the party is back.",{0} · {1}일 (→ {2}일차),"{0} · {1} days (→ day {2})"
-Expedition.RosterHeader,"Over the roster's chips in the popup. {0} = roster size, {1} = its limit.",로스터 {0}/{1} — 눌러서 파티에 넣고 뺀다,Roster {0}/{1} — click to add or remove
-Expedition.EmptyRowHint,In an empty row of the popup.,로스터에서 용병을 누르세요,Pick a mercenary from the roster
+Expedition.RosterHeader,"Over the roster's list in the popup (round 76 D). {0} = roster size, {1} = its limit.","로스터 {0}/{1} — 넣기로 비어 있는 맨 앞 열에 서고, 빼면 뒤가 전진한다",Roster {0}/{1} — In takes the next row; take one out and those behind advance
+Expedition.EmptyRowHint,Under an empty row of the popup's stage (round 76 D).,오른쪽 목록에서 넣으세요,Add from the list at the right
+Expedition.Join,The list's button that puts a mercenary in the party (round 76 D).,넣기,In
+Expedition.Leave,The list's button that takes a mercenary out of the party (round 76 D).,빼기,Out
+Expedition.EmptySlot,An empty line of the popup's list: room in the roster (round 76 D).,빈 자리 (역마차에서 고용),Empty (hire at the coach)
 Expedition.Forward,Moves a party member one row to the front (trading places).,앞으로,Forward
 Expedition.Back,Moves a party member one row to the back (trading places).,뒤로,Back
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}

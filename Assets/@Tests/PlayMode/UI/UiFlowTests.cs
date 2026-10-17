@@ -360,12 +360,14 @@ namespace F1.Tests
         }
 
         /// <summary>
-        /// Round 75 B (2026-10-17, the user: the party is formed in a popup the expedition button opens): the lobby opens the screen with
-        /// an empty party, [출발] opens the popup, the roster's chips put mercenaries in (the next row from the front) and take them out,
-        /// the moves trade rows and those behind one taken out advance, closing keeps the party on the strip, and the popup's [출발] departs.
+        /// Round 75 B (2026-10-17, the user: the party is formed in a popup the expedition button opens) and Round 76 D (the party
+        /// standing on a stage at the left as the node map stands it, the roster's list at the right): the lobby opens the screen with
+        /// an empty party, [출발] opens the popup, the list's buttons put mercenaries in (the next row from the front) and take them
+        /// out, the moves under the feet trade rows and those behind one taken out advance, closing keeps the party on the strip, and
+        /// the popup's [출발] departs.
         /// </summary>
         [UnityTest]
-        public IEnumerator Expedition_FormsThePartyInThePopup_WithTheRosterChipsAndTheMoves_AndDepartsFromIt()
+        public IEnumerator Expedition_FormsThePartyInThePopup_OnTheStageAndFromTheList_AndDepartsFromIt()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             StaticData data = Managers.Data.Data;
@@ -386,12 +388,16 @@ namespace F1.Tests
             Assert.AreEqual($"파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/Bottom/Status"));
             Assert.AreEqual("비어 있음", UiTestUtil.Views<ExpeditionPartyCardView>(screen)[0].Name);
             Assert.AreEqual("파티 — 출발을 누르면 편성한다", UiTestUtil.TextAt(screen, "Frame/Bottom/PartyHeader"));
+            Assert.Less(
+                UiTestUtil.At(screen, "Frame/Bottom/PartyRow4").GetComponent<RectTransform>().anchoredPosition.x,
+                UiTestUtil.At(screen, "Frame/Bottom/PartyRow1").GetComponent<RectTransform>().anchoredPosition.x,
+                "The strip stands the party as the node map does: 4열 at the left, 1열 at the right (round 76 D).");
             Assert.IsTrue(UiTestUtil.ButtonAt(screen, "Frame/Bottom/Depart").interactable, "[출발] opens the popup even while the party is short.");
             Assert.IsFalse(screen.IsPartyOpen);
             Assert.IsFalse(UiTestUtil.At(screen, "Frame/PartyWindow").gameObject.activeSelf);
             Assert.IsFalse(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf);
 
-            // The popup: the dungeon's line, a slot per row (empty, with the hint and no moves), a chip per mercenary of the roster.
+            // The popup: the dungeon's line, the stage's rows (empty: the dim place, the hint, no moves), the roster's list and its room.
             UiTestUtil.Click(screen, "Frame/Bottom/Depart");
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsTrue(screen.IsPartyOpen);
@@ -400,74 +406,92 @@ namespace F1.Tests
             Assert.AreEqual($"버려진 광산 · {mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
             PartyRowSlotView[] slots = UiTestUtil.Views<PartyRowSlotView>(screen);
             Assert.AreEqual(balance.PartySize, slots.Length);
-            Assert.AreEqual("비어 있음", slots[0].Name);
-            Assert.AreEqual("로스터에서 용병을 누르세요", slots[0].Hint);
-            Assert.IsFalse(slots[0].Remove.gameObject.activeSelf, "An empty row has no moves.");
-            Assert.AreEqual("1열", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartySlot1/SlotRowLabel1"));
-            PartyPickChipView[] chips = UiTestUtil.Views<PartyPickChipView>(screen);
-            Assert.AreEqual(run.Roster.Count, chips.Length, "A chip per mercenary of the roster; the template stays hidden.");
-            Assert.AreEqual($"로스터 {run.Roster.Count}/{balance.RosterLimit} — 눌러서 파티에 넣고 뺀다", UiTestUtil.TextAt(screen, "Frame/PartyWindow/RosterHeader"));
-            Assert.IsTrue(chips.All(c => !c.InParty && c.Row == string.Empty && c.FrameColor == UiPalette.PanelLight));
-            Assert.AreEqual(UiText.Mercenary(run.Roster[0].Id), chips[0].Name, "In the roster's order.");
-            Assert.AreEqual(UiText.Job(run.Roster[0].JobId), chips[0].Job);
-            Assert.AreEqual("Lv 1", chips[0].Level);
-            Assert.AreEqual(FatiguePips.Count, chips[0].Pips.Count);
+            Assert.IsTrue(slots.All(s => s.IsEmpty));
+            Assert.AreEqual("비어 있음", UiTestUtil.TextAt(screen, "Frame/PartyWindow/Stage/PartySlot1/SlotEmpty1/SlotEmptyLabel1"));
+            Assert.AreEqual("오른쪽 목록에서 넣으세요", slots[0].Detail);
+            Assert.IsFalse(slots[0].Figure.gameObject.activeSelf, "No figure in an empty row.");
+            Assert.IsFalse(slots[0].Forward.gameObject.activeSelf, "An empty row has no moves.");
+            Assert.AreEqual("1열", UiTestUtil.TextAt(screen, "Frame/PartyWindow/Stage/PartySlot1/SlotRowLabel1"));
+            Assert.Less(
+                UiTestUtil.At(screen, "Frame/PartyWindow/Stage/PartySlot4").GetComponent<RectTransform>().anchoredPosition.x,
+                UiTestUtil.At(screen, "Frame/PartyWindow/Stage/PartySlot1").GetComponent<RectTransform>().anchoredPosition.x,
+                "The stage stands the party as the node map does: 1열 at the right.");
+            PartyListRowView[] rows = UiTestUtil.Views<PartyListRowView>(screen);
+            Assert.AreEqual(run.Roster.Count, rows.Length, "A line per mercenary of the roster; the template stays hidden.");
+            Assert.AreEqual(balance.RosterLimit - run.Roster.Count, screen.EmptySlotCount, "An empty line per place left in the roster.");
+            Assert.AreEqual($"로스터 {run.Roster.Count}/{balance.RosterLimit} — 넣기로 비어 있는 맨 앞 열에 서고, 빼면 뒤가 전진한다", UiTestUtil.TextAt(screen, "Frame/PartyWindow/RosterHeader"));
+            Assert.IsTrue(rows.All(r => !r.InParty && r.Row == string.Empty && r.FrameColor == UiPalette.PanelLight && r.ButtonLabel == "넣기" && r.Button.interactable));
+            MercenaryState firstOfRoster = run.Roster[0];
+            Assert.AreEqual(UiText.Mercenary(firstOfRoster.Id), rows[0].Name, "In the roster's order.");
+            Assert.AreEqual(UiText.Job(firstOfRoster.JobId), rows[0].Job);
+            Assert.AreEqual("Lv 1", rows[0].Level);
+            Assert.AreEqual(UiText.Passive(data.Jobs.Get(firstOfRoster.JobId)), rows[0].Passive, "The passive, as the barracks lists it.");
+            Assert.IsNotNull(rows[0].Portrait, "The job's figure, small.");
+            Assert.AreEqual(FatiguePips.Count, rows[0].Pips.Count);
             Assert.AreEqual($"파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyStatus"));
             Assert.IsFalse(UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable, "Nobody to set out with.");
 
-            // A chip puts its mercenary in the next row from the front and is lit with the row's tag; a full party takes nobody more.
+            // [넣기] puts its mercenary in the next row from the front; the line is lit with the row's tag and its button reads [빼기]; a full
+            // party's [넣기] is off.
             for (int i = 0; i < balance.PartySize; i++)
             {
-                UiTestUtil.Click(chips[i].Button);
-                Assert.AreEqual(i + 1, run.Party.Single(s => s.MercenaryId == chips[i].MercenaryId).Row);
-                Assert.IsTrue(chips[i].InParty);
-                Assert.AreEqual($"{i + 1}열", chips[i].Row);
-                Assert.AreEqual(UiPalette.Selected, chips[i].FrameColor);
+                UiTestUtil.Click(rows[i].Button);
+                Assert.AreEqual(i + 1, run.Party.Single(s => s.MercenaryId == rows[i].MercenaryId).Row);
+                Assert.IsTrue(rows[i].InParty);
+                Assert.AreEqual($"{i + 1}열", rows[i].Row);
+                Assert.AreEqual(UiPalette.Selected, rows[i].FrameColor);
+                Assert.AreEqual("빼기", rows[i].ButtonLabel);
             }
 
-            // The rows' buttons were turned on by the clicks: they take a click (and a raycast) once the canvas has drawn them.
+            // The rows' figures and buttons were turned on by the clicks: they take a click (and a raycast) once the canvas has drawn them.
             yield return UiTestUtil.WaitForRedraw();
-            Assert.AreEqual(chips[0].MercenaryId, slots[0].MercenaryId);
-            Assert.AreEqual(UiText.Mercenary(chips[0].MercenaryId), slots[0].Name);
-            Assert.AreEqual(UiText.Job(run.Roster[0].JobId), slots[0].Detail);
-            Assert.IsTrue(slots[0].Remove.gameObject.activeSelf);
+            Assert.AreEqual(rows[0].MercenaryId, slots[0].MercenaryId);
+            Assert.IsFalse(slots[0].IsEmpty);
+            Assert.AreEqual(UiText.Mercenary(rows[0].MercenaryId), slots[0].Name);
+            Assert.AreEqual(UiText.Job(firstOfRoster.JobId), slots[0].Detail);
+            Assert.IsTrue(slots[0].Figure.gameObject.activeSelf);
+            Assert.AreEqual(rows[0].Portrait, slots[0].Figure.Art, "The member's figure stands on the stage: the job's, the same art as the list's.");
+            Assert.IsFalse(slots[0].Figure.ShowsPlaceholder);
+            Assert.IsTrue(slots[0].Forward.gameObject.activeSelf);
             Assert.IsFalse(slots[0].Forward.interactable, "The front row has no row before it.");
             Assert.IsTrue(slots[0].Back.interactable);
             Assert.IsTrue(slots[balance.PartySize - 1].Forward.interactable);
             Assert.IsFalse(slots[balance.PartySize - 1].Back.interactable, "The last row has nobody behind.");
-            UiTestUtil.Click(chips[balance.PartySize].Button);
-            Assert.AreEqual(balance.PartySize, run.Party.Count, "The party is full: the chip does nothing.");
-            Assert.IsFalse(chips[balance.PartySize].InParty);
+            Assert.IsFalse(rows[balance.PartySize].InParty);
+            Assert.AreEqual("넣기", rows[balance.PartySize].ButtonLabel);
+            Assert.IsFalse(rows[balance.PartySize].Button.interactable, "The party is full: nobody more can join.");
             Assert.AreEqual("출발할 수 있습니다", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyStatus"));
             Assert.IsTrue(UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable);
 
-            // The moves: back trades places with the row behind, forward with the row before; out of the party, those behind advance.
-            string first = chips[0].MercenaryId;
-            string second = chips[1].MercenaryId;
+            // The moves: back trades places with the row behind, forward with the row before; [빼기] takes one out and those behind advance.
+            string first = rows[0].MercenaryId;
+            string second = rows[1].MercenaryId;
             UiTestUtil.Click(slots[0].Back);
             Assert.AreEqual(2, run.Party.Single(s => s.MercenaryId == first).Row);
             Assert.AreEqual(1, run.Party.Single(s => s.MercenaryId == second).Row);
             Assert.AreEqual(UiText.Mercenary(second), slots[0].Name);
-            Assert.AreEqual("1열", chips[1].Row);
+            Assert.AreEqual("1열", rows[1].Row);
             UiTestUtil.Click(slots[1].Forward);
             Assert.AreEqual(1, run.Party.Single(s => s.MercenaryId == first).Row);
             Assert.AreEqual(2, run.Party.Single(s => s.MercenaryId == second).Row);
-            UiTestUtil.Click(slots[1].Remove);
+            UiTestUtil.Click(rows[1].Button);
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsFalse(run.Party.Any(s => s.MercenaryId == second));
             Assert.AreEqual(balance.PartySize - 1, run.Party.Count);
-            Assert.AreEqual(UiText.Mercenary(chips[2].MercenaryId), slots[1].Name, "Those behind advanced a row.");
-            Assert.AreEqual("비어 있음", slots[balance.PartySize - 1].Name);
-            Assert.IsFalse(chips[1].InParty);
-            Assert.AreEqual(string.Empty, chips[1].Row);
+            Assert.AreEqual(UiText.Mercenary(rows[2].MercenaryId), slots[1].Name, "Those behind advanced a row.");
+            Assert.IsTrue(slots[balance.PartySize - 1].IsEmpty);
+            Assert.IsFalse(rows[1].InParty);
+            Assert.AreEqual(string.Empty, rows[1].Row);
+            Assert.AreEqual("넣기", rows[1].ButtonLabel);
+            Assert.IsTrue(rows[balance.PartySize].Button.interactable, "A place opened: the others can join again.");
             Assert.AreEqual(balance.PartySize - 1 >= balance.MinPartySize, UiTestUtil.ButtonAt(screen, "Frame/PartyWindow/PartyDepart").interactable, "The departure follows the party's size.");
 
-            // A chip in the party takes its mercenary out; a chip outside puts it at the back.
-            UiTestUtil.Click(chips[0].Button);
+            // [빼기] on another; [넣기] puts one back at the back.
+            UiTestUtil.Click(rows[0].Button);
             Assert.IsFalse(run.Party.Any(s => s.MercenaryId == first));
-            UiTestUtil.Click(chips[0].Button);
+            UiTestUtil.Click(rows[0].Button);
             Assert.AreEqual(balance.PartySize - 1, run.Party.Single(s => s.MercenaryId == first).Row, "Back in, at the back.");
-            UiTestUtil.Click(chips[1].Button);
+            UiTestUtil.Click(rows[1].Button);
             Assert.AreEqual(balance.PartySize, run.Party.Count);
             Assert.AreEqual(balance.PartySize, run.Party.Single(s => s.MercenaryId == second).Row);
 

@@ -13,9 +13,10 @@ namespace F1.UI
     /// <summary>
     /// Where to go (Round 71 E2, Docs/Design/04_Lobby_100Day_Economy.md §7): the painted map of the lands with a marker per dungeon,
     /// the chosen dungeon's details, the party on the strip, and the departure. [출발] opens the party popup over the map (Round 75 B,
-    /// 2026-10-17): the party is formed there — the roster's chips put mercenaries in and take them out, the moves trade rows — and
-    /// the popup's own [출발] sets out. Past the last day only the final dungeon can be chosen: the final stand (Docs/Design/04 §2).
-    /// The lobby opens this screen; it goes back to the lobby or on to the node map.
+    /// 2026-10-17): the party is formed there — on the stage at the left the members stand as the node map's party side stands them,
+    /// with the moves that trade rows under their feet; the roster's list at the right puts mercenaries in and takes them out (Round 76
+    /// D) — and the popup's own [출발] sets out. Past the last day only the final dungeon can be chosen: the final stand
+    /// (Docs/Design/04 §2). The lobby opens this screen; it goes back to the lobby or on to the node map.
     /// </summary>
     public sealed class ExpeditionScreen : UIScreen
     {
@@ -44,19 +45,22 @@ namespace F1.UI
         [SerializeField] TMP_Text _status;
         [SerializeField] Button _depart;
 
-        // The party popup (Round 75 B).
+        // The party popup (Round 75 B; the stage and the list, Round 76 D).
         [SerializeField] GameObject _shade;
         [SerializeField] GameObject _partyWindow;
         [SerializeField] TMP_Text _partyDungeon;
         [SerializeField] PartyRowSlotView[] _slots;
         [SerializeField] TMP_Text _rosterHeader;
-        [SerializeField] PartyPickChipView _chipTemplate;
+        [SerializeField] PartyListRowView _rowTemplate;
+        [SerializeField] GameObject _emptyTemplate;
         [SerializeField] TMP_Text _partyStatus;
         [SerializeField] Button _partyDepart;
         [SerializeField] Button _partyClose;
 
         readonly List<DungeonMarkerView> _markers = new List<DungeonMarkerView>();
-        readonly Dictionary<string, PartyPickChipView> _chips = new Dictionary<string, PartyPickChipView>();
+        readonly Dictionary<string, PartyListRowView> _rows = new Dictionary<string, PartyListRowView>();
+        readonly List<GameObject> _emptySlots = new List<GameObject>();
+        readonly Dictionary<string, Sprite> _figures = new Dictionary<string, Sprite>();
         Sprite _mapArt;
         string _selectedId;
         bool _partyOpen;
@@ -66,10 +70,24 @@ namespace F1.UI
         /// <summary>True while the party popup is over the map.</summary>
         public bool IsPartyOpen => _partyOpen;
 
-        /// <summary>The map is loaded before the screen opens, into the lobby's scope: the lobby and this screen share it.</summary>
+        /// <summary>The empty lines of the popup's list: the roster's room up to its limit.</summary>
+        public int EmptySlotCount => _emptySlots.Count;
+
+        /// <summary>
+        /// The map and the jobs' figures (for the party popup's stage and list, Round 76 D) are loaded before the screen opens, into
+        /// the lobby's scope: the lobby and this screen share it. The figures are the unit art of the expedition's scope, loaded here
+        /// by address as well (Docs/Architecture/04 "Scope").
+        /// </summary>
         public override async Task PrepareAsync()
         {
             _mapArt = await Managers.Resource.LoadAsync<Sprite>(ArtAddress.ExpeditionMap, ResourceScope.Lobby);
+            foreach (JobData job in Managers.Data.Data.Jobs.Ordered)
+            {
+                if (job.Figure != null)
+                {
+                    _figures[job.Id] = await Managers.Resource.LoadAsync<Sprite>(job.Figure, ResourceScope.Lobby);
+                }
+            }
         }
 
         protected override void OnOpen()
@@ -85,7 +103,6 @@ namespace F1.UI
                 PartyRowSlotView slot = _slots[i];
                 slot.Forward.onClick.AddListener(() => MoveInParty(slot.MercenaryId, row - 1));
                 slot.Back.onClick.AddListener(() => MoveInParty(slot.MercenaryId, row + 1));
-                slot.Remove.onClick.AddListener(() => RemoveFromParty(slot.MercenaryId));
             }
 
             StaticData data = Managers.Data.Data;
@@ -258,12 +275,13 @@ namespace F1.UI
             }
         }
 
-        // ---- The party popup (Round 75 B) ----------------------------------------------------
+        // ---- The party popup (Round 75 B; the stage and the list, Round 76 D) ---------------
 
         /// <summary>
-        /// The popup: the chosen dungeon's line, a slot per row (the member and its moves, or the empty row and its hint), a chip per
-        /// mercenary of the roster (lit and tagged with its row while in the party), the status and the departure, which only a party
-        /// that can set out enables.
+        /// The popup: the chosen dungeon's line; on the stage a slot per row (the member's figure with its moves under the feet, or
+        /// the empty place and its hint); in the list a line per mercenary of the roster (lit and tagged with its row while in the
+        /// party, its button putting it in or taking it out) and an empty line per place left up to the roster's limit; the status and
+        /// the departure, which only a party that can set out enables.
         /// </summary>
         void RefreshPartyWindow(StaticData data, RunState run, DepartCheck chosen, string status, Color statusColor)
         {
@@ -279,7 +297,7 @@ namespace F1.UI
                 PartySlot slot = SlotInRow(run, row);
                 if (slot == null)
                 {
-                    _slots[i].ShowEmpty(UiStrings.Get(UiKeys.Lobby.EmptyRow), UiStrings.Get(UiKeys.Expedition.EmptyRowHint));
+                    _slots[i].ShowEmpty(UiStrings.Get(UiKeys.Expedition.EmptyRowHint));
                     continue;
                 }
 
@@ -287,6 +305,7 @@ namespace F1.UI
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 _slots[i].Show(
                     slot.MercenaryId,
+                    FigureOf(mercenary.JobId),
                     UiText.Mercenary(slot.MercenaryId),
                     UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
                     UiText.JobLine(mercenary.JobId, affliction),
@@ -298,37 +317,43 @@ namespace F1.UI
             }
 
             var alive = new HashSet<string>();
+            int next = run.Party.Count + 1;
             foreach (MercenaryState mercenary in run.Roster)
             {
                 alive.Add(mercenary.Id);
-                if (!_chips.TryGetValue(mercenary.Id, out PartyPickChipView chip))
+                if (!_rows.TryGetValue(mercenary.Id, out PartyListRowView line))
                 {
-                    chip = Instantiate(_chipTemplate, _chipTemplate.transform.parent);
-                    chip.gameObject.SetActive(true);
-                    chip.name = "Chip_" + mercenary.Id;
-                    chip.MercenaryId = mercenary.Id;
+                    line = Instantiate(_rowTemplate, _rowTemplate.transform.parent);
+                    line.gameObject.SetActive(true);
+                    line.name = "Row_" + mercenary.Id;
+                    line.MercenaryId = mercenary.Id;
                     string id = mercenary.Id;
-                    chip.Button.onClick.AddListener(() => OnChip(id));
-                    _chips.Add(mercenary.Id, chip);
+                    line.Button.onClick.AddListener(() => OnRowButton(id));
+                    _rows.Add(mercenary.Id, line);
                 }
 
                 int row = RowOf(run, mercenary.Id);
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
-                chip.Show(
+                JobData job = data.Jobs.Get(mercenary.JobId);
+                line.Show(
+                    FigureOf(mercenary.JobId),
                     UiText.Mercenary(mercenary.Id),
-                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
-                    row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
                     UiText.JobLine(mercenary.JobId, affliction),
                     affliction != null,
+                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
+                    UiText.Passive(job),
+                    row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
                     row != 0,
+                    row == 0 && Managers.Run.CanPlaceInParty(mercenary.Id, next),
+                    UiStrings.Get(row != 0 ? UiKeys.Expedition.Leave : UiKeys.Expedition.Join),
                     mercenary.Fatigue,
                     balance.MaxFatigue,
                     balance.FatigueBreakdown);
-                chip.transform.SetAsLastSibling();
+                line.transform.SetAsLastSibling();
             }
 
             var gone = new List<string>();
-            foreach (KeyValuePair<string, PartyPickChipView> pair in _chips)
+            foreach (KeyValuePair<string, PartyListRowView> pair in _rows)
             {
                 if (!alive.Contains(pair.Key))
                 {
@@ -338,14 +363,41 @@ namespace F1.UI
 
             foreach (string id in gone)
             {
-                Destroy(_chips[id].gameObject);
-                _chips.Remove(id);
+                Destroy(_rows[id].gameObject);
+                _rows.Remove(id);
+            }
+
+            // The room left in the roster, as empty lines after the mercenaries' (the coach fills them).
+            int empties = Mathf.Max(0, balance.RosterLimit - run.Roster.Count);
+            while (_emptySlots.Count < empties)
+            {
+                GameObject slot = Instantiate(_emptyTemplate, _emptyTemplate.transform.parent);
+                slot.name = "EmptySlot" + (_emptySlots.Count + 1);
+                _emptySlots.Add(slot);
+            }
+
+            while (_emptySlots.Count > empties)
+            {
+                Destroy(_emptySlots[_emptySlots.Count - 1]);
+                _emptySlots.RemoveAt(_emptySlots.Count - 1);
+            }
+
+            foreach (GameObject slot in _emptySlots)
+            {
+                slot.SetActive(true);
+                slot.transform.SetAsLastSibling();
             }
 
             _rosterHeader.text = UiStrings.Get(UiKeys.Expedition.RosterHeader, run.Roster.Count, balance.RosterLimit);
             _partyStatus.text = status;
             _partyStatus.color = statusColor;
             _partyDepart.interactable = chosen == DepartCheck.Ok;
+        }
+
+        /// <summary>A job's figure, loaded before the screen opened; null for a job without one.</summary>
+        Sprite FigureOf(string jobId)
+        {
+            return _figures.TryGetValue(jobId, out Sprite art) ? art : null;
         }
 
         static PartySlot SlotInRow(RunState run, int row)
@@ -417,8 +469,8 @@ namespace F1.UI
             Refresh();
         }
 
-        /// <summary>A chip: in the party, its mercenary comes out; outside it, the mercenary takes the next row from the front (nobody more once the party is full).</summary>
-        void OnChip(string mercenaryId)
+        /// <summary>A line's button: in the party, its mercenary comes out; outside it, the mercenary takes the next row from the front (the button is off once the party is full).</summary>
+        void OnRowButton(string mercenaryId)
         {
             RunState run = Managers.Run.Run;
             if (RowOf(run, mercenaryId) != 0)
@@ -448,17 +500,6 @@ namespace F1.UI
             }
 
             Managers.Run.PlaceInParty(mercenaryId, row);
-            Refresh();
-        }
-
-        void RemoveFromParty(string mercenaryId)
-        {
-            if (mercenaryId == null)
-            {
-                return;
-            }
-
-            Managers.Run.RemoveFromParty(mercenaryId);
             Refresh();
         }
 
