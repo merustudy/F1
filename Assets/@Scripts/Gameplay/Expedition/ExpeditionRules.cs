@@ -144,7 +144,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The current party against a given enemy group on a floor. The simulator uses this to test one group directly.
-        /// The enemies of a floor deeper than the first are stronger by the dungeon's per-floor share; the boss is as its data says.
+        /// The enemies of a floor deeper than the first are stronger by the dungeon's per-floor share, the boss by its own floor's.
         /// </summary>
         public static BattleSetup BuildBattleSetup(StaticData data, ExpeditionState state, string enemyGroupId, ulong battleSeed, int floor = 1)
         {
@@ -1407,9 +1407,14 @@ namespace F1.Gameplay
         }
 
         /// <summary>How many floors below the first a group stands on a floor: 0 for a boss group, which is as the data says wherever it is.</summary>
+        /// <summary>
+        /// How many floors below the first a node stands. The boss too (2026-10-17: it stands on the floor past the last map floor,
+        /// so the depth that grew the dungeon's enemies grows it; before, the boss was as its data says). The final stand's map is
+        /// the boss alone on its only floor, so there the boss carries no depth.
+        /// </summary>
         static int FloorsBelowTheFirst(EnemyGroupData group, int floor)
         {
-            return group.IsBoss ? 0 : Math.Max(0, floor - 1);
+            return Math.Max(0, floor - 1);
         }
 
         /// <summary>

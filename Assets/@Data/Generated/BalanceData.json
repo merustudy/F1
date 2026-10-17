@@ -39,11 +39,11 @@
     },
     {
       "Key": "CritFatigueTaken",
-      "Value": 9
+      "Value": 15
     },
     {
       "Key": "CritFatigueTakenAllies",
-      "Value": 2
+      "Value": 3
     },
     {
       "Key": "DeathLimit",
@@ -111,7 +111,7 @@
     },
     {
       "Key": "FatigueOnHit",
-      "Value": 1
+      "Value": 0
     },
     {
       "Key": "FatigueOnKill",

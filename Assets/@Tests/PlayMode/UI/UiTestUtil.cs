@@ -695,11 +695,12 @@ namespace F1.Tests
         }
 
         /// <summary>
-        /// From the title: a new run, a full party, the first node, and its battle advanced (and left paused) to the moment a
-        /// mercenary (the valkyrie, in row 1) broke down at the fatigue threshold (round 36). Staged: everyone leaves a few hits short of the threshold
-        /// after the entry cost (far enough that the breakdown cannot come in the frames before the clock is paused), with so
-        /// much HP and so weak a weapon that the battle lasts until somebody has been hit that often (a hit raises the fatigue;
-        /// a kill would bring it down).
+        /// From the title: a new run, a full party, and the first node's battle entered (and left paused), staged so that the
+        /// valkyrie breaks down a little way in. A plain hit tires nobody (2026-10-17: FatigueOnHit 0), so the breakdown comes from an
+        /// ally's death's door: a decoy stands in row 1 with the least HP, the enemy's first blow puts it at death's door, which
+        /// tires its allies by FatigueOnAllyDog; the valkyrie, in row 2 with endless HP, is staged exactly that far under the
+        /// breakdown after the entry cost (far enough that nothing in the frames before the clock is paused can bring it).
+        /// Her state poses are the ones drawn so far (round 38).
         /// </summary>
         public static IEnumerator ReachABreakdownInTheFirstBattle()
         {
@@ -709,24 +710,27 @@ namespace F1.Tests
             yield return DepartFromLobby();
 
             BalanceData balance = Managers.Data.Data.Balance;
-            Assume.That(balance.FatigueOnHit, Is.GreaterThan(0), "A hit raises fatigue.");
+            Assume.That(balance.FatigueOnAllyDog, Is.GreaterThan(0), "An ally's death's door raises fatigue.");
             IReadOnlyList<ExpeditionMember> members = Managers.Expedition.Expedition.Members;
             foreach (ExpeditionMember member in members)
             {
-                member.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, member.Board.InReadingOrder()) - 6 * balance.FatigueOnHit;
+                member.Fatigue = 0;
                 member.MaxHp = EndlessHp;
                 member.Hp = member.MaxHp;
                 Regrade(member, 1);
             }
 
-            // The valkyrie stands in row 1, where the hits land: hers are the state poses drawn so far (round 38).
             ExpeditionMember valkyrie = members.Single(m => m.JobId == "valkyrie");
-            ExpeditionMember front = members.Single(m => m.Row == BattleRows.Front);
-            if (valkyrie != front)
+            ExpeditionMember decoy = members.First(m => m != valkyrie);
+            int row = BattleRows.Front;
+            foreach (ExpeditionMember member in new[] { decoy, valkyrie }.Concat(members.Where(m => m != decoy && m != valkyrie)))
             {
-                front.Row = valkyrie.Row;
-                valkyrie.Row = BattleRows.Front;
+                member.Row = row++;
             }
+
+            decoy.MaxHp = 1;
+            decoy.Hp = 1;
+            valkyrie.Fatigue = balance.FatigueBreakdown - FatigueRules.BattleEntryCost(balance, valkyrie.Board.InReadingOrder()) - balance.FatigueOnAllyDog;
 
             NodeMapScreen map = Screen<NodeMapScreen>();
             Click(Views<MapNodeView>(map).First(n => n.Button.interactable).Button);

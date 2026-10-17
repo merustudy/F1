@@ -1137,7 +1137,7 @@ namespace F1.Tests
             FatigueStateData state = Managers.Data.Data.FatigueStates.Get(down.Id);
             bool virtue = state.Kind == FatigueStateKind.Virtue;
             BattleUnitView broken = units.Single(u => u.Unit.Ref.Equals(down.Target));
-            Assert.AreEqual("valkyrie", broken.Unit.Setup.JobId, "The valkyrie, staged in row 1, broke down.");
+            Assert.AreEqual("valkyrie", broken.Unit.Setup.JobId, "The valkyrie, staged in row 2 behind the decoy at death's door, broke down.");
 
             // A quarter of a second in: the slow stretch, the dark and the zoom at full, the pose held, the burst and the word on.
             yield return new WaitForSecondsRealtime(0.25f);

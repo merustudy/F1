@@ -119,7 +119,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheEnemiesOfADeeperFloor_HaveMoreHpAndBetterItems_ButTheBossIsAsItsDataSays()
+        public void TheEnemiesOfADeeperFloor_HaveMoreHpAndBetterItems_AndSoDoesTheBoss_ByItsOwnFloor()
         {
             StaticData data = DeepCave(hpPerFloor: 10, powerPerFloor: 20);
             ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, Party);
@@ -139,8 +139,16 @@ namespace F1.Tests
             Assert.AreEqual((int)compounded, fifth.Enemies[0].MaxHp, "Four floors deeper: +10% compounded four times in whole hundredths (2026-10-17: x1.4641, not +40%).");
             Assert.AreEqual(fifth.Enemies[0].MaxHp, fifth.Enemies[0].Hp);
             Assert.AreEqual(grunt.Items[0].PowerPercent + 80, fifth.Enemies[0].Items[0].PowerPercent, "Four floors deeper: +80% power (stage 22: was +8 grades).");
-            Assert.AreEqual(data.Enemies.Get("chief").MaxHp, boss.Enemies[0].MaxHp, "The boss is not scaled.");
-            Assert.AreEqual(grunt.MaxHp, boss.Enemies[1].MaxHp, "Nor are its guards.");
+            long chief = data.Enemies.Get("chief").MaxHp, guard = grunt.MaxHp;
+            for (int i = 0; i < 8; i++)
+            {
+                chief = chief * 110 / 100;
+                guard = guard * 110 / 100;
+            }
+
+            Assert.AreEqual((int)chief, boss.Enemies[0].MaxHp, "The boss on floor 9 is eight floors deep (2026-10-17: it was as its data says).");
+            Assert.AreEqual((int)guard, boss.Enemies[1].MaxHp, "And so are its guards.");
+            Assert.AreEqual(data.Enemies.Get("chief").Items[0].PowerPercent + 160, boss.Enemies[0].Items[0].PowerPercent, "Eight floors deeper: +160% power.");
         }
 
         // ---- Camps ---------------------------------------------------------------------------
