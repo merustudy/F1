@@ -1,4 +1,6 @@
-# Round 77 — 원정 화면의 아래 띠를 없앨까 (2026-10-17 사용자 "원정 하단에 로스터는 굳이 안보여줘도 될 것 같아(어차피 전투 던전 선택해서 출발 누르면 로스터 구성 하니) 따로 용병 리스트 버튼을 눌러 제공하는 방식으로 할까? 검토") — 판정 대기
+# Round 77 — 원정 화면의 아래 띠를 없앨까 (2026-10-17 사용자 "원정 하단에 로스터는 굳이 안보여줘도 될 것 같아(어차피 전투 던전 선택해서 출발 누르면 로스터 구성 하니) 따로 용병 리스트 버튼을 눌러 제공하는 방식으로 할까? 검토") — 판정됨
+
+판정(2026-10-17 사용자 "1. 권장안 반영 / 2. 권장은 / 3. 용병 목록"): 띠 없음(안 1), [출발]은 지금처럼 팝업을 연다(팝업이 출발 확인을 겸함), 버튼 이름은 **[용병 목록]**(사용자 결정 — 권장은 "파티 편성"이었다). 구현은 아래 "구현"과 Architecture/12 "원정 화면".
 
 ## 지금
 
@@ -24,10 +26,10 @@
 2. [출발]의 동작: **지금처럼 팝업을 연다**(팝업이 출발 확인을 겸한다. 원정 뒤 지친 용병을 보고 떠난다) / 파티가 갖춰졌으면 바로 떠나고 모자랄 때만 팝업(한 번 덜 누른다. 직접 플레이 뒤 다시 볼 만하다).
 3. 버튼 이름: **[파티 편성]** / [용병 목록].
 
-## 구현 (판정 뒤, 안 1이면)
+## 구현 (안 1, 구현함)
 
-- 빌더: 아래 띠(`Frame/Bottom`)와 `ExpeditionPartyCardView` 넷을 지우고, 정보 패널(`Frame/Details`)을 120~1040으로 늘려 밑에 안내 줄(`Status`, 파티 수를 앞에)과 [파티 편성](`Form`)·[출발](`Depart`)을 둔다. 둘 다 팝업을 연다.
-- 화면: `RefreshParty`(띠)를 지우고, 안내 줄에 "파티 N명 · "를 앞세운다(문구 `Expedition.PartyCount` "파티 {0}명"). `Expedition.Party`(띠 머리글)는 지운다.
-- Test: 원정 Test의 띠 단정(카드 넷, 머리글, 순서)을 패널의 안내 줄·버튼 단정으로, `UiTestUtil.DepartFromExpedition`은 그대로(`Frame/Details/Depart` → 팝업 → `PartyDepart`), 스크린샷 `_56`. 문서: Architecture/12 "원정 화면", Design/04 §7, Roadmap.
+- 빌더: 아래 띠(`Frame/Bottom`)와 `ExpeditionPartyCardView`(파일도)를 지우고, 정보 패널(`Frame/Details`)을 120~1040으로 늘려 밑에 선·안내 줄(`Status`, 파티 수를 앞에)과 [용병 목록](`Roster`, 254x140)·[출발](`Depart`, 234x140)을 뒀다. 둘 다 팝업을 연다(`OpenParty`).
+- 화면: `RefreshParty`(띠)를 지우고, 안내 줄은 "파티 N명 · " + 상태(문구 `Expedition.PartyCount` "파티 {0}명", `Expedition.Roster` "용병 목록"). `Expedition.Party`(띠 머리글)는 지웠다.
+- Test: 원정 Test의 띠 단정을 패널의 안내 줄·버튼 단정으로, 팝업 Test에 "띠가 없다"와 [용병 목록]이 여는 팝업, `UiTestUtil.DepartFromExpedition`은 `Frame/Details/Depart` → 팝업 → `PartyDepart`, 스크린샷 `_56`. 문서: Architecture/12 "원정 화면", Design/04 §7·00, Roadmap.
 
 파일: `mock_strip.py`, `base-expedition.png`(Round 76 뒤의 스크린샷), `mock-strip-1-buttons.png`, `mock-strip-2-line.png`, `mock-strip-compare.png`.
