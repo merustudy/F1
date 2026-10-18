@@ -85,11 +85,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489279218909191
-  - m_Id: 9766393864199
-    m_Key: Lobby.Remove
-    m_Metadata:
-      m_Items:
-      - rid: 636489279218909192
   - m_Id: 9766393864200
     m_Key: Lobby.Expedition
     m_Metadata:
@@ -1550,16 +1545,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673481061990403
-  - m_Id: 5844067983286273
-    m_Key: Settle.LevelUps
-    m_Metadata:
-      m_Items:
-      - rid: 8623673481061990404
-  - m_Id: 5844067983286274
-    m_Key: Settle.LevelUp
-    m_Metadata:
-      m_Items:
-      - rid: 8623673481061990405
   - m_Id: 5853680703102976
     m_Key: Log.PhaseChanged
     m_Metadata:
@@ -1705,6 +1690,101 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673501619585024
+  - m_Id: 6394468449116160
+    m_Key: Expedition.StatTooltip
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098944
+  - m_Id: 6394468465893376
+    m_Key: Item.StatScale
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098945
+  - m_Id: 6394468465893377
+    m_Key: Stat.Str
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098946
+  - m_Id: 6394468465893378
+    m_Key: Stat.Dex
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098947
+  - m_Id: 6394468465893379
+    m_Key: Stat.Con
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098948
+  - m_Id: 6394468465893380
+    m_Key: Stat.Int
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098949
+  - m_Id: 6394468465893381
+    m_Key: Stat.Spi
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098950
+  - m_Id: 6394468465893382
+    m_Key: Stat.End
+    m_Metadata:
+      m_Items:
+      - rid: 8623673515462098951
+  - m_Id: 6416151813808128
+    m_Key: Item.Hit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673516817121280
+  - m_Id: 6416151822196736
+    m_Key: Log.Missed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673516817121281
+  - m_Id: 6416151822196737
+    m_Key: Fx.Miss
+    m_Metadata:
+      m_Items:
+      - rid: 8623673516817121282
+  - m_Id: 6472751761055745
+    m_Key: Stat.Up
+    m_Metadata:
+      m_Items:
+      - rid: 8623673520354754562
+  - m_Id: 6472751761055746
+    m_Key: Stat.Down
+    m_Metadata:
+      m_Items:
+      - rid: 8623673520354754563
+  - m_Id: 6525681168015360
+    m_Key: Lobby.LevelUp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673523662749696
+  - m_Id: 6525681180598272
+    m_Key: Lobby.LevelUpCount
+    m_Metadata:
+      m_Items:
+      - rid: 8623673523662749697
+  - m_Id: 6525681180598273
+    m_Key: Lobby.LevelUpMark
+    m_Metadata:
+      m_Items:
+      - rid: 8623673523662749698
+  - m_Id: 6525681180598274
+    m_Key: Lobby.StatGain
+    m_Metadata:
+      m_Items:
+      - rid: 8623673523662749699
+  - m_Id: 6525681184792576
+    m_Key: Settle.Ready
+    m_Metadata:
+      m_Items:
+      - rid: 8623673523662749700
+  - m_Id: 6531433886638080
+    m_Key: Lobby.BarracksLockedNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673524022411264
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -1774,10 +1854,6 @@ MonoBehaviour:
       data:
         m_CommentText: '{0} = fatigue (0 is fresh; it builds up on expeditions).
           {1} = maximum.'
-    - rid: 636489279218909192
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Takes a mercenary out of the party.
     - rid: 636489279218909193
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3074,16 +3150,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The experience every survivor got (stage 27). {0} = the experience.
-    - rid: 8623673481061990404
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: After the experience, when survivors reached a new level.
-          {0} = Settle.LevelUp entries joined by commas.
-    - rid: 8623673481061990405
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: One survivor that reached a new level. {0} = the name, {1}
-          = the level now.
     - rid: 8623673481662824448
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3230,3 +3296,108 @@ MonoBehaviour:
       data:
         m_CommentText: 'The plate of a bag lying on the floor (round 79): its name
           and its squares. {0} = the name, {1} = squares across, {2} = squares down.'
+    - rid: 8623673515462098944
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The title of the stat tooltip beside a list row of the party
+          popup (Slice D stage 32, Round 81). {0} = the mercenary's name. {1} = the
+          job. {2} = the level.
+    - rid: 8623673515462098945
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the card of an item its owner''s stat grows (Slice D stage
+          32, Round 81), after the stars'' line: the stat, its value and the multiplier
+          the card''s values count. {0} = the stat''s name. {1} = its value. {2}
+          = the multiplier (1.2).'
+    - rid: 8623673515462098946
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32, Round 81): the barracks''
+          lines, the candidates, the party popup and the item cards. Strength: the
+          power and hit of heavy melee weapons.'
+    - rid: 8623673515462098947
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32). Dexterity: the power and
+          hit of light weapons (daggers, bows), dodge and critical hits.'
+    - rid: 8623673515462098948
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32). Constitution: the maximum
+          HP and the chance to live at death''s door.'
+    - rid: 8623673515462098949
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32). Intellect: the power and
+          hit of fire and howls.'
+    - rid: 8623673515462098950
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32). Spirit: heals and shields,
+          and the chance of a virtue.'
+    - rid: 8623673515462098951
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A stat''s name (Slice D stage 32). Endurance: how slowly
+          fatigue builds up.'
+    - rid: 8623673516817121280
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In the facts of an item whose damage or burn can miss (Slice
+          D stage 33, Round 81): its hit chance against a target at the baseline,
+          with the owner''s stat of the item''s axis (an enemy''s Accuracy). {0}
+          = percent, up to two decimals, maybe coloured.'
+    - rid: 8623673516817121281
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A miss (Slice D stage 33, Round 81): the attack dealt nothing
+          to that unit. {0} = the source (item and owner). {1} = the target. {2}
+          = the hit chance in percent. {3} = the roll in percent (two decimals at
+          most).'
+    - rid: 8623673516817121282
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Rises over a unit an attack missed (Slice D stage 33, Round
+          81), grey, where the damage would have stood.
+    - rid: 8623673520354754562
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'After a candidate''s stat at the stagecoach (Slice D stage
+          34, Round 81): how far above its job''s base value. {0} = points.'
+    - rid: 8623673520354754563
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'After a candidate''s stat: how far under its job''s base
+          value. {0} = points.'
+    - rid: 8623673523662749696
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "The button on a barracks line whose experience meets its
+          level (Slice D stage 35, Round 82 \uC548 A): levels the mercenary up by
+          one."
+    - rid: 8623673523662749697
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The small gold count at the barracks'' plate (Slice D stage
+          35): how many mercenaries can level up. {0} = the count.'
+    - rid: 8623673523662749698
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Before the level on a strip chip of a mercenary who can level
+          up (Slice D stage 35).
+    - rid: 8623673523662749699
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: After a stat value on a barracks line that the level-up just
+          grew (Slice D stage 35). {0} = points.
+    - rid: 8623673523662749700
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the experience (Slice D stage 35, Round 82): the survivors
+          whose experience now meets their level; the barracks levels them up. {0}
+          = the names joined by commas.'
+    - rid: 8623673524022411264
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the barracks'' list while it is under construction
+          (Slice D stage 35): dismissing is off, the level-up is not.'

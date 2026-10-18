@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Globalization;
+using F1.Data;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,10 +8,12 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// One mercenary of the roster in the barracks (Round 71: the lobby's barracks window), with the buttons that put it in a row of the party
-    /// and, from Slice C stage 26, the one that dismisses it. Its fatigue is pips and
-    /// words (round 33, C); a mercenary that came home in an affliction has its name after the words and what it does at the
-    /// right end of the passive's line (round 36). The lobby never shows a virtue: it ends with the expedition.
+    /// One mercenary of the roster in the barracks (Round 71: the lobby's barracks window): its fatigue as pips and words (round 33, C), an
+    /// affliction's name after the words and what it does at the right end of the passive's line (round 36), its six stats as a sheet (Slice D
+    /// stage 32, Round 81 안 B: where the row buttons and "remove" stood — the party is formed in the expedition screen's popup only), its level
+    /// and experience (stage 27) with the level-up button when the experience meets the level (Slice D stage 35, Round 82 안 A: the bar shortens and
+    /// turns gold, the button stands at its end; what the roll grew shows beside the values under a gold rim), and the button that dismisses it
+    /// (stage 26). The lobby never shows a virtue: it ends with the expedition.
     /// </summary>
     public sealed class RosterEntryView : MonoBehaviour
     {
@@ -19,20 +23,31 @@ namespace F1.UI
         [SerializeField] TMP_Text _fatigue;
         [SerializeField] TMP_Text _state;
         [SerializeField] UiBar[] _fatiguePips;
-        [SerializeField] Button[] _rows;
-        [SerializeField] Image[] _rowFrames;
-        [SerializeField] Button _remove;
+        [SerializeField] TMP_Text[] _statNames;
+        [SerializeField] TMP_Text[] _statValues;
         [SerializeField] Button _dismiss;
         [SerializeField] TMP_Text _level;
         [SerializeField] TMP_Text _exp;
         [SerializeField] UiBar _expBar;
+        [SerializeField] Button _levelUp;
+        [SerializeField] GameObject _rim;
 
-        /// <summary>One button per battle row; index 0 is row 1.</summary>
-        public IReadOnlyList<Button> Rows => _rows;
-        public Button Remove => _remove;
+        /// <summary>The level block's two layouts (Round 82 안 A): the experience's words and bar as built, and shorter beside the level-up button.</summary>
+        public const float ReadyExpLeft = 1212f;
+        public const float ReadyBarWidth = 192f;
+
+        Vector2 _expPosition;
+        Vector2 _barSize;
+        bool _layoutKept;
 
         /// <summary>Dismisses the mercenary from the roster for good (Slice C stage 26). Off for the last mercenary left.</summary>
         public Button Dismiss => _dismiss;
+
+        /// <summary>Levels the mercenary up by one (Slice D stage 35). Shown only while its experience meets the level's.</summary>
+        public Button LevelUp => _levelUp;
+
+        /// <summary>The gold rim round a line whose level-up the barracks just rolled (Round 82 안 A).</summary>
+        public bool RimShown => _rim.activeSelf;
 
         /// <summary>The fatigue pips, left to right: each a tenth of the most fatigue (round 33, C).</summary>
         public IReadOnlyList<UiBar> FatiguePips => _fatiguePips;
@@ -48,11 +63,10 @@ namespace F1.UI
         public TMP_Text Exp => _exp;
         public UiBar ExpBar => _expBar;
 
-        /// <param name="row">The row the mercenary holds in the party, or 0 when it is not in the party.</param>
-        /// <param name="canTake">
-        /// For each row the party can stand in, whether the mercenary can take it now. Buttons of rows
-        /// beyond that are not shown: a side has more rows than the party has members.
-        /// </param>
+        /// <summary>The six stats' names and values, in <see cref="StatBlock.All"/>'s order (Slice D stage 32).</summary>
+        public IReadOnlyList<TMP_Text> StatNames => _statNames;
+        public IReadOnlyList<TMP_Text> StatValues => _statValues;
+
         /// <param name="affliction">The name of the affliction the mercenary is in, or null.</param>
         /// <param name="afflictionEffect">What the affliction does, or null.</param>
         /// <param name="canDismiss">Whether the mercenary can be dismissed now.</param>
@@ -63,8 +77,6 @@ namespace F1.UI
             int fatigue,
             int maxFatigue,
             int breakdown,
-            int row,
-            IReadOnlyList<bool> canTake,
             string affliction = null,
             string afflictionEffect = null,
             bool canDismiss = false)
@@ -82,32 +94,52 @@ namespace F1.UI
             _fatigue.color = fatigue >= breakdown ? UiPalette.FatigueDanger : UiPalette.Fatigue;
             _state.text = afflictionEffect ?? string.Empty;
             UI.FatiguePips.Show(_fatiguePips, fatigue, maxFatigue, breakdown);
-
-            for (int i = 0; i < _rows.Length; i++)
-            {
-                bool shown = i < canTake.Count;
-                _rows[i].gameObject.SetActive(shown);
-                if (!shown)
-                {
-                    continue;
-                }
-
-                // The button of the row the mercenary stands in stays lit; clicking it changes nothing.
-                bool own = row == i + 1;
-                _rowFrames[i].color = own ? UiPalette.Selected : UiPalette.ButtonQuiet;
-                _rows[i].interactable = own || canTake[i];
-            }
-
-            _remove.gameObject.SetActive(row != 0);
         }
-    
 
-        /// <summary>The level and the experience (stage 27): the words and the bar, which is full at the last level (expToNext 0).</summary>
-        public void ShowLevel(int level, int exp, int expToNext)
+        /// <summary>
+        /// The level and the experience (stage 27): the words and the bar, which is full at the last level (expToNext 0). When the barracks can level
+        /// the mercenary up (Slice D stage 35) the words and the full bar turn gold, the bar shortens and the level-up button stands at its end.
+        /// </summary>
+        public void ShowLevel(int level, int exp, int expToNext, bool canLevelUp = false)
         {
+            KeepLayout();
             _level.text = UiStrings.Get(UiKeys.Lobby.Level, level);
             _exp.text = expToNext > 0 ? UiStrings.Get(UiKeys.Lobby.Exp, exp, expToNext) : UiStrings.Get(UiKeys.Lobby.ExpMax);
-            _expBar.SetRatio(expToNext > 0 ? (float)exp / expToNext : 1f);
+            _exp.color = canLevelUp ? UiPalette.StarLit : UiPalette.TextDim;
+            _expBar.SetRatio(expToNext > 0 ? Mathf.Clamp01((float)exp / expToNext) : 1f);
+            _expBar.SetColor(canLevelUp ? UiPalette.StarLit : UiPalette.Bone);
+            _levelUp.gameObject.SetActive(canLevelUp);
+            _exp.rectTransform.anchoredPosition = canLevelUp ? new Vector2(ReadyExpLeft, _expPosition.y) : _expPosition;
+            ((RectTransform)_expBar.transform).sizeDelta = canLevelUp ? new Vector2(ReadyBarWidth, _barSize.y) : _barSize;
+        }
+
+        /// <summary>
+        /// The six stats (Slice D stage 32, Round 81): each name over its value, the value green above the baseline, red below it. With the gains of a
+        /// level-up just rolled (stage 35) each grown value carries a small green +N and the line a gold rim; null takes them away.
+        /// </summary>
+        public void ShowStats(StatBlock stats, StatBlock gains = null)
+        {
+            for (int i = 0; i < StatBlock.All.Length; i++)
+            {
+                Stat stat = StatBlock.All[i];
+                _statNames[i].text = UiText.StatName(stat);
+                _statValues[i].text = UiText.StatValue(stats[stat], gains == null ? 0 : gains[stat]);
+                _statValues[i].color = UiText.StatColor(stats[stat]);
+            }
+
+            _rim.SetActive(gains != null);
+        }
+
+        void KeepLayout()
+        {
+            if (_layoutKept)
+            {
+                return;
+            }
+
+            _expPosition = _exp.rectTransform.anchoredPosition;
+            _barSize = ((RectTransform)_expBar.transform).sizeDelta;
+            _layoutKept = true;
         }
     }
 }

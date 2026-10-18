@@ -1013,7 +1013,7 @@ namespace F1.UI
 
             bool party = board.Unit.Side == BattleSide.Party;
             _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party,
-                starLine: party ? BattleStarLine(board.Unit, item) : null, starDamage: item.StarDamage);
+                starLine: party ? BattleStarLine(board.Unit, item) : null, starDamage: item.StarDamage, ownerStats: board.Unit.Setup.Stats, ownerAccuracy: board.Unit.Setup.Accuracy, ownerPassive: board.Unit.Setup.Passive);
             Managers.Sound.PlayEffect(SoundEffect.Button);
         }
 
@@ -1679,7 +1679,8 @@ namespace F1.UI
 
             string merge = Managers.Expedition.HasMergeTarget(item.Item) ? UiText.MergeHint(item.Item) : null;
             ItemBoard board = expedition.Members[member].Board;
-            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item));
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item), ownerStats: expedition.Members[member].Stats,
+                ownerPassive: Managers.Data.Data.Jobs.Get(expedition.Members[member].JobId).Passive);
         }
 
         void OnLootSquareEntered(int member, int x, int y)

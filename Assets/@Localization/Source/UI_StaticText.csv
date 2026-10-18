@@ -30,7 +30,6 @@ Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day 
 Lobby.Gold,"The company's gold in the header and the windows (stage 26). {0} = gold.",금 {0},Gold {0}
 Lobby.Fatigue,{0} = fatigue (0 is fresh; it builds up on expeditions). {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
 Lobby.FatigueState,"On a roster line of a mercenary in an affliction: the fatigue words, then the affliction's name. {0} = the fatigue words (Lobby.Fatigue). {1} = the affliction.",{0} · {1},{0} · {1}
-Lobby.Remove,Takes a mercenary out of the party.,제외,Remove
 Lobby.Dismiss,"Dismisses a mercenary from the roster for good (stage 26, the barracks).",내보내기,Dismiss
 Lobby.Expedition,Header of the expedition panel.,원정,Expedition
 Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
@@ -71,6 +70,10 @@ Lobby.InnNote,Under the inn's list: the treatment takes no day.,치료는 날이
 Lobby.Level,"A mercenary's level (stage 27), on the strip's chips, the barracks' lines, the candidates and the expedition cards. {0} = the level.",Lv {0},Lv {0}
 Lobby.Exp,"The experience toward the next level, on a barracks line. {0} = the experience, {1} = what the next level takes.",경험치 {0}/{1},XP {0}/{1}
 Lobby.ExpMax,"On a barracks line at the last level.",경험치 최대,XP max
+Lobby.LevelUp,"The button on a barracks line whose experience meets its level (Slice D stage 35, Round 82 안 A): levels the mercenary up by one.",▲ 레벨 업,▲ Level up
+Lobby.LevelUpCount,"The small gold count at the barracks' plate (Slice D stage 35): how many mercenaries can level up. {0} = the count.",▲{0},▲{0}
+Lobby.LevelUpMark,"Before the level on a strip chip of a mercenary who can level up (Slice D stage 35).",▲,▲
+Lobby.StatGain,"After a stat value on a barracks line that the level-up just grew (Slice D stage 35). {0} = points.",+{0},+{0}
 Lobby.EndedOn,Row of the result window: the day the run ended.,끝난 날,Ended on
 Lobby.DayValue,"A day as a value. {0} = the day.",{0}일차,Day {0}
 Lobby.Expeditions,Row of the result window: how many expeditions.,원정,Expeditions
@@ -88,6 +91,7 @@ Lobby.UpgradeButton,"The button that starts a building's next level. {0} = the p
 Lobby.MaxLevelLine,"The building line of a window at the last level. {0} = the level, {1} = the effect at this level (Lobby.Effect* with the same value twice).",Lv {0} · 최고 레벨 · {1},Lv {0} · top level · {1}
 Lobby.ConstructionLine,"The building line of a window while its level is being built. {0} = the level, {1} = the level being built, {2} = the days left.",Lv {0} → Lv {1} 건설 중 · {2}일 남음,Lv {0} → Lv {1} under construction · {2} days left
 Lobby.LockedNote,"Under the lists of a window whose building is under construction: its commands are off.",건설 중이라 쓸 수 없다,Closed while under construction
+Lobby.BarracksLockedNote,"Under the barracks' list while it is under construction (Slice D stage 35): dismissing is off, the level-up is not.",건설 중이라 내보낼 수 없다 (레벨 업은 된다),No dismissing while under construction (levelling up still works)
 Lobby.EffectBarracks,"What the barracks' level gives. {0} = the roster limit now, {1} = at the next level.",로스터 상한 {0} → {1},roster limit {0} → {1}
 Lobby.EffectInn,"What the inn's level gives. {0} = the treatment's relief now, {1} = at the next level.",치료 피로 -{0} → -{1},treatment -{0} → -{1}
 Lobby.EffectCoach,"What the stagecoach's level gives. {0} = the candidates now, {1} = at the next level.",후보 {0}명 → {1}명,{0} → {1} candidates
@@ -122,6 +126,7 @@ Expedition.Leave,The list's button that takes a mercenary out of the party (roun
 Expedition.EmptySlot,An empty line of the popup's list: room in the roster (round 76 D).,빈 자리 (역마차에서 고용),Empty (hire at the coach)
 Expedition.Roster,The button under the details that opens the party popup to look and form (round 77).,용병 목록,Mercenaries
 Expedition.PartyCount,Before the status under the details (round 77). {0} = party size.,파티 {0}명,Party of {0}
+Expedition.StatTooltip,"The title of the stat tooltip beside a list row of the party popup (Slice D stage 32, Round 81). {0} = the mercenary's name. {1} = the job. {2} = the level.",{0} · {1} Lv {2},{0} · {1} Lv {2}
 Expedition.Forward,Moves a party member one row to the front (trading places).,앞으로,Forward
 Expedition.Back,Moves a party member one row to the back (trading places).,뒤로,Back
 Map.Progress,{0} = floor of the last cleared node. {1} = number of floors.,{0}층 / {1}층,Floor {0} / {1}
@@ -200,6 +205,7 @@ Item.Other,Item category: anything else.,기타 아이템,Other item
 Item.Size,{0} x {1} = the squares the item takes across and down on a board (Slice B stage 19).,크기 {0}×{1},Size {0}×{1}
 Item.Cooldown,{0} = seconds.,쿨다운 {0}초,Cooldown {0}s
 Item.Crit,"In a weapon's facts (Slice B stage 22): the chance that its damage on a unit is a critical hit, rolled for each unit it hits. {0} = percent.",치명타 {0}%,Crit {0}%
+Item.Hit,"In the facts of an item whose damage or burn can miss (Slice D stage 33, Round 81): its hit chance against a target at the baseline, with the owner's stat of the item's axis (an enemy's Accuracy). {0} = percent, up to two decimals, maybe coloured.",명중 {0}%,Hit {0}%
 Item.RowsFront,The item only works while its owner stands within the front N rows. {0} = N (2 or more).,앞에서 {0}번째 자리까지만 발동,Only within the front {0} rows
 Item.RowsFrontOne,The item only works in the front row.,맨 앞에서만 발동,Only in the front row
 Item.RowsBack,The item only works while its owner stands within the rear N rows of the living line. {0} = N (2 or more).,뒤에서 {0}번째 자리까지만 발동,Only within the rear {0} rows
@@ -217,6 +223,7 @@ Item.Melee,"In an item's facts: a melee weapon, which the stars of a whetstone s
 Item.NoActivation,In an item's facts in place of its cooldown: an item that never activates and works by its stars (stage 20).,발동하지 않음,Never activates
 Item.StarDamage,The effect line of a star item (stage 20): a melee weapon on one of its stars deals more. {0} = how much.,★에 놓인 근접 무기: 피해 +{0},★ A melee weapon on a star: damage +{0}
 Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which already count it: what the stars on it add. {0} = the star items' names. {1} = the damage they add.",(★ {0} +{1}),(★ {0} +{1})
+Item.StatScale,"On the card of an item its owner's stat grows (Slice D stage 32, Round 81), after the stars' line: the stat, its value and the multiplier the card's values count. {0} = the stat's name. {1} = its value. {2} = the multiplier (1.2).",({0} {1} ×{2}),({0} {1} ×{2})
 Item.StarLit,"On a star item's card (stage 20): how many of its stars a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons' names.",걸린 ★ {0}/{1} — {2},Stars lit {0}/{1} — {2}
 Item.StarLitNone,On a star item's card when no melee weapon lies on its stars (stage 20). {0} = its stars.,걸린 ★ 0/{0},Stars lit 0/{0}
 Item.Unique,"In a unique item's facts (stage 23), first.",유니크,Unique
@@ -273,6 +280,7 @@ Log.SourceStorm,Damage source.,폭풍,Storm
 Log.Damage,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 피해 {2},{0} → {1}: {2} damage
 Log.DamageAbsorbed,{0} = source. {1} = target. {2} = amount. {3} = absorbed by shield.,{0} → {1}: 피해 {2} (보호막이 {3} 흡수),{0} → {1}: {2} damage ({3} absorbed by Shield)
 Log.CriticalHit,"A critical hit (stage 22), just before its damage line. {0} = source. {1} = target.",{0} → {1}: 치명타!,{0} → {1}: critical hit!
+Log.Missed,"A miss (Slice D stage 33, Round 81): the attack dealt nothing to that unit. {0} = the source (item and owner). {1} = the target. {2} = the hit chance in percent. {3} = the roll in percent (two decimals at most).",{0} → {1}: 빗나감 (명중 {2}% · 굴림 {3}),{0} → {1}: miss (hit {2}% · roll {3})
 Log.Heal,{0} = source. {1} = target. {2} = HP restored.,{0} → {1}: 회복 {2},{0} → {1}: healed {2}
 Log.Shield,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 보호막 +{2},{0} → {1}: Shield +{2}
 Log.Burn,{0} = source. {1} = target. {2} = stacks.,{0} → {1}: 화상 +{2},{0} → {1}: Burn +{2}
@@ -320,8 +328,7 @@ Settle.FinalStandLost,The run was lost with this expedition: the final stand was
 Settle.Gold,"The gold the settlement paid (stage 26). {0} = gold earned, {1} = the floors reached, {2} = the gold held now.",얻은 금 +{0} ({1}층 도달) · 보유 금 {2},Gold +{0} ({1} floors reached) · gold held {2}
 Settle.GoldWithCoins,"The gold the settlement paid when a cleared expedition's coins came home as gold (2026-10-17). {0} = gold earned in all, {1} = the floors reached, {2} = the coins converted (those left and the items' worth), {3} = the gold they made, {4} = the gold held now.",얻은 금 +{0} ({1}층 도달 · 지역 코인 {2} → 금 +{3}) · 보유 금 {4},Gold +{0} ({1} floors reached · {2} region coins → gold +{3}) · gold held {4}
 Settle.Exp,"The experience every survivor got (stage 27). {0} = the experience.",경험치 +{0},XP +{0}
-Settle.LevelUps,"After the experience, when survivors reached a new level. {0} = Settle.LevelUp entries joined by commas.",레벨 업: {0},Level up: {0}
-Settle.LevelUp,"One survivor that reached a new level. {0} = the name, {1} = the level now.",{0} Lv {1},{0} Lv {1}
+Settle.Ready,"Under the experience (Slice D stage 35, Round 82): the survivors whose experience now meets their level; the barracks levels them up. {0} = the names joined by commas.",▲ 레벨 업 가능: {0} — 막사에서 올린다,▲ Ready to level up: {0} — in the barracks
 Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
 Save.Retry,Writes the unsaved change again.,다시 시도,Retry
 Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}
@@ -336,6 +343,15 @@ Fx.RetreatSucceeded,The retreat roll succeeded.,후퇴!,Retreat!
 Fx.RetreatFailed,The retreat roll failed.,후퇴 실패,Retreat failed
 Fx.Storm,{0} = damage of this storm tick. Rises from the clock.,폭풍 -{0},Storm -{0}
 Fx.Crit,"The small word over a critical hit's number (stage 22, Round 60 mock A in the damage red).",치명타,Critical
+Fx.Miss,"Rises over a unit an attack missed (Slice D stage 33, Round 81), grey, where the damage would have stood.",빗나감,Miss
 Fx.Phase,"Rises over a boss that entered a phase (stage 28). {0} = the phase number.",페이즈 {0},Phase {0}
 Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
 Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue
+Stat.Str,"A stat's name (Slice D stage 32, Round 81): the barracks' lines, the candidates, the party popup and the item cards. Strength: the power and hit of heavy melee weapons.",힘,STR
+Stat.Dex,"A stat's name (Slice D stage 32). Dexterity: the power and hit of light weapons (daggers, bows), dodge and critical hits.",민첩,DEX
+Stat.Con,"A stat's name (Slice D stage 32). Constitution: the maximum HP and the chance to live at death's door.",체력,CON
+Stat.Int,"A stat's name (Slice D stage 32). Intellect: the power and hit of fire and howls.",지식,INT
+Stat.Spi,"A stat's name (Slice D stage 32). Spirit: heals and shields, and the chance of a virtue.",정신력,SPI
+Stat.End,"A stat's name (Slice D stage 32). Endurance: how slowly fatigue builds up.",인내,END
+Stat.Up,"After a candidate's stat at the stagecoach (Slice D stage 34, Round 81): how far above its job's base value. {0} = points.",▲{0},▲{0}
+Stat.Down,"After a candidate's stat: how far under its job's base value. {0} = points.",▼{0},▼{0}

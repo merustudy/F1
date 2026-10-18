@@ -1,7 +1,7 @@
-Level,ExpToNext,MaxHpBonusPercent
-1,15,0
-2,25,10
-3,40,20
-4,60,30
-5,90,40
-6,0,50
+Level,ExpToNext
+1,15
+2,25
+3,40
+4,60
+5,90
+6,0

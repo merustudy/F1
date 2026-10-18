@@ -122,6 +122,8 @@ namespace F1.Data
         Shield,
         Burn,
         WeaponPowerPercent,
+        /// <summary>Slice D stage 36 (the ranger): percent points added to the critical chance of the unit's weapon items that have one.</summary>
+        CritChancePercent,
     }
 
     public enum PassiveTarget
@@ -147,5 +149,19 @@ namespace F1.Data
     {
         Affliction,
         Virtue,
+    }
+
+    /// <summary>
+    /// A mercenary's stat (Slice D stage 32, Docs/Design/05_Mercenary_Growth.md §2): strength, dexterity, constitution, intellect, spirit and
+    /// endurance. Strength, dexterity, intellect and spirit are what an item's power can grow with (<see cref="ItemData.ScalesWith"/>).
+    /// </summary>
+    public enum Stat
+    {
+        Str,
+        Dex,
+        Con,
+        Int,
+        Spi,
+        End,
     }
 }

@@ -16,12 +16,14 @@ namespace F1.Tests
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nSellPercent,50\nCoinsPerGold,20\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
-            "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n";
+            "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n" +
+            "StatBaseline,10\nStatMin,1\nStatMax,30\nStatPowerPercentPerPoint,10\nHpPercentPerConPoint,5\n" +
+            "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerStatPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nDogDeathPercentPerConPoint,1\nVirtuePerSpiPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure\n" +
-            "knight,기사,Knight,38,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight\n" +
-            "bishop,주교,Bishop,24.5,staff,3,,,,,,,,,\n";
+            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd\n" +
+            "knight,기사,Knight,38,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50\n" +
+            "bishop,주교,Bishop,24.5,staff,3,,,,,,,,,,7,8,9,11,14,10,20,50,50,90,110,50\n";
 
         public const string Items =
             "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Value,Effect2Kind,Effect2Target,Effect2Reach,Effect2Value,ShopWeight,Icon,Price,Melee,Stars,StarDamage,CritChancePercent\n" +
@@ -76,10 +78,10 @@ namespace F1.Tests
 
         /// <summary>Three levels (stage 27): no Id and no Name, the level is the key.</summary>
         public const string Levels =
-            "Level,ExpToNext,MaxHpBonusPercent\n" +
-            "1,10,0\n" +
-            "2,20,10\n" +
-            "3,0,25\n";
+            "Level,ExpToNext\n" +
+            "1,10\n" +
+            "2,20\n" +
+            "3,0\n";
 
         /// <summary>The town's buildings (stage 30): two levels each, as TestData.Buildings.</summary>
         public const string Buildings =

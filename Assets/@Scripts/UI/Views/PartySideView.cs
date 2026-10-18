@@ -367,7 +367,8 @@ namespace F1.UI
             _cardMember = member;
             _cardX = x;
             _cardY = y;
-            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item), sell?.Label, sell?.Enabled ?? false);
+            _tooltip.ShowAbove(item.Item, merge, piece.Rect, _boardPanel, UiText.StarLine(board, item), StarRules.DamageOn(board, item), sell?.Label, sell?.Enabled ?? false,
+                expedition.Members[member].Stats);
         }
 
         /// <summary>Round 47 (a grid since round 49): the card of the item on a square of the inventory, beside its piece inside the popup, while nothing is held.</summary>

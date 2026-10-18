@@ -327,14 +327,15 @@ namespace F1.Tests
         /// start bag: a board with two empty rows under its weapon to stage on. Since round 51 the valkyrie's battle axe is 3x2, and the
         /// party of these tests stands her in row 1.
         /// </summary>
-        public static int FlatRow(int nth = 0)
+        public static int FlatRow(int nth = 0, bool melee = false)
         {
             ExpeditionState expedition = Managers.Expedition.Expedition;
             int found = 0;
             for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
             {
+                // melee: only a melee base weapon counts (a whetstone's star lights on one; Slice D stage 36 put the priest's staff in row 2).
                 BoardItem weapon = expedition.Members.Find(m => m.Alive && m.Row == row)?.Board.ItemAt(0, 0);
-                if (weapon != null && weapon.Height == 1 && found++ == nth)
+                if (weapon != null && weapon.Height == 1 && (!melee || weapon.Item.Item.Melee) && found++ == nth)
                 {
                     return row;
                 }
@@ -424,18 +425,27 @@ namespace F1.Tests
             return Views<RosterEntryView>(lobby);
         }
 
-        /// <summary>Fills the party in the barracks from the top of the roster list (the first mercenary takes row 1, the second row 2 and so on) and closes the window.</summary>
+        /// <summary>
+        /// Fills the party from the top of the roster (the first mercenary takes row 1, the second row 2 and so on) with the command the party popup
+        /// gives (Round 81 took the row buttons out of the barracks: Docs/Architecture/12_UI.md "원정 화면"). The popup itself is tested on its own.
+        /// </summary>
         public static IEnumerator FillParty(LobbyScreen lobby)
         {
-            yield return OpenBarracks(lobby);
-            RosterEntryView[] entries = RosterEntries(lobby);
             int size = Managers.Data.Data.Balance.PartySize;
             for (int i = 0; i < size; i++)
             {
-                Click(entries[i].Rows[i]);
+                PlaceInParty(lobby, Managers.Run.Run.Roster[i].Id, i + 1);
             }
 
-            CloseQuarter(lobby);
+            yield return null;
+        }
+
+        /// <summary>Puts a mercenary in a row of the lobby party (the party popup's command) and redraws the lobby.</summary>
+        public static void PlaceInParty(LobbyScreen lobby, string mercenaryId, int row)
+        {
+            Assert.IsTrue(Managers.Run.CanPlaceInParty(mercenaryId, row), $"'{mercenaryId}' cannot take row {row}.");
+            Managers.Run.PlaceInParty(mercenaryId, row);
+            lobby.Refresh();
         }
 
         /// <summary>Rests a day at the inn of the town and closes its window.</summary>
@@ -727,7 +737,7 @@ namespace F1.Tests
                 Regrade(member, 1);
             }
 
-            ExpeditionMember valkyrie = members.Single(m => m.JobId == "valkyrie");
+            ExpeditionMember valkyrie = members.Single(m => m.JobId == "viking");
             ExpeditionMember decoy = members.First(m => m != valkyrie);
             int row = BattleRows.Front;
             foreach (ExpeditionMember member in new[] { decoy, valkyrie }.Concat(members.Where(m => m != decoy && m != valkyrie)))

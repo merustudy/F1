@@ -2,10 +2,10 @@
   "SchemaVersion": 1,
   "Items": [
     {
-      "Id": "archmage",
+      "Id": "mage",
       "Name": {
-        "en-US": "Archmage",
-        "ko-KR": "대마법사"
+        "en-US": "Mage",
+        "ko-KR": "마법사"
       },
       "MaxHp": 2200,
       "WeaponItemId": "fire_staff",
@@ -25,13 +25,29 @@
         "en-US": "Rear 2 rows: weapon damage +{0}%",
         "ko-KR": "뒤에서 2번째 자리까지: 무기 피해 +{0}%"
       },
-      "Figure": "unit/job/archmage"
+      "Figure": "unit/job/archmage",
+      "Stats": {
+        "Str": 6,
+        "Dex": 9,
+        "Con": 7,
+        "Int": 15,
+        "Spi": 11,
+        "End": 8
+      },
+      "Growth": {
+        "Str": 20,
+        "Dex": 50,
+        "Con": 50,
+        "Int": 110,
+        "Spi": 90,
+        "End": 50
+      }
     },
     {
-      "Id": "bishop",
+      "Id": "priest",
       "Name": {
-        "en-US": "Bishop",
-        "ko-KR": "주교"
+        "en-US": "Priest",
+        "ko-KR": "사제"
       },
       "MaxHp": 2500,
       "WeaponItemId": "healing_staff",
@@ -48,13 +64,107 @@
         "en-US": "Healed targets also gain {0} Shield",
         "ko-KR": "회복시킨 대상에게 보호막 {0}"
       },
-      "Figure": "unit/job/bishop"
+      "Figure": "unit/job/bishop",
+      "Stats": {
+        "Str": 7,
+        "Dex": 8,
+        "Con": 9,
+        "Int": 11,
+        "Spi": 14,
+        "End": 10
+      },
+      "Growth": {
+        "Str": 20,
+        "Dex": 50,
+        "Con": 50,
+        "Int": 90,
+        "Spi": 110,
+        "End": 50
+      }
     },
     {
-      "Id": "knight",
+      "Id": "ranger",
       "Name": {
-        "en-US": "Knight",
-        "ko-KR": "기사"
+        "en-US": "Ranger",
+        "ko-KR": "방랑자"
+      },
+      "MaxHp": 2700,
+      "WeaponItemId": "longbow",
+      "RecommendedRow": 3,
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "None",
+        "Rows": null,
+        "Effect": "CritChancePercent",
+        "Target": "Self",
+        "Magnitude": 10
+      },
+      "PassiveText": {
+        "en-US": "Weapon critical chance +{0}%",
+        "ko-KR": "무기의 치명타 확률 +{0}%"
+      },
+      "Figure": "unit/job/spellblade",
+      "Stats": {
+        "Str": 8,
+        "Dex": 14,
+        "Con": 9,
+        "Int": 7,
+        "Spi": 9,
+        "End": 11
+      },
+      "Growth": {
+        "Str": 50,
+        "Dex": 110,
+        "Con": 50,
+        "Int": 20,
+        "Spi": 50,
+        "End": 90
+      }
+    },
+    {
+      "Id": "viking",
+      "Name": {
+        "en-US": "Viking",
+        "ko-KR": "바이킹"
+      },
+      "MaxHp": 3300,
+      "WeaponItemId": "greataxe",
+      "RecommendedRow": 1,
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "SelfInDog",
+        "Rows": null,
+        "Effect": "WeaponPowerPercent",
+        "Target": "Self",
+        "Magnitude": 100
+      },
+      "PassiveText": {
+        "en-US": "At death's door: weapon damage +{0}%",
+        "ko-KR": "빈사 상태: 무기 피해 +{0}%"
+      },
+      "Figure": "unit/job/valkyrie",
+      "Stats": {
+        "Str": 13,
+        "Dex": 11,
+        "Con": 10,
+        "Int": 5,
+        "Spi": 8,
+        "End": 9
+      },
+      "Growth": {
+        "Str": 110,
+        "Dex": 90,
+        "Con": 50,
+        "Int": 20,
+        "Spi": 50,
+        "End": 50
+      }
+    },
+    {
+      "Id": "warrior",
+      "Name": {
+        "en-US": "Warrior",
+        "ko-KR": "전사"
       },
       "MaxHp": 3800,
       "WeaponItemId": "longsword",
@@ -74,79 +184,23 @@
         "en-US": "Front row: gains {0} Shield at the start of battle",
         "ko-KR": "맨 앞: 전투 시작 때 자신에게 보호막 {0}"
       },
-      "Figure": "unit/job/knight"
-    },
-    {
-      "Id": "paladin",
-      "Name": {
-        "en-US": "Paladin",
-        "ko-KR": "성기사"
+      "Figure": "unit/job/knight",
+      "Stats": {
+        "Str": 12,
+        "Dex": 9,
+        "Con": 12,
+        "Int": 6,
+        "Spi": 9,
+        "End": 11
       },
-      "MaxHp": 3500,
-      "WeaponItemId": "mace",
-      "RecommendedRow": 1,
-      "Passive": {
-        "Trigger": "BattleStart",
-        "Condition": "InRows",
-        "Rows": {
-          "From": "Front",
-          "Reach": 1
-        },
-        "Effect": "Shield",
-        "Target": "AllyAll",
-        "Magnitude": 218
-      },
-      "PassiveText": {
-        "en-US": "Front row: every ally gains {0} Shield at the start of battle",
-        "ko-KR": "맨 앞: 전투 시작 때 아군 전체에 보호막 {0}"
-      },
-      "Figure": "unit/job/paladin"
-    },
-    {
-      "Id": "spellblade",
-      "Name": {
-        "en-US": "Spellblade",
-        "ko-KR": "마검사"
-      },
-      "MaxHp": 2700,
-      "WeaponItemId": "longsword",
-      "RecommendedRow": 2,
-      "Passive": {
-        "Trigger": "WeaponHit",
-        "Condition": "None",
-        "Rows": null,
-        "Effect": "Burn",
-        "Target": "EventTarget",
-        "Magnitude": 3
-      },
-      "PassiveText": {
-        "en-US": "Weapon hits apply {0} Burn",
-        "ko-KR": "무기 적중 시 화상 {0}"
-      },
-      "Figure": "unit/job/spellblade"
-    },
-    {
-      "Id": "valkyrie",
-      "Name": {
-        "en-US": "Valkyrie",
-        "ko-KR": "발키리"
-      },
-      "MaxHp": 3300,
-      "WeaponItemId": "greataxe",
-      "RecommendedRow": 1,
-      "Passive": {
-        "Trigger": "Always",
-        "Condition": "SelfInDog",
-        "Rows": null,
-        "Effect": "WeaponPowerPercent",
-        "Target": "Self",
-        "Magnitude": 100
-      },
-      "PassiveText": {
-        "en-US": "At death's door: weapon damage +{0}%",
-        "ko-KR": "빈사 상태: 무기 피해 +{0}%"
-      },
-      "Figure": "unit/job/valkyrie"
+      "Growth": {
+        "Str": 110,
+        "Dex": 50,
+        "Con": 90,
+        "Int": 20,
+        "Spi": 50,
+        "End": 50
+      }
     }
   ]
 }

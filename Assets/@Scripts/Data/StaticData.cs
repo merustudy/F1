@@ -287,15 +287,6 @@ namespace F1.Data
                     problems.Add($"{LevelData.DefinitionName} {level.Level}: ExpToNext must be 0 at the last level and above 0 before it.");
                 }
 
-                if (i == 0 && level.MaxHpBonusPercent != 0)
-                {
-                    problems.Add($"{LevelData.DefinitionName} 1: the first level adds nothing to the maximum HP (MaxHpBonusPercent 0).");
-                }
-
-                if (i > 0 && level.MaxHpBonusPercent < levels[i - 1].MaxHpBonusPercent)
-                {
-                    problems.Add($"{LevelData.DefinitionName} {level.Level}: MaxHpBonusPercent cannot be under the level below it.");
-                }
             }
 
             return levels;
@@ -344,6 +335,11 @@ namespace F1.Data
             {
                 string what = $"{JobData.DefinitionName} '{job.Id}'";
                 Require(Items, job.WeaponItemId, what + " WeaponItemId", problems);
+                Stat? outside = job.Stats?.FirstOutside(Balance.StatMin, Balance.StatMax);
+                if (outside != null)
+                {
+                    problems.Add($"{what}: {outside} = {job.Stats[outside.Value]} is outside StatMin..StatMax ({Balance.StatMin}..{Balance.StatMax}).");
+                }
 
                 // The weapon lies unturned at the top-left of the start bag when the expedition leaves.
                 if (startBags == 1 && Items.Contains(job.WeaponItemId))

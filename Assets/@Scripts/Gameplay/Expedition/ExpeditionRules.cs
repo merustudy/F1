@@ -47,8 +47,10 @@ namespace F1.Gameplay
                 }
 
                 JobData job = data.Jobs.Get(member.JobId);
-                // The maximum HP is the job's with the level's bonus (stage 27); every expedition starts with it full.
-                int maxHp = LevelRules.MaxHpOf(data, job.Id, member.Level);
+                // The maximum HP is the job's with constitution's share (Slice D stage 32; the level reaches it through the stats it grew, stage 34);
+                // every expedition starts with it full.
+                StatBlock stats = member.Stats ?? StatRules.BaseOf(data, job.Id);
+                int maxHp = LevelRules.MaxHpOf(data, job.Id, stats);
                 state.Members.Add(new ExpeditionMember
                 {
                     MercenaryId = member.MercenaryId,
@@ -60,6 +62,7 @@ namespace F1.Gameplay
                     Board = ItemBoard.Starting(data.StartBag, new EquippedItem(data.Items.Get(job.WeaponItemId), isBase: true)),
                     Fatigue = member.Fatigue,
                     StateId = member.AfflictionId,
+                    Stats = stats,
                 });
             }
 
@@ -124,7 +127,9 @@ namespace F1.Gameplay
             {
                 if (member.Alive)
                 {
-                    member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()));
+                    // One event (entry and equipment together), after the member's endurance (Slice D stage 33).
+                    int cost = StatRules.FatigueGain(data.Balance, member.Stats, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()));
+                    member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, cost);
                 }
             }
 
@@ -1608,6 +1613,7 @@ namespace F1.Gameplay
                     HasDog = true,
                     Fatigue = member.Fatigue,
                     FatigueState = member.StateId == null ? null : data.FatigueStates.Get(member.StateId),
+                    Stats = member.Stats,
                 });
             }
         }
@@ -1675,6 +1681,8 @@ namespace F1.Gameplay
                 Passive = null,
                 HasDog = false,
                 Phases = phases,
+                Accuracy = enemy.Accuracy,
+                Dodge = enemy.Dodge,
             };
         }
 

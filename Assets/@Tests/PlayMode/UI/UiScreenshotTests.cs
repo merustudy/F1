@@ -48,6 +48,73 @@ namespace F1.Tests
             yield return BootTestUtil.ShutdownApp();
         }
 
+        /// <summary>The settlement with survivors who can level up (Slice D stage 35, Round 82), staged on the report for one picture, then as it was.</summary>
+        IEnumerator StagedReady(SettlementScreen screen, string name)
+        {
+            SettlementReport report = Managers.Expedition.Report;
+            RunState run = Managers.Run.Run;
+            ExpeditionResult result = report.Result;
+            List<string> survivors = report.SurvivorIds, fallen = report.FallenIds, states = report.SurvivorStates, ready = report.ReadyToLevelUp;
+            List<int> fatigue = report.SurvivorFatigue;
+            int exp = report.ExpEarned;
+
+            List<string> home = run.Roster.Take(2).Select(m => m.Id).ToList();
+            report.Result = ExpeditionResult.Retreated;
+            report.SurvivorIds = home;
+            report.FallenIds = new List<string>();
+            report.SurvivorFatigue = new List<int> { 64, 30 };
+            report.SurvivorStates = new List<string> { null, null };
+            report.ExpEarned = 20;
+            report.ReadyToLevelUp = home;
+            screen.Refresh();
+            yield return Capture(name);
+
+            report.Result = result;
+            report.SurvivorIds = survivors;
+            report.FallenIds = fallen;
+            report.SurvivorFatigue = fatigue;
+            report.SurvivorStates = states;
+            report.ExpEarned = exp;
+            report.ReadyToLevelUp = ready;
+            screen.Refresh();
+            yield return null;
+        }
+
+        /// <summary>
+        /// The barracks' level-up (Slice D stage 35, Round 82 안 A), staged on the roster: the last four came home with their level's experience and
+        /// some to spare, the last one is levelled up (the window open: the +N and the rim), then the town with the others still waiting (the strip's
+        /// ▲ and the barracks' count). Then the roster as it was: levels, experience and stats.
+        /// </summary>
+        IEnumerator StagedLevelUp(LobbyScreen lobby, string prefix)
+        {
+            StaticData data = Managers.Data.Data;
+            List<MercenaryState> roster = Managers.Run.Run.Roster.ToList();
+            var kept = roster.Select(m => (m.Level, m.Exp, m.Stats)).ToList();
+            foreach (MercenaryState mercenary in roster.Skip(Mathf.Max(0, roster.Count - 4)))
+            {
+                mercenary.Exp = LevelRules.ExpToNext(data, mercenary) + 5;
+            }
+
+            lobby.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.Click(UiTestUtil.RosterEntries(lobby)[roster.Count - 1].LevelUp);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture(prefix + "_73_barracks_levelup");
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture(prefix + "_74_lobby_levelup_ready");
+
+            for (int i = 0; i < roster.Count; i++)
+            {
+                roster[i].Level = kept[i].Level;
+                roster[i].Exp = kept[i].Exp;
+                roster[i].Stats = kept[i].Stats;
+            }
+
+            lobby.Refresh();
+            yield return null;
+        }
+
         [UnityTest]
         public IEnumerator EveryScreen_Korean()
         {
@@ -169,6 +236,14 @@ namespace F1.Tests
             battle.Fx.Float(party[0].FigureRect, UiStrings.Get(UiKeys.Fx.Damage, 3), UiPalette.Danger, false);
             yield return new WaitForSeconds(0.25f);
             yield return Capture("ko_51_battle_critical");
+
+            // Slice D stage 33 (Round 81 판정 6): a miss's grey words over the second enemy, and its line in the ticker.
+            BattleUnitView[] enemies = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Enemy).OrderBy(view => view.Unit.Row).ToArray();
+            BattleUnitView missed = enemies.Length > 1 ? enemies[1] : enemies[0];
+            yield return new WaitForSeconds(1.5f);
+            battle.Fx.Float(missed.FigureRect, UiStrings.Get(UiKeys.Fx.Miss), UiPalette.TextDim, false);
+            yield return new WaitForSeconds(0.25f);
+            yield return Capture("ko_71_battle_miss");
         }
 
         /// <summary>
@@ -242,13 +317,13 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
-            string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
+            string[] ids = { "rowan", "kai", "ella", "mira" };
             yield return UiTestUtil.OpenBarracks(lobby);
             RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
-            for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
+            for (int i = 0; i < Mathf.Min(ids.Length, data.Balance.PartySize); i++)
             {
-                int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
-                UiTestUtil.Click(entries[index].Rows[i]);
+                int index = Managers.Run.Run.Roster.FindIndex(m => m.Id == ids[i]);
+                UiTestUtil.PlaceInParty(lobby, Managers.Run.Run.Roster[index].Id, i + 1);
             }
 
             UiTestUtil.CloseQuarter(lobby);
@@ -282,7 +357,7 @@ namespace F1.Tests
             yield return Capture(prefix + "_02_lobby_empty");
 
             // The town (stage 26): the stagecoach under the pointer with its bubble, then the barracks window where the party is formed:
-            // knight, spellblade, bishop, archmage from row 1 back, the party the balance was tuned with. One mercenary is staged at level 2
+            // rowan and kai (warriors), ella (priest), mira (mage) from row 1 back (Slice D stage 36: the five jobs; the ranger comes from the stagecoach). One mercenary is staged at level 2
             // with some experience for the pictures (stage 27) and put back before the party leaves.
             MercenaryState leveled = Managers.Run.Run.Roster[0];
             leveled.Level = 2;
@@ -300,16 +375,17 @@ namespace F1.Tests
             lobby.Coach.Hover();
             yield return Capture(prefix + "_61_lobby_hover");
             lobby.Coach.Leave();
-            string[] jobs = { "knight", "spellblade", "bishop", "archmage" };
+            string[] ids = { "rowan", "kai", "ella", "mira" };
             yield return UiTestUtil.OpenBarracks(lobby);
             RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
-            for (int i = 0; i < Mathf.Min(jobs.Length, data.Balance.PartySize); i++)
+            for (int i = 0; i < Mathf.Min(ids.Length, data.Balance.PartySize); i++)
             {
-                int index = Managers.Run.Run.Roster.FindIndex(m => m.JobId == jobs[i]);
-                UiTestUtil.Click(entries[index].Rows[i]);
+                int index = Managers.Run.Run.Roster.FindIndex(m => m.Id == ids[i]);
+                UiTestUtil.PlaceInParty(lobby, Managers.Run.Run.Roster[index].Id, i + 1);
             }
 
             yield return Capture(prefix + "_57_lobby_barracks");
+            yield return StagedLevelUp(lobby, prefix);
             UiTestUtil.CloseQuarter(lobby);
             yield return Capture(prefix + "_03_lobby_party");
 
@@ -339,6 +415,11 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Details/Depart");
             yield return UiTestUtil.WaitForRedraw();
             yield return Capture(prefix + "_66_expedition_party");
+            // The stat tooltip of a list line (Slice D stage 32, Round 81): the pointer on the first line not in the party.
+            PartyListRowView benched = UiTestUtil.Views<PartyListRowView>(UiTestUtil.Screen<ExpeditionScreen>()).First(r => !r.InParty);
+            benched.OnPointerEnter(null);
+            yield return Capture(prefix + "_70_expedition_stat_tooltip");
+            benched.OnPointerExit(null);
             UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/PartyWindow/PartyDepart");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
@@ -748,6 +829,10 @@ namespace F1.Tests
 
             yield return UiTestUtil.WaitForScreen(ScreenId.Settlement);
             yield return Capture(prefix + "_11_settlement");
+
+            // Slice D stage 35 (Round 82): the line naming who can level up, staged on the report for one picture — the first two of the roster came
+            // home with their level's experience; then the report as it was.
+            yield return StagedReady(UiTestUtil.Screen<SettlementScreen>(), prefix + "_72_settlement_ready");
 
             UiTestUtil.Click(UiTestUtil.Screen<SettlementScreen>(), "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);

@@ -52,6 +52,12 @@ namespace F1.Tests
             return kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
         }
 
+        /// <summary>Every stat at the test data's baseline (version 18): what the test jobs, which name no stats, give.</summary>
+        static StatsRecord Baseline()
+        {
+            return new StatsRecord { Str = 10, Dex = 10, Con = 10, Int = 10, Spi = 10, End = 10 };
+        }
+
         static void AssertRefused(RunSaveData save, StaticData data)
         {
             Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState _));
@@ -121,22 +127,29 @@ namespace F1.Tests
             yield return Case("ACauseWhileOngoing", r => r.DefeatCause = "DeathLimit");
             yield return Case("NegativeExpeditionCount", r => r.ExpeditionCount = -1);
 
+            // Version 18 (Slice D stage 32): the six stats of a mercenary and of a candidate, each within StatMin..StatMax.
+            yield return Case("StatsMissing", r => r.Roster[0].Stats = null);
+            yield return Case("StatOverStatMax", r => r.Roster[0].Stats.Str = 31);
+            yield return Case("StatUnderStatMin", r => r.Roster[1].Stats.Con = 0);
+            yield return Case("RecruitStatsMissing", r => r.Recruits[0].Stats = null);
+            yield return Case("RecruitStatOverStatMax", r => r.Recruits[0].Stats.End = 31);
+
             // Version 14 (stage 26): the gold, the candidates, the dismissed and the expeditions per dungeon.
             yield return Case("NegativeGold", r => r.Gold = -1);
             yield return Case("RecruitsMissing", r => r.Recruits = null);
-            yield return Case("RecruitUnknown", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "nobody", JobId = "tank" } });
-            yield return Case("RecruitIsAStartingMercenary", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "anna", JobId = "tank" } });
-            yield return Case("RecruitUnknownJob", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "nojob" } });
-            yield return Case("RecruitTwice", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank" }, new RecruitRecord { Id = "eve", JobId = "healer" } });
-            yield return Case("RecruitIsAlsoInTheRoster", r => { r.Roster.Add(new MercenaryRecord { Id = "eve", JobId = "tank" }); r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank" } }; });
+            yield return Case("RecruitUnknown", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "nobody", JobId = "tank", Stats = Baseline() } });
+            yield return Case("RecruitIsAStartingMercenary", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "anna", JobId = "tank", Stats = Baseline() } });
+            yield return Case("RecruitUnknownJob", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "nojob", Stats = Baseline() } });
+            yield return Case("RecruitTwice", r => r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank", Stats = Baseline() }, new RecruitRecord { Id = "eve", JobId = "healer", Stats = Baseline() } });
+            yield return Case("RecruitIsAlsoInTheRoster", r => { r.Roster.Add(new MercenaryRecord { Id = "eve", JobId = "tank", Stats = Baseline() }); r.Recruits = new List<RecruitRecord> { new RecruitRecord { Id = "eve", JobId = "tank", Stats = Baseline() } }; });
             yield return Case("MoreRecruitsThanRecruitCount", r => r.Recruits = new List<RecruitRecord>
             {
-                new RecruitRecord { Id = "eve", JobId = "tank" }, new RecruitRecord { Id = "finn", JobId = "tank" }, new RecruitRecord { Id = "gil", JobId = "tank" }, new RecruitRecord { Id = "hana", JobId = "tank" },
+                new RecruitRecord { Id = "eve", JobId = "tank", Stats = Baseline() }, new RecruitRecord { Id = "finn", JobId = "tank", Stats = Baseline() }, new RecruitRecord { Id = "gil", JobId = "tank", Stats = Baseline() }, new RecruitRecord { Id = "hana", JobId = "tank", Stats = Baseline() },
             });
             yield return Case("DismissedUnknown", r => r.Dismissed.Add("nobody"));
             yield return Case("DismissedIsAlsoAlive", r => r.Dismissed.Add(r.Roster[3].Id));
             yield return Case("DismissedIsAlsoDead", r => { r.Dismissed.Add("eve"); r.Fallen.Add("eve"); });
-            yield return Case("RosterOverTheLimit", r => r.Roster.AddRange(new[] { "eve", "finn", "gil" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank" })));
+            yield return Case("RosterOverTheLimit", r => r.Roster.AddRange(new[] { "eve", "finn", "gil" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank", Stats = Baseline() })));
             yield return Case("ExpeditionsUnknownDungeon", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "nowhere", Count = 1 }));
             yield return Case("ExpeditionsZeroTimes", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "pit", Count = 0 }));
             yield return Case("ExpeditionsDungeonTwice", r => r.Expeditions.Add(new ExpeditionCountRecord { DungeonId = "cave", Count = 1 }));
@@ -145,7 +158,6 @@ namespace F1.Tests
             yield return Case("LevelZero", r => r.Roster[3].Level = 0);
             yield return Case("LevelPastTheLast", r => r.Roster[3].Level = 4);
             yield return Case("ExpNegative", r => r.Roster[3].Exp = -1);
-            yield return Case("ExpMeetsTheNextLevel", r => { r.Roster[3].Level = 1; r.Roster[3].Exp = 10; });
             yield return Case("ExpAtTheLastLevel", r => { r.Roster[3].Level = 3; r.Roster[3].Exp = 1; });
 
             // Version 16 (stage 30): the buildings' levels on their ladders, one construction per building building the next level, not yet due.
@@ -159,9 +171,9 @@ namespace F1.Tests
             yield return Case("ConstructionSkipsALevel", r => r.Constructions.Add(new ConstructionRecord { BuildingId = "coach", ToLevel = 3, FinishDay = 9 }));
             yield return Case("ConstructionOfTheLevelHeld", r => { r.Buildings.Add(new BuildingLevelRecord { BuildingId = "coach", Level = 2 }); r.Constructions.Add(new ConstructionRecord { BuildingId = "coach", ToLevel = 2, FinishDay = 9 }); });
             yield return Case("ConstructionAlreadyDue", r => r.Constructions.Add(new ConstructionRecord { BuildingId = "coach", ToLevel = 2, FinishDay = r.Day }));
-            // Version 17 (2026-10-18): the gate is no building; a version 17 file naming it is broken (a version 16 one is migrated: Migrate_From16_DropsTheGate).
+            // Version 17 (2026-10-18): the gate is no building; a version 17 file naming it is broken (older files are not read since version 21).
             yield return Case("GateAsABuilding", r => r.Buildings.Add(new BuildingLevelRecord { BuildingId = "gate", Level = 2 }));
-            yield return Case("RosterOverTheRaisedLimit", r => { r.Buildings.Add(new BuildingLevelRecord { BuildingId = "barracks", Level = 2 }); r.Roster.AddRange(new[] { "eve", "finn", "gil", "hana", "ivo" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank", Level = 1 })); });
+            yield return Case("RosterOverTheRaisedLimit", r => { r.Buildings.Add(new BuildingLevelRecord { BuildingId = "barracks", Level = 2 }); r.Roster.AddRange(new[] { "eve", "finn", "gil", "hana", "ivo" }.Select(id => new MercenaryRecord { Id = id, JobId = "tank", Level = 1, Stats = Baseline() })); });
         }
 
         [TestCaseSource(nameof(BrokenRuns))]
@@ -387,112 +399,29 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Migrate_From12_SetsTheOutcomeFromTheRoster_AndNoFinalStand()
+        public void Save_KeepsTheStats_OfTheRosterAndTheCandidates_AndTheMembersTakeTheRosters()
         {
-            // Version 12 said only IsOver (nobody left). Its conversions from 2..11 were deleted (2026-10-16): those files are refused.
+            // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 12;
-            save.Run.Outcome = null;
-            save.Run.DefeatCause = null;
-            RunSaveMigrator.Migrate(save, data);
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual("Ongoing", save.Run.Outcome);
-            Assert.AreEqual("None", save.Run.DefeatCause);
-            Assert.IsFalse(save.Expedition.FinalStand);
+            Assert.AreEqual(21, RunSaveData.CurrentSchemaVersion);
+            Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
+            save.Run.Roster[0].Stats.Str = 13;
+            save.Run.Roster[0].Stats.End = 7;
+            save.Run.Recruits[0].Stats.Int = 15;
+
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
-            Assert.AreEqual(RunOutcome.Ongoing, run.Outcome);
-            Assert.IsFalse(expedition.FinalStand);
 
-            RunSaveData over = ValidSave(out data);
-            over.SchemaVersion = 12;
-            over.Expedition = null;
-            over.Run.Fallen.AddRange(over.Run.Roster.ConvertAll(m => m.Id));
-            over.Run.Roster.Clear();
-            over.Run.Party.Clear();
-            RunSaveMigrator.Migrate(over, data);
-            Assert.AreEqual("Defeat", over.Run.Outcome);
-            Assert.AreEqual("Wipeout", over.Run.DefeatCause);
-            RunSaveMapper.Read(over, data, out run, out ExpeditionState _);
-            Assert.IsTrue(run.IsOver);
-        }
+            Assert.AreEqual(new StatBlock(13, 10, 10, 10, 10, 7), run.Roster[0].Stats);
+            Assert.AreEqual(15, run.Recruits[0].Stats.Int);
+            ExpeditionMember member = expedition.Members.FirstOrDefault(m => m.MercenaryId == run.Roster[0].Id);
+            if (member != null)
+            {
+                Assert.AreSame(run.Roster[0].Stats, member.Stats);
+            }
 
-        [Test]
-        public void Migrate_From13_StartsTheGoldTheCandidatesTheDismissedAndTheExpeditionsByDungeonEmpty()
-        {
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 13;
-            save.Run.Gold = 99;
-            save.Run.Recruits = null;
-            save.Run.Dismissed = null;
-            save.Run.Expeditions = null;
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.AreEqual(0, save.Run.Gold, "A version 13 run had no gold.");
-            Assert.IsEmpty(save.Run.Recruits);
-            Assert.IsEmpty(save.Run.Dismissed);
-            Assert.IsEmpty(save.Run.Expeditions);
-            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
-            Assert.AreEqual(0, run.Gold);
-            Assert.IsEmpty(run.Recruits);
-            Assert.IsEmpty(run.ExpeditionsByDungeon);
-            Assert.AreEqual(1, run.ExpeditionCount, "The total stays.");
-        }
-
-        [Test]
-        public void Migrate_From14_StartsEveryMercenaryAtLevelOne()
-        {
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 14;
-            save.Run.Roster[0].Level = 0;
-            save.Run.Roster[0].Exp = 99;
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.IsTrue(save.Run.Roster.TrueForAll(m => m.Level == 1 && m.Exp == 0));
-            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
-            Assert.IsTrue(run.Roster.All(m => m.Level == 1 && m.Exp == 0));
-        }
-
-        [Test]
-        public void Migrate_From15_StartsTheTownAtLevelOne_WithNothingBeingBuilt()
-        {
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 15;
-            save.Run.Buildings = null;
-            save.Run.Constructions = null;
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            Assert.IsEmpty(save.Run.Buildings);
-            Assert.IsEmpty(save.Run.Constructions);
-            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
-            Assert.IsTrue(BuildingId.All.All(id => BuildingRules.LevelOf(run, id) == 1));
-            Assert.IsEmpty(run.Constructions);
-        }
-
-        [Test]
-        public void Migrate_From16_DropsTheGate_AndKeepsTheOtherBuildings()
-        {
-            // 2026-10-18: the gate has no level any more; a version 16 gate at level 2 and a gate being built are dropped, the rest kept.
-            RunSaveData save = ValidSave(out StaticData data);
-            save.SchemaVersion = 16;
-            save.Run.Buildings.Add(new BuildingLevelRecord { BuildingId = "gate", Level = 2 });
-            save.Run.Buildings.Add(new BuildingLevelRecord { BuildingId = "inn", Level = 2 });
-            save.Run.Constructions.Add(new ConstructionRecord { BuildingId = "gate", ToLevel = 3, FinishDay = save.Run.Day + 2 });
-            save.Run.Constructions.Add(new ConstructionRecord { BuildingId = "coach", ToLevel = 2, FinishDay = save.Run.Day + 3 });
-
-            RunSaveMigrator.Migrate(save, data);
-
-            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
-            CollectionAssert.AreEqual(new[] { "inn:2" }, save.Run.Buildings.Select(b => b.BuildingId + ":" + b.Level).ToList());
-            CollectionAssert.AreEqual(new[] { "coach:2" }, save.Run.Constructions.Select(c => c.BuildingId + ":" + c.ToLevel).ToList());
-            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
-            Assert.AreEqual(2, BuildingRules.LevelOf(run, BuildingId.Inn));
-            Assert.AreEqual(save.Run.Day + 3, BuildingRules.ConstructionOf(run, BuildingId.Coach).FinishDay);
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.AreEqual(13, again.Run.Roster[0].Stats.Str);
+            Assert.AreEqual(15, again.Run.Recruits[0].Stats.Int);
         }
 
         [Test]
@@ -534,6 +463,28 @@ namespace F1.Tests
             Assert.AreEqual(2, RunRules.FindMercenary(read, "ben").Level);
             Assert.AreEqual(7, RunRules.FindMercenary(read, "ben").Exp);
             Assert.AreEqual(1, RunRules.FindMercenary(read, "anna").Level);
+        }
+
+        [Test]
+        public void Save_KeepsExperiencePastTheLevel_AndTheBarracksLevelUpSavesAtOnce()
+        {
+            // Slice D stage 35 (version 20): the experience may pass what the level takes until the barracks levels the mercenary up.
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            RunState run = kit.Run.Run;
+            RunRules.FindMercenary(run, "ben").Exp = 25;
+            kit.Run.Rest();
+            RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
+            Assert.AreEqual(25, save.Run.Roster.Find(m => m.Id == "ben").Exp);
+            RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState _);
+            Assert.AreEqual(25, RunRules.FindMercenary(read, "ben").Exp, "Past the level's 10: kept.");
+
+            Assert.IsTrue(kit.Run.CanLevelUp("ben"));
+            Assert.IsFalse(kit.Run.CanLevelUp("anna"));
+            kit.Run.LevelUp("ben");
+            MercenaryRecord ben = kit.Save.Load<RunSaveData>(RunManager.FileName).Value.Run.Roster.Find(m => m.Id == "ben");
+            Assert.AreEqual(2, ben.Level, "Saved with the click.");
+            Assert.AreEqual(15, ben.Exp);
+            Assert.IsFalse(kit.Run.CanLevelUp("ben"), "15 of the next level's 20.");
         }
 
         [Test]

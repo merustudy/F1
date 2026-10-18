@@ -66,7 +66,8 @@ namespace F1.Editor.Data
             table.RequireHeaders(RowMapping.Headers(
                 "MaxHp", "WeaponItemId", "RecommendedRow",
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
-                RowMapping.Figure)
+                RowMapping.Figure, "Str", "Dex", "Con", "Int", "Spi", "End",
+                "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthSpi", "GrowthEnd")
                 .Concat(CsvRow.LocalizedHeaders(PassiveText)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
@@ -77,7 +78,11 @@ namespace F1.Editor.Data
                 row.Int("RecommendedRow"),
                 ReadPassive(row),
                 ReadPassiveText(row),
-                RowMapping.ReadArt(row, RowMapping.Figure)));
+                RowMapping.ReadArt(row, RowMapping.Figure),
+                // The job's base stats (Slice D stage 32): whole numbers, every one required; StaticData checks the balance's range.
+                new StatBlock(row.Int("Str"), row.Int("Dex"), row.Int("Con"), row.Int("Int"), row.Int("Spi"), row.Int("End")),
+                // The growth grades (Slice D stage 34), every one required; JobData checks 0..200.
+                new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthSpi"), row.Int("GrowthEnd"))));
         }
 
         const string PassiveText = "PassiveText";
@@ -117,7 +122,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight" });
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "ScalesWith" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -149,7 +154,9 @@ namespace F1.Editor.Data
                     row.IsEmpty("StarDamage") ? 0 : row.Centi("StarDamage"),
                     row.OptionalInt("CritChancePercent", 0),
                     row.OptionalBool("Unique", false),
-                    row.OptionalInt("DropWeight", 0, 0));
+                    row.OptionalInt("DropWeight", 0, 0),
+                    // The stat that grows the item (Slice D stage 32): a Stat name, empty for none. ItemData checks it is one of the four.
+                    row.OptionalEnum<Stat>("ScalesWith"));
             });
         }
 
@@ -195,16 +202,16 @@ namespace F1.Editor.Data
         }
     }
 
-    /// <summary>LevelData.csv (stage 27): Level, ExpToNext, MaxHpBonusPercent; no Id and no Name (the level is the key).</summary>
+    /// <summary>LevelData.csv (stage 27): Level and ExpToNext; no Id and no Name (the level is the key).</summary>
     internal static class LevelMapper
     {
         public static List<LevelData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(new[] { "Level", "ExpToNext", "MaxHpBonusPercent" });
+            // Slice D stage 34: no MaxHpBonusPercent any more (a level reaches the HP through the stats it grows).
+            table.RequireHeaders(new[] { "Level", "ExpToNext" });
             return RowMapping.MapRows(table, errors, row => new LevelData(
                 row.Int("Level"),
-                row.Int("ExpToNext"),
-                row.Int("MaxHpBonusPercent")));
+                row.Int("ExpToNext")));
         }
     }
 
@@ -262,7 +269,7 @@ namespace F1.Editor.Data
     {
         public static List<EnemyData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"), new[] { "Phases" });
+            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"), new[] { "Phases", "Accuracy", "Dodge" });
             return RowMapping.MapRows(table, errors, row => new EnemyData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -271,7 +278,10 @@ namespace F1.Editor.Data
                 row.GrantList("Items"),
                 RowMapping.ReadArt(row, RowMapping.Figure),
                 row.Int("FigureScale"),
-                row.PhaseList("Phases")));
+                row.PhaseList("Phases"),
+                // Slice D stage 33: an enemy's hit and dodge in percent points (optional columns, 0 when empty); EnemyData checks the range.
+                row.OptionalInt("Accuracy", 0),
+                row.OptionalInt("Dodge", 0)));
         }
     }
 

@@ -64,6 +64,9 @@ namespace F1.UI
         /// <summary>The piece's ground colour on show: its squares' for an item, the rim's for a bag.</summary>
         public Color Ground => _ground.enabled ? _ground.color : _frame.color;
 
+        /// <summary>The piece's rim: a bag's goes dark red when it cannot be bought (<see cref="ShowUnaffordable"/>).</summary>
+        public Color Rim => _frame.color;
+
         /// <summary>The ground's squares across and down (an item's as it lies; round 53: the grid's line between them).</summary>
         public Vector2Int GroundSquares => new Vector2Int(_ground.Columns, _ground.Rows);
 

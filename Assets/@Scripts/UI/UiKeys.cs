@@ -47,7 +47,6 @@ namespace F1.UI
             public const string Gold = "Lobby.Gold";
             public const string Fatigue = "Lobby.Fatigue";
             public const string FatigueState = "Lobby.FatigueState";
-            public const string Remove = "Lobby.Remove";
             public const string Dismiss = "Lobby.Dismiss";
             public const string Expedition = "Lobby.Expedition";
             public const string EmptyRow = "Lobby.EmptyRow";
@@ -94,6 +93,10 @@ namespace F1.UI
             public const string Level = "Lobby.Level";
             public const string Exp = "Lobby.Exp";
             public const string ExpMax = "Lobby.ExpMax";
+            public const string LevelUp = "Lobby.LevelUp";
+            public const string LevelUpCount = "Lobby.LevelUpCount";
+            public const string LevelUpMark = "Lobby.LevelUpMark";
+            public const string StatGain = "Lobby.StatGain";
 
             // The result window (Round 72).
             public const string EndedOn = "Lobby.EndedOn";
@@ -115,6 +118,7 @@ namespace F1.UI
             public const string MaxLevelLine = "Lobby.MaxLevelLine";
             public const string ConstructionLine = "Lobby.ConstructionLine";
             public const string LockedNote = "Lobby.LockedNote";
+            public const string BarracksLockedNote = "Lobby.BarracksLockedNote";
             public const string EffectBarracks = "Lobby.EffectBarracks";
             public const string EffectInn = "Lobby.EffectInn";
             public const string EffectCoach = "Lobby.EffectCoach";
@@ -124,6 +128,7 @@ namespace F1.UI
         public static class Expedition
         {
             public const string Title = "Expedition.Title";
+            public const string StatTooltip = "Expedition.StatTooltip";
             public const string ToLobby = "Expedition.ToLobby";
             public const string Home = "Expedition.Home";
             public const string MarkerOpen = "Expedition.MarkerOpen";
@@ -239,9 +244,23 @@ namespace F1.UI
             public const string GhostBag = "Board.GhostBag";
         }
 
+        /// <summary>The six stats' names (Slice D stage 32, Docs/Architecture/12_UI.md "스탯의 표시").</summary>
+        public static class Stat
+        {
+            public const string Str = "Stat.Str";
+            public const string Dex = "Stat.Dex";
+            public const string Con = "Stat.Con";
+            public const string Int = "Stat.Int";
+            public const string Spi = "Stat.Spi";
+            public const string End = "Stat.End";
+            public const string Up = "Stat.Up";
+            public const string Down = "Stat.Down";
+        }
+
         public static class Item
         {
             public const string TooltipTitle = "Item.TooltipTitle";
+            public const string StatScale = "Item.StatScale";
             public const string Weapon = "Item.Weapon";
             public const string Armor = "Item.Armor";
             public const string Attack = "Item.Attack";
@@ -266,6 +285,7 @@ namespace F1.UI
             public const string NoActivation = "Item.NoActivation";
             public const string StarDamage = "Item.StarDamage";
             public const string Crit = "Item.Crit";
+            public const string Hit = "Item.Hit";
             public const string StarBonus = "Item.StarBonus";
             public const string StarLit = "Item.StarLit";
             public const string StarLitNone = "Item.StarLitNone";
@@ -348,6 +368,7 @@ namespace F1.UI
             public const string RetreatFailed = "Fx.RetreatFailed";
             public const string Storm = "Fx.Storm";
             public const string Crit = "Fx.Crit";
+            public const string Miss = "Fx.Miss";
             public const string Phase = "Fx.Phase";
             public const string CritDamage = "Fx.CritDamage";
             public const string Collapsed = "Fx.Collapsed";
@@ -363,6 +384,7 @@ namespace F1.UI
             public const string Damage = "Log.Damage";
             public const string DamageAbsorbed = "Log.DamageAbsorbed";
             public const string CriticalHit = "Log.CriticalHit";
+            public const string Missed = "Log.Missed";
             public const string Heal = "Log.Heal";
             public const string Shield = "Log.Shield";
             public const string Burn = "Log.Burn";
@@ -423,8 +445,7 @@ namespace F1.UI
             public const string Gold = "Settle.Gold";
             public const string GoldWithCoins = "Settle.GoldWithCoins";
             public const string Exp = "Settle.Exp";
-            public const string LevelUps = "Settle.LevelUps";
-            public const string LevelUp = "Settle.LevelUp";
+            public const string Ready = "Settle.Ready";
         }
 
         public static class Save

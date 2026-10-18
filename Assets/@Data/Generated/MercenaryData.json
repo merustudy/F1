@@ -16,7 +16,7 @@
         "en-US": "Astrid",
         "ko-KR": "아스트리드"
       },
-      "JobId": "valkyrie",
+      "JobId": "viking",
       "Starting": true
     },
     {
@@ -27,15 +27,6 @@
       },
       "JobId": null,
       "Starting": false
-    },
-    {
-      "Id": "cedric",
-      "Name": {
-        "en-US": "Cedric",
-        "ko-KR": "세드릭"
-      },
-      "JobId": "paladin",
-      "Starting": true
     },
     {
       "Id": "dagny",
@@ -61,7 +52,7 @@
         "en-US": "Ella",
         "ko-KR": "엘라"
       },
-      "JobId": "bishop",
+      "JobId": "priest",
       "Starting": true
     },
     {
@@ -151,7 +142,7 @@
         "en-US": "Kai",
         "ko-KR": "카이"
       },
-      "JobId": "spellblade",
+      "JobId": "warrior",
       "Starting": true
     },
     {
@@ -214,7 +205,7 @@
         "en-US": "Mira",
         "ko-KR": "미라"
       },
-      "JobId": "archmage",
+      "JobId": "mage",
       "Starting": true
     },
     {
@@ -286,7 +277,7 @@
         "en-US": "Rowan",
         "ko-KR": "로언"
       },
-      "JobId": "knight",
+      "JobId": "warrior",
       "Starting": true
     },
     {

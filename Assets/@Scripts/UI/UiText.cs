@@ -179,11 +179,13 @@ namespace F1.UI
         /// the item neither costs fatigue nor is a base weapon.
         /// </summary>
         /// <param name="starDamage">What the stars on the item's board add to a weapon's damage (stage 20): its damage line counts it.</param>
-        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0)
+        /// <param name="ownerStats">The stats of the mercenary whose board the item is on (Slice D stage 32): its values count them. Null for an item without an owner, or an enemy's.</param>
+        /// <param name="ownerAccuracy">An enemy owner's Accuracy (Slice D stage 33), which its card's hit chance counts; 0 otherwise.</param>
+        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null)
         {
             // Each fact keeps together (stage 22: "치명타 5%" split as "치|명타" on a Korean card); the line breaks between facts only.
-            facts = string.Join(FactSeparator, ItemFacts(item).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
-            effects = string.Join("\n", ItemEffects(item, starDamage));
+            facts = string.Join(FactSeparator, ItemFacts(item, ownerStats, ownerAccuracy, ownerPassive).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
+            effects = string.Join("\n", ItemEffects(item, starDamage, ownerStats));
             var parts = new List<string>();
             AddFatigue(parts, item);
             fatigue = parts.Count == 0 ? null : parts[0];
@@ -304,7 +306,9 @@ namespace F1.UI
             return Name(bag.Name) + " — " + UiStrings.Get(UiKeys.Map.ShopBagSub, bag.Width, bag.Height) + " / " + UiStrings.Get(UiKeys.Map.BagFacts, bag.Area);
         }
 
-        static List<string> ItemFacts(EquippedItem item)
+        /// <param name="ownerStats">The owner's stats (Slice D stage 33): the critical and hit chances count them. Null without an owner.</param>
+        /// <param name="ownerAccuracy">An enemy owner's Accuracy, which the hit chance counts.</param>
+        static List<string> ItemFacts(EquippedItem item, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null)
         {
             ItemData data = item.Item;
             var facts = new List<string>
@@ -326,10 +330,18 @@ namespace F1.UI
 
             facts.Add(CooldownFact(data));
 
-            // A weapon's chance of a critical hit (stage 22).
+            // A weapon's chance of a critical hit (stage 22), with the owner's dexterity (Slice D stage 33), and the hit chance of what can miss against a
+            // target at the baseline: the number green over the data's, red under it (Round 81).
+            BalanceData balance = Managers.Data.Data.Balance;
             if (data.CritChancePercent > 0)
             {
-                facts.Add(UiStrings.Get(UiKeys.Item.Crit, data.CritChancePercent));
+                facts.Add(UiStrings.Get(UiKeys.Item.Crit, AgainstData(StatRules.CritChance(balance, ownerStats, data, StatRules.CritBonusPercent(ownerPassive, data)), data.CritChancePercent * 100)));
+            }
+
+            if (CanMiss(data))
+            {
+                int hit = StatRules.HitChance(balance, StatRules.Accuracy(balance, ownerStats, ownerAccuracy, data), 0);
+                facts.Add(UiStrings.Get(UiKeys.Item.Hit, AgainstData(hit, balance.HitBasePercent * 100)));
             }
 
             // An item that works anywhere in the line needs no fact about where.
@@ -348,13 +360,13 @@ namespace F1.UI
         }
 
         /// <param name="starDamage">What stars add to the item's weapon damage on its board (stage 20, as the battle adds it), or 0.</param>
-        static List<string> ItemEffects(EquippedItem item, int starDamage = 0)
+        static List<string> ItemEffects(EquippedItem item, int starDamage = 0, StatBlock ownerStats = null)
         {
             var effects = new List<string>();
             BalanceData balance = Managers.Data.Data.Balance;
             foreach (ItemEffect effect in item.Item.Effects)
             {
-                effects.Add(Effect(effect, item, balance, starDamage));
+                effects.Add(Effect(effect, item, balance, starDamage, ownerStats));
             }
 
             // A star item's work (stage 20): what a melee weapon on one of its stars deals more, at its tier.
@@ -419,30 +431,175 @@ namespace F1.UI
 
         /// <summary>One effect of an item at its tier and power, as its card says it: "맨 앞 적에게 피해 2-4", "자신에게 보호막 2", "화상 2".</summary>
         /// <param name="starDamage">What stars add to a weapon's damage on its board (stage 20, as the battle adds it), in hundredths, or 0.</param>
-        public static string Effect(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0)
+        /// <param name="ownerStats">The owner's stats (Slice D stage 32), counted as the battle counts them; null for none.</param>
+        public static string Effect(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0, StatBlock ownerStats = null)
         {
-            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), EffectValue(effect, item, balance, starDamage));
+            return UiStrings.Get(EffectKey(effect.Kind), Target(effect), EffectValue(effect, item, balance, starDamage, ownerStats));
         }
 
         /// <summary>
         /// The value of one effect of an item at its tier and power (stage 22): damage as a range with the stars of its board on both ends
         /// ("2-4"), a heal or a shield whole ("3"), a burn its stacks.
         /// </summary>
-        public static string EffectValue(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0)
+        public static string EffectValue(ItemEffect effect, EquippedItem item, BalanceData balance, int starDamage = 0, StatBlock ownerStats = null)
         {
+            // The owner's stat grows the value as it does in battle (Slice D stage 32): the damage after the stars, a burn rounded.
+            int percent = StatRules.PowerPercent(balance, ownerStats, item.Item);
             switch (effect.Kind)
             {
                 case EffectKind.Damage:
                 {
                     int stars = item.Item.Category == ItemCategory.Weapon ? starDamage : 0;
-                    return Range(item.Min(balance, effect) + stars, item.Max(balance, effect) + stars);
+                    return Range(StatRules.Scale(item.Min(balance, effect) + stars, percent), StatRules.Scale(item.Max(balance, effect) + stars, percent));
                 }
 
                 case EffectKind.Burn:
-                    return item.Magnitude(balance, effect).ToString(CultureInfo.InvariantCulture);
+                    return StatRules.ScaleStacks(item.Magnitude(balance, effect), percent).ToString(CultureInfo.InvariantCulture);
                 default:
-                    return Amount(item.Magnitude(balance, effect)).ToString(CultureInfo.InvariantCulture);
+                    return Amount(StatRules.Scale(item.Magnitude(balance, effect), percent)).ToString(CultureInfo.InvariantCulture);
             }
+        }
+
+        // ---- The stats (Slice D stage 32, Round 81; Docs/Architecture/12_UI.md "스탯의 표시") ----
+
+        public static string StatName(Stat stat)
+        {
+            switch (stat)
+            {
+                case Stat.Str: return UiStrings.Get(UiKeys.Stat.Str);
+                case Stat.Dex: return UiStrings.Get(UiKeys.Stat.Dex);
+                case Stat.Con: return UiStrings.Get(UiKeys.Stat.Con);
+                case Stat.Int: return UiStrings.Get(UiKeys.Stat.Int);
+                case Stat.Spi: return UiStrings.Get(UiKeys.Stat.Spi);
+                case Stat.End: return UiStrings.Get(UiKeys.Stat.End);
+                default: throw new ArgumentOutOfRangeException(nameof(stat), stat, "No name for this stat.");
+            }
+        }
+
+        /// <summary>A stat's value against the baseline (Round 81): green above it, a soft red below it, white at it.</summary>
+        public static Color StatColor(int value)
+        {
+            int baseline = Managers.Data.Data.Balance.StatBaseline;
+            return value > baseline ? UiPalette.Good : value < baseline ? UiPalette.BloodLight : UiPalette.Text;
+        }
+
+        /// <summary>"힘 12": the name dimmed and the value in its colour.</summary>
+        public static string StatPair(Stat stat, int value)
+        {
+            return Colored(StatName(stat), UiPalette.TextDim) + " " + Colored(value.ToString(CultureInfo.InvariantCulture), StatColor(value));
+        }
+
+        /// <summary>The six as pairs on one line in columns this wide (the stagecoach's candidates, Round 81): TMP's position tags keep them aligned.</summary>
+        /// <param name="against">The job's base values (Slice D stage 34, Round 81 판정 3): each stat that differs gets a small ▲N/▼N after it; null for none.</param>
+        public static string StatColumns(StatBlock stats, float column, StatBlock against = null)
+        {
+            var line = new System.Text.StringBuilder();
+            for (int i = 0; i < StatBlock.All.Length; i++)
+            {
+                Stat stat = StatBlock.All[i];
+                line.Append("<pos=").Append((i * column).ToString("0", CultureInfo.InvariantCulture)).Append('>');
+                line.Append(StatPair(stat, stats[stat]));
+                int delta = against == null ? 0 : stats[stat] - against[stat];
+                if (delta != 0)
+                {
+                    string mark = UiStrings.Get(delta > 0 ? UiKeys.Stat.Up : UiKeys.Stat.Down, Math.Abs(delta));
+                    line.Append("<size=70%><voffset=0.45em>").Append(Colored(mark, delta > 0 ? UiPalette.Good : UiPalette.BloodLight)).Append("</voffset></size>");
+                }
+            }
+
+            return line.ToString();
+        }
+
+        /// <summary>
+        /// A stat's value on a barracks line (Slice D stage 35, Round 82 안 A): the value, and when the level-up just grew it, a small green "+N" raised
+        /// after it — the roll stays where the stats are read until the window closes. An invisible copy of the "+N" before the value keeps the value
+        /// in the middle of its cell, under the others.
+        /// </summary>
+        public static string StatValue(int value, int gain)
+        {
+            string words = value.ToString(CultureInfo.InvariantCulture);
+            if (gain <= 0)
+            {
+                return words;
+            }
+
+            string plus = UiStrings.Get(UiKeys.Lobby.StatGain, gain);
+            // TMP's alpha tag has no closing form: the opaque one ends the invisible copy.
+            return "<size=55%><alpha=#00>" + plus + "<alpha=#FF></size>" + words + "<size=55%><voffset=0.9em>" + Colored(plus, UiPalette.Good) + "</voffset></size>";
+        }
+
+        /// <summary>A strip chip's level (Slice D stage 35): "Lv 2", or in gold with a ▲ before it when the barracks can level the mercenary up.</summary>
+        public static string ChipLevel(int level, bool ready)
+        {
+            string words = UiStrings.Get(UiKeys.Lobby.Level, level);
+            return ready ? Colored("<size=85%>" + UiStrings.Get(UiKeys.Lobby.LevelUpMark) + "</size>" + words, UiPalette.StarLit) : words;
+        }
+
+        /// <summary>The six as pairs on one line, a gap of spaces apart.</summary>
+        public static string StatLine(StatBlock stats, string gap)
+        {
+            var pairs = new List<string>();
+            foreach (Stat stat in StatBlock.All)
+            {
+                pairs.Add(StatPair(stat, stats[stat]));
+            }
+
+            return string.Join(gap, pairs);
+        }
+
+        /// <summary>
+        /// The tail of an item card whose owner's stat grows it (Round 81): "(힘 12 ×1.2)", in the stat's colour. Null without an owner, for an item
+        /// that grows with no stat, or at the baseline (×1).
+        /// </summary>
+        public static string StatScale(EquippedItem item, StatBlock ownerStats)
+        {
+            if (ownerStats == null || item.Item.ScalesWith == null)
+            {
+                return null;
+            }
+
+            Stat stat = item.Item.ScalesWith.Value;
+            int value = ownerStats[stat];
+            int percent = StatRules.PowerPercent(Managers.Data.Data.Balance, value);
+            if (percent == StatRules.Full)
+            {
+                return null;
+            }
+
+            return Colored(UiStrings.Get(UiKeys.Item.StatScale, StatName(stat), value, Multiplier(percent)), StatColor(value));
+        }
+
+        /// <summary>Whether any effect of the item can miss (Slice D stage 33): a weapon's or an attack item's damage or burn.</summary>
+        static bool CanMiss(ItemData item)
+        {
+            foreach (ItemEffect effect in item.Effects)
+            {
+                if (StatRules.CanMiss(item, effect))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>A chance in ten-thousandths as percent words: 450 is "4.5", 8200 "82" (Slice D stage 33).</summary>
+        public static string Percent(int tenThousandths)
+        {
+            return (tenThousandths / 100m).ToString("0.##", CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>A chance's words coloured against the data's: green above it, red under it, plain when the same (Round 81).</summary>
+        static string AgainstData(int tenThousandths, int data)
+        {
+            string words = Percent(tenThousandths);
+            return tenThousandths == data ? words : Colored(words, tenThousandths > data ? UiPalette.Good : UiPalette.BloodLight);
+        }
+
+        /// <summary>A percent as a multiplier: 120 is "1.2", 125 "1.25", 90 "0.9".</summary>
+        public static string Multiplier(int percent)
+        {
+            return (percent / 100m).ToString("0.##", CultureInfo.InvariantCulture);
         }
 
         public static string PotionDetails(PotionData potion)

@@ -1,4 +1,5 @@
 using System;
+using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
@@ -99,11 +100,13 @@ namespace F1.UI
         /// <param name="starDamage">What they add to its weapon damage, which its damage line counts (<see cref="StarRules.DamageOn"/>).</param>
         /// <param name="sellLabel">Round 74 B: the sell button's words while at a shop (what the shop pays, or that it cannot be sold); null hides the button.</param>
         /// <param name="sellEnabled">Whether the sell button can be pressed.</param>
+        /// <param name="ownerStats">The stats of the mercenary whose board the item is on (Slice D stage 32): the card counts them. Null without an owner.</param>
+        /// <param name="ownerPassive">That mercenary's job passive (Slice D stage 36): the ranger's adds to a weapon's critical chance. Null without one.</param>
         public void ShowAbove(EquippedItem item, string mergeHint, RectTransform cell, RectTransform panel, string starLine = null, int starDamage = 0,
-            string sellLabel = null, bool sellEnabled = false)
+            string sellLabel = null, bool sellEnabled = false, StatBlock ownerStats = null, PassiveSpec ownerPassive = null)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, true, starLine, starDamage, sellLabel, sellEnabled);
+            Vector2 size = Fill(item, mergeHint, true, starLine, starDamage, sellLabel, sellEnabled, ownerStats, 0, ownerPassive);
             Rect anchor = TooltipPlacement.In(cell, parent);
             Rect placed = TooltipPlacement.Above(anchor, size, TooltipPlacement.In(panel, parent).yMin, Screen(parent), out float notchX);
             ShowNotch(Notch.Bottom, notchX);
@@ -116,10 +119,11 @@ namespace F1.UI
         /// false): the enemy has no fatigue.
         /// </summary>
         public void ShowBeside(EquippedItem item, RectTransform cell, bool left, RectTransform panel, bool withFatigue, string mergeHint = null,
-            string starLine = null, int starDamage = 0, string sellLabel = null, bool sellEnabled = false)
+            string starLine = null, int starDamage = 0, string sellLabel = null, bool sellEnabled = false, StatBlock ownerStats = null, int ownerAccuracy = 0,
+            PassiveSpec ownerPassive = null)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage, sellLabel, sellEnabled);
+            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage, sellLabel, sellEnabled, ownerStats, ownerAccuracy, ownerPassive);
             Rect anchor = TooltipPlacement.In(cell, parent);
             Rect placed = TooltipPlacement.Beside(anchor, size, left, TooltipPlacement.In(panel, parent), Screen(parent), out float notchY, out bool cardIsLeftOfCell);
             ShowNotch(cardIsLeftOfCell ? Notch.Right : Notch.Left, notchY);
@@ -134,7 +138,7 @@ namespace F1.UI
         }
 
         /// <summary>Writes the card and measures it. The card is active and on top afterwards: the layout needs it active.</summary>
-        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage, string sellLabel = null, bool sellEnabled = false)
+        Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage, string sellLabel = null, bool sellEnabled = false, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null)
         {
             if (_sell != null)
             {
@@ -153,9 +157,12 @@ namespace F1.UI
             Set(_uniqueLine, unique ? UiStrings.Get(UiKeys.Item.UniqueTitle) : null);
             string recipe = UiText.RecipeHint(item);
             mergeHint = recipe == null ? mergeHint : string.IsNullOrEmpty(mergeHint) ? recipe : mergeHint + "\n" + recipe;
-            UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage);
+            UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage, ownerStats, ownerAccuracy, ownerPassive);
             Set(_facts, facts);
-            Set(_effects, string.IsNullOrEmpty(starLine) ? effects : string.IsNullOrEmpty(effects) ? starLine : effects + "\n" + starLine);
+            // Under the effects, one line: what the stars add and what the owner's stat multiplies (Round 81: "(★ 숫돌 +1)  (힘 12 ×1.2)").
+            string statScale = UiText.StatScale(item, ownerStats);
+            string tail = string.IsNullOrEmpty(starLine) ? statScale : string.IsNullOrEmpty(statScale) ? starLine : starLine + "  " + statScale;
+            Set(_effects, string.IsNullOrEmpty(tail) ? effects : string.IsNullOrEmpty(effects) ? tail : effects + "\n" + tail);
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
             _title.color = UiText.TitleColor(item);

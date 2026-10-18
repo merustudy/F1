@@ -4,38 +4,32 @@
     {
       "IsLast": false,
       "Level": 1,
-      "ExpToNext": 15,
-      "MaxHpBonusPercent": 0
+      "ExpToNext": 15
     },
     {
       "IsLast": false,
       "Level": 2,
-      "ExpToNext": 25,
-      "MaxHpBonusPercent": 10
+      "ExpToNext": 25
     },
     {
       "IsLast": false,
       "Level": 3,
-      "ExpToNext": 40,
-      "MaxHpBonusPercent": 20
+      "ExpToNext": 40
     },
     {
       "IsLast": false,
       "Level": 4,
-      "ExpToNext": 60,
-      "MaxHpBonusPercent": 30
+      "ExpToNext": 60
     },
     {
       "IsLast": false,
       "Level": 5,
-      "ExpToNext": 90,
-      "MaxHpBonusPercent": 40
+      "ExpToNext": 90
     },
     {
       "IsLast": true,
       "Level": 6,
-      "ExpToNext": 0,
-      "MaxHpBonusPercent": 50
+      "ExpToNext": 0
     }
   ]
 }

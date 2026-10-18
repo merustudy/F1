@@ -104,6 +104,8 @@ namespace F1.UI
                         : UiStrings.Get(UiKeys.Log.Damage, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
                 case BattleEventKind.CriticalHit:
                     return UiStrings.Get(UiKeys.Log.CriticalHit, Source(engine, e.Source, e.Id), UnitName(engine, e.Target));
+                case BattleEventKind.Missed:
+                    return UiStrings.Get(UiKeys.Log.Missed, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Percent(e.B), UiText.Percent(e.A));
                 case BattleEventKind.Healed:
                     return UiStrings.Get(UiKeys.Log.Heal, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.B));
                 case BattleEventKind.ShieldGained:

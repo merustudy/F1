@@ -78,10 +78,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 9766393864199
-    m_Localized: Remove
-    m_Metadata:
-      m_Items: []
   - m_Id: 9766393864200
     m_Localized: Expedition
     m_Metadata:
@@ -1405,16 +1401,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 5844067983286273
-    m_Localized: 'Level up: {0}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
-  - m_Id: 5844067983286274
-    m_Localized: '{0} Lv {1}'
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 5853680703102976
     m_Localized: '{0}: phase {1} (HP {2}%): its items change'
     m_Metadata:
@@ -1552,6 +1538,91 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 6394468449116160
+    m_Localized: "{0} \xB7 {1} Lv {2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6394468465893376
+    m_Localized: "({0} {1} \xD7{2})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6394468465893377
+    m_Localized: STR
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6394468465893378
+    m_Localized: DEX
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6394468465893379
+    m_Localized: CON
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6394468465893380
+    m_Localized: INT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6394468465893381
+    m_Localized: SPI
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6394468465893382
+    m_Localized: END
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6416151813808128
+    m_Localized: Hit {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6416151822196736
+    m_Localized: "{0} \u2192 {1}: miss (hit {2}% \xB7 roll {3})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6416151822196737
+    m_Localized: Miss
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6472751761055745
+    m_Localized: "\u25B2{0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6472751761055746
+    m_Localized: "\u25BC{0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6525681168015360
+    m_Localized: "\u25B2 Level up"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6525681180598272
+    m_Localized: "\u25B2{0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6525681180598273
+    m_Localized: "\u25B2"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6525681180598274
+    m_Localized: +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6525681184792576
+    m_Localized: "\u25B2 Ready to level up: {0} \u2014 in the barracks"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6531433886638080
+    m_Localized: No dismissing while under construction (levelling up still works)
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1706,8 +1777,6 @@ MonoBehaviour:
         - id: 5844067966509056
         - id: 5844067979091968
         - id: 5844067983286272
-        - id: 5844067983286273
-        - id: 5844067983286274
         - id: 5853680703102976
         - id: 5853680715685888
         - id: 6039611447959552
@@ -1727,3 +1796,12 @@ MonoBehaviour:
         - id: 6151713181392903
         - id: 6151713181392904
         - id: 6172991850274816
+        - id: 6394468449116160
+        - id: 6394468465893376
+        - id: 6416151813808128
+        - id: 6416151822196736
+        - id: 6472751761055745
+        - id: 6472751761055746
+        - id: 6525681180598272
+        - id: 6525681180598274
+        - id: 6525681184792576

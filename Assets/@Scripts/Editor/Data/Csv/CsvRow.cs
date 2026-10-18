@@ -276,6 +276,13 @@ namespace F1.Editor.Data
             }
         }
 
+        /// <summary>An enum a file may leave out (an optional header): null without the column or with an empty value.</summary>
+        public TEnum? OptionalEnum<TEnum>(string header)
+            where TEnum : struct
+        {
+            return !_table.TryGetColumn(header, out int _) || IsEmpty(header) ? (TEnum?)null : Enum<TEnum>(header);
+        }
+
         /// <summary>Only names defined by the enum are accepted; numbers are not.</summary>
         public TEnum Enum<TEnum>(string header)
             where TEnum : struct

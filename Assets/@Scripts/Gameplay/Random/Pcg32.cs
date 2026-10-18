@@ -81,6 +81,8 @@ namespace F1.Gameplay
         public const ulong Damage = 7UL;
         /// <summary>The candidates the stagecoach draws at each settlement (Slice C stage 26): which names, and which job each gets.</summary>
         public const ulong Recruit = 8UL;
+        /// <summary>The stats a level-up grows by the remainder of each growth grade (Slice D stage 34), at the return settlement.</summary>
+        public const ulong Growth = 9UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

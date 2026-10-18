@@ -142,6 +142,10 @@ namespace F1.UI
         public static readonly Color Bone = Rgb(0xCD, 0xC0, 0xA0);
         public static readonly Color DiabloGold = Rgb(0xC7, 0xB3, 0x77);
 
+        /// <summary>The level-up's button and count (Slice D stage 35, Round 82): a warm gold with dark words.</summary>
+        public static readonly Color LevelUp = Rgb(0xC9, 0x9A, 0x3A);
+        public static readonly Color LevelUpText = Rgb(0x1C, 0x1A, 0x14);
+
         /// <summary>A unique item (stage 23): Diablo's unique gold for its name, its plate and the rim round its piece; the forge card's dark gold and its light words.</summary>
         public static readonly Color Unique = DiabloGold;
         public static readonly Color ForgeCard = Rgb(0x5A, 0x48, 0x1E);

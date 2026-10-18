@@ -29,8 +29,8 @@ namespace F1.Tests
             Assert.IsTrue(Managers.Data.IsLoaded);
 
             StaticData data = Managers.Data.Data;
-            Assert.AreEqual("기사", data.Jobs.Get("knight").Name.Resolve("ko-KR"));
-            Assert.AreEqual("Knight", data.Jobs.Get("knight").Name.Resolve("en-US"));
+            Assert.AreEqual("전사", data.Jobs.Get("warrior").Name.Resolve("ko-KR"));
+            Assert.AreEqual("Warrior", data.Jobs.Get("warrior").Name.Resolve("en-US"));
             Assert.Throws<KeyNotFoundException>(() => data.Jobs.Get("samurai"));
             Assert.IsNotEmpty(data.Dungeons.Ordered);
             Assert.Greater(data.Balance.PartySize, 0);

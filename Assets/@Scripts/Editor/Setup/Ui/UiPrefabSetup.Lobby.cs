@@ -75,7 +75,8 @@ namespace F1.Editor.Setup
             // The barracks: the building line (stage 30), the roster with the rows, the party commands and dismissing (a scrolling list: the barracks'
             // levels let the roster outgrow the window), a summary line under it.
             Image barracksWindow = Window(frame, "BarracksWindow", new Rect(40f, 130f, 1840f, 910f), UiKeys.Lobby.BarracksTitle, "BarracksClose", out ButtonParts barracksClose);
-            BuildingLineView barracksLine = BuildBuildingLine(barracksWindow.transform, "Barracks", 1792f, 832f);
+            // Slice D stage 35: the barracks under construction only stops dismissing; its note says the level-up still works.
+            BuildingLineView barracksLine = BuildBuildingLine(barracksWindow.transform, "Barracks", 1792f, 832f, UiKeys.Lobby.BarracksLockedNote);
             RectTransform entries = ListScroll("Entries", barracksWindow.transform, 24f, 136f, 1792f, 688f, 8f);
             RosterEntryView entryTemplate = BuildRosterEntry(entries);
             TextMeshProUGUI barracksSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("BarracksSummary", barracksWindow.transform, 22f, UiPalette.TextDim)), 24f, 868f, 1792f, 32f);
@@ -199,6 +200,12 @@ namespace F1.Editor.Setup
             UiBuild.Box(badgeBar, 16f, 42f, BuildingView.BadgeWidth - 32f, 8f);
             badge.gameObject.SetActive(false);
 
+            // Slice D stage 35: a small gold count at the plate's upper right corner (the barracks' mercenaries who can level up), hidden at zero.
+            Image count = UiBuild.Panel(name + "Count", plate.transform, UiPalette.LevelUp);
+            UiBuild.Box(count, BuildingView.PlateWidth - 40f, -14f, 70f, 34f);
+            TextMeshProUGUI countWords = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name + "CountWords", count.transform, 20f, UiPalette.LevelUpText, TextAlignmentOptions.Center)), 0f, 2f, 70f, 30f);
+            count.gameObject.SetActive(false);
+
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_picture", picture);
             UiBuild.SetReference(view, "_scaffold", scaffold);
@@ -210,6 +217,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_badge", badge.rectTransform);
             UiBuild.SetReference(view, "_badgeWords", badgeWords);
             UiBuild.SetReference(view, "_badgeBar", badgeBar);
+            UiBuild.SetReference(view, "_count", count.rectTransform);
+            UiBuild.SetReference(view, "_countWords", countWords);
             return view;
         }
 
@@ -217,7 +226,7 @@ namespace F1.Editor.Setup
         /// The building line of a window (stage 30): a light panel under the title with the level (bone), what the next level gives (dim) and the
         /// [업그레이드] button at the right; and, at <paramref name="lockedY"/>, the note that the building is closed while under construction.
         /// </summary>
-        static BuildingLineView BuildBuildingLine(Transform window, string prefix, float width, float lockedY)
+        static BuildingLineView BuildBuildingLine(Transform window, string prefix, float width, float lockedY, string lockedKey = UiKeys.Lobby.LockedNote)
         {
             Image line = UiBuild.Panel(prefix + "Line", window, UiPalette.PanelLight);
             UiBuild.Box(line, 24f, 72f, width, 56f);
@@ -225,7 +234,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI effect = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(prefix + "Effect", line.transform, 22f, UiPalette.TextDim)), 170f, 13f, width - 480f, 32f);
             ButtonParts upgrade = UiBuild.Button(prefix + "Upgrade", line.transform, UiPalette.Button, 22f);
             UiBuild.Box(upgrade.Rect, width - 296f, 7f, 276f, 42f);
-            TextMeshProUGUI locked = UiBuild.Box(UiBuild.LocalizedLabel(prefix + "Locked", window, UiKeys.Lobby.LockedNote, 22f, UiPalette.Burn, TextAlignmentOptions.Center), 24f, lockedY, width, 32f);
+            TextMeshProUGUI locked = UiBuild.Box(UiBuild.LocalizedLabel(prefix + "Locked", window, lockedKey, 22f, UiPalette.Burn, TextAlignmentOptions.Center), 24f, lockedY, width, 32f);
             locked.gameObject.SetActive(false);
 
             var view = line.gameObject.AddComponent<BuildingLineView>();
@@ -312,7 +321,8 @@ namespace F1.Editor.Setup
             Transform chip = background.transform;
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipName", chip, 20f, UiPalette.Text)), 10f, 6f, 108f, 28f);
             // The level at the right of the name (the mock's "Lv 2", stage 27), the row the mercenary holds at the right of the job.
-            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipLevel", chip, 16f, UiPalette.Bone, TextAlignmentOptions.Right)), 118f, 8f, 48f, 24f);
+            // Slice D stage 35: a ▲ in gold goes before the level when the barracks can level the mercenary up — the box reaches left for it.
+            TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipLevel", chip, 16f, UiPalette.Bone, TextAlignmentOptions.Right)), 100f, 8f, 66f, 24f);
             TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipJob", chip, 16f, UiPalette.TextDim)), 10f, 36f, 104f, 24f);
             TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("ChipRow", chip, 16f, UiPalette.Brass, TextAlignmentOptions.Right)), 114f, 36f, 52f, 24f);
             RectTransform pips = UiBuild.Box(UiBuild.Rect("ChipPips", chip), 10f, 72f, 156f, 10f);
@@ -357,20 +367,24 @@ namespace F1.Editor.Setup
         static CandidateView BuildCandidate(Transform parent)
         {
             Image background = UiBuild.Panel("CandidateTemplate", parent, UiPalette.PanelLight);
-            UiBuild.Size(background, 932f, 110f);
+            // 150 high from Round 81 (Slice D stage 32): the stat line stands under the passive, past a hairline; the hire button sits in the middle.
+            UiBuild.Size(background, 932f, 150f);
             Transform line = background.transform;
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateName", line, 30f, UiPalette.Text)), 20f, 10f, 260f, 40f);
             TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateJob", line, 22f, UiPalette.TextDim)), 290f, 16f, 180f, 32f);
             TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateDetail", line, 18f, UiPalette.Bone)), 480f, 19f, 210f, 28f);
             TextMeshProUGUI passive = UiBuild.Box(UiBuild.Label("CandidatePassive", line, 18f, UiPalette.TextDim, TextAlignmentOptions.TopLeft), 20f, 58f, 660f, 44f);
+            UiBuild.Box(UiBuild.Image("CandidateStatLine", line, UiPalette.ButtonQuiet), 20f, 102f, 660f, 1f);
+            TextMeshProUGUI stats = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("CandidateStats", line, 20f, UiPalette.Text), 20f, 106f, 680f, 32f));
             ButtonParts hire = UiBuild.Button("CandidateHire", line, UiPalette.Button, 22f);
-            UiBuild.Box(hire.Rect, 700f, 28f, 212f, 56f);
+            UiBuild.Box(hire.Rect, 700f, 47f, 212f, 56f);
 
             var view = background.gameObject.AddComponent<CandidateView>();
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReference(view, "_detail", detail);
             UiBuild.SetReference(view, "_passive", passive);
+            UiBuild.SetReference(view, "_stats", stats);
             UiBuild.SetReference(view, "_hire", hire.Button);
             UiBuild.SetReference(view, "_hireLabel", hire.Label);
             background.gameObject.SetActive(false);
@@ -400,6 +414,10 @@ namespace F1.Editor.Setup
             return pips;
         }
 
+        /// <summary>The barracks line's stat sheet (Round 81 안 B): where it starts and how wide a cell is (six of them fill 640..1108).</summary>
+        const float StatSheetLeft = 640f;
+        const float StatCellWidth = 78f;
+
         /// <summary>The template of one roster line of the barracks (1792 wide, 92 high: eight lines fit the window). The lobby clones it per mercenary.</summary>
         static RosterEntryView BuildRosterEntry(Transform parent)
         {
@@ -422,24 +440,21 @@ namespace F1.Editor.Setup
             TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 18f, UiPalette.TextDim), 20f, 62f, 380f, 26f));
             TextMeshProUGUI state = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryState", entry, 16f, UiPalette.FatigueDanger, TextAlignmentOptions.Right), 410f, 62f, 200f, 26f));
 
-            // One button per row, then the button that takes the mercenary out of the party. The row
-            // buttons are lined up against the right edge of their box, so the ones the lobby hides
-            // (rows the party cannot reach) leave no hole next to "remove".
-            RectTransform rowBox = UiBuild.Box(UiBuild.Rect("EntryRows", entry), 640f, 16f, 352f, 60f);
-            UiBuild.Horizontal(rowBox, 8f, 0, TextAnchor.MiddleRight);
-            var rowButtons = new Button[BattleRows.Count];
-            var rowFrames = new Image[BattleRows.Count];
-            for (int i = 0; i < rowButtons.Length; i++)
+            // The six stats as a sheet (Slice D stage 32, Round 81 안 B): where the row buttons and "remove" stood (the party is formed in the
+            // expedition screen's popup only), a cell each, the name over the value, a hairline between two cells.
+            var statNames = new TextMeshProUGUI[StatBlock.All.Length];
+            var statValues = new TextMeshProUGUI[StatBlock.All.Length];
+            for (int i = 0; i < statNames.Length; i++)
             {
-                int row = i + 1;
-                ButtonParts button = UiBuild.LocalizedButton("EntryRow" + row, rowBox, UiText.RowKey(row), UiPalette.ButtonQuiet, 22f);
-                UiBuild.Size(button.Rect, 80f, 60f);
-                rowButtons[i] = button.Button;
-                rowFrames[i] = button.Frame;
-            }
+                float left = StatSheetLeft + i * StatCellWidth;
+                if (i > 0)
+                {
+                    UiBuild.Box(UiBuild.Image("EntryStatLine" + i, entry, UiPalette.ButtonQuiet), left, 16f, 1f, 60f);
+                }
 
-            ButtonParts remove = UiBuild.LocalizedButton("EntryRemove", entry, UiKeys.Lobby.Remove, UiPalette.ButtonQuiet, 22f);
-            UiBuild.Box(remove.Rect, 1000f, 16f, 112f, 60f);
+                statNames[i] = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryStatName" + i, entry, 18f, UiPalette.TextDim, TextAlignmentOptions.Center), left, 12f, StatCellWidth, 26f));
+                statValues[i] = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryStatValue" + i, entry, 30f, UiPalette.Text, TextAlignmentOptions.Center), left, 38f, StatCellWidth, 44f));
+            }
 
             // The level and the experience (stage 27, the mock's block: "Lv 2", "경험치 4/20" and the bar), then dismissing (stage 26) at the far right.
             TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("EntryLevel", entry, 28f, UiPalette.Bone)), 1140f, 8f, 110f, 40f);
@@ -448,6 +463,20 @@ namespace F1.Editor.Setup
             ButtonParts dismiss = UiBuild.LocalizedButton("EntryDismiss", entry, UiKeys.Lobby.Dismiss, UiPalette.ButtonQuiet, 20f);
             UiBuild.Box(dismiss.Rect, 1620f, 16f, 152f, 60f);
 
+            // Slice D stage 35 (Round 82 안 A): the level-up button at the end of the shortened gold bar (RosterEntryView.ReadyBarWidth), shown only when
+            // the experience meets the level, and the gold rim round a line whose roll the window just showed.
+            ButtonParts levelUp = UiBuild.LocalizedButton("EntryLevelUp", entry, UiKeys.Lobby.LevelUp, UiPalette.LevelUp, 22f);
+            UiBuild.Box(levelUp.Rect, 1348f, 20f, 148f, 52f);
+            levelUp.Label.color = UiPalette.LevelUpText;
+            // Its own sound (the heal's small bell, LobbyScreen.LevelUp) instead of the click.
+            UiBuild.Silence(levelUp.Button);
+            levelUp.Button.gameObject.SetActive(false);
+            // The rim is four thin images inside the line's edges (an Outline's copies outside them would be cut by the scrolling list's mask).
+            RectTransform rim = UiBuild.Rect("EntryRim", entry);
+            UiBuild.Stretch(rim);
+            Rim("EntryRim", rim, 2f, UiPalette.Brass);
+            rim.gameObject.SetActive(false);
+
             var view = background.gameObject.AddComponent<RosterEntryView>();
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
@@ -455,13 +484,14 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_fatigue", fatigue);
             UiBuild.SetReference(view, "_state", state);
             UiBuild.SetReferences(view, "_fatiguePips", fatiguePips);
-            UiBuild.SetReferences(view, "_rows", rowButtons);
-            UiBuild.SetReferences(view, "_rowFrames", rowFrames);
-            UiBuild.SetReference(view, "_remove", remove.Button);
+            UiBuild.SetReferences(view, "_statNames", statNames);
+            UiBuild.SetReferences(view, "_statValues", statValues);
             UiBuild.SetReference(view, "_dismiss", dismiss.Button);
             UiBuild.SetReference(view, "_level", level);
             UiBuild.SetReference(view, "_exp", exp);
             UiBuild.SetReference(view, "_expBar", expBar);
+            UiBuild.SetReference(view, "_levelUp", levelUp.Button);
+            UiBuild.SetReference(view, "_rim", rim.gameObject);
 
             background.gameObject.SetActive(false);
             return view;

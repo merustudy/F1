@@ -495,7 +495,7 @@ namespace F1.UI
             }
             else
             {
-                chance = FatigueRules.DogDeathChancePercent(balance, _unit.State);
+                chance = FatigueRules.DogDeathChancePercent(balance, _unit.State, _unit.Setup.Stats);
                 status = -2L - chance;
             }
 

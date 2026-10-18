@@ -88,7 +88,7 @@ namespace F1.Tests
             Assert.AreEqual(900, critical.A);
             List<BattleEvent> events = battle.Events.ToList();
             Assert.AreEqual(events.IndexOf(critical) + 1, events.IndexOf(damaged), "The critical hit is told just before its damage.");
-            Assert.AreEqual(100, critical.C, "The weapon's chance.");
+            Assert.AreEqual(10000, critical.C, "The weapon's chance, in ten-thousandths (Slice D stage 33).");
         }
 
         [Test]

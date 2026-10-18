@@ -1,10 +1,9 @@
 Id,Name.ko-KR,Name.en-US,JobId,Starting
-rowan,로언,Rowan,knight,true
-astrid,아스트리드,Astrid,valkyrie,true
-ella,엘라,Ella,bishop,true
-cedric,세드릭,Cedric,paladin,true
-mira,미라,Mira,archmage,true
-kai,카이,Kai,spellblade,true
+rowan,로언,Rowan,warrior,true
+astrid,아스트리드,Astrid,viking,true
+ella,엘라,Ella,priest,true
+mira,미라,Mira,mage,true
+kai,카이,Kai,warrior,true
 bran,브란,Bran,,false
 johanna,요한나,Johanna,,false
 teo,테오,Teo,,false

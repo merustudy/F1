@@ -30,6 +30,42 @@ namespace F1.Tests
         }
 
         [Test]
+        public void EveryShippedJob_NamesItsSixStats_AndEveryBaseWeaponGrowsWithOne()
+        {
+            // Slice D stage 32 (Docs/Design/05_Mercenary_Growth.md §2): the CSV requires the six; the base weapons are the jobs' axes (02 §4).
+            StaticData data = LoadShipped();
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                Assert.IsNotNull(job.Stats, job.Id);
+                Assert.IsNull(job.Stats.FirstOutside(data.Balance.StatMin, data.Balance.StatMax), job.Id);
+                Assert.IsNotNull(data.Items.Get(job.WeaponItemId).ScalesWith, job.WeaponItemId);
+            }
+        }
+
+        [Test]
+        public void TheShippedJobs_AreTheFive_AndTheStartingRosterIsFive()
+        {
+            // Slice D stage 36 (Docs/Design/05_Mercenary_Growth.md §1, Design/15 판정): 전사·바이킹·방랑자·마법사·사제 on their base weapons;
+            // 세드릭 is gone and 카이 is a warrior (the user's decision); the ranger comes from the stagecoach.
+            StaticData data = LoadShipped();
+            CollectionAssert.AreEquivalent(new[] { "warrior", "viking", "ranger", "mage", "priest" }, data.Jobs.Ordered.Select(j => j.Id));
+            Assert.AreEqual("longsword", data.Jobs.Get("warrior").WeaponItemId);
+            Assert.AreEqual("greataxe", data.Jobs.Get("viking").WeaponItemId);
+            Assert.AreEqual("longbow", data.Jobs.Get("ranger").WeaponItemId);
+            Assert.AreEqual("fire_staff", data.Jobs.Get("mage").WeaponItemId);
+            Assert.AreEqual("healing_staff", data.Jobs.Get("priest").WeaponItemId);
+            Assert.AreEqual(PassiveEffect.CritChancePercent, data.Jobs.Get("ranger").Passive.Effect);
+            Assert.AreEqual(10, data.Jobs.Get("ranger").Passive.Magnitude);
+            Assert.AreEqual(3, data.Items.Get("longbow").ShopWeight, "A base weapon's shop weight.");
+
+            Dictionary<string, string> roster = data.StartingMercenaries.ToDictionary(m => m.Id, m => m.JobId);
+            CollectionAssert.AreEquivalent(new[] { "rowan", "astrid", "ella", "mira", "kai" }, roster.Keys);
+            Assert.AreEqual("warrior", roster["kai"]);
+            Assert.AreEqual("warrior", roster["rowan"]);
+            Assert.IsFalse(data.Mercenaries.Contains("cedric"));
+        }
+
+        [Test]
         public void EveryDefinition_HasSourceAndGeneratedFile()
         {
             foreach (StaticDataFiles.Entry file in StaticDataFiles.All)
@@ -171,8 +207,9 @@ namespace F1.Tests
 
             ItemData axe = data.Items.Get("greataxe");
             Assert.AreEqual("전투도끼", axe.Name.Resolve("ko-KR"));
-            Assert.AreEqual((3, 2), (axe.Width, axe.Height), "The valkyrie's battle axe is the one base weapon of 3x2.");
-            foreach (JobData job in data.Jobs.Ordered.Where(j => j.WeaponItemId != "greataxe"))
+            Assert.AreEqual((3, 2), (axe.Width, axe.Height), "The viking's battle axe is a base weapon of 3x2.");
+            Assert.AreEqual((2, 2), (data.Items.Get("longbow").Width, data.Items.Get("longbow").Height), "The ranger's longbow (Slice D stage 36) keeps its 2x2.");
+            foreach (JobData job in data.Jobs.Ordered.Where(j => j.WeaponItemId != "greataxe" && j.WeaponItemId != "longbow"))
             {
                 ItemData weapon = data.Items.Get(job.WeaponItemId);
                 Assert.AreEqual((3, 1), (weapon.Width, weapon.Height), job.Id);
@@ -316,7 +353,8 @@ namespace F1.Tests
                 Assert.AreEqual(0, weapon.DropWeight, job.Id + ": a base weapon comes from a shop or a camp, never a drop.");
             }
 
-            foreach (string id in new[] { "dagger", "longbow", "spear", "halberd", "buckler", "ward_charm", "herb_pouch", "ember_flask" })
+            // Slice D stage 36: the longbow is the ranger's base weapon now — shops only, like the other base weapons.
+            foreach (string id in new[] { "dagger", "spear", "halberd", "buckler", "ward_charm", "herb_pouch", "ember_flask" })
             {
                 Assert.Greater(data.Items.Get(id).DropWeight, 0, id);
             }

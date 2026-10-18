@@ -43,85 +43,105 @@ namespace F1.Tests
             StaticData data = TestData.Data();
             Assert.AreEqual(3, data.MaxLevel);
             Assert.AreEqual(1, data.LevelAt(1).Level);
-            Assert.AreEqual(0, data.LevelAt(1).MaxHpBonusPercent);
             Assert.IsTrue(data.LevelAt(3).IsLast);
             Assert.Throws<ArgumentOutOfRangeException>(() => data.LevelAt(0));
             Assert.Throws<ArgumentOutOfRangeException>(() => data.LevelAt(4));
         }
 
         [Test]
-        public void Gain_ClimbsALevelWhenTheExperienceMeetsIt_CarriesTheRest_AndKeepsNothingAtTheLast()
+        public void Gain_KeepsTheExperience_TheBarracksClimbsOneLevelAClick_AndTheLastLevelKeepsNothing()
         {
+            // Slice D stage 35: the experience only builds up; LevelUp climbs one level and carries the rest.
             StaticData data = TestData.Data();
             var mercenary = new MercenaryState { Id = "anna", JobId = "tank", Level = 1 };
 
-            Assert.AreEqual(0, LevelRules.Gain(data, mercenary, 7));
-            Assert.AreEqual(1, mercenary.Level);
+            Assert.IsFalse(LevelRules.Gain(data, mercenary, 7));
             Assert.AreEqual(7, mercenary.Exp);
             Assert.AreEqual(10, LevelRules.ExpToNext(data, mercenary));
+            Assert.Throws<InvalidOperationException>(() => LevelRules.LevelUp(data, mercenary, 1UL), "7 of 10: not yet.");
 
-            Assert.AreEqual(1, LevelRules.Gain(data, mercenary, 5), "7 + 5 = 12: level 2 with 2 to spare.");
+            Assert.IsTrue(LevelRules.Gain(data, mercenary, 5), "7 + 5 = 12 meets the 10.");
+            Assert.AreEqual(1, mercenary.Level, "The settlement climbs nothing.");
+            Assert.AreEqual(12, mercenary.Exp);
+            LevelRules.LevelUp(data, mercenary, 1UL);
             Assert.AreEqual(2, mercenary.Level);
-            Assert.AreEqual(2, mercenary.Exp);
+            Assert.AreEqual(2, mercenary.Exp, "The rest is carried.");
+            Assert.IsFalse(LevelRules.CanLevelUp(data, mercenary));
             Assert.AreEqual(20, LevelRules.ExpToNext(data, mercenary));
 
-            // Two levels in one leap are climbed one after the other; at the last level the experience is 0 and stays so.
+            // Two levels' worth wait for two clicks; at the last level the experience is 0 and stays so.
             var fresh = new MercenaryState { Id = "ben", JobId = "healer", Level = 1 };
-            Assert.AreEqual(2, LevelRules.Gain(data, fresh, 100));
+            Assert.IsTrue(LevelRules.Gain(data, fresh, 100));
+            LevelRules.LevelUp(data, fresh, 1UL);
+            Assert.AreEqual(2, fresh.Level);
+            Assert.AreEqual(90, fresh.Exp);
+            Assert.IsTrue(LevelRules.CanLevelUp(data, fresh));
+            LevelRules.LevelUp(data, fresh, 1UL);
             Assert.AreEqual(3, fresh.Level);
             Assert.AreEqual(0, fresh.Exp);
+            Assert.IsFalse(LevelRules.CanLevelUp(data, fresh), "The last level.");
             Assert.AreEqual(0, LevelRules.ExpToNext(data, fresh));
-            Assert.AreEqual(0, LevelRules.Gain(data, fresh, 50));
+            Assert.IsFalse(LevelRules.Gain(data, fresh, 50));
             Assert.AreEqual(0, fresh.Exp);
             Assert.Throws<ArgumentOutOfRangeException>(() => LevelRules.Gain(data, fresh, -1));
         }
 
         [Test]
-        public void ALevel_AddsItsBonusToTheJobsMaximumHp_WhenTheMercenaryLeaves()
+        public void ALevel_NoLongerAddsToTheMaximumHp_OnlyTheStatsItGrewDo()
         {
+            // Slice D stage 34: the level's HP bonus is gone; the maximum is the job's with constitution's share (the test jobs: the baseline).
             StaticData data = TestData.Data();
-            Assert.AreEqual(100, LevelRules.MaxHpOf(data, "tank", 1), "The job's 100 (hundredths).");
-            Assert.AreEqual(110, LevelRules.MaxHpOf(data, "tank", 2));
-            Assert.AreEqual(125, LevelRules.MaxHpOf(data, "tank", 3));
-            Assert.AreEqual(66, LevelRules.MaxHpOf(data, "healer", 2), "60 + 10%.");
+            Assert.AreEqual(100, LevelRules.MaxHpOf(data, "tank"), "The job's 100 (hundredths).");
+            Assert.AreEqual(60, LevelRules.MaxHpOf(data, "healer"));
+            Assert.AreEqual(110, LevelRules.MaxHpOf(data, "tank", StatBlock.Uniform(10).With(Stat.Con, 12)), "Constitution 12: 10% more.");
 
             RunState run = RunWithParty(data);
             RunRules.FindMercenary(run, "anna").Level = 3;
-            RunRules.FindMercenary(run, "ben").Level = 2;
+            RunRules.FindMercenary(run, "ben").Stats = StatBlock.Uniform(10).With(Stat.Con, 12);
             ExpeditionState expedition = RunRules.BeginExpedition(data, run, "cave");
 
-            Assert.AreEqual(125, expedition.Members[0].MaxHp);
-            Assert.AreEqual(125, expedition.Members[0].Hp, "Full at the start.");
-            Assert.AreEqual(66, expedition.Members[1].MaxHp);
-            Assert.AreEqual(80, expedition.Members[2].MaxHp, "Level 1: the job's.");
-            Assert.AreEqual(125, ExpeditionRules.BeginBattle(data, expedition, expedition.Map.Nodes[0].Id).Party[0].MaxHp, "The battle takes the member's maximum.");
+            Assert.AreEqual(100, expedition.Members[0].MaxHp, "Level 3 and the baseline: the job's.");
+            Assert.AreEqual(100, expedition.Members[0].Hp, "Full at the start.");
+            Assert.AreEqual(66, expedition.Members[1].MaxHp, "60 + 10%.");
+            Assert.AreEqual(80, expedition.Members[2].MaxHp);
+            Assert.AreEqual(100, ExpeditionRules.BeginBattle(data, expedition, expedition.Map.Nodes[0].Id).Party[0].MaxHp, "The battle takes the member's maximum.");
         }
 
         [Test]
-        public void TheSettlement_GivesEverySurvivorTheSameExperience_ForTheFloorsAndAClear_AndNamesWhoLeveledUp()
+        public void TheSettlement_GivesEverySurvivorTheSameExperience_ForTheFloorsAndAClear_AndNamesWhoCanLevelUp()
         {
             StaticData data = TestData.Data();
             RunState run = RunWithParty(data);
             RunRules.FindMercenary(run, "ben").Exp = 5;
 
-            // Cleared at the boss: 2 floors x 1 and 5 for the clear = 7. ben had 5: 12 takes him to level 2 with 2 to spare.
+            // Cleared at the boss: 2 floors x 1 and 5 for the clear = 7. ben had 5: 12 meets his level's 10 — the barracks levels him up (stage 35).
             SettlementReport report = RunRules.Settle(data, run, Ended(data, run, ExpeditionResult.Cleared, 3, "cora"));
 
             Assert.AreEqual(7, report.ExpEarned);
             Assert.AreEqual(7, RunRules.FindMercenary(run, "anna").Exp);
             Assert.AreEqual(1, RunRules.FindMercenary(run, "anna").Level);
-            Assert.AreEqual(2, RunRules.FindMercenary(run, "ben").Level);
-            Assert.AreEqual(2, RunRules.FindMercenary(run, "ben").Exp);
+            Assert.AreEqual(1, RunRules.FindMercenary(run, "ben").Level, "The settlement climbs nothing.");
+            Assert.AreEqual(12, RunRules.FindMercenary(run, "ben").Exp);
             Assert.AreEqual(0, RunRules.FindMercenary(run, "dan").Exp, "Stayed home: nothing.");
-            CollectionAssert.AreEqual(new[] { "ben" }, report.LevelUps);
+            CollectionAssert.AreEqual(new[] { "ben" }, report.ReadyToLevelUp);
             Assert.IsNull(RunRules.FindMercenary(run, "cora"), "Dead: the level dies with her.");
 
-            // Retreated from floor 1: 1 experience, nobody levels.
+            // Retreated from floor 1: 1 experience. ben left his level-up waiting: he is named again.
             RunRules.SetParty(data, run, FlowTestKit.Party(("anna", 1), ("ben", 2)));
             report = RunRules.Settle(data, run, Ended(data, run, ExpeditionResult.Retreated, 1));
             Assert.AreEqual(1, report.ExpEarned);
-            Assert.IsEmpty(report.LevelUps);
+            CollectionAssert.AreEqual(new[] { "ben" }, report.ReadyToLevelUp);
             Assert.AreEqual(8, RunRules.FindMercenary(run, "anna").Exp);
+            Assert.AreEqual(13, RunRules.FindMercenary(run, "ben").Exp);
+
+            // The barracks levels him up: one level, the rest carried, saved by the manager (RunManager.LevelUp).
+            Assert.IsTrue(RunRules.CanLevelUp(data, run, "ben"));
+            Assert.IsFalse(RunRules.CanLevelUp(data, run, "anna"));
+            Assert.IsFalse(RunRules.CanLevelUp(data, run, "nobody"));
+            RunRules.LevelUp(data, run, "ben");
+            Assert.AreEqual(2, RunRules.FindMercenary(run, "ben").Level);
+            Assert.AreEqual(3, RunRules.FindMercenary(run, "ben").Exp);
+            Assert.Throws<InvalidOperationException>(() => RunRules.LevelUp(data, run, "anna"));
         }
 
         [Test]

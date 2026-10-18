@@ -50,12 +50,24 @@
       "Value": 3
     },
     {
+      "Key": "CritPerDexPoint",
+      "Value": 50
+    },
+    {
       "Key": "DeathLimit",
       "Value": 15
     },
     {
+      "Key": "DodgePerDexPoint",
+      "Value": 50
+    },
+    {
       "Key": "DogDeathChancePercent",
       "Value": 30
+    },
+    {
+      "Key": "DogDeathPercentPerConPoint",
+      "Value": 1
     },
     {
       "Key": "DogGraceBreakHits",
@@ -122,6 +134,10 @@
       "Value": 3
     },
     {
+      "Key": "FatiguePercentPerEndPoint",
+      "Value": 3
+    },
+    {
       "Key": "FatigueRecoveryPerDay",
       "Value": 10
     },
@@ -142,8 +158,28 @@
       "Value": 20
     },
     {
+      "Key": "HitBasePercent",
+      "Value": 80
+    },
+    {
+      "Key": "HitMaxPercent",
+      "Value": 95
+    },
+    {
       "Key": "HitMinDamage",
       "Value": 50
+    },
+    {
+      "Key": "HitMinPercent",
+      "Value": 5
+    },
+    {
+      "Key": "HitPerStatPoint",
+      "Value": 100
+    },
+    {
+      "Key": "HpPercentPerConPoint",
+      "Value": 5
     },
     {
       "Key": "InventoryHeight",
@@ -190,6 +226,10 @@
       "Value": 3
     },
     {
+      "Key": "RecruitStatSpread",
+      "Value": 2
+    },
+    {
       "Key": "RestDays",
       "Value": 1
     },
@@ -224,6 +264,22 @@
     {
       "Key": "ShopSlots",
       "Value": 8
+    },
+    {
+      "Key": "StatBaseline",
+      "Value": 10
+    },
+    {
+      "Key": "StatMax",
+      "Value": 30
+    },
+    {
+      "Key": "StatMin",
+      "Value": 1
+    },
+    {
+      "Key": "StatPowerPercentPerPoint",
+      "Value": 10
     },
     {
       "Key": "StormBaseDamage",
@@ -272,6 +328,10 @@
     {
       "Key": "VirtueFatigue",
       "Value": 40
+    },
+    {
+      "Key": "VirtuePerSpiPoint",
+      "Value": 1
     }
   ]
 }

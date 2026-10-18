@@ -68,7 +68,7 @@ namespace F1.Flow
 
             foreach (RecruitState recruit in run.Recruits)
             {
-                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId });
+                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId, Stats = ToRecord(recruit.Stats) });
             }
 
             foreach (KeyValuePair<string, int> visits in run.ExpeditionsByDungeon)
@@ -78,7 +78,7 @@ namespace F1.Flow
 
             foreach (MercenaryState mercenary in run.Roster)
             {
-                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp });
+                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp, Stats = ToRecord(mercenary.Stats) });
             }
 
             foreach (PartySlot slot in run.Party)
@@ -270,11 +270,21 @@ namespace F1.Flow
                 Require(known.Add(mercenary.Id), $"Mercenary '{mercenary.Id}' is listed twice.");
                 Require(mercenary.Fatigue >= 0 && mercenary.Fatigue <= data.Balance.MaxFatigue, $"Fatigue of '{mercenary.Id}' is out of range.");
                 RequireState(data, mercenary.Affliction, mercenary.Fatigue, $"'{mercenary.Id}'", atHome: true);
-                // The level and the experience (stage 27): on the ladder, and the experience under what the level takes (none at the last level).
+                // The level and the experience (stage 27): on the ladder, and none at the last level. Slice D stage 35: the experience may pass
+                // what the level takes (the barracks levels the mercenary up), so there is no upper bound below the last level.
                 Require(mercenary.Level >= 1 && mercenary.Level <= data.MaxLevel, $"Level of '{mercenary.Id}' is out of range.");
                 LevelData level = data.LevelAt(mercenary.Level);
-                Require(mercenary.Exp >= 0 && (level.IsLast ? mercenary.Exp == 0 : mercenary.Exp < level.ExpToNext), $"Experience of '{mercenary.Id}' is out of range.");
-                run.Roster.Add(new MercenaryState { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, AfflictionId = mercenary.Affliction, Level = mercenary.Level, Exp = mercenary.Exp });
+                Require(mercenary.Exp >= 0 && (!level.IsLast || mercenary.Exp == 0), $"Experience of '{mercenary.Id}' is out of range.");
+                run.Roster.Add(new MercenaryState
+                {
+                    Id = mercenary.Id,
+                    JobId = mercenary.JobId,
+                    Fatigue = mercenary.Fatigue,
+                    AfflictionId = mercenary.Affliction,
+                    Level = mercenary.Level,
+                    Exp = mercenary.Exp,
+                    Stats = ToStats(mercenary.Stats, data, $"'{mercenary.Id}'"),
+                });
             }
 
             Require(run.Roster.Count <= BuildingRules.RosterLimit(data, run), "The roster is over RosterLimit.");
@@ -300,7 +310,7 @@ namespace F1.Flow
                 Require(recruit != null && data.Mercenaries.Contains(recruit.Id) && !data.Mercenaries.Get(recruit.Id).Starting, $"Candidate '{recruit?.Id}' is not a name of the recruit pool.");
                 Require(data.Jobs.Contains(recruit.JobId), $"Unknown job '{recruit.JobId}'.");
                 Require(known.Add(recruit.Id), $"Mercenary '{recruit.Id}' is listed twice.");
-                run.Recruits.Add(new RecruitState { Id = recruit.Id, JobId = recruit.JobId });
+                run.Recruits.Add(new RecruitState { Id = recruit.Id, JobId = recruit.JobId, Stats = ToStats(recruit.Stats, data, $"candidate '{recruit.Id}'") });
             }
 
             var party = new List<PartySlot>();
@@ -402,6 +412,8 @@ namespace F1.Flow
                     Board = board,
                     Fatigue = member.Fatigue,
                     StateId = member.State,
+                    // A member's stats are the roster's (version 18): they do not change on an expedition, so the file does not repeat them.
+                    Stats = mercenary.Stats,
                 });
             }
 
@@ -644,6 +656,21 @@ namespace F1.Flow
                 Require(input.PotionSlot >= 0 && input.PartyIndex >= 0, "A battle input has a negative index.");
                 previous = input.TimeMs;
             }
+        }
+
+        static StatsRecord ToRecord(StatBlock stats)
+        {
+            return stats == null ? null : new StatsRecord { Str = stats.Str, Dex = stats.Dex, Con = stats.Con, Int = stats.Int, Spi = stats.Spi, End = stats.End };
+        }
+
+        /// <summary>The six stats of a mercenary or a candidate (version 18): present, and each within StatMin..StatMax.</summary>
+        static StatBlock ToStats(StatsRecord record, StaticData data, string who)
+        {
+            Require(record != null, $"Stats of {who} are missing.");
+            var stats = new StatBlock(record.Str, record.Dex, record.Con, record.Int, record.Spi, record.End);
+            Stat? outside = stats.FirstOutside(data.Balance.StatMin, data.Balance.StatMax);
+            Require(outside == null, $"{outside} of {who} is out of range.");
+            return stats;
         }
 
         static string Text(ulong value)

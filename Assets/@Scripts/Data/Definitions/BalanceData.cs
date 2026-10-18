@@ -125,6 +125,21 @@ namespace F1.Data
             new KeySpec(nameof(TreatmentRelief), 1, Big),
             new KeySpec(nameof(ExpPerFloor), 0, Big),
             new KeySpec(nameof(ExpClear), 0, Big),
+            new KeySpec(nameof(StatBaseline), 1, 100),
+            new KeySpec(nameof(StatMin), 1, 100),
+            new KeySpec(nameof(StatMax), 1, 100),
+            new KeySpec(nameof(StatPowerPercentPerPoint), 0, 100),
+            new KeySpec(nameof(HpPercentPerConPoint), 0, 100),
+            new KeySpec(nameof(HitBasePercent), 0, 100),
+            new KeySpec(nameof(HitMinPercent), 0, 100),
+            new KeySpec(nameof(HitMaxPercent), 0, 100),
+            new KeySpec(nameof(HitPerStatPoint), 0, 10000, centi: true),
+            new KeySpec(nameof(DodgePerDexPoint), 0, 10000, centi: true),
+            new KeySpec(nameof(CritPerDexPoint), 0, 10000, centi: true),
+            new KeySpec(nameof(DogDeathPercentPerConPoint), 0, 100),
+            new KeySpec(nameof(VirtuePerSpiPoint), 0, 100),
+            new KeySpec(nameof(FatiguePercentPerEndPoint), 0, 100),
+            new KeySpec(nameof(RecruitStatSpread), 0, 10),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -195,6 +210,27 @@ namespace F1.Data
             if (PartySize > BattleRows.Count)
             {
                 throw new DataException($"{DefinitionName}: PartySize cannot exceed the {BattleRows.Count} rows of a side.");
+            }
+
+            // The stats (Slice D stage 32): the baseline lies in the range, and even the lowest stat leaves an item some power and a mercenary some HP.
+            if (StatMin > StatBaseline || StatBaseline > StatMax)
+            {
+                throw new DataException($"{DefinitionName}: StatBaseline must lie within StatMin..StatMax.");
+            }
+
+            if (100 - StatPowerPercentPerPoint * (StatBaseline - StatMin) < 1)
+            {
+                throw new DataException($"{DefinitionName}: StatPowerPercentPerPoint leaves the lowest stat no power (under 1%).");
+            }
+
+            if (100 - HpPercentPerConPoint * (StatBaseline - StatMin) < 1)
+            {
+                throw new DataException($"{DefinitionName}: HpPercentPerConPoint leaves the lowest constitution no HP (under 1%).");
+            }
+
+            if (HitMinPercent > HitBasePercent || HitBasePercent > HitMaxPercent)
+            {
+                throw new DataException($"{DefinitionName}: HitBasePercent must lie within HitMinPercent..HitMaxPercent.");
             }
 
             if (RosterLimit < PartySize)
@@ -369,5 +405,35 @@ namespace F1.Data
         /// </summary>
         public int ExpPerFloor => _values[nameof(ExpPerFloor)];
         public int ExpClear => _values[nameof(ExpClear)];
+
+        /// <summary>
+        /// The stats (Slice D stage 32, Docs/Design/05_Mercenary_Growth.md §2): the baseline every effect is counted from, the range a stat stays in,
+        /// how much each point above (or below) the baseline grows an item's power (Docs/Design/02 §4) and a mercenary's maximum HP (05 §2), in percent.
+        /// </summary>
+        public int StatBaseline => _values[nameof(StatBaseline)];
+        public int StatMin => _values[nameof(StatMin)];
+        public int StatMax => _values[nameof(StatMax)];
+        public int StatPowerPercentPerPoint => _values[nameof(StatPowerPercentPerPoint)];
+        public int HpPercentPerConPoint => _values[nameof(HpPercentPerConPoint)];
+
+        /// <summary>
+        /// The stats' rolls (Slice D stage 33, Docs/Design/02_Combat_System.md §4·§5·§6, 04 §3): the hit chance against a target at the baseline and
+        /// the bounds it stays in (whole percents); what each point of the attacking item's stat adds to it, each point of the target's dexterity takes
+        /// off it and each point of dexterity adds to a weapon's critical chance (hundredths of a percent point: "0.5" is 50, which the rolls count
+        /// in ten-thousandths); what each point of constitution takes off the death chance at death's door and each point of spirit adds to a
+        /// virtue (percent points); and what each point of endurance takes off the fatigue a mercenary gains (percent).
+        /// </summary>
+        public int HitBasePercent => _values[nameof(HitBasePercent)];
+        public int HitMinPercent => _values[nameof(HitMinPercent)];
+        public int HitMaxPercent => _values[nameof(HitMaxPercent)];
+        public int HitPerStatPoint => _values[nameof(HitPerStatPoint)];
+        public int DodgePerDexPoint => _values[nameof(DodgePerDexPoint)];
+        public int CritPerDexPoint => _values[nameof(CritPerDexPoint)];
+        public int DogDeathPercentPerConPoint => _values[nameof(DogDeathPercentPerConPoint)];
+        public int VirtuePerSpiPoint => _values[nameof(VirtuePerSpiPoint)];
+        public int FatiguePercentPerEndPoint => _values[nameof(FatiguePercentPerEndPoint)];
+
+        /// <summary>How far a candidate's stat may lie from its job's base value, either way (Slice D stage 34, Docs/Design/04 §6): drawn evenly in -n..n.</summary>
+        public int RecruitStatSpread => _values[nameof(RecruitStatSpread)];
     }
 }

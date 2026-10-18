@@ -39,12 +39,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 09fb679c0bb374c9682fdfb2b6faacc3
-    m_Address: unit/job/paladin
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0c8e2268248dc4c56ae29726d630d4da
     m_Address: item/whetstone
     m_ReadOnly: 0
@@ -65,12 +59,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11102349196d34ef9924c294f1138643
     m_Address: item/rat-bite
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 13ffaeca5587e4fa48dac891936c3530
-    m_Address: pose/job/paladin-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -213,12 +201,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5b302dc88de5749c291a06933ba84cbf
-    m_Address: pose/job/paladin-resolute
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5bcf6180d93de495998508c2b6df9c09
     m_Address: item/greataxe
     m_ReadOnly: 0
@@ -281,12 +263,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72ea9c297924a4805a218a3fb095cfbd
     m_Address: item/overseer-maul
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 774597c89f9e44481a97541d83484b02
-    m_Address: pose/job/paladin-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -575,12 +551,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f764de12c07144c35bf7b3fba6df7cda
     m_Address: pose/enemy/goblin-archer-hit
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f7b43789322d44d0fb9f2e4c3680d57f
-    m_Address: pose/job/paladin-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

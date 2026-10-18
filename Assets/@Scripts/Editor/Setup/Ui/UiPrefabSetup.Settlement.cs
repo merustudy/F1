@@ -26,7 +26,9 @@ namespace F1.Editor.Setup
             TextMeshProUGUI days = UiBuild.Box(UiBuild.Label("Days", p, 28f, UiPalette.Text), 80f, 398f, 940f, 40f);
             TextMeshProUGUI gold = UiBuild.Box(UiBuild.Label("Gold", p, 28f, UiPalette.DiabloGold), 80f, 446f, 940f, 40f);
             TextMeshProUGUI exp = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("Exp", p, 28f, UiPalette.Bone)), 80f, 494f, 940f, 40f);
-            UiBuild.Box(UiBuild.LocalizedLabel("ItemsLost", p, UiKeys.Settle.ItemsLost, 24f, UiPalette.TextDim), 80f, 542f, 940f, 36f);
+            // Who can level up in the barracks (Slice D stage 35, Round 82): one gold line under the experience; the screen grows the panel by it.
+            TextMeshProUGUI ready = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("Ready", p, 24f, UiPalette.StarLit, TextAlignmentOptions.TopLeft)), 110f, 544f, 910f, 0f);
+            TextMeshProUGUI itemsLost = UiBuild.Box(UiBuild.LocalizedLabel("ItemsLost", p, UiKeys.Settle.ItemsLost, 24f, UiPalette.TextDim), 80f, 542f, 940f, 36f);
             TextMeshProUGUI runOver = UiBuild.Box(UiBuild.Label("RunOver", p, 32f, UiPalette.Danger), 80f, 586f, 940f, 48f);
 
             ButtonParts confirm = UiBuild.LocalizedButton("Confirm", p, UiKeys.Common.Confirm, UiPalette.Button, 36f);
@@ -42,6 +44,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_exp", exp);
             UiBuild.SetReference(screen, "_runOver", runOver);
             UiBuild.SetReference(screen, "_confirm", confirm.Button);
+            UiBuild.SetReference(screen, "_ready", ready);
+            UiBuild.SetReference(screen, "_itemsLost", itemsLost);
+            UiBuild.SetReference(screen, "_panel", (RectTransform)panel.transform);
             return screen;
         }
     }

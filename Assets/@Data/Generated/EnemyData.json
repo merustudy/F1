@@ -65,7 +65,9 @@
             }
           ]
         }
-      ]
+      ],
+      "Accuracy": 10,
+      "Dodge": 0
     },
     {
       "Id": "cave_rat",
@@ -83,7 +85,9 @@
       ],
       "Figure": "unit/enemy/cave-rat",
       "FigureScale": 100,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 10
     },
     {
       "Id": "goblin_archer",
@@ -101,7 +105,9 @@
       ],
       "Figure": "unit/enemy/goblin-archer",
       "FigureScale": 100,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     },
     {
       "Id": "goblin_hexer",
@@ -123,7 +129,9 @@
       ],
       "Figure": "unit/enemy/goblin-shaman",
       "FigureScale": 115,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     },
     {
       "Id": "goblin_raider",
@@ -141,7 +149,9 @@
       ],
       "Figure": "unit/enemy/goblin-raider",
       "FigureScale": 100,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     },
     {
       "Id": "goblin_shaman",
@@ -163,7 +173,9 @@
       ],
       "Figure": "unit/enemy/goblin-shaman",
       "FigureScale": 100,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     },
     {
       "Id": "goblin_veteran",
@@ -185,7 +197,9 @@
       ],
       "Figure": "unit/enemy/goblin-raider",
       "FigureScale": 115,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     },
     {
       "Id": "mine_overseer",
@@ -207,7 +221,9 @@
       ],
       "Figure": "unit/enemy/mine-overseer",
       "FigureScale": 150,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 10,
+      "Dodge": 0
     },
     {
       "Id": "skeleton_guard",
@@ -229,7 +245,9 @@
       ],
       "Figure": "unit/enemy/skeleton-guard",
       "FigureScale": 100,
-      "Phases": []
+      "Phases": [],
+      "Accuracy": 0,
+      "Dodge": 0
     }
   ]
 }

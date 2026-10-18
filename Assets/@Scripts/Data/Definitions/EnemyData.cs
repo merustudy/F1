@@ -69,7 +69,8 @@ namespace F1.Data
         public const int MaxFigureScale = 300;
 
         [JsonConstructor]
-        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale, IReadOnlyList<EnemyPhase> phases = null)
+        public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale, IReadOnlyList<EnemyPhase> phases = null,
+            int accuracy = 0, int dodge = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -114,7 +115,18 @@ namespace F1.Data
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
             FigureScale = figureScale;
             Phases = ladder;
+            // An enemy has no stats (Slice D stage 33, Docs/Design/02_Combat_System.md §5): these stand in for them, in percent points.
+            if (accuracy < -MaxHitShift || accuracy > MaxHitShift || dodge < -MaxHitShift || dodge > MaxHitShift)
+            {
+                throw new DataException($"{DefinitionName} '{id}': Accuracy and Dodge must be -{MaxHitShift}..{MaxHitShift}.");
+            }
+
+            Accuracy = accuracy;
+            Dodge = dodge;
         }
+
+        /// <summary>The most an enemy's Accuracy or Dodge moves the hit chance, in percent points.</summary>
+        public const int MaxHitShift = 100;
 
         [JsonProperty(Order = 1, Required = Required.Always)]
         public string Id { get; }
@@ -146,6 +158,16 @@ namespace F1.Data
         /// <summary>A boss's phases (stage 28): none for most enemies.</summary>
         [JsonProperty(Order = 8, Required = Required.Always)]
         public IReadOnlyList<EnemyPhase> Phases { get; }
+
+        /// <summary>
+        /// The enemy's hit and dodge (Slice D stage 33, Docs/Design/02_Combat_System.md §5), in percent points: what it adds to its own hit chance, and
+        /// what it takes off a mercenary's hit on it. An enemy has no stats; 0 for most.
+        /// </summary>
+        [JsonProperty(Order = 9, Required = Required.Always)]
+        public int Accuracy { get; }
+
+        [JsonProperty(Order = 10, Required = Required.Always)]
+        public int Dodge { get; }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the enemy has no figure.</summary>
         [JsonIgnore]

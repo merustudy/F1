@@ -126,6 +126,8 @@ namespace F1.UI
         readonly Dictionary<string, RosterEntryView> _entries = new Dictionary<string, RosterEntryView>();
         readonly Dictionary<string, RosterChipView> _chips = new Dictionary<string, RosterChipView>();
         readonly Dictionary<string, PatientView> _patients = new Dictionary<string, PatientView>();
+        // What the barracks' level-ups grew since the window opened (Slice D stage 35, Round 82 안 A): shown beside the values until it closes.
+        readonly Dictionary<string, StatBlock> _grown = new Dictionary<string, StatBlock>();
         readonly List<CandidateView> _candidates = new List<CandidateView>();
         readonly Dictionary<string, Sprite> _pictures = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
         Sprite _townArt;
@@ -248,6 +250,11 @@ namespace F1.UI
         /// <summary>Opens a quarter's window over the town, or closes it (None). The bubble goes with the pointer leaving the building.</summary>
         public void Open(Quarter quarter)
         {
+            if (quarter != _open)
+            {
+                _grown.Clear();
+            }
+
             _open = quarter;
             _bubble.gameObject.SetActive(false);
             Refresh();
@@ -317,6 +324,14 @@ namespace F1.UI
             }
 
             _barracks.ShowPlate(Plate(UiKeys.Lobby.Barracks, BuildingId.Barracks), null, dim: Managers.Run.IsBuildingLocked(BuildingId.Barracks));
+            // How many the barracks can level up (Slice D stage 35): a small gold count at the plate's corner, none at zero.
+            int ready = 0;
+            foreach (MercenaryState mercenary in run.Roster)
+            {
+                ready += Managers.Run.CanLevelUp(mercenary.Id) ? 1 : 0;
+            }
+
+            _barracks.ShowCount(ready > 0 ? UiStrings.Get(UiKeys.Lobby.LevelUpCount, ready) : null);
             _inn.ShowPlate(Plate(UiKeys.Lobby.Inn, BuildingId.Inn), due && !run.IsOver ? UiStrings.Get(UiKeys.Lobby.InnClosed) : null, dim: due || Managers.Run.IsBuildingLocked(BuildingId.Inn));
             _coach.ShowPlate(Plate(UiKeys.Lobby.Coach, BuildingId.Coach), null, dim: Managers.Run.IsBuildingLocked(BuildingId.Coach));
             if (due && data.FinalDungeon != null)
@@ -485,7 +500,7 @@ namespace F1.UI
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 chip.Show(
                     UiText.Mercenary(mercenary.Id),
-                    UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
+                    UiText.ChipLevel(mercenary.Level, Managers.Run.CanLevelUp(mercenary.Id)),
                     row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
                     UiText.JobLine(mercenary.JobId, affliction),
                     affliction != null,
@@ -521,21 +536,8 @@ namespace F1.UI
                     _entries.Add(mercenary.Id, entry);
 
                     string id = mercenary.Id;
-                    for (int i = 0; i < entry.Rows.Count; i++)
-                    {
-                        int row = i + 1;
-                        entry.Rows[i].onClick.AddListener(() => PutInRow(id, row));
-                    }
-
-                    entry.Remove.onClick.AddListener(() => RemoveFromParty(id));
                     entry.Dismiss.onClick.AddListener(() => Dismiss(id));
-                }
-
-                // Which rows the mercenary can take is a rule; the lobby only asks.
-                var canTake = new bool[Mathf.Min(entry.Rows.Count, balance.PartySize)];
-                for (int i = 0; i < canTake.Length; i++)
-                {
-                    canTake[i] = Managers.Run.CanPlaceInParty(mercenary.Id, i + 1);
+                    entry.LevelUp.onClick.AddListener(() => LevelUp(id));
                 }
 
                 // An affliction came home with the mercenary (a virtue never does: Docs/Design/04_Lobby_100Day_Economy.md §3).
@@ -548,12 +550,11 @@ namespace F1.UI
                     mercenary.Fatigue,
                     balance.MaxFatigue,
                     balance.FatigueBreakdown,
-                    RowOf(run, mercenary.Id),
-                    canTake,
                     affliction == null ? null : UiText.FatigueStateName(affliction),
                     affliction == null ? null : UiText.Name(affliction.Description),
                     Managers.Run.CanDismiss(mercenary.Id));
-                entry.ShowLevel(mercenary.Level, mercenary.Exp, LevelRules.ExpToNext(data, mercenary));
+                entry.ShowLevel(mercenary.Level, mercenary.Exp, LevelRules.ExpToNext(data, mercenary), Managers.Run.CanLevelUp(mercenary.Id));
+                entry.ShowStats(mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId), _grown.TryGetValue(mercenary.Id, out StatBlock gains) ? gains : null);
                 entry.transform.SetAsLastSibling();
             }
 
@@ -626,6 +627,9 @@ namespace F1.UI
 
         // ---- The stagecoach ------------------------------------------------------------------
 
+        /// <summary>How far apart the six pairs of a candidate's stat line stand (Round 81: 106).</summary>
+        const float CandidateStatColumn = 106f;
+
         /// <summary>The candidates are few and change at every settlement and hire: their views are rebuilt each time.</summary>
         void RefreshCoach(StaticData data, RunState run)
         {
@@ -650,6 +654,7 @@ namespace F1.UI
                     UiText.Name(job.Name),
                     UiStrings.Get(UiKeys.Lobby.Level, LevelRules.FirstLevel) + " · " + UiStrings.Get(UiKeys.Lobby.Fatigue, 0, balance.MaxFatigue),
                     UiText.Passive(job),
+                    UiText.StatColumns(recruit.Stats ?? StatRules.BaseOf(data, recruit.JobId), CandidateStatColumn, StatRules.BaseOf(data, recruit.JobId)),
                     UiStrings.Get(UiKeys.Lobby.Hire, balance.HirePrice),
                     Managers.Run.CanHire(i) == HireCheck.Ok);
                 int index = i;
@@ -745,22 +750,6 @@ namespace F1.UI
             }
         }
 
-        /// <summary>Joins the party in that row, or trades places with the mercenary standing there.</summary>
-        void PutInRow(string mercenaryId, int row)
-        {
-            if (Managers.Run.CanPlaceInParty(mercenaryId, row))
-            {
-                Managers.Run.PlaceInParty(mercenaryId, row);
-                Refresh();
-            }
-        }
-
-        void RemoveFromParty(string mercenaryId)
-        {
-            Managers.Run.RemoveFromParty(mercenaryId);
-            Refresh();
-        }
-
         void Dismiss(string mercenaryId)
         {
             if (Managers.Run.CanDismiss(mercenaryId))
@@ -768,6 +757,23 @@ namespace F1.UI
                 Managers.Run.Dismiss(mercenaryId);
                 Refresh();
             }
+        }
+
+        /// <summary>
+        /// Levels a mercenary up by one in the barracks (Slice D stage 35): the roll is saved with it; what it grew joins what this window already
+        /// showed for the mercenary (two levels in a row add up), and the small bell of a heal rings.
+        /// </summary>
+        void LevelUp(string mercenaryId)
+        {
+            if (!Managers.Run.CanLevelUp(mercenaryId))
+            {
+                return;
+            }
+
+            StatBlock gains = Managers.Run.LevelUp(mercenaryId);
+            _grown[mercenaryId] = _grown.TryGetValue(mercenaryId, out StatBlock before) ? before.Plus(gains) : gains;
+            Managers.Sound.PlayEffect(SoundEffect.Heal);
+            Refresh();
         }
 
         void Hire(int index)
@@ -839,6 +845,7 @@ namespace F1.UI
             _entries.Clear();
             _chips.Clear();
             _patients.Clear();
+            _grown.Clear();
             _open = Quarter.None;
             Refresh();
         }

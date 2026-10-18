@@ -7,6 +7,11 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 21 (Slice D stage 36): the same shape; the jobs are the five (warrior, viking, ranger, mage, priest). Older files are not read
+    /// (RunSaveMigrator.OldestReadableVersion: the user's decision). What follows is the history.
+    /// Version 20 (Slice D stage 35): the same shape; a mercenary's Exp may pass what its level takes (the barracks levels it up, one level a click).
+    /// Version 19 (Slice D stage 34): the same shape; a mercenary's Stats hold what its levels grew (the level's HP bonus is gone).
+    /// Version 18 (Slice D stage 32): a mercenary's and a candidate's Stats (the six stats). Version 17 (2026-10-18): no gate among the buildings.
     /// Version 16 (Slice C stage 30): the town's building levels (Buildings) and the constructions going on (Constructions).
     /// Version 15 (Slice C stage 27): a mercenary's Level and Exp. Version 14 (Slice C stage 26): the run's Gold, the candidates at the stagecoach (Recruits), the mercenaries Dismissed and the expeditions
     /// started per dungeon (Expeditions). Version 13 (stage 25): the run's Outcome and DefeatCause, and whether the expedition is the final stand.
@@ -23,7 +28,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 17;
+        public const int CurrentSchemaVersion = 21;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -82,6 +87,20 @@ namespace F1.Save
     {
         public string Id;
         public string JobId;
+
+        /// <summary>The stats the candidate would join with (version 18).</summary>
+        public StatsRecord Stats;
+    }
+
+    /// <summary>The six stats (version 18, Slice D stage 32): strength, dexterity, constitution, intellect, spirit, endurance.</summary>
+    public sealed class StatsRecord
+    {
+        public int Str;
+        public int Dex;
+        public int Con;
+        public int Int;
+        public int Spi;
+        public int End;
     }
 
     public sealed class ExpeditionCountRecord
@@ -104,6 +123,9 @@ namespace F1.Save
         /// <summary>The level, from 1, and the experience toward the next level, 0 at the last (version 15).</summary>
         public int Level;
         public int Exp;
+
+        /// <summary>The six stats (version 18). An expedition member has none of its own: it takes them from here.</summary>
+        public StatsRecord Stats;
     }
 
     public sealed class PartySlotRecord

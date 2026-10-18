@@ -37,6 +37,8 @@ namespace F1.UI
         [SerializeField] RectTransform _badge;
         [SerializeField] TMP_Text _badgeWords;
         [SerializeField] UiBar _badgeBar;
+        [SerializeField] RectTransform _count;
+        [SerializeField] TMP_Text _countWords;
 
         public Button Button => _button;
         public RectTransform Rect => (RectTransform)transform;
@@ -48,6 +50,10 @@ namespace F1.UI
         public bool ScaffoldShown => _scaffold.gameObject.activeSelf;
         public bool BadgeShown => _badge.gameObject.activeSelf;
         public string BadgeWords => _badgeWords.text;
+
+        /// <summary>The small gold count at the plate's corner (Slice D stage 35: the barracks' mercenaries who can level up).</summary>
+        public bool CountShown => _count.gameObject.activeSelf;
+        public string CountWords => _countWords.text;
 
         public event Action<BuildingView> Entered;
         public event Action<BuildingView> Exited;
@@ -93,6 +99,13 @@ namespace F1.UI
             _sub.text = sub ?? string.Empty;
             _sub.gameObject.SetActive(sub != null);
             _plate.sizeDelta = new Vector2(PlateWidth, sub != null ? PlateHeightWithSub : PlateHeight);
+        }
+
+        /// <summary>The count at the plate's corner (Slice D stage 35), or null for none.</summary>
+        public void ShowCount(string words)
+        {
+            _count.gameObject.SetActive(words != null);
+            _countWords.text = words ?? string.Empty;
         }
 
         /// <summary>Under construction: the scaffold over the picture and the badge with the words and how far along the work is (0..1).</summary>

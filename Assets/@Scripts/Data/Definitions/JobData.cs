@@ -48,7 +48,9 @@ namespace F1.Data
                     valid = effect == PassiveEffect.Shield && target == PassiveTarget.EventTarget;
                     break;
                 case PassiveTrigger.Always:
-                    valid = effect == PassiveEffect.WeaponPowerPercent && target == PassiveTarget.Self;
+                    // Slice D stage 36: the critical chance holds everywhere (no condition), so a card can count it without knowing the row.
+                    valid = target == PassiveTarget.Self
+                        && (effect == PassiveEffect.WeaponPowerPercent || (effect == PassiveEffect.CritChancePercent && condition == PassiveCondition.None));
                     break;
                 default:
                     valid = false;
@@ -103,7 +105,9 @@ namespace F1.Data
             int recommendedRow,
             PassiveSpec passive,
             LocalizedText passiveText = null,
-            string figure = null)
+            string figure = null,
+            StatBlock stats = null,
+            StatBlock growth = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -128,7 +132,19 @@ namespace F1.Data
             Passive = passive;
             PassiveText = passiveText;
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
+            Stats = stats;
+            // The growth grades (Slice D stage 34): the percent chance of a point per level-up, stat by stat; 100 is a sure point.
+            Stat? outside = growth?.FirstOutside(0, MaxGrowthPercent);
+            if (outside != null)
+            {
+                throw new DataException($"{DefinitionName} '{id}': Growth{outside} must be 0..{MaxGrowthPercent}.");
+            }
+
+            Growth = growth;
         }
+
+        /// <summary>The highest growth grade (Docs/Design/05_Mercenary_Growth.md §2: 0~200%): two sure points a level.</summary>
+        public const int MaxGrowthPercent = 200;
 
         [JsonProperty(Order = 1, Required = Required.Always)]
         public string Id { get; }
@@ -165,6 +181,20 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 9, Required = Required.AllowNull)]
         public string Figure { get; }
+
+        /// <summary>
+        /// The base stats of the job's mercenaries (Slice D stage 32, Docs/Design/05_Mercenary_Growth.md §2): a new run's roster and the stagecoach's
+        /// candidates start from them. Null for a job that names none (test data): every stat is then the baseline. The shipped CSV requires them.
+        /// </summary>
+        [JsonProperty(Order = 10, Required = Required.AllowNull)]
+        public StatBlock Stats { get; }
+
+        /// <summary>
+        /// The growth grades of the job's mercenaries (Slice D stage 34, Docs/Design/05_Mercenary_Growth.md §2), stat by stat in percent: at each
+        /// level-up a stat gains grade ÷ 100 points and one more by the remainder's chance. Null for a job that names none (test data): nothing grows.
+        /// </summary>
+        [JsonProperty(Order = 11, Required = Required.AllowNull)]
+        public StatBlock Growth { get; }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the job has no figure.</summary>
         [JsonIgnore]

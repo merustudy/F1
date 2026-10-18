@@ -1,10 +1,10 @@
-Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,Phases
-cave_rat,동굴 쥐,Cave Rat,2,11,rat_bite:208,unit/enemy/cave-rat,100,
-goblin_raider,고블린 약탈자,Goblin Raider,4,22,rusty_blade:222,unit/enemy/goblin-raider,100,
-goblin_archer,고블린 궁수,Goblin Archer,4,15,crude_bow:152,unit/enemy/goblin-archer,100,
-goblin_shaman,고블린 주술사,Goblin Shaman,5,16,lantern_staff:150+mending_chant:150,unit/enemy/goblin-shaman,100,
-mine_overseer,광산 감독관,Mine Overseer,9,120,overseer_maul:100+overseer_roar:100,unit/enemy/mine-overseer,150,
-goblin_veteran,고블린 고참,Goblin Veteran,6,41,rusty_blade:328+buckler:175,unit/enemy/goblin-raider,115,
-goblin_hexer,고블린 주술 대가,Goblin Hexer,7,30,lantern_staff:225+mending_chant:225,unit/enemy/goblin-shaman,115,
-skeleton_guard,스켈레톤 호위,Skeleton Guard,8,42,rusty_blade:220+buckler:120,unit/enemy/skeleton-guard,100,
-abyss_lord,심연의 군주,Abyss Lord,14,364,abyss_cleaver:100,unit/enemy/abyss-lord,150,75=abyss_cleaver:100+abyss_howl:100|50=abyss_cleaver:115+abyss_howl:115+abyss_grasp:100|25=abyss_cleaver:140+abyss_howl:140+abyss_grasp:140
+Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,Phases,Accuracy,Dodge
+cave_rat,동굴 쥐,Cave Rat,2,11,rat_bite:208,unit/enemy/cave-rat,100,,,10
+goblin_raider,고블린 약탈자,Goblin Raider,4,22,rusty_blade:222,unit/enemy/goblin-raider,100,,,
+goblin_archer,고블린 궁수,Goblin Archer,4,15,crude_bow:152,unit/enemy/goblin-archer,100,,,
+goblin_shaman,고블린 주술사,Goblin Shaman,5,16,lantern_staff:150+mending_chant:150,unit/enemy/goblin-shaman,100,,,
+mine_overseer,광산 감독관,Mine Overseer,9,120,overseer_maul:100+overseer_roar:100,unit/enemy/mine-overseer,150,,10,
+goblin_veteran,고블린 고참,Goblin Veteran,6,41,rusty_blade:328+buckler:175,unit/enemy/goblin-raider,115,,,
+goblin_hexer,고블린 주술 대가,Goblin Hexer,7,30,lantern_staff:225+mending_chant:225,unit/enemy/goblin-shaman,115,,,
+skeleton_guard,스켈레톤 호위,Skeleton Guard,8,42,rusty_blade:220+buckler:120,unit/enemy/skeleton-guard,100,,,
+abyss_lord,심연의 군주,Abyss Lord,14,364,abyss_cleaver:100,unit/enemy/abyss-lord,150,75=abyss_cleaver:100+abyss_howl:100|50=abyss_cleaver:115+abyss_howl:115+abyss_grasp:100|25=abyss_cleaver:140+abyss_howl:140+abyss_grasp:140,10,

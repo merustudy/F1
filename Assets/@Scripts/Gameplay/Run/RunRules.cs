@@ -27,6 +27,7 @@ namespace F1.Gameplay
                     JobId = mercenary.JobId,
                     Fatigue = 0,
                     Level = LevelRules.FirstLevel,
+                    Stats = StatRules.BaseOf(data, mercenary.JobId),
                 });
             }
 
@@ -75,10 +76,32 @@ namespace F1.Gameplay
             {
                 MercenaryData name = pool[rng.NextInt(pool.Count)];
                 pool.Remove(name);
-                drawn.Add(new RecruitState { Id = name.Id, JobId = jobs[rng.NextInt(jobs.Count)].Id });
+                JobData job = jobs[rng.NextInt(jobs.Count)];
+                drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = Spread(data, StatRules.BaseOf(data, job.Id), rng) });
             }
 
             state.Recruits = drawn;
+        }
+
+        /// <summary>
+        /// A candidate's stats (Slice D stage 34, Docs/Design/04 §6, Battle Brothers' backgrounds): each stat of the job's base values moved by an even
+        /// draw in -RecruitStatSpread..RecruitStatSpread on the stagecoach's stream, strength first, within StatMin..StatMax. No draw with no spread.
+        /// </summary>
+        static StatBlock Spread(StaticData data, StatBlock stats, Pcg32 rng)
+        {
+            int spread = data.Balance.RecruitStatSpread;
+            if (spread == 0)
+            {
+                return stats;
+            }
+
+            foreach (Stat stat in StatBlock.All)
+            {
+                int value = stats[stat] + rng.NextInt(2 * spread + 1) - spread;
+                stats = stats.With(stat, Math.Max(data.Balance.StatMin, Math.Min(data.Balance.StatMax, value)));
+            }
+
+            return stats;
         }
 
         /// <summary>Whether the candidate at that index of <see cref="RunState.Recruits"/> can be hired now: the run goes on, the roster has room, the gold covers the price.</summary>
@@ -119,7 +142,14 @@ namespace F1.Gameplay
             RecruitState candidate = state.Recruits[index];
             state.Recruits.RemoveAt(index);
             state.Gold -= data.Balance.HirePrice;
-            var hired = new MercenaryState { Id = candidate.Id, JobId = candidate.JobId, Fatigue = 0, Level = LevelRules.FirstLevel };
+            var hired = new MercenaryState
+            {
+                Id = candidate.Id,
+                JobId = candidate.JobId,
+                Fatigue = 0,
+                Level = LevelRules.FirstLevel,
+                Stats = candidate.Stats ?? StatRules.BaseOf(data, candidate.JobId),
+            };
             state.Roster.Add(hired);
             return hired;
         }
@@ -128,6 +158,27 @@ namespace F1.Gameplay
         public static bool CanDismiss(StaticData data, RunState state, string mercenaryId)
         {
             return !state.IsOver && !BuildingRules.IsLocked(data, state, BuildingId.Barracks) && FindMercenary(state, mercenaryId) != null && state.Roster.Count > 1;
+        }
+
+        /// <summary>
+        /// Whether a mercenary of the roster can be levelled up now (Slice D stage 35): the run goes on and its experience meets the level's
+        /// ExpToNext. The barracks being built does not stop it (the level is the mercenary's; the barracks is only where the button stands).
+        /// </summary>
+        public static bool CanLevelUp(StaticData data, RunState state, string mercenaryId)
+        {
+            MercenaryState mercenary = FindMercenary(state, mercenaryId);
+            return !state.IsOver && mercenary != null && LevelRules.CanLevelUp(data, mercenary);
+        }
+
+        /// <summary>Levels a mercenary of the roster up by one level and rolls what it grows (<see cref="LevelRules.LevelUp"/>). Returns the gains.</summary>
+        public static StatBlock LevelUp(StaticData data, RunState state, string mercenaryId)
+        {
+            if (!CanLevelUp(data, state, mercenaryId))
+            {
+                throw new InvalidOperationException($"Mercenary '{mercenaryId}' cannot level up now.");
+            }
+
+            return LevelRules.LevelUp(data, FindMercenary(state, mercenaryId), state.Seed);
         }
 
         /// <summary>Dismisses a mercenary, for free: out of the party (those behind advance) and the roster, never to return.</summary>
@@ -442,7 +493,7 @@ namespace F1.Gameplay
             foreach (PartySlot slot in state.Party)
             {
                 MercenaryState mercenary = FindMercenary(state, slot.MercenaryId);
-                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level));
+                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level, mercenary.Stats));
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);
@@ -494,9 +545,10 @@ namespace F1.Gameplay
                     report.SurvivorIds.Add(member.MercenaryId);
                     report.SurvivorFatigue.Add(member.Fatigue);
                     report.SurvivorStates.Add(mercenary.AfflictionId);
-                    if (LevelRules.Gain(data, mercenary, report.ExpEarned) > 0)
+                    // Slice D stage 35: the experience only builds up; the barracks levels the mercenary up (LevelUp below).
+                    if (LevelRules.Gain(data, mercenary, report.ExpEarned))
                     {
-                        report.LevelUps.Add(member.MercenaryId);
+                        report.ReadyToLevelUp.Add(member.MercenaryId);
                     }
                 }
                 else

@@ -19,6 +19,9 @@ namespace F1.Gameplay
         /// <summary>The level (Slice C stage 27, LevelData), from 1, and the experience toward the next one (0 at the last level).</summary>
         public int Level = LevelRules.FirstLevel;
         public int Exp;
+
+        /// <summary>The six stats (Slice D stage 32, Docs/Design/05_Mercenary_Growth.md §2): the job's base values for a new run's roster, the candidate's for a hired one.</summary>
+        public StatBlock Stats;
     }
 
     /// <summary>A candidate at the stagecoach (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §6): a name of the recruit pool and the job it was drawn with.</summary>
@@ -27,6 +30,9 @@ namespace F1.Gameplay
         /// <summary>Id of the MercenaryData row (of the recruit pool) that names the candidate. It is the mercenary's id once hired.</summary>
         public string Id;
         public string JobId;
+
+        /// <summary>The stats the candidate would join with (Slice D stage 32): the job's base values with the stagecoach's spread (stage 34).</summary>
+        public StatBlock Stats;
     }
 
     /// <summary>A construction going on at a building of the town (Slice C stage 30): the level it builds and the day it is done.</summary>
@@ -175,9 +181,12 @@ namespace F1.Gameplay
         /// <summary>The buildings whose construction the passing days finished (stage 30).</summary>
         public List<string> BuildingsCompleted = new List<string>();
 
-        /// <summary>The experience every survivor got (stage 27), and the survivors it took to a new level, in the order of <see cref="SurvivorIds"/>.</summary>
+        /// <summary>
+        /// The experience every survivor got (stage 27), and the survivors whose experience now meets their level's (Slice D stage 35: the barracks
+        /// levels them up), in the order of <see cref="SurvivorIds"/>.
+        /// </summary>
         public int ExpEarned;
-        public List<string> LevelUps = new List<string>();
+        public List<string> ReadyToLevelUp = new List<string>();
         public List<string> FallenIds = new List<string>();
         public List<string> SurvivorIds = new List<string>();
 

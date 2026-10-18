@@ -173,18 +173,16 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable, "An empty party no longer keeps the expedition screen shut: the party is formed there (round 75 B).");
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Gate").interactable);
 
-            // Party: in the barracks, the first mercenaries of the roster, one per row from the front.
+            // Party: the first mercenaries of the roster, one per row from the front (the party popup's command; Round 81).
             RunState run = Managers.Run.Run;
             yield return UiTestUtil.OpenBarracks(lobby);
             RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
             Assert.AreEqual(data.StartingMercenaries.Count, entries.Length);
+            UiTestUtil.CloseQuarter(lobby);
             yield return UiTestUtil.FillParty(lobby);
 
             Assert.AreEqual(data.Balance.PartySize, run.Party.Count);
-            Assert.IsTrue(
-                entries[data.Balance.PartySize].Rows.Where(button => button.gameObject.activeSelf).All(button => !button.interactable),
-                "The party is full.");
-            Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter, "FillParty closed the barracks.");
+            Assert.IsFalse(Managers.Run.CanPlaceInParty(run.Roster[data.Balance.PartySize].Id, data.Balance.PartySize + 1), "The party is full.");
 
             // Lobby -> node map
             yield return UiTestUtil.DepartFromLobby();
@@ -226,6 +224,7 @@ namespace F1.Tests
             SettlementScreen settlement = UiTestUtil.Screen<SettlementScreen>();
             SettlementReport report = Managers.Expedition.Report;
             string settlementExp = UiTestUtil.TextAt(settlement, "Frame/Panel/Exp");
+            string settlementReady = settlement.Ready.text;
             UiTestUtil.Click(settlement, "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
 
@@ -241,8 +240,14 @@ namespace F1.Tests
             Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Gold, run.Gold), UiTestUtil.TextAt(lobby, "Frame/Header/Gold"), "The settlement's gold is in the header (stage 26).");
             if (report.SurvivorIds.Count > 0)
             {
-                StringAssert.StartsWith(UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned), settlementExp, "The settlement said what experience the survivors got (stage 27).");
-                Assert.AreEqual(report.LevelUps.Count > 0, settlementExp.Contains("레벨 업"), "And who leveled up, when someone did.");
+                Assert.AreEqual(UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned), settlementExp, "The settlement said what experience the survivors got (stage 27).");
+                // Slice D stage 35 (Round 82): one line names who can level up in the barracks; nothing is rolled here.
+                Assert.AreEqual(report.ReadyToLevelUp.Count > 0, settlementReady.Length > 0);
+                foreach (string id in report.ReadyToLevelUp)
+                {
+                    StringAssert.Contains(UiText.Mercenary(id), settlementReady);
+                    Assert.IsTrue(Managers.Run.CanLevelUp(id), "And the barracks can level them up.");
+                }
             }
 
             // A second expedition can depart, or the lobby says why not.
@@ -403,6 +408,7 @@ namespace F1.Tests
             Assert.AreEqual("오른쪽 목록에서 넣으세요", slots[0].Detail);
             Assert.IsFalse(slots[0].Figure.gameObject.activeSelf, "No figure in an empty row.");
             Assert.IsFalse(slots[0].Forward.gameObject.activeSelf, "An empty row has no moves.");
+            Assert.IsTrue(slots[0].Stats.All(t => t.text == string.Empty), "An empty row has no stats (Slice D stage 32).");
             Assert.AreEqual("1열", UiTestUtil.TextAt(screen, "Frame/PartyWindow/Stage/PartySlot1/SlotRowLabel1"));
             Assert.Less(
                 UiTestUtil.At(screen, "Frame/PartyWindow/Stage/PartySlot4").GetComponent<RectTransform>().anchoredPosition.x,
@@ -444,6 +450,43 @@ namespace F1.Tests
             Assert.IsTrue(slots[0].Figure.gameObject.activeSelf);
             Assert.AreEqual(rows[0].Portrait, slots[0].Figure.Art, "The member's figure stands on the stage: the job's, the same art as the list's.");
             Assert.IsFalse(slots[0].Figure.ShowsPlaceholder);
+            // The stage's card: the six stats in two columns between the job and the moves (Slice D stage 32, Round 81).
+            MercenaryState standing = RunRules.FindMercenary(run, slots[0].MercenaryId);
+            for (int i = 0; i < StatBlock.All.Length; i++)
+            {
+                Assert.AreEqual(UiText.StatPair(StatBlock.All[i], standing.Stats[StatBlock.All[i]]), slots[0].Stats[i].text);
+            }
+
+            Assert.Greater(
+                -slots[0].Forward.GetComponent<RectTransform>().anchoredPosition.y,
+                -slots[0].Stats[StatBlock.All.Length - 1].GetComponent<RectTransform>().anchoredPosition.y,
+                "The moves stand under the stats.");
+
+            // The pointer on a list line opens its stat tooltip at the line's left; leaving the line closes it.
+            StatTooltipView tooltip = UiTestUtil.At(screen, "Frame/PartyWindow/StatTooltip").GetComponent<StatTooltipView>();
+            Assert.IsFalse(tooltip.IsShown);
+            MercenaryState benched = RunRules.FindMercenary(run, rows[balance.PartySize].MercenaryId);
+            rows[balance.PartySize].OnPointerEnter(null);
+            Assert.IsTrue(tooltip.IsShown);
+            Assert.IsTrue(rows[balance.PartySize].Hovered, "The line's rim lights.");
+            Assert.AreEqual(benched.Id, tooltip.MercenaryId);
+            Assert.AreEqual($"{UiText.Mercenary(benched.Id)} · {UiText.Job(benched.JobId)} Lv {benched.Level}", tooltip.Title);
+            for (int i = 0; i < StatBlock.All.Length; i++)
+            {
+                Assert.AreEqual(UiText.StatPair(StatBlock.All[i], benched.Stats[StatBlock.All[i]]), tooltip.Stats[i].text);
+            }
+
+            Vector3[] card = new Vector3[4];
+            Vector3[] line = new Vector3[4];
+            tooltip.GetComponent<RectTransform>().GetWorldCorners(card);
+            rows[balance.PartySize].GetComponent<RectTransform>().GetWorldCorners(line);
+            Assert.Less(card[2].x, line[0].x, "The card stands left of the line.");
+            Assert.Less(card[0].y, (line[0].y + line[1].y) / 2f);
+            Assert.Greater(card[1].y, (line[0].y + line[1].y) / 2f, "Centred on the line.");
+            rows[balance.PartySize].OnPointerExit(null);
+            Assert.IsFalse(tooltip.IsShown, "Leaving the line closes it.");
+            Assert.IsFalse(rows[balance.PartySize].Hovered);
+
             Assert.IsTrue(slots[0].Forward.gameObject.activeSelf);
             Assert.IsFalse(slots[0].Forward.interactable, "The front row has no row before it.");
             Assert.IsTrue(slots[0].Back.interactable);
@@ -731,71 +774,108 @@ namespace F1.Tests
             Assert.AreEqual(string.Empty, entries[1].State.text);
         }
 
+        /// <summary>
+        /// The barracks' lines (Slice D stage 32, Round 81 안 B): no row buttons and no "remove" any more — the party is formed in the expedition
+        /// screen's popup — and in their place the six stats, each name over its value, the value green above the baseline, red below it, white at it.
+        /// </summary>
         [UnityTest]
-        public IEnumerator Lobby_RowButtons_JoinTheFirstEmptyRow_TradePlaces_AndRemove()
+        public IEnumerator Lobby_Barracks_ShowsTheSixStats_WhereTheRowButtonsWere()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
+            StaticData data = Managers.Data.Data;
             yield return UiTestUtil.OpenBarracks(lobby);
             RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
-            string first = UiText.Mercenary(run.Roster[0].Id);
-            string second = UiText.Mercenary(run.Roster[1].Id);
-
-            int size = Managers.Data.Data.Balance.PartySize;
-            Assert.GreaterOrEqual(size, 2, "The cases below put two mercenaries in the party.");
-
-            // Who stands in which row, read off the strip's chips (a chip tags the row its mercenary holds; stage 26).
-            string[] RowTexts()
+            Assert.AreEqual(run.Roster.Count, entries.Length);
+            for (int e = 0; e < entries.Length; e++)
             {
-                RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
-                return Enumerable.Range(1, size)
-                    .Select(row => chips.FirstOrDefault(c => c.Row == UiStrings.Get(UiText.RowKey(row)))?.Name ?? UiStrings.Get(UiKeys.Lobby.EmptyRow))
-                    .ToArray();
+                MercenaryState mercenary = run.Roster[e];
+                Assert.AreEqual(StatRules.BaseOf(data, mercenary.JobId), mercenary.Stats, "A new run's roster has its jobs' base stats.");
+                Assert.IsNull(entries[e].transform.Find("EntryRows"), "No row buttons in the barracks (Round 81).");
+                Assert.IsNull(entries[e].transform.Find("EntryRemove"), "No \"remove\" in the barracks.");
+                Assert.IsNotNull(entries[e].Dismiss, "Dismissing stays.");
+                Assert.AreEqual(StatBlock.All.Length, entries[e].StatValues.Count);
+                for (int i = 0; i < StatBlock.All.Length; i++)
+                {
+                    Stat stat = StatBlock.All[i];
+                    int value = mercenary.Stats[stat];
+                    Assert.AreEqual(UiText.StatName(stat), entries[e].StatNames[i].text);
+                    Assert.AreEqual(value.ToString(), entries[e].StatValues[i].text);
+                    Color expected = value > data.Balance.StatBaseline ? UiPalette.Good : value < data.Balance.StatBaseline ? UiPalette.BloodLight : UiPalette.Text;
+                    Assert.AreEqual(expected, entries[e].StatValues[i].color, $"{mercenary.Id} {stat} {value}");
+                }
             }
 
-            // The names from row 1 back; the rows after them are empty.
-            string[] Lined(params string[] fromFront)
-            {
-                return Enumerable.Range(0, size).Select(i => i < fromFront.Length ? fromFront[i] : UiStrings.Get(UiKeys.Lobby.EmptyRow)).ToArray();
-            }
+            // The warrior's sheet in Korean (the knight's values, Slice D stage 36): 힘 12 green, 지식 6 red.
+            int knight = run.Roster.FindIndex(m => m.JobId == "warrior");
+            Assert.AreEqual("힘", entries[knight].StatNames[0].text);
+            Assert.AreEqual(UiPalette.Good, entries[knight].StatValues[0].color);
+            Assert.AreEqual(UiPalette.BloodLight, entries[knight].StatValues[3].color);
+        }
 
-            // The shown row buttons of an entry (one per row the party can stand in), by whether they can be clicked.
-            bool[] RowButtons(RosterEntryView entry)
-            {
-                bool[] shown = entry.Rows.Where(button => button.gameObject.activeSelf).Select(button => button.interactable).ToArray();
-                Assert.AreEqual(size, shown.Length, "One button per row the party can stand in.");
-                return shown;
-            }
+        /// <summary>
+        /// The barracks' level-up (Slice D stage 35, Round 82 안 A): a mercenary whose experience meets its level has a gold ▲ on the strip, the
+        /// barracks' plate counts it, and its barracks line a gold bar with [▲ 레벨 업]. A click climbs one level (the rest carried), rolls the
+        /// job's growth and saves; the line shows +N beside what grew under a gold rim until the window closes.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Lobby_Barracks_LevelsUpWhoseExperienceMeetsTheLevel_ShowsTheRoll_AndTheLobbySaysWhoCan()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            RunState run = Managers.Run.Run;
+            StaticData data = Managers.Data.Data;
+            Assert.IsFalse(lobby.Barracks.CountShown, "Nobody can level up in a new run.");
 
-            bool[] Lit(params int[] rows)
-            {
-                return Enumerable.Range(1, size).Select(rows.Contains).ToArray();
-            }
+            // Staged: the first of the roster came home with its level's experience and five to spare.
+            MercenaryState first = run.Roster[0];
+            first.Exp = LevelRules.ExpToNext(data, first) + 5;
+            StatBlock before = first.Stats;
+            lobby.Refresh();
+            yield return null;
 
-            // Nobody is in the party: a newcomer can only take row 1, then the next one row 2.
-            CollectionAssert.AreEqual(Lit(1), RowButtons(entries[0]));
-            UiTestUtil.Click(entries[0].Rows[0]);
-            CollectionAssert.AreEqual(Lit(2), RowButtons(entries[1]));
-            UiTestUtil.Click(entries[1].Rows[1]);
-            CollectionAssert.AreEqual(Lined(first, second), RowTexts());
+            RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
+            Assert.AreEqual(UiText.ChipLevel(1, true), chips[0].Level, "A gold ▲ before the level on the strip.");
+            StringAssert.Contains(UiStrings.Get(UiKeys.Lobby.LevelUpMark), chips[0].Level);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Level, 1), chips[1].Level);
+            Assert.IsTrue(lobby.Barracks.CountShown);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.LevelUpCount, 1), lobby.Barracks.CountWords);
 
-            // A member can move only to a row where someone else stands: the two trade places.
-            // The button of the row the member stands in stays lit, but clicking it changes nothing.
-            CollectionAssert.AreEqual(Lit(1, 2), RowButtons(entries[1]));
-            UiTestUtil.Click(entries[1].Rows[1]);
-            CollectionAssert.AreEqual(Lined(first, second), RowTexts());
-            UiTestUtil.Click(entries[1].Rows[0]);
-            CollectionAssert.AreEqual(Lined(second, first), RowTexts());
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
+            Assert.IsTrue(entries[0].LevelUp.gameObject.activeSelf, "The button stands on the line whose experience meets the level.");
+            Assert.IsFalse(entries[1].LevelUp.gameObject.activeSelf);
+            Assert.AreEqual(UiPalette.StarLit, entries[0].Exp.color);
+            Assert.IsFalse(entries[0].RimShown);
 
-            // Taking the one in row 1 out: the one behind advances.
+            UiTestUtil.Click(entries[0].LevelUp);
             yield return UiTestUtil.WaitForRedraw();
-            UiTestUtil.Click(entries[1].Remove);
-            CollectionAssert.AreEqual(Lined(first), RowTexts());
-            Assert.AreEqual(1, run.Party.Single().Row);
-            Assert.IsFalse(entries[1].Remove.gameObject.activeSelf, "Only party members can be taken out.");
+            Assert.AreEqual(2, first.Level);
+            Assert.AreEqual(5, first.Exp, "The rest is carried.");
+            Assert.IsFalse(Managers.Run.IsSaveBlocked, "Saved with the click.");
+            entries = UiTestUtil.RosterEntries(lobby);
+            Assert.IsFalse(entries[0].LevelUp.gameObject.activeSelf, "5 of the next level's: the button goes.");
+            Assert.IsTrue(entries[0].RimShown, "The gold rim round the line just rolled.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Level, 2), entries[0].Level.text);
+            for (int i = 0; i < StatBlock.All.Length; i++)
+            {
+                Stat stat = StatBlock.All[i];
+                Assert.AreEqual(UiText.StatValue(first.Stats[stat], first.Stats[stat] - before[stat]), entries[0].StatValues[i].text, $"{stat}: the value with what grew.");
+            }
+
+            Assert.IsFalse(lobby.Barracks.CountShown, "Nobody left to level up.");
+
+            // Closing the window takes the roll's marks away; the stats stay grown.
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.OpenBarracks(lobby);
+            entries = UiTestUtil.RosterEntries(lobby);
+            Assert.IsFalse(entries[0].RimShown);
+            Assert.AreEqual(first.Stats.Str.ToString(), entries[0].StatValues[0].text);
         }
 
         [UnityTest]
@@ -840,6 +920,35 @@ namespace F1.Tests
 
             UiTestUtil.Click(party.ColumnOfRow(2).Forward);
             Assert.AreEqual(1, expedition.Members.Single(m => m.MercenaryId == front).Row, "Forward undoes Back.");
+        }
+
+        /// <summary>
+        /// A miss (Slice D stage 33, Round 81 판정 6): in a real battle of the shipped data an enemy's blow misses a mercenary at some point; the
+        /// ticker's and the log's line says so with the hit chance and the roll, and nothing was dealt by that blow.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AMiss_IsALineOfTheLog_WithTheChanceAndTheRoll()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.EnterALongFirstBattle();
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            int steps = 0;
+            while (!engine.Events.Any(e => e.Kind == BattleEventKind.Missed))
+            {
+                Assert.Less(steps++, 600, "A minute of blows without a miss.");
+                Managers.Expedition.AdvanceBattle(100);
+            }
+
+            BattleEvent miss = engine.Events.First(e => e.Kind == BattleEventKind.Missed);
+            Assert.AreEqual(BattleSide.Enemy, miss.Source.Side, "The party carries nothing in this battle: an enemy missed.");
+            Assert.GreaterOrEqual(miss.A, miss.B, "A miss is a roll at or over the chance.");
+            string line = BattleLogText.Caption(miss, engine);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Log.Missed, BattleLogText.Source(engine, miss.Source, miss.Id), BattleLogText.UnitName(engine, miss.Target), UiText.Percent(miss.B), UiText.Percent(miss.A)), line);
+            StringAssert.Contains("빗나감 (명중 " + UiText.Percent(miss.B) + "%", line);
+            int index = engine.Events.ToList().IndexOf(miss);
+            Assert.IsFalse(
+                index + 1 < engine.Events.Count && engine.Events[index + 1].Kind == BattleEventKind.Damaged && engine.Events[index + 1].Target.Equals(miss.Target) && engine.Events[index + 1].Source.Equals(miss.Source),
+                "Nothing was dealt by the blow that missed.");
         }
 
         [UnityTest]
@@ -928,7 +1037,19 @@ namespace F1.Tests
             UiTestUtil.Click(screen, "Frame/ResultPanel/ResultBox/ShowLog");
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsTrue(UiTestUtil.At(screen, "Frame/LogPanel").gameObject.activeSelf);
-            Assert.IsEmpty(UiTestUtil.TextAt(screen, "Frame/LogPanel/LogBox/LogPartyFallen"), "Nobody of the party died.");
+            // The party's dead are named too (since Slice D stage 33 a miss may cost the party someone in this fight; before, nobody fell).
+            string partyFallen = UiTestUtil.TextAt(screen, "Frame/LogPanel/LogBox/LogPartyFallen");
+            BattleUnit[] partyDead = engine.Party.Where(u => !u.Alive).ToArray();
+            if (partyDead.Length == 0)
+            {
+                Assert.IsEmpty(partyFallen, "Nobody of the party died.");
+            }
+
+            foreach (BattleUnit unit in partyDead)
+            {
+                StringAssert.Contains(UiText.Name(unit.Setup.Name), partyFallen);
+            }
+
             string fallen = UiTestUtil.TextAt(screen, "Frame/LogPanel/LogBox/LogEnemyFallen");
             foreach (BattleUnit unit in engine.Enemies)
             {
@@ -1289,7 +1410,7 @@ namespace F1.Tests
             FatigueStateData state = Managers.Data.Data.FatigueStates.Get(down.Id);
             bool virtue = state.Kind == FatigueStateKind.Virtue;
             BattleUnitView broken = units.Single(u => u.Unit.Ref.Equals(down.Target));
-            Assert.AreEqual("valkyrie", broken.Unit.Setup.JobId, "The valkyrie, staged in row 2 behind the decoy at death's door, broke down.");
+            Assert.AreEqual("viking", broken.Unit.Setup.JobId, "The viking, staged in row 2 behind the decoy at death's door, broke down.");
 
             // A quarter of a second in: the slow stretch, the dark and the zoom at full, the pose held, the burst and the word on.
             yield return new WaitForSecondsRealtime(0.25f);
@@ -1654,7 +1775,8 @@ namespace F1.Tests
             {
                 ItemSlotView piece = map.Merchant.PieceOf(shown);
                 Assert.IsTrue(piece.IsUnaffordable, $"Slot {shown}: no coins, nothing can be bought.");
-                Assert.AreEqual(UiPalette.GridPieceUnaffordable, piece.Ground, $"Slot {shown}: dark red.");
+                bool bag = Managers.Expedition.ShopStock[shown].Kind == OfferKind.Bag;
+                Assert.AreEqual(UiPalette.GridPieceUnaffordable, bag ? piece.Rim : piece.Ground, $"Slot {shown}: dark red (a bag: its rim).");
                 Assert.AreEqual(UiPalette.DiabloGold, map.Merchant.PriceLabelOf(shown).color, $"Slot {shown}: the price stays gold.");
             }
 
@@ -2002,9 +2124,11 @@ namespace F1.Tests
             Assert.IsTrue(card.IsShown);
             Assert.AreSame(dagger, card.Item);
             Assert.AreEqual(UiText.ItemTitle(dagger), card.Title);
-            UiText.ItemCard(dagger, out string facts, out string effects, out string fatigue);
+            // The card counts its owner's stats (Slice D stage 32): the dagger grows with dexterity, and its tail says by how much unless at the baseline.
+            UiText.ItemCard(dagger, out string facts, out string effects, out string fatigue, 0, first.Stats);
             Assert.AreEqual(facts, UiTestUtil.TextAt(card, "ItemTooltipFacts"));
-            Assert.AreEqual(effects, UiTestUtil.TextAt(card, "ItemTooltipEffects"));
+            string scale = UiText.StatScale(dagger, first.Stats);
+            Assert.AreEqual(scale == null ? effects : effects + "\n" + scale, UiTestUtil.TextAt(card, "ItemTooltipEffects"));
             Assert.AreEqual(fatigue, UiTestUtil.TextAt(card, "ItemTooltipFatigue"));
             Assert.AreEqual(UiText.MergeHint(dagger), UiTestUtil.TextAt(card, "ItemTooltipMerge"));
             Assert.IsFalse(party.Hand.Holding, "A right click picks nothing up.");
@@ -2595,7 +2719,7 @@ namespace F1.Tests
             StaticData data = Managers.Data.Data;
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             PartySideView party = map.GetComponentInChildren<PartySideView>();
-            PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
+            PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow(melee: true));
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
             BoardItem weapon = front.Board.ItemAt(0, 0);
             Assert.AreEqual(1, weapon.Height, "The staging needs a base weapon of one row.");
@@ -2638,7 +2762,7 @@ namespace F1.Tests
             yield return null;
             ItemEffect damage = weapon.Item.Item.Effects[0];
             string weaponLines = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipEffects");
-            StringAssert.Contains(UiText.Effect(damage, weapon.Item, data.Balance, weapon.Item.Item.Category == ItemCategory.Weapon ? whetstone.StarDamage : 0), weaponLines, "The damage range counts the star's 1 on both ends.");
+            StringAssert.Contains(UiText.Effect(damage, weapon.Item, data.Balance, weapon.Item.Item.Category == ItemCategory.Weapon ? whetstone.StarDamage : 0, front.Stats), weaponLines, "The damage range counts the star's 1 on both ends, and the owner's stat.");
             StringAssert.Contains(UiStrings.Get(UiKeys.Item.StarBonus, UiText.Name(whetstone.Item.Name), 1), weaponLines);
             UiTestUtil.RightClickSquare(board, 2, 1);
             yield return null;
@@ -2759,6 +2883,25 @@ namespace F1.Tests
             Assert.AreEqual(UiText.Job(run.Recruits[0].JobId), lobby.Candidates[0].Job);
             Assert.AreEqual("고용 금 20", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateHire/CandidateHireLabel"));
             Assert.AreEqual($"Lv 1 · 피로도 0/{balance.MaxFatigue}", UiTestUtil.TextAt(lobby.Candidates[0], "CandidateDetail"), "A candidate is always level 1 and fresh.");
+            // The stat line under the passive (Slice D stage 32, Round 81): the six pairs; a candidate's stats lie within the spread of its job's base
+            // values (stage 34), and those that differ carry a small ▲/▼.
+            StatBlock jobBase = StatRules.BaseOf(Managers.Data.Data, run.Recruits[0].JobId);
+            int spread = Managers.Data.Data.Balance.RecruitStatSpread;
+            Assert.IsTrue(StatBlock.All.All(s => System.Math.Abs(run.Recruits[0].Stats[s] - jobBase[s]) <= spread));
+            foreach (Stat stat in StatBlock.All)
+            {
+                int delta = run.Recruits[0].Stats[stat] - jobBase[stat];
+                if (delta != 0)
+                {
+                    StringAssert.Contains(UiStrings.Get(delta > 0 ? UiKeys.Stat.Up : UiKeys.Stat.Down, System.Math.Abs(delta)), lobby.Candidates[0].Stats.text);
+                }
+            }
+
+            foreach (Stat stat in StatBlock.All)
+            {
+                StringAssert.Contains(UiText.StatPair(stat, run.Recruits[0].Stats[stat]), lobby.Candidates[0].Stats.text);
+            }
+
             Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks while a window is open.");
 
             run.Gold = 100;
@@ -2767,14 +2910,16 @@ namespace F1.Tests
             Assert.IsTrue(lobby.Candidates.All(c => c.Hire.interactable));
             string hiredId = run.Recruits[0].Id;
             string hiredJob = run.Recruits[0].JobId;
+            StatBlock hiredStats = run.Recruits[0].Stats;
             int rosterBefore = run.Roster.Count;
             UiTestUtil.Click(lobby.Candidates[0].Hire);
             Assert.AreEqual(80, run.Gold);
             Assert.AreEqual(rosterBefore + 1, run.Roster.Count);
+            Assert.AreEqual(hiredStats, run.Roster[run.Roster.Count - 1].Stats, "The hired one joins with the candidate's stats.");
             Assert.AreEqual(hiredJob, RunRules.FindMercenary(run, hiredId).JobId);
             Assert.AreEqual(balance.RecruitCount - 1, lobby.Candidates.Count, "The hired one left the coach.");
             Assert.AreEqual("금 80", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
-            Assert.AreEqual("금 80 · 로스터 7/8", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachSummary"));
+            Assert.AreEqual($"금 80 · 로스터 {run.Roster.Count}/8", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachSummary"));
             UiTestUtil.CloseQuarter(lobby);
             Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/Shade").gameObject.activeSelf);
@@ -3384,7 +3529,9 @@ namespace F1.Tests
             battle.Clock.Paused = true;
             yield return null;
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
-            string job = unit.Unit.Setup.JobId;
+            // The poses are named after the figure, which a job may share with an older one (Slice D stage 36: the mage stands in the archmage's).
+            string figureAddress = Managers.Data.Data.Jobs.Get(unit.Unit.Setup.JobId).Figure;
+            string job = figureAddress.Substring(figureAddress.LastIndexOf('/') + 1);
             Sprite figure = unit.Figure.Art;
             RectTransform art = unit.FigureArt.rectTransform;
             Vector2 size = art.sizeDelta;

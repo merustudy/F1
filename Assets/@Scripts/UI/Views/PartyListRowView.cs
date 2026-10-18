@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace F1.UI
@@ -9,9 +11,9 @@ namespace F1.UI
     /// A mercenary of the roster in the party popup's list (Round 76 D, 2026-10-17), as the barracks lists them: a small figure, the
     /// name, the job with the affliction the mercenary came home in, the level, the passive, the fatigue pips, and the party button —
     /// [넣기] puts the mercenary in the party's next row (off once the party is full), [빼기] takes it out. In the party the line is lit
-    /// and tagged with its row.
+    /// and tagged with its row. The pointer on the line opens its stat tooltip (Slice D stage 32, Round 81): the screen listens.
     /// </summary>
-    public sealed class PartyListRowView : MonoBehaviour
+    public sealed class PartyListRowView : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         [SerializeField] Image _frame;
         [SerializeField] Image _portrait;
@@ -23,8 +25,28 @@ namespace F1.UI
         [SerializeField] UiBar[] _pips;
         [SerializeField] Button _button;
         [SerializeField] TMP_Text _buttonLabel;
+        [SerializeField] Outline _hover;
 
         public string MercenaryId { get; set; }
+
+        /// <summary>The pointer came onto the line, or left it (its button included).</summary>
+        public event Action<PartyListRowView> PointerEntered;
+        public event Action<PartyListRowView> PointerExited;
+
+        /// <summary>The pointer is on the line: its rim lights in the target blue (Round 81's mock) while its tooltip is open.</summary>
+        public bool Hovered => _hover.enabled;
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            _hover.enabled = true;
+            PointerEntered?.Invoke(this);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            _hover.enabled = false;
+            PointerExited?.Invoke(this);
+        }
         public bool InParty { get; private set; }
         public Button Button => _button;
         public Color FrameColor => _frame.color;

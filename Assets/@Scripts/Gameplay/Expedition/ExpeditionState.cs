@@ -88,12 +88,16 @@ namespace F1.Gameplay
 
         /// <summary>The affliction or virtue the member is in (a FatigueStateData id), or null. An affliction came from the roster or the breakdown; a virtue ends with the expedition.</summary>
         public string StateId;
+
+        /// <summary>The mercenary's stats (Slice D stage 32): they do not change on an expedition, and the battle grows the member's items with them.</summary>
+        public StatBlock Stats;
     }
 
     /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>
     public readonly struct PartyMember
     {
-        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel)
+        /// <param name="stats">The mercenary's stats (Slice D stage 32); null for the job's base values.</param>
+        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel, StatBlock stats = null)
         {
             MercenaryId = mercenaryId;
             JobId = jobId;
@@ -101,6 +105,7 @@ namespace F1.Gameplay
             Fatigue = fatigue;
             AfflictionId = afflictionId;
             Level = level;
+            Stats = stats;
         }
 
         public string MercenaryId { get; }
@@ -115,6 +120,9 @@ namespace F1.Gameplay
 
         /// <summary>The mercenary's level (stage 27): it sets the maximum HP the member leaves with.</summary>
         public int Level { get; }
+
+        /// <summary>The mercenary's stats (Slice D stage 32), or null for the job's base values.</summary>
+        public StatBlock Stats { get; }
     }
 
     /// <summary>

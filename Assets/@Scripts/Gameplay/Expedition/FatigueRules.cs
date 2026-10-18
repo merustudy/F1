@@ -62,11 +62,12 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The chance of dying on a hit at death's door: the base chance moved by the fatigue state (a reckless mercenary dies more
-        /// easily, a stalwart one less), within 0..100. The battle rolls it and the screen shows it.
+        /// easily, a stalwart one less) and by constitution (Slice D stage 33: each point above the baseline takes DogDeathPercentPerConPoint off),
+        /// within 0..100. The battle rolls it and the screen shows it.
         /// </summary>
-        public static int DogDeathChancePercent(BalanceData balance, FatigueStateData state)
+        public static int DogDeathChancePercent(BalanceData balance, FatigueStateData state, StatBlock stats = null)
         {
-            return Math.Max(0, Math.Min(100, balance.DogDeathChancePercent + (state?.DeathChanceDelta ?? 0)));
+            return Math.Max(0, Math.Min(100, balance.DogDeathChancePercent + (state?.DeathChanceDelta ?? 0) - StatRules.DeathChanceShift(balance, stats)));
         }
 
         /// <summary>A value changed by a state's percent: value x (100 + percent) / 100, rounded down, never below 0.</summary>

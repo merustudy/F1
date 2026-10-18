@@ -33,6 +33,8 @@ namespace F1.Sim
         /// <summary>Critical hits (Slice B stage 22) the party dealt and took.</summary>
         public int CritsDealt;
         public int CritsTaken;
+        public int MissesDealt;
+        public int MissesTaken;
         public readonly Dictionary<string, int> DeathsByMercenary = new Dictionary<string, int>();
 
         public void Add(BattleEngine battle)
@@ -63,6 +65,17 @@ namespace F1.Sim
                         break;
                     case BattleEventKind.DeathRolled:
                         DeathRolls++;
+                        break;
+                    case BattleEventKind.Missed:
+                        if (e.Source.Side == BattleSide.Party)
+                        {
+                            MissesDealt++;
+                        }
+                        else
+                        {
+                            MissesTaken++;
+                        }
+
                         break;
                     case BattleEventKind.CriticalHit:
                         if (e.Source.Side == BattleSide.Party)
@@ -135,7 +148,7 @@ namespace F1.Sim
             Console.WriteLine($"  duration avg {DurationMs / Battles / 1000.0:F1}s, longest {LongestMs / 1000.0:F1}s, reached storm {Percent(ReachedStorm, Battles)}");
             Console.WriteLine($"  per battle: deaths {Ratio(Deaths, Battles)}, DoG entries {Ratio(DogEntries, Battles)}, grace breaks {Ratio(GraceBreaks, Battles)}, death rolls {Ratio(DeathRolls, Battles)}");
             Console.WriteLine($"  per battle: potions {Ratio(PotionsUsed, Battles)}, retreat attempts {Ratio(RetreatAttempts, Battles)}, party advances {Ratio(PartyAdvances, Battles)}");
-            Console.WriteLine($"  per battle: critical hits dealt {Ratio(CritsDealt, Battles)}, taken {Ratio(CritsTaken, Battles)}");
+            Console.WriteLine($"  per battle: critical hits dealt {Ratio(CritsDealt, Battles)}, taken {Ratio(CritsTaken, Battles)}; misses (Slice D stage 33) by the party {Ratio(MissesDealt, Battles)}, by the enemies {Ratio(MissesTaken, Battles)}");
             if (Afflictions + Virtues + Collapses > 0)
             {
                 Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths})");
@@ -161,25 +174,42 @@ namespace F1.Sim
     public static class Simulations
     {
         /// <summary>
-        /// Resolves "rowan" (mercenary id) or "knight" (job id). With a row (":1", ":2", ...) on every
-        /// member the rows are taken as written. Without them the party lines up by the recommended
+        /// Resolves "rowan" (mercenary id) or "warrior" (job id). A job takes the first starting mercenary of that job not already in the party,
+        /// or else (Slice D stage 36: the ranger comes only from the stagecoach) the first name of the recruit pool not in it, on that job.
+        /// With a row (":1", ":2", ...) on every member the rows are taken as written. Without them the party lines up by the recommended
         /// row of each job (ties keep the order given), one per row from the front.
         /// </summary>
         public static List<PartyMember> ParseParty(StaticData data, string spec)
         {
             var members = new List<(MercenaryData Mercenary, JobData Job, int Row)>();
+            var used = new HashSet<string>(StringComparer.Ordinal);
             int explicitRows = 0;
             foreach (string token in spec.Split(','))
             {
                 string[] parts = token.Trim().Split(':');
                 string name = parts[0];
-                MercenaryData mercenary = data.Mercenaries.Contains(name)
-                    ? data.Mercenaries.Get(name)
-                    : data.Mercenaries.Ordered.FirstOrDefault(m => m.JobId == name);
-                if (mercenary == null)
+                MercenaryData mercenary;
+                JobData job;
+                if (data.Mercenaries.Contains(name))
                 {
-                    throw new ArgumentException($"'{name}' is neither a mercenary id nor a job with a mercenary.");
+                    mercenary = data.Mercenaries.Get(name);
+                    job = mercenary.JobId == null ? null : data.Jobs.Get(mercenary.JobId);
                 }
+                else
+                {
+                    job = data.Jobs.Contains(name) ? data.Jobs.Get(name) : null;
+                    mercenary = job == null
+                        ? null
+                        : data.Mercenaries.Ordered.FirstOrDefault(m => m.JobId == name && !used.Contains(m.Id))
+                            ?? data.Mercenaries.Ordered.FirstOrDefault(m => !m.Starting && !used.Contains(m.Id));
+                }
+
+                if (mercenary == null || job == null)
+                {
+                    throw new ArgumentException($"'{name}' is neither a mercenary id with a job nor a job.");
+                }
+
+                used.Add(mercenary.Id);
 
                 int row = 0;
                 if (parts.Length > 1)
@@ -192,7 +222,7 @@ namespace F1.Sim
                     explicitRows++;
                 }
 
-                members.Add((mercenary, data.Jobs.Get(mercenary.JobId), row));
+                members.Add((mercenary, job, row));
             }
 
             if (explicitRows != 0 && explicitRows != members.Count)
@@ -360,6 +390,7 @@ namespace F1.Sim
 
             Console.WriteLine($"dungeon {dungeonId}, party {Describe(party)}, policy {policy.Name}, seed {baseSeed}");
             Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
+            Console.WriteLine("  stats (Slice D stage 32, str/dex/con/int/spi/end): " + string.Join(", ", party.Select(m => $"{m.MercenaryId} {m.Stats ?? StatRules.BaseOf(data, m.JobId)}")));
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
             Console.WriteLine($"  bags per member at the end: added {BattleStats.Ratio(stats.BagsAdded, stats.MembersAtEnd)}, bag squares {Average(stats.BagSquares, stats.MembersAtEnd)}");
@@ -538,6 +569,7 @@ namespace F1.Sim
             long days = 0, expeditions = 0, deaths = 0, rests = 0, unlockDays = 0;
             long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
             long levelsAtEnd = 0, levelUps = 0, highestLevel = 0, runsAtMaxLevel = 0, runsWithLiving = 0;
+            var statsAtEnd = new long[StatBlock.All.Length];
             long finalExpeditions = 0, finalCleared = 0, finalWiped = 0, finalRetreated = 0, finalDeaths = 0, runsThatClearedFinal = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
@@ -635,7 +667,15 @@ namespace F1.Sim
                     SettlementReport report = RunRules.Settle(data, state, expedition);
                     goldEarned += report.GoldEarned;
                     finished += report.BuildingsCompleted.Count;
-                    levelUps += report.LevelUps.Count;
+                    // Slice D stage 35: the barracks levels up by hand; every policy levels everyone up right after the settlement, the roster's order.
+                    foreach (MercenaryState mercenary in state.Roster)
+                    {
+                        while (RunRules.CanLevelUp(data, state, mercenary.Id))
+                        {
+                            RunRules.LevelUp(data, state, mercenary.Id);
+                            levelUps++;
+                        }
+                    }
                     if (expedition.FinalStand && state.Outcome == RunOutcome.Victory)
                     {
                         finalStandsWon++;
@@ -656,6 +696,14 @@ namespace F1.Sim
                 rosterAtEnd += state.Roster.Count;
                 int highest = state.Roster.Count == 0 ? 0 : state.Roster.Max(m => m.Level);
                 levelsAtEnd += state.Roster.Sum(m => m.Level);
+                foreach (MercenaryState living in state.Roster)
+                {
+                    StatBlock stats = living.Stats ?? StatRules.BaseOf(data, living.JobId);
+                    for (int i = 0; i < StatBlock.All.Length; i++)
+                    {
+                        statsAtEnd[i] += stats[StatBlock.All[i]];
+                    }
+                }
                 highestLevel += highest;
                 runsWithLiving += state.Roster.Count > 0 ? 1 : 0;
                 runsAtMaxLevel += highest >= data.MaxLevel ? 1 : 0;
@@ -688,6 +736,8 @@ namespace F1.Sim
                 + "levels at the end " + string.Join(", ", BuildingId.All.Select(id => $"{id} {Average(levelsAtEndBy[id], runs)}")));
             Console.WriteLine($"  levels (stage 27): level-ups per run {Average(levelUps, runs)}, the living at the end average level {Average(levelsAtEnd, (int)rosterAtEnd)}, "
                 + $"the highest {Average(highestLevel, (int)runsWithLiving)} on average (runs with someone living), at the last level ({data.MaxLevel}) in {BattleStats.Percent((int)runsAtMaxLevel, runs)} of runs");
+            Console.WriteLine("  stats (Slice D stage 32): the living at the end average "
+                + string.Join(", ", StatBlock.All.Select((stat, i) => $"{stat} {Average(statsAtEnd[i], (int)rosterAtEnd)}")));
         }
 
         /// <summary>The final dungeon once it is open (or once the final stand is due), else the first dungeon that is not final and is open.</summary>

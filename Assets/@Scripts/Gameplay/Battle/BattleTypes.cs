@@ -130,6 +130,13 @@ namespace F1.Gameplay
 
         /// <summary>A boss's phases (Slice C stage 28), from the highest HP percent down; null or empty for a unit without any.</summary>
         public IReadOnlyList<BattlePhaseSetup> Phases;
+
+        /// <summary>A mercenary's stats (Slice D stage 32): they grow the power of its items that grow with one (<see cref="StatRules"/>). Null for an enemy, which has none.</summary>
+        public StatBlock Stats;
+
+        /// <summary>An enemy's hit and dodge in percent points (Slice D stage 33, EnemyData), standing in for the stats it has not; 0 for a mercenary.</summary>
+        public int Accuracy;
+        public int Dodge;
     }
 
     /// <summary>
@@ -246,7 +253,7 @@ namespace F1.Gameplay
         DogExited,
         /// <summary>Target, A = hits taken during grace.</summary>
         GraceBroken,
-        /// <summary>Target, A = death chance percent, B = roll 0..99, C = 1 if the unit died.</summary>
+        /// <summary>Target, A = death chance percent (constitution counted, stage 33), B = roll 0..99, C = 1 if the unit died.</summary>
         DeathRolled,
         /// <summary>Target.</summary>
         Died,
@@ -266,7 +273,7 @@ namespace F1.Gameplay
 
         /// <summary>A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue", and the critical hit's four), A = change, C = fatigue after.</summary>
         FatigueChanged,
-        /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent, C = 1 for a virtue.</summary>
+        /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent (spirit counted, stage 33), C = 1 for a virtue.</summary>
         BrokeDown,
         /// <summary>A boss entered a phase (Slice C stage 28): its items were replaced. Target, A = the phase (1 = the first after the start), B = the phase's HP percent, C = HP now.</summary>
         PhaseChanged,
@@ -276,9 +283,15 @@ namespace F1.Gameplay
         FatigueStateEnded,
         /// <summary>
         /// A weapon's damage on one unit is a critical hit (Slice B stage 22), just before its Damaged. Source, Target, Id = the item, A = the damage
-        /// (hundredths), B = the roll 0..99, C = the chance percent.
+        /// (hundredths), B = the roll 0..9999, C = the chance in ten-thousandths (Slice D stage 33: dexterity adds half points).
         /// </summary>
         CriticalHit,
+
+        /// <summary>
+        /// A weapon's or an attack item's damage or burn missed one unit (Slice D stage 33, Docs/Design/02_Combat_System.md §5): nothing was dealt to
+        /// it. Source, Target, Id = the item, A = the roll 0..9999, B = the hit chance in ten-thousandths.
+        /// </summary>
+        Missed,
     }
 
     /// <summary>

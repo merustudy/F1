@@ -102,6 +102,7 @@ namespace F1.Editor.Setup
             UiBuild.Vertical(list, 8f);
             PartyListRowView rowTemplate = BuildPartyListRow(list);
             GameObject emptyTemplate = BuildEmptySlot(list);
+            StatTooltipView statTooltip = BuildStatTooltip(w);
 
             UiBuild.SetReference(screen, "_day", day);
             UiBuild.SetReference(screen, "_gold", gold);
@@ -129,6 +130,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_partyStatus", partyStatus);
             UiBuild.SetReference(screen, "_partyDepart", partyDepart.Button);
             UiBuild.SetReference(screen, "_partyClose", partyClose.Button);
+            UiBuild.SetReference(screen, "_statTooltip", statTooltip);
             return screen;
         }
 
@@ -171,10 +173,17 @@ namespace F1.Editor.Setup
             TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotDetail" + row, column, 20f, UiPalette.TextDim)), cx - 110f, top + 34f, 220f, 28f);
             RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("SlotPips" + row, column), cx - 110f, top + 66f, 220f, 12f);
             UiBar[] pips = FatiguePipRow("Slot" + row + "Pip", pipsRow, 220f, 12f);
+            // The six stats in two columns and three rows (Slice D stage 32, Round 81), then the moves 96 lower than before.
+            var stats = new TextMeshProUGUI[StatBlock.All.Length];
+            for (int i = 0; i < stats.Length; i++)
+            {
+                stats[i] = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotStat" + row + "_" + i, column, 18f, UiPalette.Text)), cx - 110f + (i % 2) * 112f, top + 88f + (i / 2) * 28f, 108f, 26f);
+            }
+
             ButtonParts forward = UiBuild.LocalizedButton("SlotForward" + row, column, UiKeys.Expedition.Forward, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(forward.Rect, cx - 110f, top + 88f, 106f, 40f);
+            UiBuild.Box(forward.Rect, cx - 110f, top + 184f, 106f, 40f);
             ButtonParts back = UiBuild.LocalizedButton("SlotBack" + row, column, UiKeys.Expedition.Back, UiPalette.ButtonQuiet, 20f);
-            UiBuild.Box(back.Rect, cx + 4f, top + 88f, 106f, 40f);
+            UiBuild.Box(back.Rect, cx + 4f, top + 184f, 106f, 40f);
 
             var view = column.gameObject.AddComponent<PartyRowSlotView>();
             UiBuild.SetReference(view, "_figure", figureView);
@@ -183,6 +192,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_level", level);
             UiBuild.SetReference(view, "_detail", detail);
             UiBuild.SetReferences(view, "_pips", pips);
+            UiBuild.SetReferences(view, "_stats", stats);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
             return view;
@@ -195,6 +205,8 @@ namespace F1.Editor.Setup
         static PartyListRowView BuildPartyListRow(Transform parent)
         {
             Image background = UiBuild.Panel("RowTemplate", parent, UiPalette.PanelLight);
+            // The line takes the pointer so that it can open its stat tooltip (Round 81); its button still takes the clicks.
+            background.raycastTarget = true;
             UiBuild.Size(background, PartyListWidth, PartyListRowHeight);
             Transform line = background.transform;
             UiBuild.Box(UiBuild.Panel("RowPortraitBox", line, UiPalette.Slot), 10f, 7f, 56f, 72f);
@@ -223,7 +235,55 @@ namespace F1.Editor.Setup
             UiBuild.SetReferences(view, "_pips", pips);
             UiBuild.SetReference(view, "_button", button.Button);
             UiBuild.SetReference(view, "_buttonLabel", button.Label);
+            // The rim of the line the pointer is on (Round 81's mock): a 2-pixel outline in the target blue, off until then.
+            Outline hover = background.gameObject.AddComponent<Outline>();
+            hover.effectColor = UiPalette.RimTarget;
+            hover.effectDistance = new Vector2(2f, 2f);
+            hover.enabled = false;
+            UiBuild.SetReference(view, "_hover", hover);
             background.gameObject.SetActive(false);
+            return view;
+        }
+
+        const float StatTooltipWidth = 304f;
+        const float StatTooltipHeight = 112f;
+
+        /// <summary>
+        /// The stat tooltip of the list (Slice D stage 32, Round 81): the item card's black see-through card with its grey hairline and a notch on the
+        /// right edge, the title ("이름 · 직업 Lv N"), a rule, and the six stats in three columns and two rows. Its pivot is the right middle: the
+        /// screen stands it at a line's left. It takes no clicks. Hidden until the pointer is on a line.
+        /// </summary>
+        static StatTooltipView BuildStatTooltip(Transform window)
+        {
+            RectTransform card = UiBuild.Rect("StatTooltip", window);
+            card.anchorMin = new Vector2(0.5f, 0.5f);
+            card.anchorMax = new Vector2(0.5f, 0.5f);
+            card.pivot = new Vector2(1f, 0.5f);
+            card.sizeDelta = new Vector2(StatTooltipWidth, StatTooltipHeight);
+            Image line = Rounded("StatTooltipLine", card, UiPalette.TooltipLine, TooltipRadius);
+            UiBuild.Stretch(line.rectTransform);
+            Image fill = Rounded("StatTooltipFill", card, UiPalette.TooltipFill, TooltipRadius - 1f);
+            UiBuild.Stretch(fill.rectTransform, 1f, 1f, 1f, 1f);
+            RectTransform notch = NotchClip("StatTooltipNotch", card, new Vector2(1f, 1f), new Vector2(0f, 0.5f), new Vector2(TooltipNotch, TooltipNotch * 2f), new Vector2(0f, 0.5f));
+            notch.anchoredPosition = new Vector2(-1f, -StatTooltipHeight / 2f);
+            notch.gameObject.SetActive(true);
+            TextMeshProUGUI title = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("StatTooltipTitle", card, 20f, UiPalette.Text, TextAlignmentOptions.Center)), 12f, 8f, StatTooltipWidth - 24f, 28f);
+            UiBuild.Box(UiBuild.Image("StatTooltipRule", card, UiPalette.TooltipLine), 16f, 40f, StatTooltipWidth - 32f, 1f);
+            var stats = new TextMeshProUGUI[StatBlock.All.Length];
+            for (int i = 0; i < stats.Length; i++)
+            {
+                stats[i] = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("StatTooltipStat" + i, card, 18f, UiPalette.Text)), 18f + (i % 3) * 94f, 50f + (i / 3) * 30f, 92f, 28f);
+            }
+
+            foreach (Graphic graphic in card.GetComponentsInChildren<Graphic>(true))
+            {
+                graphic.raycastTarget = false;
+            }
+
+            var view = card.gameObject.AddComponent<StatTooltipView>();
+            UiBuild.SetReference(view, "_title", title);
+            UiBuild.SetReferences(view, "_stats", stats);
+            card.gameObject.SetActive(false);
             return view;
         }
 

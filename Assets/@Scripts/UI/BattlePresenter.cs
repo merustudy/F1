@@ -149,6 +149,10 @@ namespace F1.UI
                 case BattleEventKind.Damaged:
                     PlayDamage(e, KillMoments && KillingBlowAt(index) != null);
                     break;
+                case BattleEventKind.Missed:
+                    // A miss (Slice D stage 33, Round 81): grey words where the damage would have stood, and no hit sound (the swing was the activation's).
+                    FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Miss), UiPalette.TextDim, false);
+                    break;
                 case BattleEventKind.Healed:
                     // Amounts are in hundredths (stage 22): the screen shows them whole, and nothing for what rounds to 0.
                     if (UiText.Amount(e.B) > 0)

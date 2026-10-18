@@ -182,6 +182,21 @@ namespace F1.Flow
             Save(null);
         }
 
+        /// <summary>Whether the barracks can level a mercenary up now (Slice D stage 35): at home, the run goes on, its experience meets the level's.</summary>
+        public bool CanLevelUp(string mercenaryId)
+        {
+            return HasRun && !IsAway && RunRules.CanLevelUp(_data.Data, _run, mercenaryId);
+        }
+
+        /// <summary>Levels a mercenary up by one and rolls its growth (Docs/Design/05_Mercenary_Growth.md §2), then saves. Returns what each stat gained.</summary>
+        public StatBlock LevelUp(string mercenaryId)
+        {
+            RequireAtHome();
+            StatBlock gains = RunRules.LevelUp(_data.Data, _run, mercenaryId);
+            Save(null);
+            return gains;
+        }
+
         public TreatCheck CanTreat(string mercenaryId)
         {
             return !HasRun || IsAway ? TreatCheck.NotInRoster : RunRules.CanTreat(_data.Data, _run, mercenaryId);

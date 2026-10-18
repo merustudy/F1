@@ -32,7 +32,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "abyss_grasp",
@@ -65,7 +66,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "abyss_howl",
@@ -98,7 +100,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Int"
     },
     {
       "Id": "buckler",
@@ -131,7 +134,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 10,
+      "ScalesWith": null
     },
     {
       "Id": "crude_bow",
@@ -164,7 +168,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Dex"
     },
     {
       "Id": "dagger",
@@ -197,7 +202,8 @@
       "StarDamage": 0,
       "CritChancePercent": 10,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 10,
+      "ScalesWith": "Dex"
     },
     {
       "Id": "ember_flask",
@@ -230,7 +236,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 8
+      "DropWeight": 8,
+      "ScalesWith": "Int"
     },
     {
       "Id": "fire_staff",
@@ -263,7 +270,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Int"
     },
     {
       "Id": "gladius",
@@ -305,7 +313,8 @@
       "StarDamage": 400,
       "CritChancePercent": 10,
       "Unique": true,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "greataxe",
@@ -338,7 +347,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "halberd",
@@ -371,7 +381,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 8
+      "DropWeight": 8,
+      "ScalesWith": "Str"
     },
     {
       "Id": "healing_staff",
@@ -404,7 +415,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Spi"
     },
     {
       "Id": "herb_pouch",
@@ -437,7 +449,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 10,
+      "ScalesWith": "Spi"
     },
     {
       "Id": "lantern_staff",
@@ -470,7 +483,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Int"
     },
     {
       "Id": "longbow",
@@ -495,7 +509,7 @@
           "Max": 168
         }
       ],
-      "ShopWeight": 10,
+      "ShopWeight": 3,
       "Icon": "item/longbow",
       "Price": 16,
       "Melee": false,
@@ -503,7 +517,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 0,
+      "ScalesWith": "Dex"
     },
     {
       "Id": "longsword",
@@ -536,7 +551,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "mace",
@@ -576,7 +592,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "mending_chant",
@@ -609,7 +626,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Spi"
     },
     {
       "Id": "overseer_maul",
@@ -642,7 +660,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "overseer_roar",
@@ -675,7 +694,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "rat_bite",
@@ -708,7 +728,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Dex"
     },
     {
       "Id": "rusty_blade",
@@ -741,7 +762,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": "Str"
     },
     {
       "Id": "spear",
@@ -774,7 +796,8 @@
       "StarDamage": 0,
       "CritChancePercent": 5,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 10,
+      "ScalesWith": "Str"
     },
     {
       "Id": "ward_charm",
@@ -807,7 +830,8 @@
       "StarDamage": 0,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 10
+      "DropWeight": 10,
+      "ScalesWith": "Spi"
     },
     {
       "Id": "whetstone",
@@ -841,7 +865,8 @@
       "StarDamage": 100,
       "CritChancePercent": 0,
       "Unique": false,
-      "DropWeight": 0
+      "DropWeight": 0,
+      "ScalesWith": null
     }
   ]
 }

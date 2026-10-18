@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using F1.Core;
+using F1.Data;
 using F1.Gameplay;
 using TMPro;
 using UnityEngine;
@@ -21,6 +22,24 @@ namespace F1.UI
         [SerializeField] TMP_Text _exp;
         [SerializeField] TMP_Text _runOver;
         [SerializeField] Button _confirm;
+        [SerializeField] TMP_Text _ready;
+        [SerializeField] TMP_Text _itemsLost;
+        [SerializeField] RectTransform _panel;
+
+        /// <summary>How tall the "ready to level up" line is, and the gap under it (Slice D stage 35, Round 82: the panel grows by 46).</summary>
+        const float ReadyLine = 34f;
+        const float ReadyGap = 12f;
+
+        /// <summary>Where the panel and the things under the line stand without it (the builder's places), kept to move them back.</summary>
+        Vector2 _panelPosition;
+        Vector2 _panelSize;
+        float _itemsLostY;
+        float _runOverY;
+        float _confirmY;
+        bool _placesKept;
+
+        /// <summary>The line naming who can level up in the barracks (Slice D stage 35), empty when nobody can.</summary>
+        public TMP_Text Ready => _ready;
 
         protected override void OnOpen()
         {
@@ -58,6 +77,7 @@ namespace F1.UI
                 ? UiStrings.Get(UiKeys.Settle.GoldWithCoins, report.GoldEarned, report.FloorsReached, report.CoinsConverted, report.GoldFromCoins, report.GoldAfter)
                 : UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
             _exp.text = ExpText(report);
+            ShowReady(report);
             _runOver.text = RunOverText(report);
         }
 
@@ -75,28 +95,49 @@ namespace F1.UI
             return string.Join(", ", entries);
         }
 
-        /// <summary>The experience every survivor got (stage 27) and who reached a new level: "경험치 +20 · 레벨 업: 로언 Lv 2". Nothing without survivors.</summary>
+        /// <summary>The experience every survivor got (stage 27): "경험치 +20". Nothing without survivors.</summary>
         static string ExpText(SettlementReport report)
         {
-            if (report.SurvivorIds.Count == 0)
+            return report.SurvivorIds.Count == 0 ? string.Empty : UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned);
+        }
+
+        /// <summary>
+        /// Who can level up now (Slice D stage 35, Round 82): "▲ 레벨 업 가능: 로언, 카이 — 막사에서 올린다" under the experience, in gold — the roll
+        /// waits for the barracks. The panel grows by the line, half up and half down, and the lines under it (the lost items, the run's end,
+        /// [확인]) move down as much; without anyone the panel stays as built.
+        /// </summary>
+        void ShowReady(SettlementReport report)
+        {
+            KeepPlaces();
+            bool any = report.ReadyToLevelUp.Count > 0;
+            _ready.text = any ? UiStrings.Get(UiKeys.Settle.Ready, UiText.MercenaryList(report.ReadyToLevelUp)) : string.Empty;
+            float grown = any ? ReadyLine + ReadyGap : 0f;
+            _ready.rectTransform.sizeDelta = new Vector2(_ready.rectTransform.sizeDelta.x, any ? ReadyLine : 0f);
+            _panel.anchoredPosition = _panelPosition + new Vector2(0f, grown / 2f);
+            _panel.sizeDelta = _panelSize + new Vector2(0f, grown);
+            Move(_itemsLost.rectTransform, _itemsLostY - grown);
+            Move(_runOver.rectTransform, _runOverY - grown);
+            Move((RectTransform)_confirm.transform, _confirmY - grown);
+        }
+
+        void KeepPlaces()
+        {
+            if (_placesKept)
             {
-                return string.Empty;
+                return;
             }
 
-            string words = UiStrings.Get(UiKeys.Settle.Exp, report.ExpEarned);
-            if (report.LevelUps.Count == 0)
-            {
-                return words;
-            }
+            _panelPosition = _panel.anchoredPosition;
+            _panelSize = _panel.sizeDelta;
+            _itemsLostY = _itemsLost.rectTransform.anchoredPosition.y;
+            _runOverY = _runOver.rectTransform.anchoredPosition.y;
+            _confirmY = ((RectTransform)_confirm.transform).anchoredPosition.y;
+            _placesKept = true;
+        }
 
-            RunState run = Managers.Run.Run;
-            var ups = new List<string>();
-            foreach (string id in report.LevelUps)
-            {
-                ups.Add(UiStrings.Get(UiKeys.Settle.LevelUp, UiText.Mercenary(id), RunRules.FindMercenary(run, id).Level));
-            }
-
-            return words + " · " + UiStrings.Get(UiKeys.Settle.LevelUps, string.Join(", ", ups));
+        static void Move(RectTransform rect, float y)
+        {
+            rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, y);
         }
 
         void OnConfirm()

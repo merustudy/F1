@@ -96,6 +96,24 @@ namespace F1.Tests
                 { "ExpClear", 5 },
                 { "EliteCoinPercent", 200 },
                 { "ShopPotionChancePercent", 50 },
+                // Slice D stage 32: the shipped values. The test jobs name no stats (all at the baseline), so the arithmetic of the tests stays.
+                { "StatBaseline", 10 },
+                { "StatMin", 1 },
+                { "StatMax", 30 },
+                { "StatPowerPercentPerPoint", 10 },
+                { "HpPercentPerConPoint", 5 },
+                // Slice D stage 33: every hit lands (a certain hit rolls nothing, so the tests' damage streams stay as they were); the rest as shipped.
+                { "HitBasePercent", 100 },
+                { "HitMinPercent", 5 },
+                { "HitMaxPercent", 100 },
+                { "HitPerStatPoint", 100 },
+                { "DodgePerDexPoint", 50 },
+                { "CritPerDexPoint", 50 },
+                { "DogDeathPercentPerConPoint", 1 },
+                { "VirtuePerSpiPoint", 1 },
+                { "FatiguePercentPerEndPoint", 3 },
+                // Slice D stage 34: no spread (a candidate draws nothing more, so the tests' candidates stay as they were); growth tests set 2.
+                { "RecruitStatSpread", 0 },
             };
             foreach ((string key, int value) in overrides)
             {
@@ -128,7 +146,8 @@ namespace F1.Tests
             bool unique = false,
             IReadOnlyList<StarSquare> stars = null,
             int starDamage = 0,
-            int dropWeight = 0)
+            int dropWeight = 0,
+            Stat? scalesWith = null)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
@@ -136,7 +155,7 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight);
+            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight, scalesWith: scalesWith);
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -366,9 +385,9 @@ namespace F1.Tests
         {
             return new List<LevelData>
             {
-                new LevelData(1, 10, 0),
-                new LevelData(2, 20, 10),
-                new LevelData(3, 0, 25),
+                new LevelData(1, 10),
+                new LevelData(2, 20),
+                new LevelData(3, 0),
             };
         }
 

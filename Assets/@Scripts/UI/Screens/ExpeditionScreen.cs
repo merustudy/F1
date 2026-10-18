@@ -56,6 +56,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _partyStatus;
         [SerializeField] Button _partyDepart;
         [SerializeField] Button _partyClose;
+        [SerializeField] StatTooltipView _statTooltip;
 
         readonly List<DungeonMarkerView> _markers = new List<DungeonMarkerView>();
         readonly Dictionary<string, PartyListRowView> _rows = new Dictionary<string, PartyListRowView>();
@@ -288,10 +289,13 @@ namespace F1.UI
                     mercenary.Fatigue,
                     balance.MaxFatigue,
                     balance.FatigueBreakdown,
+                    mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId),
                     canForward: Managers.Run.CanPlaceInParty(slot.MercenaryId, row - 1),
                     canBack: Managers.Run.CanPlaceInParty(slot.MercenaryId, row + 1));
             }
 
+            // The list is drawn again: a tooltip left open would speak of a line that may have moved (Round 81).
+            _statTooltip.Hide();
             var alive = new HashSet<string>();
             int next = run.Party.Count + 1;
             foreach (MercenaryState mercenary in run.Roster)
@@ -305,6 +309,8 @@ namespace F1.UI
                     line.MercenaryId = mercenary.Id;
                     string id = mercenary.Id;
                     line.Button.onClick.AddListener(() => OnRowButton(id));
+                    line.PointerEntered += OnRowEntered;
+                    line.PointerExited += OnRowExited;
                     _rows.Add(mercenary.Id, line);
                 }
 
@@ -442,7 +448,30 @@ namespace F1.UI
         void CloseParty()
         {
             _partyOpen = false;
+            _statTooltip.Hide();
             Refresh();
+        }
+
+        /// <summary>The pointer on a list line (Slice D stage 32, Round 81): its stat tooltip at the line's left.</summary>
+        void OnRowEntered(PartyListRowView line)
+        {
+            StaticData data = Managers.Data.Data;
+            MercenaryState mercenary = RunRules.FindMercenary(Managers.Run.Run, line.MercenaryId);
+            if (mercenary == null)
+            {
+                return;
+            }
+
+            string title = UiStrings.Get(UiKeys.Expedition.StatTooltip, UiText.Mercenary(mercenary.Id), UiText.Job(mercenary.JobId), mercenary.Level);
+            _statTooltip.Show(mercenary.Id, (RectTransform)line.transform, title, mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId));
+        }
+
+        void OnRowExited(PartyListRowView line)
+        {
+            if (_statTooltip.MercenaryId == line.MercenaryId)
+            {
+                _statTooltip.Hide();
+            }
         }
 
         /// <summary>A line's button: in the party, its mercenary comes out; outside it, the mercenary takes the next row from the front (the button is off once the party is full).</summary>

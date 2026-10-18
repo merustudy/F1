@@ -476,6 +476,8 @@ namespace F1.Gameplay
             ItemData data = item.Equipped.Item;
             Log(BattleEventKind.ItemActivated, owner.Ref, UnitRef.None, data.Id, item.SlotIndex, 0, 0);
 
+            // The owner's stat grows the item's power (Slice D stage 32): an enemy has no stats, an item may grow with none.
+            int statPercent = StatRules.PowerPercent(_balance, owner.Setup.Stats, data);
             foreach (ItemEffect effect in data.Effects)
             {
                 int magnitude = item.Equipped.Magnitude(_balance, effect);
@@ -490,6 +492,14 @@ namespace F1.Gameplay
                         magnitude += item.StarDamage;
                     }
                 }
+                else if (effect.Kind == EffectKind.Burn)
+                {
+                    magnitude = StatRules.ScaleStacks(magnitude, statPercent);
+                }
+                else
+                {
+                    magnitude = StatRules.Scale(magnitude, statPercent);
+                }
 
                 foreach (BattleUnit target in ResolveTargets(owner, effect))
                 {
@@ -502,8 +512,16 @@ namespace F1.Gameplay
                     {
                         case EffectKind.Damage:
                         {
+                            // Each unit hit rolls its own hit first (Slice D stage 33): a miss deals nothing and triggers nothing.
+                            if (StatRules.CanMiss(data, effect) && !RollHit(owner, target, data))
+                            {
+                                continue;
+                            }
+
                             int dealt = magnitude;
                             bool critical = weaponDamage && RollCritical(owner, target, data, ref dealt);
+                            // Roll, stars, critical hit, then the owner's stat, then the weapon-power passive (Docs/Design/02_Combat_System.md §4).
+                            dealt = StatRules.Scale(dealt, statPercent);
                             if (weaponDamage)
                             {
                                 dealt = WithWeaponPower(owner, dealt);
@@ -511,7 +529,7 @@ namespace F1.Gameplay
 
                             if (critical)
                             {
-                                Log(BattleEventKind.CriticalHit, owner.Ref, target.Ref, data.Id, dealt, _lastCritRoll, data.CritChancePercent);
+                                Log(BattleEventKind.CriticalHit, owner.Ref, target.Ref, data.Id, dealt, _lastCritRoll, _lastCritChance);
                             }
 
                             ApplyDamage(target, dealt, owner.Ref, data.Id);
@@ -535,6 +553,11 @@ namespace F1.Gameplay
                             AddShield(target, magnitude, owner.Ref, data.Id);
                             break;
                         case EffectKind.Burn:
+                            if (StatRules.CanMiss(data, effect) && !RollHit(owner, target, data))
+                            {
+                                continue;
+                            }
+
                             AddBurn(target, magnitude, owner.Ref, data.Id);
                             break;
                         default:
@@ -551,6 +574,34 @@ namespace F1.Gameplay
         }
 
         int _lastCritRoll;
+        int _lastCritChance;
+
+        /// <summary>
+        /// Rolls one unit's hit (Slice D stage 33, Docs/Design/02_Combat_System.md §5) on the damage stream, before its critical hit: the base chance with
+        /// the attacker's accuracy (its stat of the item's axis, or an enemy's Accuracy) and less the target's dodge (its dexterity, or an enemy's Dodge),
+        /// within the bounds. A miss is logged; nothing is dealt to that unit.
+        /// </summary>
+        bool RollHit(BattleUnit owner, BattleUnit target, ItemData item)
+        {
+            int chance = StatRules.HitChance(
+                _balance,
+                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, item),
+                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge));
+            // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
+            if (chance >= StatRules.Certain)
+            {
+                return true;
+            }
+
+            int roll = _damageRng.NextInt(StatRules.Certain);
+            if (roll < chance)
+            {
+                return true;
+            }
+
+            Log(BattleEventKind.Missed, owner.Ref, target.Ref, item.Id, roll, chance, 0);
+            return false;
+        }
 
         /// <summary>
         /// Rolls the weapon's critical hit on one unit (stage 22, Docs/Design/02_Combat_System.md §4): with the weapon's chance, the damage
@@ -563,8 +614,10 @@ namespace F1.Gameplay
                 return false;
             }
 
-            _lastCritRoll = _damageRng.NextInt(100);
-            if (_lastCritRoll >= weapon.CritChancePercent)
+            // In ten-thousandths, with the owner's dexterity (Slice D stage 33) and the ranger's passive (stage 36).
+            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon));
+            _lastCritRoll = _damageRng.NextInt(StatRules.Certain);
+            if (_lastCritRoll >= _lastCritChance)
             {
                 return false;
             }
@@ -886,7 +939,7 @@ namespace F1.Gameplay
                 Log(BattleEventKind.GraceBroken, UnitRef.None, target.Ref, null, target.GraceHits, 0, 0);
             }
 
-            int chance = FatigueRules.DogDeathChancePercent(_balance, target.State);
+            int chance = FatigueRules.DogDeathChancePercent(_balance, target.State, target.Setup.Stats);
             int roll = _battleRng.NextInt(100);
             bool died = roll < chance;
             Log(BattleEventKind.DeathRolled, UnitRef.None, target.Ref, null, chance, roll, died ? 1 : 0);
@@ -958,6 +1011,13 @@ namespace F1.Gameplay
                 return;
             }
 
+            // A gain is softened (or hardened) by the unit's endurance (Slice D stage 33); what takes fatigue off stays as it is.
+            amount = StatRules.FatigueGain(_balance, unit.Setup.Stats, amount);
+            if (amount == 0)
+            {
+                return;
+            }
+
             int before = unit.Fatigue;
             unit.Fatigue = FatigueRules.Add(_balance, before, amount);
             if (unit.Fatigue != before)
@@ -1018,8 +1078,10 @@ namespace F1.Gameplay
         /// </summary>
         void BreakDown(BattleUnit unit)
         {
+            // Spirit helps (Slice D stage 33).
+            int chance = StatRules.VirtueChancePercent(_balance, unit.Setup.Stats);
             int roll = _fatigueRng.NextInt(100);
-            bool virtue = roll < _balance.VirtueChancePercent;
+            bool virtue = roll < chance;
             List<FatigueStateData> pool = StatesOf(virtue ? FatigueStateKind.Virtue : FatigueStateKind.Affliction);
             if (pool.Count == 0)
             {
@@ -1027,7 +1089,7 @@ namespace F1.Gameplay
             }
 
             unit.State = pool[_fatigueRng.NextInt(pool.Count)];
-            Log(BattleEventKind.BrokeDown, UnitRef.None, unit.Ref, unit.State.Id, roll, _balance.VirtueChancePercent, virtue ? 1 : 0);
+            Log(BattleEventKind.BrokeDown, UnitRef.None, unit.Ref, unit.State.Id, roll, chance, virtue ? 1 : 0);
             if (virtue && unit.Fatigue > _balance.VirtueFatigue)
             {
                 int before = unit.Fatigue;

@@ -145,7 +145,8 @@ namespace F1.Data
             int starDamage = 0,
             int critChancePercent = 0,
             bool unique = false,
-            int dropWeight = 0)
+            int dropWeight = 0,
+            Stat? scalesWith = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             if (dropWeight < 0)
@@ -154,6 +155,13 @@ namespace F1.Data
             }
 
             DropWeight = dropWeight;
+            // The stat that grows the item's power (Slice D stage 32): one of the four that are an item's axis, on an item that does something.
+            if (scalesWith != null && !IsPowerStat(scalesWith.Value))
+            {
+                throw new DataException($"{DefinitionName} '{id}': ScalesWith must be Str, Dex, Int or Spi, not {scalesWith}.");
+            }
+
+            ScalesWith = scalesWith;
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
             if (width < 1 || width > BoardFrame.MaxSide || height < 1 || height > BoardFrame.MaxSide)
             {
@@ -171,6 +179,11 @@ namespace F1.Data
             // An item without effects never activates (stage 20): only a star item may be one, and it has no cooldown.
             if (effects.Count == 0)
             {
+                if (scalesWith != null)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': an item without effects has no power to grow, so no ScalesWith.");
+                }
+
                 if (stars.Count == 0)
                 {
                     throw new DataException($"{DefinitionName} '{id}': an item without effects must have stars.");
@@ -244,6 +257,12 @@ namespace F1.Data
             StarDamage = starDamage;
             CritChancePercent = critChancePercent;
             Unique = unique;
+        }
+
+        /// <summary>The stats an item's power can grow with (Slice D stage 32): strength, dexterity, intellect, spirit. Constitution and endurance are no item's axis.</summary>
+        public static bool IsPowerStat(Stat stat)
+        {
+            return stat == Stat.Str || stat == Stat.Dex || stat == Stat.Int || stat == Stat.Spi;
         }
 
         static bool HasDamage(IReadOnlyList<ItemEffect> effects)
@@ -362,6 +381,13 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 17, Required = Required.Always)]
         public int DropWeight { get; }
+
+        /// <summary>
+        /// The owner's stat that grows the item's power (Slice D stage 32, Docs/Design/02_Combat_System.md §4): its damage, heal, shield or burn,
+        /// and from stage 33 its hit chance. Null for an item that grows with none (a shield, a whetstone). An enemy has no stats: its items stay as they are.
+        /// </summary>
+        [JsonProperty(Order = 18, Required = Required.AllowNull)]
+        public Stat? ScalesWith { get; }
 
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]
