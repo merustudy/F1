@@ -203,7 +203,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 - `MercenaryState.Level`(1부터)·`Exp`(다음 레벨까지 쌓인 것. 마지막 레벨은 0). 새 런의 로스터와 고용된 용병은 레벨 1. 죽은 용병의 레벨은 함께 사라진다.
 - `Settle`: 살아 돌아온 파티원 모두 같은 경험치(`LevelRules.ExpFor`: 도달한 층 × `ExpPerFloor` + 클리어 `ExpClear`)를 받고(`Gain`: `ExpToNext`를 채울 때마다 한 레벨씩, 남은 것은 이월, 마지막 레벨에서는 0), `SettlementReport.ExpEarned`·`LevelUps`(새 레벨에 닿은 용병)가 정산 화면에 간다.
-- 레벨은 최대 HP를 올린다: `BeginExpedition`이 `PartyMember.Level`을 넘기고 `ExpeditionRules.Create`가 `LevelRules.MaxHpOf`(직업 최대 HP × (100 + 그 레벨의 `MaxHpBonusPercent`)/100)로 구성원의 `MaxHp`·`Hp`를 세운다. 전투 Setup은 구성원의 값을 그대로 쓴다. 피로의 150 문턱과 무기 세기는 레벨이 바꾸지 않는다(HP 대 무기 세기의 측정은 `Docs/Design/08_Simulation_Report.md` §25).
+- ~~레벨은 최대 HP를 올린다~~ (Slice D 34단계에 레벨의 HP 보너스를 지웠다: 레벨은 스탯의 성장으로 HP에 닿는다 — 아래 "편차와 성장"). `ExpeditionRules.Create`가 `LevelRules.MaxHpOf`(직업 최대 HP × (100 + 체력 %)/100)로 구성원의 `MaxHp`·`Hp`를 세운다. 전투 Setup은 구성원의 값을 그대로 쓴다. 피로의 150 문턱과 무기 세기는 레벨이 바꾸지 않는다(HP 대 무기 세기의 측정은 `Docs/Design/08_Simulation_Report.md` §25).
 
 ## 건물과 건설 (Slice C 30단계, Round 78)
 
@@ -217,6 +217,45 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 효과: `RosterLimit`·`RecruitCount`·`TreatmentRelief`(기본값 + 그 레벨의 `Bonus`). `DrawRecruits`·`CanHire`·`Treat`·저장 검증이 이 값을 읽는다. 밸런스 상수는 데이터에만 있다. (성문의 정산 금 %는 2026-10-18에 뺐다.)
 - 시뮬 `run`의 정책(`--build 0|1`): 고용·치료 뒤 금이 "다음 레벨의 값 + 고용비" 이상이면 가장 싼 다음 레벨부터(같으면 역마차 → 막사 → 쉼터). 전후는 `Docs/Design/08_Simulation_Report.md` §34·§35.
 - Test: `BuildingRulesTests`(시작 레벨, 값과 공사, 쉬기·정산의 완성, 동시 건설과 금, 잠금 셋과 쉬기·출발, 기한 뒤, 효과 셋, 같은 시드), `RunSaveMapperTests`(17, 15 → 16, 16 → 17: 성문을 버림, 17의 성문은 거름), `StaticDataTransformerTests`·`ShippedDataTests`(사다리).
+
+## 스탯 (Slice D 32단계)
+
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §2(스탯 여섯·척도·직업 기본값·체력의 HP)와 `02_Combat_System.md` §4(세기)가 소유한다. 수치는 `JobData`의 스탯 열과 `BalanceData`(`StatBaseline`·`StatMin`·`StatMax`·`StatPowerPercentPerPoint`·`HpPercentPerConPoint`)다.
+
+- Type(`F1.Data`): `Stat`(`Str`·`Dex`·`Con`·`Int`·`Spi`·`End`)과 `StatBlock`(불변, 여섯 정수, `this[Stat]`). 직업의 기본값은 `JobData.Stats`다. **null이면 모두 기준값**으로 센다(Test 데이터의 직업. 출고 CSV는 여섯 열이 필수라 늘 있다). 아이템의 축은 `ItemData.ScalesWith`(`Stat?`: `Str`·`Dex`·`Int`·`Spi`만, 효과가 있는 아이템만).
+- 규칙은 `StatRules` 한 곳이다: `BaseOf`(직업의 기본값, 없으면 기준값 여섯), `PowerPercent`(100 + `StatPowerPercentPerPoint` × (값 − 기준)), `HpPercent`(`HpPercentPerConPoint` × (체력 − 기준)), `Scale`(곱하고 내림, 최소 1 — 피해·회복·보호막의 0.01 단위)과 `ScaleStacks`(반올림, 최소 1 — 화상의 중첩). 기준에서 가장 낮은 스탯도 %가 1 이상이라는 것은 `BalanceData`의 검증이 보장한다(숨은 바닥값 없음).
+- 상태: `MercenaryState.Stats`·`RecruitState.Stats`(새 런의 로스터와 뽑힌 후보는 `BaseOf`. 후보의 편차는 34단계), 고용은 후보의 것을 그대로 가져간다. `PartyMember.Stats`(null이면 `BaseOf`) → `ExpeditionMember.Stats` → `BattleUnitSetup.Stats`(적은 null: 스탯이 없다). 원정 동안 스탯은 바뀌지 않는다(성장은 막사의 레벨업에서, 35단계).
+- 최대 HP: `LevelRules.MaxHpOf(data, jobId, stats)` = 직업의 `MaxHp` × (100 + `HpPercent`) / 100(내림). 레벨은 체력의 성장으로만 HP에 닿는다(아래 "후보의 편차와 성장").
+- 세기: `BattleEngine.Activate`가 주인의 `Stats`와 아이템의 `ScalesWith`로 `PowerPercent`를 구해 곱한다 — 피해는 대상마다 **치명타 뒤, 무기 피해 % 패시브 앞**(굴림 → 별 → 치명타 → 스탯 → 패시브), 회복·보호막은 `Scale`, 화상은 `ScaleStacks`. 적(`Stats` null)과 `ScalesWith`가 없는 아이템은 100%. 직업 패시브의 크기(보호막·화상 +3·무기 피해 %)는 곱하지 않는다. 난수를 더 쓰지 않으므로 같은 Setup은 같은 로그다.
+- 화면의 셈(`UiText`의 카드)은 같은 `StatRules`를 부른다. 표시만 하고 상태를 바꾸지 않는다.
+- Test: `StatRulesTests`(기준·위·아래의 %, 내림과 반올림, 최소 1, `BaseOf`의 null 직업, HP), `BattleEngineTests`의 "Stats" 묶음(힘 무기의 피해, 치명타 뒤 패시브 앞의 차례, 정신력의 회복·보호막, 지식의 화상 반올림, 적과 축 없는 아이템은 그대로, 같은 Setup의 같은 로그), `LevelRulesTests`(체력과 레벨의 HP), `LobbyEconomyTests`(새 런·후보·고용의 스탯), `RunSaveMapperTests`(18의 왕복, 17 → 18, 범위 밖 거름), `StaticDataValidationTests`·`DefinitionTests`(열과 범위, `ScalesWith`의 축).
+
+
+### 판정의 스탯 (Slice D 33단계)
+
+규칙은 `Docs/Design/02_Combat_System.md` §4(치명타)·§5(명중·회피·빗나감)·§6(빈사), `04_Lobby_100Day_Economy.md` §3(인내·각성)이 소유한다. 수치는 `BalanceData`(`HitBasePercent`·`HitPerStatPoint`·`DodgePerDexPoint`·`HitMinPercent`·`HitMaxPercent`·`CritPerDexPoint`·`DogDeathPercentPerConPoint`·`VirtuePerSpiPoint`·`FatiguePercentPerEndPoint`)와 `EnemyData`의 선택 열 `Accuracy`·`Dodge`(%p)다.
+
+- 확률은 **만분율**(0.01%p = 1)이다: 민첩의 회피·치명타가 0.5%p씩이라 백분율 정수로는 적을 수 없다. `HitPerStatPoint`·`DodgePerDexPoint`·`CritPerDexPoint`는 0.01 단위 Key(CSV는 "1"·"0.5")라 그 값이 곧 만분율의 1점이다. 굴림은 `NextInt(10000)`이다. 빈사와 각성은 1%p씩이라 지금처럼 백분율·`NextInt(100)`이다.
+- 명중(`StatRules.HitChance`): `HitBasePercent`×100 + 공격자의 정확 − 대상의 회피를 `HitMinPercent`~`HitMaxPercent`(×100)로 자른다. 정확은 용병이면 (공격하는 아이템의 `ScalesWith` 스탯 − 기준) × `HitPerStatPoint`(축이 없으면 0), 적이면 `Accuracy`×100. 회피는 용병이면 (민첩 − 기준) × `DodgePerDexPoint`, 적이면 `Dodge`×100. `BattleUnitSetup.Accuracy`·`Dodge`가 적의 값을 나른다.
+- 빗나갈 수 있는 것(`StatRules.CanMiss`)은 무기 장비와 공격 아이템의 `Damage`·`Burn`이다. `Activate`가 **대상마다** 그 효과를 적용하기 전에 굴린다. 피해 스트림의 차례는 공격의 피해 굴림 하나 → 대상마다 명중 굴림 → (맞았고 치명타가 있는 무기면) 치명타 굴림이다. 빗나가면 `Missed`(공격자, 대상, 아이템, A = 굴림, B = 확률)를 남기고 그 대상을 건너뛴다: 피해·피로·빈사 판정·무기 적중 패시브가 없다.
+- 치명타(`StatRules.CritChance`): (아이템의 `CritChancePercent` + 주인의 패시브 %p)×100 + (민첩 − 기준) × `CritPerDexPoint`, 0~10000. 아이템의 값이 0인 무기는 굴리지 않는다(지금처럼). `CriticalHit`의 B·C는 만분율의 굴림과 확률이다.
+  패시브 %p(36단계, 방랑자): `PassiveEffect.CritChancePercent`(언제 `Always`, 조건 `None`만 — `JobData`가 다른 조건을 거절한다, 대상 `Self`)의 크기를 `StatRules.CritBonusPercent(패시브, 아이템)`이 준다: 치명타 확률이 있는 **무기 장비**에만, 그 밖은 0. 조건이 없으므로 화면의 카드(`UiText.ItemCard`의 `ownerPassive`)도 열을 모른 채 같은 값을 센다.
+- 빈사의 사망 확률(`FatigueRules.DogDeathChancePercent`): 기본값 + 피로 상태의 %p − (체력 − 기준) × `DogDeathPercentPerConPoint`, 0~100.
+- 각성(`StatRules.VirtueChancePercent`): `VirtueChancePercent` + (정신력 − 기준) × `VirtuePerSpiPoint`, 0~100. `BrokeDown`의 B가 그 확률이다.
+- 인내(`StatRules.FatigueGain`): 오르는 피로(양수)만 (100 − `FatiguePercentPerEndPoint` × (인내 − 기준))%로 곱하고 반올림한다(0 아래 없음). 전투 안은 `ChangeFatigue` 한 곳, 전투에 들어가는 비용(진입 + 장비, 한 사건)은 `ExpeditionRules.BeginBattle`이다. 덜어 내는 피로(처치, 치명타를 넣음)와 쉬기·치료는 그대로다. 보드 머리의 "피로 +N"은 장비의 값 그대로 보인다(인내는 진입과 합친 사건에 곱해지므로).
+- 저장 형식은 그대로다(규칙 변경): 32단계의 진행 중 전투를 이으면 지금 규칙으로 재현한다(`Diverged`).
+- Test: `StatJudgementTests`(명중의 식과 자름·적의 열·축 없는 공격, 빗나감은 피해·피로·패시브 없음, 대상마다, 회복·보호막은 빗나가지 않음, 치명타 + 민첩, 빈사 − 체력, 각성 + 정신력, 인내의 피로와 덜어 냄, 진입 비용, 같은 Setup의 같은 로그).
+
+### 편차와 성장 (Slice D 34단계)
+
+규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §6(후보의 편차)과 `05_Mercenary_Growth.md` §2(레벨업의 굴림)가 소유한다. 수치는 `BalanceData.RecruitStatSpread`와 `JobData`의 성장 등급(`JobData.Growth`, `StatBlock`: 스탯마다 0~200%. null이면 성장 없음 — Test 데이터)이다.
+
+- 후보(`RunRules.DrawRecruits`): 이름 → 직업 → 스탯마다 `NextInt(2 × spread + 1) − spread`를 같은 `Recruit` 스트림에서 차례로(힘 … 인내) 굴려 직업 기본값에 더하고 `StatMin`~`StatMax`로 자른다. 시작 로스터(`NewRun`)는 편차가 없다.
+- 성장(`LevelRules.Grow`): 한 레벨마다 스탯마다 등급 ÷ 100을 더하고 나머지 %가 0보다 크면 `NextInt(100)` < 나머지로 1을 더 준다(`StatMax`에서 멈춤).
+- **레벨업은 막사에서**(35단계): `Settle`은 살아 돌아온 파티원에게 경험치만 준다(`LevelRules.Gain`: 쌓기만, `ExpToNext`를 넘어도 버리지 않음, 마지막 레벨은 0). `LevelRules.CanLevelUp`(마지막 레벨 아님 + 경험치 ≥ `ExpToNext`), `LevelUp(data, 용병, 런 시드)`: 경험치 − `ExpToNext`, 레벨 + 1(마지막이면 경험치 0), 스트림 `new Pcg32(Derive(런 시드, "growth:" + 용병 id, 오른 레벨), RngStream.Growth)`로 한 레벨을 굴려 오른 스탯을 돌려준다 — 누르는 차례·시각과 무관하고 다시 불러와도 같다(굴림과 함께 저장). `RunRules.CanLevelUp`(런이 이어짐 + 로스터에 있음, 막사의 공사는 막지 않음)·`LevelUp`.
+- `SettlementReport.ReadyToLevelUp`(생환자의 차례): 그 정산 뒤 올릴 수 있는 생환자(전에 미뤄 둔 것도). 정산 화면의 한 줄이 읽는다. 시뮬의 정책은 정산 직후 로스터의 차례로 올릴 수 있는 만큼 모두 올린다.
+- 최대 HP는 `LevelRules.MaxHpOf(data, jobId, stats)` = 직업 HP × (100 + 체력 %) / 100. 레벨은 HP를 바꾸지 않는다(`LevelData.MaxHpBonusPercent` 삭제).
+- Test: `GrowthTests`(후보 편차의 범위·같은 시드·시작 로스터 없음, 등급의 확정분과 나머지 굴림, 여러 레벨, `StatMax`, 등급 없는 직업, HP에 레벨이 없음, 35단계: 정산은 굴리지 않고 막사의 굴림은 누르는 차례와 무관), `LevelRulesTests`(쌓기·한 레벨씩·이월·마지막 레벨, 정산의 `ReadyToLevelUp`), `RunSaveMapperTests`(18 → 19의 기대 성장, 20의 넘는 경험치와 막사 레벨업의 저장).
 
 ## 전투: 결정론
 
@@ -276,7 +315,7 @@ dotnet run --project Tools/Sim -- map        --dungeon <id> --seed n
 dotnet run --project Tools/Sim -- items
 ```
 
-- 파티는 용병 id나 직업 id로 적는다. 모두에게 열 번호를 붙이면 그 열에 세운다(`knight:1,spellblade:2,bishop:3,archmage:4`).
+- 파티는 용병 id나 직업 id로 적는다. 직업 id는 아직 파티에 없는 그 직업의 시작 용병, 없으면(36단계: 방랑자는 역마차에서만 온다) 이름 풀의 첫 이름을 그 직업으로 쓴다. 기본 파티는 `warrior,ranger,priest,mage`. 모두에게 열 번호를 붙이면 그 열에 세운다(`rowan:1,kai:2,ella:3,mira:4`).
   붙이지 않으면 직업의 권장 열 순서로 앞에서부터 세운다.
 - `formations`는 같은 파티를 가능한 모든 순서로 세워 같은 시드로 돌린다. 자리가 결과를 얼마나 바꾸는지 본다.
 - `items`는 아이템마다 일반 단계의 피해 범위, 한 대상의 평균, 맞히는 수, 칸·초당 피해를 적는다(22단계의 크기 규칙). `trace`는 0.01 단위의 값(HP, 피해, 회복, 보호막, 폭풍)을 수로 적는다.
@@ -305,6 +344,7 @@ dotnet run --project Tools/Sim -- items
   단계(효과 크기, 전리품의 단계, 데이터 검증), 합치기, 정비는 `TierRulesTests`가 고정한다.
   전투 안의 피로(사건, 판정, 상태의 효과, 쓰러짐, 되쓰기, 야영지·정산·쉬는 날의 풀림, 데이터 검증)는 `FatigueBreakdownTests`가 고정한다.
   상점과 지역 코인(상점 노드의 배치, 물건과 값, 사기, 새로고침, 나가기, 전투의 코인, 데이터 검증)은 `ShopRulesTests`, 상점의 명령과 저장은 `ShopFlowTests`가 고정한다.
+  스탯(32단계: 척도, 세기, 체력의 HP, 상태와 저장)은 위 "스탯"의 Test가 고정한다.
   런의 끝(해금, 최종 결전, 승패)은 `RunEndTests`·`RunEndFlowTests`, 금·후보·고용·해고·치료(26단계)는 `LobbyEconomyTests`·`LobbyEconomyFlowTests`, 레벨과 경험치(27단계: 사다리, 오르기, HP 보너스, 정산의 경험치)는 `LevelRulesTests`가 고정한다.
 - 출고 데이터 감사: 모든 던전의 맵과 싸우는 노드마다 그 층의 전투 Setup이 만들어지고, 모든 적 무리와의 전투가 끝난다(`ShippedDataTests`).
 
@@ -320,6 +360,6 @@ dotnet run --project Tools/Sim -- items
 
 ## Deferred and Forbidden
 
-- Deferred: 유물, 전직과 STR(Slice D. 레벨·경험치·HP 보너스는 27단계에 들어왔다), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스는 28단계에 들어왔다(위 "최종 보스의 페이즈").
+- Deferred: 유물, 전직(Slice E 이후. 레벨·경험치·HP 보너스는 27단계에, 스탯은 Slice D 32단계부터 들어왔다), 일당과 로비 상점(Slice D. 금·고용·시설은 26단계에, 지역 코인은 17단계에 들어왔다), 나머지 지역 속성과 노드 종류(이벤트·보물), 최종 보스는 28단계에 들어왔다(위 "최종 보스의 페이즈").
 - Forbidden: Domain에서 Unity/Managers/Save DTO 참조, 결과 계산에 부동소수점이나 시드 밖 난수 사용, 표현 계층이 상태를 바꾸기,
   규칙 없이 추가한 효과 어휘, 시뮬 통계를 Test 통과 조건으로 쓰기.
