@@ -1,7 +1,7 @@
 Key,Subject,Reference
 longsword,"the knight's longsword: a broad steel blade, a brass crossguard and a round pommel",Assets/@Art/Unit/Job/knight.png
 greataxe,"the valkyrie's great axe: a wooden haft with one broad steel axe blade",Assets/@Art/Unit/Job/valkyrie.png
-mace,"the paladin's mace: a dark handle with a round steel head studded with spikes",Assets/@Art/Unit/Job/paladin.png
+mace,"the paladin's mace: a dark handle with a round steel head studded with spikes",ArtPipeline/Archive/82-barracks-levelup/removed-paladin/paladin.png
 healing_staff,"the bishop's staff: a golden-brown staff topped with a golden sun disc",Assets/@Art/Unit/Job/bishop.png
 fire_staff,"the archmage's staff: a gnarled wooden staff with a red crystal at its top",Assets/@Art/Unit/Job/archmage.png
 dagger,"a dagger: a short steel blade, a small crossguard and a leather grip",
