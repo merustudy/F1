@@ -257,6 +257,18 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 최대 HP는 `LevelRules.MaxHpOf(data, jobId, stats)` = 직업 HP × (100 + 체력 %) / 100. 레벨은 HP를 바꾸지 않는다(`LevelData.MaxHpBonusPercent` 삭제).
 - Test: `GrowthTests`(후보 편차의 범위·같은 시드·시작 로스터 없음, 등급의 확정분과 나머지 굴림, 여러 레벨, `StatMax`, 등급 없는 직업, HP에 레벨이 없음, 35단계: 정산은 굴리지 않고 막사의 굴림은 누르는 차례와 무관), `LevelRulesTests`(쌓기·한 레벨씩·이월·마지막 레벨, 정산의 `ReadyToLevelUp`), `RunSaveMapperTests`(18 → 19의 기대 성장, 20의 넘는 경험치와 막사 레벨업의 저장).
 
+### 특성 (Slice D 37단계)
+
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §6이 소유한다(Design/16 판정). 수치는 `TraitData`의 효과 열과 `BalanceData`(`RecruitTraitWeight0`~`2`).
+
+- Type: `TraitData`(`F1.Data`, 불변: 종류·장점/약점·가중치·반대·효과 일곱, `Clashes`)와 `TraitBonus`(`F1.Gameplay`, 효과의 합. `None`은 0). 규칙은 `TraitRules` 한 곳이다: `BonusOf(data, ids)`(합), `CanTake(data, held, trait)`(두 번 없음, 충돌 없음), `DrawInnate(data, rng)`.
+- 상태: `MercenaryState.Traits`·`RecruitState.Traits`(id의 목록, 얻은 차례). 새 런의 로스터는 `MercenaryData.Traits`(데이터, 굴리지 않음), 후보는 `DrawInnate`, 고용은 후보의 것을 가져간다. `PartyMember.Traits` → `ExpeditionMember.Traits`(원정 동안 그대로) → `BattleUnitSetup.Traits`(`TraitBonus`, 적은 null).
+- 후보의 굴림(`RunRules.DrawRecruits`): 이름 → 직업 → 스탯 → **특성**, 같은 `Recruit` 스트림. `DrawInnate`는 개수를 가중치 셋으로(`NextInt(합)`) 고르고, 하나씩 아직 가질 수 있는 타고난 특성 가운데 `Weight`로 고른다(id 차례). **고를 특성이 없거나 1·2개의 가중치가 0이면 굴리지 않는다** — 특성이 없는 데이터(Test)는 전처럼 뽑는다.
+- 식의 항(각 식은 그 항을 더하고 원래의 자름을 그대로 한다): 명중 `StatRules.Accuracy`(+ `HitPercent`×100, 용병만), 회피 `Dodge`(+ `DodgePercent`×100), 치명타 `CritChance`(+ `CritPercent`, 치명타가 있는 아이템만), 각성 `VirtueChancePercent`(+ `VirtuePercent`), 오르는 피로 `FatigueGain`(인내의 %에 `FatiguePercent`를 더함), 빈사 `FatigueRules.DogDeathChancePercent`(+ `DogDeathPercent`), 최대 HP `LevelRules.MaxHpOf`(체력의 %에 `MaxHpPercent`를 더함, 1% 아래 없음). 전투와 화면(아이템 카드의 명중·치명타, 전투 칸의 빈사 확률)이 같은 함수를 부른다.
+- 직업 특성은 직업 패시브(02 §7) 그대로다. 화면만 특성으로 보인다(`JobData.PassiveName`).
+- 결정론: 특성은 Setup의 입력이고 굴림은 런 시드의 스트림이다. 저장 22가 목록을 가진다(Architecture/07).
+- Test: `TraitRulesTests`(합, 두 번·충돌, 굴리지 않는 경우와 스트림, 개수의 가중치·같은 시드·모든 타고난 특성, 식의 항 일곱, 전투 로그의 명중·빈사 확률, 데이터 → 로스터·후보·고용·원정·Setup), `StaticDataValidationTests`(반대·시작 로스터의 검증, 정의의 범위), `ShippedDataTests`(첫 묶음 여섯과 짝, 시작 로스터, 직업 특성의 이름), `RunSaveMapperTests`(22의 저장·검증·21 → 22).
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
@@ -285,7 +297,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 ```text
 런 시드 -> 원정 시드 = Derive(런 시드, "expedition", 원정 순번)
-       -> 후보 난수 = Derive(런 시드, "recruit", 원정 순번) (26단계: 역마차의 후보)
+       -> 후보 난수 = Derive(런 시드, "recruit", 원정 순번) (26단계: 역마차의 후보. 34단계 스탯의 편차, 37단계 타고난 특성도)
 원정 시드 -> 맵 난수 = Derive(원정 시드, "map", 0)
           -> 전리품 난수 = Derive(원정 시드, "loot", 노드 id)
           -> 상점 난수 = Derive(원정 시드, "shop", 노드 id)
