@@ -28,6 +28,7 @@ namespace F1.Gameplay
                     Fatigue = 0,
                     Level = LevelRules.FirstLevel,
                     Stats = StatRules.BaseOf(data, mercenary.JobId),
+                    Traits = new List<string>(mercenary.Traits),
                 });
             }
 
@@ -77,7 +78,9 @@ namespace F1.Gameplay
                 MercenaryData name = pool[rng.NextInt(pool.Count)];
                 pool.Remove(name);
                 JobData job = jobs[rng.NextInt(jobs.Count)];
-                drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = Spread(data, StatRules.BaseOf(data, job.Id), rng) });
+                StatBlock stats = Spread(data, StatRules.BaseOf(data, job.Id), rng);
+                // Then the innate traits it was born with (Slice D stage 37), on the same stream.
+                drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = stats, Traits = TraitRules.DrawInnate(data, rng) });
             }
 
             state.Recruits = drawn;
@@ -149,6 +152,7 @@ namespace F1.Gameplay
                 Fatigue = 0,
                 Level = LevelRules.FirstLevel,
                 Stats = candidate.Stats ?? StatRules.BaseOf(data, candidate.JobId),
+                Traits = new List<string>(candidate.Traits ?? new List<string>()),
             };
             state.Roster.Add(hired);
             return hired;
@@ -493,7 +497,7 @@ namespace F1.Gameplay
             foreach (PartySlot slot in state.Party)
             {
                 MercenaryState mercenary = FindMercenary(state, slot.MercenaryId);
-                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level, mercenary.Stats));
+                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level, mercenary.Stats, mercenary.Traits));
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);

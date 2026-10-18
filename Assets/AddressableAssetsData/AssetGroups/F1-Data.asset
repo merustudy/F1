@@ -33,6 +33,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-app
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 428f1b074905d4401937c0474e11104f
+    m_Address: data/app/trait
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 49de757ed396f4570a7e674232db941f
     m_Address: data/app/recipe
     m_ReadOnly: 0

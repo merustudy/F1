@@ -68,7 +68,8 @@ namespace F1.Editor.Data
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
                 RowMapping.Figure, "Str", "Dex", "Con", "Int", "Spi", "End",
                 "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthSpi", "GrowthEnd")
-                .Concat(CsvRow.LocalizedHeaders(PassiveText)));
+                .Concat(CsvRow.LocalizedHeaders(PassiveText))
+                .Concat(CsvRow.LocalizedHeaders(PassiveName)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
                 row.Id(RowMapping.Id),
@@ -82,10 +83,12 @@ namespace F1.Editor.Data
                 // The job's base stats (Slice D stage 32): whole numbers, every one required; StaticData checks the balance's range.
                 new StatBlock(row.Int("Str"), row.Int("Dex"), row.Int("Con"), row.Int("Int"), row.Int("Spi"), row.Int("End")),
                 // The growth grades (Slice D stage 34), every one required; JobData checks 0..200.
-                new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthSpi"), row.Int("GrowthEnd"))));
+                new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthSpi"), row.Int("GrowthEnd")),
+                CsvRow.LocalizedHeaders(PassiveName).All(row.IsEmpty) ? null : row.Localized(PassiveName)));
         }
 
         const string PassiveText = "PassiveText";
+        const string PassiveName = "PassiveName";
 
         /// <summary>Empty in every locale when the job has no passive; otherwise required in every locale.</summary>
         static LocalizedText ReadPassiveText(CsvRow row)
@@ -375,12 +378,38 @@ namespace F1.Editor.Data
     {
         public static List<MercenaryData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("JobId", "Starting"));
+            table.RequireHeaders(RowMapping.Headers("JobId", "Starting", "Traits"));
             return RowMapping.MapRows(table, errors, row => new MercenaryData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.OptionalId("JobId"),
-                row.Bool("Starting")));
+                row.Bool("Starting"),
+                row.IdList("Traits")));
+        }
+    }
+
+    /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none.</summary>
+    internal static class TraitMapper
+    {
+        static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent" };
+
+        public static List<TraitData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(RowMapping.Headers(new[] { "Kind", "Polarity", "Weight", "Excludes" }.Concat(Effects).ToArray()));
+            return RowMapping.MapRows(table, errors, row => new TraitData(
+                row.Id(RowMapping.Id),
+                row.Localized(RowMapping.Name),
+                row.Enum<TraitKind>("Kind"),
+                row.Enum<TraitPolarity>("Polarity"),
+                row.Int("Weight"),
+                row.OptionalId("Excludes"),
+                row.OptionalInt("HitPercent", 0),
+                row.OptionalInt("DodgePercent", 0),
+                row.OptionalInt("CritPercent", 0),
+                row.OptionalInt("DogDeathPercent", 0),
+                row.OptionalInt("VirtuePercent", 0),
+                row.OptionalInt("FatiguePercent", 0),
+                row.OptionalInt("MaxHpPercent", 0)));
         }
     }
 }

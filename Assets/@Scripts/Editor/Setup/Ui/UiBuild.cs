@@ -472,6 +472,14 @@ namespace F1.Editor.Setup
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        /// <summary>Sets a serialized number of a view (a size the builder chose, which the view lays out by).</summary>
+        public static void SetFloat(UnityEngine.Object target, string propertyName, float value)
+        {
+            var serialized = new SerializedObject(target);
+            Find(serialized, target, propertyName).floatValue = value;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         public static void SetReferences(UnityEngine.Object target, string propertyName, params UnityEngine.Object[] values)
         {
             var serialized = new SerializedObject(target);

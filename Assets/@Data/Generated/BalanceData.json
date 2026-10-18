@@ -230,6 +230,18 @@
       "Value": 2
     },
     {
+      "Key": "RecruitTraitWeight0",
+      "Value": 30
+    },
+    {
+      "Key": "RecruitTraitWeight1",
+      "Value": 50
+    },
+    {
+      "Key": "RecruitTraitWeight2",
+      "Value": 20
+    },
+    {
       "Key": "RestDays",
       "Value": 1
     },

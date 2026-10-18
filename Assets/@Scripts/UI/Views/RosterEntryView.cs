@@ -9,7 +9,8 @@ namespace F1.UI
 {
     /// <summary>
     /// One mercenary of the roster in the barracks (Round 71: the lobby's barracks window): its fatigue as pips and words (round 33, C), an
-    /// affliction's name after the words and what it does at the right end of the passive's line (round 36), its six stats as a sheet (Slice D
+    /// affliction's name after the words and what it does at the right end of the traits' line (round 36; the line was the passive's until Slice D
+    /// stage 37, Round 84 안 A: the job's trait first, then the mercenary's, each an icon and a name), its six stats as a sheet (Slice D
     /// stage 32, Round 81 안 B: where the row buttons and "remove" stood — the party is formed in the expedition screen's popup only), its level
     /// and experience (stage 27) with the level-up button when the experience meets the level (Slice D stage 35, Round 82 안 A: the bar shortens and
     /// turns gold, the button stands at its end; what the roll grew shows beside the values under a gold rim), and the button that dismisses it
@@ -19,7 +20,7 @@ namespace F1.UI
     {
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _job;
-        [SerializeField] TMP_Text _passive;
+        [SerializeField] TraitLineView _traits;
         [SerializeField] TMP_Text _fatigue;
         [SerializeField] TMP_Text _state;
         [SerializeField] UiBar[] _fatiguePips;
@@ -35,6 +36,10 @@ namespace F1.UI
         /// <summary>The level block's two layouts (Round 82 안 A): the experience's words and bar as built, and shorter beside the level-up button.</summary>
         public const float ReadyExpLeft = 1212f;
         public const float ReadyBarWidth = 192f;
+
+        /// <summary>How far the traits' line may reach (Round 84): to the affliction's words, or the pips' end without them.</summary>
+        public const float TraitLineWidth = 590f;
+        public const float TraitStateGap = 16f;
 
         Vector2 _expPosition;
         Vector2 _barSize;
@@ -55,8 +60,11 @@ namespace F1.UI
         /// <summary>The fatigue words: "피로도 N/200", and " · 공포" after them in an affliction.</summary>
         public TMP_Text Fatigue => _fatigue;
 
-        /// <summary>What the affliction does, at the right end of the passive's line; empty without one.</summary>
+        /// <summary>What the affliction does, at the right end of the traits' line; empty without one.</summary>
         public TMP_Text State => _state;
+
+        /// <summary>The traits' line (Slice D stage 37): the job's trait and the mercenary's own.</summary>
+        public TraitLineView Traits => _traits;
 
         /// <summary>The level and the experience toward the next one (stage 27): "Lv 2", "경험치 4/25" and the bar.</summary>
         public TMP_Text Level => _level;
@@ -73,7 +81,7 @@ namespace F1.UI
         public void Show(
             string mercenaryName,
             string jobName,
-            string passive,
+            IReadOnlyList<TraitChip> traits,
             int fatigue,
             int maxFatigue,
             int breakdown,
@@ -85,7 +93,6 @@ namespace F1.UI
             _name.text = mercenaryName;
             ShowLevel(1, 0, 1);
             _job.text = jobName;
-            _passive.text = passive;
 
             // Fatigue (round 33, C): the pips fill up to it in the fatigue's violet; the pips from the breakdown on, and the
             // words once it is reached, are red. An affliction's name follows the words and what it does stands on the passive's line (round 36).
@@ -94,6 +101,8 @@ namespace F1.UI
             _fatigue.color = fatigue >= breakdown ? UiPalette.FatigueDanger : UiPalette.Fatigue;
             _state.text = afflictionEffect ?? string.Empty;
             UI.FatiguePips.Show(_fatiguePips, fatigue, maxFatigue, breakdown);
+            float stateWidth = string.IsNullOrEmpty(afflictionEffect) ? 0f : TextWidth.Of(_state, afflictionEffect) + TraitStateGap;
+            _traits.Show(traits, TraitLineWidth - stateWidth);
         }
 
         /// <summary>

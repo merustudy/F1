@@ -50,7 +50,7 @@ namespace F1.Gameplay
                 // The maximum HP is the job's with constitution's share (Slice D stage 32; the level reaches it through the stats it grew, stage 34);
                 // every expedition starts with it full.
                 StatBlock stats = member.Stats ?? StatRules.BaseOf(data, job.Id);
-                int maxHp = LevelRules.MaxHpOf(data, job.Id, stats);
+                int maxHp = LevelRules.MaxHpOf(data, job.Id, stats, TraitRules.BonusOf(data, member.Traits));
                 state.Members.Add(new ExpeditionMember
                 {
                     MercenaryId = member.MercenaryId,
@@ -63,6 +63,7 @@ namespace F1.Gameplay
                     Fatigue = member.Fatigue,
                     StateId = member.AfflictionId,
                     Stats = stats,
+                    Traits = new List<string>(member.Traits),
                 });
             }
 
@@ -127,8 +128,9 @@ namespace F1.Gameplay
             {
                 if (member.Alive)
                 {
-                    // One event (entry and equipment together), after the member's endurance (Slice D stage 33).
-                    int cost = StatRules.FatigueGain(data.Balance, member.Stats, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()));
+                    // One event (entry and equipment together), after the member's endurance (Slice D stage 33) and its traits (stage 37).
+                    int cost = StatRules.FatigueGain(data.Balance, member.Stats, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()),
+                        TraitRules.BonusOf(data, member.Traits));
                     member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, cost);
                 }
             }
@@ -1614,6 +1616,7 @@ namespace F1.Gameplay
                     Fatigue = member.Fatigue,
                     FatigueState = member.StateId == null ? null : data.FatigueStates.Get(member.StateId),
                     Stats = member.Stats,
+                    Traits = TraitRules.BonusOf(data, member.Traits),
                 });
             }
         }

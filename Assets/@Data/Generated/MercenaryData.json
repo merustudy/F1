@@ -8,7 +8,8 @@
         "ko-KR": "아벨"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "astrid",
@@ -17,7 +18,11 @@
         "ko-KR": "아스트리드"
       },
       "JobId": "viking",
-      "Starting": true
+      "Starting": true,
+      "Traits": [
+        "iron_bones",
+        "clumsy"
+      ]
     },
     {
       "Id": "bran",
@@ -26,7 +31,8 @@
         "ko-KR": "브란"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "dagny",
@@ -35,7 +41,8 @@
         "ko-KR": "다그니"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "edda",
@@ -44,7 +51,8 @@
         "ko-KR": "에다"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ella",
@@ -53,7 +61,10 @@
         "ko-KR": "엘라"
       },
       "JobId": "priest",
-      "Starting": true
+      "Starting": true,
+      "Traits": [
+        "frail"
+      ]
     },
     {
       "Id": "finn",
@@ -62,7 +73,8 @@
         "ko-KR": "핀"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "greta",
@@ -71,7 +83,8 @@
         "ko-KR": "그레타"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "gudrun",
@@ -80,7 +93,8 @@
         "ko-KR": "구드룬"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "halvar",
@@ -89,7 +103,8 @@
         "ko-KR": "할바르"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "hugo",
@@ -98,7 +113,8 @@
         "ko-KR": "휴고"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ingrid",
@@ -107,7 +123,8 @@
         "ko-KR": "잉그리드"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ivo",
@@ -116,7 +133,8 @@
         "ko-KR": "이보"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "johanna",
@@ -125,7 +143,8 @@
         "ko-KR": "요한나"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "jorun",
@@ -134,7 +153,8 @@
         "ko-KR": "요룬"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "kai",
@@ -143,7 +163,8 @@
         "ko-KR": "카이"
       },
       "JobId": "warrior",
-      "Starting": true
+      "Starting": true,
+      "Traits": []
     },
     {
       "Id": "karin",
@@ -152,7 +173,8 @@
         "ko-KR": "카린"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "lars",
@@ -161,7 +183,8 @@
         "ko-KR": "라르스"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "leif",
@@ -170,7 +193,8 @@
         "ko-KR": "레이프"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "liv",
@@ -179,7 +203,8 @@
         "ko-KR": "리브"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "magda",
@@ -188,7 +213,8 @@
         "ko-KR": "마그다"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "maren",
@@ -197,7 +223,8 @@
         "ko-KR": "마렌"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "mira",
@@ -206,7 +233,11 @@
         "ko-KR": "미라"
       },
       "JobId": "mage",
-      "Starting": true
+      "Starting": true,
+      "Traits": [
+        "eagle_eye",
+        "timid"
+      ]
     },
     {
       "Id": "nils",
@@ -215,7 +246,8 @@
         "ko-KR": "닐스"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "nora",
@@ -224,7 +256,8 @@
         "ko-KR": "노라"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "orla",
@@ -233,7 +266,8 @@
         "ko-KR": "올라"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "oskar",
@@ -242,7 +276,8 @@
         "ko-KR": "오스카르"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "otto",
@@ -251,7 +286,8 @@
         "ko-KR": "오토"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "piet",
@@ -260,7 +296,8 @@
         "ko-KR": "피트"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ragna",
@@ -269,7 +306,8 @@
         "ko-KR": "라그나"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "rowan",
@@ -278,7 +316,10 @@
         "ko-KR": "로언"
       },
       "JobId": "warrior",
-      "Starting": true
+      "Starting": true,
+      "Traits": [
+        "steady"
+      ]
     },
     {
       "Id": "runa",
@@ -287,7 +328,8 @@
         "ko-KR": "루나"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "sigrid",
@@ -296,7 +338,8 @@
         "ko-KR": "시그리드"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "sven",
@@ -305,7 +348,8 @@
         "ko-KR": "스벤"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "teo",
@@ -314,7 +358,8 @@
         "ko-KR": "테오"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "thea",
@@ -323,7 +368,8 @@
         "ko-KR": "테아"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "tove",
@@ -332,7 +378,8 @@
         "ko-KR": "토베"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ulf",
@@ -341,7 +388,8 @@
         "ko-KR": "울프"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "una",
@@ -350,7 +398,8 @@
         "ko-KR": "우나"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "vera",
@@ -359,7 +408,8 @@
         "ko-KR": "베라"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "viggo",
@@ -368,7 +418,8 @@
         "ko-KR": "비고"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "wren",
@@ -377,7 +428,8 @@
         "ko-KR": "렌"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "ylva",
@@ -386,7 +438,8 @@
         "ko-KR": "윌바"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "yrsa",
@@ -395,7 +448,8 @@
         "ko-KR": "위르사"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     },
     {
       "Id": "zelda",
@@ -404,7 +458,8 @@
         "ko-KR": "젤다"
       },
       "JobId": null,
-      "Starting": false
+      "Starting": false,
+      "Traits": []
     }
   ]
 }

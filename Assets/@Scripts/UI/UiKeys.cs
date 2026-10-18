@@ -257,6 +257,26 @@ namespace F1.UI
             public const string Down = "Stat.Down";
         }
 
+        /// <summary>The traits' line and card (Slice D stage 37, Round 84).</summary>
+        public static class Trait
+        {
+            public const string KindJob = "Trait.KindJob";
+            public const string KindInnate = "Trait.KindInnate";
+            public const string KindAcquired = "Trait.KindAcquired";
+            public const string Strength = "Trait.Strength";
+            public const string Weakness = "Trait.Weakness";
+            public const string Sub = "Trait.Sub";
+            public const string More = "Trait.More";
+            public const string MoreTitle = "Trait.MoreTitle";
+            public const string Hit = "Trait.Hit";
+            public const string Dodge = "Trait.Dodge";
+            public const string Crit = "Trait.Crit";
+            public const string DogDeath = "Trait.DogDeath";
+            public const string Virtue = "Trait.Virtue";
+            public const string Fatigue = "Trait.Fatigue";
+            public const string MaxHp = "Trait.MaxHp";
+        }
+
         public static class Item
         {
             public const string TooltipTitle = "Item.TooltipTitle";

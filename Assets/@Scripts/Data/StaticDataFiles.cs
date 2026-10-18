@@ -44,6 +44,7 @@ namespace F1.Data
         public static readonly Entry Recipe = new Entry(RecipeData.DefinitionName, "recipe");
         public static readonly Entry Level = new Entry(LevelData.DefinitionName, "level");
         public static readonly Entry Building = new Entry(BuildingData.DefinitionName, "building");
+        public static readonly Entry Trait = new Entry(TraitData.DefinitionName, "trait");
 
         public static readonly IReadOnlyList<Entry> All = new[]
         {
@@ -61,6 +62,7 @@ namespace F1.Data
             Recipe,
             Level,
             Building,
+            Trait,
         };
     }
 }

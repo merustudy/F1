@@ -1682,6 +1682,77 @@ MonoBehaviour:
       (\uB808\uBCA8 \uC5C5\uC740 \uB41C\uB2E4)"
     m_Metadata:
       m_Items: []
+  - m_Id: 6589976169930752
+    m_Localized: "\uC9C1\uC5C5 \uD2B9\uC131 \xB7 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319360
+    m_Localized: "\uD0C0\uACE0\uB09C \uD2B9\uC131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319361
+    m_Localized: "\uC5BB\uC740 \uD2B9\uC131"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319362
+    m_Localized: "\uC7A5\uC810"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319363
+    m_Localized: "\uC57D\uC810"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319364
+    m_Localized: "{0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319365
+    m_Localized: +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319366
+    m_Localized: "\uADF8 \uBC16\uC758 \uD2B9\uC131 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319367
+    m_Localized: "\uBA85\uC911 {0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319368
+    m_Localized: "\uD68C\uD53C {0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319369
+    m_Localized: "\uCE58\uBA85\uD0C0 {0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319370
+    m_Localized: "\uBE48\uC0AC\uC758 \uC0AC\uB9DD \uD655\uB960 {0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319371
+    m_Localized: "\uAC01\uC131 \uD655\uB960 {0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319372
+    m_Localized: "\uC624\uB974\uB294 \uD53C\uB85C {0}%"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 6589976178319373
+    m_Localized: "\uCD5C\uB300 HP {0}%"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
   references:
     version: 2
     RefIds:
@@ -1864,3 +1935,14 @@ MonoBehaviour:
         - id: 6525681180598272
         - id: 6525681180598274
         - id: 6525681184792576
+        - id: 6589976169930752
+        - id: 6589976178319364
+        - id: 6589976178319365
+        - id: 6589976178319366
+        - id: 6589976178319367
+        - id: 6589976178319368
+        - id: 6589976178319369
+        - id: 6589976178319370
+        - id: 6589976178319371
+        - id: 6589976178319372
+        - id: 6589976178319373

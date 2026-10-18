@@ -18,12 +18,13 @@ namespace F1.Tests
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nSellPercent,50\nCoinsPerGold,20\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nEliteCoinPercent,200\n" +
             "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n" +
             "StatBaseline,10\nStatMin,1\nStatMax,30\nStatPowerPercentPerPoint,10\nHpPercentPerConPoint,5\n" +
-            "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerStatPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nDogDeathPercentPerConPoint,1\nVirtuePerSpiPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n";
+            "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerStatPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nDogDeathPercentPerConPoint,1\nVirtuePerSpiPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n" +
+            "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd\n" +
-            "knight,기사,Knight,38,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50\n" +
-            "bishop,주교,Bishop,24.5,staff,3,,,,,,,,,,7,8,9,11,14,10,20,50,50,90,110,50\n";
+            "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US\n" +
+            "knight,기사,Knight,38,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50,선봉,Vanguard\n" +
+            "bishop,주교,Bishop,24.5,staff,3,,,,,,,,,,7,8,9,11,14,10,20,50,50,90,110,50,,\n";
 
         public const string Items =
             "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Value,Effect2Kind,Effect2Target,Effect2Reach,Effect2Value,ShopWeight,Icon,Price,Melee,Stars,StarDamage,CritChancePercent\n" +
@@ -57,11 +58,18 @@ namespace F1.Tests
             "mine,광산,Mine,swift,2,2,3,2,tonic,background/dungeon/mine,2,20,0,0,0,5,10,2,0,0,2,20\n";
 
         public const string Mercenaries =
-            "Id,Name.ko-KR,Name.en-US,JobId,Starting\n" +
-            "rowan,로언,Rowan,knight,true\n" +
-            "ella,엘라,Ella,bishop,true\n" +
-            "teo,테오,Teo,,false\n" +
-            "bran,브란,Bran,,false\n";
+            "Id,Name.ko-KR,Name.en-US,JobId,Starting,Traits\n" +
+            "rowan,로언,Rowan,knight,true,keen+sturdy\n" +
+            "ella,엘라,Ella,bishop,true,\n" +
+            "teo,테오,Teo,,false,\n" +
+            "bran,브란,Bran,,false,\n";
+
+        /// <summary>Three traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two.</summary>
+        public const string Traits =
+            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent\n" +
+            "dull,둔함,Dull,Innate,Negative,10,,-5,,,,,,\n" +
+            "keen,예리함,Keen,Innate,Positive,10,dull,5,2,1,,,,\n" +
+            "sturdy,강골,Sturdy,Innate,Positive,5,,,,,-5,3,-10,8\n";
 
         public const string Bags =
             "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +
@@ -109,6 +117,7 @@ namespace F1.Tests
                 { StaticDataFiles.Recipe.SourceFileName, Recipes },
                 { StaticDataFiles.Level.SourceFileName, Levels },
                 { StaticDataFiles.Building.SourceFileName, Buildings },
+                { StaticDataFiles.Trait.SourceFileName, Traits },
             };
         }
 

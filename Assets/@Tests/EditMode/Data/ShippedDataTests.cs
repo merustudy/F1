@@ -338,6 +338,35 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ShippedTraits_AreTheFirstBatchsSixInnate_InClashingPairs_AndTheStartingRosterHasTheDatas()
+        {
+            // Slice D stage 37 (Design/16 판정 14, Docs/Design/05 §6): the six innate traits of the first batch (the acquired seven come with stage 38),
+            // strengths and weaknesses three each, eagle eye against clumsy and steady against timid; the starting roster's set in the data.
+            StaticData data = LoadShipped();
+            CollectionAssert.AreEquivalent(new[] { "eagle_eye", "clumsy", "iron_bones", "frail", "steady", "timid" }, data.Traits.Ordered.Select(t => t.Id).ToList());
+            Assert.IsTrue(data.Traits.Ordered.All(t => t.Kind == TraitKind.Innate && t.Weight > 0));
+            Assert.AreEqual(3, data.Traits.Ordered.Count(t => t.Polarity == TraitPolarity.Positive));
+            Assert.IsTrue(data.Traits.Get("eagle_eye").Clashes(data.Traits.Get("clumsy")));
+            Assert.IsTrue(data.Traits.Get("steady").Clashes(data.Traits.Get("timid")));
+            Assert.AreEqual((5, -5, -5, -10, -10, 10), (data.Traits.Get("eagle_eye").HitPercent, data.Traits.Get("clumsy").HitPercent, data.Traits.Get("iron_bones").DogDeathPercent,
+                data.Traits.Get("frail").MaxHpPercent, data.Traits.Get("steady").FatiguePercent, data.Traits.Get("timid").FatiguePercent));
+            CollectionAssert.AreEquivalent(new[] { "rowan:steady", "astrid:iron_bones+clumsy", "ella:frail", "mira:eagle_eye+timid", "kai:" },
+                data.StartingMercenaries.Select(m => m.Id + ":" + string.Join("+", m.Traits)).ToList());
+            Assert.IsTrue(data.RecruitPool.All(m => m.Traits.Count == 0));
+            Assert.AreEqual((30, 50, 20), (data.Balance.RecruitTraitWeight0, data.Balance.RecruitTraitWeight1, data.Balance.RecruitTraitWeight2));
+        }
+
+        [Test]
+        public void EveryShippedJobsPassive_HasItsShortNameAsATrait()
+        {
+            // Round 84 판정 4: 선봉·광기·급소·후방 영창·축복.
+            StaticData data = LoadShipped();
+            var names = data.Jobs.Ordered.ToDictionary(job => job.Id, job => job.PassiveName?.Resolve("ko-KR"));
+            Assert.AreEqual(("선봉", "광기", "급소", "후방 영창", "축복"), (names["warrior"], names["viking"], names["ranger"], names["mage"], names["priest"]));
+            Assert.IsTrue(data.Jobs.Ordered.All(job => job.Passive != null && job.PassiveName.Resolve("en-US").Length > 0));
+        }
+
+        [Test]
         public void ShippedBaseWeapons_AreOnSale_AndTheGeneralItems_DropByWeight()
         {
             // 2026-10-17: the jobs' base weapons priced and weighted for the shop (the party's own only: ExpeditionRules), the shop's general

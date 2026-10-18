@@ -23,6 +23,38 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ATraitsOpposite_MustExist_AndTheStartingRostersTraits_MustExist_BeHeldOnce_AndNotClash()
+        {
+            // Slice D stage 37.
+            StringAssert.Contains("Excludes: 'ghost' does not exist", ProblemOf(parts => parts.Traits = new List<TraitData> { TestData.Trait("lone", TraitPolarity.Positive, hit: 1, excludes: "ghost") }));
+            foreach ((string[] traits, string problem) in new[]
+            {
+                (new[] { "nobody" }, "'nobody' does not exist"),
+                (new[] { "keen", "keen" }, "is there twice"),
+                (new[] { "keen", "dull" }, "clashes with another"),
+            })
+            {
+                string problems = ProblemOf(parts =>
+                {
+                    parts.Traits = TestData.Traits();
+                    parts.Mercenaries = Replace(parts.Mercenaries, m => m.Id == "anna", new MercenaryData("anna", TestData.Text("anna"), "tank", true, traits));
+                });
+                StringAssert.Contains(problem, problems);
+            }
+        }
+
+        [Test]
+        public void ATrait_MustChangeSomething_WithinItsBounds_AndAPoolNameHasNoTraits()
+        {
+            Assert.Throws<DataException>(() => TestData.Trait("idle", TraitPolarity.Positive), "Changes nothing.");
+            Assert.Throws<DataException>(() => TestData.Trait("wild", TraitPolarity.Positive, hit: 101));
+            Assert.Throws<DataException>(() => TestData.Trait("self", TraitPolarity.Positive, hit: 1, excludes: "self"));
+            Assert.Throws<DataException>(() => TestData.Trait("heavy", TraitPolarity.Positive, hit: 1, weight: -1));
+            Assert.Throws<DataException>(() => new MercenaryData("eve", TestData.Text("eve"), null, false, new[] { "keen" }), "A candidate draws its own.");
+            Assert.Throws<DataException>(() => TestData.Balance(("RecruitTraitWeight0", 0)), "Some count of traits must be possible.");
+        }
+
+        [Test]
         public void ValidParts_BuildData()
         {
             StaticData data = TestData.Data();

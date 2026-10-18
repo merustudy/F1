@@ -1,0 +1,7 @@
+Id,Name.ko-KR,Name.en-US,Kind,Polarity,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent
+clumsy,서투름,Clumsy,Innate,Negative,10,,-5,,,,,,
+eagle_eye,매의 눈,Eagle Eye,Innate,Positive,10,clumsy,5,,,,,,
+frail,허약,Frail,Innate,Negative,10,,,,,,,,-10
+iron_bones,강골,Iron Bones,Innate,Positive,10,,,,,-5,,,
+steady,담대함,Steady,Innate,Positive,10,timid,,,,,,-10,
+timid,소심함,Timid,Innate,Negative,10,,,,,,,10,

@@ -63,22 +63,26 @@ namespace F1.Gameplay
 
         /// <summary>
         /// What the attacker adds to its hit chance, in ten-thousandths: a mercenary's stat of the item's axis above the baseline times HitPerStatPoint
-        /// (nothing for an item without an axis), an enemy's Accuracy.
+        /// (nothing for an item without an axis) and its traits' points (Slice D stage 37), an enemy's Accuracy.
         /// </summary>
-        public static int Accuracy(BalanceData balance, StatBlock attackerStats, int enemyAccuracy, ItemData item)
+        public static int Accuracy(BalanceData balance, StatBlock attackerStats, int enemyAccuracy, ItemData item, TraitBonus traits = null)
         {
             if (attackerStats == null)
             {
                 return enemyAccuracy * 100;
             }
 
-            return item.ScalesWith == null ? 0 : (attackerStats[item.ScalesWith.Value] - balance.StatBaseline) * balance.HitPerStatPoint;
+            int axis = item.ScalesWith == null ? 0 : (attackerStats[item.ScalesWith.Value] - balance.StatBaseline) * balance.HitPerStatPoint;
+            return axis + (traits?.HitPercent ?? 0) * 100;
         }
 
-        /// <summary>What the target takes off a hit on it, in ten-thousandths: a mercenary's dexterity above the baseline times DodgePerDexPoint, an enemy's Dodge.</summary>
-        public static int Dodge(BalanceData balance, StatBlock targetStats, int enemyDodge)
+        /// <summary>
+        /// What the target takes off a hit on it, in ten-thousandths: a mercenary's dexterity above the baseline times DodgePerDexPoint with its traits'
+        /// points (stage 37), an enemy's Dodge.
+        /// </summary>
+        public static int Dodge(BalanceData balance, StatBlock targetStats, int enemyDodge, TraitBonus traits = null)
         {
-            return targetStats == null ? enemyDodge * 100 : (targetStats.Dex - balance.StatBaseline) * balance.DodgePerDexPoint;
+            return targetStats == null ? enemyDodge * 100 : (targetStats.Dex - balance.StatBaseline) * balance.DodgePerDexPoint + (traits?.DodgePercent ?? 0) * 100;
         }
 
         /// <summary>The hit chance in ten-thousandths: HitBasePercent with the accuracy and less the dodge, within HitMinPercent..HitMaxPercent.</summary>
@@ -88,10 +92,11 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// A weapon's critical chance in ten-thousandths: the item's percent with the owner's dexterity's half points and the owner's passive's
-        /// points (Slice D stage 36, <see cref="CritBonusPercent"/>), within 0..100%. 0 for an item without a critical chance.
+        /// A weapon's critical chance in ten-thousandths: the item's percent with the owner's dexterity's half points, the owner's passive's
+        /// points (Slice D stage 36, <see cref="CritBonusPercent"/>) and its traits' points (stage 37), within 0..100%. 0 for an item without a
+        /// critical chance.
         /// </summary>
-        public static int CritChance(BalanceData balance, StatBlock ownerStats, ItemData item, int bonusPercent = 0)
+        public static int CritChance(BalanceData balance, StatBlock ownerStats, ItemData item, int bonusPercent = 0, TraitBonus traits = null)
         {
             if (item.CritChancePercent <= 0)
             {
@@ -99,7 +104,7 @@ namespace F1.Gameplay
             }
 
             int dex = ownerStats == null ? 0 : (ownerStats.Dex - balance.StatBaseline) * balance.CritPerDexPoint;
-            return Clamp((item.CritChancePercent + bonusPercent) * 100 + dex, 0, Certain);
+            return Clamp((item.CritChancePercent + bonusPercent + (traits?.CritPercent ?? 0)) * 100 + dex, 0, Certain);
         }
 
         /// <summary>
@@ -114,11 +119,11 @@ namespace F1.Gameplay
                 : 0;
         }
 
-        /// <summary>The chance of a virtue at the breakdown, in percent: VirtueChancePercent with spirit's points (none without stats), within 0..100.</summary>
-        public static int VirtueChancePercent(BalanceData balance, StatBlock stats)
+        /// <summary>The chance of a virtue at the breakdown, in percent: VirtueChancePercent with spirit's points (none without stats) and the traits' (stage 37), within 0..100.</summary>
+        public static int VirtueChancePercent(BalanceData balance, StatBlock stats, TraitBonus traits = null)
         {
             int spirit = stats == null ? 0 : (stats.Spi - balance.StatBaseline) * balance.VirtuePerSpiPoint;
-            return Clamp(balance.VirtueChancePercent + spirit, 0, Full);
+            return Clamp(balance.VirtueChancePercent + spirit + (traits?.VirtuePercent ?? 0), 0, Full);
         }
 
         /// <summary>What constitution takes off the death chance at death's door, in percent points (negative under the baseline); 0 without stats.</summary>
@@ -129,16 +134,18 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The fatigue a mercenary gains from one event, after its endurance: a gain (a positive amount) times 100 less FatiguePercentPerEndPoint for each
-        /// point above the baseline (more below it), rounded half up, never under 0. What takes fatigue off stays as it is.
+        /// point above the baseline (more below it) with its traits' percent (stage 37), rounded half up, never under 0. What takes fatigue off stays as it is.
         /// </summary>
-        public static int FatigueGain(BalanceData balance, StatBlock stats, int amount)
+        public static int FatigueGain(BalanceData balance, StatBlock stats, int amount, TraitBonus traits = null)
         {
-            if (amount <= 0 || stats == null)
+            int traitPercent = traits?.FatiguePercent ?? 0;
+            if (amount <= 0 || (stats == null && traitPercent == 0))
             {
                 return amount;
             }
 
-            int percent = Math.Max(0, Full - balance.FatiguePercentPerEndPoint * (stats.End - balance.StatBaseline));
+            int endurance = stats == null ? 0 : balance.FatiguePercentPerEndPoint * (stats.End - balance.StatBaseline);
+            int percent = Math.Max(0, Full - endurance + traitPercent);
             return (int)(((long)amount * percent + Full / 2) / Full);
         }
 

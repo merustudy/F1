@@ -82,3 +82,6 @@ DogDeathPercentPerConPoint,1
 VirtuePerSpiPoint,1
 FatiguePercentPerEndPoint,3
 RecruitStatSpread,2
+RecruitTraitWeight0,30
+RecruitTraitWeight1,50
+RecruitTraitWeight2,20

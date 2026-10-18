@@ -140,6 +140,9 @@ namespace F1.Data
             new KeySpec(nameof(VirtuePerSpiPoint), 0, 100),
             new KeySpec(nameof(FatiguePercentPerEndPoint), 0, 100),
             new KeySpec(nameof(RecruitStatSpread), 0, 10),
+            new KeySpec(nameof(RecruitTraitWeight0), 0, 1000),
+            new KeySpec(nameof(RecruitTraitWeight1), 0, 1000),
+            new KeySpec(nameof(RecruitTraitWeight2), 0, 1000),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -231,6 +234,12 @@ namespace F1.Data
             if (HitMinPercent > HitBasePercent || HitBasePercent > HitMaxPercent)
             {
                 throw new DataException($"{DefinitionName}: HitBasePercent must lie within HitMinPercent..HitMaxPercent.");
+            }
+
+            // How many innate traits a candidate draws (Slice D stage 37): some count must be possible.
+            if (RecruitTraitWeight0 + RecruitTraitWeight1 + RecruitTraitWeight2 <= 0)
+            {
+                throw new DataException($"{DefinitionName}: RecruitTraitWeight0..2 cannot all be 0.");
             }
 
             if (RosterLimit < PartySize)
@@ -435,5 +444,13 @@ namespace F1.Data
 
         /// <summary>How far a candidate's stat may lie from its job's base value, either way (Slice D stage 34, Docs/Design/04 §6): drawn evenly in -n..n.</summary>
         public int RecruitStatSpread => _values[nameof(RecruitStatSpread)];
+
+        /// <summary>
+        /// The weights of how many innate traits a candidate is born with (Slice D stage 37, Docs/Design/05 §6): none, one or two. The draw happens
+        /// only when one or two can come (a weight above 0 for them) and there is a trait to draw.
+        /// </summary>
+        public int RecruitTraitWeight0 => _values[nameof(RecruitTraitWeight0)];
+        public int RecruitTraitWeight1 => _values[nameof(RecruitTraitWeight1)];
+        public int RecruitTraitWeight2 => _values[nameof(RecruitTraitWeight2)];
     }
 }

@@ -585,8 +585,8 @@ namespace F1.Gameplay
         {
             int chance = StatRules.HitChance(
                 _balance,
-                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, item),
-                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge));
+                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, item, owner.Setup.Traits),
+                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits));
             // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
             if (chance >= StatRules.Certain)
             {
@@ -614,8 +614,8 @@ namespace F1.Gameplay
                 return false;
             }
 
-            // In ten-thousandths, with the owner's dexterity (Slice D stage 33) and the ranger's passive (stage 36).
-            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon));
+            // In ten-thousandths, with the owner's dexterity (Slice D stage 33), the ranger's passive (stage 36) and the owner's traits (stage 37).
+            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon), owner.Setup.Traits);
             _lastCritRoll = _damageRng.NextInt(StatRules.Certain);
             if (_lastCritRoll >= _lastCritChance)
             {
@@ -939,7 +939,7 @@ namespace F1.Gameplay
                 Log(BattleEventKind.GraceBroken, UnitRef.None, target.Ref, null, target.GraceHits, 0, 0);
             }
 
-            int chance = FatigueRules.DogDeathChancePercent(_balance, target.State, target.Setup.Stats);
+            int chance = FatigueRules.DogDeathChancePercent(_balance, target.State, target.Setup.Stats, target.Setup.Traits);
             int roll = _battleRng.NextInt(100);
             bool died = roll < chance;
             Log(BattleEventKind.DeathRolled, UnitRef.None, target.Ref, null, chance, roll, died ? 1 : 0);
@@ -1011,8 +1011,8 @@ namespace F1.Gameplay
                 return;
             }
 
-            // A gain is softened (or hardened) by the unit's endurance (Slice D stage 33); what takes fatigue off stays as it is.
-            amount = StatRules.FatigueGain(_balance, unit.Setup.Stats, amount);
+            // A gain is softened (or hardened) by the unit's endurance (Slice D stage 33) and its traits (stage 37); what takes fatigue off stays as it is.
+            amount = StatRules.FatigueGain(_balance, unit.Setup.Stats, amount, unit.Setup.Traits);
             if (amount == 0)
             {
                 return;
@@ -1078,8 +1078,8 @@ namespace F1.Gameplay
         /// </summary>
         void BreakDown(BattleUnit unit)
         {
-            // Spirit helps (Slice D stage 33).
-            int chance = StatRules.VirtueChancePercent(_balance, unit.Setup.Stats);
+            // Spirit helps (Slice D stage 33), and so may the unit's traits (stage 37).
+            int chance = StatRules.VirtueChancePercent(_balance, unit.Setup.Stats, unit.Setup.Traits);
             int roll = _fatigueRng.NextInt(100);
             bool virtue = roll < chance;
             List<FatigueStateData> pool = StatesOf(virtue ? FatigueStateKind.Virtue : FatigueStateKind.Affliction);

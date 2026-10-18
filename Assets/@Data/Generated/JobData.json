@@ -41,6 +41,10 @@
         "Int": 110,
         "Spi": 90,
         "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Rear Casting",
+        "ko-KR": "후방 영창"
       }
     },
     {
@@ -80,6 +84,10 @@
         "Int": 90,
         "Spi": 110,
         "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Blessing",
+        "ko-KR": "축복"
       }
     },
     {
@@ -119,6 +127,10 @@
         "Int": 20,
         "Spi": 50,
         "End": 90
+      },
+      "PassiveName": {
+        "en-US": "Weak Spot",
+        "ko-KR": "급소"
       }
     },
     {
@@ -158,6 +170,10 @@
         "Int": 20,
         "Spi": 50,
         "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Frenzy",
+        "ko-KR": "광기"
       }
     },
     {
@@ -200,6 +216,10 @@
         "Int": 20,
         "Spi": 50,
         "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Vanguard",
+        "ko-KR": "선봉"
       }
     }
   ]

@@ -20,13 +20,14 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// The maximum HP (hundredths) a mercenary of a job has with its stats: the job's, with what constitution adds (Slice D stage 32), in percent,
-        /// rounded down. A level reaches it through the constitution it grows (stage 34 took the level's own bonus out).
+        /// The maximum HP (hundredths) a mercenary of a job has with its stats: the job's, with what constitution adds (Slice D stage 32) and what its
+        /// traits add (stage 37), in percent, rounded down, never under 1%. A level reaches it through the constitution it grows (stage 34 took the
+        /// level's own bonus out).
         /// </summary>
-        public static int MaxHpOf(StaticData data, string jobId, StatBlock stats)
+        public static int MaxHpOf(StaticData data, string jobId, StatBlock stats, TraitBonus traits = null)
         {
             JobData job = data.Jobs.Get(jobId);
-            int percent = 100 + StatRules.HpPercent(data.Balance, stats);
+            int percent = Math.Max(1, 100 + StatRules.HpPercent(data.Balance, stats) + (traits?.MaxHpPercent ?? 0));
             return (int)((long)job.MaxHp * percent / 100);
         }
 

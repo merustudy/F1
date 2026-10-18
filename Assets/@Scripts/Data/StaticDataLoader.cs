@@ -33,6 +33,7 @@ namespace F1.Data
                 Recipes = Read<RecipeData>(StaticDataFiles.Recipe, readJson),
                 Levels = Read<LevelData>(StaticDataFiles.Level, readJson),
                 Buildings = Read<BuildingData>(StaticDataFiles.Building, readJson),
+                Traits = Read<TraitData>(StaticDataFiles.Trait, readJson),
             });
         }
 
@@ -55,6 +56,7 @@ namespace F1.Data
                 { StaticDataFiles.FatigueState.GeneratedFileName, StaticDataJson.Serialize(new List<FatigueStateData>(data.FatigueStates.Ordered)) },
                 { StaticDataFiles.Level.GeneratedFileName, StaticDataJson.Serialize(new List<LevelData>(data.Levels)) },
                 { StaticDataFiles.Building.GeneratedFileName, StaticDataJson.Serialize(new List<BuildingData>(data.Buildings)) },
+                { StaticDataFiles.Trait.GeneratedFileName, StaticDataJson.Serialize(new List<TraitData>(data.Traits.Ordered)) },
             };
         }
 

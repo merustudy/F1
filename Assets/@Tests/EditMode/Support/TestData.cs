@@ -114,6 +114,10 @@ namespace F1.Tests
                 { "FatiguePercentPerEndPoint", 3 },
                 // Slice D stage 34: no spread (a candidate draws nothing more, so the tests' candidates stay as they were); growth tests set 2.
                 { "RecruitStatSpread", 0 },
+                // No innate traits by default (Slice D stage 37): a candidate draws none and rolls nothing, so the stagecoach draws as before.
+                { "RecruitTraitWeight0", 1 },
+                { "RecruitTraitWeight1", 0 },
+                { "RecruitTraitWeight2", 0 },
             };
             foreach ((string key, int value) in overrides)
             {
@@ -231,6 +235,34 @@ namespace F1.Tests
         }
 
         /// <summary>The fatigue states of the test data: an affliction and a virtue of each kind of change.</summary>
+        /// <summary>A trait of the tests (Slice D stage 37): innate unless told, weight 10.</summary>
+        public static TraitData Trait(string id, TraitPolarity polarity, int hit = 0, int dodge = 0, int crit = 0, int dogDeath = 0, int virtue = 0, int fatigue = 0,
+            int maxHp = 0, string excludes = null, int weight = 10, TraitKind kind = TraitKind.Innate)
+        {
+            return new TraitData(id, Text(id), kind, polarity, weight, excludes, hit, dodge, crit, dogDeath, virtue, fatigue, maxHp);
+        }
+
+        /// <summary>Four innate traits — keen and dull clash — and one acquired, which a candidate never draws. Parts() has none: a test adds them.</summary>
+        public static List<TraitData> Traits()
+        {
+            return new List<TraitData>
+            {
+                Trait("keen", TraitPolarity.Positive, hit: 5, excludes: "dull"),
+                Trait("dull", TraitPolarity.Negative, hit: -5),
+                Trait("sturdy", TraitPolarity.Positive, dogDeath: -5),
+                Trait("frail_t", TraitPolarity.Negative, maxHp: -10),
+                Trait("scar_t", TraitPolarity.Negative, maxHp: -5, kind: TraitKind.Acquired),
+            };
+        }
+
+        /// <summary>The test data with <see cref="Traits"/>.</summary>
+        public static StaticData DataWithTraits(params (string Key, int Value)[] balanceOverrides)
+        {
+            StaticDataParts parts = Parts(balanceOverrides);
+            parts.Traits = Traits();
+            return new StaticData(parts);
+        }
+
         public static List<FatigueStateData> FatigueStates()
         {
             return new List<FatigueStateData>

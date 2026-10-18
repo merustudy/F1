@@ -85,11 +85,13 @@ namespace F1.Editor.Setup
             Image stage = UiBuild.Panel("Stage", w, UiPalette.Slot);
             UiBuild.Box(stage, PartyStageX, PartyStageY, PartyStageWidth, PartyStageHeight);
             UiBuild.Box(UiBuild.Image("StageFloorLine", stage.transform, UiPalette.Line), 20f, PartyStageFoot + 1f, PartyStageWidth - 40f, 2f);
+            // The popup's trait card (Slice D stage 37): the stage's and the list's chips open it.
+            TraitTooltipView traitCard = BuildTraitTooltip(w, "Party");
             var slots = new PartyRowSlotView[BattleRows.Count];
             for (int i = 0; i < slots.Length; i++)
             {
                 int row = i + 1;
-                slots[i] = BuildPartyStageColumn(stage.transform, row, PartyStageColumnWidth * (BattleRows.Count - row));
+                slots[i] = BuildPartyStageColumn(stage.transform, row, PartyStageColumnWidth * (BattleRows.Count - row), traitCard);
             }
 
             TextMeshProUGUI partyStatus = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("PartyStatus", w, 24f, UiPalette.Text)), PartyStageX + 24f, PartyStageY + PartyStageHeight - 68f, 600f, 40f);
@@ -100,7 +102,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI rosterHeader = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RosterHeader", w, 20f, UiPalette.TextDim)), PartyListX, 86f, PartyListWidth, 30f);
             RectTransform list = UiBuild.Box(UiBuild.Rect("List", w), PartyListX, 120f, PartyListWidth, PartyWindowHeight - 120f - 24f);
             UiBuild.Vertical(list, 8f);
-            PartyListRowView rowTemplate = BuildPartyListRow(list);
+            PartyListRowView rowTemplate = BuildPartyListRow(list, traitCard);
             GameObject emptyTemplate = BuildEmptySlot(list);
             StatTooltipView statTooltip = BuildStatTooltip(w);
 
@@ -155,7 +157,7 @@ namespace F1.Editor.Setup
         /// placeholder) standing on the floor line, or the dim empty place with its words; under the feet the row label, the name and
         /// the level, the job line (the empty row's hint in its place), the fatigue pips, and the moves — forward, back.
         /// </summary>
-        static PartyRowSlotView BuildPartyStageColumn(Transform parent, int row, float x)
+        static PartyRowSlotView BuildPartyStageColumn(Transform parent, int row, float x, TraitTooltipView traitCard)
         {
             float w = PartyStageColumnWidth;
             RectTransform column = UiBuild.Box(UiBuild.Rect("PartySlot" + row, parent), x, 0f, w, PartyStageHeight);
@@ -171,6 +173,8 @@ namespace F1.Editor.Setup
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotName" + row, column, 26f, UiPalette.Text)), cx - 66f, top - 3f, 126f, 34f);
             TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotLevel" + row, column, 18f, UiPalette.Bone, TextAlignmentOptions.Right)), cx + 60f, top + 2f, 50f, 26f);
             TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("SlotDetail" + row, column, 20f, UiPalette.TextDim)), cx - 110f, top + 34f, 220f, 28f);
+            // The traits' icons after the job's words (Slice D stage 37, Round 84): the view moves the line to where the words end.
+            TraitLineView traits = BuildTraitLine("SlotTraits" + row, column, cx - 110f, top + 35f, 26f, 20f, 14f, 6, false, traitCard);
             RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("SlotPips" + row, column), cx - 110f, top + 66f, 220f, 12f);
             UiBar[] pips = FatiguePipRow("Slot" + row + "Pip", pipsRow, 220f, 12f);
             // The six stats in two columns and three rows (Slice D stage 32, Round 81), then the moves 96 lower than before.
@@ -193,6 +197,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_detail", detail);
             UiBuild.SetReferences(view, "_pips", pips);
             UiBuild.SetReferences(view, "_stats", stats);
+            UiBuild.SetReference(view, "_traits", traits);
+            UiBuild.SetFloat(view, "_detailRight", cx + 110f);
             UiBuild.SetReference(view, "_forward", forward.Button);
             UiBuild.SetReference(view, "_back", back.Button);
             return view;
@@ -202,7 +208,7 @@ namespace F1.Editor.Setup
         /// The template of a line of the popup's list (the mock, as the barracks lists the roster): a small figure, the name, the job,
         /// the level, the passive, the pips, the row tag and the party button. The screen clones it per mercenary.
         /// </summary>
-        static PartyListRowView BuildPartyListRow(Transform parent)
+        static PartyListRowView BuildPartyListRow(Transform parent, TraitTooltipView traitCard)
         {
             Image background = UiBuild.Panel("RowTemplate", parent, UiPalette.PanelLight);
             // The line takes the pointer so that it can open its stat tooltip (Round 81); its button still takes the clicks.
@@ -217,7 +223,8 @@ namespace F1.Editor.Setup
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowName", line, 24f, UiPalette.Text)), 80f, 6f, 126f, 32f);
             TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowJob", line, 18f, UiPalette.TextDim)), 210f, 11f, 96f, 26f);
             TextMeshProUGUI level = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowLevel", line, 17f, UiPalette.Bone)), 310f, 11f, 70f, 26f);
-            TextMeshProUGUI passive = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowPassive", line, 15f, UiPalette.TextDim)), 80f, 38f, 440f, 24f);
+            // The traits where the passive stood (Slice D stage 37, Round 84): smaller icons and names, "+N" past what fits before the row tag.
+            TraitLineView traits = BuildTraitLine("RowTraits", line, 80f, 38f, 24f, 18f, 14f, 6, true, traitCard);
             RectTransform pipsRow = UiBuild.Box(UiBuild.Rect("RowPips", line), 80f, 66f, 320f, 9f);
             UiBar[] pips = FatiguePipRow("RowPip", pipsRow, 320f, 9f);
             TextMeshProUGUI row = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("RowTag", line, 20f, UiPalette.Brass, TextAlignmentOptions.Right)), PartyListWidth - 200f, 30f, 60f, 28f);
@@ -230,7 +237,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReference(view, "_level", level);
-            UiBuild.SetReference(view, "_passive", passive);
+            UiBuild.SetReference(view, "_traits", traits);
             UiBuild.SetReference(view, "_row", row);
             UiBuild.SetReferences(view, "_pips", pips);
             UiBuild.SetReference(view, "_button", button.Button);

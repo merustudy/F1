@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using F1.Data;
 using F1.Save;
 
@@ -23,6 +24,39 @@ namespace F1.Flow
             {
                 throw new RunSaveException($"Schema version {save.SchemaVersion} cannot be read.");
             }
+
+            if (save.SchemaVersion == 21)
+            {
+                From21To22(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 22 (Slice D stage 37) added the traits: a version 21 run had none, so every mercenary and candidate gets an empty list (the starting
+        /// roster's traits of the data are not given to a run already going: Docs/Design/16 §5-7).
+        /// </summary>
+        static void From21To22(RunSaveData save)
+        {
+            if (save.Run != null)
+            {
+                foreach (MercenaryRecord mercenary in save.Run.Roster ?? new List<MercenaryRecord>())
+                {
+                    if (mercenary != null)
+                    {
+                        mercenary.Traits = mercenary.Traits ?? new List<string>();
+                    }
+                }
+
+                foreach (RecruitRecord recruit in save.Run.Recruits ?? new List<RecruitRecord>())
+                {
+                    if (recruit != null)
+                    {
+                        recruit.Traits = recruit.Traits ?? new List<string>();
+                    }
+                }
+            }
+
+            save.SchemaVersion = 22;
         }
     }
 }

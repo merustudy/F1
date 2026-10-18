@@ -240,7 +240,8 @@ namespace F1.Sim
                 }
             }
 
-            return members.Select(m => new PartyMember(m.Mercenary.Id, m.Job.Id, m.Row)).ToList();
+            // A starting mercenary brings the traits the data gives it (Slice D stage 37); a name of the pool has none.
+            return members.Select(m => new PartyMember(m.Mercenary.Id, m.Job.Id, m.Row, traits: m.Mercenary.Traits)).ToList();
         }
 
         /// <summary>One fresh party against one enemy group, many seeds.</summary>
@@ -425,7 +426,7 @@ namespace F1.Sim
                 var lined = new List<PartyMember>();
                 for (int i = 0; i < order.Count; i++)
                 {
-                    lined.Add(new PartyMember(order[i].MercenaryId, order[i].JobId, BattleRows.Front + i));
+                    lined.Add(new PartyMember(order[i].MercenaryId, order[i].JobId, BattleRows.Front + i, traits: order[i].Traits));
                 }
 
                 results.Add((lined, RunExpeditions(data, dungeonId, lined, policy, runs, baseSeed)));
@@ -570,6 +571,7 @@ namespace F1.Sim
             long goldEarned = 0, goldHired = 0, goldTreated = 0, goldLeft = 0, hires = 0, treatments = 0, rosterAtEnd = 0, hiredDeaths = 0;
             long levelsAtEnd = 0, levelUps = 0, highestLevel = 0, runsAtMaxLevel = 0, runsWithLiving = 0;
             var statsAtEnd = new long[StatBlock.All.Length];
+            long hiredStrengths = 0, hiredWeaknesses = 0, strengthsAtEnd = 0, weaknessesAtEnd = 0;
             long finalExpeditions = 0, finalCleared = 0, finalWiped = 0, finalRetreated = 0, finalDeaths = 0, runsThatClearedFinal = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
@@ -580,12 +582,16 @@ namespace F1.Sim
                 int guard = 0;
                 while (!state.IsOver && guard++ < 10000)
                 {
-                    // The stagecoach first: a fresh recruit may be the least tired of all.
+                    // The stagecoach first: a fresh recruit may be the least tired of all. The candidate with the fewest weaknesses goes first,
+                    // then the one with the most strengths (Slice D stage 37), then the first.
                     while (state.Roster.Count < data.Balance.PartySize + bench && RunRules.CanHire(data, state, 0) == HireCheck.Ok)
                     {
-                        hired.Add(RunRules.Hire(data, state, 0).Id);
+                        MercenaryState recruit = RunRules.Hire(data, state, BestCandidate(data, state));
+                        hired.Add(recruit.Id);
                         hires++;
                         goldHired += data.Balance.HirePrice;
+                        hiredStrengths += Count(data, recruit.Traits, TraitPolarity.Positive);
+                        hiredWeaknesses += Count(data, recruit.Traits, TraitPolarity.Negative);
                     }
 
                     List<PartySlot> party = ChooseParty(data, state);
@@ -698,6 +704,8 @@ namespace F1.Sim
                 levelsAtEnd += state.Roster.Sum(m => m.Level);
                 foreach (MercenaryState living in state.Roster)
                 {
+                    strengthsAtEnd += Count(data, living.Traits, TraitPolarity.Positive);
+                    weaknessesAtEnd += Count(data, living.Traits, TraitPolarity.Negative);
                     StatBlock stats = living.Stats ?? StatRules.BaseOf(data, living.JobId);
                     for (int i = 0; i < StatBlock.All.Length; i++)
                     {
@@ -738,6 +746,30 @@ namespace F1.Sim
                 + $"the highest {Average(highestLevel, (int)runsWithLiving)} on average (runs with someone living), at the last level ({data.MaxLevel}) in {BattleStats.Percent((int)runsAtMaxLevel, runs)} of runs");
             Console.WriteLine("  stats (Slice D stage 32): the living at the end average "
                 + string.Join(", ", StatBlock.All.Select((stat, i) => $"{stat} {Average(statsAtEnd[i], (int)rosterAtEnd)}")));
+            Console.WriteLine($"  traits (Slice D stage 37): a hire brings {Average(hiredStrengths, (int)hires)} strengths and {Average(hiredWeaknesses, (int)hires)} weaknesses; "
+                + $"the living at the end have {Average(strengthsAtEnd, (int)rosterAtEnd)} and {Average(weaknessesAtEnd, (int)rosterAtEnd)}");
+        }
+
+        /// <summary>The run policy's pick at the stagecoach (stage 37): the fewest weaknesses, then the most strengths, then the first.</summary>
+        static int BestCandidate(StaticData data, RunState state)
+        {
+            int best = 0;
+            for (int i = 1; i < state.Recruits.Count; i++)
+            {
+                List<string> traits = state.Recruits[i].Traits, bestTraits = state.Recruits[best].Traits;
+                int weaker = Count(data, traits, TraitPolarity.Negative) - Count(data, bestTraits, TraitPolarity.Negative);
+                if (weaker < 0 || (weaker == 0 && Count(data, traits, TraitPolarity.Positive) > Count(data, bestTraits, TraitPolarity.Positive)))
+                {
+                    best = i;
+                }
+            }
+
+            return best;
+        }
+
+        static int Count(StaticData data, IReadOnlyList<string> traitIds, TraitPolarity polarity)
+        {
+            return traitIds.Count(id => data.Traits.Get(id).Polarity == polarity);
         }
 
         /// <summary>The final dungeon once it is open (or once the final stand is due), else the first dungeon that is not final and is open.</summary>

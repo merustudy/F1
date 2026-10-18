@@ -385,6 +385,14 @@ namespace F1.Tests
             }
 
             yield return Capture(prefix + "_57_lobby_barracks");
+            // The trait card (Slice D stage 37, Round 84; 2026-10-19 on a right click): 아스트리드's weakness right-clicked.
+            int astrid = Managers.Run.Run.Roster.FindIndex(m => m.Id == "astrid");
+            TraitChipBase weakness = UiTestUtil.RosterEntries(lobby)[astrid].Traits.Chips[2];
+            UiTestUtil.PressTheBackground();
+            weakness.RightClickNow();
+            yield return Capture(prefix + "_75_barracks_trait_card");
+            UiTestUtil.PressTheBackground();
+            yield return null;
             yield return StagedLevelUp(lobby, prefix);
             UiTestUtil.CloseQuarter(lobby);
             yield return Capture(prefix + "_03_lobby_party");

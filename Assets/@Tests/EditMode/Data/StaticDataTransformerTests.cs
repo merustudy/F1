@@ -103,6 +103,17 @@ namespace F1.Tests
             Assert.AreEqual("Shield {0}", knight.PassiveText.Resolve("en-US"));
             Assert.IsNull(data.Jobs.Get("bishop").Passive, "Empty Passive* cells mean no passive.");
             Assert.IsNull(data.Jobs.Get("bishop").PassiveText);
+            Assert.AreEqual(("선봉", "Vanguard"), (knight.PassiveName.Resolve("ko-KR"), knight.PassiveName.Resolve("en-US")), "The passive's short name as the job's trait (stage 37).");
+            Assert.IsNull(data.Jobs.Get("bishop").PassiveName);
+            // The traits (Slice D stage 37): every column, an empty effect cell is 0, an empty Excludes none; the starting roster's in the data's order.
+            TraitData keen = data.Traits.Get("keen");
+            Assert.AreEqual((TraitKind.Innate, TraitPolarity.Positive, 10, "dull"), (keen.Kind, keen.Polarity, keen.Weight, keen.Excludes));
+            Assert.AreEqual((5, 2, 1, 0, 0, 0, 0), (keen.HitPercent, keen.DodgePercent, keen.CritPercent, keen.DogDeathPercent, keen.VirtuePercent, keen.FatiguePercent, keen.MaxHpPercent));
+            TraitData sturdy = data.Traits.Get("sturdy");
+            Assert.AreEqual((5, (string)null, -5, 3, -10, 8), (sturdy.Weight, sturdy.Excludes, sturdy.DogDeathPercent, sturdy.VirtuePercent, sturdy.FatiguePercent, sturdy.MaxHpPercent));
+            Assert.AreEqual("둔함", data.Traits.Get("dull").Name.Resolve("ko-KR"));
+            CollectionAssert.AreEqual(new[] { "keen", "sturdy" }, data.Mercenaries.Get("rowan").Traits);
+            Assert.AreEqual(0, data.Mercenaries.Get("teo").Traits.Count);
             Assert.AreEqual("unit/job/knight", knight.Figure);
             Assert.IsNull(data.Jobs.Get("bishop").Figure, "An empty Figure cell means the job has no art.");
             Assert.AreEqual("unit/enemy/rat", data.Enemies.Get("rat").Figure);

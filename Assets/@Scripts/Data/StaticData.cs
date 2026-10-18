@@ -21,6 +21,9 @@ namespace F1.Data
         public IEnumerable<RecipeData> Recipes;
         public IEnumerable<LevelData> Levels;
         public IEnumerable<BuildingData> Buildings;
+
+        /// <summary>The mercenaries' traits (Slice D stage 37). Null is none (test data).</summary>
+        public IEnumerable<TraitData> Traits;
     }
 
     /// <summary>
@@ -98,6 +101,7 @@ namespace F1.Data
             Recipes = Index(parts.Recipes ?? new List<RecipeData>(), x => x.Id, RecipeData.DefinitionName, problems);
             Levels = LevelLadder(parts.Levels, problems);
             Buildings = BuildingLadders(parts.Buildings, problems);
+            Traits = Index(parts.Traits ?? new List<TraitData>(), x => x.Id, TraitData.DefinitionName, problems);
 
             if (Balance != null)
             {
@@ -293,6 +297,12 @@ namespace F1.Data
         }
         public DataTable<FatigueStateData> FatigueStates { get; }
 
+        /// <summary>The mercenaries' traits (Slice D stage 37, Docs/Design/05_Mercenary_Growth.md §6), in id order.</summary>
+        public DataTable<TraitData> Traits { get; }
+
+        /// <summary>The traits a candidate of the stagecoach can be born with: the innate ones of a weight above 0, in id order.</summary>
+        public List<TraitData> InnateTraits => Traits.Ordered.Where(trait => trait.Kind == TraitKind.Innate && trait.Weight > 0).ToList();
+
         /// <summary>The states of a kind, in id order: what the breakdown at the fatigue threshold picks from.</summary>
         public List<FatigueStateData> FatigueStatesOf(FatigueStateKind kind)
         {
@@ -479,9 +489,40 @@ namespace F1.Data
                 problems.Add($"{DungeonData.DefinitionName}: at most one dungeon is final.");
             }
 
+            foreach (TraitData trait in Traits.Ordered)
+            {
+                if (trait.Excludes != null)
+                {
+                    Require(Traits, trait.Excludes, $"{TraitData.DefinitionName} '{trait.Id}' Excludes", problems);
+                }
+            }
+
             foreach (MercenaryData mercenary in StartingMercenaries)
             {
                 Require(Jobs, mercenary.JobId, $"{MercenaryData.DefinitionName} '{mercenary.Id}' JobId", problems);
+                // The starting roster's traits (stage 37): each exists, none twice, no two that clash.
+                var held = new List<TraitData>();
+                foreach (string traitId in mercenary.Traits)
+                {
+                    string what = $"{MercenaryData.DefinitionName} '{mercenary.Id}' Traits";
+                    if (!Traits.Contains(traitId))
+                    {
+                        problems.Add($"{what}: '{traitId}' does not exist.");
+                        continue;
+                    }
+
+                    TraitData trait = Traits.Get(traitId);
+                    if (held.Contains(trait))
+                    {
+                        problems.Add($"{what}: '{traitId}' is there twice.");
+                    }
+                    else if (held.Any(other => other.Clashes(trait)))
+                    {
+                        problems.Add($"{what}: '{traitId}' clashes with another of its traits.");
+                    }
+
+                    held.Add(trait);
+                }
             }
 
             if (StartingMercenaries.Count < Balance.MinPartySize)

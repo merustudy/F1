@@ -68,7 +68,7 @@ namespace F1.Flow
 
             foreach (RecruitState recruit in run.Recruits)
             {
-                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId, Stats = ToRecord(recruit.Stats) });
+                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId, Stats = ToRecord(recruit.Stats), Traits = new List<string>(recruit.Traits) });
             }
 
             foreach (KeyValuePair<string, int> visits in run.ExpeditionsByDungeon)
@@ -78,7 +78,11 @@ namespace F1.Flow
 
             foreach (MercenaryState mercenary in run.Roster)
             {
-                record.Roster.Add(new MercenaryRecord { Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp, Stats = ToRecord(mercenary.Stats) });
+                record.Roster.Add(new MercenaryRecord
+                {
+                    Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp,
+                    Stats = ToRecord(mercenary.Stats), Traits = new List<string>(mercenary.Traits),
+                });
             }
 
             foreach (PartySlot slot in run.Party)
@@ -284,6 +288,7 @@ namespace F1.Flow
                     Level = mercenary.Level,
                     Exp = mercenary.Exp,
                     Stats = ToStats(mercenary.Stats, data, $"'{mercenary.Id}'"),
+                    Traits = ToTraits(mercenary.Traits, data, $"'{mercenary.Id}'"),
                 });
             }
 
@@ -310,7 +315,11 @@ namespace F1.Flow
                 Require(recruit != null && data.Mercenaries.Contains(recruit.Id) && !data.Mercenaries.Get(recruit.Id).Starting, $"Candidate '{recruit?.Id}' is not a name of the recruit pool.");
                 Require(data.Jobs.Contains(recruit.JobId), $"Unknown job '{recruit.JobId}'.");
                 Require(known.Add(recruit.Id), $"Mercenary '{recruit.Id}' is listed twice.");
-                run.Recruits.Add(new RecruitState { Id = recruit.Id, JobId = recruit.JobId, Stats = ToStats(recruit.Stats, data, $"candidate '{recruit.Id}'") });
+                run.Recruits.Add(new RecruitState
+                {
+                    Id = recruit.Id, JobId = recruit.JobId, Stats = ToStats(recruit.Stats, data, $"candidate '{recruit.Id}'"),
+                    Traits = ToTraits(recruit.Traits, data, $"candidate '{recruit.Id}'"),
+                });
             }
 
             var party = new List<PartySlot>();
@@ -412,8 +421,9 @@ namespace F1.Flow
                     Board = board,
                     Fatigue = member.Fatigue,
                     StateId = member.State,
-                    // A member's stats are the roster's (version 18): they do not change on an expedition, so the file does not repeat them.
+                    // A member's stats and traits are the roster's (versions 18 and 22): they do not change on an expedition, so the file does not repeat them.
                     Stats = mercenary.Stats,
+                    Traits = new List<string>(mercenary.Traits),
                 });
             }
 
@@ -671,6 +681,21 @@ namespace F1.Flow
             Stat? outside = stats.FirstOutside(data.Balance.StatMin, data.Balance.StatMax);
             Require(outside == null, $"{outside} of {who} is out of range.");
             return stats;
+        }
+
+        /// <summary>The traits of a mercenary or a candidate (version 22): present, each known, none twice, no two that clash.</summary>
+        static List<string> ToTraits(List<string> record, StaticData data, string who)
+        {
+            Require(record != null, $"Traits of {who} are missing.");
+            var traits = new List<string>();
+            foreach (string id in record)
+            {
+                Require(data.Traits.Contains(id), $"Unknown trait '{id}' of {who}.");
+                Require(TraitRules.CanTake(data, traits, data.Traits.Get(id)), $"Trait '{id}' of {who} is there twice or clashes with another.");
+                traits.Add(id);
+            }
+
+            return traits;
         }
 
         static string Text(ulong value)

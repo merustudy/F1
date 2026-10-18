@@ -107,7 +107,8 @@ namespace F1.Data
             LocalizedText passiveText = null,
             string figure = null,
             StatBlock stats = null,
-            StatBlock growth = null)
+            StatBlock growth = null,
+            LocalizedText passiveName = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -128,9 +129,16 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': a passive and its PassiveText come together.");
             }
 
+            // The passive is the job's trait on the screens (Slice D stage 37, Docs/Design/05 §6): its short name comes with it.
+            if (passive == null && passiveName != null)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a PassiveName needs a passive.");
+            }
+
             RecommendedRow = recommendedRow;
             Passive = passive;
             PassiveText = passiveText;
+            PassiveName = passiveName;
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
             Stats = stats;
             // The growth grades (Slice D stage 34): the percent chance of a point per level-up, stat by stat; 100 is a sure point.
@@ -195,6 +203,13 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 11, Required = Required.AllowNull)]
         public StatBlock Growth { get; }
+
+        /// <summary>
+        /// The passive's short name as the job's trait (Slice D stage 37, Round 84 판정 4: 선봉·광기·급소·후방 영창·축복); <see cref="PassiveText"/> is
+        /// what it does. Null without a passive, or for test data that names none (the screens then use the job's name).
+        /// </summary>
+        [JsonProperty(Order = 12, Required = Required.AllowNull)]
+        public LocalizedText PassiveName { get; }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the job has no figure.</summary>
         [JsonIgnore]

@@ -423,7 +423,10 @@ namespace F1.Tests
             Assert.AreEqual(UiText.Mercenary(firstOfRoster.Id), rows[0].Name, "In the roster's order.");
             Assert.AreEqual(UiText.Job(firstOfRoster.JobId), rows[0].Job);
             Assert.AreEqual("Lv 1", rows[0].Level);
-            Assert.AreEqual(UiText.Passive(data.Jobs.Get(firstOfRoster.JobId)), rows[0].Passive, "The passive, as the barracks lists it.");
+            // The traits where the passive stood (Slice D stage 37, Round 84): the job's trait first, then the mercenary's own, as the barracks lists them.
+            List<TraitChip> traits = UiText.TraitChips(data, firstOfRoster.JobId, firstOfRoster.Traits);
+            CollectionAssert.AreEqual(traits.Select(t => t.Name).ToList(), rows[0].Traits.Shown.Select(t => t.Name).ToList(), "The traits, as the barracks lists them.");
+            Assert.AreEqual(UiText.Passive(data.Jobs.Get(firstOfRoster.JobId)), rows[0].Traits.Shown[0].Effect, "The job's trait is its passive.");
             Assert.IsNotNull(rows[0].Portrait, "The job's figure, small.");
             Assert.AreEqual(FatiguePips.Count, rows[0].Pips.Count);
             Assert.AreEqual($"파티에 용병을 {balance.MinPartySize}명 이상 넣으세요", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyStatus"));
@@ -447,6 +450,10 @@ namespace F1.Tests
             Assert.IsFalse(slots[0].IsEmpty);
             Assert.AreEqual(UiText.Mercenary(rows[0].MercenaryId), slots[0].Name);
             Assert.AreEqual(UiText.Job(firstOfRoster.JobId), slots[0].Detail);
+            // The traits' icons after the job's words (Slice D stage 37): the line starts past them.
+            Assert.AreEqual(1 + firstOfRoster.Traits.Count, slots[0].Traits.Shown.Count);
+            TMP_Text detail = UiTestUtil.At(slots[0], "SlotDetail1").GetComponent<TMP_Text>();
+            Assert.Greater(((RectTransform)slots[0].Traits.transform).anchoredPosition.x, detail.rectTransform.anchoredPosition.x + 30f, "The icons do not cover the job.");
             Assert.IsTrue(slots[0].Figure.gameObject.activeSelf);
             Assert.AreEqual(rows[0].Portrait, slots[0].Figure.Art, "The member's figure stands on the stage: the job's, the same art as the list's.");
             Assert.IsFalse(slots[0].Figure.ShowsPlaceholder);
@@ -814,6 +821,99 @@ namespace F1.Tests
             Assert.AreEqual("힘", entries[knight].StatNames[0].text);
             Assert.AreEqual(UiPalette.Good, entries[knight].StatValues[0].color);
             Assert.AreEqual(UiPalette.BloodLight, entries[knight].StatValues[3].color);
+        }
+
+        /// <summary>
+        /// The traits (Slice D stage 37, Round 84 안 A and 안 1): each barracks line's trait line, where the passive stood — the job's trait first with
+        /// its gold rim, then the mercenary's own, a strength green and a weakness red, each its letter and its name; a right click on a chip opens the
+        /// window's card with the name, the kind and what it does (2026-10-19 사용자: on a right click, not under the pointer), the next press closes
+        /// it; a line too short for them all ends with "+N", whose card names the rest. The stagecoach's candidates show theirs the same way.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Lobby_Barracks_AndTheStagecoach_ShowTheTraits_AndTheirCards()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            RunState run = Managers.Run.Run;
+            StaticData data = Managers.Data.Data;
+            yield return UiTestUtil.OpenBarracks(lobby);
+            RosterEntryView[] entries = UiTestUtil.RosterEntries(lobby);
+            for (int e = 0; e < entries.Length; e++)
+            {
+                MercenaryState mercenary = run.Roster[e];
+                List<TraitChip> expected = UiText.TraitChips(data, mercenary.JobId, mercenary.Traits);
+                Assert.AreEqual(1 + mercenary.Traits.Count, expected.Count, "The job's trait and the mercenary's.");
+                CollectionAssert.AreEqual(expected.Select(c => c.Name).ToList(), entries[e].Traits.Shown.Select(c => c.Name).ToList(), mercenary.Id);
+                Assert.AreEqual(0, entries[e].Traits.Hidden.Count, "A line of the barracks holds a new run's traits.");
+                Assert.AreEqual(UiPalette.TraitJob, entries[e].Traits.Chips[0].RimColor);
+                Assert.AreEqual(UiText.Name(data.Jobs.Get(mercenary.JobId).PassiveName), entries[e].Traits.Chips[0].Name);
+            }
+
+            // 아스트리드 (the data: 강골, 서투름): the gold 광기, the green 강골, the red 서투름; the pointer on 서투름 opens its card.
+            int astrid = run.Roster.FindIndex(m => m.Id == "astrid");
+            TraitLineView line = entries[astrid].Traits;
+            CollectionAssert.AreEqual(new[] { "광기", "강골", "서투름" }, line.Shown.Select(c => c.Name).ToList());
+            Assert.AreEqual((UiPalette.TraitStrength, UiPalette.TraitWeakness), (line.Chips[1].RimColor, line.Chips[2].RimColor));
+            Assert.AreEqual("서", line.Chips[2].Glyph);
+            TraitTooltipView card = UiTestUtil.At(lobby, "Frame/BarracksWindow/BarracksTraitTooltip").GetComponent<TraitTooltipView>();
+            Assert.IsFalse(card.IsShown);
+            Assert.IsFalse(typeof(UnityEngine.EventSystems.IPointerEnterHandler).IsAssignableFrom(line.Chips[2].GetType()), "The pointer over a chip opens nothing.");
+            RightClick(line.Chips[2]);
+            Assert.IsTrue(card.IsShown);
+            Assert.AreEqual(("서투름", "타고난 특성 · 약점", "명중 -5%p"), (card.Title, card.Kind, card.Effect));
+            yield return null;
+            Assert.IsTrue(card.IsShown, "It stays open until the next press.");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(card.IsShown, "A press anywhere closes it.");
+            RightClick(line.Chips[2]);
+            yield return null;
+            RightClick(line.Chips[0]);
+            yield return null;
+            Assert.IsTrue(card.IsShown, "A right click on another chip opens that one's.");
+            Assert.AreEqual(("광기", "직업 특성 · 바이킹", UiText.Passive(data.Jobs.Get("viking"))), (card.Title, card.Kind, card.Effect));
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            // Too short a line: what does not fit is the pill, and its card names it.
+            List<TraitChip> chips = UiText.TraitChips(data, "viking", new[] { "iron_bones", "clumsy", "frail", "timid" });
+            line.Show(chips, 260f);
+            Assert.Greater(line.Hidden.Count, 0);
+            Assert.AreEqual(chips.Count, line.Shown.Count + line.Hidden.Count);
+            Assert.IsTrue(line.More.gameObject.activeSelf);
+            Assert.AreEqual("+" + line.Hidden.Count, line.More.Name);
+            RightClick(line.More);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Trait.MoreTitle, line.Hidden.Count), card.Title);
+            StringAssert.Contains(line.Hidden.Last().Name, card.Kind);
+            yield return null;
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(card.IsShown);
+            lobby.Refresh();
+            yield return null;
+            Assert.IsFalse(entries[astrid].Traits.More.gameObject.activeSelf, "Drawn again at full width: all fit.");
+
+            // The stagecoach: each candidate's job trait and what it was born with.
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
+            for (int i = 0; i < run.Recruits.Count; i++)
+            {
+                RecruitState recruit = run.Recruits[i];
+                Assert.LessOrEqual(recruit.Traits.Count, 2, "Born with 0~2.");
+                CollectionAssert.AreEqual(UiText.TraitChips(data, recruit.JobId, recruit.Traits).Select(c => c.Name).ToList(),
+                    lobby.Candidates[i].Traits.Shown.Select(c => c.Name).ToList(), recruit.Id);
+                // A candidate is a fresh clone shown at once: its chips are as wide as their names (TMP's measure answered 0 there).
+                Assert.Greater(((RectTransform)lobby.Candidates[i].Traits.Chips[0].transform).sizeDelta.x, 24f + TraitChipView.NameGap + 10f, recruit.Id);
+            }
+        }
+
+        /// <summary>A right click on a trait's chip, as the test kit clicks: the press, then the click.</summary>
+        static void RightClick(TraitChipBase chip)
+        {
+            UiTestUtil.PressTheBackground();
+            chip.RightClickNow();
         }
 
         /// <summary>
@@ -3228,11 +3328,12 @@ namespace F1.Tests
             Assert.IsNotEmpty(UiTestUtil.TextAt(unit, "UnitMarks/UnitStates/UnitStatusChip/UnitStatus"));
             Assert.IsFalse(UiTestUtil.At(unit, "UnitMarks/UnitStates/UnitBurnChip").gameObject.activeSelf);
 
-            // Past its grace, the chip says the chance the battle rolls: the base moved by a fatigue state (a reckless one dies more easily).
+            // Past its grace, the chip says the chance the battle rolls: the base moved by a fatigue state (a reckless one dies more easily), by the
+            // unit's constitution and by its traits (Slice D stage 37: a starting mercenary may be born iron-boned).
             StaticData data = Managers.Data.Data;
             FatigueStateData reckless = data.FatigueStates.Get("reckless");
-            int chance = FatigueRules.DogDeathChancePercent(data.Balance, reckless);
-            Assert.AreNotEqual(data.Balance.DogDeathChancePercent, chance, "Staged so that the state moves the chance.");
+            int chance = FatigueRules.DogDeathChancePercent(data.Balance, reckless, unit.Unit.Setup.Stats, unit.Unit.Setup.Traits);
+            Assert.AreNotEqual(FatigueRules.DogDeathChancePercent(data.Balance, null, unit.Unit.Setup.Stats, unit.Unit.Setup.Traits), chance, "Staged so that the state moves the chance.");
             unit.Unit.State = reckless;
             unit.Unit.GraceEndMs = Managers.Expedition.Battle.Engine.TimeMs;
             yield return UiTestUtil.WaitForRedraw();

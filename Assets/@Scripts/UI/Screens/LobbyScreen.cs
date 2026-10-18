@@ -546,7 +546,7 @@ namespace F1.UI
                 entry.Show(
                     UiText.Mercenary(mercenary.Id),
                     UiText.Name(job.Name),
-                    UiText.Passive(job),
+                    UiText.TraitChips(data, mercenary.JobId, mercenary.Traits),
                     mercenary.Fatigue,
                     balance.MaxFatigue,
                     balance.FatigueBreakdown,
@@ -653,7 +653,7 @@ namespace F1.UI
                     UiText.Mercenary(recruit.Id),
                     UiText.Name(job.Name),
                     UiStrings.Get(UiKeys.Lobby.Level, LevelRules.FirstLevel) + " · " + UiStrings.Get(UiKeys.Lobby.Fatigue, 0, balance.MaxFatigue),
-                    UiText.Passive(job),
+                    UiText.TraitChips(data, recruit.JobId, recruit.Traits),
                     UiText.StatColumns(recruit.Stats ?? StatRules.BaseOf(data, recruit.JobId), CandidateStatColumn, StatRules.BaseOf(data, recruit.JobId)),
                     UiStrings.Get(UiKeys.Lobby.Hire, balance.HirePrice),
                     Managers.Run.CanHire(i) == HireCheck.Ok);

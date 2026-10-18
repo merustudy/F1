@@ -336,7 +336,8 @@ namespace F1.Data
         public const string DefinitionName = "Mercenary";
 
         [JsonConstructor]
-        public MercenaryData(string id, LocalizedText name, string jobId, bool starting = true)
+        /// <param name="traits">A starting mercenary's traits (Slice D stage 37, Docs/Design/05 §6: the data sets them, nothing rolls them). Null is none.</param>
+        public MercenaryData(string id, LocalizedText name, string jobId, bool starting = true, IReadOnlyList<string> traits = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -349,6 +350,19 @@ namespace F1.Data
             {
                 throw new DataException($"{DefinitionName} '{id}': a name of the recruit pool has no JobId; the job is rolled when the candidate is drawn.");
             }
+
+            var list = new List<string>();
+            foreach (string trait in traits ?? new List<string>())
+            {
+                list.Add(DataId.Require(trait, $"{DefinitionName} '{id}' Traits"));
+            }
+
+            if (!starting && list.Count > 0)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a name of the recruit pool has no Traits; a candidate draws its own.");
+            }
+
+            Traits = list;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -364,5 +378,9 @@ namespace F1.Data
         /// <summary>True for the starting roster; false for a name the stagecoach draws candidates from.</summary>
         [JsonProperty(Order = 4)]
         public bool Starting { get; }
+
+        /// <summary>The traits a starting mercenary has from the first day (Slice D stage 37), in the data's order; empty for a name of the pool.</summary>
+        [JsonProperty(Order = 5)]
+        public IReadOnlyList<string> Traits { get; }
     }
 }

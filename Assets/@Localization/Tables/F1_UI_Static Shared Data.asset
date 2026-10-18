@@ -1785,6 +1785,81 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673524022411264
+  - m_Id: 6589976169930752
+    m_Key: Trait.KindJob
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155072
+  - m_Id: 6589976178319360
+    m_Key: Trait.KindInnate
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155073
+  - m_Id: 6589976178319361
+    m_Key: Trait.KindAcquired
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155074
+  - m_Id: 6589976178319362
+    m_Key: Trait.Strength
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155075
+  - m_Id: 6589976178319363
+    m_Key: Trait.Weakness
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155076
+  - m_Id: 6589976178319364
+    m_Key: Trait.Sub
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155077
+  - m_Id: 6589976178319365
+    m_Key: Trait.More
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155078
+  - m_Id: 6589976178319366
+    m_Key: Trait.MoreTitle
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155079
+  - m_Id: 6589976178319367
+    m_Key: Trait.Hit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155080
+  - m_Id: 6589976178319368
+    m_Key: Trait.Dodge
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155081
+  - m_Id: 6589976178319369
+    m_Key: Trait.Crit
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155082
+  - m_Id: 6589976178319370
+    m_Key: Trait.DogDeath
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155083
+  - m_Id: 6589976178319371
+    m_Key: Trait.Virtue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155084
+  - m_Id: 6589976178319372
+    m_Key: Trait.Fatigue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155085
+  - m_Id: 6589976178319373
+    m_Key: Trait.MaxHp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673527681155086
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3401,3 +3476,80 @@ MonoBehaviour:
       data:
         m_CommentText: 'Under the barracks'' list while it is under construction
           (Slice D stage 35): dismissing is off, the level-up is not.'
+    - rid: 8623673527681155072
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait card''s second line for the job''s trait (Slice D
+          stage 37, Round 84): the job''s passive shown as a trait. {0} = the job''s
+          name.'
+    - rid: 8623673527681155073
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait card''s second line (Slice D stage 37): a trait the
+          mercenary was born with.'
+    - rid: 8623673527681155074
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait card''s second line (Slice D stage 38): a trait an
+          expedition left on the mercenary.'
+    - rid: 8623673527681155075
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'After a trait''s kind on its card (Slice D stage 37): the
+          trait is a strength.'
+    - rid: 8623673527681155076
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'After a trait''s kind on its card (Slice D stage 37): the
+          trait is a weakness.'
+    - rid: 8623673527681155077
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Joins two parts of a trait card''s line (Slice D stage 37):
+          the kind and strength or weakness, or two effects. {0}, {1} = the parts.'
+    - rid: 8623673527681155078
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "The pill at the end of a trait line that does not hold them
+          all (Slice D stage 37, Round 84 \uD310\uC815 3). {0} = how many more."
+    - rid: 8623673527681155079
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The title of the card the more pill opens (Slice D stage
+          37): the traits the line could not hold, named on the next line. {0} =
+          how many.'
+    - rid: 8623673527681155080
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the hit chance of
+          the mercenary''s attacks. {0} = signed percent points.'
+    - rid: 8623673527681155081
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the mercenary''s
+          dodge. {0} = signed percent points.'
+    - rid: 8623673527681155082
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the critical chance
+          of the mercenary''s items that have one. {0} = signed percent points.'
+    - rid: 8623673527681155083
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the death chance
+          of a hit at death''s door. {0} = signed percent points.'
+    - rid: 8623673527681155084
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the chance of a
+          virtue at the breakdown. {0} = signed percent points.'
+    - rid: 8623673527681155085
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the fatigue the
+          mercenary gains. {0} = signed percent.'
+    - rid: 8623673527681155086
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (Slice D stage 37): on the mercenary''s
+          maximum HP. {0} = signed percent.'

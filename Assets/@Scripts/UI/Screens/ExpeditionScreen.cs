@@ -290,6 +290,7 @@ namespace F1.UI
                     balance.MaxFatigue,
                     balance.FatigueBreakdown,
                     mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId),
+                    UiText.TraitChips(data, mercenary.JobId, mercenary.Traits),
                     canForward: Managers.Run.CanPlaceInParty(slot.MercenaryId, row - 1),
                     canBack: Managers.Run.CanPlaceInParty(slot.MercenaryId, row + 1));
             }
@@ -316,14 +317,13 @@ namespace F1.UI
 
                 int row = RowOf(run, mercenary.Id);
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
-                JobData job = data.Jobs.Get(mercenary.JobId);
                 line.Show(
                     FigureOf(mercenary.JobId),
                     UiText.Mercenary(mercenary.Id),
                     UiText.JobLine(mercenary.JobId, affliction),
                     affliction != null,
                     UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
-                    UiText.Passive(job),
+                    UiText.TraitChips(data, mercenary.JobId, mercenary.Traits),
                     row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
                     row != 0,
                     row == 0 && Managers.Run.CanPlaceInParty(mercenary.Id, next),

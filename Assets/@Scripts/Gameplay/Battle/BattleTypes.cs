@@ -134,6 +134,9 @@ namespace F1.Gameplay
         /// <summary>A mercenary's stats (Slice D stage 32): they grow the power of its items that grow with one (<see cref="StatRules"/>). Null for an enemy, which has none.</summary>
         public StatBlock Stats;
 
+        /// <summary>What a mercenary's traits add to its rolls and its fatigue (Slice D stage 37, <see cref="TraitRules"/>). Null for a unit without traits (an enemy).</summary>
+        public TraitBonus Traits;
+
         /// <summary>An enemy's hit and dodge in percent points (Slice D stage 33, EnemyData), standing in for the stats it has not; 0 for a mercenary.</summary>
         public int Accuracy;
         public int Dodge;

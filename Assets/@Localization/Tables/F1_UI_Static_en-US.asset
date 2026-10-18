@@ -1623,6 +1623,77 @@ MonoBehaviour:
     m_Localized: No dismissing while under construction (levelling up still works)
     m_Metadata:
       m_Items: []
+  - m_Id: 6589976169930752
+    m_Localized: "Job trait \xB7 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319360
+    m_Localized: Innate trait
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319361
+    m_Localized: Acquired trait
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319362
+    m_Localized: Strength
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319363
+    m_Localized: Weakness
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6589976178319364
+    m_Localized: "{0} \xB7 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319365
+    m_Localized: +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319366
+    m_Localized: '{0} more traits'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319367
+    m_Localized: Hit {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319368
+    m_Localized: Dodge {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319369
+    m_Localized: Crit {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319370
+    m_Localized: Death chance at death's door {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319371
+    m_Localized: Virtue chance {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319372
+    m_Localized: Fatigue gained {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 6589976178319373
+    m_Localized: Max HP {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1805,3 +1876,14 @@ MonoBehaviour:
         - id: 6525681180598272
         - id: 6525681180598274
         - id: 6525681184792576
+        - id: 6589976169930752
+        - id: 6589976178319364
+        - id: 6589976178319365
+        - id: 6589976178319366
+        - id: 6589976178319367
+        - id: 6589976178319368
+        - id: 6589976178319369
+        - id: 6589976178319370
+        - id: 6589976178319371
+        - id: 6589976178319372
+        - id: 6589976178319373

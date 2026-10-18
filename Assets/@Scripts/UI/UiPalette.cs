@@ -146,6 +146,16 @@ namespace F1.UI
         public static readonly Color LevelUp = Rgb(0xC9, 0x9A, 0x3A);
         public static readonly Color LevelUpText = Rgb(0x1C, 0x1A, 0x14);
 
+        /// <summary>
+        /// A trait's icon (Slice D stage 37, Round 84 안 1): the rim says what it does to its holder — the job's trait gold, a strength green, a
+        /// weakness red (the stats' colours) — on a dark square; the more pill is the quiet button grey.
+        /// </summary>
+        public static readonly Color TraitJob = StarLit;
+        public static readonly Color TraitStrength = Good;
+        public static readonly Color TraitWeakness = BloodLight;
+        public static readonly Color TraitIconFill = Rgb(0x14, 0x18, 0x1E);
+        public static readonly Color TraitMore = ButtonQuiet;
+
         /// <summary>A unique item (stage 23): Diablo's unique gold for its name, its plate and the rim round its piece; the forge card's dark gold and its light words.</summary>
         public static readonly Color Unique = DiabloGold;
         public static readonly Color ForgeCard = Rgb(0x5A, 0x48, 0x1E);

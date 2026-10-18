@@ -164,4 +164,21 @@ namespace F1.Data
         Spi,
         End,
     }
+
+    /// <summary>
+    /// Where a mercenary's trait comes from (Slice D stage 37, Docs/Design/05_Mercenary_Growth.md §6): it was born with it (a candidate of the
+    /// stagecoach draws it, the starting roster's are in the data) or an expedition left it (stage 38). The job's trait is the job's passive.
+    /// </summary>
+    public enum TraitKind
+    {
+        Innate,
+        Acquired,
+    }
+
+    /// <summary>Whether a trait is a strength or a weakness (05 §6). A strength may carry a small drawback; the data says which it is.</summary>
+    public enum TraitPolarity
+    {
+        Positive,
+        Negative,
+    }
 }

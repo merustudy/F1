@@ -403,7 +403,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(21, RunSaveData.CurrentSchemaVersion);
+            Assert.AreEqual(22, RunSaveData.CurrentSchemaVersion);
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -422,6 +422,62 @@ namespace F1.Tests
             RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
             Assert.AreEqual(13, again.Run.Roster[0].Stats.Str);
             Assert.AreEqual(15, again.Run.Recruits[0].Stats.Int);
+        }
+
+        [Test]
+        public void Save_KeepsTheTraits_OfTheRosterAndTheCandidates_AndTheMembersTakeTheRosters()
+        {
+            // Slice D stage 37 (version 22): the traits written and read back in their order; an expedition member has none of its own in the file.
+            var kit = new FlowTestKit(TestData.DataWithTraits(("RecruitTraitWeight0", 0), ("RecruitTraitWeight2", 1))).InLobby();
+            RunState run = kit.Run.Run;
+            run.Roster[0].Traits = new List<string> { "sturdy", "keen" };
+            Assert.IsTrue(run.Recruits.All(r => r.Traits.Count == 2), "The candidates drew two each.");
+            kit.Expedition.Depart("cave");
+            RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
+            Assert.AreEqual(22, save.SchemaVersion);
+            CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, save.Run.Roster[0].Traits);
+
+            RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState expedition);
+            CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, read.Roster[0].Traits);
+            CollectionAssert.AreEqual(run.Recruits.Select(r => string.Join("+", r.Traits)).ToList(), read.Recruits.Select(r => string.Join("+", r.Traits)).ToList());
+            ExpeditionMember member = expedition.Members.FirstOrDefault(m => m.MercenaryId == read.Roster[0].Id);
+            if (member != null)
+            {
+                CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, member.Traits, "A member takes the roster's.");
+            }
+        }
+
+        [Test]
+        public void Read_RefusesAnUnknownTrait_ATraitTwice_AndTwoThatClash()
+        {
+            var kit = new FlowTestKit(TestData.DataWithTraits()).InLobby();
+            foreach (string[] traits in new[] { new[] { "nobody_knows" }, new[] { "keen", "keen" }, new[] { "dull", "keen" } })
+            {
+                RunSaveData save = RunSaveMapper.ToSave(kit.Run.Run, null);
+                save.Run.Roster[0].Traits = traits.ToList();
+                Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(save, kit.Data, out RunState _, out ExpeditionState _), string.Join("+", traits));
+            }
+
+            RunSaveData missing = RunSaveMapper.ToSave(kit.Run.Run, null);
+            missing.Run.Recruits.ForEach(r => r.Traits = null);
+            Assert.Throws<RunSaveException>(() => RunSaveMapper.Read(missing, kit.Data, out RunState _, out ExpeditionState _), "A version 22 file lists them.");
+        }
+
+        [Test]
+        public void Migrate_From21_GivesEveryMercenaryAndCandidateNoTraits()
+        {
+            // Version 22 (Slice D stage 37) added the traits; a version 21 run had none (Design/16 §5-7).
+            RunSaveData save = ValidSave(out StaticData data);
+            save.SchemaVersion = 21;
+            save.Run.Roster.ForEach(m => m.Traits = null);
+            save.Run.Recruits.ForEach(r => r.Traits = null);
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(22, save.SchemaVersion);
+            Assert.IsTrue(save.Run.Roster.All(m => m.Traits != null && m.Traits.Count == 0) && save.Run.Recruits.All(r => r.Traits != null && r.Traits.Count == 0));
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
+            Assert.IsTrue(run.Roster.All(m => m.Traits.Count == 0));
         }
 
         [Test]

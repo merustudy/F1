@@ -22,6 +22,9 @@ namespace F1.Gameplay
 
         /// <summary>The six stats (Slice D stage 32, Docs/Design/05_Mercenary_Growth.md §2): the job's base values for a new run's roster, the candidate's for a hired one.</summary>
         public StatBlock Stats;
+
+        /// <summary>Its traits (Slice D stage 37, 05 §6), TraitData ids in the order it got them: the data's for the starting roster, the candidate's for a hired one.</summary>
+        public List<string> Traits = new List<string>();
     }
 
     /// <summary>A candidate at the stagecoach (Slice C stage 26, Docs/Design/04_Lobby_100Day_Economy.md §6): a name of the recruit pool and the job it was drawn with.</summary>
@@ -33,6 +36,9 @@ namespace F1.Gameplay
 
         /// <summary>The stats the candidate would join with (Slice D stage 32): the job's base values with the stagecoach's spread (stage 34).</summary>
         public StatBlock Stats;
+
+        /// <summary>The innate traits it was born with (Slice D stage 37), drawn with it; they join with it.</summary>
+        public List<string> Traits = new List<string>();
     }
 
     /// <summary>A construction going on at a building of the town (Slice C stage 30): the level it builds and the day it is done.</summary>

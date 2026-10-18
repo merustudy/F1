@@ -355,3 +355,18 @@ Stat.Spi,"A stat's name (Slice D stage 32). Spirit: heals and shields, and the c
 Stat.End,"A stat's name (Slice D stage 32). Endurance: how slowly fatigue builds up.",인내,END
 Stat.Up,"After a candidate's stat at the stagecoach (Slice D stage 34, Round 81): how far above its job's base value. {0} = points.",▲{0},▲{0}
 Stat.Down,"After a candidate's stat: how far under its job's base value. {0} = points.",▼{0},▼{0}
+Trait.KindJob,"A trait card's second line for the job's trait (Slice D stage 37, Round 84): the job's passive shown as a trait. {0} = the job's name.",직업 특성 · {0},Job trait · {0}
+Trait.KindInnate,A trait card's second line (Slice D stage 37): a trait the mercenary was born with.,타고난 특성,Innate trait
+Trait.KindAcquired,A trait card's second line (Slice D stage 38): a trait an expedition left on the mercenary.,얻은 특성,Acquired trait
+Trait.Strength,After a trait's kind on its card (Slice D stage 37): the trait is a strength.,장점,Strength
+Trait.Weakness,After a trait's kind on its card (Slice D stage 37): the trait is a weakness.,약점,Weakness
+Trait.Sub,"Joins two parts of a trait card's line (Slice D stage 37): the kind and strength or weakness, or two effects. {0}, {1} = the parts.",{0} · {1},{0} · {1}
+Trait.More,"The pill at the end of a trait line that does not hold them all (Slice D stage 37, Round 84 판정 3). {0} = how many more.",+{0},+{0}
+Trait.MoreTitle,"The title of the card the more pill opens (Slice D stage 37): the traits the line could not hold, named on the next line. {0} = how many.",그 밖의 특성 {0},{0} more traits
+Trait.Hit,A trait's effect (Slice D stage 37): on the hit chance of the mercenary's attacks. {0} = signed percent points.,명중 {0}%p,Hit {0}%p
+Trait.Dodge,A trait's effect (Slice D stage 37): on the mercenary's dodge. {0} = signed percent points.,회피 {0}%p,Dodge {0}%p
+Trait.Crit,A trait's effect (Slice D stage 37): on the critical chance of the mercenary's items that have one. {0} = signed percent points.,치명타 {0}%p,Crit {0}%p
+Trait.DogDeath,A trait's effect (Slice D stage 37): on the death chance of a hit at death's door. {0} = signed percent points.,빈사의 사망 확률 {0}%p,Death chance at death's door {0}%p
+Trait.Virtue,A trait's effect (Slice D stage 37): on the chance of a virtue at the breakdown. {0} = signed percent points.,각성 확률 {0}%p,Virtue chance {0}%p
+Trait.Fatigue,A trait's effect (Slice D stage 37): on the fatigue the mercenary gains. {0} = signed percent.,오르는 피로 {0}%,Fatigue gained {0}%
+Trait.MaxHp,A trait's effect (Slice D stage 37): on the mercenary's maximum HP. {0} = signed percent.,최대 HP {0}%,Max HP {0}%

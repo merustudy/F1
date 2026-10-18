@@ -91,14 +91,20 @@ namespace F1.Gameplay
 
         /// <summary>The mercenary's stats (Slice D stage 32): they do not change on an expedition, and the battle grows the member's items with them.</summary>
         public StatBlock Stats;
+
+        /// <summary>The mercenary's traits (Slice D stage 37, TraitData ids): they do not change on an expedition; the battle and the fatigue count them.</summary>
+        public IReadOnlyList<string> Traits = new List<string>();
     }
 
     /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>
     public readonly struct PartyMember
     {
         /// <param name="stats">The mercenary's stats (Slice D stage 32); null for the job's base values.</param>
-        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel, StatBlock stats = null)
+        /// <param name="traits">The mercenary's traits (Slice D stage 37); null for none.</param>
+        public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel, StatBlock stats = null,
+            IReadOnlyList<string> traits = null)
         {
+            Traits = traits ?? new List<string>();
             MercenaryId = mercenaryId;
             JobId = jobId;
             Row = row;
@@ -123,6 +129,9 @@ namespace F1.Gameplay
 
         /// <summary>The mercenary's stats (Slice D stage 32), or null for the job's base values.</summary>
         public StatBlock Stats { get; }
+
+        /// <summary>The mercenary's traits (Slice D stage 37); empty for none.</summary>
+        public IReadOnlyList<string> Traits { get; }
     }
 
     /// <summary>

@@ -78,7 +78,9 @@ namespace F1.Editor.Setup
             // Slice D stage 35: the barracks under construction only stops dismissing; its note says the level-up still works.
             BuildingLineView barracksLine = BuildBuildingLine(barracksWindow.transform, "Barracks", 1792f, 832f, UiKeys.Lobby.BarracksLockedNote);
             RectTransform entries = ListScroll("Entries", barracksWindow.transform, 24f, 136f, 1792f, 688f, 8f);
-            RosterEntryView entryTemplate = BuildRosterEntry(entries);
+            // The trait card (Slice D stage 37) stands in the window, outside the scrolling list's mask; the lines' chips open it.
+            TraitTooltipView barracksTraitCard = BuildTraitTooltip(barracksWindow.transform, "Barracks");
+            RosterEntryView entryTemplate = BuildRosterEntry(entries, barracksTraitCard);
             TextMeshProUGUI barracksSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("BarracksSummary", barracksWindow.transform, 22f, UiPalette.TextDim)), 24f, 868f, 1792f, 32f);
 
             // The inn: the building line, resting (a day for everyone, even while the inn is built), and the treatment of one mercenary for gold.
@@ -95,7 +97,8 @@ namespace F1.Editor.Setup
             BuildingLineView coachLine = BuildBuildingLine(coachWindow.transform, "Coach", 932f, 672f);
             TextMeshProUGUI coachSummary = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CoachSummary", coachWindow.transform, 22f, UiPalette.TextDim)), 24f, 138f, 932f, 32f);
             RectTransform candidates = ListScroll("Candidates", coachWindow.transform, 24f, 178f, 932f, 486f, 8f);
-            CandidateView candidateTemplate = BuildCandidate(candidates);
+            TraitTooltipView coachTraitCard = BuildTraitTooltip(coachWindow.transform, "Coach");
+            CandidateView candidateTemplate = BuildCandidate(candidates, coachTraitCard);
             TextMeshProUGUI noCandidates = UiBuild.Box(UiBuild.LocalizedLabel("NoCandidates", coachWindow.transform, UiKeys.Lobby.NoCandidates, 24f, UiPalette.TextDim, TextAlignmentOptions.Center), 24f, 400f, 932f, 40f);
             UiBuild.Box(UiBuild.LocalizedLabel("CoachNote", coachWindow.transform, UiKeys.Lobby.CoachNote, 20f, UiPalette.TextDim), 24f, 706f, 932f, 30f);
 
@@ -363,8 +366,8 @@ namespace F1.Editor.Setup
             return view;
         }
 
-        /// <summary>The template of a candidate of the stagecoach: the name, the job, its passive and the hire button. The lobby clones it per candidate.</summary>
-        static CandidateView BuildCandidate(Transform parent)
+        /// <summary>The template of a candidate of the stagecoach: the name, the job, its traits and the hire button. The lobby clones it per candidate.</summary>
+        static CandidateView BuildCandidate(Transform parent, TraitTooltipView traitCard)
         {
             Image background = UiBuild.Panel("CandidateTemplate", parent, UiPalette.PanelLight);
             // 150 high from Round 81 (Slice D stage 32): the stat line stands under the passive, past a hairline; the hire button sits in the middle.
@@ -373,7 +376,8 @@ namespace F1.Editor.Setup
             TextMeshProUGUI name = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateName", line, 30f, UiPalette.Text)), 20f, 10f, 260f, 40f);
             TextMeshProUGUI job = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateJob", line, 22f, UiPalette.TextDim)), 290f, 16f, 180f, 32f);
             TextMeshProUGUI detail = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label("CandidateDetail", line, 18f, UiPalette.Bone)), 480f, 19f, 210f, 28f);
-            TextMeshProUGUI passive = UiBuild.Box(UiBuild.Label("CandidatePassive", line, 18f, UiPalette.TextDim, TextAlignmentOptions.TopLeft), 20f, 58f, 660f, 44f);
+            // The traits where the passive stood (Slice D stage 37, Round 84): the job's trait and the 0~2 the candidate was born with.
+            TraitLineView traits = BuildTraitLine("CandidateTraits", line, 20f, 62f, 28f, 24f, 17f, 6, true, traitCard);
             UiBuild.Box(UiBuild.Image("CandidateStatLine", line, UiPalette.ButtonQuiet), 20f, 102f, 660f, 1f);
             TextMeshProUGUI stats = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("CandidateStats", line, 20f, UiPalette.Text), 20f, 106f, 680f, 32f));
             ButtonParts hire = UiBuild.Button("CandidateHire", line, UiPalette.Button, 22f);
@@ -383,7 +387,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
             UiBuild.SetReference(view, "_detail", detail);
-            UiBuild.SetReference(view, "_passive", passive);
+            UiBuild.SetReference(view, "_traits", traits);
             UiBuild.SetReference(view, "_stats", stats);
             UiBuild.SetReference(view, "_hire", hire.Button);
             UiBuild.SetReference(view, "_hireLabel", hire.Label);
@@ -419,7 +423,7 @@ namespace F1.Editor.Setup
         const float StatCellWidth = 78f;
 
         /// <summary>The template of one roster line of the barracks (1792 wide, 92 high: eight lines fit the window). The lobby clones it per mercenary.</summary>
-        static RosterEntryView BuildRosterEntry(Transform parent)
+        static RosterEntryView BuildRosterEntry(Transform parent, TraitTooltipView traitCard)
         {
             Image background = UiBuild.Panel("EntryTemplate", parent, UiPalette.PanelLight);
             UiBuild.Size(background, 1792f, 92f);
@@ -436,8 +440,9 @@ namespace F1.Editor.Setup
             RectTransform pips = UiBuild.Box(UiBuild.Rect("EntryFatiguePips", entry), 20f, 48f, FatiguePipsWidth, 12f);
             UiBar[] fatiguePips = FatiguePipRow("EntryFatiguePip", pips, FatiguePipsWidth, 12f);
 
-            // The passive on the left of the line under the pips and, at its right end, what the mercenary's affliction does (round 36; empty without one).
-            TextMeshProUGUI passive = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryPassive", entry, 18f, UiPalette.TextDim), 20f, 62f, 380f, 26f));
+            // The traits on the left of the line under the pips (Slice D stage 37, Round 84 안 A: where the passive stood — the job's trait first, an icon
+            // and a name each, "+N" past what fits) and, at its right end, what the mercenary's affliction does (round 36; empty without one).
+            TraitLineView traits = BuildTraitLine("EntryTraits", entry, 20f, 62f, 26f, 24f, 17f, 8, true, traitCard);
             TextMeshProUGUI state = UiBuild.SingleLine(UiBuild.Box(UiBuild.Label("EntryState", entry, 16f, UiPalette.FatigueDanger, TextAlignmentOptions.Right), 410f, 62f, 200f, 26f));
 
             // The six stats as a sheet (Slice D stage 32, Round 81 안 B): where the row buttons and "remove" stood (the party is formed in the
@@ -480,7 +485,7 @@ namespace F1.Editor.Setup
             var view = background.gameObject.AddComponent<RosterEntryView>();
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_job", job);
-            UiBuild.SetReference(view, "_passive", passive);
+            UiBuild.SetReference(view, "_traits", traits);
             UiBuild.SetReference(view, "_fatigue", fatigue);
             UiBuild.SetReference(view, "_state", state);
             UiBuild.SetReferences(view, "_fatiguePips", fatiguePips);

@@ -1,0 +1,113 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "clumsy",
+      "Name": {
+        "en-US": "Clumsy",
+        "ko-KR": "서투름"
+      },
+      "Kind": "Innate",
+      "Polarity": "Negative",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": -5,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "eagle_eye",
+      "Name": {
+        "en-US": "Eagle Eye",
+        "ko-KR": "매의 눈"
+      },
+      "Kind": "Innate",
+      "Polarity": "Positive",
+      "Weight": 10,
+      "Excludes": "clumsy",
+      "HitPercent": 5,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "frail",
+      "Name": {
+        "en-US": "Frail",
+        "ko-KR": "허약"
+      },
+      "Kind": "Innate",
+      "Polarity": "Negative",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": -10
+    },
+    {
+      "Id": "iron_bones",
+      "Name": {
+        "en-US": "Iron Bones",
+        "ko-KR": "강골"
+      },
+      "Kind": "Innate",
+      "Polarity": "Positive",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": -5,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "steady",
+      "Name": {
+        "en-US": "Steady",
+        "ko-KR": "담대함"
+      },
+      "Kind": "Innate",
+      "Polarity": "Positive",
+      "Weight": 10,
+      "Excludes": "timid",
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": -10,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "timid",
+      "Name": {
+        "en-US": "Timid",
+        "ko-KR": "소심함"
+      },
+      "Kind": "Innate",
+      "Polarity": "Negative",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 10,
+      "MaxHpPercent": 0
+    }
+  ]
+}

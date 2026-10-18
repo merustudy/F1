@@ -1,6 +1,6 @@
-Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd
-warrior,전사,Warrior,38,longsword,1,BattleStart,InRows,front:1,Shield,Self,5.45,맨 앞: 전투 시작 때 자신에게 보호막 {0},Front row: gains {0} Shield at the start of battle,unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50
-viking,바이킹,Viking,33,greataxe,1,Always,SelfInDog,,WeaponPowerPercent,Self,100,빈사 상태: 무기 피해 +{0}%,At death's door: weapon damage +{0}%,unit/job/valkyrie,13,11,10,5,8,9,110,90,50,20,50,50
-ranger,방랑자,Ranger,27,longbow,3,Always,None,,CritChancePercent,Self,10,무기의 치명타 확률 +{0}%,Weapon critical chance +{0}%,unit/job/spellblade,8,14,9,7,9,11,50,110,50,20,50,90
-mage,마법사,Mage,22,fire_staff,3,Always,InRows,back:2,WeaponPowerPercent,Self,25,뒤에서 2번째 자리까지: 무기 피해 +{0}%,Rear 2 rows: weapon damage +{0}%,unit/job/archmage,6,9,7,15,11,8,20,50,50,110,90,50
-priest,사제,Priest,25,healing_staff,3,Heal,None,,Shield,EventTarget,2.73,회복시킨 대상에게 보호막 {0},Healed targets also gain {0} Shield,unit/job/bishop,7,8,9,11,14,10,20,50,50,90,110,50
+Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US
+warrior,전사,Warrior,38,longsword,1,BattleStart,InRows,front:1,Shield,Self,5.45,맨 앞: 전투 시작 때 자신에게 보호막 {0},Front row: gains {0} Shield at the start of battle,unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50,선봉,Vanguard
+viking,바이킹,Viking,33,greataxe,1,Always,SelfInDog,,WeaponPowerPercent,Self,100,빈사 상태: 무기 피해 +{0}%,At death's door: weapon damage +{0}%,unit/job/valkyrie,13,11,10,5,8,9,110,90,50,20,50,50,광기,Frenzy
+ranger,방랑자,Ranger,27,longbow,3,Always,None,,CritChancePercent,Self,10,무기의 치명타 확률 +{0}%,Weapon critical chance +{0}%,unit/job/spellblade,8,14,9,7,9,11,50,110,50,20,50,90,급소,Weak Spot
+mage,마법사,Mage,22,fire_staff,3,Always,InRows,back:2,WeaponPowerPercent,Self,25,뒤에서 2번째 자리까지: 무기 피해 +{0}%,Rear 2 rows: weapon damage +{0}%,unit/job/archmage,6,9,7,15,11,8,20,50,50,110,90,50,후방 영창,Rear Casting
+priest,사제,Priest,25,healing_staff,3,Heal,None,,Shield,EventTarget,2.73,회복시킨 대상에게 보호막 {0},Healed targets also gain {0} Shield,unit/job/bishop,7,8,9,11,14,10,20,50,50,90,110,50,축복,Blessing

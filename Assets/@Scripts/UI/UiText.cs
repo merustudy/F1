@@ -43,6 +43,88 @@ namespace F1.UI
         }
 
         /// <summary>
+        /// A mercenary's traits as the trait line shows them (Slice D stage 37, Round 84): the job's trait first (its passive, by its short name, the
+        /// gold rim), then the mercenary's own in their order (a strength's rim green, a weakness's red).
+        /// </summary>
+        public static List<TraitChip> TraitChips(StaticData data, string jobId, IReadOnlyList<string> traitIds)
+        {
+            var chips = new List<TraitChip>();
+            JobData job = data.Jobs.Get(jobId);
+            if (job.Passive != null)
+            {
+                string jobName = Name(job.Name);
+                string name = job.PassiveName == null ? jobName : Name(job.PassiveName);
+                chips.Add(new TraitChip(name, Glyph(name), UiPalette.TraitJob, UiStrings.Get(UiKeys.Trait.KindJob, jobName), Passive(job)));
+            }
+
+            foreach (string id in traitIds ?? new List<string>())
+            {
+                TraitData trait = data.Traits.Get(id);
+                string name = Name(trait.Name);
+                bool strength = trait.Polarity == TraitPolarity.Positive;
+                string kind = UiStrings.Get(trait.Kind == TraitKind.Innate ? UiKeys.Trait.KindInnate : UiKeys.Trait.KindAcquired);
+                string polarity = UiStrings.Get(strength ? UiKeys.Trait.Strength : UiKeys.Trait.Weakness);
+                chips.Add(new TraitChip(name, Glyph(name), strength ? UiPalette.TraitStrength : UiPalette.TraitWeakness,
+                    UiStrings.Get(UiKeys.Trait.Sub, kind, polarity), TraitEffect(trait)));
+            }
+
+            return chips;
+        }
+
+        /// <summary>The more pill of a trait line (Round 84 판정 3): "+N", and on its card the names it stands for.</summary>
+        public static TraitChip MoreChip(IReadOnlyList<TraitChip> hidden)
+        {
+            string names = string.Empty;
+            foreach (TraitChip chip in hidden)
+            {
+                names = names.Length == 0 ? chip.Name : UiStrings.Get(UiKeys.Trait.Sub, names, chip.Name);
+            }
+
+            return MoreChip(hidden.Count, names);
+        }
+
+        /// <summary>A more pill for a count, with what its card names (empty where only its width matters).</summary>
+        public static TraitChip MoreChip(int count, string names = "")
+        {
+            return new TraitChip(UiStrings.Get(UiKeys.Trait.More, count), null, UiPalette.TraitMore, names, string.Empty, count);
+        }
+
+        /// <summary>What a trait does, each term it moves in turn ("명중 +5%p", "최대 HP -10%").</summary>
+        public static string TraitEffect(TraitData trait)
+        {
+            string line = string.Empty;
+            foreach ((string key, int value) in new[]
+            {
+                (UiKeys.Trait.Hit, trait.HitPercent), (UiKeys.Trait.Dodge, trait.DodgePercent), (UiKeys.Trait.Crit, trait.CritPercent),
+                (UiKeys.Trait.DogDeath, trait.DogDeathPercent), (UiKeys.Trait.Virtue, trait.VirtuePercent), (UiKeys.Trait.Fatigue, trait.FatiguePercent),
+                (UiKeys.Trait.MaxHp, trait.MaxHpPercent),
+            })
+            {
+                if (value == 0)
+                {
+                    continue;
+                }
+
+                string term = UiStrings.Get(key, Signed(value));
+                line = line.Length == 0 ? term : UiStrings.Get(UiKeys.Trait.Sub, line, term);
+            }
+
+            return line;
+        }
+
+        /// <summary>A whole number with its sign: "+5", "-10".</summary>
+        public static string Signed(int value)
+        {
+            return (value > 0 ? "+" : string.Empty) + value.ToString(CultureInfo.InvariantCulture);
+        }
+
+        /// <summary>The placeholder icon's letter: the name's first.</summary>
+        static string Glyph(string name)
+        {
+            return string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1);
+        }
+
+        /// <summary>
         /// A damage, a heal or a shield in hundredths as the screen shows it (Slice B stage 22, Docs/Architecture/12_UI.md "수의 표시"): a whole
         /// number, rounded half up.
         /// </summary>
@@ -181,10 +263,11 @@ namespace F1.UI
         /// <param name="starDamage">What the stars on the item's board add to a weapon's damage (stage 20): its damage line counts it.</param>
         /// <param name="ownerStats">The stats of the mercenary whose board the item is on (Slice D stage 32): its values count them. Null for an item without an owner, or an enemy's.</param>
         /// <param name="ownerAccuracy">An enemy owner's Accuracy (Slice D stage 33), which its card's hit chance counts; 0 otherwise.</param>
-        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null)
+        public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null,
+            TraitBonus ownerTraits = null)
         {
             // Each fact keeps together (stage 22: "치명타 5%" split as "치|명타" on a Korean card); the line breaks between facts only.
-            facts = string.Join(FactSeparator, ItemFacts(item, ownerStats, ownerAccuracy, ownerPassive).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
+            facts = string.Join(FactSeparator, ItemFacts(item, ownerStats, ownerAccuracy, ownerPassive, ownerTraits).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
             effects = string.Join("\n", ItemEffects(item, starDamage, ownerStats));
             var parts = new List<string>();
             AddFatigue(parts, item);
@@ -308,7 +391,7 @@ namespace F1.UI
 
         /// <param name="ownerStats">The owner's stats (Slice D stage 33): the critical and hit chances count them. Null without an owner.</param>
         /// <param name="ownerAccuracy">An enemy owner's Accuracy, which the hit chance counts.</param>
-        static List<string> ItemFacts(EquippedItem item, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null)
+        static List<string> ItemFacts(EquippedItem item, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null, TraitBonus ownerTraits = null)
         {
             ItemData data = item.Item;
             var facts = new List<string>
@@ -331,16 +414,16 @@ namespace F1.UI
             facts.Add(CooldownFact(data));
 
             // A weapon's chance of a critical hit (stage 22), with the owner's dexterity (Slice D stage 33), and the hit chance of what can miss against a
-            // target at the baseline: the number green over the data's, red under it (Round 81).
+            // target at the baseline: the number green over the data's, red under it (Round 81). Both count the owner's traits (stage 37, Round 84 판정 9).
             BalanceData balance = Managers.Data.Data.Balance;
             if (data.CritChancePercent > 0)
             {
-                facts.Add(UiStrings.Get(UiKeys.Item.Crit, AgainstData(StatRules.CritChance(balance, ownerStats, data, StatRules.CritBonusPercent(ownerPassive, data)), data.CritChancePercent * 100)));
+                facts.Add(UiStrings.Get(UiKeys.Item.Crit, AgainstData(StatRules.CritChance(balance, ownerStats, data, StatRules.CritBonusPercent(ownerPassive, data), ownerTraits), data.CritChancePercent * 100)));
             }
 
             if (CanMiss(data))
             {
-                int hit = StatRules.HitChance(balance, StatRules.Accuracy(balance, ownerStats, ownerAccuracy, data), 0);
+                int hit = StatRules.HitChance(balance, StatRules.Accuracy(balance, ownerStats, ownerAccuracy, data, ownerTraits), 0);
                 facts.Add(UiStrings.Get(UiKeys.Item.Hit, AgainstData(hit, balance.HitBasePercent * 100)));
             }
 

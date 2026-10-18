@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,15 +6,16 @@ using UnityEngine.UI;
 namespace F1.UI
 {
     /// <summary>
-    /// A candidate at the stagecoach (Slice C stage 26): the name, the job it was drawn with, its level and fatigue (always level 1, fresh), that job's
-    /// passive, its six stats on a line under a hairline (Slice D stage 32, Round 81), and the button that hires it at the price.
+    /// A candidate at the stagecoach (Slice C stage 26): the name, the job it was drawn with, its level and fatigue (always level 1, fresh), its traits
+    /// (Slice D stage 37, Round 84: the job's trait and the 0~2 it was born with, where the job's passive stood), its six stats on a line under a
+    /// hairline (Slice D stage 32, Round 81), and the button that hires it at the price.
     /// </summary>
     public sealed class CandidateView : MonoBehaviour
     {
         [SerializeField] TMP_Text _name;
         [SerializeField] TMP_Text _job;
         [SerializeField] TMP_Text _detail;
-        [SerializeField] TMP_Text _passive;
+        [SerializeField] TraitLineView _traits;
         [SerializeField] TMP_Text _stats;
         [SerializeField] Button _hire;
         [SerializeField] TMP_Text _hireLabel;
@@ -22,18 +24,24 @@ namespace F1.UI
         public string Job => _job.text;
         public Button Hire => _hire;
 
+        /// <summary>The traits' line (Slice D stage 37).</summary>
+        public TraitLineView Traits => _traits;
+
+        /// <summary>How far the traits' line may reach: the hairline's width.</summary>
+        public const float TraitLineWidth = 660f;
+
         /// <summary>The stat line (Round 81): six pairs "힘 12" in columns.</summary>
         public TMP_Text Stats => _stats;
 
         /// <param name="detail">What a candidate always is: "Lv 1 · 피로도 0/200".</param>
         /// <param name="stats">The stat line (<see cref="UiText.StatColumns"/>).</param>
-        public void Show(string name, string job, string detail, string passive, string stats, string hireLabel, bool canHire)
+        public void Show(string name, string job, string detail, IReadOnlyList<TraitChip> traits, string stats, string hireLabel, bool canHire)
         {
             _stats.text = stats;
             _name.text = name;
             _job.text = job;
             _detail.text = detail;
-            _passive.text = passive;
+            _traits.Show(traits, TraitLineWidth);
             _hireLabel.text = hireLabel;
             _hire.interactable = canHire;
         }
