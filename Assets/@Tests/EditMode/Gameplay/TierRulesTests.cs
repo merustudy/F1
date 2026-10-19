@@ -268,6 +268,49 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ABaseWeaponAtTwoStars_TakesTheShopsTwoStar_IntoAThreeStarBaseWeapon_EveryWay()
+        {
+            // 2026-10-19 the user's report "기본 롱소드로 조합된 롱소드2성과 상점에서 파는 롱소드2성이 조합 안되는 현상": a base blade made 2-star
+            // (by merging, as the test above shows) takes the shop's 2-star blade — bought onto it, put on it from the inventory, or put onto it
+            // in the inventory — and the 3-star stays a base weapon. (Before that day's rule, a base weapon merged with nothing.)
+            StaticData data = TestData.Data();
+            ItemData blade = data.Items.Get("blade");
+            foreach (string way in new[] { "bought onto it", "from the inventory", "onto the bought one" })
+            {
+                ExpeditionState state = Expedition(data);
+                BoardItem own = state.Members[0].Board.Items.Single(i => i.Item.IsBase);
+                own.Item = new EquippedItem(blade, isBase: true, tier: ItemTier.Tier2);
+                state.Phase = ExpeditionPhase.AtShop;
+                state.Shop = new ShopState { Stock = { new ItemOffer(OfferKind.Item, "blade", ItemTier.Tier2) } };
+                state.Coins = 1000;
+                EquippedItem merged;
+                switch (way)
+                {
+                    case "bought onto it":
+                        Assert.IsTrue(ExpeditionRules.ShopMergesAt(state, 0, 0, own.At.X, own.At.Y), way);
+                        ExpeditionRules.BuyToBoard(data, state, 0, 0, own.At);
+                        merged = TestBoards.ItemAt(state.Members[0], own.At.X, own.At.Y);
+                        break;
+                    case "from the inventory":
+                        ExpeditionRules.BuyToInventoryAt(data, state, 0, At(0, 0));
+                        Assert.IsTrue(ExpeditionRules.MergesAt(state, state.Inventory[0], 0, own.At.X, own.At.Y), way);
+                        ExpeditionRules.PlaceFromInventory(data, state, 0, 0, own.At);
+                        merged = TestBoards.ItemAt(state.Members[0], own.At.X, own.At.Y);
+                        break;
+                    default:
+                        ExpeditionRules.BuyToInventoryAt(data, state, 0, At(0, 0));
+                        Assert.IsTrue(ExpeditionRules.CanMoveToInventoryAt(state, 0, own.At.X, own.At.Y, At(0, 0)), way);
+                        ExpeditionRules.MoveToInventoryAt(state, 0, own.At.X, own.At.Y, At(0, 0));
+                        merged = state.Inventory.Items.Single().Item;
+                        break;
+                }
+
+                Assert.AreEqual((ItemTier.Tier3, true), (merged.Tier, merged.IsBase), way);
+                Assert.AreEqual(1, TestBoards.Items(state.Members[0]).Count(i => i.Item.Id == "blade") + state.Inventory.Count(i => i.Item.Id == "blade"), way + ": one blade left.");
+            }
+        }
+
+        [Test]
         public void MergingTwoWeapons_LeavesOneToPayFatigueFor()
         {
             StaticData data = TestData.Data();
