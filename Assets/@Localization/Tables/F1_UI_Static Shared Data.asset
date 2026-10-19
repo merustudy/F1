@@ -1900,6 +1900,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673543694745606
+  - m_Id: 6911573292474368
+    m_Key: Item.BattleStart
+    m_Metadata:
+      m_Items:
+      - rid: 8623673547781046272
+  - m_Id: 6911573305057280
+    m_Key: Item.CritTaken
+    m_Metadata:
+      m_Items:
+      - rid: 8623673547781046273
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2034,8 +2044,8 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'How to use the boards on the party side (Slice B stage 19;
-          2026-10-18: a press elsewhere sends a board''s item to the inventory, the
-          right button puts it back).'
+          2026-10-18: a press elsewhere sends a board''s item to the inventory; 2026-10-19:
+          the right button turns it again, Escape puts it back).'
     - rid: 636489279218909224
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2727,8 +2737,8 @@ MonoBehaviour:
     - rid: 8623673275332689925
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'In the panel while an offer of the shop is picked (2026-10-18:
-          the right button puts it back).'
+        m_CommentText: 'In the panel while an offer of the shop is picked (2026-10-19:
+          the right button turns it again, Escape puts it back).'
     - rid: 8623673275332689926
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2788,7 +2798,8 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'On the board panel after a win, while a drop is picked (round
-          47, stage 19; 2026-10-18: the right button puts it back).'
+          47, stage 19; 2026-10-19: the right button turns it again, Escape puts
+          it back).'
     - rid: 8623673301822865408
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2817,7 +2828,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'Under a held item''s tooltip in the inventory popup (round
-          49; 2026-10-18: the right button lets go).'
+          49; 2026-10-19: the right button turns it again).'
     - rid: 8623673318725910528
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3633,3 +3644,14 @@ MonoBehaviour:
       data:
         m_CommentText: 'What left an acquired trait (Slice D stage 38): a virtue
           on the expedition.'
+    - rid: 8623673547781046272
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In an item''s facts in place of its cooldown (Slice D stage
+          39, Round 87): an item that activates once when a battle starts, the armour.'
+    - rid: 8623673547781046273
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: An effect line of an item that takes points off the critical
+          chance of the weapons that hit its owner (stage 39, the iron helm). {0}
+          = the points.

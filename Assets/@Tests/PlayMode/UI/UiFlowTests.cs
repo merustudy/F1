@@ -2172,7 +2172,7 @@ namespace F1.Tests
             party.TurnHeld(-1);
             yield return null;
 
-            // The right button (or Escape) lets go: it is back where it was (2026-10-18; the right button turned it before).
+            // Escape lets go: it is back where it was (2026-10-19: the right button turns it again, as R does; on 2026-10-18 it let go).
             party.LetGo();
             yield return null;
             Assert.IsFalse(party.Hand.Holding, "Let go.");

@@ -145,9 +145,9 @@ MonoBehaviour:
       - rid: 636489278608375844
   - m_Id: 9766393864229
     m_Localized: "Click an item to pick it up, then a square to put it down (one
-      item in the way goes to the inventory). While holding: wheel or R turns it
-      \xB7 click elsewhere sends it to the inventory \xB7 right-click puts it back.
-      Forward and Back swap with the next row."
+      item in the way goes to the inventory). While holding: right-click, wheel or
+      R turns it \xB7 click elsewhere sends it to the inventory \xB7 Esc puts it
+      back. Forward and Back swap with the next row."
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864231
@@ -875,8 +875,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580996
-    m_Localized: "Click a square to put it there and buy it. While holding: wheel
-      or R turns it \xB7 right-click puts it back. Or take it straight into the inventory."
+    m_Localized: "Click a square to put it there and buy it. While holding: right-click,
+      wheel or R turns it \xB7 Esc puts it back. Or take it straight into the inventory."
     m_Metadata:
       m_Items: []
   - m_Id: 2552399930580997
@@ -934,7 +934,7 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2894741283790849
     m_Localized: "Click a square on the left to put the drop there. While holding:
-      wheel or R turns it \xB7 right-click puts it back."
+      right-click, wheel or R turns it \xB7 Esc puts it back."
     m_Metadata:
       m_Items: []
   - m_Id: 2976244533551104
@@ -962,7 +962,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 3219372028977152
-    m_Localized: "R \xB7 wheel: turn   right-click \xB7 Esc: put back"
+    m_Localized: "R \xB7 right-click \xB7 wheel: turn   Esc: put back"
     m_Metadata:
       m_Items: []
   - m_Id: 3246693813313536
@@ -1728,6 +1728,15 @@ MonoBehaviour:
     m_Localized: from a virtue
     m_Metadata:
       m_Items: []
+  - m_Id: 6911573292474368
+    m_Localized: At the start of battle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6911573305057280
+    m_Localized: Chance to be crit -{0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1923,3 +1932,4 @@ MonoBehaviour:
         - id: 6589976178319373
         - id: 6846191462506496
         - id: 6846191475089408
+        - id: 6911573305057280
