@@ -7,6 +7,8 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 23 (Slice D stage 38): a member's DeathsDoor (it was at death's door on this expedition: the settlement may leave a trait). A version 22
+    /// file's members were at none (false, as the field is missing).
     /// Version 22 (Slice D stage 37): a mercenary's and a candidate's Traits (TraitData ids). A version 21 file has none: RunSaveMigrator gives every
     /// one an empty list. Version 21 (Slice D stage 36): the same shape; the jobs are the five (warrior, viking, ranger, mage, priest). Older files are not read
     /// (RunSaveMigrator.OldestReadableVersion: the user's decision). What follows is the history.
@@ -29,7 +31,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 22;
+        public const int CurrentSchemaVersion = 23;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -207,6 +209,9 @@ namespace F1.Save
 
         /// <summary>The affliction or virtue the member is in (a FatigueState id), or null (version 6).</summary>
         public string State;
+
+        /// <summary>Whether the member was at death's door in a battle of this expedition (version 23).</summary>
+        public bool DeathsDoor;
     }
 
     public sealed class ItemRecord

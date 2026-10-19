@@ -389,19 +389,20 @@ namespace F1.Editor.Data
         }
     }
 
-    /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none.</summary>
+    /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none, an empty Source (stage 38) is an innate trait's.</summary>
     internal static class TraitMapper
     {
         static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent" };
 
         public static List<TraitData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers(new[] { "Kind", "Polarity", "Weight", "Excludes" }.Concat(Effects).ToArray()));
+            table.RequireHeaders(RowMapping.Headers(new[] { "Kind", "Polarity", "Source", "Weight", "Excludes" }.Concat(Effects).ToArray()));
             return RowMapping.MapRows(table, errors, row => new TraitData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.Enum<TraitKind>("Kind"),
                 row.Enum<TraitPolarity>("Polarity"),
+                row.OptionalEnum<TraitSource>("Source"),
                 row.Int("Weight"),
                 row.OptionalId("Excludes"),
                 row.OptionalInt("HitPercent", 0),

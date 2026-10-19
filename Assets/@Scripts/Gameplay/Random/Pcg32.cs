@@ -83,6 +83,8 @@ namespace F1.Gameplay
         public const ulong Recruit = 8UL;
         /// <summary>The stats a level-up grows by the remainder of each growth grade (Slice D stage 34), at the return settlement.</summary>
         public const ulong Growth = 9UL;
+        /// <summary>The traits an expedition leaves on a survivor (Slice D stage 38), at the return settlement.</summary>
+        public const ulong Trait = 10UL;
     }
 
     /// <summary>Derives child seeds: run seed -> expedition seed -> battle seed.</summary>

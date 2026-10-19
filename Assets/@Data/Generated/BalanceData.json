@@ -334,6 +334,26 @@
       "Value": 100
     },
     {
+      "Key": "TraitChanceAfflictionPercent",
+      "Value": 40
+    },
+    {
+      "Key": "TraitChanceClearPercent",
+      "Value": 15
+    },
+    {
+      "Key": "TraitChanceDeathsDoorPercent",
+      "Value": 25
+    },
+    {
+      "Key": "TraitChanceRetreatPercent",
+      "Value": 15
+    },
+    {
+      "Key": "TraitChanceVirtuePercent",
+      "Value": 40
+    },
+    {
       "Key": "TreatmentPrice",
       "Value": 20
     },

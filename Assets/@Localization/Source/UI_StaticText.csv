@@ -330,6 +330,7 @@ Settle.Gold,"The gold the settlement paid (stage 26). {0} = gold earned, {1} = t
 Settle.GoldWithCoins,"The gold the settlement paid when a cleared expedition's coins came home as gold (2026-10-17). {0} = gold earned in all, {1} = the floors reached, {2} = the coins converted (those left and the items' worth), {3} = the gold they made, {4} = the gold held now.",얻은 금 +{0} ({1}층 도달 · 지역 코인 {2} → 금 +{3}) · 보유 금 {4},Gold +{0} ({1} floors reached · {2} region coins → gold +{3}) · gold held {4}
 Settle.Exp,"The experience every survivor got (stage 27). {0} = the experience.",경험치 +{0},XP +{0}
 Settle.Ready,"Under the experience (Slice D stage 35, Round 82): the survivors whose experience now meets their level; the barracks levels them up. {0} = the names joined by commas.",▲ 레벨 업 가능: {0} — 막사에서 올린다,▲ Ready to level up: {0} — in the barracks
+Settle.NewTraits,"One line per survivor the expedition left new traits on (Slice D stage 38, Round 84 판정 7), before the traits' chips. {0} = the survivor's name.",새 특성: {0} —,New traits: {0} —
 Save.Failed,Shown over everything while the last change could not be written.,저장하지 못했습니다. 방금 한 행동은 아직 확정되지 않았습니다. 디스크 공간과 폴더 권한을 확인한 뒤 다시 시도하세요.,"Could not save. Your last action is not confirmed yet. Check disk space and folder permissions, then retry."
 Save.Retry,Writes the unsaved change again.,다시 시도,Retry
 Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}
@@ -362,6 +363,12 @@ Trait.KindAcquired,A trait card's second line (Slice D stage 38): a trait an exp
 Trait.Strength,After a trait's kind on its card (Slice D stage 37): the trait is a strength.,장점,Strength
 Trait.Weakness,After a trait's kind on its card (Slice D stage 37): the trait is a weakness.,약점,Weakness
 Trait.Sub,"Joins two parts of a trait card's line (Slice D stage 37): the kind and strength or weakness, or two effects. {0}, {1} = the parts.",{0} · {1},{0} · {1}
+Trait.SubFrom,"An acquired trait card's second line (Slice D stage 38): what kind it is, then what left it. {0} = kind and strength or weakness, {1} = what left it.",{0} — {1},{0} — {1}
+Trait.FromClear,What left an acquired trait (Slice D stage 38): a cleared expedition.,클리어한 원정에서,from a cleared expedition
+Trait.FromRetreat,What left an acquired trait (Slice D stage 38): a retreat.,후퇴한 원정에서,from a retreat
+Trait.FromDeathsDoor,What left an acquired trait (Slice D stage 38): coming back alive from death's door.,빈사에서 살아 돌아와,back from death's door
+Trait.FromAffliction,What left an acquired trait (Slice D stage 38): coming home in an affliction.,고통인 채 돌아와,home in an affliction
+Trait.FromVirtue,What left an acquired trait (Slice D stage 38): a virtue on the expedition.,각성한 원정에서,from a virtue
 Trait.More,"The pill at the end of a trait line that does not hold them all (Slice D stage 37, Round 84 판정 3). {0} = how many more.",+{0},+{0}
 Trait.MoreTitle,"The title of the card the more pill opens (Slice D stage 37): the traits the line could not hold, named on the next line. {0} = how many.",그 밖의 특성 {0},{0} more traits
 Trait.Hit,A trait's effect (Slice D stage 37): on the hit chance of the mercenary's attacks. {0} = signed percent points.,명중 {0}%p,Hit {0}%p

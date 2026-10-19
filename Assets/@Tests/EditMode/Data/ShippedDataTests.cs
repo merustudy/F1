@@ -340,12 +340,12 @@ namespace F1.Tests
         [Test]
         public void ShippedTraits_AreTheFirstBatchsSixInnate_InClashingPairs_AndTheStartingRosterHasTheDatas()
         {
-            // Slice D stage 37 (Design/16 판정 14, Docs/Design/05 §6): the six innate traits of the first batch (the acquired seven come with stage 38),
-            // strengths and weaknesses three each, eagle eye against clumsy and steady against timid; the starting roster's set in the data.
+            // Slice D stage 37 (Design/16 판정 14, Docs/Design/05 §6): the six innate traits of the first batch, strengths and weaknesses three each,
+            // eagle eye against clumsy and steady against timid; the starting roster's set in the data.
             StaticData data = LoadShipped();
-            CollectionAssert.AreEquivalent(new[] { "eagle_eye", "clumsy", "iron_bones", "frail", "steady", "timid" }, data.Traits.Ordered.Select(t => t.Id).ToList());
-            Assert.IsTrue(data.Traits.Ordered.All(t => t.Kind == TraitKind.Innate && t.Weight > 0));
-            Assert.AreEqual(3, data.Traits.Ordered.Count(t => t.Polarity == TraitPolarity.Positive));
+            CollectionAssert.AreEquivalent(new[] { "eagle_eye", "clumsy", "iron_bones", "frail", "steady", "timid" }, data.InnateTraits.Select(t => t.Id).ToList());
+            Assert.IsTrue(data.InnateTraits.All(t => t.Weight > 0 && t.Source == null));
+            Assert.AreEqual(3, data.InnateTraits.Count(t => t.Polarity == TraitPolarity.Positive));
             Assert.IsTrue(data.Traits.Get("eagle_eye").Clashes(data.Traits.Get("clumsy")));
             Assert.IsTrue(data.Traits.Get("steady").Clashes(data.Traits.Get("timid")));
             Assert.AreEqual((5, -5, -5, -10, -10, 10), (data.Traits.Get("eagle_eye").HitPercent, data.Traits.Get("clumsy").HitPercent, data.Traits.Get("iron_bones").DogDeathPercent,
@@ -354,6 +354,25 @@ namespace F1.Tests
                 data.StartingMercenaries.Select(m => m.Id + ":" + string.Join("+", m.Traits)).ToList());
             Assert.IsTrue(data.RecruitPool.All(m => m.Traits.Count == 0));
             Assert.AreEqual((30, 50, 20), (data.Balance.RecruitTraitWeight0, data.Balance.RecruitTraitWeight1, data.Balance.RecruitTraitWeight2));
+        }
+
+        [Test]
+        public void ShippedTraits_TheAcquiredSeven_ComeFromTheirSources_AtTheStartingChances()
+        {
+            // Slice D stage 38 (Docs/Design/05 §6 and the stage's 판정 1~3, 2026-10-19 "권장안 대로"): seasoned from a clear, shaken from a retreat,
+            // survivor, scarred and limp from death's door (one strength in three), nightmares from an affliction, hardened from a virtue; no new
+            // clashing pairs; the chances 15, 15, 25, 40, 40.
+            StaticData data = LoadShipped();
+            List<TraitData> acquired = data.Traits.Ordered.Where(t => t.Kind == TraitKind.Acquired).ToList();
+            CollectionAssert.AreEquivalent(new[] { "seasoned:Clear:Positive", "shaken:Retreat:Negative", "survivor:DeathsDoor:Positive", "scarred:DeathsDoor:Negative",
+                "limp:DeathsDoor:Negative", "nightmares:Affliction:Negative", "hardened:Virtue:Positive" }, acquired.Select(t => $"{t.Id}:{t.Source}:{t.Polarity}").ToList());
+            Assert.IsTrue(acquired.All(t => t.Weight == 10 && t.Excludes == null));
+            Assert.IsFalse(acquired.Any(t => data.Traits.Ordered.Any(other => other.Excludes == t.Id)));
+            Assert.AreEqual((2, -10, -10, -5, -5, 10, 10), (data.Traits.Get("seasoned").CritPercent, data.Traits.Get("shaken").VirtuePercent, data.Traits.Get("survivor").DogDeathPercent,
+                data.Traits.Get("scarred").MaxHpPercent, data.Traits.Get("limp").DodgePercent, data.Traits.Get("nightmares").FatiguePercent, data.Traits.Get("hardened").VirtuePercent));
+            BalanceData balance = data.Balance;
+            Assert.AreEqual((15, 15, 25, 40, 40), (balance.TraitChanceClearPercent, balance.TraitChanceRetreatPercent, balance.TraitChanceDeathsDoorPercent,
+                balance.TraitChanceAfflictionPercent, balance.TraitChanceVirtuePercent));
         }
 
         [Test]

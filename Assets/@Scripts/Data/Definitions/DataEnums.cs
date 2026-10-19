@@ -248,6 +248,20 @@ namespace F1.Data
         Acquired,
     }
 
+    /// <summary>
+    /// What leaves an acquired trait on a mercenary at the return settlement (Slice D stage 38, Docs/Design/05_Mercenary_Growth.md §6): the
+    /// expedition was cleared or retreated from, the mercenary came back from death's door, or came home in an affliction or had a virtue.
+    /// The order is the order the settlement rolls them in.
+    /// </summary>
+    public enum TraitSource
+    {
+        Clear,
+        Retreat,
+        DeathsDoor,
+        Affliction,
+        Virtue,
+    }
+
     /// <summary>Whether a trait is a strength or a weakness (05 §6). A strength may carry a small drawback; the data says which it is.</summary>
     public enum TraitPolarity
     {

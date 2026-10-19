@@ -165,6 +165,13 @@ namespace F1.Gameplay
         InnLocked,
     }
 
+    /// <summary>The traits a survivor acquired at a settlement (Slice D stage 38), in the order they were rolled.</summary>
+    public sealed class AcquiredTraits
+    {
+        public string MercenaryId;
+        public List<string> TraitIds = new List<string>();
+    }
+
     /// <summary>What the return settlement changed, for the result screen.</summary>
     public sealed class SettlementReport
     {
@@ -201,6 +208,9 @@ namespace F1.Gameplay
 
         /// <summary>The affliction each survivor came home in (a FatigueStateData id), or null, in the order of <see cref="SurvivorIds"/>. A virtue ended with the expedition.</summary>
         public List<string> SurvivorStates = new List<string>();
+
+        /// <summary>The survivors the expedition left new traits on (Slice D stage 38), in the order of <see cref="SurvivorIds"/>; none without any.</summary>
+        public List<AcquiredTraits> NewTraits = new List<AcquiredTraits>();
         public int DaysPassed;
         public int DayAfter;
         public bool RunIsOver;

@@ -572,6 +572,11 @@ namespace F1.Sim
             long levelsAtEnd = 0, levelUps = 0, highestLevel = 0, runsAtMaxLevel = 0, runsWithLiving = 0;
             var statsAtEnd = new long[StatBlock.All.Length];
             long hiredStrengths = 0, hiredWeaknesses = 0, strengthsAtEnd = 0, weaknessesAtEnd = 0;
+            // Slice D stage 38: how often a survivor met each source of acquired traits at a settlement, the traits each left, and those the living hold at the end.
+            TraitSource[] sources = (TraitSource[])Enum.GetValues(typeof(TraitSource));
+            var sourcesMet = new long[sources.Length];
+            var traitsGained = new long[sources.Length];
+            long acquiredStrengthsAtEnd = 0, acquiredWeaknessesAtEnd = 0;
             long finalExpeditions = 0, finalCleared = 0, finalWiped = 0, finalRetreated = 0, finalDeaths = 0, runsThatClearedFinal = 0;
             var scratch = new ExpeditionStats();
             for (int run = 0; run < runs; run++)
@@ -670,7 +675,23 @@ namespace F1.Sim
                     deaths += expedition.Members.Count(m => !m.Alive);
                     hiredDeaths += expedition.Members.Count(m => !m.Alive && hired.Contains(m.MercenaryId));
                     expeditions++;
+                    foreach (ExpeditionMember member in expedition.Members)
+                    {
+                        foreach (TraitSource source in TraitRules.SourcesOf(data, expedition.Result, member))
+                        {
+                            sourcesMet[(int)source]++;
+                        }
+                    }
+
                     SettlementReport report = RunRules.Settle(data, state, expedition);
+                    foreach (AcquiredTraits gained in report.NewTraits)
+                    {
+                        foreach (string id in gained.TraitIds)
+                        {
+                            traitsGained[(int)data.Traits.Get(id).Source.Value]++;
+                        }
+                    }
+
                     goldEarned += report.GoldEarned;
                     finished += report.BuildingsCompleted.Count;
                     // Slice D stage 35: the barracks levels up by hand; every policy levels everyone up right after the settlement, the roster's order.
@@ -706,6 +727,8 @@ namespace F1.Sim
                 {
                     strengthsAtEnd += Count(data, living.Traits, TraitPolarity.Positive);
                     weaknessesAtEnd += Count(data, living.Traits, TraitPolarity.Negative);
+                    acquiredStrengthsAtEnd += living.Traits.Count(id => data.Traits.Get(id).Kind == TraitKind.Acquired && data.Traits.Get(id).Polarity == TraitPolarity.Positive);
+                    acquiredWeaknessesAtEnd += living.Traits.Count(id => data.Traits.Get(id).Kind == TraitKind.Acquired && data.Traits.Get(id).Polarity == TraitPolarity.Negative);
                     StatBlock stats = living.Stats ?? StatRules.BaseOf(data, living.JobId);
                     for (int i = 0; i < StatBlock.All.Length; i++)
                     {
@@ -748,6 +771,9 @@ namespace F1.Sim
                 + string.Join(", ", StatBlock.All.Select((stat, i) => $"{stat} {Average(statsAtEnd[i], (int)rosterAtEnd)}")));
             Console.WriteLine($"  traits (Slice D stage 37): a hire brings {Average(hiredStrengths, (int)hires)} strengths and {Average(hiredWeaknesses, (int)hires)} weaknesses; "
                 + $"the living at the end have {Average(strengthsAtEnd, (int)rosterAtEnd)} and {Average(weaknessesAtEnd, (int)rosterAtEnd)}");
+            Console.WriteLine("  acquired traits (Slice D stage 38), per run: a survivor met / a trait was left — "
+                + string.Join(", ", sources.Select(source => $"{source} {Average(sourcesMet[(int)source], runs)} / {Average(traitsGained[(int)source], runs)}"))
+                + $"; the living at the end hold {Average(acquiredStrengthsAtEnd, (int)rosterAtEnd)} acquired strengths and {Average(acquiredWeaknessesAtEnd, (int)rosterAtEnd)} weaknesses");
         }
 
         /// <summary>The run policy's pick at the stagecoach (stage 37): the fewest weaknesses, then the most strengths, then the first.</summary>

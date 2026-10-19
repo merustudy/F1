@@ -50,6 +50,9 @@ namespace F1.Tests
             Assert.Throws<DataException>(() => TestData.Trait("wild", TraitPolarity.Positive, hit: 101));
             Assert.Throws<DataException>(() => TestData.Trait("self", TraitPolarity.Positive, hit: 1, excludes: "self"));
             Assert.Throws<DataException>(() => TestData.Trait("heavy", TraitPolarity.Positive, hit: 1, weight: -1));
+            // Stage 38: an acquired trait names what leaves it; an innate one names nothing.
+            Assert.Throws<DataException>(() => new TraitData("lost", TestData.Text("lost"), TraitKind.Acquired, TraitPolarity.Negative, null, 10, null, -1, 0, 0, 0, 0, 0, 0));
+            Assert.Throws<DataException>(() => new TraitData("born", TestData.Text("born"), TraitKind.Innate, TraitPolarity.Positive, TraitSource.Clear, 10, null, 1, 0, 0, 0, 0, 0, 0));
             Assert.Throws<DataException>(() => new MercenaryData("eve", TestData.Text("eve"), null, false, new[] { "keen" }), "A candidate draws its own.");
             Assert.Throws<DataException>(() => TestData.Balance(("RecruitTraitWeight0", 0)), "Some count of traits must be possible.");
         }

@@ -57,6 +57,17 @@ namespace F1.UI
                 chips.Add(new TraitChip(name, Glyph(name), UiPalette.TraitJob, UiStrings.Get(UiKeys.Trait.KindJob, jobName), Passive(job)));
             }
 
+            chips.AddRange(TraitChips(data, traitIds));
+            return chips;
+        }
+
+        /// <summary>
+        /// A mercenary's own traits, without the job's (the settlement's "new traits" line, Slice D stage 38): a strength's rim green, a weakness's
+        /// red; an acquired trait's card says what left it ("얻은 특성 · 약점 — 빈사에서 살아 돌아와").
+        /// </summary>
+        public static List<TraitChip> TraitChips(StaticData data, IReadOnlyList<string> traitIds)
+        {
+            var chips = new List<TraitChip>();
             foreach (string id in traitIds ?? new List<string>())
             {
                 TraitData trait = data.Traits.Get(id);
@@ -64,11 +75,28 @@ namespace F1.UI
                 bool strength = trait.Polarity == TraitPolarity.Positive;
                 string kind = UiStrings.Get(trait.Kind == TraitKind.Innate ? UiKeys.Trait.KindInnate : UiKeys.Trait.KindAcquired);
                 string polarity = UiStrings.Get(strength ? UiKeys.Trait.Strength : UiKeys.Trait.Weakness);
-                chips.Add(new TraitChip(name, Glyph(name), strength ? UiPalette.TraitStrength : UiPalette.TraitWeakness,
-                    UiStrings.Get(UiKeys.Trait.Sub, kind, polarity), TraitEffect(trait)));
+                string sub = UiStrings.Get(UiKeys.Trait.Sub, kind, polarity);
+                if (trait.Source != null)
+                {
+                    sub = UiStrings.Get(UiKeys.Trait.SubFrom, sub, UiStrings.Get(SourceKey(trait.Source.Value)));
+                }
+
+                chips.Add(new TraitChip(name, Glyph(name), strength ? UiPalette.TraitStrength : UiPalette.TraitWeakness, sub, TraitEffect(trait)));
             }
 
             return chips;
+        }
+
+        static string SourceKey(TraitSource source)
+        {
+            switch (source)
+            {
+                case TraitSource.Clear: return UiKeys.Trait.FromClear;
+                case TraitSource.Retreat: return UiKeys.Trait.FromRetreat;
+                case TraitSource.DeathsDoor: return UiKeys.Trait.FromDeathsDoor;
+                case TraitSource.Affliction: return UiKeys.Trait.FromAffliction;
+                default: return UiKeys.Trait.FromVirtue;
+            }
         }
 
         /// <summary>The more pill of a trait line (Round 84 판정 3): "+N", and on its card the names it stands for.</summary>

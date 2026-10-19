@@ -145,6 +145,11 @@ namespace F1.Data
             new KeySpec(nameof(RecruitTraitWeight0), 0, 1000),
             new KeySpec(nameof(RecruitTraitWeight1), 0, 1000),
             new KeySpec(nameof(RecruitTraitWeight2), 0, 1000),
+            new KeySpec(nameof(TraitChanceClearPercent), 0, 100),
+            new KeySpec(nameof(TraitChanceRetreatPercent), 0, 100),
+            new KeySpec(nameof(TraitChanceDeathsDoorPercent), 0, 100),
+            new KeySpec(nameof(TraitChanceAfflictionPercent), 0, 100),
+            new KeySpec(nameof(TraitChanceVirtuePercent), 0, 100),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -466,5 +471,16 @@ namespace F1.Data
         public int RecruitTraitWeight0 => _values[nameof(RecruitTraitWeight0)];
         public int RecruitTraitWeight1 => _values[nameof(RecruitTraitWeight1)];
         public int RecruitTraitWeight2 => _values[nameof(RecruitTraitWeight2)];
+
+        /// <summary>
+        /// The chance, in percent, that a survivor acquires a trait of each source at the return settlement (Slice D stage 38, Docs/Design/05 §6):
+        /// a cleared expedition, a retreat, a return from death's door, coming home in an affliction, a virtue. Rolled only when a trait of the
+        /// source can still be taken.
+        /// </summary>
+        public int TraitChanceClearPercent => _values[nameof(TraitChanceClearPercent)];
+        public int TraitChanceRetreatPercent => _values[nameof(TraitChanceRetreatPercent)];
+        public int TraitChanceDeathsDoorPercent => _values[nameof(TraitChanceDeathsDoorPercent)];
+        public int TraitChanceAfflictionPercent => _values[nameof(TraitChanceAfflictionPercent)];
+        public int TraitChanceVirtuePercent => _values[nameof(TraitChanceVirtuePercent)];
     }
 }

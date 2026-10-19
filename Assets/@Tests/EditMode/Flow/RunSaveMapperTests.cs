@@ -403,7 +403,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(22, RunSaveData.CurrentSchemaVersion);
+            Assert.AreEqual(23, RunSaveData.CurrentSchemaVersion);
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -434,7 +434,7 @@ namespace F1.Tests
             Assert.IsTrue(run.Recruits.All(r => r.Traits.Count == 2), "The candidates drew two each.");
             kit.Expedition.Depart("cave");
             RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            Assert.AreEqual(22, save.SchemaVersion);
+            Assert.AreEqual(23, save.SchemaVersion);
             CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, save.Run.Roster[0].Traits);
 
             RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState expedition);
@@ -474,10 +474,34 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(22, save.SchemaVersion);
+            Assert.AreEqual(23, save.SchemaVersion, "Brought on through 22 to the current version.");
             Assert.IsTrue(save.Run.Roster.All(m => m.Traits != null && m.Traits.Count == 0) && save.Run.Recruits.All(r => r.Traits != null && r.Traits.Count == 0));
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
             Assert.IsTrue(run.Roster.All(m => m.Traits.Count == 0));
+        }
+
+        [Test]
+        public void Save_KeepsWhoWasAtDeathsDoor_AndAVersion22ExpeditionHadNobodyThere()
+        {
+            // Slice D stage 38 (version 23): whether a member was at death's door on the expedition, written and read back; a version 22 file
+            // has no such field, so its members were at none (판정 7).
+            RunSaveData save = ValidSave(out StaticData data);
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            Assert.IsTrue(expedition.Members.All(m => !m.DeathsDoor));
+            expedition.Members[1].DeathsDoor = true;
+
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            CollectionAssert.AreEqual(expedition.Members.Select(m => m.DeathsDoor).ToList(), again.Expedition.Members.Select(m => m.DeathsDoor).ToList());
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState read);
+            Assert.IsTrue(read.Members[1].DeathsDoor);
+            Assert.IsFalse(read.Members[0].DeathsDoor);
+
+            again.SchemaVersion = 22;
+            again.Expedition.Members.ForEach(m => m.DeathsDoor = false);
+            RunSaveMigrator.Migrate(again, data);
+            Assert.AreEqual(23, again.SchemaVersion);
+            RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState migrated);
+            Assert.IsTrue(migrated.Members.All(m => !m.DeathsDoor));
         }
 
         [Test]

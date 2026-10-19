@@ -9,7 +9,10 @@ using UnityEngine.UI;
 
 namespace F1.UI
 {
-    /// <summary>What the expedition cost and paid: who came back, who died, fatigue, days and the gold (stage 26). The run has already been settled.</summary>
+    /// <summary>
+    /// What the expedition cost and paid: who came back, who died, fatigue, days and the gold (stage 26), who can level up (Slice D stage 35) and the
+    /// traits the expedition left (stage 38). The run has already been settled.
+    /// </summary>
     public sealed class SettlementScreen : UIScreen
     {
         [SerializeField] TMP_Text _title;
@@ -26,9 +29,19 @@ namespace F1.UI
         [SerializeField] TMP_Text _itemsLost;
         [SerializeField] RectTransform _panel;
 
+        /// <summary>The "new traits" lines (Slice D stage 38), one a survivor: the row, its words ("새 특성: 로언 —") and the traits' chips after them.</summary>
+        [SerializeField] RectTransform[] _newTraitRows;
+        [SerializeField] TMP_Text[] _newTraitLabels;
+        [SerializeField] TraitLineView[] _newTraitLines;
+
         /// <summary>How tall the "ready to level up" line is, and the gap under it (Slice D stage 35, Round 82: the panel grows by 46).</summary>
         const float ReadyLine = 34f;
         const float ReadyGap = 12f;
+
+        /// <summary>A "new traits" line grows the panel as the "ready" line does (Round 84 판정 7); the chips start this far after the words.</summary>
+        const float NewTraitLine = 34f;
+        const float NewTraitGap = 12f;
+        const float NewTraitChipsGap = 12f;
 
         /// <summary>Where the panel and the things under the line stand without it (the builder's places), kept to move them back.</summary>
         Vector2 _panelPosition;
@@ -36,10 +49,16 @@ namespace F1.UI
         float _itemsLostY;
         float _runOverY;
         float _confirmY;
+        float _newTraitY;
         bool _placesKept;
 
         /// <summary>The line naming who can level up in the barracks (Slice D stage 35), empty when nobody can.</summary>
         public TMP_Text Ready => _ready;
+
+        /// <summary>The "new traits" lines (stage 38): the rows shown are the survivors of <see cref="SettlementReport.NewTraits"/>, in order.</summary>
+        public IReadOnlyList<RectTransform> NewTraitRows => _newTraitRows;
+        public IReadOnlyList<TMP_Text> NewTraitLabels => _newTraitLabels;
+        public IReadOnlyList<TraitLineView> NewTraitLines => _newTraitLines;
 
         protected override void OnOpen()
         {
@@ -77,7 +96,7 @@ namespace F1.UI
                 ? UiStrings.Get(UiKeys.Settle.GoldWithCoins, report.GoldEarned, report.FloorsReached, report.CoinsConverted, report.GoldFromCoins, report.GoldAfter)
                 : UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
             _exp.text = ExpText(report);
-            ShowReady(report);
+            ShowLines(report);
             _runOver.text = RunOverText(report);
         }
 
@@ -103,16 +122,39 @@ namespace F1.UI
 
         /// <summary>
         /// Who can level up now (Slice D stage 35, Round 82): "▲ 레벨 업 가능: 로언, 카이 — 막사에서 올린다" under the experience, in gold — the roll
-        /// waits for the barracks. The panel grows by the line, half up and half down, and the lines under it (the lost items, the run's end,
-        /// [확인]) move down as much; without anyone the panel stays as built.
+        /// waits for the barracks. Under it one line for each survivor the expedition left traits on (stage 38, Round 84 판정 7): "◆ 새 특성:
+        /// 아스트리드 —" and the traits' chips, whose right click opens their card. The panel grows by each line, half up and half down, and the
+        /// lines under them (the lost items, the run's end, [확인]) move down as much; without any the panel stays as built.
         /// </summary>
-        void ShowReady(SettlementReport report)
+        void ShowLines(SettlementReport report)
         {
             KeepPlaces();
             bool any = report.ReadyToLevelUp.Count > 0;
             _ready.text = any ? UiStrings.Get(UiKeys.Settle.Ready, UiText.MercenaryList(report.ReadyToLevelUp)) : string.Empty;
             float grown = any ? ReadyLine + ReadyGap : 0f;
             _ready.rectTransform.sizeDelta = new Vector2(_ready.rectTransform.sizeDelta.x, any ? ReadyLine : 0f);
+            for (int i = 0; i < _newTraitRows.Length; i++)
+            {
+                bool shown = i < report.NewTraits.Count;
+                _newTraitRows[i].gameObject.SetActive(shown);
+                if (!shown)
+                {
+                    continue;
+                }
+
+                AcquiredTraits gained = report.NewTraits[i];
+                TMP_Text label = _newTraitLabels[i];
+                label.text = UiStrings.Get(UiKeys.Settle.NewTraits, UiText.Mercenary(gained.MercenaryId));
+                float labelWidth = Mathf.Ceil(TextWidth.Of(label, label.text));
+                label.rectTransform.sizeDelta = new Vector2(labelWidth, label.rectTransform.sizeDelta.y);
+                var line = (RectTransform)_newTraitLines[i].transform;
+                float lineX = label.rectTransform.anchoredPosition.x + labelWidth + NewTraitChipsGap;
+                line.anchoredPosition = new Vector2(lineX, line.anchoredPosition.y);
+                _newTraitLines[i].Show(UiText.TraitChips(Managers.Data.Data, gained.TraitIds), _newTraitRows[i].sizeDelta.x - lineX);
+                Move(_newTraitRows[i], _newTraitY - grown);
+                grown += NewTraitLine + NewTraitGap;
+            }
+
             _panel.anchoredPosition = _panelPosition + new Vector2(0f, grown / 2f);
             _panel.sizeDelta = _panelSize + new Vector2(0f, grown);
             Move(_itemsLost.rectTransform, _itemsLostY - grown);
@@ -132,6 +174,7 @@ namespace F1.UI
             _itemsLostY = _itemsLost.rectTransform.anchoredPosition.y;
             _runOverY = _runOver.rectTransform.anchoredPosition.y;
             _confirmY = ((RectTransform)_confirm.transform).anchoredPosition.y;
+            _newTraitY = _newTraitRows.Length > 0 ? _newTraitRows[0].anchoredPosition.y : 0f;
             _placesKept = true;
         }
 

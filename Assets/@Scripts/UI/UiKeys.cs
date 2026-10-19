@@ -266,6 +266,12 @@ namespace F1.UI
             public const string Strength = "Trait.Strength";
             public const string Weakness = "Trait.Weakness";
             public const string Sub = "Trait.Sub";
+            public const string SubFrom = "Trait.SubFrom";
+            public const string FromClear = "Trait.FromClear";
+            public const string FromRetreat = "Trait.FromRetreat";
+            public const string FromDeathsDoor = "Trait.FromDeathsDoor";
+            public const string FromAffliction = "Trait.FromAffliction";
+            public const string FromVirtue = "Trait.FromVirtue";
             public const string More = "Trait.More";
             public const string MoreTitle = "Trait.MoreTitle";
             public const string Hit = "Trait.Hit";
@@ -467,6 +473,7 @@ namespace F1.UI
             public const string GoldWithCoins = "Settle.GoldWithCoins";
             public const string Exp = "Settle.Exp";
             public const string Ready = "Settle.Ready";
+            public const string NewTraits = "Settle.NewTraits";
         }
 
         public static class Save

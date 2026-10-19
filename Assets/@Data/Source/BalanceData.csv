@@ -87,3 +87,8 @@ RecruitStatSpread,2
 RecruitTraitWeight0,30
 RecruitTraitWeight1,50
 RecruitTraitWeight2,20
+TraitChanceClearPercent,15
+TraitChanceRetreatPercent,15
+TraitChanceDeathsDoorPercent,25
+TraitChanceAfflictionPercent,40
+TraitChanceVirtuePercent,40

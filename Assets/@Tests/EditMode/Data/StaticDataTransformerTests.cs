@@ -107,7 +107,9 @@ namespace F1.Tests
             Assert.IsNull(data.Jobs.Get("bishop").PassiveName);
             // The traits (Slice D stage 37): every column, an empty effect cell is 0, an empty Excludes none; the starting roster's in the data's order.
             TraitData keen = data.Traits.Get("keen");
-            Assert.AreEqual((TraitKind.Innate, TraitPolarity.Positive, 10, "dull"), (keen.Kind, keen.Polarity, keen.Weight, keen.Excludes));
+            Assert.AreEqual((TraitKind.Innate, TraitPolarity.Positive, (TraitSource?)null, 10, "dull"), (keen.Kind, keen.Polarity, keen.Source, keen.Weight, keen.Excludes));
+            // An acquired trait names its source (stage 38).
+            Assert.AreEqual((TraitKind.Acquired, (TraitSource?)TraitSource.DeathsDoor, -5), (data.Traits.Get("scar").Kind, data.Traits.Get("scar").Source, data.Traits.Get("scar").MaxHpPercent));
             Assert.AreEqual((5, 2, 1, 0, 0, 0, 0), (keen.HitPercent, keen.DodgePercent, keen.CritPercent, keen.DogDeathPercent, keen.VirtuePercent, keen.FatiguePercent, keen.MaxHpPercent));
             TraitData sturdy = data.Traits.Get("sturdy");
             Assert.AreEqual((5, (string)null, -5, 3, -10, 8), (sturdy.Weight, sturdy.Excludes, sturdy.DogDeathPercent, sturdy.VirtuePercent, sturdy.FatiguePercent, sturdy.MaxHpPercent));

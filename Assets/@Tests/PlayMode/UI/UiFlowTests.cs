@@ -225,6 +225,17 @@ namespace F1.Tests
             SettlementReport report = Managers.Expedition.Report;
             string settlementExp = UiTestUtil.TextAt(settlement, "Frame/Panel/Exp");
             string settlementReady = settlement.Ready.text;
+            // Slice D stage 38 (Round 84 판정 7): a line for each survivor the expedition left traits on, its name and the traits' chips.
+            Assert.AreEqual(report.NewTraits.Count, settlement.NewTraitRows.Count(row => row.gameObject.activeSelf));
+            for (int i = 0; i < report.NewTraits.Count; i++)
+            {
+                StringAssert.Contains(UiText.Mercenary(report.NewTraits[i].MercenaryId), settlement.NewTraitLabels[i].text);
+                CollectionAssert.AreEqual(report.NewTraits[i].TraitIds.Select(id => UiText.Name(data.Traits.Get(id).Name)).ToList(),
+                    settlement.NewTraitLines[i].Shown.Select(c => c.Name).ToList());
+                CollectionAssert.IsSubsetOf(report.NewTraits[i].TraitIds, RunRules.FindMercenary(run, report.NewTraits[i].MercenaryId).Traits, "The roster has them.");
+            }
+
+            yield return StagedNewTraits(settlement);
             UiTestUtil.Click(settlement, "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
 
@@ -907,6 +918,66 @@ namespace F1.Tests
                 // A candidate is a fresh clone shown at once: its chips are as wide as their names (TMP's measure answered 0 there).
                 Assert.Greater(((RectTransform)lobby.Candidates[i].Traits.Chips[0].transform).sizeDelta.x, 24f + TraitChipView.NameGap + 10f, recruit.Id);
             }
+        }
+
+        /// <summary>
+        /// The settlement's "new traits" lines (Slice D stage 38, Round 84 판정 7), staged on the report: four survivors under the "ready" line, each
+        /// line its words and its chips (a weakness red, a strength green); a right click opens the trait's card, which says what left it. The
+        /// panel grows by each line and stays in the frame, [확인] under the last. Then the report as it was.
+        /// </summary>
+        IEnumerator StagedNewTraits(SettlementScreen settlement)
+        {
+            SettlementReport report = Managers.Expedition.Report;
+            List<string> ready = report.ReadyToLevelUp;
+            List<AcquiredTraits> newTraits = report.NewTraits;
+            var panel = (RectTransform)UiTestUtil.At(settlement, "Frame/Panel").transform;
+            var confirm = (RectTransform)UiTestUtil.At(settlement, "Frame/Panel/Confirm").transform;
+            float builtHeight = 760f;
+
+            report.ReadyToLevelUp = new List<string> { "astrid" };
+            report.NewTraits = new List<AcquiredTraits>
+            {
+                new AcquiredTraits { MercenaryId = "astrid", TraitIds = new List<string> { "shaken", "scarred" } },
+                new AcquiredTraits { MercenaryId = "rowan", TraitIds = new List<string> { "seasoned", "survivor", "hardened" } },
+                new AcquiredTraits { MercenaryId = "ella", TraitIds = new List<string> { "shaken", "limp", "nightmares" } },
+                new AcquiredTraits { MercenaryId = "mira", TraitIds = new List<string> { "seasoned" } },
+            };
+            settlement.Refresh();
+            yield return null;
+
+            Assert.IsTrue(settlement.NewTraitRows.All(row => row.gameObject.activeSelf));
+            Assert.AreEqual(UiStrings.Get(UiKeys.Settle.NewTraits, "아스트리드"), settlement.NewTraitLabels[0].text);
+            TraitLineView astrid = settlement.NewTraitLines[0];
+            CollectionAssert.AreEqual(new[] { "패배의 기억", "흉터" }, astrid.Shown.Select(c => c.Name).ToList(), "The job's trait is no new trait.");
+            Assert.AreEqual(UiPalette.TraitWeakness, astrid.Chips[1].RimColor);
+            Assert.AreEqual(UiPalette.TraitStrength, settlement.NewTraitLines[1].Chips[0].RimColor);
+            Assert.AreEqual(3, settlement.NewTraitLines[2].Shown.Count, "Three fit, the most one expedition leaves.");
+            var label = settlement.NewTraitLabels[0].rectTransform;
+            Assert.Greater(((RectTransform)astrid.transform).anchoredPosition.x, label.anchoredPosition.x + label.sizeDelta.x, "The chips come after the words.");
+            for (int i = 1; i < settlement.NewTraitRows.Count; i++)
+            {
+                Assert.AreEqual(46f, settlement.NewTraitRows[i - 1].anchoredPosition.y - settlement.NewTraitRows[i].anchoredPosition.y, 0.01f, "One under another.");
+            }
+
+            Assert.AreEqual(builtHeight + 5 * 46f, panel.sizeDelta.y, 0.01f, "The ready line and four.");
+            Assert.GreaterOrEqual(-panel.anchoredPosition.y, 0f);
+            Assert.LessOrEqual(-panel.anchoredPosition.y + panel.sizeDelta.y, 1080f, "The panel stays in the frame.");
+            Assert.Less(confirm.anchoredPosition.y, settlement.NewTraitRows[3].anchoredPosition.y - 34f, "[확인] under the last line.");
+
+            TraitTooltipView card = UiTestUtil.At(settlement, "Frame/Panel/SettleTraitTooltip").GetComponent<TraitTooltipView>();
+            RightClick(astrid.Chips[1]);
+            Assert.IsTrue(card.IsShown);
+            Assert.AreEqual(("흉터", "얻은 특성 · 약점 — 빈사에서 살아 돌아와", "최대 HP -5%"), (card.Title, card.Kind, card.Effect));
+            yield return null;
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            Assert.IsFalse(card.IsShown);
+
+            report.ReadyToLevelUp = ready;
+            report.NewTraits = newTraits;
+            settlement.Refresh();
+            yield return null;
+            Assert.AreEqual(newTraits.Count, settlement.NewTraitRows.Count(row => row.gameObject.activeSelf));
         }
 
         /// <summary>A right click on a trait's chip, as the test kit clicks: the press, then the click.</summary>

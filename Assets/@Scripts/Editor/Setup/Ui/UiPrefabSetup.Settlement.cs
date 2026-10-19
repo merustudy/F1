@@ -34,6 +34,26 @@ namespace F1.Editor.Setup
             ButtonParts confirm = UiBuild.LocalizedButton("Confirm", p, UiKeys.Common.Confirm, UiPalette.Button, 36f);
             UiBuild.Box(confirm.Rect, 350f, 650f, 400f, 90f);
 
+            // The traits the expedition left (Slice D stage 38, Round 84 판정 7): one line a survivor under the "ready" line — a bone diamond, the
+            // words and the traits' chips (icon 22, name 24) — and the card their right click opens. The screen places the lines it shows.
+            TraitTooltipView traitTooltip = BuildTraitTooltip(p, "Settle");
+            var newTraitRows = new RectTransform[NewTraitRows];
+            var newTraitLabels = new TextMeshProUGUI[NewTraitRows];
+            var newTraitLines = new TraitLineView[NewTraitRows];
+            for (int i = 0; i < NewTraitRows; i++)
+            {
+                RectTransform row = UiBuild.Box(UiBuild.Rect("NewTraits" + i, p), 110f, 544f, 910f, 34f);
+                RectTransform mark = UiBuild.Box(UiBuild.Rect("NewTraits" + i + "Mark", row), 4f, 6f, 22f, 22f);
+                Diamond("NewTraits" + i + "MarkFill", mark, UiPalette.Bone, 15f, new Vector2(0.5f, 0.5f));
+                newTraitLabels[i] = UiBuild.SingleLine(UiBuild.Label("NewTraits" + i + "Label", row, 24f, UiPalette.Bone, TextAlignmentOptions.Left));
+                UiBuild.Box(newTraitLabels[i].rectTransform, 36f, 0f, 400f, 34f);
+                newTraitLines[i] = BuildTraitLine("NewTraits" + i + "Line", row, 460f, 0f, 34f, 22f, 24f, NewTraitChips, true, traitTooltip);
+                row.gameObject.SetActive(false);
+                newTraitRows[i] = row;
+            }
+
+            traitTooltip.transform.SetAsLastSibling();
+
             UiBuild.SetReference(screen, "_title", title);
             UiBuild.SetReference(screen, "_dungeon", dungeon);
             UiBuild.SetReference(screen, "_survivors", survivors);
@@ -47,7 +67,14 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_ready", ready);
             UiBuild.SetReference(screen, "_itemsLost", itemsLost);
             UiBuild.SetReference(screen, "_panel", (RectTransform)panel.transform);
+            UiBuild.SetReferences(screen, "_newTraitRows", newTraitRows);
+            UiBuild.SetReferences(screen, "_newTraitLabels", newTraitLabels);
+            UiBuild.SetReferences(screen, "_newTraitLines", newTraitLines);
             return screen;
         }
+
+        /// <summary>The "new traits" lines of the settlement (stage 38): one for each member a party can have, and the most traits one expedition leaves (a source each).</summary>
+        const int NewTraitRows = 4;
+        const int NewTraitChips = 3;
     }
 }

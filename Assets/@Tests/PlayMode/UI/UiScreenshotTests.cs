@@ -48,6 +48,43 @@ namespace F1.Tests
             yield return BootTestUtil.ShutdownApp();
         }
 
+        /// <summary>
+        /// The settlement with the traits an expedition left (Slice D stage 38), staged on the report for one picture as the Round 84 mock has it — 아스트리드
+        /// home from a retreat with fatigue 64, ready to level up — with the lines given, then as it was.
+        /// </summary>
+        IEnumerator StagedNewTraits(SettlementScreen screen, string name, List<AcquiredTraits> newTraits)
+        {
+            SettlementReport report = Managers.Expedition.Report;
+            ExpeditionResult result = report.Result;
+            List<string> survivors = report.SurvivorIds, fallen = report.FallenIds, states = report.SurvivorStates, ready = report.ReadyToLevelUp;
+            List<int> fatigue = report.SurvivorFatigue;
+            List<AcquiredTraits> was = report.NewTraits;
+            int exp = report.ExpEarned;
+
+            List<string> home = newTraits.Select(n => n.MercenaryId).ToList();
+            report.Result = ExpeditionResult.Retreated;
+            report.SurvivorIds = home;
+            report.FallenIds = new List<string>();
+            report.SurvivorFatigue = home.Select(_ => 64).ToList();
+            report.SurvivorStates = home.Select(_ => (string)null).ToList();
+            report.ExpEarned = 20;
+            report.ReadyToLevelUp = new List<string> { "astrid" };
+            report.NewTraits = newTraits;
+            screen.Refresh();
+            yield return Capture(name);
+
+            report.Result = result;
+            report.SurvivorIds = survivors;
+            report.FallenIds = fallen;
+            report.SurvivorFatigue = fatigue;
+            report.SurvivorStates = states;
+            report.ExpEarned = exp;
+            report.ReadyToLevelUp = ready;
+            report.NewTraits = was;
+            screen.Refresh();
+            yield return null;
+        }
+
         /// <summary>The settlement with survivors who can level up (Slice D stage 35, Round 82), staged on the report for one picture, then as it was.</summary>
         IEnumerator StagedReady(SettlementScreen screen, string name)
         {
@@ -852,6 +889,20 @@ namespace F1.Tests
             // Slice D stage 35 (Round 82): the line naming who can level up, staged on the report for one picture — the first two of the roster came
             // home with their level's experience; then the report as it was.
             yield return StagedReady(UiTestUtil.Screen<SettlementScreen>(), prefix + "_72_settlement_ready");
+
+            // Slice D stage 38 (Round 84 판정 7): the "new traits" lines, staged — as the mock (아스트리드 retreated from death's door: 패배의 기억,
+            // 흉터), then four survivors with the most an expedition leaves, to see the panel hold them.
+            yield return StagedNewTraits(UiTestUtil.Screen<SettlementScreen>(), prefix + "_77_settlement_new_traits", new List<AcquiredTraits>
+            {
+                new AcquiredTraits { MercenaryId = "astrid", TraitIds = new List<string> { "shaken", "scarred" } },
+            });
+            yield return StagedNewTraits(UiTestUtil.Screen<SettlementScreen>(), prefix + "_78_settlement_new_traits_four", new List<AcquiredTraits>
+            {
+                new AcquiredTraits { MercenaryId = "astrid", TraitIds = new List<string> { "shaken", "scarred", "nightmares" } },
+                new AcquiredTraits { MercenaryId = "rowan", TraitIds = new List<string> { "seasoned", "survivor", "hardened" } },
+                new AcquiredTraits { MercenaryId = "ella", TraitIds = new List<string> { "shaken", "limp" } },
+                new AcquiredTraits { MercenaryId = "mira", TraitIds = new List<string> { "seasoned" } },
+            });
 
             UiTestUtil.Click(UiTestUtil.Screen<SettlementScreen>(), "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);

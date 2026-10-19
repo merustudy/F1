@@ -9,6 +9,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Negative",
+      "Source": null,
       "Weight": 10,
       "Excludes": null,
       "HitPercent": -5,
@@ -27,6 +28,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Positive",
+      "Source": null,
       "Weight": 10,
       "Excludes": "clumsy",
       "HitPercent": 5,
@@ -45,6 +47,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Negative",
+      "Source": null,
       "Weight": 10,
       "Excludes": null,
       "HitPercent": 0,
@@ -56,6 +59,25 @@
       "MaxHpPercent": -10
     },
     {
+      "Id": "hardened",
+      "Name": {
+        "en-US": "Hardened",
+        "ko-KR": "단련"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Positive",
+      "Source": "Virtue",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 10,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
       "Id": "iron_bones",
       "Name": {
         "en-US": "Iron Bones",
@@ -63,6 +85,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Positive",
+      "Source": null,
       "Weight": 10,
       "Excludes": null,
       "HitPercent": 0,
@@ -74,6 +97,101 @@
       "MaxHpPercent": 0
     },
     {
+      "Id": "limp",
+      "Name": {
+        "en-US": "Limp",
+        "ko-KR": "절뚝임"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Negative",
+      "Source": "DeathsDoor",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": -5,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "nightmares",
+      "Name": {
+        "en-US": "Nightmares",
+        "ko-KR": "악몽"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Negative",
+      "Source": "Affliction",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 10,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "scarred",
+      "Name": {
+        "en-US": "Scarred",
+        "ko-KR": "흉터"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Negative",
+      "Source": "DeathsDoor",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": -5
+    },
+    {
+      "Id": "seasoned",
+      "Name": {
+        "en-US": "Seasoned",
+        "ko-KR": "노련함"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Positive",
+      "Source": "Clear",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 2,
+      "DogDeathPercent": 0,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
+      "Id": "shaken",
+      "Name": {
+        "en-US": "Shaken",
+        "ko-KR": "패배의 기억"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Negative",
+      "Source": "Retreat",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": 0,
+      "VirtuePercent": -10,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
       "Id": "steady",
       "Name": {
         "en-US": "Steady",
@@ -81,6 +199,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Positive",
+      "Source": null,
       "Weight": 10,
       "Excludes": "timid",
       "HitPercent": 0,
@@ -92,6 +211,25 @@
       "MaxHpPercent": 0
     },
     {
+      "Id": "survivor",
+      "Name": {
+        "en-US": "Survivor",
+        "ko-KR": "구사일생"
+      },
+      "Kind": "Acquired",
+      "Polarity": "Positive",
+      "Source": "DeathsDoor",
+      "Weight": 10,
+      "Excludes": null,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DogDeathPercent": -10,
+      "VirtuePercent": 0,
+      "FatiguePercent": 0,
+      "MaxHpPercent": 0
+    },
+    {
       "Id": "timid",
       "Name": {
         "en-US": "Timid",
@@ -99,6 +237,7 @@
       },
       "Kind": "Innate",
       "Polarity": "Negative",
+      "Source": null,
       "Weight": 10,
       "Excludes": null,
       "HitPercent": 0,

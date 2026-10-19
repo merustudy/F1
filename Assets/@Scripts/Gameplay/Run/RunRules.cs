@@ -511,9 +511,10 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The return settlement, in this order: items and potions vanish (with the expedition state),
-        /// the dead leave the roster for good, survivors keep the fatigue they came back with and gain the expedition's
-        /// experience (stage 27), days pass and those who stayed home recover, a clear is recorded, the gold is paid (Slice C stage 26) and,
-        /// if the run goes on, the stagecoach draws new candidates.
+        /// the dead leave the roster for good, survivors keep the fatigue they came back with, gain the expedition's
+        /// experience (stage 27) and roll the traits it may leave on them (Slice D stage 38), days pass and those who stayed home recover, a clear
+        /// is recorded, the gold is paid (Slice C stage 26) and, if the run goes on, the stagecoach draws new candidates. A settlement that ends
+        /// the run rolls the traits all the same.
         /// </summary>
         public static SettlementReport Settle(StaticData data, RunState state, ExpeditionState expedition)
         {
@@ -553,6 +554,15 @@ namespace F1.Gameplay
                     if (LevelRules.Gain(data, mercenary, report.ExpEarned))
                     {
                         report.ReadyToLevelUp.Add(member.MercenaryId);
+                    }
+
+                    // Slice D stage 38: what the expedition leaves on the survivor (05 §6), on the survivor's own stream for this expedition.
+                    List<string> acquired = TraitRules.DrawAcquired(data, mercenary.Traits, TraitRules.SourcesOf(data, expedition.Result, member),
+                        TraitRules.AcquiredStream(state.Seed, member.MercenaryId, state.ExpeditionCount));
+                    if (acquired.Count > 0)
+                    {
+                        mercenary.Traits.AddRange(acquired);
+                        report.NewTraits.Add(new AcquiredTraits { MercenaryId = member.MercenaryId, TraitIds = acquired });
                     }
                 }
                 else

@@ -94,6 +94,9 @@ namespace F1.Gameplay
 
         /// <summary>The mercenary's traits (Slice D stage 37, TraitData ids): they do not change on an expedition; the battle and the fatigue count them.</summary>
         public IReadOnlyList<string> Traits = new List<string>();
+
+        /// <summary>Whether the member was at death's door in a battle of this expedition (Slice D stage 38): coming home alive from it may leave a trait.</summary>
+        public bool DeathsDoor;
     }
 
     /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>

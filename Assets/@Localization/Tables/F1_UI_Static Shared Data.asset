@@ -1865,6 +1865,41 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673541931565056
+  - m_Id: 6846191462506496
+    m_Key: Settle.NewTraits
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745600
+  - m_Id: 6846191475089408
+    m_Key: Trait.SubFrom
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745601
+  - m_Id: 6846191475089409
+    m_Key: Trait.FromClear
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745602
+  - m_Id: 6846191475089410
+    m_Key: Trait.FromRetreat
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745603
+  - m_Id: 6846191475089411
+    m_Key: Trait.FromDeathsDoor
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745604
+  - m_Id: 6846191475089412
+    m_Key: Trait.FromAffliction
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745605
+  - m_Id: 6846191475089413
+    m_Key: Trait.FromVirtue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673543694745606
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3562,3 +3597,39 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'In a unique item''s facts (2026-10-19): it costs no fatigue.'
+    - rid: 8623673543694745600
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "One line per survivor the expedition left new traits on (Slice
+          D stage 38, Round 84 \uD310\uC815 7), before the traits' chips. {0} = the
+          survivor's name."
+    - rid: 8623673543694745601
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'An acquired trait card''s second line (Slice D stage 38):
+          what kind it is, then what left it. {0} = kind and strength or weakness,
+          {1} = what left it.'
+    - rid: 8623673543694745602
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (Slice D stage 38): a cleared
+          expedition.'
+    - rid: 8623673543694745603
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (Slice D stage 38): a retreat.'
+    - rid: 8623673543694745604
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (Slice D stage 38): coming back
+          alive from death''s door.'
+    - rid: 8623673543694745605
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (Slice D stage 38): coming home
+          in an affliction.'
+    - rid: 8623673543694745606
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (Slice D stage 38): a virtue
+          on the expedition.'

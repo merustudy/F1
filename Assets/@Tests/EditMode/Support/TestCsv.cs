@@ -19,7 +19,8 @@ namespace F1.Tests
             "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n" +
             "StatBaseline,10\nStatMin,1\nStatMax,30\nStatPowerPercentPerPoint,10\nHpPercentPerConPoint,5\n" +
             "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerStatPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nDogDeathPercentPerConPoint,1\nVirtuePerSpiPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n" +
-            "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\n";
+            "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\n" +
+            "TraitChanceClearPercent,15\nTraitChanceRetreatPercent,15\nTraitChanceDeathsDoorPercent,25\nTraitChanceAfflictionPercent,40\nTraitChanceVirtuePercent,40\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,MaxHp,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Spi,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthSpi,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US\n" +
@@ -64,12 +65,13 @@ namespace F1.Tests
             "teo,테오,Teo,,false,\n" +
             "bran,브란,Bran,,false,\n";
 
-        /// <summary>Three traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two.</summary>
+        /// <summary>Four traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two, and scar acquired at death's door (stage 38).</summary>
         public const string Traits =
-            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent\n" +
-            "dull,둔함,Dull,Innate,Negative,10,,-5,,,,,,\n" +
-            "keen,예리함,Keen,Innate,Positive,10,dull,5,2,1,,,,\n" +
-            "sturdy,강골,Sturdy,Innate,Positive,5,,,,,-5,3,-10,8\n";
+            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent\n" +
+            "dull,둔함,Dull,Innate,Negative,,10,,-5,,,,,,\n" +
+            "keen,예리함,Keen,Innate,Positive,,10,dull,5,2,1,,,,\n" +
+            "scar,흉터,Scar,Acquired,Negative,DeathsDoor,10,,,,,,,,-5\n" +
+            "sturdy,강골,Sturdy,Innate,Positive,,5,,,,,-5,3,-10,8\n";
 
         public const string Bags =
             "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +

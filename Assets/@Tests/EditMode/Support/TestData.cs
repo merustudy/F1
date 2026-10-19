@@ -122,6 +122,12 @@ namespace F1.Tests
                 { "RecruitTraitWeight0", 1 },
                 { "RecruitTraitWeight1", 0 },
                 { "RecruitTraitWeight2", 0 },
+                // No acquired traits by default (Slice D stage 38): the settlement rolls nothing, so it settles as before.
+                { "TraitChanceClearPercent", 0 },
+                { "TraitChanceRetreatPercent", 0 },
+                { "TraitChanceDeathsDoorPercent", 0 },
+                { "TraitChanceAfflictionPercent", 0 },
+                { "TraitChanceVirtuePercent", 0 },
             };
             foreach ((string key, int value) in overrides)
             {
@@ -239,14 +245,18 @@ namespace F1.Tests
         }
 
         /// <summary>The fatigue states of the test data: an affliction and a virtue of each kind of change.</summary>
-        /// <summary>A trait of the tests (Slice D stage 37): innate unless told, weight 10.</summary>
+        /// <summary>A trait of the tests (Slice D stage 37): innate unless a source makes it acquired (stage 38), weight 10.</summary>
         public static TraitData Trait(string id, TraitPolarity polarity, int hit = 0, int dodge = 0, int crit = 0, int dogDeath = 0, int virtue = 0, int fatigue = 0,
-            int maxHp = 0, string excludes = null, int weight = 10, TraitKind kind = TraitKind.Innate)
+            int maxHp = 0, string excludes = null, int weight = 10, TraitSource? source = null)
         {
-            return new TraitData(id, Text(id), kind, polarity, weight, excludes, hit, dodge, crit, dogDeath, virtue, fatigue, maxHp);
+            TraitKind kind = source == null ? TraitKind.Innate : TraitKind.Acquired;
+            return new TraitData(id, Text(id), kind, polarity, source, weight, excludes, hit, dodge, crit, dogDeath, virtue, fatigue, maxHp);
         }
 
-        /// <summary>Four innate traits — keen and dull clash — and one acquired, which a candidate never draws. Parts() has none: a test adds them.</summary>
+        /// <summary>
+        /// Four innate traits — keen and dull clash — and the acquired ones a candidate never draws (stage 38): one of each source, two from death's
+        /// door (scar_t and lucky_t), and grit_t, which clashes with dull. Parts() has none: a test adds them.
+        /// </summary>
         public static List<TraitData> Traits()
         {
             return new List<TraitData>
@@ -255,7 +265,12 @@ namespace F1.Tests
                 Trait("dull", TraitPolarity.Negative, hit: -5),
                 Trait("sturdy", TraitPolarity.Positive, dogDeath: -5),
                 Trait("frail_t", TraitPolarity.Negative, maxHp: -10),
-                Trait("scar_t", TraitPolarity.Negative, maxHp: -5, kind: TraitKind.Acquired),
+                Trait("scar_t", TraitPolarity.Negative, maxHp: -5, source: TraitSource.DeathsDoor),
+                Trait("lucky_t", TraitPolarity.Positive, dogDeath: -10, source: TraitSource.DeathsDoor),
+                Trait("vet_t", TraitPolarity.Positive, crit: 2, source: TraitSource.Clear),
+                Trait("grit_t", TraitPolarity.Negative, virtue: -10, excludes: "dull", source: TraitSource.Retreat),
+                Trait("dread_t", TraitPolarity.Negative, fatigue: 10, source: TraitSource.Affliction),
+                Trait("steel_t", TraitPolarity.Positive, virtue: 10, source: TraitSource.Virtue),
             };
         }
 

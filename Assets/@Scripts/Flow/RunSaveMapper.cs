@@ -131,6 +131,7 @@ namespace F1.Flow
                     Bags = ToRecords(member.Board.Bags),
                     Fatigue = member.Fatigue,
                     State = member.StateId,
+                    DeathsDoor = member.DeathsDoor,
                 });
             }
 
@@ -421,6 +422,7 @@ namespace F1.Flow
                     Board = board,
                     Fatigue = member.Fatigue,
                     StateId = member.State,
+                    DeathsDoor = member.DeathsDoor,
                     // A member's stats and traits are the roster's (versions 18 and 22): they do not change on an expedition, so the file does not repeat them.
                     Stats = mercenary.Stats,
                     Traits = new List<string>(mercenary.Traits),

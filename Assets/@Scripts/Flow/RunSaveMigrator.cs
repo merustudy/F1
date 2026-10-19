@@ -29,6 +29,11 @@ namespace F1.Flow
             {
                 From21To22(save);
             }
+
+            if (save.SchemaVersion == 22)
+            {
+                From22To23(save);
+            }
         }
 
         /// <summary>
@@ -57,6 +62,15 @@ namespace F1.Flow
             }
 
             save.SchemaVersion = 22;
+        }
+
+        /// <summary>
+        /// Version 23 (Slice D stage 38) added whether a member was at death's door on the expedition: a version 22 expedition going on counts as
+        /// none (the field reads false), so its survivors roll no death's-door trait for the battles before.
+        /// </summary>
+        static void From22To23(RunSaveData save)
+        {
+            save.SchemaVersion = 23;
         }
     }
 }

@@ -242,11 +242,22 @@ namespace F1.Gameplay
                 throw new InvalidOperationException("The battle has not ended.");
             }
 
+            var atDeathsDoor = new HashSet<UnitRef>();
+            foreach (BattleEvent e in battle.Events)
+            {
+                if (e.Kind == BattleEventKind.DogEntered)
+                {
+                    atDeathsDoor.Add(e.Target);
+                }
+            }
+
             foreach (BattleUnit unit in battle.Party)
             {
                 ExpeditionMember member = FindMember(state, unit.Setup.SourceId);
                 member.Alive = unit.Alive;
                 member.Hp = unit.Alive ? unit.Hp : 0;
+                // Slice D stage 38: who went to death's door in the battle (one who started at 0 HP went in an earlier one and is marked already).
+                member.DeathsDoor |= atDeathsDoor.Contains(unit.Ref);
 
                 // Those who advanced during the battle keep the row they ended in; what the battle did to their fatigue stays too.
                 member.Row = unit.Row;
