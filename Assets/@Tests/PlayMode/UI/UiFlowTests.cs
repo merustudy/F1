@@ -2994,6 +2994,63 @@ namespace F1.Tests
             board.Items[weaponIndex].Hover.SimulateExit();
         }
 
+        /// <summary>
+        /// Slice D stage 39 (Round 87): the armour. On the node map the helm's card says it activates at the start of battle (no cooldown), what it
+        /// takes off the critical chance and its fatigue; in battle both pieces fired once at 0 ms — their cells stay lit with no charge, their
+        /// "방어 +N" rises once the screen is laid out, and the shield counts them.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Armour_TheCardSaysWhenItActivates_AndTheBattleOpensWithItsShield()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow(melee: true));
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            Assert.AreEqual(1, front.Board.ItemAt(0, 0).Height, "The staging needs a base weapon of one row.");
+            var armour = new EquippedItem(data.Items.Get("iron_armor"));
+            var helm = new EquippedItem(data.Items.Get("iron_helm"));
+            UiTestUtil.Put(front, armour, 0, 1);
+            UiTestUtil.Put(front, helm, 2, 1, turns: 1);
+            map.Refresh();
+            yield return null;
+
+            UiTestUtil.RightClickSquare(row1.BoardView, 2, 1);
+            yield return null;
+            Assert.AreSame(helm, party.Tooltip.Item);
+            string facts = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts");
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.BattleStart), facts);
+            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Item.Cooldown, UiText.Seconds(0)), facts, "No cooldown of 0 seconds.");
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.CritTaken, helm.Item.CritTakenPercent), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipEffects"));
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.FatigueCost, 1), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFatigue"), "Defensive gear: fatigue +1.");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
+            List<BattleItemState> items = board.Unit.Items.ToList();
+            int armourIndex = items.FindIndex(i => i.Equipped == armour);
+            int helmIndex = items.FindIndex(i => i.Equipped == helm);
+            Assert.IsTrue(board.Unit.Shield >= armour.Item.Effects[0].Min + helm.Item.Effects[0].Min, "Both pieces shielded their owner at 0 ms.");
+            BattleFxLayer fx = battle.GetComponentInChildren<BattleFxLayer>(true);
+            for (int frame = 0; frame < 5 && fx.FloatingPlayed < 2; frame++)
+            {
+                yield return null;
+            }
+
+            Assert.GreaterOrEqual(fx.FloatingPlayed, 2, "The two pieces' \"방어 +N\" rose when the battle opened.");
+            Assert.AreEqual(1f, board.Items[armourIndex].Charge, "The armour never charges: always lit.");
+            Assert.AreEqual(1f, board.Items[helmIndex].Charge);
+        }
+
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
         /// <summary>The level and the experience (stage 27, Docs/Design/05_Mercenary_Growth.md §2): "Lv N" on the strip's chip, and on the barracks' line with the experience toward the next level and its bar; "경험치 최대" at the last level.</summary>
         [UnityTest]

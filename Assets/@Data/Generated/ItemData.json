@@ -33,7 +33,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "abyss_grasp",
@@ -67,7 +69,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "abyss_howl",
@@ -101,7 +105,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int"
+      "ScalesWith": "Int",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "buckler",
@@ -135,7 +141,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": null
+      "ScalesWith": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "crude_bow",
@@ -169,7 +177,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex"
+      "ScalesWith": "Dex",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "dagger",
@@ -203,7 +213,9 @@
       "CritChancePercent": 10,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Dex"
+      "ScalesWith": "Dex",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "ember_flask",
@@ -237,7 +249,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 8,
-      "ScalesWith": "Int"
+      "ScalesWith": "Int",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "fire_staff",
@@ -271,7 +285,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int"
+      "ScalesWith": "Int",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "gladius",
@@ -314,7 +330,9 @@
       "CritChancePercent": 10,
       "Unique": true,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "greataxe",
@@ -348,7 +366,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "halberd",
@@ -382,7 +402,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 8,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "healing_staff",
@@ -416,7 +438,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Spi"
+      "ScalesWith": "Spi",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "herb_pouch",
@@ -450,7 +474,81 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Spi"
+      "ScalesWith": "Spi",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
+    },
+    {
+      "Id": "iron_armor",
+      "Name": {
+        "en-US": "Iron Armor",
+        "ko-KR": "철 갑옷"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 545,
+          "Max": 545
+        }
+      ],
+      "ShopWeight": 10,
+      "Icon": "item/iron-armor",
+      "Price": 20,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 10,
+      "ScalesWith": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0
+    },
+    {
+      "Id": "iron_helm",
+      "Name": {
+        "en-US": "Iron Helm",
+        "ko-KR": "철 투구"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 218,
+          "Max": 218
+        }
+      ],
+      "ShopWeight": 10,
+      "Icon": "item/iron-helm",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 10,
+      "ScalesWith": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 3
     },
     {
       "Id": "lantern_staff",
@@ -484,7 +582,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int"
+      "ScalesWith": "Int",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "longbow",
@@ -518,7 +618,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex"
+      "ScalesWith": "Dex",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "longsword",
@@ -552,7 +654,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "mace",
@@ -593,7 +697,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "mending_chant",
@@ -627,7 +733,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Spi"
+      "ScalesWith": "Spi",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "overseer_maul",
@@ -661,7 +769,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "overseer_roar",
@@ -695,7 +805,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "rat_bite",
@@ -729,7 +841,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex"
+      "ScalesWith": "Dex",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "rusty_blade",
@@ -763,7 +877,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "spear",
@@ -797,7 +913,9 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Str"
+      "ScalesWith": "Str",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "ward_charm",
@@ -831,7 +949,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Spi"
+      "ScalesWith": "Spi",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     },
     {
       "Id": "whetstone",
@@ -866,7 +986,9 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": null
+      "ScalesWith": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0
     }
   ]
 }

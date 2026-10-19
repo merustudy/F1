@@ -137,7 +137,8 @@ namespace F1.UI
                 _glow.sprite = glow;
                 GridGeometry.LayGlow(_glow.rectTransform, _glowArt.sizeDelta, icon, glow);
             }
-            _passive = item.Equipped.Item.IsPassive;
+            // An item that never cycles is always all lit (stage 20's star item; stage 39's armour, which fired once at 0 ms: Round 87).
+            _passive = !item.Equipped.Item.Cycles;
             ShowActive(item.Active);
             _pulseAge = -1f;
             ShowCharge(_passive ? 1f : 0f);
@@ -145,7 +146,7 @@ namespace F1.UI
 
         public void Render(int timeMs, bool ownerAlive)
         {
-            // An item that never activates (stage 20) is always all lit: it has no cooldown and does not fire.
+            // An item that never cycles (stage 20, stage 39) is always all lit: it has no cooldown to fill.
             if (_passive)
             {
                 return;

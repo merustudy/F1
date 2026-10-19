@@ -393,6 +393,62 @@ namespace F1.Tests
             stone.Hover.SimulateExit();
         }
 
+        /// <summary>
+        /// Slice D stage 39 (Round 87): the armour on the row-1 warrior — the iron armour under the longsword, the iron helm turned upright beside
+        /// it. The helm's card on the node map, the battle as it opens (both pieces lit, their "방어 +N" rising, the shield badge counting them),
+        /// and the helm's card in battle.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheArmour_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            string[] ids = { "rowan", "kai", "ella", "mira" };
+            yield return UiTestUtil.OpenBarracks(lobby);
+            for (int i = 0; i < Mathf.Min(ids.Length, data.Balance.PartySize); i++)
+            {
+                int index = Managers.Run.Run.Roster.FindIndex(m => m.Id == ids[i]);
+                UiTestUtil.PlaceInParty(lobby, Managers.Run.Run.Roster[index].Id, i + 1);
+            }
+
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.DepartFromLobby();
+
+            ExpeditionMember front = Managers.Expedition.Expedition.Members.OrderBy(m => m.Row).First();
+            var armour = new EquippedItem(data.Items.Get("iron_armor"));
+            var helm = new EquippedItem(data.Items.Get("iron_helm"));
+            UiTestUtil.Put(front, armour, 0, 1);
+            UiTestUtil.Put(front, helm, 2, 1, turns: 1);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            map.Refresh();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            yield return UiTestUtil.WaitForRedraw();
+            UiTestUtil.RightClickSquare(party.ColumnOfRow(front.Row).BoardView, 2, 1);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_79_map_armour_card");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            yield return null;
+            yield return Capture("ko_80_battle_armour_start");
+
+            BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
+            UiTestUtil.RightClick(board.Items[board.Unit.Items.ToList().FindIndex(i => i.Equipped == helm)]);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_81_battle_armour_card");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);

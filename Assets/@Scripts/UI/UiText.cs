@@ -468,10 +468,15 @@ namespace F1.UI
             return facts;
         }
 
-        /// <summary>The cooldown, or "never activates" for an item without effects (stage 20).</summary>
+        /// <summary>The cooldown, "never activates" for an item without effects (stage 20), or "at the start of battle" for the armour (Slice D stage 39, Round 87).</summary>
         static string CooldownFact(ItemData data)
         {
-            return data.IsPassive ? UiStrings.Get(UiKeys.Item.NoActivation) : UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs));
+            if (data.IsPassive)
+            {
+                return UiStrings.Get(UiKeys.Item.NoActivation);
+            }
+
+            return data.Trigger == ItemTrigger.BattleStart ? UiStrings.Get(UiKeys.Item.BattleStart) : UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs));
         }
 
         /// <param name="starDamage">What stars add to the item's weapon damage on its board (stage 20, as the battle adds it), or 0.</param>
@@ -482,6 +487,12 @@ namespace F1.UI
             foreach (ItemEffect effect in item.Item.Effects)
             {
                 effects.Add(Effect(effect, item, balance, starDamage, ownerStats));
+            }
+
+            // A helm's work (Slice D stage 39, Round 87): the points it takes off the critical chance of the weapons that hit its owner, whatever its tier.
+            if (item.Item.CritTakenPercent > 0)
+            {
+                effects.Add(UiStrings.Get(UiKeys.Item.CritTaken, item.Item.CritTakenPercent));
             }
 
             // A star item's work (stage 20): what a melee weapon on one of its stars deals more, at its tier.

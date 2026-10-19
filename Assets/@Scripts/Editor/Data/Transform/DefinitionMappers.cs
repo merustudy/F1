@@ -125,7 +125,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "ScalesWith" });
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "ScalesWith", "Trigger", "CritTakenPercent" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -159,7 +159,11 @@ namespace F1.Editor.Data
                     row.OptionalBool("Unique", false),
                     row.OptionalInt("DropWeight", 0, 0),
                     // The stat that grows the item (Slice D stage 32): a Stat name, empty for none. ItemData checks it is one of the four.
-                    row.OptionalEnum<Stat>("ScalesWith"));
+                    row.OptionalEnum<Stat>("ScalesWith"),
+                    // When it activates (Slice D stage 39): empty for its cooldown, BattleStart for once when a battle starts. And a helm's points off
+                    // the critical chance of the weapons that hit its owner, empty for none. ItemData checks both.
+                    row.OptionalEnum<ItemTrigger>("Trigger") ?? ItemTrigger.Cooldown,
+                    row.OptionalInt("CritTakenPercent", 0));
             });
         }
 

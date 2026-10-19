@@ -185,6 +185,39 @@ namespace F1.Tests
             }
         }
 
+        /// <summary>
+        /// Slice D stage 39 (Docs/Design/02_Combat_System.md §4 "방어구", the user's names): the iron armour and the iron helm, defensive gear that
+        /// activates once when a battle starts, everywhere, with no stat; the helm takes points off the critical chance. Sold and dropped; no enemy wears them.
+        /// </summary>
+        [Test]
+        public void TheShippedArmour_IsTheIronArmourAndTheIronHelm()
+        {
+            StaticData data = LoadShipped();
+            ItemData armour = data.Items.Get("iron_armor");
+            ItemData helm = data.Items.Get("iron_helm");
+            Assert.AreEqual("철 갑옷", armour.Name.Values["ko-KR"]);
+            Assert.AreEqual("철 투구", helm.Name.Values["ko-KR"]);
+            foreach (ItemData piece in new[] { armour, helm })
+            {
+                Assert.AreEqual(ItemCategory.Armor, piece.Category, piece.Id);
+                Assert.AreEqual(ItemTrigger.BattleStart, piece.Trigger, piece.Id);
+                Assert.AreEqual(0, piece.CooldownMs, piece.Id);
+                Assert.IsTrue(piece.Rows.IsEveryRow, piece.Id);
+                Assert.IsNull(piece.ScalesWith, piece.Id + ": defensive gear is outside the stats.");
+                Assert.AreEqual(EffectKind.Shield, piece.Effects.Single().Kind, piece.Id);
+                Assert.AreEqual(TargetMode.Self, piece.Effects.Single().Target, piece.Id);
+                Assert.IsTrue(piece.ShopWeight > 0 && piece.Price > 0 && piece.DropWeight > 0, piece.Id + ": sold and dropped.");
+                Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(i => i.ItemId == piece.Id) || e.Phases.Any(p => p.Items.Any(i => i.ItemId == piece.Id))),
+                    piece.Id + ": no enemy wears it.");
+            }
+
+            Assert.AreEqual((2, 2), (armour.Width, armour.Height));
+            Assert.AreEqual((2, 1), (helm.Width, helm.Height));
+            Assert.AreEqual(0, armour.CritTakenPercent);
+            Assert.IsTrue(helm.CritTakenPercent > 0);
+            Assert.IsTrue(helm.Effects[0].Min < armour.Effects[0].Min, "The helm's shield is the smaller (\"소폭\").");
+        }
+
         /// <summary>Slice B stage 20 and round 51: the whetstone and its stars, the melee weapons, the valkyrie's battle axe.</summary>
         [Test]
         public void ShippedStarsAndShapes_AreAsDecided()

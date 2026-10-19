@@ -449,6 +449,11 @@ namespace F1.UI
             _stageRest = frameRect.center;
             _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell,
                 KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect, OnBreakdown);
+            // A battle that opens now shows its armour's activations at 0 ms (Round 87); the loot alone has no battle to show.
+            if (_battle != null)
+            {
+                _presenter.PlayOpeningArmour();
+            }
             RenderCaptions();
             Managers.Sound.PlayMusic(IsBossBattle() ? MusicTrack.Boss : MusicTrack.Dungeon);
         }

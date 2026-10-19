@@ -93,10 +93,11 @@ namespace F1.Gameplay
 
         /// <summary>
         /// A weapon's critical chance in ten-thousandths: the item's percent with the owner's dexterity's half points, the owner's passive's
-        /// points (Slice D stage 36, <see cref="CritBonusPercent"/>) and its traits' points (stage 37), within 0..100%. 0 for an item without a
-        /// critical chance.
+        /// points (Slice D stage 36, <see cref="CritBonusPercent"/>) and its traits' points (stage 37), less the target's helm (stage 39), within 0..100%.
+        /// 0 for an item without a critical chance.
         /// </summary>
-        public static int CritChance(BalanceData balance, StatBlock ownerStats, ItemData item, int bonusPercent = 0, TraitBonus traits = null)
+        /// <param name="takenPercent">The points the target's items take off (Slice D stage 39, the iron helm); 0 for a card, which has no target.</param>
+        public static int CritChance(BalanceData balance, StatBlock ownerStats, ItemData item, int bonusPercent = 0, TraitBonus traits = null, int takenPercent = 0)
         {
             if (item.CritChancePercent <= 0)
             {
@@ -104,7 +105,7 @@ namespace F1.Gameplay
             }
 
             int dex = ownerStats == null ? 0 : (ownerStats.Dex - balance.StatBaseline) * balance.CritPerDexPoint;
-            return Clamp((item.CritChancePercent + bonusPercent + (traits?.CritPercent ?? 0)) * 100 + dex, 0, Certain);
+            return Clamp((item.CritChancePercent + bonusPercent + (traits?.CritPercent ?? 0) - takenPercent) * 100 + dex, 0, Certain);
         }
 
         /// <summary>

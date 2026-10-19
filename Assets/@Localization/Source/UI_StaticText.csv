@@ -222,6 +222,8 @@ Item.MergeHintPlain,"Item.MergeHint for a Common item, which names no tier of it
 Item.Change,A value before and after a change. {0} = before. {1} = after.,{0} → {1},{0} → {1}
 Item.Melee,"In an item's facts: a melee weapon, which the stars of a whetstone strengthen (Slice B stage 20).",근접,Melee
 Item.NoActivation,In an item's facts in place of its cooldown: an item that never activates and works by its stars (stage 20).,발동하지 않음,Never activates
+Item.BattleStart,"In an item's facts in place of its cooldown (Slice D stage 39, Round 87): an item that activates once when a battle starts, the armour.",전투 시작 때 발동,At the start of battle
+Item.CritTaken,"An effect line of an item that takes points off the critical chance of the weapons that hit its owner (stage 39, the iron helm). {0} = the points.",받는 치명타 확률 -{0}%p,Chance to be crit -{0}%
 Item.StarDamage,The effect line of a star item (stage 20): a melee weapon on one of its stars deals more. {0} = how much.,★에 놓인 근접 무기: 피해 +{0},★ A melee weapon on a star: damage +{0}
 Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which already count it: what the stars on it add. {0} = the star items' names. {1} = the damage they add.",(★ {0} +{1}),(★ {0} +{1})
 Item.StatScale,"On the card of an item its owner's stat grows (Slice D stage 32, Round 81), after the stars' line: the stat, its value and the multiplier the card's values count. {0} = the stat's name. {1} = its value. {2} = the multiplier (1.2).",({0} {1} ×{2}),({0} {1} ×{2})

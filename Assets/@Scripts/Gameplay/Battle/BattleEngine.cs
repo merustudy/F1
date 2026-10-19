@@ -104,6 +104,12 @@ namespace F1.Gameplay
 
             ApplyBattleStartPassives(_party);
             ApplyBattleStartPassives(_enemies);
+            // Then the items that activate when a battle starts (Slice D stage 39, the armour): the party first, unit order, slot order.
+            ApplyBattleStartItems(_party);
+            if (Result == BattleResult.Ongoing)
+            {
+                ApplyBattleStartItems(_enemies);
+            }
         }
 
         public BattleSetup Setup { get; }
@@ -404,7 +410,7 @@ namespace F1.Gameplay
 
                 foreach (BattleItemState item in unit.Items)
                 {
-                    if (item.Active && item.NextFireMs < next)
+                    if (item.Active && item.Cycles && item.NextFireMs < next)
                     {
                         next = item.NextFireMs;
                     }
@@ -456,7 +462,7 @@ namespace F1.Gameplay
                         break;
                     }
 
-                    if (!item.Active || item.NextFireMs != now)
+                    if (!item.Active || !item.Cycles || item.NextFireMs != now)
                     {
                         continue;
                     }
@@ -614,8 +620,10 @@ namespace F1.Gameplay
                 return false;
             }
 
-            // In ten-thousandths, with the owner's dexterity (Slice D stage 33), the ranger's passive (stage 36) and the owner's traits (stage 37).
-            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon), owner.Setup.Traits);
+            // In ten-thousandths, with the owner's dexterity (Slice D stage 33), the ranger's passive (stage 36), the owner's traits (stage 37) and
+            // less what the target's helm takes off (stage 39). The roll is drawn all the same: the stream does not depend on the helm.
+            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon), owner.Setup.Traits,
+                CritTakenPercent(target));
             _lastCritRoll = _damageRng.NextInt(StatRules.Certain);
             if (_lastCritRoll >= _lastCritChance)
             {
@@ -624,6 +632,24 @@ namespace F1.Gameplay
 
             damage = (int)((long)damage * _balance.CritDamagePercent / 100);
             return true;
+        }
+
+        /// <summary>
+        /// The points a unit's items take off the critical chance of the weapons that hit it (Slice D stage 39, Docs/Design/02_Combat_System.md §4
+        /// "방어구"): those working where it stands now. The tier does not change them.
+        /// </summary>
+        static int CritTakenPercent(BattleUnit target)
+        {
+            int points = 0;
+            foreach (BattleItemState item in target.Items)
+            {
+                if (item.Active)
+                {
+                    points += item.Equipped.Item.CritTakenPercent;
+                }
+            }
+
+            return points;
         }
 
         /// <summary>
@@ -815,6 +841,35 @@ namespace F1.Gameplay
                         {
                             AddShield(ally, passive.Magnitude, unit.Ref, BattleEvent.CausePassive);
                         }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The items that activate when a battle starts (Slice D stage 39, Docs/Design/02_Combat_System.md §4 "방어구"): each fires once now, where it
+        /// works, in unit and slot order, and never again (it does not cycle). A fatigue state's cooldown has nothing to change on them.
+        /// </summary>
+        void ApplyBattleStartItems(List<BattleUnit> units)
+        {
+            foreach (BattleUnit unit in units)
+            {
+                foreach (BattleItemState item in unit.Items)
+                {
+                    if (!unit.Alive)
+                    {
+                        break;
+                    }
+
+                    if (!item.Active || item.Equipped.Item.Trigger != ItemTrigger.BattleStart)
+                    {
+                        continue;
+                    }
+
+                    Activate(unit, item);
+                    if (Result != BattleResult.Ongoing)
+                    {
+                        return;
                     }
                 }
             }

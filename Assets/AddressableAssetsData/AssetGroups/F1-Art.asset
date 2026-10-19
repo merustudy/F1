@@ -381,6 +381,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ae423bcdd72904f2e959d5cec2b446e6
+    m_Address: item/iron-armor
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aed91b06bab47424ba9de9c294801f3b
     m_Address: item/halberd
     m_ReadOnly: 0
@@ -476,6 +482,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: db3c27fb55e554ebca237c2ab0368b4f
+    m_Address: item/iron-helm
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e426af557a41d47d0990399ee48adefd
     m_Address: pose/enemy/goblin-archer-attack

@@ -117,8 +117,8 @@ namespace F1.Data
     }
 
     /// <summary>
-    /// A battle card. Items exist only inside a dungeon and activate on their own cooldown (an item without effects never does: stage 20).
-    /// Items are not relics: relics are a different definition, file and type.
+    /// A battle card. Items exist only inside a dungeon and activate on their own cooldown (an item without effects never does: stage 20), or
+    /// once when a battle starts (the armour, Slice D stage 39). Items are not relics: relics are a different definition, file and type.
     /// </summary>
     public sealed class ItemData
     {
@@ -146,7 +146,9 @@ namespace F1.Data
             int critChancePercent = 0,
             bool unique = false,
             int dropWeight = 0,
-            Stat? scalesWith = null)
+            Stat? scalesWith = null,
+            ItemTrigger trigger = ItemTrigger.Cooldown,
+            int critTakenPercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             if (dropWeight < 0)
@@ -177,7 +179,20 @@ namespace F1.Data
             }
 
             // An item without effects never activates (stage 20): only a star item may be one, and it has no cooldown.
-            if (effects.Count == 0)
+            // An item that activates when a battle starts (stage 39) has effects and no cooldown.
+            if (trigger == ItemTrigger.BattleStart)
+            {
+                if (effects.Count == 0)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': an item that activates when a battle starts needs an effect.");
+                }
+
+                if (cooldownMs != 0)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': an item that activates when a battle starts has no cooldown, so its CooldownMs is 0.");
+                }
+            }
+            else if (effects.Count == 0)
             {
                 if (scalesWith != null)
                 {
@@ -244,6 +259,17 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': a unique item has no DropWeight.");
             }
 
+            // What a helm takes off the critical chance of the weapons that hit its owner (stage 39): only defensive gear has it.
+            if (critTakenPercent < 0 || critTakenPercent > 100)
+            {
+                throw new DataException($"{DefinitionName} '{id}': CritTakenPercent must be 0..100.");
+            }
+
+            if (critTakenPercent > 0 && category != ItemCategory.Armor)
+            {
+                throw new DataException($"{DefinitionName} '{id}': only defensive gear (Armor) can have a CritTakenPercent.");
+            }
+
             Category = category;
             Width = width;
             Height = height;
@@ -257,6 +283,8 @@ namespace F1.Data
             StarDamage = starDamage;
             CritChancePercent = critChancePercent;
             Unique = unique;
+            Trigger = trigger;
+            CritTakenPercent = critTakenPercent;
         }
 
         /// <summary>The stats an item's power can grow with (Slice D stage 32): strength, dexterity, intellect, spirit. Constitution and endurance are no item's axis.</summary>
@@ -389,9 +417,27 @@ namespace F1.Data
         [JsonProperty(Order = 18, Required = Required.AllowNull)]
         public Stat? ScalesWith { get; }
 
+        /// <summary>
+        /// When the item activates (Slice D stage 39, Docs/Design/02_Combat_System.md §4 "방어구"): on its cooldown, or once when a battle starts
+        /// (then it has no cooldown).
+        /// </summary>
+        [JsonProperty(Order = 19, Required = Required.Always)]
+        public ItemTrigger Trigger { get; }
+
+        /// <summary>
+        /// Percent points taken off the critical chance of every weapon that hits the item's owner (Slice D stage 39, the iron helm), while the item
+        /// works where its owner stands. The tier does not change it. 0 for an item without (only defensive gear has it).
+        /// </summary>
+        [JsonProperty(Order = 20, Required = Required.Always)]
+        public int CritTakenPercent { get; }
+
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]
         public bool IsPassive => Effects.Count == 0;
+
+        /// <summary>An item that charges and fires on its cooldown: one with effects that does not activate when a battle starts (stage 39).</summary>
+        [JsonIgnore]
+        public bool Cycles => Effects.Count > 0 && Trigger == ItemTrigger.Cooldown;
 
         /// <summary>The squares the item takes: on a board, and in the inventory, which counts squares (Slice B stage 19).</summary>
         [JsonIgnore]

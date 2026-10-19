@@ -404,6 +404,30 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_ReadsWhenAnItemActivates_AndTheCritItTakesOff()
+        {
+            // Slice D stage 39: Trigger (empty = Cooldown, BattleStart) and CritTakenPercent (empty = 0) are optional columns; ItemData checks them.
+            StaticData data = StaticDataTransformer.Transform(TestCsv.Reader(TestCsv.ValidSources())).Data;
+            Assert.IsTrue(data.Items.Ordered.All(i => i.Trigger == ItemTrigger.Cooldown && i.CritTakenPercent == 0), "Without the columns: every item cycles and takes nothing off.");
+
+            string items = TestCsv.Items.Replace("CritChancePercent\n", "CritChancePercent,Trigger,CritTakenPercent\n")
+                .Replace("claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,0.5-1.5,,,,,0,,0,false,,,\n", "claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,0.5-1.5,,,,,0,,0,false,,,,,\n")
+                .Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,,,,,0,item/sword,0,true,,,5\n", "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,,,,,0,item/sword,0,true,,,5,,\n")
+                .Replace("staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,2.73,,,,,0,,0,false,,,\n", "staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,2.73,,,,,0,,0,false,,,,,\n")
+                .Replace("mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,1.23-3.68,Shield,Self,,0.98,10,item/mace,16,true,,,5\n", "mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,1.23-3.68,Shield,Self,,0.98,10,item/mace,16,true,,,5,,\n")
+                + "helm,투구,Helm,Armor,2,1,0,all,Shield,Self,,2.18,,,,,10,,12,false,,,,BattleStart,3\n";
+            StaticData withArmour = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, items)).Data;
+            ItemData helm = withArmour.Items.Get("helm");
+            Assert.AreEqual(ItemTrigger.BattleStart, helm.Trigger);
+            Assert.AreEqual(3, helm.CritTakenPercent);
+            Assert.AreEqual(218, helm.Effects[0].Min);
+            Assert.AreEqual(ItemTrigger.Cooldown, withArmour.Items.Get("sword").Trigger, "An empty Trigger is the cooldown.");
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace("Armor,2,1,0,all", "Armor,2,1,5000,all")).Errors[0], "A cooldown with BattleStart.");
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace("helm,투구,Helm,Armor", "helm,투구,Helm,Support")).Errors[0], "CritTakenPercent off defensive gear.");
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace(",BattleStart,3", ",Sometimes,3")).Errors[0]);
+        }
+
+        [Test]
         public void Transform_WhenPassiveAndItsTextDoNotComeTogether_Reports()
         {
             string textOnly = TestCsv.Jobs.Replace("staff,3,,,,,,,,", "staff,3,,,,,,,보호막,Shield");

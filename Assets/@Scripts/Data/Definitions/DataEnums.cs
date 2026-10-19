@@ -122,7 +122,7 @@ namespace F1.Data
         /// <summary>A healing or helping item: it heals or strengthens (a charm, a pouch of herbs).</summary>
         Support,
 
-        /// <summary>Defensive gear: a shield, and later armour.</summary>
+        /// <summary>Defensive gear: a shield, and armour (Slice D stage 39: the iron armour and the iron helm).</summary>
         Armor,
 
         /// <summary>An attack that is not a weapon: something thrown or spat.</summary>
@@ -144,6 +144,16 @@ namespace F1.Data
         Tier1,
         Tier2,
         Tier3,
+    }
+
+    /// <summary>
+    /// When an item activates (Docs/Design/02_Combat_System.md §3·§4). Cooldown: from the start of a battle it charges and fires each time its
+    /// cooldown is full. BattleStart (Slice D stage 39, the armour): once at 0 ms, after the job passives, and never again; it has no cooldown.
+    /// </summary>
+    public enum ItemTrigger
+    {
+        Cooldown,
+        BattleStart,
     }
 
     public enum EffectKind

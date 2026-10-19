@@ -24,9 +24,13 @@ namespace F1.Gameplay
         /// False while the owner stands outside the span of the line the item works in, and always for an item that never activates
         /// (<see cref="ItemData.IsPassive"/>, Slice B stage 20). An inactive
         /// item does not fill its cooldown and never fires. It is judged again whenever someone on
-        /// the owner's side dies, because the span is counted on the living line.
+        /// the owner's side dies, because the span is counted on the living line. An item that activates when a battle starts (Slice D stage 39)
+        /// is active where it works, but it fired once at 0 ms and never charges (<see cref="Cycles"/>).
         /// </summary>
         public bool Active { get; internal set; }
+
+        /// <summary>Whether the item charges and fires on its cooldown (<see cref="ItemData.Cycles"/>): not one without effects, nor one that fires when a battle starts.</summary>
+        public bool Cycles => Equipped.Item.Cycles;
 
         /// <summary>Effective cooldown after modifiers.</summary>
         public int CooldownMs { get; }

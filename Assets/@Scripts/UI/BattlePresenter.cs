@@ -88,6 +88,36 @@ namespace F1.UI
             _played = engine.Events.Count;
         }
 
+        /// <summary>
+        /// Round 87 (Slice D stage 39): a battle that opens at 0 ms plays what its armour did then — each piece's activation (the cell's flash,
+        /// the sound, the caption) and its "방어 +N" — which the engine logged before the screen opened. Nothing else of the opening is replayed
+        /// (a job's passive shield shows on the badge only, as before). It plays on the second frame, once the screen is laid out.
+        /// </summary>
+        public void PlayOpeningArmour()
+        {
+            if (_engine.TimeMs != 0)
+            {
+                return;
+            }
+
+            IReadOnlyList<BattleEvent> events = _engine.Events;
+            _opening = new List<int>();
+            for (int i = 0; i < events.Count; i++)
+            {
+                BattleEvent e = events[i];
+                bool armour = e.Id != null && _data.Items.Contains(e.Id) && _data.Items.Get(e.Id).Trigger == ItemTrigger.BattleStart;
+                if (armour && (e.Kind == BattleEventKind.ItemActivated || e.Kind == BattleEventKind.ShieldGained))
+                {
+                    _opening.Add(i);
+                }
+            }
+
+            _openingFrames = 1;
+        }
+
+        List<int> _opening;
+        int _openingFrames;
+
         /// <summary>How many events of the log have been passed, played or skipped.</summary>
         public int Played => _played;
 
@@ -95,6 +125,16 @@ namespace F1.UI
         public void Play()
         {
             IReadOnlyList<BattleEvent> events = _engine.Events;
+            if (_opening != null && _openingFrames-- <= 0)
+            {
+                foreach (int index in _opening)
+                {
+                    PlayOne(events[index], index);
+                }
+
+                _opening = null;
+            }
+
             for (; _played < events.Count; _played++)
             {
                 BattleEvent e = events[_played];
