@@ -37,7 +37,7 @@
 
 | 파일 | 내용 |
 |---|---|
-| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다. 17단계: 상점의 `ShopSlots`·`ShopRefreshBase`·`ShopRefreshStep`(Round 56: 포션의 `ShopPotionChancePercent`), 코인의 `CoinsPerEnemy`·`CoinsPerFloor`·`EliteCoinPercent`. 18단계: 전리품의 `DropCount`·`EliteDropCount`(보상의 `RewardChoices`는 뺐다). 25단계: `DeathLimit`. 26단계: 금의 `GoldPerFloor`·`GoldClear`, 역마차의 `HirePrice`·`RecruitCount`·`RosterLimit`, 쉼터의 `TreatmentPrice`·`TreatmentRelief`(04 §3·§5·§6). 27단계: 경험치의 `ExpPerFloor`·`ExpClear`(05 §2) |
+| `BalanceData.csv` | 규칙의 상수 (Key, Value). 02~04 문서의 `코드 글꼴` 이름이 Key다. 17단계: 상점의 `ShopSlots`·`ShopRefreshBase`·`ShopRefreshStep`(Round 56: 포션의 `ShopPotionChancePercent`), 코인의 `CoinsPerEnemy`·`CoinsPerFloor`·`EliteCoinPercent`. 18단계: 전리품의 `DropCount`·`EliteDropCount`(보상의 `RewardChoices`는 뺐다), 2026-10-19 드랍 단계의 `DropTierKeepPercent`·원정의 시작 코인 `ExpeditionStartCoins`(03 §5). 25단계: `DeathLimit`. 26단계: 금의 `GoldPerFloor`·`GoldClear`, 역마차의 `HirePrice`·`RecruitCount`·`RosterLimit`, 쉼터의 `TreatmentPrice`·`TreatmentRelief`(04 §3·§5·§6). 27단계: 경험치의 `ExpPerFloor`·`ExpClear`(05 §2) |
 | `JobData.csv` | 직업: 이름, 최대 HP, 보드의 칸 수, 기본 무기와 등급, 패시브(자리 조건 포함)와 그 설명문, 권장 열 |
 | `ItemData.csv` | 아이템(23단계부터 `Unique` 열: 유니크는 상점·전리품에 없다): 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 상점 가중치 `ShopWeight`(18단계에 보상 가중치에서 이름을 바꿨다. 0이면 상점에 나오지 않음), 상점의 값 `Price`(일반 기준. 0이면 팔지 않음, 17단계). 적의 아이템도 같은 척도다(02 §4). 20단계: 근접 무기 `Melee`(true/false, 무기 장비만 true), 별 칸 `Stars`(돌리지 않은 모양의 왼쪽 위 칸에서 잰 "x:y"를 +로 이음, 아이템 둘레의 칸만), 별의 피해 `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준이고 단계마다 N씩 더. 별이 있으면 1 이상). 효과가 없는 아이템은 별이 있고 쿨다운이 0이다(발동하지 않음) |
 | `RecipeData.csv` | 담금질의 레시피(23단계): 결과(유니크 아이템), 바탕 아이템과 단계, 촉매(★ 아이템)와 단계. 이름 열은 없다 | `Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier` |
@@ -45,7 +45,7 @@
 | `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급(적의 힘. 쓰러뜨리면 그 아이템이 던전의 등급으로 떨어진다: 03 §5), 그림과 그림의 크기 배율(보스는 더 크게), 페이즈(28단계, 선택 열 `Phases`: HP 문턱마다 바꿔 드는 아이템 묶음. 02 §9) |
 | `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 정예 여부(Slice B), 서는 순서(앞에서부터, 넷까지) |
 | `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
-| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다), 최종 던전과 해금(25단계: `IsFinal`, `UnlockDungeonId`, `UnlockClears`), 원정 지도의 표식 자리(Round 71 E2: `MapX`, `MapY`) |
+| `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다), 최종 던전과 해금(25단계: `IsFinal`, `UnlockDungeonId`, `UnlockClears`), 원정 지도의 표식 자리(Round 71 E2: `MapX`, `MapY`), 상점 층 `ShopFloor`(2026-10-19, 03 §1) |
 | `MercenaryData.csv` | 시작 로스터(`Starting` 참: 이름, 직업)와 역마차의 **이름 풀**(26단계. `Starting` 거짓: 이름만, `JobId` 비움 — 후보를 뽑을 때 직업을 굴린다). 고용된 용병의 id는 풀의 id이고 직업은 런의 상태가 가진다 |
 | `FatigueStateData.csv` | 피로의 붕괴 판정이 주는 상태(Slice B): 종류(고통·각성), 쿨다운·받는 회복·빈사 사망 확률의 변화, 이름과 설명 |
 | `LevelData.csv` | 레벨의 사다리(27단계, 05 §2): `Level`(1부터), `ExpToNext`(다음 레벨까지의 경험치, 마지막은 0), `MaxHpBonusPercent`. 이름 열이 없다. 경험치의 양은 `BalanceData`의 `ExpPerFloor`·`ExpClear` |

@@ -85,16 +85,16 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 전투의 `BattleUnitSetup.Items`는 보드의 아이템을 **읽는 순서**로 늘어놓은 목록이고 `BattleItemState.SlotIndex`는 그 순서(발동 순서)다. `BattleUnitSetup.Layout`(`BoardLayout`)은 화면이 그리려는 자리(아이템마다의 `Placement`와 가방)이고 규칙은 쓰지 않는다.
   `BattleUnitSetup.StarDamage`는 같은 순서의 피해 +N이다(`ExpeditionRules`가 전투를 세울 때 `StarRules.DamageInReadingOrder`로 채운다. 적과 Test는 null = 모두 0). 엔진은 `BattleItemState.StarDamage`로 갖고,
   무기 장비의 피해 효과에 "무기 피해 +%" 패시브를 곱하기 **전에** 더한다. 발동하지 않는 아이템(`ItemData.IsPassive`)은 늘 활성이 아니어서 쿨다운이 돌지 않고 발동 이벤트도 없다. 별은 전투를 세울 때 정해지므로 결정론과 이어하기는 그대로다.
-  적은 가방 없이 아이템을 한 줄씩 아래로 놓은 `BoardLayout.Stacked`다.
+  적은 시작 가방에 아이템을 읽는 차례의 처음 들어가는 자리로 놓고, 안 들어가면 가방을 아래로 늘린 `BoardLayout.Packed`다(2026-10-19 Round 86. 화면만 읽고 엔진은 읽지 않는다 — 적의 아이템은 데이터의 차례대로 돈다. 배치가 없는 Test의 Setup은 `Stacked`).
 
 ## 피로
 
 규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §3이 소유한다. 피로도는 0에서 쌓이는 정수이고 0~`MaxFatigue` 안에 머문다.
 
-- 셈은 `FatigueRules` 한 곳에 있다: 장비가 피로를 내는지(`CostsFatigue`: 무기 장비나 방어 장비이고 기본 무기가 아님), 아이템 하나와 보드의 비용,
+- 셈은 `FatigueRules` 한 곳에 있다: 장비가 피로를 내는지(`CostsFatigue`: 무기 장비나 방어 장비이고 기본 무기도 유니크도 아님 — 유니크는 2026-10-19), 아이템 하나와 보드의 비용,
   전투에 들어갈 때의 비용(`BattleEntryCost` = `FatigueBattleEntry` + 장비), 범위 안에 묶는 더하기(`Add`). 화면도 같은 함수로 비용을 보인다.
 - 기본 무기는 아이템 인스턴스의 표시다(`EquippedItem.IsBase`). `ExpeditionRules.Create`가 직업의 무기에만 붙이고, 보드 사이로 옮겨도 남는다.
-  전리품과 상점의 물건, 인벤토리에서 꺼낸 아이템은 기본 무기가 아니다.
+  전리품과 상점의 물건, 인벤토리에서 꺼낸 아이템은 기본 무기가 아니다. 합친 것은 둘 중 하나가 기본 무기면 기본 무기다(2026-10-19, `MergeInto`).
 - 수명: 로스터의 `MercenaryState.Fatigue` → 출발할 때 `PartyMember`로 원정의 `ExpeditionMember.Fatigue`에 → 원정 동안 쌓임 → `RunRules.Settle`이
   살아 돌아온 구성원의 값을 로스터에 쓴다. 원정에 나가지 않은 날(`PassDays`)에는 로스터의 값이 내려간다.
 - 쌓이는 곳(12단계): `ExpeditionRules.BeginBattle`이 전투를 세우기 전에 살아 있는 구성원마다 전투에 들어가는 비용을 더한다. 그래서
@@ -112,7 +112,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §1·§4가 소유한다. 수치는 `DungeonData`와 `BalanceData`에 있다.
 
 - 노드 종류는 `MapNodeKind`(전투, 정예, 야영지, 보스, 상점(17단계))다. 싸우는 노드(`MapNode.IsFought`)만 적 무리를 갖는다. 야영지와 상점에는 `EnemyGroupId`가 없다.
-- `MapGenerator`가 노드마다 맵 난수로 종류를 뽑는다: 야영지 층(`CampFloor`)은 모두 야영지, 그 밖에서 정예가 설 수 있으면(`DungeonData.EliteCanStandOn`) 정예 확률,
+- `MapGenerator`가 노드마다 맵 난수로 종류를 뽑는다: 야영지 층(`CampFloor`)은 모두 야영지, 상점 층(`ShopFloor`, 2026-10-19)은 모두 상점(난수를 쓰지 않음), 그 밖에서 정예가 설 수 있으면(`DungeonData.EliteCanStandOn`) 정예 확률,
   아니면 야영지가 설 수 있으면(`CampCanStandOn`) 야영지 확률, 아니면 상점이 설 수 있으면(`ShopCanStandOn`: 1층과 야영지 층이 아닌 `ShopMinFloor`부터) 상점 확률, 나머지는 전투다.
   자격이 없는 층에서는 난수를 쓰지 않으므로 정예·야영지·상점이 없는 데이터의 맵은 전과 같다.
   정예 노드는 정예 무리(`EnemyGroupData.IsElite`, `StaticData.ElitesFor`)에서, 전투 노드는 정예가 아닌 무리에서 고른다. 정예가 설 수 있는 층마다 정예 무리가 있어야 한다(`StaticData`의 검증).
@@ -125,11 +125,11 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 ## 전리품 (Slice B 18단계)
 
-규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
+규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`, `DropTierKeepPercent`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
 
 - 일반 아이템 드랍(2026-10-17): `DropLoot`은 드랍 자리마다 던전의 `GeneralDropChancePercent`를 굴려 `DropWeight`로 뽑은 일반 아이템(그 층의 단계)을 두고, 아니면 적의 아이템을 둔다(적의 것이 다 떨어지면 일반, 가중치 있는 아이템이 없으면 전과 같이 굴리지 않고 적의 것만 — 난수열이 그대로다).
 - `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
-  `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
+  `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고, 일반 위의 단계면 아이템마다 `DropTierKeepPercent`%로 그대로·아니면 한 단계 아래다(2026-10-19, `DropTier`: 따로 파생한 `Derive(원정 시드, "loot-tier", 노드 id)`의 전리품 스트림이라 무엇이 떨어지는지는 바뀌지 않는다). 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
 - `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `TakeAllLootToInventory`(2026-10-17: 남은 것 가운데 인벤토리에 자리가 있는 아이템을 놓인 차례대로 모두, 각각 첫 빈 자리에; 가방과 자리 없는 것은 남고, 다 넣으면 끝남. 넣은 수를 돌려줌), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `CanTakeAllLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
 - 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
   마지막 드랍을 주우면 `ChoosingNode`로 돌아간다(`Pick` → `EndLoot`). 포션은 떨어지지 않는다(`ItemOffer`의 포션은 상점의 것).
@@ -161,7 +161,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 단계는 `ItemTier`(일반·1성·2성·3성 = `Common`·`Tier1`·`Tier2`·`Tier3`. 2026-10-15 Round 69에 일반·동·은·금에서, 2026-10-07 Round 41에 동·은·금·다이아에서 이름을 바꿨다: 값의 순서는 같다. `F1.Data`)이고 아이템 인스턴스(`EquippedItem.Tier`)와 드랍과 상점의 물건(`ItemOffer.Tier`)가 갖는다. 등급은 22단계에 뺐다(`EquippedItem.PowerPercent`: 용병의 것은 100, 적의 것은 그 적의 세기).
 - 효과 크기는 한 곳에서 센다(22단계): `EquippedItem.Min`·`Max`(피해의 최소·최대)와 `Magnitude`(범위가 없는 효과) = `ItemEffect.Scaled(값, BalanceData.TierPercent(단계), 세기 %)`(0.01 단위 정수, 내림, 1 이상). 전투와 화면이 같은 함수를 쓴다.
 - 단계는 `DungeonData.ItemTierAt(층, 정예)`가 정하고 `ExpeditionRules`가 전리품과 상점의 물건에 싣는다.
-- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 둘 다 기본 무기가 아님, 서로 다른 인스턴스)다. 보드에 놓는 명령
+- 합치기는 `ExpeditionRules.CanMerge`(같은 아이템, 같은 단계, 금 아래, 서로 다른 인스턴스. 기본 무기도 합친다 — 2026-10-19)다. 보드에 놓는 명령
   (`MoveItem`, `PlaceFromInventory`, `TakeLoot`, `BuyToBoard`)은 놓을 자리의 왼쪽 위 칸이 합쳐질 아이템의 왼쪽 위 칸이면 합친다(`MergesAt`): 그 아이템이 그 자리·방향 그대로 한 단계 위(`TierUp`)가 되고, 놓은 것은 원래 목록에서 빠진다.
   각 `Can...`은 합쳐질 때 칸과 인벤토리의 여유를 묻지 않는다. 합치기는 따로 된 명령이 없다(놓는 것이 합치기다).
   **인벤토리에 놓는 명령도 같다**(2026-10-18 사용자 "인벤창에서도 합치기 가능하게": `MoveInInventory`, `MoveToInventoryAt`, `TakeLootToInventoryAt`, `BuyToInventoryAt`): 놓을 자리의 왼쪽 위 칸을 덮은 인벤토리의 아이템(`InventoryGrid.ItemAt`)이 합쳐질 것이면 그 자리에서 `TierUp`한다.
