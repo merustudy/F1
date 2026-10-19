@@ -269,6 +269,18 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 결정론: 특성은 Setup의 입력이고 굴림은 런 시드의 스트림이다. 저장 22가 목록을 가진다(Architecture/07).
 - Test: `TraitRulesTests`(합, 두 번·충돌, 굴리지 않는 경우와 스트림, 개수의 가중치·같은 시드·모든 타고난 특성, 식의 항 일곱, 전투 로그의 명중·빈사 확률, 데이터 → 로스터·후보·고용·원정·Setup), `StaticDataValidationTests`(반대·시작 로스터의 검증, 정의의 범위), `ShippedDataTests`(첫 묶음 여섯과 짝, 시작 로스터, 직업 특성의 이름), `RunSaveMapperTests`(22의 저장·검증·21 → 22).
 
+### 얻은 특성 (Slice D 38단계)
+
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §6(38단계 판정)이 소유한다. 수치는 `TraitData`(`Source`, `Weight`, 효과 열)와 `BalanceData`(`TraitChance*Percent`).
+
+- Type: `TraitSource`(`F1.Data`: `Clear`·`Retreat`·`DeathsDoor`·`Affliction`·`Virtue`, 굴리는 차례)와 `TraitData.Source`(얻은 특성만). 규칙은 `TraitRules`에 더했다: `SourcesOf(data, 결과, 구성원)`(살아 돌아온 구성원이 만난 계기 — 클리어 또는 후퇴, 빈사 표시, 끝날 때의 상태가 고통이면 고통·각성이면 각성; 죽은 이는 없음), `ChancePercent(balance, 계기)`, `AcquiredStream(런 시드, 용병 id, 원정 수)`, `DrawAcquired(data, 가진 것, 계기들, rng)`.
+- 굴림(`DrawAcquired`): 계기마다 그 계기의 얻은 특성 가운데 가질 수 있는 것(가진 것과 이 굴림이 준 것에 대해 `CanTake`, 가중치 0 초과, id 차례)을 모으고, **없거나 확률이 0이면 굴리지 않는다**. 있으면 `NextInt(100) < 확률`, 맞으면 `NextInt(가중치 합)`으로 하나. 계기마다 하나까지.
+- 빈사 표시: `ExpeditionMember.DeathsDoor`. `ExpeditionRules.CompleteBattle`이 전투 로그의 `DogEntered`의 대상을 켠다(한 번 켜지면 원정 동안 그대로; 0 HP로 다음 전투를 시작한 이는 앞 전투에서 이미 켜졌다). 저장 23이 가진다(Architecture/07).
+- 정산(`RunRules.Settle`): 살아 돌아온 구성원마다 경험치 다음에 `DrawAcquired(로스터의 특성, SourcesOf, AcquiredStream(런 시드, id, 런의 ExpeditionCount))` — 얻은 것을 로스터의 `Traits` 끝에 더하고 `SettlementReport.NewTraits`(`AcquiredTraits`: 용병 id와 특성 id, 생환자의 차례)에 담는다. 런을 끝내는 정산도 똑같다.
+- 결정론: 스트림은 런 시드에서 용병과 원정 수로 파생하므로 정산의 차례, 막사의 레벨업, 다른 스트림과 무관하다. 정산과 같은 저장에 들어가 이어하기로 되돌릴 수 없다.
+- 시뮬: `run`의 보고에 계기를 만난 생환자 수와 계기마다 얻은 수(런마다), 끝에 산 용병의 얻은 장점·약점. 정책은 그대로(Design/08 §45).
+- Test: `AcquiredTraitTests`(계기와 그 차례·죽은 이, 계기마다 하나·가진 것과 막는 짝은 제외·굴리지 않는 경우와 스트림, 확률과 가중치의 비율·같은 시드, 정산이 로스터와 보고에 남김·용병의 스트림·죽은 이 없음, 확률 0·후퇴의 특성, `CompleteBattle`의 빈사 표시), `ShippedDataTests`(얻은 일곱의 계기·극성·효과·확률), `StaticDataValidationTests`(계기 열의 검증), `StaticDataTransformerTests`(`Source` 열), `RunSaveMapperTests`(23의 빈사 표시·22 → 23).
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
@@ -298,6 +310,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 ```text
 런 시드 -> 원정 시드 = Derive(런 시드, "expedition", 원정 순번)
        -> 후보 난수 = Derive(런 시드, "recruit", 원정 순번) (26단계: 역마차의 후보. 34단계 스탯의 편차, 37단계 타고난 특성도)
+       -> 얻은 특성 난수 = Derive(런 시드, "trait:" + 용병 id, 런의 원정 수) (38단계: 정산의 계기, `RngStream.Trait`)
 원정 시드 -> 맵 난수 = Derive(원정 시드, "map", 0)
           -> 전리품 난수 = Derive(원정 시드, "loot", 노드 id)
           -> 상점 난수 = Derive(원정 시드, "shop", 노드 id)
