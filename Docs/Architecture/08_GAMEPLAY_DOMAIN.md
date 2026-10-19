@@ -76,6 +76,9 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   아이템은 그 아이템이 덮은 어느 칸으로도 가리킨다. 가방은 놓는 것(`CanPlaceBag`: 전리품·상점에서 틀의 빈 자리에)뿐이다.
 - 놓기는 한 곳(`CanPut`·`Put`)이다: 자리가 모두 가방의 칸이고, 겹치는 아이템이 없거나 **하나**면 놓인다. 하나면 그것이 인벤토리의 첫 빈 자리로 간다(자리가 있을 때. 인벤토리에서 넣을 때는 나가는 아이템의 자리를 빈 것으로 친다). 둘 이상이면 안 된다.
   옮기는 아이템 자신은 겹침에서 빠진다. 같은 아이템의 왼쪽 위 칸에 왼쪽 위를 맞추면(`MergesAt`) 놓는 대신 합친다(아래 "단계와 합치기").
+- 바닥의 드랍과 상점의 물건(`ItemOffer`)을 놓는 몸도 한 곳이다(2026-10-20 R17): 보드에 `CanPlaceOffer`·`PlaceOffer`(가방은 틀에, 아이템은 합치기 아니면 `Put`), 인벤토리의 첫 자리에 `OfferHasRoomInInventory`·`PlaceOfferInInventory`,
+  인벤토리의 고른 자리에 `CanPlaceOfferInInventoryAt`·`PlaceOfferInInventoryAt`(또는 합치기), 합침의 질의 `OfferMergesAt`·`OfferMergesInInventoryAt`. 전리품의 `TakeLoot…`·`LootMerges…`는 그 위에 자리(`DropAt`)와 `Pick`을,
+  상점의 `BuyTo…`·`ShopMerges…`는 코인(`AffordableAt`)과 `Pay`를 얹은 얇은 껍질이다. 놓는 규칙이 바뀌면 이 한 곳만 바뀐다.
 - 가방을 옮기면 그 안에 온전히 든 아이템이 가방 안의 자리를 지키며 함께 가고, 돌리면 함께 돈다(가방의 상자 안에서 시계 방향으로: (x, y) → (높이 − y − h, x)). 가방은 틀 안의 다른 가방이 없는 자리에만 놓인다. 시작 가방은 옮기지 않는다.
 - **★(별, 20단계)**: 별의 계산은 `StarRules` 한 곳에 있다(순수 C#). 아이템의 별 칸(`ItemData.Stars`, 돌리지 않은 모양의 왼쪽 위 칸에서 잰 칸)은 아이템과 함께 돈다:
   시계 방향으로 한 번 돌리면 (x, y) → (높이 − 1 − y, x)(높이는 돌리기 전 모양의 것. 가방째 돌리기와 같은 셈). `StarSquares(아이템, 자리)`는 보드의 칸이고, `Marks(보드, 아이템, 자리, 뺄 아이템)`은
@@ -150,7 +153,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
   난수는 `RngStream.Shop`(전리품 스트림과 다름)을 `Derive(원정 시드, "shop", 노드 id)`로 열어 포션을 먼저 뽑고, 새로고침 k번째의 물건은 그 뒤를 k+1번 뽑은 마지막이다(저장한 횟수로 다시 만든다).
   새로고침은 물건 자리만 새로 채우고 포션 자리(판 것은 null 그대로)는 둔다(`RefreshShop`).
 - 값은 `PriceOf(물건)` 한 곳에서 센다: 아이템은 `Price` × `BalanceData.TierPercent(단계)` / 100, 포션과 가방은 `Price`. 새로고침의 비용은 `RefreshCost` = `ShopRefreshBase` + `ShopRefreshStep` × `Refreshes`.
-- 사는 명령은 전리품의 것과 짝이다: `BuyToBoard(자리, 구성원, Placement)`(합쳐지면 합치고, 아니면 놓기. 가방은 틀에), `BuyToInventory`(아이템만), `BuyPotion`. 각각 `Can...`이 코인(`CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
+- 사는 명령은 전리품의 것과 짝이고 몸이 같다(위 "격자 보드"의 `CanPlaceOffer`·`PlaceOffer`·`PlaceOfferInInventory`·`PlaceOfferInInventoryAt`): `BuyToBoard(자리, 구성원, Placement)`(합쳐지면 합치고, 아니면 놓기. 가방은 틀에), `BuyToInventory`(아이템만), `BuyPotion`. 각각 `Can...`이 코인(`AffordableAt`: 코인이 닿는 물건, `CanAfford`)과 자리를 묻고, 산 자리는 null(`Pay`)이 된다.
   `RefreshShop`은 비용을 내고 모든 자리를 다시 뽑는다. `OfferAt`·`ShopMergesAt`은 화면이 묻는 질의다.
 - **팔기**(Round 74, 2026-10-17): `SellPriceOf(EquippedItem)` = `Price` × 단계 % × `SellPercent` / 100, 적어도 1. `CanSellBoardItem(구성원, X, Y)`·`SellBoardItem`(보드에서 빼고 코인을 더함, 판 값을 돌려줌), `CanSellInventoryItem(X, Y)`·`SellInventoryItem`. `AtShop`에서만, 기본 무기(`IsBase`)와 유니크는 안 된다. 가방은 아이템이 아니라 팔리지 않는다. 판 아이템은 사라진다.
 

@@ -249,11 +249,11 @@ namespace F1.UI
             _inventoryToggle.gameObject.SetActive(!stepping);
             _party.ToInventory.gameObject.SetActive(!stepping);
             // The picked offer is in the party's hand (stage 19): it is aimed at the boards' squares and bought where it is put.
-            if (picking && !(_party.Hand.Outside is ShopHand held && held.Slot == pick))
+            if (picking && !(_party.Hand.Outside is OfferHand held && held.Slot == pick))
             {
-                _party.Hand.HoldOutside(new ShopHand(this, pick));
+                _party.Hand.HoldOutside(new OfferHand(OfferHand.Source.Shop, pick, buy => { Bought(buy, sound: false); Refresh(); }));
             }
-            else if (!picking && _party.Hand.Outside is ShopHand)
+            else if (!picking && _party.Hand.Outside is OfferHand)
             {
                 _party.Hand.Clear();
             }
@@ -804,63 +804,6 @@ namespace F1.UI
             _shopNote = null;
             _party.ClearSelection();
             Refresh();
-        }
-
-        /// <summary>
-        /// The picked offer of the shop in the party's hand (Slice B stage 19): it can go where the manager says it can be bought onto a
-        /// board, merges as a purchase would, and is bought where it is put (the hand sounds it).
-        /// </summary>
-        sealed class ShopHand : IOutsideHand
-        {
-            readonly NodeMapScreen _screen;
-
-            public ShopHand(NodeMapScreen screen, int slot)
-            {
-                _screen = screen;
-                Slot = slot;
-                ItemOffer offer = Managers.Expedition.ShopStock[slot];
-                StaticData data = Managers.Data.Data;
-                Item = offer.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier) : null;
-                Bag = offer.Kind == OfferKind.Bag ? data.Bags.Get(offer.Id) : null;
-            }
-
-            public int Slot { get; }
-            public EquippedItem Item { get; }
-            public BagData Bag { get; }
-
-            public bool CanPlace(int member, Placement at)
-            {
-                return Managers.Expedition.CanBuyToBoard(Slot, member, at);
-            }
-
-            public bool MergesAt(int member, int x, int y)
-            {
-                return Managers.Expedition.ShopMergesAt(Slot, member, x, y);
-            }
-
-            public void Place(int member, Placement at)
-            {
-                int slot = Slot;
-                _screen.Bought(() => Managers.Expedition.BuyToBoard(slot, member, at), sound: false);
-                _screen.Refresh();
-            }
-
-            public bool CanPlaceInInventory(Placement at)
-            {
-                return Managers.Expedition.CanBuyToInventoryAt(Slot, at);
-            }
-
-            public bool MergesInInventoryAt(int x, int y)
-            {
-                return Managers.Expedition.ShopMergesInInventoryAt(Slot, x, y);
-            }
-
-            public void PlaceInInventory(Placement at)
-            {
-                int slot = Slot;
-                _screen.Bought(() => Managers.Expedition.BuyToInventoryAt(slot, at), sound: false);
-                _screen.Refresh();
-            }
         }
 
         void OnBuyToInventory()

@@ -1481,11 +1481,11 @@ namespace F1.UI
             }
 
             // The picked drop is in the hand: it is aimed at the boards' squares and taken where it is put.
-            if (_pickedDrop >= 0 && !(_lootHand.Outside is DropInHand inHand && inHand.Slot == _pickedDrop))
+            if (_pickedDrop >= 0 && !(_lootHand.Outside is OfferHand inHand && inHand.Slot == _pickedDrop))
             {
-                _lootHand.HoldOutside(new DropInHand(this, _pickedDrop));
+                _lootHand.HoldOutside(new OfferHand(OfferHand.Source.Loot, _pickedDrop, take => { take(); _pickedDrop = -1; }));
             }
-            else if (_pickedDrop < 0 && _lootHand.Outside is DropInHand)
+            else if (_pickedDrop < 0 && _lootHand.Outside is OfferHand)
             {
                 _lootHand.Clear();
             }
@@ -1581,58 +1581,6 @@ namespace F1.UI
             else
             {
                 _lootHint.text = UiStrings.Get(UiKeys.Battle.LootHint);
-            }
-        }
-
-        /// <summary>A drop of the loot in the hand (Slice B stage 19): it goes where the manager says it can be taken, and is taken where it is put.</summary>
-        sealed class DropInHand : IOutsideHand
-        {
-            readonly BattleScreen _screen;
-
-            public DropInHand(BattleScreen screen, int slot)
-            {
-                _screen = screen;
-                Slot = slot;
-                ItemOffer drop = Managers.Expedition.BattleLoot[slot];
-                StaticData data = Managers.Data.Data;
-                Item = drop.Kind == OfferKind.Item ? new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier) : null;
-                Bag = drop.Kind == OfferKind.Bag ? data.Bags.Get(drop.Id) : null;
-            }
-
-            public int Slot { get; }
-            public EquippedItem Item { get; }
-            public BagData Bag { get; }
-
-            public bool CanPlace(int member, Placement at)
-            {
-                return Managers.Expedition.CanTakeLoot(Slot, member, at);
-            }
-
-            public bool MergesAt(int member, int x, int y)
-            {
-                return Managers.Expedition.LootMergesAt(Slot, member, x, y);
-            }
-
-            public void Place(int member, Placement at)
-            {
-                Managers.Expedition.TakeLoot(Slot, member, at);
-                _screen._pickedDrop = -1;
-            }
-
-            public bool CanPlaceInInventory(Placement at)
-            {
-                return Managers.Expedition.CanTakeLootToInventoryAt(Slot, at);
-            }
-
-            public bool MergesInInventoryAt(int x, int y)
-            {
-                return Managers.Expedition.LootMergesInInventoryAt(Slot, x, y);
-            }
-
-            public void PlaceInInventory(Placement at)
-            {
-                Managers.Expedition.TakeLootToInventoryAt(Slot, at);
-                _screen._pickedDrop = -1;
             }
         }
 

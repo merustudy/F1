@@ -460,25 +460,14 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// Whether a drop could be put on a member's board at a placement: an item as <see cref="CanPlaceItem"/> says (over nothing, or over
-        /// one item, which goes to the inventory and so must fit its free squares), or onto the same item at the same tier at the
-        /// placement's top-left square, to merge with it; a bag in the frame over no bag (<see cref="CanPlaceBag"/>).
+        /// Whether a drop could be put on a member's board at a placement (<see cref="CanPlaceOffer"/>: an item over nothing or over one
+        /// item, which goes to the inventory, or merged into the same item at the same tier at the placement's top-left square; a bag in
+        /// the frame over no bag). The shop's <see cref="CanBuyToBoard"/> asks the same of its good.
         /// </summary>
         public static bool CanTakeLoot(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
             ItemOffer drop = DropAt(state, slot);
-            if (drop == null)
-            {
-                return false;
-            }
-
-            if (drop.Kind == OfferKind.Bag)
-            {
-                return CanPlaceBag(state, memberIndex, data.Bags.Get(drop.Id), at);
-            }
-
-            return MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
-                || CanPlaceItem(data, state, data.Items.Get(drop.Id), memberIndex, at);
+            return drop != null && CanPlaceOffer(data, state, drop, memberIndex, at);
         }
 
         /// <summary>
@@ -495,24 +484,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The drop in slot {slot} cannot go at {at} of '{member.MercenaryId}' now.");
             }
 
-            if (drop.Kind == OfferKind.Bag)
-            {
-                member.Board.Bags.Add(new BoardBag(data.Bags.Get(drop.Id), at));
-                Pick(state, slot);
-                return;
-            }
-
-            var item = new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier);
-            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
-            if (CanMerge(item, there?.Item))
-            {
-                MergeInto(item, there);
-            }
-            else
-            {
-                Put(state, member.Board, item, at, null);
-            }
-
+            PlaceOffer(data, state, drop, memberIndex, at);
             Pick(state, slot);
         }
 
@@ -520,7 +492,7 @@ namespace F1.Gameplay
         public static bool CanTakeLootToInventory(StaticData data, ExpeditionState state, int slot)
         {
             ItemOffer drop = DropAt(state, slot);
-            return drop != null && drop.Kind == OfferKind.Item && state.Inventory.HasRoomFor(data.Items.Get(drop.Id));
+            return drop != null && OfferHasRoomInInventory(data, state, drop);
         }
 
         /// <summary>Takes a drop straight into the inventory, at its first room (<see cref="InventoryGrid.FindRoom"/>).</summary>
@@ -531,8 +503,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The drop in slot {slot} cannot go to the inventory now.");
             }
 
-            ItemOffer drop = state.Loot[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier));
+            PlaceOfferInInventory(data, state, state.Loot[slot]);
             Pick(state, slot);
         }
 
@@ -543,18 +514,7 @@ namespace F1.Gameplay
         public static bool CanTakeLootToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
         {
             ItemOffer drop = DropAt(state, slot);
-            if (drop == null || drop.Kind != OfferKind.Item)
-            {
-                return false;
-            }
-
-            if (LootMergesInInventoryAt(state, slot, at.X, at.Y))
-            {
-                return true;
-            }
-
-            ItemData item = data.Items.Get(drop.Id);
-            return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
+            return drop != null && CanPlaceOfferInInventoryAt(data, state, drop, at);
         }
 
         /// <summary>Takes a drop onto a placement of the inventory's grid (round 55), or merges it into the same item there.</summary>
@@ -565,25 +525,14 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The drop in slot {slot} cannot go to {at} of the inventory now.");
             }
 
-            ItemOffer drop = state.Loot[slot];
-            BoardItem into = InventoryItemAt(state, at.X, at.Y);
-            if (MergesInto(drop.Id, drop.Tier, into?.Item))
-            {
-                MergeInto(null, into);
-            }
-            else
-            {
-                state.Inventory.Add(new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier), at);
-            }
-
+            PlaceOfferInInventoryAt(data, state, state.Loot[slot], at);
             Pick(state, slot);
         }
 
         /// <summary>Whether taking the drop in a slot with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
         public static bool LootMergesInInventoryAt(ExpeditionState state, int slot, int x, int y)
         {
-            ItemOffer drop = DropAt(state, slot);
-            return drop != null && drop.Kind == OfferKind.Item && MergesInto(drop.Id, drop.Tier, InventoryItemAt(state, x, y)?.Item);
+            return OfferMergesInInventoryAt(state, DropAt(state, slot), x, y);
         }
 
         /// <summary>Whether any drop still lying there is an item the inventory has room for (2026-10-17: the key that takes them all).</summary>
@@ -636,8 +585,109 @@ namespace F1.Gameplay
         /// <summary>Whether taking a drop with its top-left on a square of a living member's board would merge it into the item there.</summary>
         public static bool LootMergesAt(ExpeditionState state, int slot, int memberIndex, int x, int y)
         {
-            ItemOffer drop = DropAt(state, slot);
-            return drop != null && drop.Kind == OfferKind.Item && MergesInto(drop.Id, drop.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
+            return OfferMergesAt(state, DropAt(state, slot), memberIndex, x, y);
+        }
+
+        // ---- Placing an offer: a drop of the loot or a good of the shop (one body for both, R17 2026-10-20) ----------------
+
+        /// <summary>
+        /// Whether an offer could go onto a member's board at a placement: an item as <see cref="CanPlaceItem"/> says (over nothing, or
+        /// over one item, which goes to the inventory and so must fit its free squares), or with its top-left on the same item at the same
+        /// tier, to merge into it; a bag into the frame over no bag (<see cref="CanPlaceBag"/>). A potion never goes on a board.
+        /// </summary>
+        static bool CanPlaceOffer(StaticData data, ExpeditionState state, ItemOffer offer, int memberIndex, Placement at)
+        {
+            if (offer.Kind == OfferKind.Bag)
+            {
+                return CanPlaceBag(state, memberIndex, data.Bags.Get(offer.Id), at);
+            }
+
+            return offer.Kind == OfferKind.Item
+                && (MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
+                    || CanPlaceItem(data, state, data.Items.Get(offer.Id), memberIndex, at));
+        }
+
+        /// <summary>
+        /// Puts an offer on a member's board at a placement, as <see cref="CanPlaceOffer"/> allowed: a bag into the frame; an item merged
+        /// into the same item there, or put there (the one item under it goes to the inventory). The caller empties the offer's slot.
+        /// </summary>
+        static void PlaceOffer(StaticData data, ExpeditionState state, ItemOffer offer, int memberIndex, Placement at)
+        {
+            ExpeditionMember member = state.Members[memberIndex];
+            if (offer.Kind == OfferKind.Bag)
+            {
+                member.Board.Bags.Add(new BoardBag(data.Bags.Get(offer.Id), at));
+                return;
+            }
+
+            var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
+            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
+            if (CanMerge(item, there?.Item))
+            {
+                MergeInto(item, there);
+            }
+            else
+            {
+                Put(state, member.Board, item, at, null);
+            }
+        }
+
+        /// <summary>Whether an offer could go straight into the inventory: an item (a bag or a potion never goes there) with room on the grid.</summary>
+        static bool OfferHasRoomInInventory(StaticData data, ExpeditionState state, ItemOffer offer)
+        {
+            return offer.Kind == OfferKind.Item && state.Inventory.HasRoomFor(data.Items.Get(offer.Id));
+        }
+
+        /// <summary>Puts an offer's item into the inventory at its first room (<see cref="InventoryGrid.FindRoom"/>).</summary>
+        static void PlaceOfferInInventory(StaticData data, ExpeditionState state, ItemOffer offer)
+        {
+            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier));
+        }
+
+        /// <summary>
+        /// Whether an offer could be laid on a placement of the inventory's grid (round 55): an item (a bag or a potion never goes there)
+        /// over no item there, or (2026-10-18) with its top-left on the same item at the same tier, to merge into it.
+        /// </summary>
+        static bool CanPlaceOfferInInventoryAt(StaticData data, ExpeditionState state, ItemOffer offer, Placement at)
+        {
+            if (offer.Kind != OfferKind.Item)
+            {
+                return false;
+            }
+
+            if (OfferMergesInInventoryAt(state, offer, at.X, at.Y))
+            {
+                return true;
+            }
+
+            ItemData item = data.Items.Get(offer.Id);
+            return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
+        }
+
+        /// <summary>Puts an offer's item on a placement of the inventory's grid, or merges it into the same item there.</summary>
+        static void PlaceOfferInInventoryAt(StaticData data, ExpeditionState state, ItemOffer offer, Placement at)
+        {
+            BoardItem into = InventoryItemAt(state, at.X, at.Y);
+            if (MergesInto(offer.Id, offer.Tier, into?.Item))
+            {
+                MergeInto(null, into);
+            }
+            else
+            {
+                state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), at);
+            }
+        }
+
+        /// <summary>Whether putting an offer (null for none) with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        static bool OfferMergesAt(ExpeditionState state, ItemOffer offer, int memberIndex, int x, int y)
+        {
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
+        }
+
+        /// <summary>Whether putting an offer (null for none) with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
+        static bool OfferMergesInInventoryAt(ExpeditionState state, ItemOffer offer, int x, int y)
+        {
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, InventoryItemAt(state, x, y)?.Item);
         }
 
         // ---- The boards (Slice B stage 19: a grid of squares, bags, turning) ---------------------
@@ -1182,30 +1232,18 @@ namespace F1.Gameplay
         /// <summary>Whether the coins cover the offer in a slot.</summary>
         public static bool CanAfford(StaticData data, ExpeditionState state, int slot)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            return offer != null && state.Coins >= PriceOf(data, offer);
+            return AffordableAt(data, state, slot) != null;
         }
 
         /// <summary>
         /// Whether the item or bag in a slot could be bought onto a member's board at a placement: the coins cover it, and it goes there as
-        /// a drop of loot would (an item over nothing, over one item that goes to the inventory, or merged into the same item at the same
-        /// tier at the placement's top-left square; a bag into the frame over no bag).
+        /// a drop of loot would (<see cref="CanPlaceOffer"/>: an item over nothing, over one item that goes to the inventory, or merged
+        /// into the same item at the same tier at the placement's top-left square; a bag into the frame over no bag).
         /// </summary>
         public static bool CanBuyToBoard(StaticData data, ExpeditionState state, int slot, int memberIndex, Placement at)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            if (offer == null || offer.Kind == OfferKind.Potion || state.Coins < PriceOf(data, offer))
-            {
-                return false;
-            }
-
-            if (offer.Kind == OfferKind.Bag)
-            {
-                return CanPlaceBag(state, memberIndex, data.Bags.Get(offer.Id), at);
-            }
-
-            return MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
-                || CanPlaceItem(data, state, data.Items.Get(offer.Id), memberIndex, at);
+            ItemOffer offer = AffordableAt(data, state, slot);
+            return offer != null && CanPlaceOffer(data, state, offer, memberIndex, at);
         }
 
         /// <summary>Buys the item or bag in a slot onto a member's board at a placement: the coins are paid as it is put there, and the slot is sold.</summary>
@@ -1216,35 +1254,15 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto {at} of member {memberIndex} now.");
             }
 
-            ItemOffer offer = state.Shop.Stock[slot];
-            ExpeditionMember member = state.Members[memberIndex];
-            if (offer.Kind == OfferKind.Bag)
-            {
-                member.Board.Bags.Add(new BoardBag(data.Bags.Get(offer.Id), at));
-                Pay(data, state, slot);
-                return;
-            }
-
-            var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
-            BoardItem there = LivingItemAt(state, memberIndex, at.X, at.Y);
-            if (CanMerge(item, there?.Item))
-            {
-                MergeInto(item, there);
-            }
-            else
-            {
-                Put(state, member.Board, item, at, null);
-            }
-
+            PlaceOffer(data, state, state.Shop.Stock[slot], memberIndex, at);
             Pay(data, state, slot);
         }
 
         /// <summary>Whether the item in a slot could be bought straight into the inventory: the coins cover it and it has room on the grid (a bag never goes there).</summary>
         public static bool CanBuyToInventory(StaticData data, ExpeditionState state, int slot)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Item && state.Coins >= PriceOf(data, offer)
-                && state.Inventory.HasRoomFor(data.Items.Get(offer.Id));
+            ItemOffer offer = AffordableAt(data, state, slot);
+            return offer != null && OfferHasRoomInInventory(data, state, offer);
         }
 
         public static void BuyToInventory(StaticData data, ExpeditionState state, int slot)
@@ -1254,8 +1272,7 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The offer in slot {slot} cannot be bought into the inventory now.");
             }
 
-            ItemOffer offer = state.Shop.Stock[slot];
-            state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier));
+            PlaceOfferInInventory(data, state, state.Shop.Stock[slot]);
             Pay(data, state, slot);
         }
 
@@ -1265,19 +1282,8 @@ namespace F1.Gameplay
         /// </summary>
         public static bool CanBuyToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            if (offer == null || offer.Kind != OfferKind.Item || state.Coins < PriceOf(data, offer))
-            {
-                return false;
-            }
-
-            if (ShopMergesInInventoryAt(state, slot, at.X, at.Y))
-            {
-                return true;
-            }
-
-            ItemData item = data.Items.Get(offer.Id);
-            return state.Inventory.IsFree(at.X, at.Y, at.WidthOf(item.Width, item.Height), at.HeightOf(item.Width, item.Height), null);
+            ItemOffer offer = AffordableAt(data, state, slot);
+            return offer != null && CanPlaceOfferInInventoryAt(data, state, offer, at);
         }
 
         public static void BuyToInventoryAt(StaticData data, ExpeditionState state, int slot, Placement at)
@@ -1287,25 +1293,15 @@ namespace F1.Gameplay
                 throw new InvalidOperationException($"The offer in slot {slot} cannot be bought onto {at} of the inventory now.");
             }
 
-            ItemOffer offer = state.Shop.Stock[slot];
-            BoardItem into = InventoryItemAt(state, at.X, at.Y);
-            if (MergesInto(offer.Id, offer.Tier, into?.Item))
-            {
-                MergeInto(null, into);
-            }
-            else
-            {
-                state.Inventory.Add(new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier), at);
-            }
-
+            PlaceOfferInInventoryAt(data, state, state.Shop.Stock[slot], at);
             Pay(data, state, slot);
         }
 
         /// <summary>Whether the potion in a slot could be bought: the coins cover it and a potion slot is empty.</summary>
         public static bool CanBuyPotion(StaticData data, ExpeditionState state, int slot)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Potion && state.Coins >= PriceOf(data, offer) && FreePotionSlot(state) >= 0;
+            ItemOffer offer = AffordableAt(data, state, slot);
+            return offer != null && offer.Kind == OfferKind.Potion && FreePotionSlot(state) >= 0;
         }
 
         public static void BuyPotion(StaticData data, ExpeditionState state, int slot)
@@ -1322,15 +1318,13 @@ namespace F1.Gameplay
         /// <summary>Whether buying the item in a slot with its top-left on a square of a living member's board would merge it into the item there.</summary>
         public static bool ShopMergesAt(ExpeditionState state, int slot, int memberIndex, int x, int y)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
+            return OfferMergesAt(state, OfferAt(state, slot), memberIndex, x, y);
         }
 
         /// <summary>Whether buying the item in a slot with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
         public static bool ShopMergesInInventoryAt(ExpeditionState state, int slot, int x, int y)
         {
-            ItemOffer offer = OfferAt(state, slot);
-            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, InventoryItemAt(state, x, y)?.Item);
+            return OfferMergesInInventoryAt(state, OfferAt(state, slot), x, y);
         }
 
         /// <summary>Whether the stock can be refreshed now: at a shop, with the coins to pay the next refresh.</summary>
@@ -1401,6 +1395,13 @@ namespace F1.Gameplay
         {
             state.Coins -= PriceOf(data, state.Shop.Stock[slot]);
             state.Shop.Stock[slot] = null;
+        }
+
+        /// <summary>The offer in a slot when the coins cover it (<see cref="CanAfford"/>), or null.</summary>
+        static ItemOffer AffordableAt(StaticData data, ExpeditionState state, int slot)
+        {
+            ItemOffer offer = OfferAt(state, slot);
+            return offer != null && state.Coins >= PriceOf(data, offer) ? offer : null;
         }
 
         // ---- Tiers: merging and the camp's upkeep --------------------------------------------
