@@ -187,6 +187,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 - Round 51(2026-10-10): `rat_bite`는 새로 그린 쥐 발톱(호출 1회, 원본 `Archive/51-claw-axe-whetstone/approved/`), `greataxe`(전투도끼 3×2)는 지금 그림을 30° 돌려 구운 것(호출 없음),
   `whetstone`(숫돌)은 **그린 도형**(회색 숫돌 막대, `Archive/51-claw-axe-whetstone/whetstone_shape.py`가 만든다. 생성한 그림이 아니다. 그림은 지시가 있을 때)이다.
 - 23단계(2026-10-16, Round 70): `gladius`(글라디우스 3×1)는 생성 1회(사용자 "생성 1회(유니크하게)". 소재는 로마식 글라디우스: 짧고 넓은 날에 금 새김, 청동 날밑·둥근 자루 끝, 기사의 그림을 기준으로. 원본 `Archive/70-unique-gladius/approved/`, 맞춘 뒤 `trim_items.py`로 자름). 유니크라 `gladius_glow`가 따른다(아래).
+- Slice D 39단계(2026-10-19, Round 87): `iron_helm`(철 투구 2×1, 띠)은 생성 1회로 확정하고 사용자 판정으로 **좌우를 뒤집었다**(호출 없음). `iron_armor`(철 갑옷 2×2)은 첫 생성에 정사각 구도 절의 예(미늘창)가 함께 그려져 소재에 "갑옷만, 무기 없이"를 `--extra`로 더해 다시 그려 확정했다. 원본 `Archive/87-armor/approved/`, 둘 다 `trim_items.py`로 자름.
 - **유니크의 금빛**(23단계, Round 70 후속 2. 사용자 "금테는 삭제, 빛을 넣는데 외곽선이 전체적으로 해당 빛으로" → "2px로 확정. 숨쉬기 제거"): 유니크 아이템(`ItemData.Unique`)의 아이콘마다 `tools/glow_items.py`가 같은 폴더에 `<icon>_glow.png`를 만든다 —
   아이콘의 알파를 화면 2px(아이콘 px로는 2 ÷ 조각 안에서 보이는 배율: 글라디우스 5)만큼 넓히고 그 0.6배로 흐린 뒤, 유니크 금 `#C7B377`에 가장자리의 밝은 심 `#F2E2A6`을 **구운** 것(흰 그림을 화면이 물들이는 다른 조각과 달리 색을 굽는다: 두 색이라서).
   호출 없음, 다시 돌려도 같다. 주소는 `ItemData.GlowIcon`(= `Icon + "-glow"`: 주소 `item/gladius-glow`, 파일 `gladius_glow.png`. `ArtAddress.GlowOf`)이 이름 짓고 아이콘의 정책으로 들여오며, `ExpeditionArt`가 아이콘과 함께 싣는다(없으면 검사가 빠진 그림으로 보고한다). 아이콘을 다시 그리거나 자르면 같은 도구를 다시 돌린다(`--check`가 어긋남을 보고한다).

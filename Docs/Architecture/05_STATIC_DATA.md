@@ -91,6 +91,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   비우면 별이 없다), `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준. 비우면 0). 정의(`ItemData`)의 검사: 별 칸은 모양 밖이고 모양에서 한 칸 안(대각선 포함)이며 겹치지 않는다,
   별이 있으면 `StarDamage` 1 이상이고 없으면 0이다. **효과가 없는 아이템**(Effect1을 모두 비움)은 발동하지 않는다(`IsPassive`): 별이 있어야 하고 `CooldownMs`는 0이다. 효과가 있으면 지금처럼 `CooldownMs` 100 이상.
   별 칸은 `StarSquare`(X·Y)의 목록으로 Generated JSON에 들어간다.
+- `ItemData.csv`의 39단계 선택 열(`Docs/Design/02_Combat_System.md` §4 "방어구"): **`Trigger`**(`ItemTrigger`: 비면 `Cooldown`, `BattleStart`면 전투 시작 때 한 번 — 효과가 있어야 하고 `CooldownMs`는 0), **`CritTakenPercent`**(정수 %p 0..100, 비면 0: 그 주인을 노린 무기의 치명타 확률에서 뺌 — `Armor`만 0보다 큼). 정의(`ItemData`)가 둘을 검사한다. `ItemData.Cycles`는 쿨다운으로 도는 아이템(효과가 있고 `Trigger`가 `Cooldown`)이다. 첫 둘은 철 갑옷(`iron_armor`)·철 투구(`iron_helm`)이고 `Icon`이 비어 있다(그림이 없으면 조각에 이름).
 - `BagData.csv`(19단계)는 가방이다: `Width`·`Height`(1..3), `Start`(시작 가방: 정확히 하나, 값·가중치 0), `Price`(상점의 값, 0이면 팔지 않음), `ShopWeight`(상점에 나올 상대 확률), `LootWeight`(정예의 가방 전리품으로 뽑힐 상대 확률), `Icon`(선택, Round 79: 가방의 그림 `bag/<kebab-id>`. 비면 우물).
   틀의 크기(`BoardFrame` 3×8)는 데이터가 아니라 구조 상수다(저장 파일과 화면의 자리가 그것에 묶인다). Dataset 검증: 시작 가방이 정확히 하나, 직업의 기본 무기가 시작 가방에 돌리지 않고 들어감, 적 아이템의 높이 합이 틀의 높이(8) 이하.
 - `RecipeData.csv`(23단계)는 담금질의 레시피다: `Result`(유니크 아이템의 id), `BaseItem`·`BaseTier`, `Catalyst`·`CatalystTier`(단계는 `ItemTier`의 이름: `Common`·`Tier1`·`Tier2`·`Tier3`). 이름 열이 없는 첫 정의다(`RecipeMapper`는 `Id`부터 직접 요구한다). 검사: 결과·바탕·촉매가 아이템에 있고, 결과는 `Unique`, 촉매는 ★이 있다.

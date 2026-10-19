@@ -281,12 +281,23 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 시뮬: `run`의 보고에 계기를 만난 생환자 수와 계기마다 얻은 수(런마다), 끝에 산 용병의 얻은 장점·약점. 정책은 그대로(Design/08 §45).
 - Test: `AcquiredTraitTests`(계기와 그 차례·죽은 이, 계기마다 하나·가진 것과 막는 짝은 제외·굴리지 않는 경우와 스트림, 확률과 가중치의 비율·같은 시드, 정산이 로스터와 보고에 남김·용병의 스트림·죽은 이 없음, 확률 0·후퇴의 특성, `CompleteBattle`의 빈사 표시), `ShippedDataTests`(얻은 일곱의 계기·극성·효과·확률), `StaticDataValidationTests`(계기 열의 검증), `StaticDataTransformerTests`(`Source` 열), `RunSaveMapperTests`(23의 빈사 표시·22 → 23).
 
+### 방어구 (Slice D 39단계)
+
+규칙은 `Docs/Design/02_Combat_System.md` §3·§4 "방어구"가 소유한다. 수치는 `ItemData`(효과의 보호막, `Trigger`, `CritTakenPercent`).
+
+- 전투 시작 때 발동하는 아이템(`ItemTrigger.BattleStart`): `BattleEngine`의 생성자가 `BattleStarted`, 들어온 피로의 판정, 직업의 전투 시작 패시브(아군·적) 다음에 `ApplyBattleStartItems`(아군 먼저, 유닛 순서, 칸 순서)로 한 번 `Activate`한다(`ItemActivated` 로그, 보호막은 `ShieldGained`). 그 아이템은 쓸 수 있는 자리에서 `Active`이지만 돌지 않는다(`BattleItemState.Cycles`가 거짓: `NextItemMs`·`FireItems`가 건너뜀). 난수를 쓰지 않는다(보호막).
+- 받는 치명타(`CritTakenPercent`): `RollCritical`이 대상의 `Active`인 아이템의 값을 더해(`CritTakenPercent(target)`) `StatRules.CritChance`의 마지막 인자로 뺀다(0 아래 없음). 굴림은 무기의 확률이 0이 아니면 늘 뽑으므로 피해 스트림의 차례는 투구와 무관하다. 단계는 곱하지 않는다. 카드(대상이 없음)는 0으로 셈한다.
+- 피로: 방어 장비라 `FatigueRules.CostsFatigue`가 그대로 하나에 `FatigueEquipment`를 낸다.
+- 시뮬: 정책은 그대로(상점·전리품을 "쓸 수 있는 자리의 첫 용병"에게). `expedition`의 보고에 원정 끝 보드의 방어구 수와 1열의 것(Design/08 §46).
+- Test: `ArmorTests`(전투 시작의 한 번·패시브 다음·돌지 않음·자리 밖은 발동 없음·단계의 보호막, 받는 치명타의 뺌·0 아래 없음·굴림은 그대로 뽑음, 장비 피로, 정의의 검사 — `Trigger`와 `CritTakenPercent`), `StaticDataTransformerTests`(두 열), `ShippedDataTests`(철 갑옷·철 투구).
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
 
 - 시간은 정수 밀리초다. `BattleEngine`은 다음 사건의 시각으로 건너뛴다. `AdvanceTo(t)`를 잘게 여러 번 부르든 한 번에 부르든 결과가 같다.
 - 같은 시각의 순서는 코드 한 곳(`ProcessAutomaticEvents`)에 고정돼 있다: 화상 틱 -> 아이템(아군, 유닛 순서, 칸 순서) -> 폭풍 틱.
+  0ms의 시작은 생성자가 처리한다: `BattleStarted` -> 들어온 피로의 판정 -> 전투 시작 패시브(아군, 적) -> 전투 시작 아이템(아군, 적. 39단계).
   플레이어 입력은 `AdvanceTo`가 끝난 뒤의 현재 시각에 적용되므로, 그 시각의 자동 사건 뒤에 온다.
 - 난수는 `Pcg32`뿐이다. 전투 스트림(사망 판정)과 입력 스트림(후퇴 판정)을 나눠, 후퇴 시도가 사망 판정을 바꾸지 않는다.
   **피해 스트림**(`RngStream.Damage`, 22단계)은 피해의 굴림과 치명타를 뽑는다: 피해 효과마다 공격에 한 번 `NextInt(최소, 최대)`, 그 뒤 맞는 대상마다 치명타의 `NextInt(100)`(무기의 확률이 0이면 뽑지 않음).
