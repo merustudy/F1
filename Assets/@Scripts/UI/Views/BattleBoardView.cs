@@ -13,11 +13,12 @@ namespace F1.UI
     /// One unit's board of the board panel under the stage: its head, with the row the unit stands
     /// in on a gold stud and its name (a monster's in a pale red, 2026-10-05 round 29), and under it
     /// its board as a grid (Slice B stage 19): a mercenary's bags in leather, the empty squares of the bags dark, and its items as pieces
-    /// where they lie, each showing its cooldown (<see cref="BattleItemView"/>); an enemy has no bags, so its board is only its items'
-    /// pieces one under another. The board sits in the panel's column of the row the unit stands in, right under its figure and marks
+    /// where they lie, each showing its cooldown (<see cref="BattleItemView"/>); an enemy's board is the start bag in the enemy's red stone,
+    /// grown when its items need it (2026-10-19 Round 86). A setup without a layout (tests) stands the pieces one under another. The board sits in the panel's column of the row the unit stands in, right under its figure and marks
     /// (2026-10-03 mockup V), so it moves when the unit advances and leaves the panel with the dead, as the figure leaves the stage. The
     /// row on the head is the row of the column the screen has put the board in, which can be behind the engine for a moment: while a
     /// fallen mercenary's grave stands, the party keeps its places (2026-10-04, round 21). The whole board is the button a potion is aimed at.
+    /// Over the pieces, the stars of the star item the pointer is on (2026-10-19 Round 85; the screen says which: <see cref="ShowStars"/>).
     /// </summary>
     public sealed class BattleBoardView : MonoBehaviour
     {
@@ -30,8 +31,12 @@ namespace F1.UI
         [SerializeField] BattleItemView _itemTemplate;
         [SerializeField] Image _bagTemplate;
         [SerializeField] Image _squareTemplate;
+        [SerializeField] RectTransform _starLayer;
+        [SerializeField] GridStarView _starTemplate;
 
         readonly List<BattleItemView> _items = new List<BattleItemView>();
+        readonly List<GridStarView> _stars = new List<GridStarView>();
+        int _starsShown;
         readonly List<GameObject> _drawn = new List<GameObject>();
         BattleUnit _unit;
         ExpeditionArt _art;
@@ -49,6 +54,32 @@ namespace F1.UI
 
         /// <summary>How many empty squares the board shows.</summary>
         public int EmptySquaresShown { get; private set; }
+
+        /// <summary>The stars on show (Round 85), in the order they were given.</summary>
+        public IEnumerable<GridStarView> Stars
+        {
+            get
+            {
+                for (int i = 0; i < _starsShown; i++)
+                {
+                    yield return _stars[i];
+                }
+            }
+        }
+
+        /// <summary>The star on show on a square, or null.</summary>
+        public GridStarView StarAt(int x, int y)
+        {
+            for (int i = 0; i < _starsShown; i++)
+            {
+                if (_stars[i].X == x && _stars[i].Y == y)
+                {
+                    return _stars[i];
+                }
+            }
+
+            return null;
+        }
 
         /// <param name="art">Where the icons of the items come from.</param>
         public void Bind(BattleUnit unit, ExpeditionArt art)
@@ -76,12 +107,12 @@ namespace F1.UI
             }
 
             // The bags as Diablo's wells (round 49) with all their squares black, under the pieces (an item lies on its black squares: it
-            // has no ground in battle). An enemy has no bags: each of its items lies in a well of its own, the stone a little red.
+            // has no ground in battle). An enemy's bag is the stone a little red (Round 86); without bags each item lies in a well of its own.
             BagsShown = 0;
             EmptySquaresShown = 0;
             foreach (BoardBag bag in layout.Bags)
             {
-                Well(bag.At.X, bag.At.Y, bag.Width, bag.Height, UiPalette.BagRim(bag.Bag.Id));
+                Well(bag.At.X, bag.At.Y, bag.Width, bag.Height, unit.Side == BattleSide.Enemy ? UiPalette.EnemyRim : UiPalette.BagRim(bag.Bag.Id));
                 BagsShown++;
                 for (int dy = 0; dy < bag.Height; dy++)
                 {
@@ -129,9 +160,14 @@ namespace F1.UI
                 BattleItemView clicked = view;
                 BattleItemState state = item;
                 view.RightClick.Clicked += () => ItemRightClicked?.Invoke(clicked, state);
+                view.Hover.Entered += () => ItemPointed?.Invoke(state);
+                view.Hover.Exited += () => ItemLeft?.Invoke(state);
                 _items.Add(view);
                 _drawn.Add(view.gameObject);
             }
+
+            // The pieces were laid after the layers that the builder made: the stars go back over them.
+            _starLayer.SetAsLastSibling();
         }
 
         /// <summary>Draws the board again from the unit's current items: a boss entered a phase and carries others now (stage 28).</summary>
@@ -149,6 +185,36 @@ namespace F1.UI
 
         /// <summary>A right click on an item's piece (round 42, right-click since round 47): the screen opens the item's card.</summary>
         public event Action<BattleItemView, BattleItemState> ItemRightClicked;
+
+        /// <summary>The pointer came onto an item's piece, and left it (Round 85): the screen shows a star item's stars meanwhile.</summary>
+        public event Action<BattleItemState> ItemPointed;
+        public event Action<BattleItemState> ItemLeft;
+
+        /// <summary>
+        /// Draws these stars over the pieces (Round 85: the stars of the star item the pointer is on, as the node map's board draws them), or
+        /// none for null.
+        /// </summary>
+        public void ShowStars(IReadOnlyList<StarMark> marks)
+        {
+            _starsShown = 0;
+            if (marks != null)
+            {
+                foreach (StarMark mark in marks)
+                {
+                    if (_starsShown == _stars.Count)
+                    {
+                        _stars.Add(Instantiate(_starTemplate, _starLayer));
+                    }
+
+                    _stars[_starsShown++].Show(mark.X, mark.Y, mark.Lit);
+                }
+            }
+
+            for (int i = _starsShown; i < _stars.Count; i++)
+            {
+                _stars[i].gameObject.SetActive(false);
+            }
+        }
 
         /// <summary>Round 42: whether the pieces take clicks for their cards. Off while a potion waits for this board to be clicked.</summary>
         public void SetItemsClickable(bool clickable)

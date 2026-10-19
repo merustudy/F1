@@ -90,7 +90,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// A base weapon: given when the expedition left, not found in it. It stays one when it moves to another
-        /// board, and it costs no fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3 "장비 피로").
+        /// board or merges (2026-10-19: what it merges with becomes one), and it costs no fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3 "장비 피로").
         /// </summary>
         public bool IsBase { get; }
     }

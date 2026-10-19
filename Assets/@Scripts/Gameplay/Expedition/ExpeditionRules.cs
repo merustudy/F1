@@ -31,6 +31,7 @@ namespace F1.Gameplay
                 Phase = ExpeditionPhase.ChoosingNode,
                 Result = ExpeditionResult.None,
                 FinalStand = finalStand,
+                Coins = balance.ExpeditionStartCoins,
             };
 
             var seen = new HashSet<string>();
@@ -296,7 +297,9 @@ namespace F1.Gameplay
         /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried,
         /// <c>DropCount</c> are drawn without repetition from the loot stream of the node (<c>EliteDropCount</c> for an elite); all of them
         /// when they carried fewer. A drop is the item at its own values and the floor's tier (an elite's a tier up), as the shop's stock is:
-        /// not at the power the enemy carried it (that is the enemy's strength, far above a found item's). An elite's loot holds a bag with the
+        /// not at the power the enemy carried it (that is the enemy's strength, far above a found item's). 2026-10-19 (the user's play feedback):
+        /// each item above Common keeps that tier with the chance <c>DropTierKeepPercent</c>, else it drops a tier lower (<see cref="DropTier"/>).
+        /// An elite's loot holds a bag with the
         /// chance <c>EliteBagPercent</c> (Slice B stage 19): its last drop is a bag drawn by loot weight instead. The boss drops nothing: the
         /// expedition ends there. Nothing for a node that is not fought.
         /// </summary>
@@ -320,6 +323,8 @@ namespace F1.Gameplay
             }
 
             var rng = new Pcg32(SeedDeriver.Derive(state.Seed, "loot", node.Id), RngStream.Loot);
+            // Its own stream, so that the tier rolls never change which items drop.
+            var tierRng = new Pcg32(SeedDeriver.Derive(state.Seed, "loot-tier", node.Id), RngStream.Loot);
             int count = node.Kind == MapNodeKind.Elite ? data.Balance.EliteDropCount : data.Balance.DropCount;
             // 2026-10-17 (the user's request): a drop is a general item (by DropWeight, at the floor's tier) with the dungeon's GeneralDropChancePercent,
             // else one the enemies carried; a general one when nothing carried is left, a carried one when no item has a drop weight
@@ -330,12 +335,12 @@ namespace F1.Gameplay
                 bool general = generals && (carried.Count == 0 || rng.NextInt(100) < dungeon.GeneralDropChancePercent);
                 if (general)
                 {
-                    drops.Add(new ItemOffer(OfferKind.Item, DrawGeneralDrop(data, rng).Id, tier));
+                    drops.Add(new ItemOffer(OfferKind.Item, DrawGeneralDrop(data, rng).Id, DropTier(data, tier, tierRng)));
                     continue;
                 }
 
                 int index = rng.NextInt(carried.Count);
-                drops.Add(carried[index]);
+                drops.Add(new ItemOffer(OfferKind.Item, carried[index].Id, DropTier(data, tier, tierRng)));
                 carried.RemoveAt(index);
             }
 
@@ -357,6 +362,20 @@ namespace F1.Gameplay
             }
 
             return drops;
+        }
+
+        /// <summary>
+        /// The tier one drop lies at (2026-10-19, the user's play feedback "drops of 1-, 2- and 3-star items are too easy"): the loot's tier with
+        /// the chance <c>DropTierKeepPercent</c>, else a tier lower. Common drops as Common and rolls nothing.
+        /// </summary>
+        static ItemTier DropTier(StaticData data, ItemTier tier, Pcg32 rng)
+        {
+            if (tier == ItemTier.Common || data.Balance.DropTierKeepPercent >= 100)
+            {
+                return tier;
+            }
+
+            return rng.NextInt(100) < data.Balance.DropTierKeepPercent ? tier : tier - 1;
         }
 
         /// <summary>A bag drawn by loot weight, or null when no bag drops.</summary>
@@ -1377,11 +1396,12 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Whether an item merges into another (Docs/Design/02_Combat_System.md §4 "합치기"): the same item at the same tier, below
-        /// Tier3, two different items and neither a base weapon. They become one a tier up where the second one is.
+        /// Tier3, two different items. They become one a tier up where the second one is. A base weapon merges too (2026-10-19, the user's
+        /// "처음 공급되는 기본무기(롱소드) 끼리 합쳤을 때 성급 올라가도록"): with a found or bought one, or with another mercenary's.
         /// </summary>
         public static bool CanMerge(EquippedItem item, EquippedItem into)
         {
-            return item != null && !ReferenceEquals(item, into) && !item.IsBase && MergesInto(item.Item.Id, item.Tier, into);
+            return item != null && !ReferenceEquals(item, into) && MergesInto(item.Item.Id, item.Tier, into);
         }
 
         /// <summary>Whether putting an item (of a board or the inventory) with its top-left on a square of a living member's board would merge it into the item there.</summary>
@@ -1432,15 +1452,17 @@ namespace F1.Gameplay
         /// <summary>Whether an item of this id and tier merges into the item given (null for none).</summary>
         static bool MergesInto(string itemId, ItemTier tier, EquippedItem into)
         {
-            return into != null && !into.IsBase && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Tier3;
+            return into != null && into.Item.Id == itemId && into.Tier == tier && tier < ItemTier.Tier3;
         }
 
         /// <summary>
         /// Merges an item into another lying on a board or in the inventory: that item becomes the merge, a tier up, where it lies. The item merged in is gone; the caller took it from where it was (a board, the inventory) or it came from nowhere (a drop, an offer: null).
+        /// The merge is a base weapon when either was one (2026-10-19, the user's "기본 무기를 베이스로 합성되는 +성급 무기 … 피로도 소모 없게"): it costs no fatigue.
         /// </summary>
         static void MergeInto(EquippedItem item, BoardItem into)
         {
-            into.Item = into.Item.TierUp();
+            EquippedItem up = into.Item.TierUp();
+            into.Item = item != null && item.IsBase && !up.IsBase ? new EquippedItem(up.Item, isBase: true, up.Tier, up.PowerPercent) : up;
         }
 
         /// <summary>The item covering a square of the inventory between battles, or null.</summary>
@@ -1667,10 +1689,10 @@ namespace F1.Gameplay
                     carried.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
                 }
 
-                phases.Add(new BattlePhaseSetup { HpPercent = phase.HpPercent, Items = carried, Layout = BoardLayout.Stacked(carried) });
+                phases.Add(new BattlePhaseSetup { HpPercent = phase.HpPercent, Items = carried, Layout = BoardLayout.Packed(carried, data.StartBag) });
             }
 
-            // An enemy's board is exactly what it carries, one item under another: it has no bags and no empty squares to show.
+            // An enemy's board is the start bag, grown when its items need it (2026-10-19 Round 86); only the screen reads where they lie.
             int maxHp = DeeperMaxHp(enemy.MaxHp, deeper, dungeon.EnemyHpPerFloorPercent);
             return new BattleUnitSetup
             {
@@ -1680,7 +1702,7 @@ namespace F1.Gameplay
                 MaxHp = maxHp,
                 Hp = maxHp,
                 Items = items,
-                Layout = BoardLayout.Stacked(items),
+                Layout = BoardLayout.Packed(items, data.StartBag),
                 Passive = null,
                 HasDog = false,
                 Phases = phases,

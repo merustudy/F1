@@ -2873,6 +2873,56 @@ namespace F1.Tests
             Assert.AreEqual(0, FatigueRules.ItemCost(data.Balance, whetstone), "Not equipment: no fatigue.");
         }
 
+        /// <summary>
+        /// 2026-10-19 Round 85 (play feedback): in battle too, the pointer on a party's whetstone shows its stars over the board — lit on the
+        /// melee weapon, hollow on the pouch — and they go when the pointer leaves; an item without stars shows none. The card stays a right click.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Battle_AWhetstonesStars_ShowWhilePointedAt_AsOnTheNodeMap()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow(melee: true));
+            ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
+            Assert.AreEqual(1, front.Board.ItemAt(0, 0).Height, "The staging needs a base weapon of one row.");
+            var whetstone = new EquippedItem(data.Items.Get("whetstone"));
+            UiTestUtil.Put(front, whetstone, 0, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("herb_pouch")), 0, 2);
+            map.Refresh();
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
+            int stoneIndex = board.Unit.Items.ToList().FindIndex(i => i.Equipped == whetstone);
+            int weaponIndex = board.Unit.Items.ToList().FindIndex(i => i.Equipped.Item.Melee);
+            Assert.IsEmpty(board.Stars, "No stars while nothing is pointed at.");
+
+            board.Items[stoneIndex].Hover.SimulateEnter();
+            yield return null;
+            Assert.AreEqual(2, board.Stars.Count());
+            Assert.IsTrue(board.StarAt(0, 0).Lit, "On the base weapon: lit.");
+            Assert.IsFalse(board.StarAt(0, 2).Lit, "On the herb pouch: hollow.");
+            Assert.IsTrue(board.StarAt(0, 0).gameObject.activeInHierarchy);
+            Assert.AreEqual(board.transform.Find("BoardCells").childCount - 1, board.StarAt(0, 0).transform.parent.GetSiblingIndex(), "The stars lie over the pieces.");
+
+            board.Items[stoneIndex].Hover.SimulateExit();
+            yield return null;
+            Assert.IsEmpty(board.Stars, "Off the whetstone the stars go.");
+
+            board.Items[weaponIndex].Hover.SimulateEnter();
+            yield return null;
+            Assert.IsEmpty(board.Stars, "A weapon has no stars of its own.");
+            board.Items[weaponIndex].Hover.SimulateExit();
+        }
+
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
         /// <summary>The level and the experience (stage 27, Docs/Design/05_Mercenary_Growth.md §2): "Lv N" on the strip's chip, and on the barracks' line with the experience toward the next level and its bar; "경험치 최대" at the last level.</summary>
         [UnityTest]
@@ -3279,9 +3329,9 @@ namespace F1.Tests
                 Assert.AreEqual(unit.Unit.Side == BattleSide.Enemy ? UiPalette.EnemyName : UiPalette.Text,
                     UiTestUtil.At(board, "BoardHead/BoardName").GetComponent<TMPro.TMP_Text>().color, id);
 
-                // The board is a grid (Slice B stage 19): a mercenary's bag in leather (an enemy has none), and a piece per item as big as
-                // its squares; each piece shows the icon its item's data names instead of the name; an enemy's icons are mirrored.
-                Assert.AreEqual(unit.Unit.Side == BattleSide.Party ? 1 : 0, board.BagsShown, id);
+                // The board is a grid (Slice B stage 19): a mercenary's bag in leather (an enemy's the start bag in red stone, Round 86), and a
+                // piece per item as big as its squares; each piece shows the icon its item's data names instead of the name; an enemy's icons are mirrored.
+                Assert.AreEqual(1, board.BagsShown, id);
                 BattleItemView[] cells = board.Items.ToArray();
                 Assert.AreEqual(unit.Unit.Items.Count, UiTestUtil.Views<BattleItemView>(board).Length, id);
                 for (int i = 0; i < cells.Length; i++)
@@ -3562,19 +3612,11 @@ namespace F1.Tests
                 Time.captureDeltaTime = 0f;
             }
 
-            // A mercenary's board shows its bag and its empty squares; an enemy's has neither.
+            // Every board shows its bag and its empty squares: a mercenary's start bag, and an enemy's (the start bag too, Round 86).
             foreach (BattleBoardView board in boards)
             {
-                bool party = board.Unit.Side == BattleSide.Party;
-                Assert.AreEqual(party ? 1 : 0, board.BagsShown, board.Unit.Setup.SourceId);
-                if (party)
-                {
-                    Assert.Greater(board.EmptySquaresShown, 0, "The start bag has room besides the weapon.");
-                }
-                else
-                {
-                    Assert.AreEqual(0, board.EmptySquaresShown);
-                }
+                Assert.AreEqual(1, board.BagsShown, board.Unit.Setup.SourceId);
+                Assert.Greater(board.EmptySquaresShown, 0, "The start bag has room besides the items.");
             }
         }
 

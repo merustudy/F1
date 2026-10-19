@@ -787,6 +787,9 @@ namespace F1.Editor.Setup
             Image bagTemplate = BuildBagLeather(cells, "BagTemplate");
             Image squareTemplate = BuildBattleSquare(cells);
             BattleItemView itemTemplate = BuildBattleItem(cells);
+            // Round 85: the stars of the star item the pointer is on, over the pieces (the view keeps the layer last as it lays the pieces).
+            RectTransform stars = Layer(cells, "BoardStars");
+            GridStarView starTemplate = BuildGridStar(stars, "BoardStarTemplate");
             BuildBoardHead(root, "Board", out TextMeshProUGUI row, out TextMeshProUGUI name);
 
             Button button = PotionTargetButton(root, target);
@@ -799,6 +802,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_itemTemplate", itemTemplate);
             UiBuild.SetReference(view, "_bagTemplate", bagTemplate);
             UiBuild.SetReference(view, "_squareTemplate", squareTemplate);
+            UiBuild.SetReference(view, "_starLayer", stars);
+            UiBuild.SetReference(view, "_starTemplate", starTemplate);
 
             root.gameObject.SetActive(false);
             return view;

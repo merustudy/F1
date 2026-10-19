@@ -2,6 +2,7 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "ShopFloor": 4,
       "IsFinal": false,
       "UnlockDungeonId": null,
       "UnlockClears": 0,
@@ -37,6 +38,7 @@
       "GeneralDropChancePercent": 30
     },
     {
+      "ShopFloor": 0,
       "IsFinal": true,
       "UnlockDungeonId": "abandoned_mine",
       "UnlockClears": 2,

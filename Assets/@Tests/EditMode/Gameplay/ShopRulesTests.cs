@@ -132,6 +132,42 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Map_TheShopFloorIsAllShops_SoEveryPathMeetsOne()
+        {
+            // 2026-10-19 (the user: a shop within the first 3-5 floors, to think of the build early): ShopFloor 4 makes the floor all shops.
+            StaticDataParts parts = TestData.Parts();
+            parts.Dungeons = new List<DungeonData>
+            {
+                new DungeonData("cave", TestData.Text("cave"), "swift", 6, 2, 4, 3, new List<string> { "tonic" }, null, campFloor: 6, shopFloor: 4),
+            };
+            parts.EnemyGroups = new List<EnemyGroupData>
+            {
+                new EnemyGroupData("pair", "cave", 1, 6, false, new[] { "grunt", "grunt" }),
+                new EnemyGroupData("lair", "cave", 0, 0, true, new[] { "chief", "grunt" }),
+            };
+            var data = new StaticData(parts);
+            for (ulong seed = 1; seed <= 50; seed++)
+            {
+                NodeMap map = MapGenerator.Generate(data, data.Dungeons.Get("cave"), seed);
+                Assert.IsTrue(map.Nodes.Where(n => n.Floor == 4).All(n => n.Kind == MapNodeKind.Shop && n.EnemyGroupId == null && !n.IsFought));
+                Assert.IsTrue(map.Nodes.Where(n => n.Floor != 4).All(n => n.Kind != MapNodeKind.Shop), "No shop chance elsewhere in this dungeon.");
+            }
+
+            var potions = new List<string>();
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, shopFloor: 1), "Not the first floor.");
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, campFloor: 4, shopFloor: 4), "Not the camp floor.");
+            Assert.Throws<DataException>(() => new DungeonData("d", TestData.Text("d"), "swift", 5, 2, 3, 2, potions, null, shopFloor: 6), "A map floor.");
+        }
+
+        [Test]
+        public void AnExpedition_StartsWithTheStartCoins()
+        {
+            StaticData data = TestData.Data(("ExpeditionStartCoins", 20));
+            ExpeditionState state = ExpeditionRules.Create(data, "cave", 7UL, new List<PartyMember> { new PartyMember("anna", "tank", 1) });
+            Assert.AreEqual(20, state.Coins);
+        }
+
+        [Test]
         public void Data_RefusesABadShopChance_AndANegativePrice()
         {
             var potions = new List<string>();

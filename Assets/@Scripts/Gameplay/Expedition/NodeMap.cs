@@ -178,14 +178,19 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// A node's kind: the camp floor is all camps; elsewhere an elite, a camp or a shop by chance where the dungeon allows one
-        /// (in that order), otherwise a battle. A chance is drawn only where it can come true.
+        /// A node's kind: the camp floor is all camps and the shop floor all shops (2026-10-19); elsewhere an elite, a camp or a shop by
+        /// chance where the dungeon allows one (in that order), otherwise a battle. A chance is drawn only where it can come true.
         /// </summary>
         static MapNodeKind DrawKind(DungeonData dungeon, int floor, Pcg32 rng)
         {
             if (floor == dungeon.CampFloor)
             {
                 return MapNodeKind.Camp;
+            }
+
+            if (floor == dungeon.ShopFloor)
+            {
+                return MapNodeKind.Shop;
             }
 
             if (dungeon.EliteCanStandOn(floor) && rng.NextInt(100) < dungeon.EliteChancePercent)

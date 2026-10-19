@@ -166,5 +166,34 @@ namespace F1.Tests
             CollectionAssert.AreEqual(new[] { new Placement(0, 0), new Placement(0, 2) }, stacked.Items);
             CollectionAssert.IsEmpty(stacked.Bags);
         }
+
+        [Test]
+        public void AnEnemysBoard_IsTheStartBag_EachItemAtTheFirstPlaceItFits_GrownDownWhenTheyNeedIt()
+        {
+            // 2026-10-19 Round 86: a 3x3 start bag; a 2x1 and a 1x1 share the top row (reading order, first fit).
+            var bag = new BagData("pack3", TestData.Text("pack3"), 3, 3, true, 0, 0, 0);
+            BoardLayout two = BoardLayout.Packed(new List<EquippedItem> { Item("blade", 2, 1), Item("shield", 1, 1) }, bag);
+            CollectionAssert.AreEqual(new[] { new Placement(0, 0), new Placement(2, 0) }, two.Items);
+            Assert.AreEqual(1, two.Bags.Count);
+            Assert.AreSame(bag, two.Bags[0].Bag);
+            Assert.AreEqual(3, two.Bags[0].Width);
+            Assert.AreEqual(3, two.Bags[0].Height, "Room enough: the bag as it is.");
+
+            // Six (four 2x1, two 1x1) do not fit 3x3: the bag grows a row, 3 wide still.
+            var six = new List<EquippedItem> { Item("a", 2, 1), Item("b", 2, 1), Item("c", 2, 1), Item("d", 1, 1), Item("e", 1, 1), Item("f", 2, 1) };
+            BoardLayout grown = BoardLayout.Packed(six, bag);
+            CollectionAssert.AreEqual(new[] { new Placement(0, 0), new Placement(0, 1), new Placement(0, 2), new Placement(2, 0), new Placement(2, 1), new Placement(0, 3) }, grown.Items);
+            Assert.AreEqual(4, grown.Bags[0].Height);
+            Assert.AreEqual(1, grown.Bags[0].ExtraRows);
+
+            // More than the frame holds is the data check's to stop; here it throws.
+            var tall = new List<EquippedItem>();
+            for (int i = 0; i < 9; i++)
+            {
+                tall.Add(Item("t" + i, 3, 1));
+            }
+
+            Assert.Throws<System.InvalidOperationException>(() => BoardLayout.Packed(tall, bag));
+        }
     }
 }

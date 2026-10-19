@@ -1035,6 +1035,35 @@ namespace F1.UI
             return item.SlotIndex < placed.Count && placed[item.SlotIndex].Item == item.Equipped ? UiText.StarLine(member.Board, placed[item.SlotIndex]) : null;
         }
 
+        /// <summary>
+        /// 2026-10-19 Round 85 (the user's play feedback): the stars of a party's star item while the pointer is on its piece, lit where a
+        /// melee weapon lies, as the node map's board shows them (stage 20). The board does not change in battle, so neither do they. Nothing
+        /// for an item without stars or an enemy's.
+        /// </summary>
+        static List<StarMark> BattleStars(BattleUnit unit, BattleItemState item)
+        {
+            if (unit.Side != BattleSide.Party || item.Equipped.Item.Stars.Count == 0)
+            {
+                return null;
+            }
+
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            ExpeditionMember member = expedition?.Members.Find(m => m.MercenaryId == unit.Setup.SourceId);
+            if (member == null)
+            {
+                return null;
+            }
+
+            List<BoardItem> placed = member.Board.PlacedInReadingOrder();
+            if (item.SlotIndex >= placed.Count || placed[item.SlotIndex].Item != item.Equipped)
+            {
+                return null;
+            }
+
+            BoardItem star = placed[item.SlotIndex];
+            return StarRules.Marks(member.Board, star.Item.Item, star.At, null);
+        }
+
         /// <summary>The unit's board of the board panel: its cells, in the panel column of its row.</summary>
         BattleBoardView CreateBoard(BattleUnit unit, Transform column)
         {
@@ -1042,6 +1071,8 @@ namespace F1.UI
             board.gameObject.SetActive(true);
             board.Bind(unit, _art);
             board.ItemRightClicked += (view, item) => OnItemRightClicked(board, view, item);
+            board.ItemPointed += item => board.ShowStars(BattleStars(board.Unit, item));
+            board.ItemLeft += item => board.ShowStars(null);
             return board;
         }
 

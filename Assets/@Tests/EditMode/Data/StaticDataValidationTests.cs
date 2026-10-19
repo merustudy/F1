@@ -189,7 +189,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AnEnemysItems_CannotStandTallerThanTheFrame()
+        public void AnEnemysItems_MustFitTheStartBagGrownWithinTheFrame()
         {
             string problem = ProblemOf(p =>
                 p.Enemies = Replace(p.Enemies, e => e.Id == "chief", new EnemyData("chief", TestData.Text("chief"), 9, 120, new List<ItemGrant>
@@ -200,7 +200,7 @@ namespace F1.Tests
                 })));
 
             StringAssert.Contains("Enemy 'chief'", problem);
-            StringAssert.Contains("stand 9 squares tall, more than a board frame (8)", problem);
+            StringAssert.Contains("need 9 rows of the start bag 'pack' (3 wide), more than a board frame (8)", problem);
         }
 
         [Test]

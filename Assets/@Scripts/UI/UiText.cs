@@ -349,7 +349,7 @@ namespace F1.UI
 
         /// <summary>
         /// What the item costs in fatigue when a battle starts (round 32): in the fatigue's violet for equipment that
-        /// costs, "no fatigue" dimmed for a base weapon, nothing for the rest (Docs/Design/04_Lobby_100Day_Economy.md §3).
+        /// costs, "no fatigue" dimmed for a base weapon or (2026-10-19) a unique item, nothing for the rest (Docs/Design/04_Lobby_100Day_Economy.md §3).
         /// </summary>
         static void AddFatigue(List<string> parts, EquippedItem item)
         {
@@ -361,6 +361,10 @@ namespace F1.UI
             else if (item.IsBase)
             {
                 parts.Add(Colored(UiStrings.Get(UiKeys.Item.BaseWeapon), UiPalette.TextDim));
+            }
+            else if (item.Item.Unique)
+            {
+                parts.Add(Colored(UiStrings.Get(UiKeys.Item.UniqueNoFatigue), UiPalette.TextDim));
             }
         }
 

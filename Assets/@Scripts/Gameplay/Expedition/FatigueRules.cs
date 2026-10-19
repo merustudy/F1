@@ -8,14 +8,17 @@ namespace F1.Gameplay
     /// Fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3): it starts at 0, builds up on an expedition and comes
     /// down with rest, between 0 and <c>BalanceData.MaxFatigue</c>. When a battle starts, every living member
     /// pays <c>FatigueBattleEntry</c> and <c>FatigueEquipment</c> for each piece of equipment on their board that
-    /// is not a base weapon. Pure functions; the screens ask them too, to show the cost.
+    /// is neither a base weapon nor a unique item. Pure functions; the screens ask them too, to show the cost.
     /// </summary>
     public static class FatigueRules
     {
-        /// <summary>Equipment (a weapon or an armor) that is not a base weapon: the items that cost fatigue when a battle starts.</summary>
+        /// <summary>
+        /// Equipment (a weapon or an armor) that is neither a base weapon nor a unique item (2026-10-19, the user's "… 유니크 아이템은 피로도 소모
+        /// 없게"): the items that cost fatigue when a battle starts.
+        /// </summary>
         public static bool CostsFatigue(EquippedItem item)
         {
-            return !item.IsBase && (item.Item.Category == ItemCategory.Weapon || item.Item.Category == ItemCategory.Armor);
+            return !item.IsBase && !item.Item.Unique && (item.Item.Category == ItemCategory.Weapon || item.Item.Category == ItemCategory.Armor);
         }
 
         /// <summary>What one item adds to its owner's fatigue when a battle starts.</summary>

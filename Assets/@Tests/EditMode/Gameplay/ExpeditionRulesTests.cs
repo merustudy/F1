@@ -202,7 +202,7 @@ namespace F1.Tests
             Assert.AreEqual(-80, setup.EnemyCooldownPermille);
             Assert.AreEqual("tonic", setup.Potions[0].Id);
             Assert.IsTrue(setup.Party.All(u => u.Layout != null && u.Layout.Bags.Count == 1 && u.Layout.Items.Count == u.Items.Count), "A member's board goes in with its bags and where its items lie.");
-            Assert.IsTrue(setup.Enemies.All(u => u.Layout != null && u.Layout.Bags.Count == 0), "An enemy's items stand one under another, without bags.");
+            Assert.IsTrue(setup.Enemies.All(u => u.Layout != null && u.Layout.Bags.Count == 1 && u.Layout.Bags[0].Bag == data.StartBag && u.Layout.Items.Count == u.Items.Count), "An enemy's board is the start bag (Round 86).");
 
             BattleSetup rebuilt = ExpeditionRules.BuildBattleSetup(data, state);
             Assert.AreEqual(setup.Seed, rebuilt.Seed);
@@ -406,6 +406,33 @@ namespace F1.Tests
             Assert.IsTrue(elite.All(d => d.Id == "claw" && d.Tier == ItemTier.Tier1), "A tier up for an elite.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(98, 3, 0, MapNodeKind.Boss, "lair", new int[0])), "The boss ends the expedition.");
             Assert.IsEmpty(ExpeditionRules.DropLoot(data, state, new MapNode(97, 2, 0, MapNodeKind.Camp, null, new int[0])), "Nobody is fought at a camp.");
+        }
+
+        [Test]
+        public void DropLoot_AnItemAboveCommon_KeepsTheTierWithTheChance_ElseDropsATierLower()
+        {
+            // 2026-10-19 play feedback: the elite's loot is a tier up (1-star in the cave); DropTierKeepPercent decides whether each item keeps it.
+            var elite = new MapNode(99, 2, 0, MapNodeKind.Elite, "trio", new int[0]);
+            StaticData keep = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("DropTierKeepPercent", 100));
+            StaticData lose = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("DropTierKeepPercent", 0));
+            List<ItemOffer> kept = ExpeditionRules.DropLoot(keep, Create(keep), elite);
+            List<ItemOffer> lowered = ExpeditionRules.DropLoot(lose, Create(lose), elite);
+            Assert.IsTrue(kept.All(d => d.Tier == ItemTier.Tier1));
+            Assert.IsTrue(lowered.All(d => d.Tier == ItemTier.Common), "A tier lower.");
+            CollectionAssert.AreEqual(kept.Select(d => d.Id), lowered.Select(d => d.Id), "The tier rolls have their own stream: the same items drop.");
+
+            // At 50 both come over many nodes, the same for the same seed; a Common drop rolls nothing.
+            StaticData half = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("DropTierKeepPercent", 50));
+            ExpeditionState state = Create(half);
+            var tiers = new List<ItemTier>();
+            for (int id = 100; id < 140; id++)
+            {
+                tiers.AddRange(ExpeditionRules.DropLoot(half, state, new MapNode(id, 2, 0, MapNodeKind.Elite, "trio", new int[0])).Select(d => d.Tier));
+            }
+
+            Assert.IsTrue(tiers.Contains(ItemTier.Tier1) && tiers.Contains(ItemTier.Common));
+            CollectionAssert.AreEqual(ExpeditionRules.DropLoot(half, state, elite).Select(d => d.Tier), ExpeditionRules.DropLoot(half, Create(half), elite).Select(d => d.Tier));
+            Assert.IsTrue(ExpeditionRules.DropLoot(half, state, new MapNode(98, 2, 0, MapNodeKind.Battle, "trio", new int[0])).All(d => d.Tier == ItemTier.Common));
         }
 
         [Test]
@@ -927,7 +954,7 @@ namespace F1.Tests
             CollectionAssert.AreEqual(new[] { At(0, 0), At(2, 0, 1), At(0, 1) }, unit.Layout.Items, "Where each lies, for the screen.");
             Assert.AreEqual(1, unit.Layout.Bags.Count);
             BattleUnitSetup enemy = setup.Enemies[0];
-            CollectionAssert.IsEmpty(enemy.Layout.Bags, "An enemy has no bags.");
+            Assert.AreEqual(1, enemy.Layout.Bags.Count, "An enemy's board is the start bag (Round 86).");
             Assert.AreEqual(At(0, 0), enemy.Layout.Items[0]);
         }
 

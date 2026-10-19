@@ -1860,6 +1860,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673527681155086
+  - m_Id: 6817983623061504
+    m_Key: Item.UniqueNoFatigue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673541931565056
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3553,3 +3558,7 @@ MonoBehaviour:
       data:
         m_CommentText: 'A trait''s effect (Slice D stage 37): on the mercenary''s
           maximum HP. {0} = signed percent.'
+    - rid: 8623673541931565056
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In a unique item''s facts (2026-10-19): it costs no fatigue.'

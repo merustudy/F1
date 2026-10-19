@@ -325,7 +325,7 @@ namespace F1.Editor.Data
                 "StartingPotions", RowMapping.Background,
                 "EliteMinFloor", "EliteChancePercent", "CampMinFloor", "CampChancePercent", "CampFloor",
                 "EnemyHpPerFloorPercent", "EnemyPowerPerFloorPercent", "Tier1Floor", "Tier2Floor", "Tier3Floor", "ShopMinFloor", "ShopChancePercent"),
-                new[] { "IsFinal", "UnlockDungeonId", "UnlockClears", "MapX", "MapY", "GeneralDropChancePercent" });
+                new[] { "IsFinal", "UnlockDungeonId", "UnlockClears", "MapX", "MapY", "GeneralDropChancePercent", "ShopFloor" });
 
             return RowMapping.MapRows(table, errors, row => new DungeonData(
                 row.Id(RowMapping.Id),
@@ -354,7 +354,8 @@ namespace F1.Editor.Data
                 row.OptionalInt("UnlockClears", 0, 0),
                 row.OptionalInt("MapX", 0, 0, 100),
                 row.OptionalInt("MapY", 0, 0, 100),
-                row.OptionalInt("GeneralDropChancePercent", 0, 0, 100)));
+                row.OptionalInt("GeneralDropChancePercent", 0, 0, 100),
+                row.OptionalInt("ShopFloor", 0, 0)));
         }
     }
 

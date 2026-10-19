@@ -513,7 +513,8 @@ namespace F1.Sim
 
                     foreach (BoardItem placed in state.Members[m].Board.PlacedInReadingOrder())
                     {
-                        if (FindMergeTarget(state, placed.Item, out int member, out Placement at) && (member != m || !at.Equals(placed.At)))
+                        // A base weapon is merged into, never moved away to merge (2026-10-19): the policy keeps every mercenary armed.
+                        if (!placed.Item.IsBase && FindMergeTarget(state, placed.Item, out int member, out Placement at) && (member != m || !at.Equals(placed.At)))
                         {
                             ExpeditionRules.MoveItem(data, state, m, placed.At.X, placed.At.Y, member, at);
                             merged = true;

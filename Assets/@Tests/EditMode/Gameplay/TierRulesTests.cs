@@ -208,7 +208,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void DifferentTiers_DifferentItems_AGold_AndBaseWeapons_DoNotMerge()
+        public void DifferentTiers_DifferentItems_AndAGold_DoNotMerge()
         {
             StaticData data = TestData.Data();
             ExpeditionState state = Expedition(data);
@@ -225,14 +225,46 @@ namespace F1.Tests
 
             Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Common), Item(data, "charm", ItemTier.Common)), "Different items.");
             Assert.IsFalse(ExpeditionRules.CanMerge(Item(data, "knife", ItemTier.Tier3), Item(data, "knife", ItemTier.Tier3)), "Gold is the last.");
+        }
 
-            // Anna (tank) and cora (striker) both left with a blade.
+        [Test]
+        public void BaseWeapons_Merge_AndTheMergeIsABaseWeapon_ThatCostsNoFatigue()
+        {
+            // 2026-10-19 (the user): base weapons merge a tier up, with a found one or with each other, and stay base weapons.
+            StaticData data = TestData.Data();
+            ExpeditionState state = Expedition(data);
+            ExpeditionMember anna = state.Members[0];
+            ExpeditionMember cora = state.Members[2];
             EquippedItem annas = TestBoards.ItemAt(anna, 0, 0);
-            EquippedItem coras = TestBoards.ItemAt(state.Members[2], 0, 0);
-            Assert.IsTrue(annas.IsBase && coras.IsBase && annas.Tier == coras.Tier);
-            coras = new EquippedItem(coras.Item, isBase: true);
-            Assert.IsFalse(ExpeditionRules.CanMerge(coras, annas), "Base weapons do not merge.");
-            Assert.IsFalse(ExpeditionRules.CanMerge(new EquippedItem(annas.Item), annas), "Not even with a found one.");
+            EquippedItem coras = TestBoards.ItemAt(cora, 0, 0);
+            Assert.IsTrue(annas.IsBase && coras.IsBase && annas.Item == coras.Item && annas.Tier == coras.Tier, "Anna (tank) and cora (striker) both left with a blade.");
+
+            // A found blade onto anna's base blade: a base blade a tier up.
+            var found = new EquippedItem(annas.Item);
+            Assert.IsTrue(ExpeditionRules.CanMerge(found, annas));
+            state.Inventory.Add(found, At(0, 0));
+            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(0, 0));
+            EquippedItem merged = TestBoards.ItemAt(anna, 0, 0);
+            Assert.AreEqual(ItemTier.Tier1, merged.Tier);
+            Assert.IsTrue(merged.IsBase, "Still a base weapon.");
+            Assert.AreEqual(0, FatigueRules.ItemCost(data.Balance, merged), "A base weapon costs no fatigue at any tier.");
+
+            // Cora's base blade put onto a found one in the inventory: the merge lies there and is a base weapon; cora is left without.
+            var bought = new EquippedItem(annas.Item);
+            state.Inventory.Add(bought, At(0, 0));
+            Assert.IsTrue(ExpeditionRules.CanMoveToInventoryAt(state, 2, 0, 0, At(0, 0)));
+            ExpeditionRules.MoveToInventoryAt(state, 2, 0, 0, At(0, 0));
+            EquippedItem onFound = state.Inventory.Items.Single().Item;
+            Assert.AreEqual(ItemTier.Tier1, onFound.Tier);
+            Assert.IsTrue(onFound.IsBase, "The base weapon carries over to the merge.");
+            Assert.IsNull(TestBoards.ItemAt(cora, 0, 0));
+
+            // Two base weapons (both 1-star now) merge into one 2-star base weapon on anna's board.
+            Assert.IsTrue(ExpeditionRules.CanMerge(onFound, merged));
+            ExpeditionRules.PlaceFromInventory(data, state, 0, 0, At(0, 0));
+            Assert.AreEqual(ItemTier.Tier2, TestBoards.ItemAt(anna, 0, 0).Tier);
+            Assert.IsTrue(TestBoards.ItemAt(anna, 0, 0).IsBase);
+            Assert.IsEmpty(state.Inventory);
         }
 
         [Test]
@@ -248,6 +280,18 @@ namespace F1.Tests
             ExpeditionRules.MoveItem(data, state, 0, 0, 1, 0, At(2, 0));
 
             Assert.AreEqual(data.Balance.FatigueEquipment, FatigueRules.EquipmentCost(data.Balance, TestBoards.Items(anna)));
+        }
+
+        [Test]
+        public void AUniqueItem_CostsNoFatigue_EvenWhenNotABaseWeapon()
+        {
+            // 2026-10-19 (the user): a unique item costs no fatigue, whatever it was forged from; other found weapons still do.
+            StaticData data = TestData.Data();
+            var unique = new EquippedItem(data.Items.Get("gladius_t"));
+            Assert.IsFalse(unique.IsBase);
+            Assert.IsTrue(unique.Item.Unique && unique.Item.Category == ItemCategory.Weapon);
+            Assert.AreEqual(0, FatigueRules.ItemCost(data.Balance, unique));
+            Assert.AreEqual(data.Balance.FatigueEquipment, FatigueRules.ItemCost(data.Balance, Item(data, "knife", ItemTier.Common)));
         }
 
         [Test]

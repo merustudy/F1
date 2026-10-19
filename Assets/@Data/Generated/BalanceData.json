@@ -82,6 +82,10 @@
       "Value": 1
     },
     {
+      "Key": "DropTierKeepPercent",
+      "Value": 50
+    },
+    {
       "Key": "EliteBagPercent",
       "Value": 50
     },
@@ -100,6 +104,10 @@
     {
       "Key": "ExpPerFloor",
       "Value": 1
+    },
+    {
+      "Key": "ExpeditionStartCoins",
+      "Value": 20
     },
     {
       "Key": "FatigueBattleEntry",

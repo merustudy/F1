@@ -65,7 +65,8 @@ namespace F1.Data
             int unlockClears = 0,
             int mapX = 0,
             int mapY = 0,
-            int generalDropChancePercent = 0)
+            int generalDropChancePercent = 0,
+            int shopFloor = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             if (generalDropChancePercent < 0 || generalDropChancePercent > 100)
@@ -138,6 +139,11 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': CampFloor is 0 or a map floor from 2 (the first floor is battles only).");
             }
 
+            if (shopFloor != 0 && (shopFloor < 2 || shopFloor > floors || shopFloor == campFloor))
+            {
+                throw new DataException($"{DefinitionName} '{id}': ShopFloor is 0 or a map floor from 2 that is not the camp floor (the first floor is battles only).");
+            }
+
             if (enemyHpPerFloorPercent < 0 || enemyPowerPerFloorPercent < 0)
             {
                 throw new DataException($"{DefinitionName} '{id}': the deeper enemies cannot get weaker.");
@@ -182,6 +188,7 @@ namespace F1.Data
             Tier3Floor = tier3Floor;
             ShopMinFloor = shopMinFloor;
             ShopChancePercent = shopChancePercent;
+            ShopFloor = shopFloor;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -231,6 +238,12 @@ namespace F1.Data
 
         [JsonProperty(Order = 16, Required = Required.Always)]
         public int CampFloor { get; }
+
+        /// <summary>
+        /// The floor whose nodes are all shops, or 0 for none (2026-10-19, the user's "원정시 초기 3-5 노드 안에 상점은 한개 노드 이상 등장 …
+        /// 초기에 덱 생각해볼수 있게" → 권장안: every path meets a shop early, as every path meets the camp floor).
+        /// </summary>
+        public int ShopFloor { get; }
 
         /// <summary>
         /// How much stronger the enemies of a floor are than those of the first: HP percent, and power percent of their items (stage 22: was item

@@ -80,17 +80,20 @@ namespace F1.Gameplay
     /// <summary>A bag lying in a board's frame. Its squares are where items can lie.</summary>
     public sealed class BoardBag
     {
-        public BoardBag(BagData bag, Placement at)
+        /// <param name="extraRows">Rows the bag has below its own (2026-10-19 Round 86: an enemy's start bag grown to hold its items); 0 for a mercenary's.</param>
+        public BoardBag(BagData bag, Placement at, int extraRows = 0)
         {
             Bag = bag ?? throw new ArgumentNullException(nameof(bag));
             At = at;
+            ExtraRows = extraRows;
         }
 
         public BagData Bag { get; }
         public Placement At { get; set; }
+        public int ExtraRows { get; }
 
         public int Width => At.WidthOf(Bag.Width, Bag.Height);
-        public int Height => At.HeightOf(Bag.Width, Bag.Height);
+        public int Height => At.HeightOf(Bag.Width, Bag.Height) + ExtraRows;
 
         public bool Covers(int x, int y)
         {
@@ -505,7 +508,35 @@ namespace F1.Gameplay
             return new BoardLayout(items, bags);
         }
 
-        /// <summary>An enemy's board: its items one under another from the top-left, unturned.</summary>
+        /// <summary>
+        /// An enemy's board (2026-10-19 Round 86, the user's "적 몬스터들도 인벤토리 기본 공간(3*3)으로 시작, 아이템 많은 경우 자동 확대"): the
+        /// start bag at the top-left, its items unturned in their order each at the first place it fits in reading order
+        /// (<see cref="BoardFrame.Pack"/>), the bag as many rows taller as they need. The data's check keeps it within the frame.
+        /// </summary>
+        public static BoardLayout Packed(IReadOnlyList<EquippedItem> items, BagData startBag)
+        {
+            var sizes = new List<(int Width, int Height)>();
+            foreach (EquippedItem item in items)
+            {
+                sizes.Add((item.Item.Width, item.Item.Height));
+            }
+
+            int rows = BoardFrame.Pack(sizes, startBag.Width, startBag.Height, out List<(int X, int Y)> places);
+            if (rows < 0 || rows > BoardFrame.Height)
+            {
+                throw new InvalidOperationException($"The items do not fit the start bag '{startBag.Id}' within the frame.");
+            }
+
+            var placements = new List<Placement>();
+            foreach ((int x, int y) in places)
+            {
+                placements.Add(new Placement(x, y));
+            }
+
+            return new BoardLayout(placements, new List<BoardBag> { new BoardBag(startBag, new Placement(0, 0), rows - startBag.Height) });
+        }
+
+        /// <summary>A board without a layout (a test's setup): its items one under another from the top-left, unturned, without bags.</summary>
         public static BoardLayout Stacked(IReadOnlyList<EquippedItem> items)
         {
             var placements = new List<Placement>();

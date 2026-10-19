@@ -1753,6 +1753,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
+  - m_Id: 6817983623061504
+    m_Localized: "\uC720\uB2C8\uD06C: \uD53C\uB85C \uC5C6\uC74C"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

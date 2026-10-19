@@ -35,6 +35,7 @@ namespace F1.UI
         [SerializeField] Image _flash;
         [SerializeField] Button _button;
         [SerializeField] RightClick _rightClick;
+        [SerializeField] PointerHover _hover;
         [SerializeField] TMP_Text _name;
         [SerializeField] Image _tierTag;
         [SerializeField] RectTransform _glowArt;
@@ -58,6 +59,9 @@ namespace F1.UI
 
         /// <summary>The right click that opens the item's card (round 47).</summary>
         public RightClick RightClick => _rightClick;
+
+        /// <summary>The pointer on the piece and off it (Round 85: a star item's stars show while it is pointed at).</summary>
+        public PointerHover Hover => _hover;
 
         /// <summary>Where the item lies on its owner's board (its icon's turn).</summary>
         public Placement At { get; private set; }

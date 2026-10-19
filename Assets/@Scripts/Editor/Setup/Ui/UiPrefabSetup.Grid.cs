@@ -410,6 +410,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_flash", flash);
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_rightClick", piece.gameObject.AddComponent<RightClick>());
+            UiBuild.SetReference(view, "_hover", piece.gameObject.AddComponent<PointerHover>());
             UiBuild.SetReference(view, "_name", name);
             UiBuild.SetReference(view, "_tierTag", tierTag);
             UiBuild.SetReferences(view, "_pips", pips);

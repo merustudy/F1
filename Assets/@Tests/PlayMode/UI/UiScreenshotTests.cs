@@ -333,6 +333,9 @@ namespace F1.Tests
             ExpeditionMember front = Managers.Expedition.Expedition.Members.OrderBy(m => m.Row).First();
             BoardItem weapon = front.Board.ItemAt(0, 0);
             weapon.Item = new EquippedItem(data.Items.Get("gladius"), isBase: true);
+            // Round 85: a whetstone under the gladius' right end, for the stars while it is pointed at (below).
+            var whetstone = new EquippedItem(data.Items.Get("whetstone"));
+            UiTestUtil.Put(front, whetstone, 2, 1);
             while (Managers.Expedition.Phase != GamePhase.Battle)
             {
                 yield return UiTestUtil.GoIntoTheFirstNode();
@@ -343,6 +346,14 @@ namespace F1.Tests
             Managers.Expedition.AdvanceBattle(1500 - Managers.Expedition.Battle.Engine.TimeMs);
             yield return UiTestUtil.WaitForRedraw();
             yield return Capture("ko_55_battle_unique");
+
+            // 2026-10-19 Round 85: the pointer on the whetstone in battle — its stars over the board, lit on the gladius, hollow below.
+            BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
+            BattleItemView stone = board.Items[board.Unit.Items.ToList().FindIndex(i => i.Equipped == whetstone)];
+            stone.Hover.SimulateEnter();
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_76_battle_star_hover");
+            stone.Hover.SimulateExit();
         }
 
         IEnumerator CaptureLap(string localeCode, string prefix)

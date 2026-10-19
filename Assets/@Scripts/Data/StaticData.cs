@@ -333,6 +333,31 @@ namespace F1.Data
             return EnemyGroups.Ordered.First(group => group.DungeonId == dungeonId && group.IsBoss);
         }
 
+        /// <summary>Whether an enemy's items fit its board: the start bag, as many rows taller as they need, within the frame (Round 86).</summary>
+        void CheckEnemyBag(IReadOnlyList<ItemGrant> grants, string what, bool hasStartBag, List<string> problems)
+        {
+            if (!hasStartBag)
+            {
+                return;
+            }
+
+            var sizes = new List<(int Width, int Height)>();
+            foreach (ItemGrant grant in grants)
+            {
+                if (Items.Contains(grant.ItemId))
+                {
+                    ItemData item = Items.Get(grant.ItemId);
+                    sizes.Add((item.Width, item.Height));
+                }
+            }
+
+            int rows = BoardFrame.Pack(sizes, StartBag.Width, StartBag.Height, out _);
+            if (rows < 0 || rows > BoardFrame.Height)
+            {
+                problems.Add($"{what} need {(rows < 0 ? "a wider bag than" : rows + " rows of")} the start bag '{StartBag.Id}' ({StartBag.Width} wide), more than a board frame ({BoardFrame.Height}).");
+            }
+        }
+
         void CheckReferences(List<string> problems)
         {
             int startBags = Bags.Ordered.Count(bag => bag.Start);
@@ -392,21 +417,13 @@ namespace F1.Data
             foreach (EnemyData enemy in Enemies.Ordered)
             {
                 string what = $"{EnemyData.DefinitionName} '{enemy.Id}'";
-                int rows = 0;
                 foreach (ItemGrant grant in enemy.Items)
                 {
                     Require(Items, grant.ItemId, what + " Items", problems);
-                    if (Items.Contains(grant.ItemId))
-                    {
-                        rows += Items.Get(grant.ItemId).Height;
-                    }
                 }
 
-                // An enemy's board shows its items one under another, unturned, in the frame's column (Slice B stage 19).
-                if (rows > BoardFrame.Height)
-                {
-                    problems.Add($"{what}: its items stand {rows} squares tall, more than a board frame ({BoardFrame.Height}).");
-                }
+                // An enemy's board is the start bag, a row taller whenever its items need it (2026-10-19 Round 86), within the frame.
+                CheckEnemyBag(enemy.Items, what + ": its items", startBags == 1, problems);
 
                 // FinalBossLevel is the final boss's alone (stage 28): an enemy may carry it only in the final dungeon's boss group, and nothing is above it.
                 if (enemy.Level > Balance.FinalBossLevel || (enemy.Level == Balance.FinalBossLevel && !finalBosses.Contains(enemy.Id)))
@@ -421,16 +438,7 @@ namespace F1.Data
                         Require(Items, grant.ItemId, $"{what} Phases", problems);
                     }
 
-                    int phaseRows = 0;
-                    foreach (ItemGrant grant in phase.Items)
-                    {
-                        phaseRows += Items.Contains(grant.ItemId) ? Items.Get(grant.ItemId).Height : 0;
-                    }
-
-                    if (phaseRows > BoardFrame.Height)
-                    {
-                        problems.Add($"{what}: the items of the phase at {phase.HpPercent}% stand {phaseRows} squares tall, more than a board frame ({BoardFrame.Height}).");
-                    }
+                    CheckEnemyBag(phase.Items, $"{what}: the items of the phase at {phase.HpPercent}%", startBags == 1, problems);
                 }
             }
 
@@ -472,7 +480,7 @@ namespace F1.Data
                 // Every floor that can have a battle node needs a group for it, and every floor that can have an elite node an elite group.
                 for (int floor = 1; floor <= dungeon.Floors; floor++)
                 {
-                    if (floor != dungeon.CampFloor && GroupsFor(dungeon.Id, floor).Count == 0)
+                    if (floor != dungeon.CampFloor && floor != dungeon.ShopFloor && GroupsFor(dungeon.Id, floor).Count == 0)
                     {
                         problems.Add($"{what}: no enemy group can appear on floor {floor}.");
                     }

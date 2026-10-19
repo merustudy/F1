@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace F1.Data
 {
     /// <summary>
@@ -34,6 +37,76 @@ namespace F1.Data
         public static bool Contains(int x, int y)
         {
             return x >= 0 && x < Width && y >= 0 && y < Height;
+        }
+
+        /// <summary>
+        /// Lays items of these sizes (unturned, in this order) in a bag <paramref name="width"/> wide (2026-10-19 Round 86: an enemy's board is
+        /// the start bag): each at the first place it fits in reading order (top to bottom, left to right), the bag a row taller whenever one
+        /// fits nowhere. Returns the rows the bag needs (at least <paramref name="minHeight"/>) and where each item lies, or -1 when an item is
+        /// wider than the bag.
+        /// </summary>
+        public static int Pack(IReadOnlyList<(int Width, int Height)> sizes, int width, int minHeight, out List<(int X, int Y)> places)
+        {
+            places = new List<(int X, int Y)>();
+            foreach ((int w, int _) in sizes)
+            {
+                if (w > width)
+                {
+                    return -1;
+                }
+            }
+
+            var taken = new HashSet<(int, int)>();
+            int height = minHeight;
+            foreach ((int w, int h) in sizes)
+            {
+                for (int y = 0; ; y++)
+                {
+                    int x = 0;
+                    for (; x + w <= width; x++)
+                    {
+                        if (Free(taken, x, y, w, h))
+                        {
+                            break;
+                        }
+                    }
+
+                    if (x + w > width)
+                    {
+                        continue;
+                    }
+
+                    places.Add((x, y));
+                    for (int dy = 0; dy < h; dy++)
+                    {
+                        for (int dx = 0; dx < w; dx++)
+                        {
+                            taken.Add((x + dx, y + dy));
+                        }
+                    }
+
+                    height = Math.Max(height, y + h);
+                    break;
+                }
+            }
+
+            return height;
+        }
+
+        static bool Free(HashSet<(int, int)> taken, int x, int y, int w, int h)
+        {
+            for (int dy = 0; dy < h; dy++)
+            {
+                for (int dx = 0; dx < w; dx++)
+                {
+                    if (taken.Contains((x + dx, y + dy)))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 

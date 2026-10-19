@@ -294,6 +294,7 @@ namespace F1.UI
             public const string RowsBackOne = "Item.RowsBackOne";
             public const string FatigueCost = "Item.FatigueCost";
             public const string BaseWeapon = "Item.BaseWeapon";
+            public const string UniqueNoFatigue = "Item.UniqueNoFatigue";
             public const string Common = "Item.Common";
             public const string Tier1 = "Item.Tier1";
             public const string Tier2 = "Item.Tier2";

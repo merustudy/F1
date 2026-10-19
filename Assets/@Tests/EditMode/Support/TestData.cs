@@ -71,6 +71,8 @@ namespace F1.Tests
                 { "InventoryWidth", 10 },
                 { "InventoryHeight", 3 },
                 { "EliteBagPercent", 0 },
+                // Drops keep the loot's tier (the rule before 2026-10-19), so the tests' drops stay as they were.
+                { "DropTierKeepPercent", 100 },
                 { "CampHealPercent", 30 },
                 { "CampFatigueRelief", 20 },
                 { "Tier1Percent", 200 },
@@ -85,6 +87,8 @@ namespace F1.Tests
                 { "CoinsPerGold", 20 },
                 { "CoinsPerEnemy", 2 },
                 { "CoinsPerFloor", 1 },
+                // An expedition starts without coins (the rule before 2026-10-19), so that the tests' coins stay as they were.
+                { "ExpeditionStartCoins", 0 },
                 { "GoldPerFloor", 2 },
                 { "GoldClear", 20 },
                 { "HirePrice", 30 },

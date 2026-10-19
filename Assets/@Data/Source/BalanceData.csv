@@ -35,6 +35,7 @@ EliteDropCount,2
 InventoryWidth,10
 InventoryHeight,3
 EliteBagPercent,50
+DropTierKeepPercent,50
 CampHealPercent,30
 CampFatigueRelief,20
 Tier1Percent,200
@@ -48,6 +49,7 @@ ShopRefreshStep,2
 ShopPotionChancePercent,50
 CoinsPerEnemy,1
 CoinsPerFloor,1
+ExpeditionStartCoins,20
 EliteCoinPercent,200
 SellPercent,25
 CoinsPerGold,10

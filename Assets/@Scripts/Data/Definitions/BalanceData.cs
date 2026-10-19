@@ -100,6 +100,7 @@ namespace F1.Data
             new KeySpec(nameof(InventoryWidth), BoardFrame.MaxSide, 30),
             new KeySpec(nameof(InventoryHeight), BoardFrame.MaxSide, 30),
             new KeySpec(nameof(EliteBagPercent), 0, 100),
+            new KeySpec(nameof(DropTierKeepPercent), 0, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
             new KeySpec(nameof(Tier1Percent), 100, Big),
@@ -113,6 +114,7 @@ namespace F1.Data
             new KeySpec(nameof(ShopPotionChancePercent), 0, 100),
             new KeySpec(nameof(CoinsPerEnemy), 0, Big),
             new KeySpec(nameof(CoinsPerFloor), 0, Big),
+            new KeySpec(nameof(ExpeditionStartCoins), 0, Big),
             new KeySpec(nameof(EliteCoinPercent), 100, Big),
             new KeySpec(nameof(SellPercent), 0, 100),
             new KeySpec(nameof(CoinsPerGold), 1, Big),
@@ -337,6 +339,12 @@ namespace F1.Data
         /// a bag drawn by <see cref="BagData.LootWeight"/> instead of an item. The number of drops stays.
         /// </summary>
         public int EliteBagPercent => _values[nameof(EliteBagPercent)];
+
+        /// <summary>
+        /// The chance, in percent, that a dropped item keeps the loot's tier (2026-10-19 play feedback, Docs/Design/03_Dungeon_Structure.md §5):
+        /// else it drops a tier lower. Common rolls nothing; 100 is the rule before it.
+        /// </summary>
+        public int DropTierKeepPercent => _values[nameof(DropTierKeepPercent)];
         /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>
         public int CampHealPercent => _values[nameof(CampHealPercent)];
         public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];
@@ -387,6 +395,12 @@ namespace F1.Data
         /// </summary>
         public int CoinsPerEnemy => _values[nameof(CoinsPerEnemy)];
         public int CoinsPerFloor => _values[nameof(CoinsPerFloor)];
+
+        /// <summary>
+        /// The region coins an expedition starts with (2026-10-19, with the shop floor: the first shop can sell a couple of things, so that the
+        /// build can be thought of early). A clear brings the coins left home as gold (CoinsPerGold).
+        /// </summary>
+        public int ExpeditionStartCoins => _values[nameof(ExpeditionStartCoins)];
         public int EliteCoinPercent => _values[nameof(EliteCoinPercent)];
 
         /// <summary>

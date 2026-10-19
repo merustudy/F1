@@ -1694,6 +1694,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 6817983623061504
+    m_Localized: 'Unique: no fatigue'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

@@ -212,6 +212,7 @@ Item.RowsBack,The item only works while its owner stands within the rear N rows 
 Item.RowsBackOne,The item only works in the rearmost row.,맨 뒤에서만 발동,Only in the rearmost row
 Item.FatigueCost,In an item's facts: equipment that costs fatigue when a battle starts. {0} = the cost.,전투마다 피로 +{0},Fatigue +{0} each battle
 Item.BaseWeapon,In a base weapon's facts: it costs no fatigue.,기본 무기: 피로 없음,Base weapon: no fatigue
+Item.UniqueNoFatigue,In a unique item's facts (2026-10-19): it costs no fatigue.,유니크: 피로 없음,Unique: no fatigue
 Item.Common,"The tier an item is found at. Not written in titles; only where a tier word is needed (the camp's mend: 일반 → 1성).",일반,Common
 Item.Tier1,"The first tier above Common (one merge). Round 69: the tiers count stars, as TFT does.",1성,1-star
 Item.Tier2,The second tier above Common.,2성,2-star
