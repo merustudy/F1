@@ -242,6 +242,9 @@ namespace F1.UI
             /// <summary>The words over a held thing's ghost (Slice B stage 19): the item it lies over goes to the inventory; a bag is laid.</summary>
             public const string GhostToInventory = "Board.GhostToInventory";
             public const string GhostBag = "Board.GhostBag";
+
+            /// <summary>Over a refused ghost when it is the stat the item asks for that refuses (Slice D stage 42, Round 89): "힘 7 필요".</summary>
+            public const string GhostRequires = "Board.GhostRequires";
         }
 
         /// <summary>The six stats' names (Slice D stage 32, Docs/Architecture/12_UI.md "스탯의 표시").</summary>
@@ -321,6 +324,9 @@ namespace F1.UI
             public const string UniqueLine = "Item.UniqueLine";
             public const string UniqueTitle = "Item.UniqueTitle";
             public const string Recipe = "Item.Recipe";
+
+            /// <summary>The last fact of equipment (Slice D stage 42, Round 89): the stat an owner needs and the least of it.</summary>
+            public const string Requires = "Item.Requires";
         }
 
         public static class Effect

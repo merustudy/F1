@@ -359,6 +359,12 @@ namespace F1.Flow
             return LootOpen && ExpeditionRules.LootMergesAt(Expedition, slot, memberIndex, x, y);
         }
 
+        /// <summary>Whether a member can wield an item (Slice D stage 42, the stat it asks for): what the ghost says when a board refuses a held item for it.</summary>
+        public bool MeetsRequirement(int memberIndex, ItemData item)
+        {
+            return Expedition != null && ExpeditionRules.MeetsRequirement(Expedition, memberIndex, item);
+        }
+
         /// <summary>Whether putting the item with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
         public bool MergesInInventoryAt(EquippedItem item, int x, int y)
         {

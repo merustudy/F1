@@ -477,6 +477,12 @@ namespace F1.UI
             if (!can)
             {
                 ghost.Kind = GhostKind.Refused;
+                // Why, when it is the stat the item asks for (Slice D stage 42, Round 89): "힘 7 필요". A refusal for want of squares says nothing, as before.
+                if (!manager.MeetsRequirement(member, item.Item))
+                {
+                    ghost.Label = UiStrings.Get(UiKeys.Board.GhostRequires, UiText.StatName(item.Item.ReqStat.Value), item.Item.ReqValue);
+                }
+
                 return ghost;
             }
 

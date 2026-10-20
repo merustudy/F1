@@ -121,10 +121,10 @@ namespace F1.UI
         /// </summary>
         public void ShowBeside(EquippedItem item, RectTransform cell, bool left, RectTransform panel, bool withFatigue, string mergeHint = null,
             string starLine = null, int starDamage = 0, string sellLabel = null, bool sellEnabled = false, StatBlock ownerStats = null, int ownerAccuracy = 0,
-            PassiveSpec ownerPassive = null, TraitBonus ownerTraits = null)
+            PassiveSpec ownerPassive = null, TraitBonus ownerTraits = null, bool ownerIsEnemy = false)
         {
             var parent = (RectTransform)transform.parent;
-            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage, sellLabel, sellEnabled, ownerStats, ownerAccuracy, ownerPassive, ownerTraits);
+            Vector2 size = Fill(item, mergeHint, withFatigue, starLine, starDamage, sellLabel, sellEnabled, ownerStats, ownerAccuracy, ownerPassive, ownerTraits, ownerIsEnemy);
             Rect anchor = TooltipPlacement.In(cell, parent);
             Rect placed = TooltipPlacement.Beside(anchor, size, left, TooltipPlacement.In(panel, parent), Screen(parent), out float notchY, out bool cardIsLeftOfCell);
             ShowNotch(cardIsLeftOfCell ? Notch.Right : Notch.Left, notchY);
@@ -140,7 +140,7 @@ namespace F1.UI
 
         /// <summary>Writes the card and measures it. The card is active and on top afterwards: the layout needs it active.</summary>
         Vector2 Fill(EquippedItem item, string mergeHint, bool withFatigue, string starLine, int starDamage, string sellLabel = null, bool sellEnabled = false, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null,
-            TraitBonus ownerTraits = null)
+            TraitBonus ownerTraits = null, bool ownerIsEnemy = false)
         {
             if (_sell != null)
             {
@@ -159,7 +159,7 @@ namespace F1.UI
             Set(_uniqueLine, unique ? UiStrings.Get(UiKeys.Item.UniqueTitle) : null);
             string recipe = UiText.RecipeHint(item);
             mergeHint = recipe == null ? mergeHint : string.IsNullOrEmpty(mergeHint) ? recipe : mergeHint + "\n" + recipe;
-            UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage, ownerStats, ownerAccuracy, ownerPassive, ownerTraits);
+            UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage, ownerStats, ownerAccuracy, ownerPassive, ownerTraits, ownerIsEnemy);
             Set(_facts, facts);
             // Under the effects, one line: what the stars add (Round 81: "(★ 숫돌 +1)"). The owner's stat multiplier tail "(힘 12 ×1.2)" is gone
             // (2026-10-20 Round 88 2차: the effects stand first on the card and their values already count the owner's stats).

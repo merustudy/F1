@@ -1019,7 +1019,7 @@ namespace F1.UI
             bool party = board.Unit.Side == BattleSide.Party;
             _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party,
                 starLine: party ? BattleStarLine(board.Unit, item) : null, starDamage: item.StarDamage, ownerStats: board.Unit.Setup.Stats, ownerAccuracy: board.Unit.Setup.Accuracy, ownerPassive: board.Unit.Setup.Passive,
-                ownerTraits: board.Unit.Setup.Traits);
+                ownerTraits: board.Unit.Setup.Traits, ownerIsEnemy: !party);
             Managers.Sound.PlayEffect(SoundEffect.Button);
         }
 

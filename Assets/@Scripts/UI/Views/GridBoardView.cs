@@ -297,7 +297,8 @@ namespace F1.UI
                 if (_ghostLabelPlate.gameObject.activeSelf)
                 {
                     _ghostLabel.text = ghost.Label;
-                    _ghostLabel.color = ghost.Kind == GhostKind.Refused ? UiPalette.GhostRefused : UiPalette.Text;
+                    // White words in the black box whatever the ghost's colour (Round 89 mock: "힘 7 필요" over the red): the box reads the same everywhere.
+                    _ghostLabel.color = UiPalette.Text;
                     float width = Mathf.Ceil(_ghostLabel.GetPreferredValues(ghost.Label).x) + 2f * LabelPadX;
                     Vector2 corner = GridGeometry.Corner(ghost.At.X, ghost.At.Y);
                     float x = Mathf.Clamp(corner.x + GridGeometry.Span(ghost.Width) / 2f - width / 2f, -8f, GridGeometry.Width + 8f - width);

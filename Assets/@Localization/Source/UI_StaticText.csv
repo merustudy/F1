@@ -196,6 +196,7 @@ Board.StateDetail,"On the detail line when the state's name under a member's fee
 Board.GhostToInventory,Over a held item's ghost where it would push one item out (Slice B stage 19). {0} = that item's name.,{0} → 인벤토리,{0} → inventory
 Board.GhostBag,Over a held bag's ghost where it can be laid (Slice B stage 19).,가방 놓기,Lay the bag
 Board.MergeInto,On a board cell the chosen item would merge into. {0} = the tier the merge makes.,합치기 → {0},Merge → {0}
+Board.GhostRequires,"Over a held item's refused ghost on the board of a member who cannot wield it (Slice D stage 42, Round 89): the stat the item asks for. {0} = the stat's name. {1} = the value asked.",{0} {1} 필요,Needs {0} {1}
 Item.TooltipTitle,"The title of an item above Common (round 57 without the grade; round 69 with the star word). {0} = item name. {1} = tier. A Common item shows its name alone.",{0} {1},{0} {1}
 Item.Weapon,Item category: a weapon held in the hand.,무기 장비,Weapon
 Item.Armor,Item category: defensive gear.,방어 장비,Armor
@@ -232,6 +233,7 @@ Item.Unique,"In a unique item's facts (stage 23), first.",유니크,Unique
 Item.UniqueLine,"Under a unique item's facts (stage 23): the party holds one.",유니크: 파티에 하나,Unique: one per party
 Item.UniqueTitle,"Under the plate of a unique item's card (stage 23). A unique has no tier.",유니크,Unique
 Item.Recipe,"On the card of a recipe's base or catalyst (stage 23). {0} = the base with its tier. {1} = the catalyst with its tier. {2} = the unique item.",담금질(야영지): {0} + {1}(★ 켜짐) → {2},Forge (camp): {0} + {1} (star lit) → {2}
+Item.Requires,"The last of an item's facts (Slice D stage 42, Round 89): the stat an owner needs to wield it and the least of it. {0} = the stat's name. {1} = the value. In the blood red when the owner falls short, or when nobody living of the party meets it on a card without an owner.",요구 {0} {1},Requires {0} {1}
 Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
 Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}

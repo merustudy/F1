@@ -1905,6 +1905,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673562083098625
+  - m_Id: 7250864954662912
+    m_Key: Board.GhostRequires
+    m_Metadata:
+      m_Items:
+      - rid: 8623673568986660864
+  - m_Id: 7250864967245824
+    m_Key: Item.Requires
+    m_Metadata:
+      m_Items:
+      - rid: 8623673568986660865
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3649,3 +3659,16 @@ MonoBehaviour:
         m_CommentText: "A stat's name (2026-10-20 \uC2A4\uD0EF \uAC1C\uC815: spirit
           renamed). Wisdom: the speed and critical chance of magic equipment, and
           the power of attack and support items."
+    - rid: 8623673568986660864
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Over a held item''s refused ghost on the board of a member
+          who cannot wield it (Slice D stage 42, Round 89): the stat the item asks
+          for. {0} = the stat''s name. {1} = the value asked.'
+    - rid: 8623673568986660865
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The last of an item''s facts (Slice D stage 42, Round 89):
+          the stat an owner needs to wield it and the least of it. {0} = the stat''s
+          name. {1} = the value. In the blood red when the owner falls short, or
+          when nobody living of the party meets it on a card without an owner.'

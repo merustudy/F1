@@ -1416,7 +1416,8 @@ namespace F1.Tests
             yield return null;
             Assert.AreEqual(frontIndex, party.Hand.ItemMember, "Picked up by any of its squares.");
             Assert.IsFalse(party.ToInventory.interactable, "No room for it in the inventory.");
-            PartyBoardView board2 = party.ColumnOfRow(UiTestUtil.FlatRow(1)).BoardView;
+            // Slice D stage 42: another board takes it only where its member can wield it (the priest's staff asks Wis 5: the mage's board, not the warrior's).
+            PartyBoardView board2 = party.ColumnOfRow(RowOfAWielder(expedition, data.Items.Get(weapon), front.Row)).BoardView;
             UiTestUtil.HoverSquare(board2, 0, 1);
             yield return null;
             Assert.AreEqual(GhostKind.Fits, board2.Grid.GhostShown, "Another board's empty row still takes it.");
@@ -2036,8 +2037,9 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             ExpeditionMember first = expedition.Members[row1.Member];
             ExpeditionMember second = expedition.Members[row2.Member];
-            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger")), 0, 1);
-            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger")), 1, 2);
+            // A 2x1 weapon everyone wields (Slice D stage 42: the rusty blade asks Str 3; the dagger's Dex 5 neither the priest nor the warrior has).
+            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("rusty_blade")), 0, 1);
+            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("rusty_blade")), 1, 2);
             map.Refresh();
             yield return null;
             PartyBoardView board1 = row1.BoardView;
@@ -2064,7 +2066,7 @@ namespace F1.Tests
             Assert.AreEqual(GhostKind.Merges, board2.Grid.GhostShown);
             Assert.AreEqual(UiStrings.Get(UiKeys.Board.MergeInto, UiText.TierWord(ItemTier.Tier1)), board2.Grid.GhostLabel, "The ghost's label colours the tier word (round 69).");
 
-            // Put there, they merge: one Bronze dagger on row 2, where it lay; none on row 1.
+            // Put there, they merge: one 1-star blade on row 2, where it lay; none on row 1.
             Managers.Sound.ForgetEffects();
             UiTestUtil.ClickSquare(board2, 1, 2);
             yield return null;
@@ -2091,7 +2093,7 @@ namespace F1.Tests
             PartyColumnView row1 = party.ColumnOfRow(UiTestUtil.FlatRow());
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
             front.Board.Bags.Add(new BoardBag(data.Bags.Get("leather_pouch"), new Placement(0, 3)));
-            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("dagger")), 0, 3);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("rusty_blade")), 0, 3);   // a 2x1 weapon the priest wields (Slice D stage 42: Str 3)
             map.Refresh();
             yield return null;
             PartyBoardView board = row1.BoardView;
@@ -2278,8 +2280,9 @@ namespace F1.Tests
             ExpeditionState expedition = Managers.Expedition.Expedition;
             ExpeditionMember first = expedition.Members[row1.Member];
             ExpeditionMember second = expedition.Members[row2.Member];
-            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("dagger")), 0, 1);
-            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("dagger")), 1, 2);
+            // A 2x1 weapon everyone wields (Slice D stage 42: the rusty blade asks Str 3; the dagger's Dex 5 neither the priest nor the warrior has).
+            UiTestUtil.Put(first, new EquippedItem(data.Items.Get("rusty_blade")), 0, 1);
+            UiTestUtil.Put(second, new EquippedItem(data.Items.Get("rusty_blade")), 1, 2);
             map.Refresh();
             yield return null;
             PartyBoardView board1 = row1.BoardView;
@@ -2465,10 +2468,10 @@ namespace F1.Tests
             Assert.AreEqual(expedition.Loot.Count, battle.Drops.Count, "A drop per slot.");
             Assert.AreEqual(UiStrings.Get(UiKeys.Battle.LootHint), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
 
-            // Staged: the first drop is a Bronze dagger, and row 1 already holds a Bronze dagger under its weapon. The battle's boards gave
+            // Staged: the first drop is a 1-star rusty blade, and row 1 already holds a 1-star rusty blade under its weapon. The battle's boards gave
             // way to the node map's: the member's board stands in row 1's column with the weapon and the staged item on it.
             int index = 0;
-            ItemOffer drop = new ItemOffer(OfferKind.Item, "dagger", ItemTier.Tier1);
+            ItemOffer drop = new ItemOffer(OfferKind.Item, "rusty_blade", ItemTier.Tier1);   // a 2x1 weapon the front member wields (Slice D stage 42: Str 3)
             expedition.Loot[index] = drop;
             int flat = UiTestUtil.FlatRow();
             PartyBoardView row1 = battle.LootBoardOfRow(flat);
@@ -2596,10 +2599,12 @@ namespace F1.Tests
             // The boards work as on the node map while nothing is picked: row 1's weapon picked up (the hint tells it), put on row 2's
             // empty row, moved. A right click on an item opens its card above the panel.
             PartyBoardView row1 = battle.LootBoardOfRow(1);
-            PartyBoardView row2 = battle.LootBoardOfRow(2);
             int front = expedition.Members.FindIndex(m => m.Alive && m.Row == 1);
-            int second = expedition.Members.FindIndex(m => m.Alive && m.Row == 2);
             EquippedItem weapon = UiTestUtil.ItemAt(expedition.Members[front], 0, 0);
+            // Slice D stage 42: the weapon goes to a member who can wield it — the viking's axe asks Str 5, which the warrior in row 3 has and the priest in row 2 has not.
+            int secondRow = RowOfAWielder(expedition, weapon.Item, 1);
+            PartyBoardView row2 = battle.LootBoardOfRow(secondRow);
+            int second = expedition.Members.FindIndex(m => m.Alive && m.Row == secondRow);
             UiTestUtil.RightClickSquare(row1, weapon.Item.Width - 1, 0);
             yield return null;
             Assert.IsTrue(battle.Tooltip.IsShown);
@@ -2611,7 +2616,7 @@ namespace F1.Tests
             StringAssert.Contains(UiText.ItemTitle(weapon), UiTestUtil.TextAt(battle, "Frame/BoardPanel/LootHint"));
             UiTestUtil.HoverSquare(row2, 0, 1);
             yield return null;
-            Assert.AreEqual(GhostKind.Fits, row2.Grid.GhostShown, "Row 2's empty row can take it.");
+            Assert.AreEqual(GhostKind.Fits, row2.Grid.GhostShown, "The wielder's empty row can take it.");
             UiTestUtil.ClickSquare(row2, 0, 1);
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(0, expedition.Members[front].Board.Items.Count);
@@ -3052,6 +3057,89 @@ namespace F1.Tests
             Assert.AreEqual(1f, board.Items[helmIndex].Charge);
         }
 
+        /// <summary>
+        /// Equipment requirements on the screens (Slice D stage 42, Round 89 "권장안 구현"): the last fact of a piece of equipment is "요구 힘 N" — plain on the
+        /// board of an owner who meets it, in the blood red on a card without an owner when nobody living of the party does; a held item's ghost over the
+        /// board of a member who cannot wield it is refused with "힘 N 필요" and a click there lays nothing down, while a wielder's board refuses it only for
+        /// want of squares, without those words.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Requirement_TheCardSaysWhatTheItemAsks_AndTheGhostSaysWhyABoardRefusesIt()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            ItemData halberd = data.Items.Get("halberd");
+            Assume.That(halberd.ReqStat == Stat.Str && halberd.ReqValue == 7, "The shipped halberd asks Str 7.");
+            ExpeditionMember warrior = expedition.Members.First(m => m.JobId == "warrior");
+            ExpeditionMember priest = expedition.Members.First(m => m.JobId == "priest");
+            ExpeditionMember viking = expedition.Members.First(m => m.JobId == "viking");
+            Assume.That(warrior.Stats.Str < 7 && priest.Stats.Str < 7 && viking.Stats.Str >= 7, "The shipped base values: only the viking lifts the halberd.");
+
+            // The warrior's longsword on his board: "요구 힘 5", plain, the last fact.
+            EquippedItem longsword = UiTestUtil.ItemAt(warrior, 0, 0);
+            string requires = UiStrings.Get(UiKeys.Item.Requires, UiText.StatName(Stat.Str), longsword.Item.ReqValue);
+            UiTestUtil.RightClickSquare(party.ColumnOfRow(warrior.Row).BoardView, 0, 0);
+            yield return null;
+            Assert.AreSame(longsword, party.Tooltip.Item);
+            string facts = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts");
+            StringAssert.EndsWith("<nobr>" + requires + "</nobr>", facts, "The requirement is the last fact.");
+            StringAssert.DoesNotContain(UiText.Colored(requires, UiPalette.BloodLight), facts, "He wields it: plain.");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            // A halberd in the inventory with nobody of the party able to lift it (the viking staged a point short): its card's line is red.
+            viking.Stats = viking.Stats.With(Stat.Str, 6);
+            expedition.Inventory.Add(new EquippedItem(halberd));
+            map.Refresh();
+            yield return null;
+            UiTestUtil.Click(map, "Frame/BoardPanel/InventoryToggle");
+            yield return null;
+            InventoryGridView grid = party.InventoryGrid;
+            Placement at = expedition.Inventory.Items[0].At;
+            string asked = UiStrings.Get(UiKeys.Item.Requires, UiText.StatName(Stat.Str), halberd.ReqValue);
+            grid.SquareAt(at.X, at.Y).RightClickNow();
+            yield return null;
+            Assert.IsTrue(party.Tooltip.IsShown);
+            Assert.AreEqual(halberd, party.Tooltip.Item.Item);
+            StringAssert.Contains(UiText.Colored(asked, UiPalette.BloodLight), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts"), "Nobody of the party wields it: red.");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            // With the viking at his base value again the same card is plain: someone of the party wields it.
+            viking.Stats = viking.Stats.With(Stat.Str, 7);
+            grid.SquareAt(at.X, at.Y).RightClickNow();
+            yield return null;
+            Assert.IsTrue(party.Tooltip.IsShown);
+            StringAssert.Contains("<nobr>" + asked + "</nobr>", UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts"), "The viking wields it: plain.");
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            // Held over the priest's board: refused, and the ghost says why; a click there lays nothing down. Over the viking's it is not the stat
+            // that stands in the way (his axe does: it would be pushed out), so the words are not there.
+            grid.SquareAt(at.X, at.Y).Click();
+            yield return null;
+            Assert.IsTrue(party.Hand.Holding);
+            string needs = UiStrings.Get(UiKeys.Board.GhostRequires, UiText.StatName(Stat.Str), halberd.ReqValue);
+            PartyBoardView priestBoard = party.ColumnOfRow(priest.Row).BoardView;
+            UiTestUtil.HoverSquare(priestBoard, 0, 1);
+            yield return null;
+            Assert.AreEqual(GhostKind.Refused, priestBoard.Grid.GhostShown);
+            Assert.AreEqual(needs, priestBoard.Grid.GhostLabel);
+            UiTestUtil.ClickSquare(priestBoard, 0, 1);
+            yield return null;
+            Assert.IsTrue(party.Hand.Holding, "Refused: still held.");
+            Assert.IsFalse(priest.Board.Items.Any(i => i.Item.Item == halberd), "Nothing landed on the priest's board.");
+            PartyBoardView vikingBoard = party.ColumnOfRow(viking.Row).BoardView;
+            UiTestUtil.HoverSquare(vikingBoard, 0, 0);
+            yield return null;
+            Assert.AreNotEqual(GhostKind.Refused, vikingBoard.Grid.GhostShown, "The viking wields it: his board takes it (pushing the axe out).");
+            Assert.AreNotEqual(needs, vikingBoard.Grid.GhostLabel);
+        }
+
         /// <summary>New run, the first mercenaries of the roster one per row, and depart: the node map before the first floor.</summary>
         /// <summary>The level and the experience (stage 27, Docs/Design/05_Mercenary_Growth.md §2): "Lv N" on the strip's chip, and on the barracks' line with the experience toward the next level and its bar; "경험치 최대" at the last level.</summary>
         [UnityTest]
@@ -3342,6 +3430,15 @@ namespace F1.Tests
             Assert.AreEqual("Lv 2 → Lv 3: 후보 4명 → 5명 · 금 80 · 5일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable, "60 gold does not cover level 3.");
             UiTestUtil.CloseQuarter(lobby);
+        }
+
+        /// <summary>
+        /// The row of the first living member, other than one row, who can wield an item (Slice D stage 42, 장비 요구 스탯): where a test may lay it down.
+        /// The shipped party of these tests stands astrid (viking), ella (priest), kai (warrior), mira (mage) in rows 1..4 (the roster in id order).
+        /// </summary>
+        static int RowOfAWielder(ExpeditionState expedition, ItemData item, int notRow)
+        {
+            return expedition.Members.First(m => m.Alive && m.Row != notRow && StatRules.MeetsRequirement(m.Stats, item)).Row;
         }
 
         static IEnumerator DepartToTheMap()

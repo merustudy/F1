@@ -1732,6 +1732,16 @@ MonoBehaviour:
     m_Localized: WIS
     m_Metadata:
       m_Items: []
+  - m_Id: 7250864954662912
+    m_Localized: Needs {0} {1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7250864967245824
+    m_Localized: Requires {0} {1}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1927,3 +1937,5 @@ MonoBehaviour:
         - id: 6846191462506496
         - id: 6846191475089408
         - id: 6911573305057280
+        - id: 7250864954662912
+        - id: 7250864967245824

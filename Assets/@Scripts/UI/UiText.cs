@@ -301,11 +301,12 @@ namespace F1.UI
         /// <param name="starDamage">What the stars on the item's board add to a weapon's damage (stage 20): its damage line counts it.</param>
         /// <param name="ownerStats">The stats of the mercenary whose board the item is on (Slice D stage 32): its values count them. Null for an item without an owner, or an enemy's.</param>
         /// <param name="ownerAccuracy">An enemy owner's Accuracy (Slice D stage 33), which its card's hit chance counts; 0 otherwise.</param>
+        /// <param name="ownerIsEnemy">True for an enemy's item (Slice D stage 42): its requirement line is plain, the enemy being never asked.</param>
         public static void ItemCard(EquippedItem item, out string facts, out string effects, out string fatigue, int starDamage = 0, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null,
-            TraitBonus ownerTraits = null)
+            TraitBonus ownerTraits = null, bool ownerIsEnemy = false)
         {
             // Each fact keeps together (stage 22: "치명타 5%" split as "치|명타" on a Korean card); the line breaks between facts only.
-            facts = string.Join(FactSeparator, ItemFacts(item, ownerStats, ownerAccuracy, ownerPassive, ownerTraits).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
+            facts = string.Join(FactSeparator, ItemFacts(item, ownerStats, ownerAccuracy, ownerPassive, ownerTraits, ownerIsEnemy).ConvertAll(fact => "<nobr>" + fact + "</nobr>"));
             effects = string.Join("\n", ItemEffects(item, starDamage, ownerStats));
             var parts = new List<string>();
             AddFatigue(parts, item);
@@ -433,7 +434,7 @@ namespace F1.UI
 
         /// <param name="ownerStats">The owner's stats (Slice D stage 33): the critical and hit chances count them. Null without an owner.</param>
         /// <param name="ownerAccuracy">An enemy owner's Accuracy, which the hit chance counts.</param>
-        static List<string> ItemFacts(EquippedItem item, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null, TraitBonus ownerTraits = null)
+        static List<string> ItemFacts(EquippedItem item, StatBlock ownerStats = null, int ownerAccuracy = 0, PassiveSpec ownerPassive = null, TraitBonus ownerTraits = null, bool ownerIsEnemy = false)
         {
             ItemData data = item.Item;
             var facts = new List<string>
@@ -476,7 +477,45 @@ namespace F1.UI
                 facts.Add(Rows(data.Rows));
             }
 
+            // What the owner needs to wield it (Slice D stage 42, Round 89 A안): the last fact, as Diablo II writes its requirements.
+            if (data.HasRequirement)
+            {
+                facts.Add(RequirementFact(data, ownerStats, ownerIsEnemy));
+            }
+
             return facts;
+        }
+
+        /// <summary>
+        /// "요구 힘 5", the stat an owner needs and the least of it (Slice D stage 42, Round 89): plain when it is met — by the owner, or, on a card without an
+        /// owner (the floor, the inventory, the shop's box), by some living member of the party — and in the blood red when it is not. An enemy's card is
+        /// plain: the enemy is never asked. The rule is the domain's (<see cref="StatRules.MeetsRequirement"/>); the card only colours by it.
+        /// </summary>
+        static string RequirementFact(ItemData data, StatBlock ownerStats, bool ownerIsEnemy)
+        {
+            string fact = UiStrings.Get(UiKeys.Item.Requires, StatName(data.ReqStat.Value), data.ReqValue);
+            bool met = ownerIsEnemy || (ownerStats != null ? StatRules.MeetsRequirement(ownerStats, data) : PartyWields(data));
+            return met ? fact : Colored(fact, UiPalette.BloodLight);
+        }
+
+        /// <summary>Whether some living member of the expedition going on can wield an item; true with no expedition (nobody to ask).</summary>
+        static bool PartyWields(ItemData item)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            if (expedition == null)
+            {
+                return true;
+            }
+
+            foreach (ExpeditionMember member in expedition.Members)
+            {
+                if (member.Alive && StatRules.MeetsRequirement(member.Stats, item))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
