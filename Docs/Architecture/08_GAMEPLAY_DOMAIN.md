@@ -124,6 +124,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 깊은 층의 적: `BuildBattleSetup(…, floor)`은 보스가 아닌 무리의 적을 1층보다 한 층 깊어질 때마다 최대 HP `EnemyHpPerFloorPercent`%, 아이템의 세기 `EnemyPowerPerFloorPercent`%만큼 올린다(22단계: 그 전에는 아이템 등급).
   HP는 **복리**다(2026-10-17, Design/03 §1): `ExpeditionRules.DeeperMaxHp`가 층마다 `×(100 + p)/100`를 정수(0.01 단위)로 거듭한다 — 29층 아래에서 5%는 ×4.1(더하기였다면 ×2.45). 아이템의 세기는 더하기 그대로. 정수 연산이라 결정론을 지킨다.
   보스 무리도 제 노드의 층만큼 받는다(2026-10-17. 그 전에는 데이터 그대로였다). 최종 결전의 지도는 보스 하나가 1층이라 보정이 없다. 층은 노드의 것이라 이어하기도 같은 Setup을 만든다.
+  **깊은 층의 아이템**(2026-10-20, Design/03 §4): `EnemySetup`은 적의 아이템을 `EnemyData.ItemsAt(층)`으로 읽는다 — 기본 아이템 뒤에 그 층까지의 깊이 묶음(`EnemyData.DeepItems`, 누적)을 데이터의 차례대로 더한 목록이고, 페이즈 묶음도 `ItemsAt(페이즈, 층)`으로 같이 더한다. 묶음의 세기에도 `EnemyPowerPerFloorPercent`의 더하기가 걸린다. **보스 무리**(`EnemyGroupData.IsBoss`)는 `carriedFloor` 1로 기본 아이템만 든다(HP의 깊이는 그대로). 전투의 발동 순서와 `BoardLayout.Packed`는 그 목록을 그대로 쓴다(틀 안에 드는지는 데이터 검사가 지킨다: `05_STATIC_DATA.md`).
 - **최종 보스의 페이즈**(28단계, Design/02 §9): `EnemyData.Phases`는 `BattleUnitSetup.Phases`(`BattlePhaseSetup`: 문턱 %, 그 묶음의 `EquippedItem` 목록, 화면이 그릴 `Layout`)로 들어간다(깊은 층의 세기 배율은 묶음에도 같이 건다. 페이즈가 없는 적은 빈 목록, 아군은 null). 엔진은 피해를 적은 뒤(`ApplyDamage`의 `Damaged` 다음, 살아 있을 때) HP가 다음 문턱에 닿았으면 `EnterPhasesReached`로 그 묶음을 들게 한다: 아이템 상태를 새로 만들고(서는 자리로 `Works`를 다시 판정) 쿨다운은 그 순간부터(`NextFireMs = TimeMs + 쿨다운`), 한 타로 여러 문턱을 지나면 차례로 하나씩, 페이즈마다 `PhaseChanged`(Target 보스, A 페이즈 번호, B 문턱 %, C 남은 HP)를 적는다. `BattleUnit.Phase`·`Items`·`EquippedNow`·`Layout`이 지금의 묶음이다. 개에 든 적은 페이즈에 들지 않는다. 입력 기록의 재생은 같은 Setup으로 같은 페이즈를 지난다(결정론).
 
 ## 전리품 (Slice B 18단계)
@@ -131,7 +132,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 규칙은 `Docs/Design/03_Dungeon_Structure.md` §5가 소유한다. 수치는 `BalanceData`(`DropCount`, `EliteDropCount`, `DropTierKeepPercent`)와 `DungeonData`(단계 `ItemTierAt`: 상점의 물건과 같은 것. 22단계부터 등급은 없다)에 있다.
 
 - 일반 아이템 드랍(2026-10-17): `DropLoot`은 드랍 자리마다 던전의 `GeneralDropChancePercent`를 굴려 `DropWeight`로 뽑은 일반 아이템(그 층의 단계)을 두고, 아니면 적의 아이템을 둔다(적의 것이 다 떨어지면 일반, 가중치 있는 아이템이 없으면 전과 같이 굴리지 않고 적의 것만 — 난수열이 그대로다).
-- `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 든 아이템(`EnemyData.Items`)을 모두 모아
+- `ExpeditionRules.CompleteBattle`이 이긴 전투(보스 아님)의 전리품을 `DropLoot(노드)`로 뽑아 `ExpeditionState.Loot`에 두고 `ExpeditionPhase.PickingLoot`로 둔다: 그 무리의 적들이 **그 층에서** 든 아이템(`EnemyData.ItemsAt(노드의 층)`: 기본 아이템과 깊이 묶음, 2026-10-20)을 모두 모아
   `DropCount`개(정예 `EliteDropCount`개)를 전리품 스트림(`RngStream.Loot`, `Derive(원정 시드, "loot", 노드 id)`)으로 겹치지 않게 뽑는다. 드랍(`ItemOffer`)의 단계는 층의 것(정예 한 단계 위)이고, 일반 위의 단계면 아이템마다 `DropTierKeepPercent`%로 그대로·아니면 한 단계 아래다(2026-10-19, `DropTier`: 따로 파생한 `Derive(원정 시드, "loot-tier", 노드 id)`의 전리품 스트림이라 무엇이 떨어지는지는 바뀌지 않는다). 수치는 아이템 데이터의 값 그대로다(22단계부터 등급은 없다) — 적이 들었던 세기(`ItemGrant.PowerPercent`)가 아니다.
 - `Loot`은 드랍마다 한 자리이고 주운 자리는 null이다. 명령: `TakeLoot(자리, 구성원, Placement)`(위 "놓기"와 같은 규칙. 가방이면 틀에), `TakeLootToInventory(자리)`(아이템만), `TakeAllLootToInventory`(2026-10-17: 남은 것 가운데 인벤토리에 자리가 있는 아이템을 놓인 차례대로 모두, 각각 첫 빈 자리에; 가방과 자리 없는 것은 남고, 다 넣으면 끝남. 넣은 수를 돌려줌), `LeaveLoot`. 질의: `DropAt`, `CanTakeLoot`, `CanTakeLootToInventory`, `CanTakeAllLootToInventory`, `LootMergesAt(자리, 구성원, X, Y)`.
 - 정예의 둘째 드랍은 `EliteBagPercent`%로 가방이다(`DrawBag`: `BagData.LootWeight`. 같은 전리품 스트림). 드랍(`ItemOffer`)의 종류는 `OfferKind.Item`·`Bag`이다.
@@ -221,33 +222,35 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 시뮬 `run`의 정책(`--build 0|1`): 고용·치료 뒤 금이 "다음 레벨의 값 + 고용비" 이상이면 가장 싼 다음 레벨부터(같으면 역마차 → 막사 → 쉼터). 전후는 `Docs/Design/08_Simulation_Report.md` §34·§35.
 - Test: `BuildingRulesTests`(시작 레벨, 값과 공사, 쉬기·정산의 완성, 동시 건설과 금, 잠금 셋과 쉬기·출발, 기한 뒤, 효과 셋, 같은 시드), `RunSaveMapperTests`(17, 15 → 16, 16 → 17: 성문을 버림, 17의 성문은 거름), `StaticDataTransformerTests`·`ShippedDataTests`(사다리).
 
-## 스탯 (Slice D 32단계)
+## 스탯 (Slice D 32단계 → 2026-10-20 스탯 개정, 41단계)
 
-규칙은 `Docs/Design/05_Mercenary_Growth.md` §2(스탯 여섯·척도·직업 기본값·체력의 HP)와 `02_Combat_System.md` §4(세기)가 소유한다. 수치는 `JobData`의 스탯 열과 `BalanceData`(`StatBaseline`·`StatMin`·`StatMax`·`StatPowerPercentPerPoint`·`HpPercentPerConPoint`)다.
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §2(스탯 여섯·기준값·직업 기본값·체력의 HP)와 `02_Combat_System.md` §4(세기·쿨타임·치명타)·§5(명중·회피)·§6(빈사), `04_Lobby_100Day_Economy.md` §3(인내·각성)이 소유한다. 경위는 `Docs/Design/17_Stat_Revision_Proposal.md`. 수치는 `JobData`의 스탯 열과 `BalanceData`다.
 
-- Type(`F1.Data`): `Stat`(`Str`·`Dex`·`Con`·`Int`·`Spi`·`End`)과 `StatBlock`(불변, 여섯 정수, `this[Stat]`). 직업의 기본값은 `JobData.Stats`다. **null이면 모두 기준값**으로 센다(Test 데이터의 직업. 출고 CSV는 여섯 열이 필수라 늘 있다). 아이템의 축은 `ItemData.ScalesWith`(`Stat?`: `Str`·`Dex`·`Int`·`Spi`만, 효과가 있는 아이템만).
-- 규칙은 `StatRules` 한 곳이다: `BaseOf`(직업의 기본값, 없으면 기준값 여섯), `PowerPercent`(100 + `StatPowerPercentPerPoint` × (값 − 기준)), `HpPercent`(`HpPercentPerConPoint` × (체력 − 기준)), `Scale`(곱하고 내림, 최소 1 — 피해·회복·보호막의 0.01 단위)과 `ScaleStacks`(반올림, 최소 1 — 화상의 중첩). 기준에서 가장 낮은 스탯도 %가 1 이상이라는 것은 `BalanceData`의 검증이 보장한다(숨은 바닥값 없음).
-- 상태: `MercenaryState.Stats`·`RecruitState.Stats`(새 런의 로스터와 뽑힌 후보는 `BaseOf`. 후보의 편차는 34단계), 고용은 후보의 것을 그대로 가져간다. `PartyMember.Stats`(null이면 `BaseOf`) → `ExpeditionMember.Stats` → `BattleUnitSetup.Stats`(적은 null: 스탯이 없다). 원정 동안 스탯은 바뀌지 않는다(성장은 막사의 레벨업에서, 35단계).
-- 최대 HP: `LevelRules.MaxHpOf(data, jobId, stats)` = 직업의 `MaxHp` × (100 + `HpPercent`) / 100(내림). 레벨은 체력의 성장으로만 HP에 닿는다(아래 "후보의 편차와 성장").
-- 세기: `BattleEngine.Activate`가 주인의 `Stats`와 아이템의 `ScalesWith`로 `PowerPercent`를 구해 곱한다 — 피해는 대상마다 **치명타 뒤, 무기 피해 % 패시브 앞**(굴림 → 별 → 치명타 → 스탯 → 패시브), 회복·보호막은 `Scale`, 화상은 `ScaleStacks`. 적(`Stats` null)과 `ScalesWith`가 없는 아이템은 100%. 직업 패시브의 크기(보호막·화상 +3·무기 피해 %)는 곱하지 않는다. 난수를 더 쓰지 않으므로 같은 Setup은 같은 로그다.
+- Type(`F1.Data`): `Stat`(`Str`·`Dex`·`Con`·`Int`·`Wis`·`End` — 2026-10-20에 `Spi`가 `Wis`가 됐다)과 `StatBlock`(불변, 여섯 정수, `this[Stat]`). 직업의 기본값은 `JobData.Stats`(출고 CSV는 여섯 열이 필수, 값은 1~8). **null이면 모두 `StatBaseline`**으로 센다(Test 데이터의 직업). 직업에 HP 열은 없다(2026-10-20).
+  아이템은 **물리/마법** `ItemData.School`(`ItemSchool`: 무기 장비·공격 아이템은 비우면 `Physical`, 방어 장비는 선택, 지원·기타는 없음 — 생성자가 거절)을 가지고, 세기의 축 `ItemData.ScalesWith`는 거기서 **파생**한다(물리 무기 → `Str`, 마법 무기 → `Int`, 공격·지원 아이템 → `Wis`, 그 밖은 null). `QuickenedBy`는 쿨타임의 축(물리 장비 → `Dex`, 마법 장비 → `Wis`, 그 밖은 null). `CritDamagePercent`(아이템·특성)는 물리 치명타 배수의 %p다.
+- **기준값은 효과마다**(`BalanceData`): 세기·쿨타임 `PowerBaseline`(5), 명중·치명타·회피·각성·빈사 `StatBaseline`(10), 오르는 피로 `FatigueBaseline`(5), HP는 0부터의 합. 범위 `StatMin`~`StatMax`(1~30). 검사: 세 기준이 범위 안, 가장 낮은 스탯의 세기 ≥ 1%, 가장 높은 스탯의 쿨타임 ≥ 1%, `HpBandLow` < `HpBandMid`.
+- 규칙은 `StatRules` 한 곳이다: `BaseOf`(직업의 기본값, 없으면 기준값 여섯), `PowerPercent`(100 + `StatPowerPercentPerPoint` × (축 스탯 − `PowerBaseline`)), `CooldownPercent`(100 − `CooldownPercentPerPoint` × (`QuickenedBy` 스탯 − `PowerBaseline`), 최소 1; 축이 없거나 적이면 100)와 `CooldownMs`(반올림, 최소 `MinCooldownMs`), `MaxHpOf(balance, 체력)`(1~`HpBandLow`점은 `HpPerConPointLow`, `HpBandMid`점까지 `HpPerConPointMid`, 그 위 `HpPerConPointHigh`의 합), `Scale`(곱하고 내림, 최소 1)과 `ScaleStacks`(반올림, 최소 1), 그리고 아래 "판정의 스탯"의 굴림들.
+- 상태: `MercenaryState.Stats`·`RecruitState.Stats`(새 런의 로스터와 뽑힌 후보는 `BaseOf`에 후보의 편차), 고용은 후보의 것을 그대로. `PartyMember.Stats`(null이면 `BaseOf`) → `ExpeditionMember.Stats` → `BattleUnitSetup.Stats`(적은 null). 원정 동안 바뀌지 않는다.
+- 최대 HP: `LevelRules.MaxHpOf(data, jobId, stats, traits)` = `StatRules.MaxHpOf(체력)` × (100 + 특성의 %) / 100(내림, 최소 1). 직업은 이름뿐이다. 레벨은 체력의 성장으로만 HP에 닿는다(아래 "편차와 성장").
+- 세기: `BattleEngine.Activate`가 주인의 `Stats`와 아이템의 `ScalesWith`로 `PowerPercent`를 구해 곱한다 — 피해는 대상마다 **치명타 뒤, 무기 피해 % 패시브 앞**(굴림 → 별 → 치명타 → 스탯 → 패시브), 회복·보호막은 `Scale`, 화상은 `ScaleStacks`. 적(`Stats` null)과 축 없는 아이템(방어 장비·기타)은 그대로.
+- 쿨타임(2026-10-20): `BattleEngine.CreateUnit`과 페이즈 진입이 아이템마다 `EffectiveCooldown(기본, 지역 permille, StatRules.CooldownPercent)` = 기본 × (1000 + permille) / 1000 × % / 100을 1ms로 반올림(최소 `MinCooldownMs`)해 `BattleItemState.CooldownMs`로 둔다 — 한 번, 전투를 세울 때. 피로 상태의 %(`CooldownOf`)는 그 위에 곱한다. 적은 permille만(스탯 없음). 지역 속성이 없으면 카드의 `StatRules.CooldownMs`와 같은 수다.
 - 화면의 셈(`UiText`의 카드)은 같은 `StatRules`를 부른다. 표시만 하고 상태를 바꾸지 않는다.
-- Test: `StatRulesTests`(기준·위·아래의 %, 내림과 반올림, 최소 1, `BaseOf`의 null 직업, HP), `BattleEngineTests`의 "Stats" 묶음(힘 무기의 피해, 치명타 뒤 패시브 앞의 차례, 정신력의 회복·보호막, 지식의 화상 반올림, 적과 축 없는 아이템은 그대로, 같은 Setup의 같은 로그), `LevelRulesTests`(체력과 레벨의 HP), `LobbyEconomyTests`(새 런·후보·고용의 스탯), `RunSaveMapperTests`(18의 왕복, 17 → 18, 범위 밖 거름), `StaticDataValidationTests`·`DefinitionTests`(열과 범위, `ScalesWith`의 축).
+- Test: `StatRulesTests`(기준·위·아래의 %, 아이템의 학파와 축, 쿨타임 %와 ms, HP 구간, 치명타 배수, `BaseOf`, 런에서 전투까지, 밸런스·데이터의 거절), `StatBattleTests`(힘의 피해, 치명타 뒤 패시브 앞, 지혜의 회복·보호막·화상과 지식의 회복, 쿨타임의 단축, 적과 축 없는 아이템, 같은 Setup의 같은 로그), `LevelRulesTests`·`TraitRulesTests`의 HP.
 
+### 판정의 스탯 (Slice D 33단계 → 2026-10-20 스탯 개정)
 
-### 판정의 스탯 (Slice D 33단계)
+규칙은 `Docs/Design/02_Combat_System.md` §4(치명타)·§5(명중·회피·빗나감)·§6(빈사), `04_Lobby_100Day_Economy.md` §3(인내·각성)이 소유한다. 수치는 `BalanceData`(`HitBasePercent`·`HitPerDexPoint`·`DodgePerDexPoint`·`HitMinPercent`·`HitMaxPercent`·`CritPerDexPoint`·`CritPerWisPoint`·`PhysicalCritDamagePercent`·`MagicCritDamagePercent`·`DogDeathPercentPerEndPoint`·`VirtuePerEndPoint`·`FatiguePercentPerEndPoint`·`FatigueBaseline`)와 `EnemyData`의 `Accuracy`·`Dodge`다.
 
-규칙은 `Docs/Design/02_Combat_System.md` §4(치명타)·§5(명중·회피·빗나감)·§6(빈사), `04_Lobby_100Day_Economy.md` §3(인내·각성)이 소유한다. 수치는 `BalanceData`(`HitBasePercent`·`HitPerStatPoint`·`DodgePerDexPoint`·`HitMinPercent`·`HitMaxPercent`·`CritPerDexPoint`·`DogDeathPercentPerConPoint`·`VirtuePerSpiPoint`·`FatiguePercentPerEndPoint`)와 `EnemyData`의 선택 열 `Accuracy`·`Dodge`(%p)다.
-
-- 확률은 **만분율**(0.01%p = 1)이다: 민첩의 회피·치명타가 0.5%p씩이라 백분율 정수로는 적을 수 없다. `HitPerStatPoint`·`DodgePerDexPoint`·`CritPerDexPoint`는 0.01 단위 Key(CSV는 "1"·"0.5")라 그 값이 곧 만분율의 1점이다. 굴림은 `NextInt(10000)`이다. 빈사와 각성은 1%p씩이라 지금처럼 백분율·`NextInt(100)`이다.
-- 명중(`StatRules.HitChance`): `HitBasePercent`×100 + 공격자의 정확 − 대상의 회피를 `HitMinPercent`~`HitMaxPercent`(×100)로 자른다. 정확은 용병이면 (공격하는 아이템의 `ScalesWith` 스탯 − 기준) × `HitPerStatPoint`(축이 없으면 0), 적이면 `Accuracy`×100. 회피는 용병이면 (민첩 − 기준) × `DodgePerDexPoint`, 적이면 `Dodge`×100. `BattleUnitSetup.Accuracy`·`Dodge`가 적의 값을 나른다.
-- 빗나갈 수 있는 것(`StatRules.CanMiss`)은 무기 장비와 공격 아이템의 `Damage`·`Burn`이다. `Activate`가 **대상마다** 그 효과를 적용하기 전에 굴린다. 피해 스트림의 차례는 공격의 피해 굴림 하나 → 대상마다 명중 굴림 → (맞았고 치명타가 있는 무기면) 치명타 굴림이다. 빗나가면 `Missed`(공격자, 대상, 아이템, A = 굴림, B = 확률)를 남기고 그 대상을 건너뛴다: 피해·피로·빈사 판정·무기 적중 패시브가 없다.
-- 치명타(`StatRules.CritChance`): (아이템의 `CritChancePercent` + 주인의 패시브 %p)×100 + (민첩 − 기준) × `CritPerDexPoint`, 0~10000. 아이템의 값이 0인 무기는 굴리지 않는다(지금처럼). `CriticalHit`의 B·C는 만분율의 굴림과 확률이다.
-  패시브 %p(36단계, 방랑자): `PassiveEffect.CritChancePercent`(언제 `Always`, 조건 `None`만 — `JobData`가 다른 조건을 거절한다, 대상 `Self`)의 크기를 `StatRules.CritBonusPercent(패시브, 아이템)`이 준다: 치명타 확률이 있는 **무기 장비**에만, 그 밖은 0. 조건이 없으므로 화면의 카드(`UiText.ItemCard`의 `ownerPassive`)도 열을 모른 채 같은 값을 센다.
-- 빈사의 사망 확률(`FatigueRules.DogDeathChancePercent`): 기본값 + 피로 상태의 %p − (체력 − 기준) × `DogDeathPercentPerConPoint`, 0~100.
-- 각성(`StatRules.VirtueChancePercent`): `VirtueChancePercent` + (정신력 − 기준) × `VirtuePerSpiPoint`, 0~100. `BrokeDown`의 B가 그 확률이다.
-- 인내(`StatRules.FatigueGain`): 오르는 피로(양수)만 (100 − `FatiguePercentPerEndPoint` × (인내 − 기준))%로 곱하고 반올림한다(0 아래 없음). 전투 안은 `ChangeFatigue` 한 곳, 전투에 들어가는 비용(진입 + 장비, 한 사건)은 `ExpeditionRules.BeginBattle`이다. 덜어 내는 피로(처치, 치명타를 넣음)와 쉬기·치료는 그대로다. 보드 머리의 "피로 +N"은 장비의 값 그대로 보인다(인내는 진입과 합친 사건에 곱해지므로).
-- 저장 형식은 그대로다(규칙 변경): 32단계의 진행 중 전투를 이으면 지금 규칙으로 재현한다(`Diverged`).
-- Test: `StatJudgementTests`(명중의 식과 자름·적의 열·축 없는 공격, 빗나감은 피해·피로·패시브 없음, 대상마다, 회복·보호막은 빗나가지 않음, 치명타 + 민첩, 빈사 − 체력, 각성 + 정신력, 인내의 피로와 덜어 냄, 진입 비용, 같은 Setup의 같은 로그).
+- 확률은 **만분율**(0.01%p = 1)이다. `HitPerDexPoint`·`DodgePerDexPoint`·`CritPerDexPoint`·`CritPerWisPoint`는 0.01 단위 Key(CSV "1")라 그 값이 곧 만분율의 1점이다. 굴림은 `NextInt(10000)`. 빈사와 각성은 1%p 단위다.
+- 빗나갈 수 있는 것(`StatRules.CanMiss`)은 **물리**(`School` Physical) 무기 장비와 공격 아이템의 `Damage`·`Burn`뿐이다. **마법은 언제나 맞는다**(굴리지 않는다 — 난수열도 쓰지 않는다). 회복·보호막·패시브·화상 틱·폭풍은 전처럼 빗나가지 않는다. `Activate`가 **대상마다** 그 효과를 적용하기 전에 굴린다.
+- 명중(`StatRules.HitChance`): `HitBasePercent`×100 + 공격자의 정확 − 대상의 회피를 `HitMinPercent`~`HitMaxPercent`(×100)로 자른다. 정확(`Accuracy`)은 용병이면 (**민첩** − `StatBaseline`) × `HitPerDexPoint` + 특성의 명중 %p×100(물리에만 닿으니 특성의 명중도 물리뿐), 적이면 `Accuracy`×100. 회피(`Dodge`)는 용병이면 (민첩 − 기준) × `DodgePerDexPoint` + 특성의 회피 %p×100, 적이면 `Dodge`×100. 확실한 명중(100%)은 굴리지 않는다.
+- 치명타(`StatRules.CritChance`): (아이템의 `CritChancePercent` + 주인의 패시브 %p + 특성의 치명타 %p − 대상의 `CritTakenPercent`)×100 + 학파의 스탯 — 물리 무기는 (민첩 − 기준) × `CritPerDexPoint`, 마법 무기는 (**지혜** − 기준) × `CritPerWisPoint` — 를 0~10000으로 자른다. 값이 0인 무기는 굴리지 않는다. 배수(`StatRules.CritDamagePercent`): 물리는 `PhysicalCritDamagePercent` + 무기의 `CritDamagePercent` + 특성의 `CritDamagePercent`(`TraitBonus`), 마법은 `MagicCritDamagePercent`. `RollCritical`이 피해에 곱한다(회복·보호막은 치명타가 없다).
+  패시브 %p(36단계, 방랑자)는 `StatRules.CritBonusPercent(패시브, 아이템)`: 치명타 확률이 있는 **무기 장비**에만.
+- 빈사의 사망 확률(`FatigueRules.DogDeathChancePercent`): 기본값 + 피로 상태의 %p − (**인내** − 기준) × `DogDeathPercentPerEndPoint` + 특성의 %p, 0~100.
+- 각성(`StatRules.VirtueChancePercent`): `VirtueChancePercent` + (**인내** − 기준) × `VirtuePerEndPoint` + 특성의 %p, 0~100. `BrokeDown`의 B가 그 확률이다.
+- 인내(`StatRules.FatigueGain`): 오르는 피로(양수)만 (100 − `FatiguePercentPerEndPoint` × (인내 − **`FatigueBaseline`**) + 특성의 %)%로 곱하고 반올림한다(0 아래 없음). 전투 안은 `ChangeFatigue` 한 곳, 전투에 들어가는 비용은 `ExpeditionRules.BeginBattle`이다.
+- 저장: 24(`Docs/Architecture/07_SAVE.md`)가 `Spi`를 `Wis`로 읽고 스탯을 새 척도로 접는다. 진행 중 전투를 이으면 지금 규칙으로 재현한다(`Diverged`).
+- Test: `StatJudgementTests`(민첩의 명중·회피, 물리만 빗나감과 마법의 명중, 빗나감의 무효, 대상마다의 굴림, 학파별 치명타, 방랑자의 패시브, 인내의 빈사·각성, 인내의 피로), `ArmorTests`(받는 치명타), `TraitRulesTests`.
 
 ### 편차와 성장 (Slice D 34단계)
 
