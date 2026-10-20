@@ -33,9 +33,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "abyss_grasp",
@@ -69,9 +70,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "abyss_howl",
@@ -105,9 +107,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "buckler",
@@ -141,9 +144,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": null,
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "crude_bow",
@@ -177,9 +181,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "dagger",
@@ -213,9 +218,10 @@
       "CritChancePercent": 10,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Dex",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "ember_flask",
@@ -249,9 +255,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 8,
-      "ScalesWith": "Int",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "fire_staff",
@@ -285,9 +292,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "gladius",
@@ -330,9 +338,10 @@
       "CritChancePercent": 10,
       "Unique": true,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 50
     },
     {
       "Id": "greataxe",
@@ -366,9 +375,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 50
     },
     {
       "Id": "halberd",
@@ -402,9 +412,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 8,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 50
     },
     {
       "Id": "healing_staff",
@@ -438,9 +449,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Spi",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "herb_pouch",
@@ -474,9 +486,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Spi",
+      "School": null,
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "iron_armor",
@@ -510,9 +523,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": null,
+      "School": null,
       "Trigger": "BattleStart",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "iron_helm",
@@ -546,9 +560,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": null,
+      "School": null,
       "Trigger": "BattleStart",
-      "CritTakenPercent": 3
+      "CritTakenPercent": 3,
+      "CritDamagePercent": 0
     },
     {
       "Id": "lantern_staff",
@@ -582,9 +597,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Int",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "longbow",
@@ -618,9 +634,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "longsword",
@@ -654,9 +671,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "mace",
@@ -697,9 +715,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "mending_chant",
@@ -733,9 +752,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Spi",
+      "School": null,
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "overseer_maul",
@@ -769,9 +789,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "overseer_roar",
@@ -805,9 +826,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Magic",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "rat_bite",
@@ -841,9 +863,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Dex",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "rusty_blade",
@@ -877,9 +900,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "spear",
@@ -913,9 +937,10 @@
       "CritChancePercent": 5,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Str",
+      "School": "Physical",
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "ward_charm",
@@ -949,9 +974,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 10,
-      "ScalesWith": "Spi",
+      "School": null,
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "whetstone",
@@ -986,9 +1012,10 @@
       "CritChancePercent": 0,
       "Unique": false,
       "DropWeight": 0,
-      "ScalesWith": null,
+      "School": null,
       "Trigger": "Cooldown",
-      "CritTakenPercent": 0
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0
     }
   ]
 }

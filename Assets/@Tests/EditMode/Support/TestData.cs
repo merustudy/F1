@@ -55,7 +55,8 @@ namespace F1.Tests
                 // gets through is a hit, and no item has a crit chance unless a test gives it one.
                 { "BurnDamagePerStack", 1 },
                 { "HitMinDamage", 0 },
-                { "CritDamagePercent", 150 },
+                { "PhysicalCritDamagePercent", 150 },
+                { "MagicCritDamagePercent", 150 },
                 { "CritFatigueTaken", 0 },
                 { "CritFatigueTakenAllies", 0 },
                 { "CritFatigueDealt", 0 },
@@ -105,16 +106,26 @@ namespace F1.Tests
                 { "StatMin", 1 },
                 { "StatMax", 30 },
                 { "StatPowerPercentPerPoint", 10 },
-                { "HpPercentPerConPoint", 5 },
+                // 2026-10-20 스탯 개정: in the tests the power and fatigue baselines stay 10 and nothing quickens an item, so the arithmetic stays; a point of
+                // constitution gives 0.10 HP in every band, so the test jobs' HP are their constitution's (the tank 1.00 at 10, the healer 0.60 at 6, the striker 0.80 at 8).
+                { "PowerBaseline", 10 },
+                { "FatigueBaseline", 10 },
+                { "CooldownPercentPerPoint", 0 },
+                { "HpPerConPointLow", 10 },
+                { "HpPerConPointMid", 10 },
+                { "HpPerConPointHigh", 10 },
+                { "HpBandLow", 10 },
+                { "HpBandMid", 20 },
                 // Slice D stage 33: every hit lands (a certain hit rolls nothing, so the tests' damage streams stay as they were); the rest as shipped.
                 { "HitBasePercent", 100 },
                 { "HitMinPercent", 5 },
                 { "HitMaxPercent", 100 },
-                { "HitPerStatPoint", 100 },
+                { "HitPerDexPoint", 100 },
                 { "DodgePerDexPoint", 50 },
                 { "CritPerDexPoint", 50 },
-                { "DogDeathPercentPerConPoint", 1 },
-                { "VirtuePerSpiPoint", 1 },
+                { "CritPerWisPoint", 50 },
+                { "DogDeathPercentPerEndPoint", 1 },
+                { "VirtuePerEndPoint", 1 },
                 { "FatiguePercentPerEndPoint", 3 },
                 // Slice D stage 34: no spread (a candidate draws nothing more, so the tests' candidates stay as they were); growth tests set 2.
                 { "RecruitStatSpread", 0 },
@@ -161,7 +172,8 @@ namespace F1.Tests
             IReadOnlyList<StarSquare> stars = null,
             int starDamage = 0,
             int dropWeight = 0,
-            Stat? scalesWith = null)
+            ItemSchool? school = null,
+            int critDamagePercent = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
@@ -169,7 +181,15 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight, scalesWith: scalesWith);
+            // 2026-10-20 스탯 개정: a weapon or an attack item is physical unless a test says Magic; the rest has no school.
+            return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight,
+                school: school ?? DefaultSchool(category), critDamagePercent: critDamagePercent);
+        }
+
+        /// <summary>The school a test item has unless the test says: physical for a weapon or an attack item, none for the rest.</summary>
+        public static ItemSchool? DefaultSchool(ItemCategory category)
+        {
+            return category == ItemCategory.Weapon || category == ItemCategory.Attack ? ItemSchool.Physical : (ItemSchool?)null;
         }
 
         /// <summary>Stands for "one enemy" on targets that are counted from an end of the enemy line, and "none" on the others.</summary>
@@ -346,9 +366,10 @@ namespace F1.Tests
                 Balance = BalanceEntries(balanceOverrides),
                 Jobs = new List<JobData>
                 {
-                    new JobData("tank", Text("tank"), 100, "blade", 1, null),
-                    new JobData("healer", Text("healer"), 60, "staff", 2, null),
-                    new JobData("striker", Text("striker"), 80, "blade", 3, null),
+                    // 2026-10-20 스탯 개정: a job has no HP of its own; the healer's and the striker's constitution give the 0.60 and 0.80 the tests always had.
+                    new JobData("tank", Text("tank"), "blade", 1, null),
+                    new JobData("healer", Text("healer"), "staff", 2, null, stats: StatBlock.Uniform(10).With(Stat.Con, 6)),
+                    new JobData("striker", Text("striker"), "blade", 3, null, stats: StatBlock.Uniform(10).With(Stat.Con, 8)),
                 },
                 Items = new List<ItemData>
                 {

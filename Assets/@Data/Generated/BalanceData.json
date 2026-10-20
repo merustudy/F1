@@ -30,8 +30,8 @@
       "Value": 10
     },
     {
-      "Key": "CritDamagePercent",
-      "Value": 150
+      "Key": "CooldownPercentPerPoint",
+      "Value": 1
     },
     {
       "Key": "CritFatigueDealt",
@@ -51,7 +51,11 @@
     },
     {
       "Key": "CritPerDexPoint",
-      "Value": 50
+      "Value": 100
+    },
+    {
+      "Key": "CritPerWisPoint",
+      "Value": 100
     },
     {
       "Key": "DeathLimit",
@@ -59,14 +63,14 @@
     },
     {
       "Key": "DodgePerDexPoint",
-      "Value": 50
+      "Value": 100
     },
     {
       "Key": "DogDeathChancePercent",
       "Value": 30
     },
     {
-      "Key": "DogDeathPercentPerConPoint",
+      "Key": "DogDeathPercentPerEndPoint",
       "Value": 1
     },
     {
@@ -108,6 +112,10 @@
     {
       "Key": "ExpeditionStartCoins",
       "Value": 20
+    },
+    {
+      "Key": "FatigueBaseline",
+      "Value": 5
     },
     {
       "Key": "FatigueBattleEntry",
@@ -182,12 +190,28 @@
       "Value": 5
     },
     {
-      "Key": "HitPerStatPoint",
+      "Key": "HitPerDexPoint",
       "Value": 100
     },
     {
-      "Key": "HpPercentPerConPoint",
-      "Value": 5
+      "Key": "HpBandLow",
+      "Value": 10
+    },
+    {
+      "Key": "HpBandMid",
+      "Value": 20
+    },
+    {
+      "Key": "HpPerConPointHigh",
+      "Value": 1500
+    },
+    {
+      "Key": "HpPerConPointLow",
+      "Value": 500
+    },
+    {
+      "Key": "HpPerConPointMid",
+      "Value": 1000
     },
     {
       "Key": "InventoryHeight",
@@ -196,6 +220,10 @@
     {
       "Key": "InventoryWidth",
       "Value": 10
+    },
+    {
+      "Key": "MagicCritDamagePercent",
+      "Value": 150
     },
     {
       "Key": "MapBranchChancePercent",
@@ -218,6 +246,10 @@
       "Value": 4
     },
     {
+      "Key": "PhysicalCritDamagePercent",
+      "Value": 150
+    },
+    {
       "Key": "PostBattleHealPercent",
       "Value": 10
     },
@@ -228,6 +260,10 @@
     {
       "Key": "PotionSlots",
       "Value": 3
+    },
+    {
+      "Key": "PowerBaseline",
+      "Value": 5
     },
     {
       "Key": "RecruitCount",
@@ -370,7 +406,7 @@
       "Value": 40
     },
     {
-      "Key": "VirtuePerSpiPoint",
+      "Key": "VirtuePerEndPoint",
       "Value": 1
     }
   ]

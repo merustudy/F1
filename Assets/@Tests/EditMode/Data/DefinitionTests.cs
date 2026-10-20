@@ -226,11 +226,10 @@ namespace F1.Tests
         {
             LocalizedText name = TestData.Text("x");
 
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 0, "sword", 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "Sword", 1, null));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 0, null), "Recommended row below 1.");
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", BattleRows.Count + 1, null), "Recommended row beyond the last row.");
+            Assert.DoesNotThrow(() => new JobData("x", name, "sword", 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, "Sword", 1, null));
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", 0, null), "Recommended row below 1.");
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", BattleRows.Count + 1, null), "Recommended row beyond the last row.");
         }
 
         [Test]
@@ -239,10 +238,10 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var passive = new PassiveSpec(PassiveTrigger.BattleStart, PassiveCondition.InRows, RowSpan.Front(1), PassiveEffect.Shield, PassiveTarget.Self, 20);
 
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, null));
-            Assert.DoesNotThrow(() => new JobData("x", name, 100, "sword", 1, passive, TestData.Text("Shield {0}")));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, passive));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, TestData.Text("Shield {0}")));
+            Assert.DoesNotThrow(() => new JobData("x", name, "sword", 1, null));
+            Assert.DoesNotThrow(() => new JobData("x", name, "sword", 1, passive, TestData.Text("Shield {0}")));
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", 1, passive));
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", 1, null, TestData.Text("Shield {0}")));
         }
 
         [Test]
@@ -251,13 +250,13 @@ namespace F1.Tests
             LocalizedText name = TestData.Text("x");
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
 
-            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).Figure, "No figure by default.");
-            Assert.AreEqual("unit/job/x", new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x").Figure);
+            Assert.IsNull(new JobData("x", name, "sword", 1, null).Figure, "No figure by default.");
+            Assert.AreEqual("unit/job/x", new JobData("x", name, "sword", 1, null, null, "unit/job/x").Figure);
             Assert.AreEqual("unit/enemy/x", new EnemyData("x", name, 1, 10, items, "unit/enemy/x").Figure);
             Assert.IsNull(new EnemyData("x", name, 1, 10, items).Figure);
 
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, null, ""));
-            Assert.Throws<DataException>(() => new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x "));
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", 1, null, null, ""));
+            Assert.Throws<DataException>(() => new JobData("x", name, "sword", 1, null, null, "unit/job/x "));
             Assert.Throws<DataException>(() => new EnemyData("x", name, 1, 10, items, "unit/ enemy/x"));
         }
 
@@ -265,12 +264,12 @@ namespace F1.Tests
         public void Poses_AreTheFigureAddressUnderPose_WithThePose_OrNullWithoutAFigure()
         {
             LocalizedText name = TestData.Text("x");
-            var job = new JobData("x", name, 100, "sword", 1, null, null, "unit/job/x");
+            var job = new JobData("x", name, "sword", 1, null, null, "unit/job/x");
 
             Assert.AreEqual("pose/job/x-attack", job.AttackPose);
             Assert.AreEqual("pose/job/x-hit", job.HitPose);
-            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).AttackPose, "No pose without a figure.");
-            Assert.IsNull(new JobData("x", name, 100, "sword", 1, null).HitPose);
+            Assert.IsNull(new JobData("x", name, "sword", 1, null).AttackPose, "No pose without a figure.");
+            Assert.IsNull(new JobData("x", name, "sword", 1, null).HitPose);
             var items = new List<ItemGrant> { new ItemGrant("claw", 1) };
             var enemy = new EnemyData("goblin_raider", name, 1, 10, items, "unit/enemy/goblin-raider");
             Assert.AreEqual("pose/enemy/goblin-raider-attack", enemy.AttackPose, "A monster has its poses too (Docs/Design/10 §5).");

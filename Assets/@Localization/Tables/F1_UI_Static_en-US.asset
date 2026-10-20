@@ -1543,11 +1543,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
-  - m_Id: 6394468465893376
-    m_Localized: "({0} {1} \xD7{2})"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 6394468465893377
     m_Localized: STR
     m_Metadata:
@@ -1562,10 +1557,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6394468465893380
     m_Localized: INT
-    m_Metadata:
-      m_Items: []
-  - m_Id: 6394468465893381
-    m_Localized: SPI
     m_Metadata:
       m_Items: []
   - m_Id: 6394468465893382
@@ -1737,6 +1728,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 7140407145127936
+    m_Localized: WIS
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1911,7 +1906,6 @@ MonoBehaviour:
         - id: 6151713181392904
         - id: 6172991850274816
         - id: 6394468449116160
-        - id: 6394468465893376
         - id: 6416151813808128
         - id: 6416151822196736
         - id: 6472751761055745

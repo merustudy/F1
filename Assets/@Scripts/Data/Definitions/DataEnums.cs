@@ -244,8 +244,20 @@ namespace F1.Data
         Dex,
         Con,
         Int,
-        Spi,
+        /// <summary>Wisdom (2026-10-20 스탯 개정: spirit renamed): magic equipment's critical hits and speed, the power of attack and support items.</summary>
+        Wis,
         End,
+    }
+
+    /// <summary>
+    /// Whether an item's blows are physical or magic (2026-10-20 스탯 개정, Docs/Design/02_Combat_System.md §4·§5): a physical weapon or attack item can
+    /// miss and its power grows with strength; a magic one always hits and grows with intellect. The owner's dexterity or wisdom quickens the
+    /// equipment of its school and sharpens its critical hits. Required on a weapon and an attack item, optional on defensive gear, absent elsewhere.
+    /// </summary>
+    public enum ItemSchool
+    {
+        Physical,
+        Magic,
     }
 
     /// <summary>

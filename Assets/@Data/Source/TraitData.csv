@@ -1,14 +1,14 @@
-Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent
-clumsy,서투름,Clumsy,Innate,Negative,,10,,-5,,,,,,
-eagle_eye,매의 눈,Eagle Eye,Innate,Positive,,10,clumsy,5,,,,,,
-frail,허약,Frail,Innate,Negative,,10,,,,,,,,-10
-hardened,단련,Hardened,Acquired,Positive,Virtue,10,,,,,,10,,
-iron_bones,강골,Iron Bones,Innate,Positive,,10,,,,,-5,,,
-limp,절뚝임,Limp,Acquired,Negative,DeathsDoor,10,,,-5,,,,,
-nightmares,악몽,Nightmares,Acquired,Negative,Affliction,10,,,,,,,10,
-scarred,흉터,Scarred,Acquired,Negative,DeathsDoor,10,,,,,,,,-5
-seasoned,노련함,Seasoned,Acquired,Positive,Clear,10,,,,2,,,,
-shaken,패배의 기억,Shaken,Acquired,Negative,Retreat,10,,,,,,-10,,
-steady,담대함,Steady,Innate,Positive,,10,timid,,,,,,-10,
-survivor,구사일생,Survivor,Acquired,Positive,DeathsDoor,10,,,,,-10,,,
-timid,소심함,Timid,Innate,Negative,,10,,,,,,,10,
+Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent,CritDamagePercent
+clumsy,서투름,Clumsy,Innate,Negative,,10,,-5,,,,,,,
+eagle_eye,매의 눈,Eagle Eye,Innate,Positive,,10,clumsy,5,,,,,,,
+frail,허약,Frail,Innate,Negative,,10,,,,,,,,-10,
+hardened,단련,Hardened,Acquired,Positive,Virtue,10,,,,,,10,,,
+iron_bones,강골,Iron Bones,Innate,Positive,,10,,,,,-5,,,,
+limp,절뚝임,Limp,Acquired,Negative,DeathsDoor,10,,,-5,,,,,,
+nightmares,악몽,Nightmares,Acquired,Negative,Affliction,10,,,,,,,10,,
+scarred,흉터,Scarred,Acquired,Negative,DeathsDoor,10,,,,,,,,-5,
+seasoned,노련함,Seasoned,Acquired,Positive,Clear,10,,,,2,,,,,25
+shaken,패배의 기억,Shaken,Acquired,Negative,Retreat,10,,,,,,-10,,,
+steady,담대함,Steady,Innate,Positive,,10,timid,,,,,,-10,,
+survivor,구사일생,Survivor,Acquired,Positive,DeathsDoor,10,,,,,-10,,,,
+timid,소심함,Timid,Innate,Negative,,10,,,,,,,10,,

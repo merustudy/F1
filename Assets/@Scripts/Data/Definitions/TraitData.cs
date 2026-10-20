@@ -34,7 +34,8 @@ namespace F1.Data
             int dogDeathPercent,
             int virtuePercent,
             int fatiguePercent,
-            int maxHpPercent)
+            int maxHpPercent,
+            int critDamagePercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -75,7 +76,13 @@ namespace F1.Data
                 }
             }
 
-            if (hitPercent == 0 && dodgePercent == 0 && critPercent == 0 && dogDeathPercent == 0 && virtuePercent == 0 && fatiguePercent == 0 && maxHpPercent == 0)
+            // What the trait adds to the physical critical multiplier (2026-10-20 스탯 개정), in percent points; never under 0.
+            if (critDamagePercent < 0 || critDamagePercent > ItemData.MaxCritDamageBonus)
+            {
+                throw new DataException($"{DefinitionName} '{id}': CritDamagePercent must be within 0..{ItemData.MaxCritDamageBonus}.");
+            }
+
+            if (hitPercent == 0 && dodgePercent == 0 && critPercent == 0 && dogDeathPercent == 0 && virtuePercent == 0 && fatiguePercent == 0 && maxHpPercent == 0 && critDamagePercent == 0)
             {
                 throw new DataException($"{DefinitionName} '{id}': a trait must change something.");
             }
@@ -92,6 +99,7 @@ namespace F1.Data
             VirtuePercent = virtuePercent;
             FatiguePercent = fatiguePercent;
             MaxHpPercent = maxHpPercent;
+            CritDamagePercent = critDamagePercent;
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -143,6 +151,10 @@ namespace F1.Data
         /// <summary>Added to the percent of the job's maximum HP the mercenary has (constitution's percent counts with it).</summary>
         [JsonProperty(Order = 14, Required = Required.Always)]
         public int MaxHpPercent { get; }
+
+        /// <summary>Percent points added to the physical critical multiplier of the owner's weapons (2026-10-20 스탯 개정, Docs/Design/02 §4). 0 for most.</summary>
+        [JsonProperty(Order = 15, Required = Required.Always)]
+        public int CritDamagePercent { get; }
 
         /// <summary>Whether two traits cannot stand together: one names the other as its opposite.</summary>
         public bool Clashes(TraitData other)

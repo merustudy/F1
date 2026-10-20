@@ -7,9 +7,9 @@ using NUnit.Framework;
 namespace F1.Tests
 {
     /// <summary>
-    /// The stats' rolls (Slice D stage 33, Docs/Design/02_Combat_System.md §4·§5·§6, 04_Lobby_100Day_Economy.md §3): the hit and the dodge, the miss
-    /// that deals and triggers nothing, the critical chance with dexterity, the death chance with constitution, the virtue with spirit, and the fatigue
-    /// a mercenary gains with endurance. Chances are in ten-thousandths. One rule per test.
+    /// The stats' rolls (Slice D stage 33; 2026-10-20 스탯 개정: Docs/Design/02_Combat_System.md §4·§5·§6, 04_Lobby_100Day_Economy.md §3): the hit (dexterity;
+    /// a magic blow never misses) and the dodge, the miss that deals and triggers nothing, the critical chance with dexterity or wisdom by the weapon's school,
+    /// the death chance and the virtue with endurance, and the fatigue a mercenary gains with endurance. Chances are in ten-thousandths. One rule per test.
     /// </summary>
     public sealed class StatJudgementTests
     {
@@ -35,7 +35,7 @@ namespace F1.Tests
 
         static EquippedItem Blade(int cooldownMs = 1000, TargetMode target = TargetMode.EnemyFront, int value = 100)
         {
-            return new EquippedItem(TestData.Item("blade", cooldownMs, EffectKind.Damage, target, value, scalesWith: Stat.Str));
+            return new EquippedItem(TestData.Item("blade", cooldownMs, EffectKind.Damage, target, value));
         }
 
         static BattleEngine Battle(BalanceData balance, BattleUnitSetup[] party, BattleUnitSetup[] enemies, int untilMs)
@@ -46,14 +46,13 @@ namespace F1.Tests
         }
 
         [Test]
-        public void HitChance_IsTheBase_WithTheAttackersAxis_LessTheTargetsDodge_WithinTheBounds()
+        public void HitChance_IsTheBase_WithTheAttackersDexterity_LessTheTargetsDodge_WithinTheBounds()
         {
             BalanceData balance = Shipped();
-            ItemData blade = Blade().Item;
-            ItemData plain = TestData.Item("plain", 1000, EffectKind.Damage, TargetMode.EnemyFront);
-            Assert.AreEqual(200, StatRules.Accuracy(balance, With(Stat.Str, 12), 0, blade), "Strength 12 on a strength weapon: 2 points.");
-            Assert.AreEqual(0, StatRules.Accuracy(balance, With(Stat.Str, 12), 0, plain), "An attack without an axis counts the baseline.");
-            Assert.AreEqual(1000, StatRules.Accuracy(balance, null, 10, blade), "An enemy's Accuracy 10.");
+            Assert.AreEqual(200, StatRules.Accuracy(balance, With(Stat.Dex, 12), 0), "Dexterity 12: 2 points (2026-10-20: whatever the weapon's axis).");
+            Assert.AreEqual(0, StatRules.Accuracy(balance, With(Stat.Str, 14), 0), "Strength moves no hit.");
+            Assert.AreEqual(-300, StatRules.Accuracy(balance, With(Stat.Dex, 7), 0));
+            Assert.AreEqual(1000, StatRules.Accuracy(balance, null, 10), "An enemy's Accuracy 10.");
             Assert.AreEqual(100, StatRules.Dodge(balance, With(Stat.Dex, 12), 0), "Dexterity 12: half a point each.");
             Assert.AreEqual(-150, StatRules.Dodge(balance, With(Stat.Dex, 7), 0));
             Assert.AreEqual(500, StatRules.Dodge(balance, null, 5), "An enemy's Dodge 5.");
@@ -63,18 +62,30 @@ namespace F1.Tests
         }
 
         [Test]
-        public void CanMiss_IsAWeaponsOrAnAttackItemsDamageOrBurn_Only()
+        public void CanMiss_IsAPhysicalWeaponsOrAttackItemsDamageOrBurn_Only_AndMagicAlwaysHits()
         {
             ItemData weapon = TestData.Item("w", 1000, EffectKind.Damage, TargetMode.EnemyFront);
             ItemData flask = TestData.Item("f", 1000, EffectKind.Burn, TargetMode.EnemyFront, 2, ItemCategory.Attack);
-            ItemData staff = TestData.Item("s", 1000, EffectKind.Heal, TargetMode.Self, 100, ItemCategory.Weapon);
+            ItemData wand = TestData.Item("m", 1000, EffectKind.Damage, TargetMode.EnemyFront, school: ItemSchool.Magic);
+            ItemData fire = TestData.Item("fire", 1000, EffectKind.Burn, TargetMode.EnemyFront, 2, ItemCategory.Attack, school: ItemSchool.Magic);
+            ItemData staff = TestData.Item("s", 1000, EffectKind.Heal, TargetMode.Self, 100, ItemCategory.Weapon, school: ItemSchool.Magic);
             ItemData charm = TestData.Item("c", 1000, EffectKind.Shield, TargetMode.Self, 100, ItemCategory.Support);
             ItemData shield = TestData.Item("b", 1000, EffectKind.Shield, TargetMode.Self, 100, ItemCategory.Armor);
             Assert.IsTrue(StatRules.CanMiss(weapon, weapon.Effects[0]));
-            Assert.IsTrue(StatRules.CanMiss(flask, flask.Effects[0]));
+            Assert.IsTrue(StatRules.CanMiss(flask, flask.Effects[0]), "A physical attack item can miss.");
+            Assert.IsFalse(StatRules.CanMiss(wand, wand.Effects[0]), "A magic blow never misses (2026-10-20 스탯 개정).");
+            Assert.IsFalse(StatRules.CanMiss(fire, fire.Effects[0]));
             Assert.IsFalse(StatRules.CanMiss(staff, staff.Effects[0]), "A healing staff's heal never misses.");
             Assert.IsFalse(StatRules.CanMiss(charm, charm.Effects[0]));
             Assert.IsFalse(StatRules.CanMiss(shield, shield.Effects[0]));
+
+            // In battle: a magic weapon lands every blow where a physical one with the same owner misses them all.
+            BalanceData balance = TestData.Balance(("HitBasePercent", 0), ("HitMinPercent", 0), ("HitMaxPercent", 0));
+            BattleUnitSetup physical = Merc("p", 1, 100000, StatBlock.Uniform(10), Blade());
+            BattleUnitSetup magic = Merc("m", 2, 100000, StatBlock.Uniform(10), new EquippedItem(wand));
+            BattleEngine battle = Battle(balance, new[] { physical, magic }, new[] { TestData.Enemy("e", 1, 1000000) }, 1000);
+            Assert.AreEqual(1, battle.Events.Count(e => e.Kind == BattleEventKind.Missed), "The blade missed.");
+            Assert.AreEqual(1, battle.Events.Count(e => e.Kind == BattleEventKind.Damaged), "The wand hit.");
         }
 
         [Test]
@@ -111,30 +122,34 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheHitChance_CountsTheAxis_AndTheEnemysDodge_InTheLog()
+        public void TheHitChance_CountsDexterity_AndTheEnemysDodge_InTheLog()
         {
-            // Strength 14 (+4) against an enemy with Dodge 10 (-10): 74%.
+            // Dexterity 14 (+4) against an enemy with Dodge 10 (-10): 74%.
             BalanceData balance = Shipped();
             BattleUnitSetup enemy = TestData.Enemy("e", 1, 1000000);
             enemy.Dodge = 10;
-            BattleEngine battle = Battle(balance, new[] { Merc("m", 1, 100000, With(Stat.Str, 14), Blade()) }, new[] { enemy }, 60000);
+            BattleEngine battle = Battle(balance, new[] { Merc("m", 1, 100000, With(Stat.Dex, 14), Blade()) }, new[] { enemy }, 60000);
             Assert.IsTrue(battle.Events.Any(e => e.Kind == BattleEventKind.Missed), "Some of sixty attacks missed.");
             Assert.IsTrue(battle.Events.Where(e => e.Kind == BattleEventKind.Missed).All(e => e.B == 7400 && e.A >= 7400));
         }
 
         [Test]
-        public void TheCriticalChance_AddsDexterity_InHalfPoints()
+        public void TheCriticalChance_AddsDexterityToAPhysicalWeapon_AndWisdomToAMagicOne_InHalfPoints()
         {
             BalanceData balance = Shipped();
             var effects = new List<ItemEffect> { TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 100) };
-            ItemData five = new ItemData("five", TestData.Text("five"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5, scalesWith: Stat.Str);
+            ItemData five = new ItemData("five", TestData.Text("five"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5, school: ItemSchool.Physical);
             Assert.AreEqual(600, StatRules.CritChance(balance, With(Stat.Dex, 12), five));
             Assert.AreEqual(450, StatRules.CritChance(balance, With(Stat.Dex, 9), five), "4.5%.");
+            Assert.AreEqual(500, StatRules.CritChance(balance, With(Stat.Wis, 12), five), "Wisdom moves no physical weapon.");
             Assert.AreEqual(500, StatRules.CritChance(balance, null, five), "An enemy: the item's.");
             Assert.AreEqual(0, StatRules.CritChance(balance, With(Stat.Dex, 30), Blade().Item), "A weapon without a critical chance gains none.");
+            ItemData wand = new ItemData("wand", TestData.Text("wand"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5, school: ItemSchool.Magic);
+            Assert.AreEqual(600, StatRules.CritChance(balance, With(Stat.Wis, 12), wand), "A magic weapon: wisdom (2026-10-20 스탯 개정).");
+            Assert.AreEqual(500, StatRules.CritChance(balance, With(Stat.Dex, 12), wand), "Dexterity moves no magic weapon.");
 
             // 99% and dexterity 12 (+1%): certain, and the log says the chance.
-            ItemData sure = new ItemData("sure", TestData.Text("sure"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 99);
+            ItemData sure = new ItemData("sure", TestData.Text("sure"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 99, school: ItemSchool.Physical);
             BattleEngine battle = Battle(TestData.Balance(), new[] { Merc("m", 1, 100000, With(Stat.Dex, 12), new EquippedItem(sure)) }, new[] { TestData.Enemy("e", 1, 100000) }, 1000);
             Assert.AreEqual(10000, battle.Events.Single(e => e.Kind == BattleEventKind.CriticalHit).C);
         }
@@ -145,7 +160,7 @@ namespace F1.Tests
             // Slice D stage 36 (Docs/Design/02_Combat_System.md §7): "무기의 치명타 확률 +10%" — a weapon item with a critical chance, nothing else.
             BalanceData balance = Shipped();
             var effects = new List<ItemEffect> { TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 100) };
-            ItemData five = new ItemData("five", TestData.Text("five"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5, scalesWith: Stat.Dex);
+            ItemData five = new ItemData("five", TestData.Text("five"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5, school: ItemSchool.Physical);
             var passive = new PassiveSpec(PassiveTrigger.Always, PassiveCondition.None, null, PassiveEffect.CritChancePercent, PassiveTarget.Self, 10);
 
             Assert.AreEqual(10, StatRules.CritBonusPercent(passive, five));
@@ -158,7 +173,7 @@ namespace F1.Tests
                 "It holds everywhere: no condition, so the card can count it without the row.");
 
             // In battle: 90% and the passive's 10 make it certain, and the log says so.
-            ItemData ninety = new ItemData("ninety", TestData.Text("ninety"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 90);
+            ItemData ninety = new ItemData("ninety", TestData.Text("ninety"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 90, school: ItemSchool.Physical);
             BattleUnitSetup ranger = Merc("r", 1, 100000, With(Stat.Dex, 10), new EquippedItem(ninety));
             ranger.Passive = passive;
             BattleEngine battle = Battle(TestData.Balance(), new[] { ranger }, new[] { TestData.Enemy("e", 1, 100000) }, 1000);
@@ -166,17 +181,19 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheDeathChance_FallsWithConstitution()
+        public void TheDeathChance_FallsWithEndurance()
         {
+            // 2026-10-20 스탯 개정: endurance, before constitution (which gives the HP now).
             BalanceData balance = TestData.Balance(("DogDeathChancePercent", 30), ("DogGraceMs", 0));
-            Assert.AreEqual(28, FatigueRules.DogDeathChancePercent(balance, null, With(Stat.Con, 12)));
-            Assert.AreEqual(33, FatigueRules.DogDeathChancePercent(balance, null, With(Stat.Con, 7)));
+            Assert.AreEqual(28, FatigueRules.DogDeathChancePercent(balance, null, With(Stat.End, 12)));
+            Assert.AreEqual(33, FatigueRules.DogDeathChancePercent(balance, null, With(Stat.End, 7)));
+            Assert.AreEqual(30, FatigueRules.DogDeathChancePercent(balance, null, With(Stat.Con, 12)), "Constitution moves it no more.");
             Assert.AreEqual(30, FatigueRules.DogDeathChancePercent(balance, null, null));
             FatigueStateData reckless = TestData.FatigueStates().Single(s => s.Id == "reckless");
-            Assert.AreEqual(53, FatigueRules.DogDeathChancePercent(balance, reckless, With(Stat.Con, 12)), "With the state's +25.");
+            Assert.AreEqual(53, FatigueRules.DogDeathChancePercent(balance, reckless, With(Stat.End, 12)), "With the state's +25.");
 
-            // At death's door from the start, without grace: the first hit rolls the death with constitution 12's chance.
-            BattleUnitSetup merc = Merc("m", 1, 1000, With(Stat.Con, 12));
+            // At death's door from the start, without grace: the first hit rolls the death with endurance 12's chance.
+            BattleUnitSetup merc = Merc("m", 1, 1000, With(Stat.End, 12));
             merc.Hp = 0;
             var claw = new EquippedItem(TestData.Item("claw", 1000, EffectKind.Damage, TargetMode.EnemyFront));
             BattleEngine battle = Battle(balance, new[] { merc }, new[] { TestData.Enemy("e", 1, 100000, claw) }, 1000);
@@ -184,15 +201,17 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheVirtueChance_GrowsWithSpirit()
+        public void TheVirtueChance_GrowsWithEndurance()
         {
+            // 2026-10-20 스탯 개정: endurance, before spirit (wisdom now, which moves the magic).
             BalanceData balance = TestData.Balance();
-            Assert.AreEqual(29, StatRules.VirtueChancePercent(balance, With(Stat.Spi, 14)));
+            Assert.AreEqual(29, StatRules.VirtueChancePercent(balance, With(Stat.End, 14)));
+            Assert.AreEqual(25, StatRules.VirtueChancePercent(balance, With(Stat.Wis, 14)), "Wisdom moves it no more.");
             Assert.AreEqual(25, StatRules.VirtueChancePercent(balance, null));
-            Assert.AreEqual(100, StatRules.VirtueChancePercent(TestData.Balance(("VirtueChancePercent", 95)), With(Stat.Spi, 20)), "Within 0..100.");
+            Assert.AreEqual(100, StatRules.VirtueChancePercent(TestData.Balance(("VirtueChancePercent", 95)), With(Stat.End, 20)), "Within 0..100.");
 
-            // A mercenary that starts at the threshold breaks down at once, rolling spirit 14's chance.
-            BattleUnitSetup merc = Merc("m", 1, 1000, With(Stat.Spi, 14)).WithFatigue(100);
+            // A mercenary that starts at the threshold breaks down at once, rolling endurance 14's chance.
+            BattleUnitSetup merc = Merc("m", 1, 1000, With(Stat.End, 14)).WithFatigue(100);
             BattleEngine battle = Battle(balance, new[] { merc }, new[] { TestData.Enemy("e", 1, 100000) }, 100);
             Assert.AreEqual(29, battle.Events.Single(e => e.Kind == BattleEventKind.BrokeDown).B);
         }

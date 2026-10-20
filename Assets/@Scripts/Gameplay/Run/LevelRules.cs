@@ -20,15 +20,15 @@ namespace F1.Gameplay
         }
 
         /// <summary>
-        /// The maximum HP (hundredths) a mercenary of a job has with its stats: the job's, with what constitution adds (Slice D stage 32) and what its
-        /// traits add (stage 37), in percent, rounded down, never under 1%. A level reaches it through the constitution it grows (stage 34 took the
-        /// level's own bonus out).
+        /// The maximum HP (hundredths) a mercenary has with its stats (2026-10-20 스탯 개정, Docs/Design/05 §2): what its constitution gives
+        /// (<see cref="StatRules.MaxHpOf"/>; a job has no HP of its own any more) with what its traits add (stage 37), in percent, rounded down, never
+        /// under 1. A level reaches it through the constitution it grows (stage 34 took the level's own bonus out). The job id names whose it is.
         /// </summary>
         public static int MaxHpOf(StaticData data, string jobId, StatBlock stats, TraitBonus traits = null)
         {
-            JobData job = data.Jobs.Get(jobId);
-            int percent = Math.Max(1, 100 + StatRules.HpPercent(data.Balance, stats) + (traits?.MaxHpPercent ?? 0));
-            return (int)((long)job.MaxHp * percent / 100);
+            data.Jobs.Get(jobId);
+            int percent = Math.Max(1, 100 + (traits?.MaxHpPercent ?? 0));
+            return Math.Max(1, (int)((long)StatRules.MaxHpOf(data.Balance, stats.Con) * percent / 100));
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace F1.Gameplay
 
             mercenary.Stats = stats;
             return new StatBlock(
-                stats.Str - before.Str, stats.Dex - before.Dex, stats.Con - before.Con, stats.Int - before.Int, stats.Spi - before.Spi, stats.End - before.End);
+                stats.Str - before.Str, stats.Dex - before.Dex, stats.Con - before.Con, stats.Int - before.Int, stats.Wis - before.Wis, stats.End - before.End);
         }
 
         /// <summary>The purpose a level-up's roll is derived for (stage 35): the mercenary's id after it, the level it rises to as the index.</summary>

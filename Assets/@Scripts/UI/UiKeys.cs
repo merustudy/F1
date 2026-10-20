@@ -251,7 +251,7 @@ namespace F1.UI
             public const string Dex = "Stat.Dex";
             public const string Con = "Stat.Con";
             public const string Int = "Stat.Int";
-            public const string Spi = "Stat.Spi";
+            public const string Wis = "Stat.Wis";
             public const string End = "Stat.End";
             public const string Up = "Stat.Up";
             public const string Down = "Stat.Down";
@@ -286,7 +286,6 @@ namespace F1.UI
         public static class Item
         {
             public const string TooltipTitle = "Item.TooltipTitle";
-            public const string StatScale = "Item.StatScale";
             public const string Weapon = "Item.Weapon";
             public const string Armor = "Item.Armor";
             public const string Attack = "Item.Attack";

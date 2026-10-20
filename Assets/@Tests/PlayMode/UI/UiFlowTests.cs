@@ -822,12 +822,13 @@ namespace F1.Tests
                     int value = mercenary.Stats[stat];
                     Assert.AreEqual(UiText.StatName(stat), entries[e].StatNames[i].text);
                     Assert.AreEqual(value.ToString(), entries[e].StatValues[i].text);
-                    Color expected = value > data.Balance.StatBaseline ? UiPalette.Good : value < data.Balance.StatBaseline ? UiPalette.BloodLight : UiPalette.Text;
+                    // 2026-10-20 스탯 개정: the colour counts from the power baseline (5), the middle of a job's 1..8.
+                    Color expected = value > data.Balance.PowerBaseline ? UiPalette.Good : value < data.Balance.PowerBaseline ? UiPalette.BloodLight : UiPalette.Text;
                     Assert.AreEqual(expected, entries[e].StatValues[i].color, $"{mercenary.Id} {stat} {value}");
                 }
             }
 
-            // The warrior's sheet in Korean (the knight's values, Slice D stage 36): 힘 12 green, 지식 6 red.
+            // The warrior's sheet in Korean (2026-10-20 스탯 개정: 힘 6 over the power baseline 5 green, 지식 3 red).
             int knight = run.Roster.FindIndex(m => m.JobId == "warrior");
             Assert.AreEqual("힘", entries[knight].StatNames[0].text);
             Assert.AreEqual(UiPalette.Good, entries[knight].StatValues[0].color);
@@ -2295,11 +2296,11 @@ namespace F1.Tests
             Assert.IsTrue(card.IsShown);
             Assert.AreSame(dagger, card.Item);
             Assert.AreEqual(UiText.ItemTitle(dagger), card.Title);
-            // The card counts its owner's stats (Slice D stage 32): the dagger grows with dexterity, and its tail says by how much unless at the baseline.
+            // The card counts its owner's stats (Slice D stage 32; 2026-10-20 Round 88 2차: no stat tail — the effects' values already count them, and they stand first).
             UiText.ItemCard(dagger, out string facts, out string effects, out string fatigue, 0, first.Stats);
             Assert.AreEqual(facts, UiTestUtil.TextAt(card, "ItemTooltipFacts"));
-            string scale = UiText.StatScale(dagger, first.Stats);
-            Assert.AreEqual(scale == null ? effects : effects + "\n" + scale, UiTestUtil.TextAt(card, "ItemTooltipEffects"));
+            Assert.AreEqual(effects, UiTestUtil.TextAt(card, "ItemTooltipEffects"));
+            Assert.Less(UiTestUtil.At(card, "ItemTooltipEffects").GetSiblingIndex(), UiTestUtil.At(card, "ItemTooltipFacts").GetSiblingIndex(), "The effects stand above the facts (Round 88 2차).");
             Assert.AreEqual(fatigue, UiTestUtil.TextAt(card, "ItemTooltipFatigue"));
             Assert.AreEqual(UiText.MergeHint(dagger), UiTestUtil.TextAt(card, "ItemTooltipMerge"));
             Assert.IsFalse(party.Hand.Holding, "A right click picks nothing up.");
@@ -3022,7 +3023,7 @@ namespace F1.Tests
             Assert.AreSame(helm, party.Tooltip.Item);
             string facts = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts");
             StringAssert.Contains(UiStrings.Get(UiKeys.Item.BattleStart), facts);
-            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Item.Cooldown, UiText.Seconds(0)), facts, "No cooldown of 0 seconds.");
+            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Item.Cooldown, UiText.RoundedSeconds(0)), facts, "No cooldown of 0 seconds.");
             StringAssert.Contains(UiStrings.Get(UiKeys.Item.CritTaken, helm.Item.CritTakenPercent), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipEffects"));
             StringAssert.Contains(UiStrings.Get(UiKeys.Item.FatigueCost, 1), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFatigue"), "Defensive gear: fatigue +1.");
             UiTestUtil.PressTheBackground();

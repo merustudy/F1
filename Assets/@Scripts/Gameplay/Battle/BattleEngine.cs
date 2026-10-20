@@ -325,7 +325,8 @@ namespace F1.Gameplay
 
                     bool active = Works(equipped.Item, setup.Row, lineLength);
                     int star = setup.StarDamage == null ? 0 : setup.StarDamage[slot];
-                    items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille), star));
+                    // 2026-10-20 스탯 개정: the owner's dexterity or wisdom quickens its equipment (an enemy has no stats: 100%).
+                    items.Add(new BattleItemState(slot, equipped, active, EffectiveCooldown(equipped.Item.CooldownMs, cooldownPermille, StatRules.CooldownPercent(_balance, setup.Stats, equipped.Item)), star));
                 }
             }
 
@@ -361,7 +362,7 @@ namespace F1.Gameplay
                 for (int slot = 0; slot < phase.Items.Count; slot++)
                 {
                     EquippedItem equipped = phase.Items[slot];
-                    var state = new BattleItemState(slot, equipped, Works(equipped.Item, unit.Row, lineLength), EffectiveCooldown(equipped.Item.CooldownMs, permille), 0);
+                    var state = new BattleItemState(slot, equipped, Works(equipped.Item, unit.Row, lineLength), EffectiveCooldown(equipped.Item.CooldownMs, permille, StatRules.CooldownPercent(_balance, unit.Setup.Stats, equipped.Item)), 0);
                     state.NextFireMs = TimeMs + CooldownOf(unit, state);
                     items.Add(state);
                 }
@@ -380,7 +381,16 @@ namespace F1.Gameplay
         /// <summary>base x (1000 + permille) / 1000, rounded to the nearest millisecond, never below MinCooldownMs.</summary>
         int EffectiveCooldown(int baseMs, int permille)
         {
-            long scaled = ((long)baseMs * (1000 + permille) + 500) / 1000;
+            return EffectiveCooldown(baseMs, permille, StatRules.Full);
+        }
+
+        /// <summary>
+        /// base x (1000 + permille) / 1000 x statPercent / 100 (2026-10-20 스탯 개정: the owner's dexterity or wisdom, <see cref="StatRules.CooldownPercent"/>),
+        /// rounded to the nearest millisecond, never below MinCooldownMs. With no affinity it is <see cref="StatRules.CooldownMs"/>, which the cards show.
+        /// </summary>
+        int EffectiveCooldown(int baseMs, int permille, int statPercent)
+        {
+            long scaled = ((long)baseMs * (1000 + permille) * statPercent + 50000) / 100000;
             return scaled < _balance.MinCooldownMs ? _balance.MinCooldownMs : (int)scaled;
         }
 
@@ -584,14 +594,14 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Rolls one unit's hit (Slice D stage 33, Docs/Design/02_Combat_System.md §5) on the damage stream, before its critical hit: the base chance with
-        /// the attacker's accuracy (its stat of the item's axis, or an enemy's Accuracy) and less the target's dodge (its dexterity, or an enemy's Dodge),
+        /// the attacker's accuracy (its dexterity, or an enemy's Accuracy; 2026-10-20 스탯 개정: only a physical blow rolls) and less the target's dodge (its dexterity, or an enemy's Dodge),
         /// within the bounds. A miss is logged; nothing is dealt to that unit.
         /// </summary>
         bool RollHit(BattleUnit owner, BattleUnit target, ItemData item)
         {
             int chance = StatRules.HitChance(
                 _balance,
-                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, item, owner.Setup.Traits),
+                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, owner.Setup.Traits),
                 StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits));
             // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
             if (chance >= StatRules.Certain)
@@ -611,7 +621,8 @@ namespace F1.Gameplay
 
         /// <summary>
         /// Rolls the weapon's critical hit on one unit (stage 22, Docs/Design/02_Combat_System.md §4): with the weapon's chance, the damage
-        /// becomes <see cref="BalanceData.CritDamagePercent"/>% of the attack's roll (stars included). A weapon without a chance rolls nothing.
+        /// becomes <see cref="StatRules.CritDamagePercent"/>% of the attack's roll (stars included; 2026-10-20 스탯 개정: a physical weapon's multiplier
+        /// grows with the weapon and the owner's traits, a magic one's is the balance's). A weapon without a chance rolls nothing.
         /// </summary>
         bool RollCritical(BattleUnit owner, BattleUnit target, ItemData weapon, ref int damage)
         {
@@ -630,7 +641,7 @@ namespace F1.Gameplay
                 return false;
             }
 
-            damage = (int)((long)damage * _balance.CritDamagePercent / 100);
+            damage = (int)((long)damage * StatRules.CritDamagePercent(_balance, weapon, owner.Setup.Traits) / 100);
             return true;
         }
 

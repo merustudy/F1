@@ -7,7 +7,6 @@
         "en-US": "Mage",
         "ko-KR": "마법사"
       },
-      "MaxHp": 2200,
       "WeaponItemId": "fire_staff",
       "RecommendedRow": 3,
       "Passive": {
@@ -27,19 +26,19 @@
       },
       "Figure": "unit/job/archmage",
       "Stats": {
-        "Str": 6,
-        "Dex": 9,
-        "Con": 7,
-        "Int": 15,
-        "Spi": 11,
-        "End": 8
+        "Str": 3,
+        "Dex": 4,
+        "Con": 4,
+        "Int": 8,
+        "Wis": 5,
+        "End": 4
       },
       "Growth": {
         "Str": 20,
         "Dex": 50,
         "Con": 50,
         "Int": 110,
-        "Spi": 90,
+        "Wis": 90,
         "End": 50
       },
       "PassiveName": {
@@ -53,7 +52,6 @@
         "en-US": "Priest",
         "ko-KR": "사제"
       },
-      "MaxHp": 2500,
       "WeaponItemId": "healing_staff",
       "RecommendedRow": 3,
       "Passive": {
@@ -70,19 +68,19 @@
       },
       "Figure": "unit/job/bishop",
       "Stats": {
-        "Str": 7,
-        "Dex": 8,
-        "Con": 9,
-        "Int": 11,
-        "Spi": 14,
-        "End": 10
+        "Str": 3,
+        "Dex": 4,
+        "Con": 5,
+        "Int": 6,
+        "Wis": 7,
+        "End": 5
       },
       "Growth": {
         "Str": 20,
         "Dex": 50,
         "Con": 50,
         "Int": 90,
-        "Spi": 110,
+        "Wis": 110,
         "End": 50
       },
       "PassiveName": {
@@ -96,7 +94,6 @@
         "en-US": "Ranger",
         "ko-KR": "방랑자"
       },
-      "MaxHp": 2700,
       "WeaponItemId": "longbow",
       "RecommendedRow": 3,
       "Passive": {
@@ -113,19 +110,19 @@
       },
       "Figure": "unit/job/spellblade",
       "Stats": {
-        "Str": 8,
-        "Dex": 14,
-        "Con": 9,
-        "Int": 7,
-        "Spi": 9,
-        "End": 11
+        "Str": 5,
+        "Dex": 7,
+        "Con": 4,
+        "Int": 3,
+        "Wis": 4,
+        "End": 6
       },
       "Growth": {
         "Str": 50,
         "Dex": 110,
         "Con": 50,
         "Int": 20,
-        "Spi": 50,
+        "Wis": 50,
         "End": 90
       },
       "PassiveName": {
@@ -139,7 +136,6 @@
         "en-US": "Viking",
         "ko-KR": "바이킹"
       },
-      "MaxHp": 3300,
       "WeaponItemId": "greataxe",
       "RecommendedRow": 1,
       "Passive": {
@@ -156,19 +152,19 @@
       },
       "Figure": "unit/job/valkyrie",
       "Stats": {
-        "Str": 13,
-        "Dex": 11,
-        "Con": 10,
-        "Int": 5,
-        "Spi": 8,
-        "End": 9
+        "Str": 7,
+        "Dex": 5,
+        "Con": 5,
+        "Int": 3,
+        "Wis": 4,
+        "End": 4
       },
       "Growth": {
         "Str": 110,
         "Dex": 90,
         "Con": 50,
         "Int": 20,
-        "Spi": 50,
+        "Wis": 50,
         "End": 50
       },
       "PassiveName": {
@@ -182,7 +178,6 @@
         "en-US": "Warrior",
         "ko-KR": "전사"
       },
-      "MaxHp": 3800,
       "WeaponItemId": "longsword",
       "RecommendedRow": 1,
       "Passive": {
@@ -202,19 +197,19 @@
       },
       "Figure": "unit/job/knight",
       "Stats": {
-        "Str": 12,
-        "Dex": 9,
-        "Con": 12,
-        "Int": 6,
-        "Spi": 9,
-        "End": 11
+        "Str": 6,
+        "Dex": 4,
+        "Con": 6,
+        "Int": 3,
+        "Wis": 4,
+        "End": 6
       },
       "Growth": {
         "Str": 110,
         "Dex": 50,
         "Con": 90,
         "Int": 20,
-        "Spi": 50,
+        "Wis": 50,
         "End": 50
       },
       "PassiveName": {

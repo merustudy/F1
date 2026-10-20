@@ -89,20 +89,21 @@ namespace F1.Tests
         [Test]
         public void ALevel_NoLongerAddsToTheMaximumHp_OnlyTheStatsItGrewDo()
         {
-            // Slice D stage 34: the level's HP bonus is gone; the maximum is the job's with constitution's share (the test jobs: the baseline).
+            // Slice D stage 34: the level's HP bonus is gone; the maximum is constitution's (2026-10-20 스탯 개정: 0.10 a point in the test balance; the test
+            // healer's constitution is 6, the striker's 8).
             StaticData data = TestData.Data();
-            Assert.AreEqual(100, LevelRules.MaxHpOf(data, "tank"), "The job's 100 (hundredths).");
+            Assert.AreEqual(100, LevelRules.MaxHpOf(data, "tank"), "Constitution 10: 1.00 (hundredths).");
             Assert.AreEqual(60, LevelRules.MaxHpOf(data, "healer"));
-            Assert.AreEqual(110, LevelRules.MaxHpOf(data, "tank", StatBlock.Uniform(10).With(Stat.Con, 12)), "Constitution 12: 10% more.");
+            Assert.AreEqual(120, LevelRules.MaxHpOf(data, "tank", StatBlock.Uniform(10).With(Stat.Con, 12)), "Constitution 12: two points more.");
 
             RunState run = RunWithParty(data);
             RunRules.FindMercenary(run, "anna").Level = 3;
             RunRules.FindMercenary(run, "ben").Stats = StatBlock.Uniform(10).With(Stat.Con, 12);
             ExpeditionState expedition = RunRules.BeginExpedition(data, run, "cave");
 
-            Assert.AreEqual(100, expedition.Members[0].MaxHp, "Level 3 and the baseline: the job's.");
+            Assert.AreEqual(100, expedition.Members[0].MaxHp, "Level 3 and the baseline: constitution 10's.");
             Assert.AreEqual(100, expedition.Members[0].Hp, "Full at the start.");
-            Assert.AreEqual(66, expedition.Members[1].MaxHp, "60 + 10%.");
+            Assert.AreEqual(120, expedition.Members[1].MaxHp, "Constitution 12, whatever the job.");
             Assert.AreEqual(80, expedition.Members[2].MaxHp);
             Assert.AreEqual(100, ExpeditionRules.BeginBattle(data, expedition, expedition.Map.Nodes[0].Id).Party[0].MaxHp, "The battle takes the member's maximum.");
         }

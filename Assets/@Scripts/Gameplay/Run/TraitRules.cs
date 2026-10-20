@@ -12,8 +12,9 @@ namespace F1.Gameplay
     {
         public static readonly TraitBonus None = new TraitBonus(0, 0, 0, 0, 0, 0, 0);
 
-        public TraitBonus(int hitPercent, int dodgePercent, int critPercent, int dogDeathPercent, int virtuePercent, int fatiguePercent, int maxHpPercent)
+        public TraitBonus(int hitPercent, int dodgePercent, int critPercent, int dogDeathPercent, int virtuePercent, int fatiguePercent, int maxHpPercent, int critDamagePercent = 0)
         {
+            CritDamagePercent = critDamagePercent;
             HitPercent = hitPercent;
             DodgePercent = dodgePercent;
             CritPercent = critPercent;
@@ -30,6 +31,9 @@ namespace F1.Gameplay
         public int VirtuePercent { get; }
         public int FatiguePercent { get; }
         public int MaxHpPercent { get; }
+
+        /// <summary>Percent points the traits add to the physical critical multiplier (2026-10-20 스탯 개정).</summary>
+        public int CritDamagePercent { get; }
     }
 
     /// <summary>
@@ -50,7 +54,7 @@ namespace F1.Gameplay
                 return TraitBonus.None;
             }
 
-            int hit = 0, dodge = 0, crit = 0, dogDeath = 0, virtue = 0, fatigue = 0, maxHp = 0;
+            int hit = 0, dodge = 0, crit = 0, dogDeath = 0, virtue = 0, fatigue = 0, maxHp = 0, critDamage = 0;
             foreach (string id in traitIds)
             {
                 TraitData trait = data.Traits.Get(id);
@@ -61,9 +65,10 @@ namespace F1.Gameplay
                 virtue += trait.VirtuePercent;
                 fatigue += trait.FatiguePercent;
                 maxHp += trait.MaxHpPercent;
+                critDamage += trait.CritDamagePercent;
             }
 
-            return new TraitBonus(hit, dodge, crit, dogDeath, virtue, fatigue, maxHp);
+            return new TraitBonus(hit, dodge, crit, dogDeath, virtue, fatigue, maxHp, critDamage);
         }
 
         /// <summary>Whether a mercenary holding these traits can take another: it does not hold it yet and none of them clashes with it.</summary>

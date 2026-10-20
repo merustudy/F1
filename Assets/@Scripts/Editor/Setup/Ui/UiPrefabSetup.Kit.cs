@@ -182,8 +182,9 @@ namespace F1.Editor.Setup
             LayoutElement ruleElement = rule.gameObject.AddComponent<LayoutElement>();
             ruleElement.minHeight = 1f;
             ruleElement.preferredHeight = 1f;
-            TextMeshProUGUI facts = UiBuild.Label(name + "Facts", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
+            // 2026-10-20 Round 88 2차 (the user: "피해는 항목 중 가장 위쪽으로 배치"): the effects stand above the facts.
             TextMeshProUGUI effects = UiBuild.Label(name + "Effects", card, 20f, UiPalette.TooltipEffect, TextAlignmentOptions.Center);
+            TextMeshProUGUI facts = UiBuild.Label(name + "Facts", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
             TextMeshProUGUI fatigue = UiBuild.Label(name + "Fatigue", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
             TextMeshProUGUI merge = UiBuild.Label(name + "Merge", card, 19f, UiPalette.Text, TextAlignmentOptions.Center);
 

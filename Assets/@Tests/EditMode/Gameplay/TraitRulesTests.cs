@@ -94,12 +94,12 @@ namespace F1.Tests
             BalanceData balance = TestData.Balance(("HitBasePercent", 80), ("HitMaxPercent", 95), ("DogDeathChancePercent", 30));
             var traits = new TraitBonus(5, 3, 2, -5, 10, 10, -10);
             StatBlock baseline = StatBlock.Uniform(10);
-            ItemData blade = TestData.Item("blade", 1000, EffectKind.Damage, TargetMode.EnemyFront, scalesWith: Stat.Str);
+            ItemData blade = TestData.Item("blade", 1000, EffectKind.Damage, TargetMode.EnemyFront);
             var effects = new List<ItemEffect> { TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 100) };
             var five = new ItemData("five", TestData.Text("five"), ItemCategory.Weapon, 1, 1, 1000, RowSpan.All, effects, 0, critChancePercent: 5);
 
-            Assert.AreEqual(500, StatRules.Accuracy(balance, baseline, 0, blade, traits), "Hit +5 points, in ten-thousandths.");
-            Assert.AreEqual(1000, StatRules.Accuracy(balance, null, 10, blade, traits), "An enemy's Accuracy alone: it has no traits.");
+            Assert.AreEqual(500, StatRules.Accuracy(balance, baseline, 0, traits), "Hit +5 points, in ten-thousandths.");
+            Assert.AreEqual(1000, StatRules.Accuracy(balance, null, 10, traits), "An enemy's Accuracy alone: it has no traits.");
             Assert.AreEqual(300, StatRules.Dodge(balance, baseline, 0, traits));
             Assert.AreEqual(700, StatRules.CritChance(balance, baseline, five, 0, traits), "5% + 2 points.");
             Assert.AreEqual(0, StatRules.CritChance(balance, baseline, blade, 0, traits), "An item without a critical chance has none.");
@@ -119,7 +119,7 @@ namespace F1.Tests
             // A dull mercenary (-6 points) at the shipped 80%: every miss is logged at 74%. At death's door from the start, without grace, the first
             // hit rolls the death at 30% less a sturdy 5.
             BalanceData balance = TestData.Balance(("HitBasePercent", 80), ("HitMaxPercent", 95), ("DogDeathChancePercent", 30), ("DogGraceMs", 0));
-            var blade = new EquippedItem(TestData.Item("blade", 1000, EffectKind.Damage, TargetMode.EnemyFront, scalesWith: Stat.Str));
+            var blade = new EquippedItem(TestData.Item("blade", 1000, EffectKind.Damage, TargetMode.EnemyFront));
             BattleUnitSetup dull = TestData.Mercenary("m", 1, 100000, blade);
             dull.Stats = StatBlock.Uniform(10);
             dull.Traits = new TraitBonus(-6, 0, 0, 0, 0, 0, 0);

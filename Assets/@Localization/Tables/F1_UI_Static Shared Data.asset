@@ -1695,11 +1695,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673515462098944
-  - m_Id: 6394468465893376
-    m_Key: Item.StatScale
-    m_Metadata:
-      m_Items:
-      - rid: 8623673515462098945
   - m_Id: 6394468465893377
     m_Key: Stat.Str
     m_Metadata:
@@ -1720,11 +1715,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673515462098949
-  - m_Id: 6394468465893381
-    m_Key: Stat.Spi
-    m_Metadata:
-      m_Items:
-      - rid: 8623673515462098950
   - m_Id: 6394468465893382
     m_Key: Stat.End
     m_Metadata:
@@ -1910,6 +1900,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673547781046273
+  - m_Id: 7140407145127936
+    m_Key: Stat.Wis
+    m_Metadata:
+      m_Items:
+      - rid: 8623673562083098625
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2057,7 +2052,9 @@ MonoBehaviour:
     - rid: 636489279218909226
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = seconds.'
+        m_CommentText: "{0} = seconds; with an owner whose dexterity or wisdom quickens
+          the item (2026-10-20 \uC2A4\uD0EF \uAC1C\uC815) the owner's seconds, maybe
+          coloured."
     - rid: 636489279218909229
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3428,51 +3425,42 @@ MonoBehaviour:
         m_CommentText: The title of the stat tooltip beside a list row of the party
           popup (Slice D stage 32, Round 81). {0} = the mercenary's name. {1} = the
           job. {2} = the level.
-    - rid: 8623673515462098945
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'On the card of an item its owner''s stat grows (Slice D stage
-          32, Round 81), after the stars'' line: the stat, its value and the multiplier
-          the card''s values count. {0} = the stat''s name. {1} = its value. {2}
-          = the multiplier (1.2).'
     - rid: 8623673515462098946
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'A stat''s name (Slice D stage 32, Round 81): the barracks''
-          lines, the candidates, the party popup and the item cards. Strength: the
-          power and hit of heavy melee weapons.'
+        m_CommentText: "A stat's name (Slice D stage 32, Round 81; 2026-10-20 \uC2A4\uD0EF
+          \uAC1C\uC815): the barracks' lines, the candidates, the party popup and
+          the item cards. Strength: the power of physical weapons."
     - rid: 8623673515462098947
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'A stat''s name (Slice D stage 32). Dexterity: the power and
-          hit of light weapons (daggers, bows), dodge and critical hits.'
+        m_CommentText: "A stat's name (Slice D stage 32; 2026-10-20 \uC2A4\uD0EF
+          \uAC1C\uC815). Dexterity: the speed, hit and critical chance of physical
+          equipment, and dodge."
     - rid: 8623673515462098948
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'A stat''s name (Slice D stage 32). Constitution: the maximum
-          HP and the chance to live at death''s door.'
+        m_CommentText: "A stat's name (Slice D stage 32; 2026-10-20 \uC2A4\uD0EF
+          \uAC1C\uC815). Constitution: the maximum HP."
     - rid: 8623673515462098949
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'A stat''s name (Slice D stage 32). Intellect: the power and
-          hit of fire and howls.'
-    - rid: 8623673515462098950
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'A stat''s name (Slice D stage 32). Spirit: heals and shields,
-          and the chance of a virtue.'
+        m_CommentText: "A stat's name (Slice D stage 32; 2026-10-20 \uC2A4\uD0EF
+          \uAC1C\uC815). Intellect: the power of magic weapons, their damage and
+          heals alike."
     - rid: 8623673515462098951
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'A stat''s name (Slice D stage 32). Endurance: how slowly
-          fatigue builds up.'
+        m_CommentText: "A stat's name (Slice D stage 32; 2026-10-20 \uC2A4\uD0EF
+          \uAC1C\uC815). Endurance: how slowly fatigue builds up, the chance of a
+          virtue, and the chance to live at death's door."
     - rid: 8623673516817121280
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'In the facts of an item whose damage or burn can miss (Slice
-          D stage 33, Round 81): its hit chance against a target at the baseline,
-          with the owner''s stat of the item''s axis (an enemy''s Accuracy). {0}
-          = percent, up to two decimals, maybe coloured.'
+        m_CommentText: "In the facts of a physical item whose damage or burn can
+          miss (Slice D stage 33, Round 81; 2026-10-20 \uC2A4\uD0EF \uAC1C\uC815):
+          its hit chance against a target at the baseline, with the owner's dexterity
+          (an enemy's Accuracy). {0} = percent, up to two decimals, maybe coloured."
     - rid: 8623673516817121281
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3655,3 +3643,9 @@ MonoBehaviour:
         m_CommentText: An effect line of an item that takes points off the critical
           chance of the weapons that hit its owner (stage 39, the iron helm). {0}
           = the points.
+    - rid: 8623673562083098625
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "A stat's name (2026-10-20 \uC2A4\uD0EF \uAC1C\uC815: spirit
+          renamed). Wisdom: the speed and critical chance of magic equipment, and
+          the power of attack and support items."

@@ -100,7 +100,6 @@ namespace F1.Data
         public JobData(
             string id,
             LocalizedText name,
-            int maxHp,
             string weaponItemId,
             int recommendedRow,
             PassiveSpec passive,
@@ -112,17 +111,11 @@ namespace F1.Data
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
-            if (maxHp < 1)
-            {
-                throw new DataException($"{DefinitionName} '{id}': MaxHp must be at least 1.");
-            }
-
             if (!BattleRows.IsValid(recommendedRow))
             {
                 throw new DataException($"{DefinitionName} '{id}': RecommendedRow must be {BattleRows.Front}..{BattleRows.Count}.");
             }
 
-            MaxHp = maxHp;
             WeaponItemId = DataId.Require(weaponItemId, $"{DefinitionName} '{id}' WeaponItemId");
             if ((passive == null) != (passiveText == null))
             {
@@ -159,10 +152,6 @@ namespace F1.Data
 
         [JsonProperty(Order = 2, Required = Required.Always)]
         public LocalizedText Name { get; }
-
-        /// <summary>In hundredths (Slice B stage 22).</summary>
-        [JsonProperty(Order = 3, Required = Required.Always)]
-        public int MaxHp { get; }
 
         /// <summary>The item every mercenary of this job starts an expedition with.</summary>
         [JsonProperty(Order = 4, Required = Required.Always)]

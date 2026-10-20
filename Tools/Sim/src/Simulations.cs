@@ -395,7 +395,7 @@ namespace F1.Sim
 
             Console.WriteLine($"dungeon {dungeonId}, party {Describe(party)}, policy {policy.Name}, seed {baseSeed}");
             Console.WriteLine($"expeditions {runs}: cleared {BattleStats.Percent(stats.Cleared, runs)}, wiped {BattleStats.Percent(stats.Wiped, runs)}, retreated {BattleStats.Percent(stats.Retreated, runs)}");
-            Console.WriteLine("  stats (Slice D stage 32, str/dex/con/int/spi/end): " + string.Join(", ", party.Select(m => $"{m.MercenaryId} {m.Stats ?? StatRules.BaseOf(data, m.JobId)}")));
+            Console.WriteLine("  stats (Slice D stage 32, str/dex/con/int/wis/end): " + string.Join(", ", party.Select(m => $"{m.MercenaryId} {m.Stats ?? StatRules.BaseOf(data, m.JobId)}")));
             Console.WriteLine($"  deaths per expedition {BattleStats.Ratio(stats.Deaths, runs)}, expeditions with a death {BattleStats.Percent(stats.ExpeditionsWithDeath, runs)}, battles won per expedition {BattleStats.Ratio(stats.BattlesWon, runs)}");
             Console.WriteLine($"  at the end: items on boards {BattleStats.Ratio(stats.ItemsOnBoards, runs)}, in the inventory {BattleStats.Ratio(stats.ItemsInInventory, runs)}");
             Console.WriteLine($"  bags per member at the end: added {BattleStats.Ratio(stats.BagsAdded, stats.MembersAtEnd)}, bag squares {Average(stats.BagSquares, stats.MembersAtEnd)}");

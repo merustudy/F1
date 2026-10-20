@@ -11,16 +11,16 @@ namespace F1.Data
     public sealed class StatBlock : IEquatable<StatBlock>
     {
         /// <summary>Every stat, in the order the screens list them.</summary>
-        public static readonly Stat[] All = { Stat.Str, Stat.Dex, Stat.Con, Stat.Int, Stat.Spi, Stat.End };
+        public static readonly Stat[] All = { Stat.Str, Stat.Dex, Stat.Con, Stat.Int, Stat.Wis, Stat.End };
 
         [JsonConstructor]
-        public StatBlock(int str, int dex, int con, int @int, int spi, int end)
+        public StatBlock(int str, int dex, int con, int @int, int wis, int end)
         {
             Str = str;
             Dex = dex;
             Con = con;
             Int = @int;
-            Spi = spi;
+            Wis = wis;
             End = end;
         }
 
@@ -37,7 +37,7 @@ namespace F1.Data
         public int Int { get; }
 
         [JsonProperty(Order = 5, Required = Required.Always)]
-        public int Spi { get; }
+        public int Wis { get; }
 
         [JsonProperty(Order = 6, Required = Required.Always)]
         public int End { get; }
@@ -52,7 +52,7 @@ namespace F1.Data
                     case Stat.Dex: return Dex;
                     case Stat.Con: return Con;
                     case Stat.Int: return Int;
-                    case Stat.Spi: return Spi;
+                    case Stat.Wis: return Wis;
                     case Stat.End: return End;
                     default: throw new ArgumentOutOfRangeException(nameof(stat), stat, "Not a stat.");
                 }
@@ -73,14 +73,14 @@ namespace F1.Data
                 stat == Stat.Dex ? value : Dex,
                 stat == Stat.Con ? value : Con,
                 stat == Stat.Int ? value : Int,
-                stat == Stat.Spi ? value : Spi,
+                stat == Stat.Wis ? value : Wis,
                 stat == Stat.End ? value : End);
         }
 
         /// <summary>Each stat added to the other's (Slice D stage 35: two level-ups' gains shown together).</summary>
         public StatBlock Plus(StatBlock other)
         {
-            return new StatBlock(Str + other.Str, Dex + other.Dex, Con + other.Con, Int + other.Int, Spi + other.Spi, End + other.End);
+            return new StatBlock(Str + other.Str, Dex + other.Dex, Con + other.Con, Int + other.Int, Wis + other.Wis, End + other.End);
         }
 
         /// <summary>The first stat outside min..max, or null when all lie within.</summary>
@@ -99,7 +99,7 @@ namespace F1.Data
 
         public bool Equals(StatBlock other)
         {
-            return other != null && Str == other.Str && Dex == other.Dex && Con == other.Con && Int == other.Int && Spi == other.Spi && End == other.End;
+            return other != null && Str == other.Str && Dex == other.Dex && Con == other.Con && Int == other.Int && Wis == other.Wis && End == other.End;
         }
 
         public override bool Equals(object obj)
@@ -109,12 +109,12 @@ namespace F1.Data
 
         public override int GetHashCode()
         {
-            return ((((Str * 31 + Dex) * 31 + Con) * 31 + Int) * 31 + Spi) * 31 + End;
+            return ((((Str * 31 + Dex) * 31 + Con) * 31 + Int) * 31 + Wis) * 31 + End;
         }
 
         public override string ToString()
         {
-            return $"{Str}/{Dex}/{Con}/{Int}/{Spi}/{End}";
+            return $"{Str}/{Dex}/{Con}/{Int}/{Wis}/{End}";
         }
     }
 }

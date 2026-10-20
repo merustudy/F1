@@ -146,9 +146,10 @@ namespace F1.Data
             int critChancePercent = 0,
             bool unique = false,
             int dropWeight = 0,
-            Stat? scalesWith = null,
+            ItemSchool? school = null,
             ItemTrigger trigger = ItemTrigger.Cooldown,
-            int critTakenPercent = 0)
+            int critTakenPercent = 0,
+            int critDamagePercent = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             if (dropWeight < 0)
@@ -157,13 +158,15 @@ namespace F1.Data
             }
 
             DropWeight = dropWeight;
-            // The stat that grows the item's power (Slice D stage 32): one of the four that are an item's axis, on an item that does something.
-            if (scalesWith != null && !IsPowerStat(scalesWith.Value))
+            // Physical or magic (2026-10-20 스탯 개정, Docs/Design/02_Combat_System.md §4·§5): a weapon and an attack item are physical unless the data says
+            // Magic; defensive gear may say (its cooldown then grows with dexterity); a support item and anything else has none (a support item's power
+            // grows with wisdom all the same).
+            if ((category == ItemCategory.Support || category == ItemCategory.Other) && school != null)
             {
-                throw new DataException($"{DefinitionName} '{id}': ScalesWith must be Str, Dex, Int or Spi, not {scalesWith}.");
+                throw new DataException($"{DefinitionName} '{id}': only a weapon, an attack item or defensive gear has a School.");
             }
 
-            ScalesWith = scalesWith;
+            School = school ?? (category == ItemCategory.Weapon || category == ItemCategory.Attack ? ItemSchool.Physical : (ItemSchool?)null);
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
             if (width < 1 || width > BoardFrame.MaxSide || height < 1 || height > BoardFrame.MaxSide)
             {
@@ -194,11 +197,6 @@ namespace F1.Data
             }
             else if (effects.Count == 0)
             {
-                if (scalesWith != null)
-                {
-                    throw new DataException($"{DefinitionName} '{id}': an item without effects has no power to grow, so no ScalesWith.");
-                }
-
                 if (stars.Count == 0)
                 {
                     throw new DataException($"{DefinitionName} '{id}': an item without effects must have stars.");
@@ -248,6 +246,17 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName} '{id}': only a weapon that deals damage can have a CritChancePercent.");
             }
 
+            // What the weapon adds to the physical critical multiplier (2026-10-20 스탯 개정): a physical weapon with a critical chance, in percent points.
+            if (critDamagePercent < 0 || critDamagePercent > MaxCritDamageBonus)
+            {
+                throw new DataException($"{DefinitionName} '{id}': CritDamagePercent must be 0..{MaxCritDamageBonus}.");
+            }
+
+            if (critDamagePercent > 0 && (critChancePercent == 0 || school != ItemSchool.Physical))
+            {
+                throw new DataException($"{DefinitionName} '{id}': only a physical weapon with a CritChancePercent can have a CritDamagePercent.");
+            }
+
             // A unique item (stage 23) is forged at a camp (RecipeData), never bought or dropped.
             if (unique && (shopWeight != 0 || price != 0))
             {
@@ -285,13 +294,11 @@ namespace F1.Data
             Unique = unique;
             Trigger = trigger;
             CritTakenPercent = critTakenPercent;
+            CritDamagePercent = critDamagePercent;
         }
 
-        /// <summary>The stats an item's power can grow with (Slice D stage 32): strength, dexterity, intellect, spirit. Constitution and endurance are no item's axis.</summary>
-        public static bool IsPowerStat(Stat stat)
-        {
-            return stat == Stat.Str || stat == Stat.Dex || stat == Stat.Int || stat == Stat.Spi;
-        }
+        /// <summary>The most a weapon or a trait adds to the physical critical multiplier, in percent points.</summary>
+        public const int MaxCritDamageBonus = 500;
 
         static bool HasDamage(IReadOnlyList<ItemEffect> effects)
         {
@@ -410,12 +417,9 @@ namespace F1.Data
         [JsonProperty(Order = 17, Required = Required.Always)]
         public int DropWeight { get; }
 
-        /// <summary>
-        /// The owner's stat that grows the item's power (Slice D stage 32, Docs/Design/02_Combat_System.md §4): its damage, heal, shield or burn,
-        /// and from stage 33 its hit chance. Null for an item that grows with none (a shield, a whetstone). An enemy has no stats: its items stay as they are.
-        /// </summary>
+        /// <summary>Physical or magic (2026-10-20 스탯 개정): a weapon's and an attack item's (physical unless the data says Magic), maybe defensive gear's; null for the rest.</summary>
         [JsonProperty(Order = 18, Required = Required.AllowNull)]
-        public Stat? ScalesWith { get; }
+        public ItemSchool? School { get; }
 
         /// <summary>
         /// When the item activates (Slice D stage 39, Docs/Design/02_Combat_System.md §4 "방어구"): on its cooldown, or once when a battle starts
@@ -430,6 +434,37 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 20, Required = Required.Always)]
         public int CritTakenPercent { get; }
+
+        /// <summary>Percent points a physical weapon adds to the critical multiplier of its hits (2026-10-20 스탯 개정, Docs/Design/02 §4): the heavy weapons. 0 for the rest.</summary>
+        [JsonProperty(Order = 21, Required = Required.Always)]
+        public int CritDamagePercent { get; }
+
+        /// <summary>
+        /// The owner's stat that grows the item's power (2026-10-20 스탯 개정, Docs/Design/02_Combat_System.md §4; before, the data's ScalesWith column):
+        /// strength for a physical weapon, intellect for a magic one (its damage and its heals alike), wisdom for an attack or a support item; null for
+        /// defensive gear and the rest, which grow with none. An enemy has no stats: its items stay as they are.
+        /// </summary>
+        [JsonIgnore]
+        public Stat? ScalesWith
+        {
+            get
+            {
+                if (Category == ItemCategory.Weapon)
+                {
+                    return School == ItemSchool.Magic ? Stat.Int : Stat.Str;
+                }
+
+                return Category == ItemCategory.Attack || Category == ItemCategory.Support ? Stat.Wis : (Stat?)null;
+            }
+        }
+
+        /// <summary>
+        /// The owner's stat that quickens the item (2026-10-20 스탯 개정): dexterity for physical equipment, wisdom for magic equipment (a weapon or
+        /// defensive gear with a school); null for an item no stat quickens.
+        /// </summary>
+        [JsonIgnore]
+        public Stat? QuickenedBy =>
+            (Category == ItemCategory.Weapon || Category == ItemCategory.Armor) && School != null ? (School == ItemSchool.Magic ? Stat.Wis : Stat.Dex) : (Stat?)null;
 
         /// <summary>An item without effects (stage 20): it never activates and has no cooldown; it works by its stars.</summary>
         [JsonIgnore]

@@ -18,7 +18,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "eagle_eye",
@@ -37,7 +38,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "frail",
@@ -56,7 +58,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": -10
+      "MaxHpPercent": -10,
+      "CritDamagePercent": 0
     },
     {
       "Id": "hardened",
@@ -75,7 +78,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 10,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "iron_bones",
@@ -94,7 +98,8 @@
       "DogDeathPercent": -5,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "limp",
@@ -113,7 +118,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "nightmares",
@@ -132,7 +138,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 10,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "scarred",
@@ -151,7 +158,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": -5
+      "MaxHpPercent": -5,
+      "CritDamagePercent": 0
     },
     {
       "Id": "seasoned",
@@ -170,7 +178,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 25
     },
     {
       "Id": "shaken",
@@ -189,7 +198,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": -10,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "steady",
@@ -208,7 +218,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": -10,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "survivor",
@@ -227,7 +238,8 @@
       "DogDeathPercent": -10,
       "VirtuePercent": 0,
       "FatiguePercent": 0,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     },
     {
       "Id": "timid",
@@ -246,7 +258,8 @@
       "DogDeathPercent": 0,
       "VirtuePercent": 0,
       "FatiguePercent": 10,
-      "MaxHpPercent": 0
+      "MaxHpPercent": 0,
+      "CritDamagePercent": 0
     }
   ]
 }

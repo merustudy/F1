@@ -65,7 +65,7 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The chance of dying on a hit at death's door: the base chance moved by the fatigue state (a reckless mercenary dies more
-        /// easily, a stalwart one less), by constitution (Slice D stage 33: each point above the baseline takes DogDeathPercentPerConPoint off) and by
+        /// easily, a stalwart one less), by endurance (2026-10-20 스탯 개정, before constitution: each point above the baseline takes DogDeathPercentPerEndPoint off) and by
         /// the mercenary's traits (stage 37), within 0..100. The battle rolls it and the screen shows it.
         /// </summary>
         public static int DogDeathChancePercent(BalanceData balance, FatigueStateData state, StatBlock stats = null, TraitBonus traits = null)

@@ -20,7 +20,7 @@ namespace F1.Tests
         {
             StaticDataParts parts = TestData.Parts(balance);
             parts.Jobs = parts.Jobs
-                .Select(job => job.Id == "tank" ? new JobData(job.Id, job.Name, job.MaxHp, job.WeaponItemId, job.RecommendedRow, job.Passive, job.PassiveText, job.Figure, TankStats, tankGrowth) : job)
+                .Select(job => job.Id == "tank" ? new JobData(job.Id, job.Name, job.WeaponItemId, job.RecommendedRow, job.Passive, job.PassiveText, job.Figure, TankStats, tankGrowth) : job)
                 .ToList();
             return new StaticData(parts);
         }
@@ -47,7 +47,7 @@ namespace F1.Tests
         public void ACandidatesStats_StayWithinStatMinAndStatMax()
         {
             // A spread of 10 around the test jobs' baseline 10 would reach 0 and 20: StatMin 5 and StatMax 15 hold them.
-            StaticData data = Data(null, ("RecruitStatSpread", 10), ("RecruitCount", 3), ("StatMin", 5), ("StatMax", 15), ("StatPowerPercentPerPoint", 5), ("HpPercentPerConPoint", 5));
+            StaticData data = Data(null, ("RecruitStatSpread", 10), ("RecruitCount", 3), ("StatMin", 5), ("StatMax", 15), ("StatPowerPercentPerPoint", 5));
             for (ulong seed = 1; seed <= 20; seed++)
             {
                 foreach (RecruitState recruit in RunRules.NewRun(data, seed).Recruits)
@@ -68,7 +68,7 @@ namespace F1.Tests
             Assert.AreEqual(2, gains.Str);
             Assert.AreEqual(1, gains.Dex);
             Assert.AreEqual(0, gains.Con);
-            Assert.IsTrue(new[] { gains.Int, gains.Spi, gains.End }.All(g => g == 0 || g == 1));
+            Assert.IsTrue(new[] { gains.Int, gains.Wis, gains.End }.All(g => g == 0 || g == 1));
             Assert.AreEqual(TankStats.Str + 2, tank.Stats.Str, "The mercenary's stats grew.");
 
             // Over many level-ups the chance shows: about half of them give the point.

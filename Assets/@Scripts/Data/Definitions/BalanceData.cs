@@ -84,7 +84,8 @@ namespace F1.Data
             new KeySpec(nameof(StormGrowth), 0, Big, centi: true),
             new KeySpec(nameof(BurnDamagePerStack), 1, Big, centi: true),
             new KeySpec(nameof(HitMinDamage), 0, Big, centi: true),
-            new KeySpec(nameof(CritDamagePercent), 100, 1000),
+            new KeySpec(nameof(PhysicalCritDamagePercent), 100, 1000),
+            new KeySpec(nameof(MagicCritDamagePercent), 100, 1000),
             new KeySpec(nameof(CritFatigueTaken), 0, Big),
             new KeySpec(nameof(CritFatigueTakenAllies), 0, Big),
             new KeySpec(nameof(CritFatigueDealt), 0, Big),
@@ -131,15 +132,23 @@ namespace F1.Data
             new KeySpec(nameof(StatMin), 1, 100),
             new KeySpec(nameof(StatMax), 1, 100),
             new KeySpec(nameof(StatPowerPercentPerPoint), 0, 100),
-            new KeySpec(nameof(HpPercentPerConPoint), 0, 100),
+            new KeySpec(nameof(PowerBaseline), 1, 100),
+            new KeySpec(nameof(FatigueBaseline), 1, 100),
+            new KeySpec(nameof(CooldownPercentPerPoint), 0, 100),
+            new KeySpec(nameof(HpPerConPointLow), 1, Big, centi: true),
+            new KeySpec(nameof(HpPerConPointMid), 1, Big, centi: true),
+            new KeySpec(nameof(HpPerConPointHigh), 1, Big, centi: true),
+            new KeySpec(nameof(HpBandLow), 1, 100),
+            new KeySpec(nameof(HpBandMid), 1, 100),
             new KeySpec(nameof(HitBasePercent), 0, 100),
             new KeySpec(nameof(HitMinPercent), 0, 100),
             new KeySpec(nameof(HitMaxPercent), 0, 100),
-            new KeySpec(nameof(HitPerStatPoint), 0, 10000, centi: true),
+            new KeySpec(nameof(HitPerDexPoint), 0, 10000, centi: true),
             new KeySpec(nameof(DodgePerDexPoint), 0, 10000, centi: true),
             new KeySpec(nameof(CritPerDexPoint), 0, 10000, centi: true),
-            new KeySpec(nameof(DogDeathPercentPerConPoint), 0, 100),
-            new KeySpec(nameof(VirtuePerSpiPoint), 0, 100),
+            new KeySpec(nameof(CritPerWisPoint), 0, 10000, centi: true),
+            new KeySpec(nameof(DogDeathPercentPerEndPoint), 0, 100),
+            new KeySpec(nameof(VirtuePerEndPoint), 0, 100),
             new KeySpec(nameof(FatiguePercentPerEndPoint), 0, 100),
             new KeySpec(nameof(RecruitStatSpread), 0, 10),
             new KeySpec(nameof(RecruitTraitWeight0), 0, 1000),
@@ -228,14 +237,25 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: StatBaseline must lie within StatMin..StatMax.");
             }
 
-            if (100 - StatPowerPercentPerPoint * (StatBaseline - StatMin) < 1)
+            // 2026-10-20 스탯 개정: the power and fatigue baselines lie in the range too; the lowest stat keeps some power, the highest some cooldown; the HP bands rise.
+            if (StatMin > PowerBaseline || PowerBaseline > StatMax || StatMin > FatigueBaseline || FatigueBaseline > StatMax)
+            {
+                throw new DataException($"{DefinitionName}: PowerBaseline and FatigueBaseline must lie within StatMin..StatMax.");
+            }
+
+            if (100 - StatPowerPercentPerPoint * (PowerBaseline - StatMin) < 1)
             {
                 throw new DataException($"{DefinitionName}: StatPowerPercentPerPoint leaves the lowest stat no power (under 1%).");
             }
 
-            if (100 - HpPercentPerConPoint * (StatBaseline - StatMin) < 1)
+            if (100 - CooldownPercentPerPoint * (StatMax - PowerBaseline) < 1)
             {
-                throw new DataException($"{DefinitionName}: HpPercentPerConPoint leaves the lowest constitution no HP (under 1%).");
+                throw new DataException($"{DefinitionName}: CooldownPercentPerPoint leaves the highest stat no cooldown (under 1%).");
+            }
+
+            if (HpBandLow >= HpBandMid)
+            {
+                throw new DataException($"{DefinitionName}: HpBandLow must be under HpBandMid.");
             }
 
             if (HitMinPercent > HitBasePercent || HitBasePercent > HitMaxPercent)
@@ -313,12 +333,13 @@ namespace F1.Data
         /// <summary>
         /// Slice B stage 22 (Docs/Design/02_Combat_System.md §4·§5, 04 §3): a burn's tick deals this per stack (hundredths); damage that gets
         /// through a shield is a hit only from <see cref="HitMinDamage"/> (hundredths) or when it takes the HP to 0; a critical hit is the
-        /// rolled damage times <see cref="CritDamagePercent"/>%, and tires the one it hit and its allies, and relieves the one who dealt it and
+        /// rolled damage times <see cref="PhysicalCritDamagePercent"/>% (a magic weapon's <see cref="MagicCritDamagePercent"/>%; 2026-10-20 스탯 개정), and tires the one it hit and its allies, and relieves the one who dealt it and
         /// its allies.
         /// </summary>
         public int BurnDamagePerStack => _values[nameof(BurnDamagePerStack)];
         public int HitMinDamage => _values[nameof(HitMinDamage)];
-        public int CritDamagePercent => _values[nameof(CritDamagePercent)];
+        public int PhysicalCritDamagePercent => _values[nameof(PhysicalCritDamagePercent)];
+        public int MagicCritDamagePercent => _values[nameof(MagicCritDamagePercent)];
         public int CritFatigueTaken => _values[nameof(CritFatigueTaken)];
         public int CritFatigueTakenAllies => _values[nameof(CritFatigueTakenAllies)];
         public int CritFatigueDealt => _values[nameof(CritFatigueDealt)];
@@ -442,7 +463,21 @@ namespace F1.Data
         public int StatMin => _values[nameof(StatMin)];
         public int StatMax => _values[nameof(StatMax)];
         public int StatPowerPercentPerPoint => _values[nameof(StatPowerPercentPerPoint)];
-        public int HpPercentPerConPoint => _values[nameof(HpPercentPerConPoint)];
+
+        /// <summary>
+        /// 2026-10-20 스탯 개정 (Docs/Design/05 §2, 02 §4, 04 §3): the baseline an item's power and cooldown count from (strength, intellect, wisdom; dexterity
+        /// and wisdom for the cooldown), what each point above it takes off the cooldown of the owner's equipment (percent), the baseline the fatigue a
+        /// mercenary gains counts from, and the HP each point of constitution gives (hundredths): the low band up to HpBandLow points, the middle band up to
+        /// HpBandMid, the high band above. The rolls (hit, dodge, critical hits, the virtue, the death at death's door) count from StatBaseline.
+        /// </summary>
+        public int PowerBaseline => _values[nameof(PowerBaseline)];
+        public int CooldownPercentPerPoint => _values[nameof(CooldownPercentPerPoint)];
+        public int FatigueBaseline => _values[nameof(FatigueBaseline)];
+        public int HpPerConPointLow => _values[nameof(HpPerConPointLow)];
+        public int HpPerConPointMid => _values[nameof(HpPerConPointMid)];
+        public int HpPerConPointHigh => _values[nameof(HpPerConPointHigh)];
+        public int HpBandLow => _values[nameof(HpBandLow)];
+        public int HpBandMid => _values[nameof(HpBandMid)];
 
         /// <summary>
         /// The stats' rolls (Slice D stage 33, Docs/Design/02_Combat_System.md §4·§5·§6, 04 §3): the hit chance against a target at the baseline and
@@ -454,11 +489,12 @@ namespace F1.Data
         public int HitBasePercent => _values[nameof(HitBasePercent)];
         public int HitMinPercent => _values[nameof(HitMinPercent)];
         public int HitMaxPercent => _values[nameof(HitMaxPercent)];
-        public int HitPerStatPoint => _values[nameof(HitPerStatPoint)];
+        public int HitPerDexPoint => _values[nameof(HitPerDexPoint)];
         public int DodgePerDexPoint => _values[nameof(DodgePerDexPoint)];
         public int CritPerDexPoint => _values[nameof(CritPerDexPoint)];
-        public int DogDeathPercentPerConPoint => _values[nameof(DogDeathPercentPerConPoint)];
-        public int VirtuePerSpiPoint => _values[nameof(VirtuePerSpiPoint)];
+        public int CritPerWisPoint => _values[nameof(CritPerWisPoint)];
+        public int DogDeathPercentPerEndPoint => _values[nameof(DogDeathPercentPerEndPoint)];
+        public int VirtuePerEndPoint => _values[nameof(VirtuePerEndPoint)];
         public int FatiguePercentPerEndPoint => _values[nameof(FatiguePercentPerEndPoint)];
 
         /// <summary>How far a candidate's stat may lie from its job's base value, either way (Slice D stage 34, Docs/Design/04 §6): drawn evenly in -n..n.</summary>

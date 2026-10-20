@@ -55,7 +55,7 @@ namespace F1.Tests
         /// <summary>Every stat at the test data's baseline (version 18): what the test jobs, which name no stats, give.</summary>
         static StatsRecord Baseline()
         {
-            return new StatsRecord { Str = 10, Dex = 10, Con = 10, Int = 10, Spi = 10, End = 10 };
+            return new StatsRecord { Str = 10, Dex = 10, Con = 10, Int = 10, Wis = 10, End = 10 };
         }
 
         static void AssertRefused(RunSaveData save, StaticData data)
@@ -403,7 +403,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(23, RunSaveData.CurrentSchemaVersion);
+            Assert.AreEqual(24, RunSaveData.CurrentSchemaVersion);
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -434,7 +434,7 @@ namespace F1.Tests
             Assert.IsTrue(run.Recruits.All(r => r.Traits.Count == 2), "The candidates drew two each.");
             kit.Expedition.Depart("cave");
             RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            Assert.AreEqual(23, save.SchemaVersion);
+            Assert.AreEqual(24, save.SchemaVersion);
             CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, save.Run.Roster[0].Traits);
 
             RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState expedition);
@@ -474,7 +474,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(23, save.SchemaVersion, "Brought on through 22 to the current version.");
+            Assert.AreEqual(24, save.SchemaVersion, "Brought on through 22 and 23 to the current version.");
             Assert.IsTrue(save.Run.Roster.All(m => m.Traits != null && m.Traits.Count == 0) && save.Run.Recruits.All(r => r.Traits != null && r.Traits.Count == 0));
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
             Assert.IsTrue(run.Roster.All(m => m.Traits.Count == 0));
@@ -499,9 +499,45 @@ namespace F1.Tests
             again.SchemaVersion = 22;
             again.Expedition.Members.ForEach(m => m.DeathsDoor = false);
             RunSaveMigrator.Migrate(again, data);
-            Assert.AreEqual(23, again.SchemaVersion);
+            Assert.AreEqual(24, again.SchemaVersion);
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState migrated);
             Assert.IsTrue(migrated.Members.All(m => !m.DeathsDoor));
+        }
+
+        [Test]
+        public void Migrate_From23_RenamesSpiritToWisdom_HalvesTheStats_AndGivesAMemberItsNewConstitutionsHp()
+        {
+            // Version 24 (2026-10-20 스탯 개정): a version 23 file's stats stood around 10; they are halved, rounded half up ((old + 1) / 2), Spi read into Wis,
+            // and a member of the expedition going on gets the HP of its new constitution (0.10 a point in the test balance), its HP in proportion.
+            RunSaveData save = ValidSave(out StaticData data, ExpeditionPhase.ChoosingNode);
+            save.SchemaVersion = 23;
+            MercenaryRecord first = save.Run.Roster[0];
+            first.Stats = new StatsRecord { Str = 13, Dex = 9, Con = 12, Int = 6, Spi = 14, End = 11 };
+            save.Run.Recruits[0].Stats = new StatsRecord { Str = 5, Dex = 10, Con = 15, Int = 1, Spi = 30, End = 7 };
+            MemberRecord member = save.Expedition.Members.Single(m => m.MercenaryId == first.Id);
+            member.MaxHp = 120;
+            member.Hp = 90;
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(24, save.SchemaVersion);
+            Assert.AreEqual((7, 5, 6, 3, 7, 6), (first.Stats.Str, first.Stats.Dex, first.Stats.Con, first.Stats.Int, first.Stats.Wis, first.Stats.End));
+            Assert.IsNull(first.Stats.Spi, "Spirit is read once and written no more.");
+            Assert.AreEqual((3, 5, 8, 1, 15, 4), (save.Run.Recruits[0].Stats.Str, save.Run.Recruits[0].Stats.Dex, save.Run.Recruits[0].Stats.Con, save.Run.Recruits[0].Stats.Int, save.Run.Recruits[0].Stats.Wis, save.Run.Recruits[0].Stats.End));
+            Assert.AreEqual(60, member.MaxHp, "Constitution 6 now.");
+            Assert.AreEqual(45, member.Hp, "90 of 120 becomes 45 of 60.");
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+            Assert.AreEqual(new StatBlock(7, 5, 6, 3, 7, 6), run.Roster[0].Stats);
+            Assert.AreEqual(60, expedition.Members.Single(m => m.MercenaryId == first.Id).MaxHp);
+
+            // Nothing left of a member at 0 HP stays at 0; one with any HP keeps at least 1.
+            RunSaveData low = ValidSave(out StaticData _, ExpeditionPhase.ChoosingNode);
+            low.SchemaVersion = 23;
+            MemberRecord weak = low.Expedition.Members[0];
+            weak.MaxHp = 10000;
+            weak.Hp = 1;
+            RunSaveMigrator.Migrate(low, data);
+            Assert.AreEqual(1, weak.Hp);
         }
 
         [Test]

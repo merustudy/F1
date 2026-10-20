@@ -67,11 +67,11 @@ namespace F1.Tests
 
         /// <summary>Four traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two, and scar acquired at death's door (stage 38).</summary>
         public const string Traits =
-            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent\n" +
-            "dull,둔함,Dull,Innate,Negative,,10,,-5,,,,,,\n" +
-            "keen,예리함,Keen,Innate,Positive,,10,dull,5,2,1,,,,\n" +
-            "scar,흉터,Scar,Acquired,Negative,DeathsDoor,10,,,,,,,,-5\n" +
-            "sturdy,강골,Sturdy,Innate,Positive,,5,,,,,-5,3,-10,8\n";
+            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent,CritDamagePercent\n" +
+            "dull,둔함,Dull,Innate,Negative,,10,,-5,,,,,,,\n" +
+            "keen,예리함,Keen,Innate,Positive,,10,dull,5,2,1,,,,,10\n" +
+            "scar,흉터,Scar,Acquired,Negative,DeathsDoor,10,,,,,,,,-5,\n" +
+            "sturdy,강골,Sturdy,Innate,Positive,,5,,,,,-5,3,-10,8,\n";
 
         public const string Bags =
             "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +

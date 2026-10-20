@@ -207,10 +207,20 @@ namespace F1.UI
             }
         }
 
-        /// <summary>Milliseconds as seconds with one decimal, for example "2.9".</summary>
+        /// <summary>Milliseconds as seconds with one decimal, for example "2.9" (the battle's clock and log).</summary>
         public static string Seconds(int milliseconds)
         {
             int tenths = milliseconds / 100;
+            return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", tenths / 10, tenths % 10);
+        }
+
+        /// <summary>
+        /// Milliseconds as seconds with one decimal, rounded half up at the second: 2940 is "2.9", 1455 "1.5", 2960 "3.0" (2026-10-20 Round 88 4차, the user:
+        /// "소수점 둘째 자리에서 반올림" for the card's numbers; <see cref="Seconds"/> truncates, for the clock and the log).
+        /// </summary>
+        public static string RoundedSeconds(int milliseconds)
+        {
+            int tenths = (milliseconds + 50) / 100;
             return string.Format(CultureInfo.InvariantCulture, "{0}.{1}", tenths / 10, tenths % 10);
         }
 
@@ -443,7 +453,7 @@ namespace F1.UI
                 facts.Add(UiStrings.Get(UiKeys.Item.Melee));
             }
 
-            facts.Add(CooldownFact(data));
+            facts.Add(CooldownFact(data, ownerStats));
 
             // A weapon's chance of a critical hit (stage 22), with the owner's dexterity (Slice D stage 33), and the hit chance of what can miss against a
             // target at the baseline: the number green over the data's, red under it (Round 81). Both count the owner's traits (stage 37, Round 84 판정 9).
@@ -455,9 +465,10 @@ namespace F1.UI
 
             if (CanMiss(data))
             {
-                int hit = StatRules.HitChance(balance, StatRules.Accuracy(balance, ownerStats, ownerAccuracy, data, ownerTraits), 0);
+                int hit = StatRules.HitChance(balance, StatRules.Accuracy(balance, ownerStats, ownerAccuracy, ownerTraits), 0);
                 facts.Add(UiStrings.Get(UiKeys.Item.Hit, AgainstData(hit, balance.HitBasePercent * 100)));
             }
+            // A magic blow never misses (2026-10-20 스탯 개정): no hit line at all (Round 88 2차, the user: "마법 장비는 언제나 명중 항목 빼기").
 
             // An item that works anywhere in the line needs no fact about where.
             if (!data.Rows.IsEveryRow)
@@ -468,16 +479,36 @@ namespace F1.UI
             return facts;
         }
 
-        /// <summary>The cooldown, "never activates" for an item without effects (stage 20), or "at the start of battle" for the armour (Slice D stage 39, Round 87).</summary>
-        static string CooldownFact(ItemData data)
+        /// <summary>
+        /// The cooldown, "never activates" for an item without effects (stage 20), or "at the start of battle" for the armour (Slice D stage 39, Round 87).
+        /// With an owner whose dexterity or wisdom quickens the item (2026-10-20 스탯 개정), the seconds are the owner's: green when quicker than the data's,
+        /// red when slower (as the hit and the critical chance are coloured).
+        /// </summary>
+        static string CooldownFact(ItemData data, StatBlock ownerStats = null)
         {
             if (data.IsPassive)
             {
                 return UiStrings.Get(UiKeys.Item.NoActivation);
             }
 
-            return data.Trigger == ItemTrigger.BattleStart ? UiStrings.Get(UiKeys.Item.BattleStart) : UiStrings.Get(UiKeys.Item.Cooldown, Seconds(data.CooldownMs));
+            if (data.Trigger == ItemTrigger.BattleStart)
+            {
+                return UiStrings.Get(UiKeys.Item.BattleStart);
+            }
+
+            BalanceData balance = Managers.Data.Data.Balance;
+            int percent = StatRules.CooldownPercent(balance, ownerStats, data);
+            // Round 88 4차 (2026-10-20, the user: "소수점 둘째 자리에서 반올림 — 보여주는 항목에서"): the card's seconds keep one decimal, rounded.
+            if (percent == StatRules.Full)
+            {
+                return UiStrings.Get(UiKeys.Item.Cooldown, RoundedSeconds(data.CooldownMs));
+            }
+
+            string seconds = RoundedSeconds(StatRules.CooldownMs(balance, data.CooldownMs, percent));
+            return UiStrings.Get(UiKeys.Item.Cooldown, Colored(seconds, percent < StatRules.Full ? UiPalette.Good : UiPalette.BloodLight));
         }
+
+
 
         /// <param name="starDamage">What stars add to the item's weapon damage on its board (stage 20, as the battle adds it), or 0.</param>
         static List<string> ItemEffects(EquippedItem item, int starDamage = 0, StatBlock ownerStats = null)
@@ -596,16 +627,19 @@ namespace F1.UI
                 case Stat.Dex: return UiStrings.Get(UiKeys.Stat.Dex);
                 case Stat.Con: return UiStrings.Get(UiKeys.Stat.Con);
                 case Stat.Int: return UiStrings.Get(UiKeys.Stat.Int);
-                case Stat.Spi: return UiStrings.Get(UiKeys.Stat.Spi);
+                case Stat.Wis: return UiStrings.Get(UiKeys.Stat.Wis);
                 case Stat.End: return UiStrings.Get(UiKeys.Stat.End);
                 default: throw new ArgumentOutOfRangeException(nameof(stat), stat, "No name for this stat.");
             }
         }
 
-        /// <summary>A stat's value against the baseline (Round 81): green above it, a soft red below it, white at it.</summary>
+        /// <summary>
+        /// A stat's value against the power baseline (Round 81; 2026-10-20 스탯 개정: PowerBaseline 5, the middle of a job's 1..8 — the rolls' baseline 10 would
+        /// paint every stat red): green above it, a soft red below it, white at it.
+        /// </summary>
         public static Color StatColor(int value)
         {
-            int baseline = Managers.Data.Data.Balance.StatBaseline;
+            int baseline = Managers.Data.Data.Balance.PowerBaseline;
             return value > baseline ? UiPalette.Good : value < baseline ? UiPalette.BloodLight : UiPalette.Text;
         }
 
@@ -673,28 +707,6 @@ namespace F1.UI
             return string.Join(gap, pairs);
         }
 
-        /// <summary>
-        /// The tail of an item card whose owner's stat grows it (Round 81): "(힘 12 ×1.2)", in the stat's colour. Null without an owner, for an item
-        /// that grows with no stat, or at the baseline (×1).
-        /// </summary>
-        public static string StatScale(EquippedItem item, StatBlock ownerStats)
-        {
-            if (ownerStats == null || item.Item.ScalesWith == null)
-            {
-                return null;
-            }
-
-            Stat stat = item.Item.ScalesWith.Value;
-            int value = ownerStats[stat];
-            int percent = StatRules.PowerPercent(Managers.Data.Data.Balance, value);
-            if (percent == StatRules.Full)
-            {
-                return null;
-            }
-
-            return Colored(UiStrings.Get(UiKeys.Item.StatScale, StatName(stat), value, Multiplier(percent)), StatColor(value));
-        }
-
         /// <summary>Whether any effect of the item can miss (Slice D stage 33): a weapon's or an attack item's damage or burn.</summary>
         static bool CanMiss(ItemData item)
         {
@@ -709,10 +721,14 @@ namespace F1.UI
             return false;
         }
 
-        /// <summary>A chance in ten-thousandths as percent words: 450 is "4.5", 8200 "82" (Slice D stage 33).</summary>
+        /// <summary>
+        /// A chance in ten-thousandths as percent words with at most one decimal, rounded half up at the second: 450 is "4.5", 7667 "76.7", 8200 "82"
+        /// (Slice D stage 33; 2026-10-20 Round 88 4차, the user: "소수점 둘째 자리에서 반올림 — 보여지는 화면에서": the cards, the battle's log and subtitles alike).
+        /// </summary>
         public static string Percent(int tenThousandths)
         {
-            return (tenThousandths / 100m).ToString("0.##", CultureInfo.InvariantCulture);
+            int tenths = (tenThousandths + 5) / 10;
+            return (tenths / 10m).ToString("0.#", CultureInfo.InvariantCulture);
         }
 
         /// <summary>A chance's words coloured against the data's: green above it, red under it, plain when the same (Round 81).</summary>

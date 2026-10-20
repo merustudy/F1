@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace F1.Save
 {
@@ -7,6 +8,9 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 24 (2026-10-20 스탯 개정, Slice D stage 41): a stats record's Spi is Wis (wisdom), and the stats stand on the new scale (a job's base values
+    /// 1..8 around the power baseline 5): RunSaveMigrator rescales a version 23 file's roster and candidates ((old + 1) / 2) and gives a member of an
+    /// expedition going on the maximum HP of its new constitution, its HP in proportion.
     /// Version 23 (Slice D stage 38): a member's DeathsDoor (it was at death's door on this expedition: the settlement may leave a trait). A version 22
     /// file's members were at none (false, as the field is missing).
     /// Version 22 (Slice D stage 37): a mercenary's and a candidate's Traits (TraitData ids). A version 21 file has none: RunSaveMigrator gives every
@@ -31,7 +35,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 23;
+        public const int CurrentSchemaVersion = 24;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -105,8 +109,12 @@ namespace F1.Save
         public int Dex;
         public int Con;
         public int Int;
-        public int Spi;
+        public int Wis;
         public int End;
+
+        /// <summary>Spirit, written by version 23 and before: RunSaveMigrator reads it into <see cref="Wis"/>. Never written since.</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? Spi;
     }
 
     public sealed class ExpeditionCountRecord

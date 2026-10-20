@@ -672,14 +672,14 @@ namespace F1.Flow
 
         static StatsRecord ToRecord(StatBlock stats)
         {
-            return stats == null ? null : new StatsRecord { Str = stats.Str, Dex = stats.Dex, Con = stats.Con, Int = stats.Int, Spi = stats.Spi, End = stats.End };
+            return stats == null ? null : new StatsRecord { Str = stats.Str, Dex = stats.Dex, Con = stats.Con, Int = stats.Int, Wis = stats.Wis, End = stats.End };
         }
 
         /// <summary>The six stats of a mercenary or a candidate (version 18): present, and each within StatMin..StatMax.</summary>
         static StatBlock ToStats(StatsRecord record, StaticData data, string who)
         {
             Require(record != null, $"Stats of {who} are missing.");
-            var stats = new StatBlock(record.Str, record.Dex, record.Con, record.Int, record.Spi, record.End);
+            var stats = new StatBlock(record.Str, record.Dex, record.Con, record.Int, record.Wis, record.End);
             Stat? outside = stats.FirstOutside(data.Balance.StatMin, data.Balance.StatMax);
             Require(outside == null, $"{outside} of {who} is out of range.");
             return stats;

@@ -100,8 +100,10 @@ namespace F1.Tests
             StaticData data = Transform().Data;
 
             JobData knight = data.Jobs.Get("knight");
-            Assert.AreEqual(3800, knight.MaxHp, "HP in hundredths (stage 22): 38 is 3800.");
-            Assert.AreEqual(2450, data.Jobs.Get("bishop").MaxHp, "24.5 is 2450.");
+            // 2026-10-20 스탯 개정: no MaxHp column (constitution gives the HP); Wis for Spi.
+            Assert.AreEqual(new StatBlock(12, 9, 12, 6, 9, 11), knight.Stats);
+            Assert.AreEqual(110, knight.Growth.Str);
+            Assert.AreEqual(14, data.Jobs.Get("bishop").Stats.Wis);
             Assert.AreEqual("sword", knight.WeaponItemId);
             Assert.AreEqual(1, knight.RecommendedRow);
             Assert.AreEqual(PassiveTrigger.BattleStart, knight.Passive.Trigger);
@@ -163,7 +165,18 @@ namespace F1.Tests
             Assert.AreEqual(55, data.Balance.StormBaseDamage, "A balance value in hundredths is written with decimals.");
             Assert.AreEqual(50, data.Balance.HitMinDamage);
             Assert.AreEqual(27, data.Balance.BurnDamagePerStack);
-            Assert.AreEqual(150, data.Balance.CritDamagePercent);
+            Assert.AreEqual(150, data.Balance.PhysicalCritDamagePercent);
+            Assert.AreEqual(150, data.Balance.MagicCritDamagePercent);
+            Assert.AreEqual(5, data.Balance.PowerBaseline, "2026-10-20 스탯 개정: the power baseline, the fatigue baseline, the cooldown per point, the HP bands.");
+            Assert.AreEqual(5, data.Balance.FatigueBaseline);
+            Assert.AreEqual(1, data.Balance.CooldownPercentPerPoint);
+            Assert.AreEqual((500, 1000, 1500, 10, 20), (data.Balance.HpPerConPointLow, data.Balance.HpPerConPointMid, data.Balance.HpPerConPointHigh, data.Balance.HpBandLow, data.Balance.HpBandMid));
+            Assert.AreEqual(50, data.Balance.CritPerWisPoint, "0.5 in hundredths.");
+            Assert.AreEqual((ItemSchool?)ItemSchool.Physical, data.Items.Get("sword").School);
+            Assert.AreEqual((ItemSchool?)ItemSchool.Magic, data.Items.Get("claw").School);
+            Assert.IsNull(data.Items.Get("staff").School, "A support item has no school.");
+            Assert.AreEqual(10, data.Traits.Get("keen").CritDamagePercent);
+            Assert.AreEqual(0, data.Traits.Get("dull").CritDamagePercent, "An empty cell.");
             Assert.AreEqual(1400, data.Potions.Get("tonic").Magnitude);
             Assert.AreEqual(TargetMode.Self, mace.Effects[1].Target);
             Assert.AreEqual(0, mace.Effects[1].Reach, "An empty Reach cell: the target takes none.");
@@ -398,28 +411,36 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Transform_ReadsTheJobsStats_AndTheItemsAxis_AndRefusesWhatIsNotOne()
+        public void Transform_ReadsTheJobsStats_AndTheItemsSchool_AndRefusesWhatIsNotOne()
         {
-            // Slice D stage 32: the six stat columns are required; ScalesWith is an optional column of Stat names (Str, Dex, Int, Spi).
+            // Slice D stage 32: the six stat columns are required. 2026-10-20 스탯 개정: School (Physical or Magic) is an optional column; a weapon or an attack
+            // item left empty is physical, and the school and the category say which stat grows the item (no ScalesWith column any more).
             StaticData data = StaticDataTransformer.Transform(TestCsv.Reader(TestCsv.ValidSources())).Data;
             Assert.IsTrue(data.Jobs.Get("knight").Stats.Equals(new StatBlock(12, 9, 12, 6, 9, 11)));
-            Assert.IsTrue(data.Items.Ordered.All(i => i.ScalesWith == null), "No ScalesWith column: no item grows with a stat.");
+            Assert.AreEqual((Stat?)Stat.Str, data.Items.Get("sword").ScalesWith, "A physical weapon: strength.");
+            Assert.AreEqual((Stat?)Stat.Int, data.Items.Get("claw").ScalesWith, "A magic weapon: intellect.");
+            Assert.AreEqual((Stat?)Stat.Wis, data.Items.Get("staff").ScalesWith, "A support item: wisdom.");
 
             // Stage 34: the six growth columns follow the stats; dropping End keeps them.
-            string withoutEnd = TestCsv.Jobs.Replace(",Spi,End,GrowthStr", ",Spi,GrowthStr").Replace(",9,11,110,", ",9,110,").Replace(",14,10,20,", ",14,20,");
+            string withoutEnd = TestCsv.Jobs.Replace(",Wis,End,GrowthStr", ",Wis,GrowthStr").Replace(",9,11,110,", ",9,110,").Replace(",14,10,20,", ",14,20,");
             StringAssert.Contains("End", TransformFails(StaticDataFiles.Job, withoutEnd).Errors[0]);
             string notANumber = TestCsv.Jobs.Replace("unit/job/knight,12,", "unit/job/knight,strong,");
             StringAssert.StartsWith("JobData.csv(2)", TransformFails(StaticDataFiles.Job, notANumber).Errors[0]);
+            string oldSpirit = TestCsv.Jobs.Replace(",Wis,End,GrowthStr", ",Spi,End,GrowthStr");
+            StringAssert.Contains("Wis", TransformFails(StaticDataFiles.Job, oldSpirit).Errors[0], "Spirit's column is wisdom's now.");
+            string withHp = TestCsv.Jobs.Replace("Name.en-US,WeaponItemId", "Name.en-US,MaxHp,WeaponItemId").Replace("Knight,sword", "Knight,38,sword").Replace("Bishop,staff", "Bishop,24.5,staff");
+            StringAssert.Contains("MaxHp", TransformFails(StaticDataFiles.Job, withHp).Errors[0], "A job has no HP column any more.");
 
-            string items = TestCsv.Items.Replace("CritChancePercent\n", "CritChancePercent,ScalesWith\n");
-            string[] lines = items.Split('\n');
-            string axis = string.Join("\n", lines.Select((line, i) => i == 0 || line.Length == 0 ? line : line + (line.StartsWith("sword") ? ",Str" : line.StartsWith("staff") ? ",Spi" : ",")));
-            StaticData withAxis = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, axis)).Data;
-            Assert.AreEqual(Stat.Str, withAxis.Items.Get("sword").ScalesWith);
-            Assert.AreEqual(Stat.Spi, withAxis.Items.Get("staff").ScalesWith);
-            Assert.IsNull(withAxis.Items.Get("claw").ScalesWith);
-            StringAssert.StartsWith("ItemData.csv(2)", TransformFails(StaticDataFiles.Item, axis.Replace(",5,Str", ",5,Con")).Errors[0]);
-            StringAssert.StartsWith("ItemData.csv(2)", TransformFails(StaticDataFiles.Item, axis.Replace(",5,Str", ",5,Luck")).Errors[0]);
+            // Without the School column every weapon is physical; a school that is not one, or a school on a support item, is refused.
+            string[] lines = TestCsv.Items.Split('\n');
+            string noSchool = string.Join("\n", lines.Select((line, i) => i == 0 ? line.Replace(",School", "") : line.Length == 0 ? line : line.Substring(0, line.LastIndexOf(','))));
+            StaticData physical = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, noSchool)).Data;
+            Assert.IsTrue(physical.Items.Ordered.Where(i => i.Category == ItemCategory.Weapon).All(i => i.School == ItemSchool.Physical));
+            Assert.IsNull(physical.Items.Get("staff").School);
+            StringAssert.StartsWith("ItemData.csv(2)", TransformFails(StaticDataFiles.Item, TestCsv.Items.Replace(",5,Physical\nstaff", ",5,Luck\nstaff")).Errors[0]);
+            StringAssert.Contains("only a weapon, an attack item or defensive gear has a School", TransformFails(StaticDataFiles.Item, TestCsv.Items.Replace("false,,,,\nmace", "false,,,,Magic\nmace")).Errors[0]);
+            string oldAxis = TestCsv.Items.Replace("CritChancePercent,School", "CritChancePercent,ScalesWith");
+            StringAssert.Contains("ScalesWith", TransformFails(StaticDataFiles.Item, oldAxis).Errors[0], "The axis column is gone.");
         }
 
         [Test]
@@ -429,12 +450,10 @@ namespace F1.Tests
             StaticData data = StaticDataTransformer.Transform(TestCsv.Reader(TestCsv.ValidSources())).Data;
             Assert.IsTrue(data.Items.Ordered.All(i => i.Trigger == ItemTrigger.Cooldown && i.CritTakenPercent == 0), "Without the columns: every item cycles and takes nothing off.");
 
-            string items = TestCsv.Items.Replace("CritChancePercent\n", "CritChancePercent,Trigger,CritTakenPercent\n")
-                .Replace("claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,0.5-1.5,,,,,0,,0,false,,,\n", "claw,발톱,Claw,Weapon,1,1,2000,all,Damage,EnemyBack,1,0.5-1.5,,,,,0,,0,false,,,,,\n")
-                .Replace("sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,,,,,0,item/sword,0,true,,,5\n", "sword,소드,Sword,Weapon,2,1,2500,front:2,Damage,EnemyFront,1,2-4,,,,,0,item/sword,0,true,,,5,,\n")
-                .Replace("staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,2.73,,,,,0,,0,false,,,\n", "staff,지팡이,Staff,Support,3,1,4000,back:2,Heal,AllyLowestHp,,2.73,,,,,0,,0,false,,,,,\n")
-                .Replace("mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,1.23-3.68,Shield,Self,,0.98,10,item/mace,16,true,,,5\n", "mace,메이스,Mace,Weapon,3,2,3200,front:1,Damage,EnemyFront,2,1.23-3.68,Shield,Self,,0.98,10,item/mace,16,true,,,5,,\n")
-                + "helm,투구,Helm,Armor,2,1,0,all,Shield,Self,,2.18,,,,,10,,12,false,,,,BattleStart,3\n";
+            // The two columns after School (2026-10-20): every row of the test items gets two empty cells, the helm fills them.
+            string[] rows = TestCsv.Items.Split('\n');
+            string items = string.Join("\n", rows.Select((line, i) => i == 0 ? line + ",Trigger,CritTakenPercent" : line.Length == 0 ? line : line + ",,"))
+                + "helm,투구,Helm,Armor,2,1,0,all,Shield,Self,,2.18,,,,,10,,12,false,,,,,BattleStart,3\n";
             StaticData withArmour = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, items)).Data;
             ItemData helm = withArmour.Items.Get("helm");
             Assert.AreEqual(ItemTrigger.BattleStart, helm.Trigger);
@@ -480,7 +499,7 @@ namespace F1.Tests
         /// <summary>A whetstone-like row (Slice B stage 20) after the test items: no effects, no cooldown, its stars as given.</summary>
         static string WithHone(string stars)
         {
-            return TestCsv.Items + "hone,숫돌,Hone,Other,1,1,0,all,,,,,,,,,8,,8,false," + stars + ",1,\n";
+            return TestCsv.Items + "hone,숫돌,Hone,Other,1,1,0,all,,,,,,,,,8,,8,false," + stars + ",1,,\n";
         }
 
         [Test]

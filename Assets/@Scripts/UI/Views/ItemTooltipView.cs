@@ -161,10 +161,9 @@ namespace F1.UI
             mergeHint = recipe == null ? mergeHint : string.IsNullOrEmpty(mergeHint) ? recipe : mergeHint + "\n" + recipe;
             UiText.ItemCard(item, out string facts, out string effects, out string fatigue, starDamage, ownerStats, ownerAccuracy, ownerPassive, ownerTraits);
             Set(_facts, facts);
-            // Under the effects, one line: what the stars add and what the owner's stat multiplies (Round 81: "(★ 숫돌 +1)  (힘 12 ×1.2)").
-            string statScale = UiText.StatScale(item, ownerStats);
-            string tail = string.IsNullOrEmpty(starLine) ? statScale : string.IsNullOrEmpty(statScale) ? starLine : starLine + "  " + statScale;
-            Set(_effects, string.IsNullOrEmpty(tail) ? effects : string.IsNullOrEmpty(effects) ? tail : effects + "\n" + tail);
+            // Under the effects, one line: what the stars add (Round 81: "(★ 숫돌 +1)"). The owner's stat multiplier tail "(힘 12 ×1.2)" is gone
+            // (2026-10-20 Round 88 2차: the effects stand first on the card and their values already count the owner's stats).
+            Set(_effects, string.IsNullOrEmpty(starLine) ? effects : string.IsNullOrEmpty(effects) ? starLine : effects + "\n" + starLine);
             Set(_fatigue, withFatigue ? fatigue : null);
             Set(_merge, mergeHint);
             _title.color = UiText.TitleColor(item);

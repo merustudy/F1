@@ -203,9 +203,9 @@ Item.Attack,Item category: an attack that is not a weapon.,공격 아이템,Atta
 Item.Support,Item category: heals or strengthens.,지원 아이템,Support item
 Item.Other,Item category: anything else.,기타 아이템,Other item
 Item.Size,{0} x {1} = the squares the item takes across and down on a board (Slice B stage 19).,크기 {0}×{1},Size {0}×{1}
-Item.Cooldown,{0} = seconds.,쿨다운 {0}초,Cooldown {0}s
+Item.Cooldown,"{0} = seconds; with an owner whose dexterity or wisdom quickens the item (2026-10-20 스탯 개정) the owner's seconds, maybe coloured.",쿨다운 {0}초,Cooldown {0}s
 Item.Crit,"In a weapon's facts (Slice B stage 22): the chance that its damage on a unit is a critical hit, rolled for each unit it hits. {0} = percent.",치명타 {0}%,Crit {0}%
-Item.Hit,"In the facts of an item whose damage or burn can miss (Slice D stage 33, Round 81): its hit chance against a target at the baseline, with the owner's stat of the item's axis (an enemy's Accuracy). {0} = percent, up to two decimals, maybe coloured.",명중 {0}%,Hit {0}%
+Item.Hit,"In the facts of a physical item whose damage or burn can miss (Slice D stage 33, Round 81; 2026-10-20 스탯 개정): its hit chance against a target at the baseline, with the owner's dexterity (an enemy's Accuracy). {0} = percent, up to two decimals, maybe coloured.",명중 {0}%,Hit {0}%
 Item.RowsFront,The item only works while its owner stands within the front N rows. {0} = N (2 or more).,앞에서 {0}번째 자리까지만 발동,Only within the front {0} rows
 Item.RowsFrontOne,The item only works in the front row.,맨 앞에서만 발동,Only in the front row
 Item.RowsBack,The item only works while its owner stands within the rear N rows of the living line. {0} = N (2 or more).,뒤에서 {0}번째 자리까지만 발동,Only within the rear {0} rows
@@ -226,7 +226,6 @@ Item.BattleStart,"In an item's facts in place of its cooldown (Slice D stage 39,
 Item.CritTaken,"An effect line of an item that takes points off the critical chance of the weapons that hit its owner (stage 39, the iron helm). {0} = the points.",받는 치명타 확률 -{0}%p,Chance to be crit -{0}%
 Item.StarDamage,The effect line of a star item (stage 20): a melee weapon on one of its stars deals more. {0} = how much.,★에 놓인 근접 무기: 피해 +{0},★ A melee weapon on a star: damage +{0}
 Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which already count it: what the stars on it add. {0} = the star items' names. {1} = the damage they add.",(★ {0} +{1}),(★ {0} +{1})
-Item.StatScale,"On the card of an item its owner's stat grows (Slice D stage 32, Round 81), after the stars' line: the stat, its value and the multiplier the card's values count. {0} = the stat's name. {1} = its value. {2} = the multiplier (1.2).",({0} {1} ×{2}),({0} {1} ×{2})
 Item.StarLit,"On a star item's card (stage 20): how many of its stars a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons' names.",걸린 ★ {0}/{1} — {2},Stars lit {0}/{1} — {2}
 Item.StarLitNone,On a star item's card when no melee weapon lies on its stars (stage 20). {0} = its stars.,걸린 ★ 0/{0},Stars lit 0/{0}
 Item.Unique,"In a unique item's facts (stage 23), first.",유니크,Unique
@@ -351,12 +350,12 @@ Fx.Miss,"Rises over a unit an attack missed (Slice D stage 33, Round 81), grey, 
 Fx.Phase,"Rises over a boss that entered a phase (stage 28). {0} = the phase number.",페이즈 {0},Phase {0}
 Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
 Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue
-Stat.Str,"A stat's name (Slice D stage 32, Round 81): the barracks' lines, the candidates, the party popup and the item cards. Strength: the power and hit of heavy melee weapons.",힘,STR
-Stat.Dex,"A stat's name (Slice D stage 32). Dexterity: the power and hit of light weapons (daggers, bows), dodge and critical hits.",민첩,DEX
-Stat.Con,"A stat's name (Slice D stage 32). Constitution: the maximum HP and the chance to live at death's door.",체력,CON
-Stat.Int,"A stat's name (Slice D stage 32). Intellect: the power and hit of fire and howls.",지식,INT
-Stat.Spi,"A stat's name (Slice D stage 32). Spirit: heals and shields, and the chance of a virtue.",정신력,SPI
-Stat.End,"A stat's name (Slice D stage 32). Endurance: how slowly fatigue builds up.",인내,END
+Stat.Str,"A stat's name (Slice D stage 32, Round 81; 2026-10-20 스탯 개정): the barracks' lines, the candidates, the party popup and the item cards. Strength: the power of physical weapons.",힘,STR
+Stat.Dex,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Dexterity: the speed, hit and critical chance of physical equipment, and dodge.",민첩,DEX
+Stat.Con,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Constitution: the maximum HP.",체력,CON
+Stat.Int,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Intellect: the power of magic weapons, their damage and heals alike.",지식,INT
+Stat.Wis,"A stat's name (2026-10-20 스탯 개정: spirit renamed). Wisdom: the speed and critical chance of magic equipment, and the power of attack and support items.",지혜,WIS
+Stat.End,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Endurance: how slowly fatigue builds up, the chance of a virtue, and the chance to live at death's door.",인내,END
 Stat.Up,"After a candidate's stat at the stagecoach (Slice D stage 34, Round 81): how far above its job's base value. {0} = points.",▲{0},▲{0}
 Stat.Down,"After a candidate's stat: how far under its job's base value. {0} = points.",▼{0},▼{0}
 Trait.KindJob,"A trait card's second line for the job's trait (Slice D stage 37, Round 84): the job's passive shown as a trait. {0} = the job's name.",직업 특성 · {0},Job trait · {0}

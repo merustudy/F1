@@ -63,27 +63,27 @@ namespace F1.Editor.Data
     {
         public static List<JobData> Map(CsvTable table, List<string> errors)
         {
+            // 2026-10-20 스탯 개정: no MaxHp (constitution gives the HP), Wis for Spi.
             table.RequireHeaders(RowMapping.Headers(
-                "MaxHp", "WeaponItemId", "RecommendedRow",
+                "WeaponItemId", "RecommendedRow",
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
-                RowMapping.Figure, "Str", "Dex", "Con", "Int", "Spi", "End",
-                "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthSpi", "GrowthEnd")
+                RowMapping.Figure, "Str", "Dex", "Con", "Int", "Wis", "End",
+                "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthWis", "GrowthEnd")
                 .Concat(CsvRow.LocalizedHeaders(PassiveText))
                 .Concat(CsvRow.LocalizedHeaders(PassiveName)));
 
             return RowMapping.MapRows(table, errors, row => new JobData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
-                row.Centi("MaxHp"),
                 row.Id("WeaponItemId"),
                 row.Int("RecommendedRow"),
                 ReadPassive(row),
                 ReadPassiveText(row),
                 RowMapping.ReadArt(row, RowMapping.Figure),
                 // The job's base stats (Slice D stage 32): whole numbers, every one required; StaticData checks the balance's range.
-                new StatBlock(row.Int("Str"), row.Int("Dex"), row.Int("Con"), row.Int("Int"), row.Int("Spi"), row.Int("End")),
+                new StatBlock(row.Int("Str"), row.Int("Dex"), row.Int("Con"), row.Int("Int"), row.Int("Wis"), row.Int("End")),
                 // The growth grades (Slice D stage 34), every one required; JobData checks 0..200.
-                new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthSpi"), row.Int("GrowthEnd")),
+                new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthWis"), row.Int("GrowthEnd")),
                 CsvRow.LocalizedHeaders(PassiveName).All(row.IsEmpty) ? null : row.Localized(PassiveName)));
         }
 
@@ -125,7 +125,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "ScalesWith", "Trigger", "CritTakenPercent" });
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "School", "Trigger", "CritTakenPercent", "CritDamagePercent" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -158,12 +158,14 @@ namespace F1.Editor.Data
                     row.OptionalInt("CritChancePercent", 0),
                     row.OptionalBool("Unique", false),
                     row.OptionalInt("DropWeight", 0, 0),
-                    // The stat that grows the item (Slice D stage 32): a Stat name, empty for none. ItemData checks it is one of the four.
-                    row.OptionalEnum<Stat>("ScalesWith"),
+                    // Physical or Magic (2026-10-20 스탯 개정): a weapon or an attack item left empty is physical; allowed on defensive gear; ItemData checks the rest.
+                    row.OptionalEnum<ItemSchool>("School"),
                     // When it activates (Slice D stage 39): empty for its cooldown, BattleStart for once when a battle starts. And a helm's points off
                     // the critical chance of the weapons that hit its owner, empty for none. ItemData checks both.
                     row.OptionalEnum<ItemTrigger>("Trigger") ?? ItemTrigger.Cooldown,
-                    row.OptionalInt("CritTakenPercent", 0));
+                    row.OptionalInt("CritTakenPercent", 0),
+                    // Percent points a physical weapon adds to the critical multiplier (2026-10-20 스탯 개정), empty for none.
+                    row.OptionalInt("CritDamagePercent", 0));
             });
         }
 
@@ -398,7 +400,7 @@ namespace F1.Editor.Data
     /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none, an empty Source (stage 38) is an innate trait's.</summary>
     internal static class TraitMapper
     {
-        static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent" };
+        static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent", "CritDamagePercent" };
 
         public static List<TraitData> Map(CsvTable table, List<string> errors)
         {
@@ -417,7 +419,8 @@ namespace F1.Editor.Data
                 row.OptionalInt("DogDeathPercent", 0),
                 row.OptionalInt("VirtuePercent", 0),
                 row.OptionalInt("FatiguePercent", 0),
-                row.OptionalInt("MaxHpPercent", 0)));
+                row.OptionalInt("MaxHpPercent", 0),
+                row.OptionalInt("CritDamagePercent", 0)));
         }
     }
 }
