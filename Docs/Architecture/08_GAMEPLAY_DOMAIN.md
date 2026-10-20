@@ -297,6 +297,19 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 시뮬: 정책은 그대로(상점·전리품을 "쓸 수 있는 자리의 첫 용병"에게). `expedition`의 보고에 원정 끝 보드의 방어구 수와 1열의 것(Design/08 §46).
 - Test: `ArmorTests`(전투 시작의 한 번·패시브 다음·돌지 않음·자리 밖은 발동 없음·단계의 보호막, 받는 치명타의 뺌·0 아래 없음·굴림은 그대로 뽑음, 장비 피로, 정의의 검사 — `Trigger`와 `CritTakenPercent`), `StaticDataTransformerTests`(두 열), `ShippedDataTests`(철 갑옷·철 투구).
 
+### 장비 요구 스탯 (Slice D 42단계)
+
+규칙은 `Docs/Design/02_Combat_System.md` §4 "장비 요구 스탯"과 `03_Dungeon_Structure.md` §5, 후보의 보장은 `04_Lobby_100Day_Economy.md` §6, 직업 기본값의 보장은 `05_Mercenary_Growth.md` §2가 소유한다. 수치는 `ItemData`의 `ReqStat`·`ReqValue`다.
+
+- Type: `ItemData.ReqStat`(`Stat?`)·`ReqValue`·`HasRequirement`. 판정은 `StatRules.MeetsRequirement(주인의 스탯, 아이템)` 한 식이다: 요구가 없거나, 스탯이 없거나(적, 주인 없는 카드), 그 스탯이 요구값 이상이면 참. 화면도 같은 식을 부른다.
+- 보드의 질의는 `ExpeditionRules.MeetsRequirement(state, 구성원, 아이템)`(구성원의 `Stats`. `Create`가 모든 구성원에게 스탯을 준다)이고, 보드에 놓는 모든 길의 맨 앞에서 거절한다: `CanPlaceOffer`(전리품·상점, R17의 한 몸), `CanPlaceItem`, `CanMoveItem`(같은 보드에 다시 놓기 포함), `CanPlaceFromInventory`.
+  합침의 질의(`OfferMergesAt`·`MergesAt`)에도 같은 판정이 들어 그림자와 명령이 어긋나지 않는다. 인벤토리의 질의(`…InInventoryAt`)와 `CanTakeLootToInventory`·`CanBuyToInventory`·`CanMoveToInventory`는 묻지 않는다.
+- 놓을 때만 본다: `ExpeditionMember.Stats`는 원정 동안 바뀌지 않고 성장은 오르기만 하므로 보드의 아이템은 유효하다. 전투 엔진은 요구를 모른다(`BattleUnitSetup`에 요구가 없다). 원정 출발의 기본 무기(`ItemBoard.Starting`)와 담금질의 결과(`ForgeRules`)는 명령이 아니라 Setup이라 묻지 않는다 —
+  그래서 데이터 검사(직업 기본값 ≥ 기본 무기의 요구, 레시피의 결과 ≤ 바탕의 요구)와 아래의 보장이 그 자리를 지킨다.
+- 보장: `StatRules.MeetingBaseWeapon(data, 직업, 스탯)`은 그 직업 기본 무기의 요구 스탯을 요구값까지 올린 스탯이다(다른 스탯은 그대로, 난수 없음). `RunRules.DrawRecruits`가 편차 다음에 쓰고(뒤의 특성 굴림은 같은 수를 뽑는다), 저장 25(`RunSaveMigrator.From24To25`)가 옛 로스터·후보에 쓴다. 시작 로스터는 직업 기본값이라 데이터 검사로 충분하다.
+- 시뮬: 정책(`Tools/Sim`의 `SimPolicy`)은 요구를 채우는 구성원에게만 놓는다(`MemberWithRoomFor`·`MemberWithStarRoomFor`·`FindMergeTarget`). `expedition`의 보고에 "요구로 보드에 못 놓은 드랍"(어느 구성원은 자리가 있었으나 요구를 채우는 구성원이 없던 것)을 더했다. 전후는 Design/08 §49.
+- Test: `ItemRequirementTests`(식, 다섯 길의 거절과 허용, 합침의 질의, 요구 없는 아이템, 적, 후보의 올림과 난수, `MeetingBaseWeapon`), `DefinitionTests`(짝·분류), `StaticDataValidationTests`(직업 기본값·범위·레시피), `StaticDataTransformerTests`(열 둘), `ShippedDataTests`(모든 장비의 요구, 기본 무기 5와 주 스탯), `RunSaveMapperTests`(25).
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
