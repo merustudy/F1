@@ -67,7 +67,8 @@
         }
       ],
       "Accuracy": 10,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": []
     },
     {
       "Id": "cave_rat",
@@ -87,7 +88,18 @@
       "FigureScale": 100,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 10
+      "Dodge": 10,
+      "DeepItems": [
+        {
+          "Floor": 11,
+          "Items": [
+            {
+              "ItemId": "rat_bite",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "goblin_archer",
@@ -107,7 +119,27 @@
       "FigureScale": 100,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": [
+        {
+          "Floor": 11,
+          "Items": [
+            {
+              "ItemId": "crude_bow",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 21,
+          "Items": [
+            {
+              "ItemId": "ember_flask",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "goblin_hexer",
@@ -131,7 +163,18 @@
       "FigureScale": 115,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": [
+        {
+          "Floor": 21,
+          "Items": [
+            {
+              "ItemId": "ward_charm",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "goblin_raider",
@@ -151,7 +194,27 @@
       "FigureScale": 100,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": [
+        {
+          "Floor": 11,
+          "Items": [
+            {
+              "ItemId": "rusty_blade",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 21,
+          "Items": [
+            {
+              "ItemId": "ember_flask",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "goblin_shaman",
@@ -175,7 +238,27 @@
       "FigureScale": 100,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": [
+        {
+          "Floor": 11,
+          "Items": [
+            {
+              "ItemId": "ward_charm",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 21,
+          "Items": [
+            {
+              "ItemId": "lantern_staff",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "goblin_veteran",
@@ -199,7 +282,18 @@
       "FigureScale": 115,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": [
+        {
+          "Floor": 21,
+          "Items": [
+            {
+              "ItemId": "rusty_blade",
+              "PowerPercent": 100
+            }
+          ]
+        }
+      ]
     },
     {
       "Id": "mine_overseer",
@@ -223,7 +317,8 @@
       "FigureScale": 150,
       "Phases": [],
       "Accuracy": 10,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": []
     },
     {
       "Id": "skeleton_guard",
@@ -247,7 +342,8 @@
       "FigureScale": 100,
       "Phases": [],
       "Accuracy": 0,
-      "Dodge": 0
+      "Dodge": 0,
+      "DeepItems": []
     }
   ]
 }

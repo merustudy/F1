@@ -165,6 +165,32 @@ namespace F1.Editor.Data
             return phases;
         }
 
+        /// <summary>
+        /// An enemy's deep items (2026-10-20, Docs/Design/03_Dungeon_Structure.md §4): "11=item:100|21=item:100+item:100", each bundle the first map
+        /// floor it is carried from and the items (as <see cref="GrantList"/>), separated by '|'. An empty or missing cell is no bundle.
+        /// </summary>
+        public List<EnemyDepthItems> DepthList(string header)
+        {
+            var bundles = new List<EnemyDepthItems>();
+            if (!_table.TryGetColumn(header, out int _) || IsEmpty(header))
+            {
+                return bundles;
+            }
+
+            foreach (string part in Text(header).Split('|'))
+            {
+                int equals = part.IndexOf('=');
+                if (equals <= 0 || !TryParseInt(part.Substring(0, equals), out int floor))
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not 'floor=item_id:power percent+...'.");
+                }
+
+                bundles.Add(new EnemyDepthItems(floor, Grants(header, part.Substring(equals + 1))));
+            }
+
+            return bundles;
+        }
+
         /// <summary>A value with up to two decimals, read in hundredths (Slice B stage 22, <see cref="global::F1.Data.Centi"/>): "38" is 3800, "5.45" is 545.</summary>
         public int Centi(string header)
         {

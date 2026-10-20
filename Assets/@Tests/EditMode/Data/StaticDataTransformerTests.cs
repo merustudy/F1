@@ -32,6 +32,18 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_RefusesDeepItems_ThatAreMalformed_BelowTheSecondFloor_NotRising_OrUnknown()
+        {
+            // 2026-10-20 (Docs/Design/03_Dungeon_Structure.md §4): "floor=item:power+item:power|floor=...", floors from 2 and rising.
+            string head = "Id,Name.ko-KR,Name.en-US,Level,MaxHp,Items,Figure,FigureScale,DeepItems\n";
+            StringAssert.Contains("is not 'floor=item_id:power percent+...'", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,mace:100\n").Errors[0]);
+            StringAssert.Contains("Floor must be at least 2", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,1=mace:100\n").Errors[0]);
+            StringAssert.Contains("rising floors", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,12=mace:100|9=claw:100\n").Errors[0]);
+            StringAssert.Contains("is not 'item_id:power percent'", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,9=mace\n").Errors[0]);
+            StringAssert.Contains("DeepItems: 'axe' does not exist", TransformFails(StaticDataFiles.Enemy, head + "rat,쥐,Rat,2,11,claw:200,,100,9=axe:100\n").Errors[0]);
+        }
+
+        [Test]
         public void Transform_RefusesLevels_ThatDoNotRunFromOne_OrWhoseLastTakesExperience_AndTheOldBonusColumn()
         {
             StringAssert.Contains("run from 1 without a gap", TransformFails(StaticDataFiles.Level, "Level,ExpToNext\n1,10\n3,0\n").Errors[0]);
@@ -174,6 +186,13 @@ namespace F1.Tests
             Assert.AreEqual(25, ogre.Phases[1].HpPercent);
             Assert.AreEqual(2, ogre.Phases[1].Items.Count);
             Assert.IsEmpty(data.Enemies.Get("rat").Phases, "An empty cell: no phase.");
+            // Deep items (2026-10-20): "9=claw:100|12=mace:100+claw:100" on the rat, an empty cell on the ogre.
+            EnemyData rat = data.Enemies.Get("rat");
+            CollectionAssert.AreEqual(new[] { 9, 12 }, rat.DeepItems.Select(bundle => bundle.Floor));
+            Assert.AreEqual("claw", rat.DeepItems[0].Items[0].ItemId);
+            Assert.AreEqual(100, rat.DeepItems[0].Items[0].PowerPercent);
+            Assert.AreEqual(2, rat.DeepItems[1].Items.Count);
+            Assert.IsEmpty(ogre.DeepItems, "An empty cell: no bundle.");
             Assert.AreEqual(150, ogre.FigureScale, "a boss is drawn larger than the common figure place");
             Assert.AreEqual(EnemyData.DefaultFigureScale, data.Enemies.Get("rat").FigureScale);
             Assert.AreEqual(9, ogre.Level);

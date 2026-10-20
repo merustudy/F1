@@ -276,7 +276,7 @@ namespace F1.Editor.Data
     {
         public static List<EnemyData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"), new[] { "Phases", "Accuracy", "Dodge" });
+            table.RequireHeaders(RowMapping.Headers("Level", "MaxHp", "Items", RowMapping.Figure, "FigureScale"), new[] { "Phases", "Accuracy", "Dodge", "DeepItems" });
             return RowMapping.MapRows(table, errors, row => new EnemyData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -288,7 +288,9 @@ namespace F1.Editor.Data
                 row.PhaseList("Phases"),
                 // Slice D stage 33: an enemy's hit and dodge in percent points (optional columns, 0 when empty); EnemyData checks the range.
                 row.OptionalInt("Accuracy", 0),
-                row.OptionalInt("Dodge", 0)));
+                row.OptionalInt("Dodge", 0),
+                // 2026-10-20: the bundles carried from a floor down (optional column; EnemyData checks the floors, StaticData the items and the frame).
+                row.DepthList("DeepItems")));
         }
     }
 

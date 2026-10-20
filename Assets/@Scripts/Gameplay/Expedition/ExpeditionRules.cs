@@ -168,10 +168,13 @@ namespace F1.Gameplay
             }
 
             int deeper = FloorsBelowTheFirst(group, floor);
+            // 2026-10-20 (Docs/Design/03_Dungeon_Structure.md §4): on a deep floor an enemy carries its deep item bundles too; a boss group (the boss
+            // and its escort) carries the base items alone — its depth still grows its HP.
+            int carriedFloor = group.IsBoss ? 1 : floor;
             var enemies = new List<BattleUnitSetup>();
             for (int i = 0; i < group.Enemies.Count; i++)
             {
-                enemies.Add(EnemySetup(data.Enemies.Get(group.Enemies[i]), BattleRows.Front + i, data, dungeon, deeper));
+                enemies.Add(EnemySetup(data.Enemies.Get(group.Enemies[i]), BattleRows.Front + i, data, dungeon, deeper, carriedFloor));
             }
 
             var potions = new List<PotionData>();
@@ -305,7 +308,7 @@ namespace F1.Gameplay
         // ---- Loot (Slice B stage 18) -----------------------------------------------------------
 
         /// <summary>
-        /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried,
+        /// What a won battle at a node drops (Docs/Design/03_Dungeon_Structure.md §5): of every item the enemies of its group carried on that floor,
         /// <c>DropCount</c> are drawn without repetition from the loot stream of the node (<c>EliteDropCount</c> for an elite); all of them
         /// when they carried fewer. A drop is the item at its own values and the floor's tier (an elite's a tier up), as the shop's stock is:
         /// not at the power the enemy carried it (that is the enemy's strength, far above a found item's). 2026-10-19 (the user's play feedback):
@@ -327,7 +330,8 @@ namespace F1.Gameplay
             var carried = new List<ItemOffer>();
             foreach (string enemyId in data.EnemyGroups.Get(node.EnemyGroupId).Enemies)
             {
-                foreach (ItemGrant grant in data.Enemies.Get(enemyId).Items)
+                // 2026-10-20: what the enemies carried on this floor, the deep item bundles included (Docs/Design/03_Dungeon_Structure.md §4·§5).
+                foreach (ItemGrant grant in data.Enemies.Get(enemyId).ItemsAt(node.Floor))
                 {
                     carried.Add(new ItemOffer(OfferKind.Item, grant.ItemId, tier));
                 }
@@ -1683,20 +1687,21 @@ namespace F1.Gameplay
         }
 
         /// <param name="deeper">How many floors below the first the enemy stands: its HP and the power of its items grow by the dungeon's share for each.</param>
-        static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data, DungeonData dungeon, int deeper)
+        /// <param name="carriedFloor">The map floor whose deep item bundles the enemy carries (<see cref="EnemyData.ItemsAt(int)"/>): 1 for the base items alone.</param>
+        static BattleUnitSetup EnemySetup(EnemyData enemy, int row, StaticData data, DungeonData dungeon, int deeper, int carriedFloor)
         {
             var items = new List<EquippedItem>();
-            foreach (ItemGrant grant in enemy.Items)
+            foreach (ItemGrant grant in enemy.ItemsAt(carriedFloor))
             {
                 items.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
             }
 
-            // A boss's phases (stage 28): each a board of its own, carried as hard as the base one.
+            // A boss's phases (stage 28): each a board of its own, carried as hard as the base one, with the same deep bundles (2026-10-20).
             var phases = new List<BattlePhaseSetup>();
             foreach (EnemyPhase phase in enemy.Phases)
             {
                 var carried = new List<EquippedItem>();
-                foreach (ItemGrant grant in phase.Items)
+                foreach (ItemGrant grant in enemy.ItemsAt(phase, carriedFloor))
                 {
                     carried.Add(new EquippedItem(data.Items.Get(grant.ItemId), powerPercent: grant.PowerPercent + deeper * dungeon.EnemyPowerPerFloorPercent));
                 }

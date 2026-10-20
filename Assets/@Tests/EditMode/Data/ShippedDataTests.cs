@@ -290,6 +290,42 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ShippedMineEnemies_CarryOneMoreFromTheEleventhFloor_AndAnotherFromTheTwentyFirst_AtTheItemsOwnValues()
+        {
+            // 2026-10-20 (Docs/Design/03_Dungeon_Structure.md §4, the user's "11층 +1, 21층+2, 보통 세기"): the mine's common enemies carry a bundle from
+            // floor 11 and another from floor 21, each at the item's own values (100); the elites only the second; the bosses, the escort and the abyss none.
+            StaticData data = LoadShipped();
+            foreach (string id in new[] { "goblin_raider", "goblin_archer", "goblin_shaman" })
+            {
+                CollectionAssert.AreEqual(new[] { 11, 21 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
+            }
+
+            CollectionAssert.AreEqual(new[] { 11 }, data.Enemies.Get("cave_rat").DeepItems.Select(bundle => bundle.Floor), "Rats roam to floor 18.");
+            foreach (string id in new[] { "goblin_veteran", "goblin_hexer" })
+            {
+                CollectionAssert.AreEqual(new[] { 21 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
+            }
+
+            foreach (string id in new[] { "mine_overseer", "skeleton_guard", "abyss_lord" })
+            {
+                Assert.IsEmpty(data.Enemies.Get(id).DeepItems, id);
+            }
+
+            foreach (EnemyData enemy in data.Enemies.Ordered)
+            {
+                foreach (EnemyDepthItems bundle in enemy.DeepItems)
+                {
+                    Assert.AreEqual(1, bundle.Items.Count, enemy.Id + ": one item per bundle");
+                    Assert.AreEqual(100, bundle.Items[0].PowerPercent, enemy.Id + ": at the item's own values");
+                }
+            }
+
+            CollectionAssert.AreEqual(new[] { "rusty_blade", "rusty_blade", "ember_flask" }, data.Enemies.Get("goblin_raider").ItemsAt(21).Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "ward_charm", "lantern_staff" }, data.Enemies.Get("goblin_shaman").ItemsAt(21).Select(g => g.ItemId));
+            Assert.AreEqual(1, data.Enemies.Get("goblin_raider").ItemsAt(10).Count, "The tenth floor is the base alone.");
+        }
+
+        [Test]
         public void ShippedAbyssLord_CarriesThreeFallingPhases_IntoTheBattleSetup()
         {
             // Slice C stage 28 (Docs/Design/02_Combat_System.md §9): the final boss starts with its cleaver and changes its items at 75, 50 and 25%.

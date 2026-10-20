@@ -440,6 +440,22 @@ namespace F1.Data
 
                     CheckEnemyBag(phase.Items, $"{what}: the items of the phase at {phase.HpPercent}%", startBags == 1, problems);
                 }
+
+                // The deep item bundles (2026-10-20, Design/03 §4): their items exist, and what the enemy carries from each bundle's floor — the base
+                // items, and each phase's, with the bundles down to that floor — still fits the frame.
+                foreach (EnemyDepthItems bundle in enemy.DeepItems)
+                {
+                    foreach (ItemGrant grant in bundle.Items)
+                    {
+                        Require(Items, grant.ItemId, $"{what} DeepItems", problems);
+                    }
+
+                    CheckEnemyBag(enemy.ItemsAt(bundle.Floor), $"{what}: its items from floor {bundle.Floor}", startBags == 1, problems);
+                    foreach (EnemyPhase phase in enemy.Phases)
+                    {
+                        CheckEnemyBag(enemy.ItemsAt(phase, bundle.Floor), $"{what}: the items of the phase at {phase.HpPercent}% from floor {bundle.Floor}", startBags == 1, problems);
+                    }
+                }
             }
 
             foreach (EnemyGroupData group in EnemyGroups.Ordered)

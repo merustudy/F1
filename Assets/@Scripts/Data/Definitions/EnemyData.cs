@@ -59,6 +59,41 @@ namespace F1.Data
         public IReadOnlyList<ItemGrant> Items { get; }
     }
 
+    /// <summary>
+    /// Items an enemy carries in addition from a map floor down (2026-10-20, Docs/Design/03_Dungeon_Structure.md §4 "깊은 층의 아이템"): on
+    /// that floor and below it the enemy carries these after its base items and after the bundles of the floors above, and a won battle drops
+    /// from them too. The first floor carries the base items alone; a boss group carries no bundle (ExpeditionRules).
+    /// </summary>
+    public sealed class EnemyDepthItems
+    {
+        /// <summary>The lowest floor a bundle can start on: the first floor is the base items alone.</summary>
+        public const int MinFloor = 2;
+
+        [JsonConstructor]
+        public EnemyDepthItems(int floor, IReadOnlyList<ItemGrant> items)
+        {
+            if (floor < MinFloor)
+            {
+                throw new DataException($"Deep items from floor {floor}: Floor must be at least {MinFloor} (the first floor carries the base items alone).");
+            }
+
+            if (items == null || items.Count < 1 || items.Count > BoardFrame.Height)
+            {
+                throw new DataException($"Deep items from floor {floor}: a bundle carries 1..{BoardFrame.Height} items.");
+            }
+
+            Floor = floor;
+            Items = items;
+        }
+
+        /// <summary>The first map floor the bundle is carried on (the boss node counts as the floor past the last map floor).</summary>
+        [JsonProperty(Order = 1, Required = Required.Always)]
+        public int Floor { get; }
+
+        [JsonProperty(Order = 2, Required = Required.Always)]
+        public IReadOnlyList<ItemGrant> Items { get; }
+    }
+
     public sealed class EnemyData
     {
         public const string DefinitionName = "Enemy";
@@ -70,7 +105,7 @@ namespace F1.Data
 
         [JsonConstructor]
         public EnemyData(string id, LocalizedText name, int level, int maxHp, IReadOnlyList<ItemGrant> items, string figure = null, int figureScale = DefaultFigureScale, IReadOnlyList<EnemyPhase> phases = null,
-            int accuracy = 0, int dodge = 0)
+            int accuracy = 0, int dodge = 0, IReadOnlyList<EnemyDepthItems> deepItems = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -123,6 +158,23 @@ namespace F1.Data
 
             Accuracy = accuracy;
             Dodge = dodge;
+
+            // The deep item bundles (2026-10-20) come at rising floors, each above the one before.
+            var depths = new List<EnemyDepthItems>(deepItems ?? new List<EnemyDepthItems>());
+            for (int i = 0; i < depths.Count; i++)
+            {
+                if (depths[i] == null)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': a deep item bundle is missing.");
+                }
+
+                if (i > 0 && depths[i].Floor <= depths[i - 1].Floor)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': the deep item bundles must come at rising floors ({depths[i - 1].Floor} then {depths[i].Floor}).");
+                }
+            }
+
+            DeepItems = depths;
         }
 
         /// <summary>The most an enemy's Accuracy or Dodge moves the hit chance, in percent points.</summary>
@@ -168,6 +220,43 @@ namespace F1.Data
 
         [JsonProperty(Order = 10, Required = Required.Always)]
         public int Dodge { get; }
+
+        /// <summary>The bundles carried from a floor down (2026-10-20, Docs/Design/03_Dungeon_Structure.md §4), at rising floors; none for most enemies.</summary>
+        [JsonProperty(Order = 11, Required = Required.Always)]
+        public IReadOnlyList<EnemyDepthItems> DeepItems { get; }
+
+        /// <summary>What the enemy carries on a map floor: its items, then the bundles of that floor and the floors above it, in their order.</summary>
+        public IReadOnlyList<ItemGrant> ItemsAt(int floor)
+        {
+            return CarriedAt(Items, floor);
+        }
+
+        /// <summary>What the enemy carries in one of its phases on a map floor: the phase's items, then the same bundles.</summary>
+        public IReadOnlyList<ItemGrant> ItemsAt(EnemyPhase phase, int floor)
+        {
+            return CarriedAt(phase.Items, floor);
+        }
+
+        IReadOnlyList<ItemGrant> CarriedAt(IReadOnlyList<ItemGrant> baseItems, int floor)
+        {
+            if (DeepItems.Count == 0 || floor < DeepItems[0].Floor)
+            {
+                return baseItems;
+            }
+
+            var carried = new List<ItemGrant>(baseItems);
+            foreach (EnemyDepthItems bundle in DeepItems)
+            {
+                if (bundle.Floor > floor)
+                {
+                    break;
+                }
+
+                carried.AddRange(bundle.Items);
+            }
+
+            return carried;
+        }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the enemy has no figure.</summary>
         [JsonIgnore]
