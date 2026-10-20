@@ -125,7 +125,7 @@ namespace F1.Editor.Data
                 "Category", "Width", "Height", "CooldownMs", "Rows",
                 "Effect1Kind", "Effect1Target", "Effect1Reach", "Effect1Value",
                 "Effect2Kind", "Effect2Target", "Effect2Reach", "Effect2Value",
-                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "School", "Trigger", "CritTakenPercent", "CritDamagePercent" });
+                "ShopWeight", RowMapping.Icon, "Price", "Melee", "Stars", "StarDamage", "CritChancePercent"), new[] { "Unique", "DropWeight", "School", "Trigger", "CritTakenPercent", "CritDamagePercent", "ReqStat", "ReqValue" });
 
             return RowMapping.MapRows(table, errors, row =>
             {
@@ -165,7 +165,10 @@ namespace F1.Editor.Data
                     row.OptionalEnum<ItemTrigger>("Trigger") ?? ItemTrigger.Cooldown,
                     row.OptionalInt("CritTakenPercent", 0),
                     // Percent points a physical weapon adds to the critical multiplier (2026-10-20 스탯 개정), empty for none.
-                    row.OptionalInt("CritDamagePercent", 0));
+                    row.OptionalInt("CritDamagePercent", 0),
+                    // What the owner needs to wield it (Slice D stage 42): a stat and the least value, both empty for an item anyone wields. ItemData checks the pair.
+                    row.OptionalEnum<Stat>("ReqStat"),
+                    row.OptionalInt("ReqValue", 0));
             });
         }
 

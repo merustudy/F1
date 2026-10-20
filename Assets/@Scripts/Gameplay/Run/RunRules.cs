@@ -78,7 +78,9 @@ namespace F1.Gameplay
                 MercenaryData name = pool[rng.NextInt(pool.Count)];
                 pool.Remove(name);
                 JobData job = jobs[rng.NextInt(jobs.Count)];
-                StatBlock stats = Spread(data, StatRules.BaseOf(data, job.Id), rng);
+                // The spread, then (Slice D stage 42, Docs/Design/04 §6) the candidate meets its job's base weapon: the stat the weapon asks for is raised to what
+                // it asks when the spread took it under, no draw spent (the traits below draw the same numbers either way).
+                StatBlock stats = StatRules.MeetingBaseWeapon(data, job.Id, Spread(data, StatRules.BaseOf(data, job.Id), rng));
                 // Then the innate traits it was born with (Slice D stage 37), on the same stream.
                 drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = stats, Traits = TraitRules.DrawInnate(data, rng) });
             }

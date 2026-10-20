@@ -173,7 +173,9 @@ namespace F1.Tests
             int starDamage = 0,
             int dropWeight = 0,
             ItemSchool? school = null,
-            int critDamagePercent = 0)
+            int critDamagePercent = 0,
+            Stat? reqStat = null,
+            int reqValue = 0)
         {
             var effects = new List<ItemEffect> { Effect(kind, target, value, reach) };
             if (second != null)
@@ -181,9 +183,9 @@ namespace F1.Tests
                 effects.Add(second);
             }
 
-            // 2026-10-20 스탯 개정: a weapon or an attack item is physical unless a test says Magic; the rest has no school.
+            // 2026-10-20 스탯 개정: a weapon or an attack item is physical unless a test says Magic; the rest has no school. Stage 42: an item asks for a stat only when a test says.
             return new ItemData(id, Text(id), category, width, height, cooldownMs, rows ?? RowSpan.All, effects, shopWeight, null, price, melee, stars, starDamage, unique: unique, dropWeight: dropWeight,
-                school: school ?? DefaultSchool(category), critDamagePercent: critDamagePercent);
+                school: school ?? DefaultSchool(category), critDamagePercent: critDamagePercent, reqStat: reqStat, reqValue: reqValue);
         }
 
         /// <summary>The school a test item has unless the test says: physical for a weapon or an attack item, none for the rest.</summary>

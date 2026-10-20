@@ -213,6 +213,28 @@ namespace F1.Gameplay
             return (int)(((long)amount * percent + Full / 2) / Full);
         }
 
+        // ---- Equipment requirements (Slice D stage 42, Docs/Design/02_Combat_System.md §4 "장비 요구 스탯") ----
+
+        /// <summary>
+        /// Whether an owner with these stats may wield an item: the item asks for no stat, the owner has none (an enemy, a card without an owner), or the owner's
+        /// stat the item asks for is at least the value asked. The boards ask it wherever an item would go onto one (ExpeditionRules); the card colours its line by it.
+        /// </summary>
+        public static bool MeetsRequirement(StatBlock ownerStats, ItemData item)
+        {
+            return item.ReqStat == null || ownerStats == null || ownerStats[item.ReqStat.Value] >= item.ReqValue;
+        }
+
+        /// <summary>
+        /// The stats with the one the job's base weapon asks for raised to what it asks, when it fell short: every mercenary of a job wields its base weapon
+        /// (Docs/Design/05 §2). The stagecoach applies it to a candidate after its spread (Docs/Design/04 §6) and version 25 of the save to what was saved before.
+        /// Nothing else changes, and nothing is drawn.
+        /// </summary>
+        public static StatBlock MeetingBaseWeapon(StaticData data, string jobId, StatBlock stats)
+        {
+            ItemData weapon = data.Items.Get(data.Jobs.Get(jobId).WeaponItemId);
+            return MeetsRequirement(stats, weapon) ? stats : stats.With(weapon.ReqStat.Value, weapon.ReqValue);
+        }
+
         static int Clamp(int value, int min, int max)
         {
             return value < min ? min : value > max ? max : value;

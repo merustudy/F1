@@ -182,6 +182,62 @@ namespace F1.Tests
             StringAssert.Contains("'ballista' (3x3) does not fit the start bag 'pack' (3x2)", problem);
         }
 
+        static ItemData BladeAsking(int strength)
+        {
+            return TestData.Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2, reqStat: Stat.Str, reqValue: strength);
+        }
+
+        [Test]
+        public void AJobsBaseValues_MustMeetWhatItsWeaponAsks()
+        {
+            // Slice D stage 42 (Docs/Design/05 §2): every mercenary of a job wields its base weapon. The tank names no stats and stands at the baseline 10.
+            string problem = ProblemOf(p => p.Items = Replace(p.Items, i => i.Id == "blade", BladeAsking(11)));
+            StringAssert.Contains("Job 'tank'", problem);
+            StringAssert.Contains("its base Str 10 does not meet what its weapon 'blade' asks (Str 11)", problem);
+            StringAssert.Contains("Job 'striker'", problem, "The striker's strength is 10 too.");
+
+            StaticDataParts atTheBaseline = TestData.Parts();
+            atTheBaseline.Items = Replace(atTheBaseline.Items, i => i.Id == "blade", BladeAsking(10));
+            Assert.DoesNotThrow(() => new StaticData(atTheBaseline), "Asking exactly the base value is met.");
+        }
+
+        [Test]
+        public void ARequirement_MustAskAValueAStatCanHold()
+        {
+            string problem = ProblemOf(p => p.Items = Replace(p.Items, i => i.Id == "knife",
+                TestData.Item("knife", 1500, EffectKind.Damage, TargetMode.EnemyFront, 50, shopWeight: 5, price: 10, reqStat: Stat.Dex, reqValue: 31)));
+            StringAssert.Contains("Item 'knife': ReqValue 31 is outside StatMin..StatMax (1..30)", problem);
+        }
+
+        [Test]
+        public void ARecipesResult_AsksNoMoreOfItsOwnerThanItsBase()
+        {
+            // Stage 42: the forge puts the result where the base lay without asking, so the unique may not ask more than the base (or ask another stat).
+            StarSquare[] aboveBelow = { new StarSquare(0, -1), new StarSquare(0, 1) };
+            ItemData sabre = TestData.Item("sabre", 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2, melee: true, reqStat: Stat.Str, reqValue: 10);
+            var hone = new ItemData("hone", TestData.Text("hone"), ItemCategory.Other, 1, 1, 0, RowSpan.All, new ItemEffect[0], 0, stars: aboveBelow, starDamage: 100);
+            ItemData Result(Stat? stat, int value)
+            {
+                return TestData.Item("gladius_t", 2000, EffectKind.Damage, TargetMode.EnemyFront, 30, width: 2, melee: true, unique: true, stars: aboveBelow, starDamage: 100,
+                    reqStat: stat, reqValue: value);
+            }
+
+            void Forge(StaticDataParts p, ItemData result)
+            {
+                p.Items = Replace(p.Items, i => i.Id == "gladius_t", result).Concat(new[] { sabre, hone }).ToList();
+                p.Recipes = new List<RecipeData> { new RecipeData("gladius_t", "gladius_t", "sabre", ItemTier.Tier3, "hone", ItemTier.Tier3) };
+            }
+
+            StringAssert.Contains("Recipe 'gladius_t': the result 'gladius_t' asks Str 12, more than its base 'sabre' (Str 10)", ProblemOf(p => Forge(p, Result(Stat.Str, 12))));
+            StringAssert.Contains("asks Dex 5, more than its base 'sabre' (Str 10)", ProblemOf(p => Forge(p, Result(Stat.Dex, 5))), "Another stat is more too.");
+            StaticDataParts asMuch = TestData.Parts();
+            Forge(asMuch, Result(Stat.Str, 10));
+            Assert.DoesNotThrow(() => new StaticData(asMuch), "As much as the base.");
+            StaticDataParts nothing = TestData.Parts();
+            Forge(nothing, Result(null, 0));
+            Assert.DoesNotThrow(() => new StaticData(nothing), "Or nothing.");
+        }
+
         [Test]
         public void ExactlyOneBag_IsTheStartBag()
         {

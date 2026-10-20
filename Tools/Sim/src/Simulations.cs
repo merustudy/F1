@@ -378,6 +378,9 @@ namespace F1.Sim
             public int Drops;
             public int DropsTaken;
 
+            /// <summary>Drops a member had room for but nobody could wield (Slice D stage 42: the stat the item asks for).</summary>
+            public int DropsKeptOffByRequirement;
+
             /// <summary>Items merged a tier up, items mended at camps, and the items on the boards at the end by tier.</summary>
             public int Merges;
             public int Mends;
@@ -406,7 +409,7 @@ namespace F1.Sim
                 + $"expeditions with a breakdown {BattleStats.Percent(stats.ExpeditionsWithBreakdown, runs)}, survivors at or over the breakdown {BattleStats.Percent(stats.SurvivorsAtBreakdown, stats.Survivors)}, afflicted at the end {BattleStats.Percent(stats.SurvivorsAfflicted, stats.Survivors)}");
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition (2026-10-17): general drops {BattleStats.Ratio(stats.GeneralDrops, runs)} of the drops, the party's base weapons on offer {BattleStats.Ratio(stats.BaseWeaponsOffered, runs)} (per shop {(stats.Shops > 0 ? (double)stats.BaseWeaponsOffered / stats.Shops : 0):F2})");
-            Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}");
+            Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}, kept off a board by a stat requirement (Slice D stage 42) {BattleStats.Ratio(stats.DropsKeptOffByRequirement, runs)}");
             Console.WriteLine($"  per expedition: forges at camps {BattleStats.Ratio(stats.Forges, runs)}, expeditions ending with a unique item {BattleStats.Percent(stats.UniqueAtEnd, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
                 + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, 1-star {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, 2-star {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, 3-star {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
@@ -487,8 +490,9 @@ namespace F1.Sim
                     }
 
                     stats.GeneralDrops += state.Loot.Count(d => d != null && d.Kind == OfferKind.Item && !carried.Contains(d.Id));
-                    stats.Merges += policy.PickLoot(data, state, out int taken);
+                    stats.Merges += policy.PickLoot(data, state, out int taken, out int keptOff);
                     stats.DropsTaken += taken;
+                    stats.DropsKeptOffByRequirement += keptOff;
                     continue;
                 }
 

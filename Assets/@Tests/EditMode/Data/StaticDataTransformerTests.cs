@@ -466,6 +466,30 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Transform_ReadsWhatAnItemAsksOfItsOwner_AStatAndAValueTogether()
+        {
+            // Slice D stage 42 (Docs/Design/02 §4 "장비 요구 스탯"): ReqStat (a Stat name) and ReqValue are optional columns, both or neither, on a weapon or
+            // defensive gear. Without the columns no item asks anything.
+            StaticData data = StaticDataTransformer.Transform(TestCsv.Reader(TestCsv.ValidSources())).Data;
+            Assert.IsTrue(data.Items.Ordered.All(i => i.ReqStat == null && i.ReqValue == 0), "Without the columns: anyone wields anything.");
+
+            string[] rows = TestCsv.Items.Split('\n');
+            string items = string.Join("\n", rows.Select((line, i) => i == 0 ? line + ",ReqStat,ReqValue" : line.Length == 0 ? line : line + ",,"))
+                + "axe,도끼,Axe,Weapon,2,1,3000,front:1,Damage,EnemyFront,1,2-4,,,,,10,,12,true,,,5,Physical,Str,7\n";
+            StaticData asking = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Item, items)).Data;
+            Assert.AreEqual((Stat?)Stat.Str, asking.Items.Get("axe").ReqStat);
+            Assert.AreEqual(7, asking.Items.Get("axe").ReqValue);
+            Assert.IsNull(asking.Items.Get("sword").ReqStat, "Empty cells: nothing asked.");
+            Assert.AreEqual(0, asking.Items.Get("sword").ReqValue);
+
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace(",Physical,Str,7", ",Physical,Str,")).Errors[0], "A stat without its value.");
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace(",Physical,Str,7", ",Physical,,7")).Errors[0], "A value without its stat.");
+            StringAssert.StartsWith("ItemData.csv(6)", TransformFails(StaticDataFiles.Item, items.Replace(",Physical,Str,7", ",Physical,Luck,7")).Errors[0], "Not a stat.");
+            StringAssert.Contains("only equipment (a weapon or defensive gear) has a ReqStat", TransformFails(StaticDataFiles.Item, items.Replace("0,false,,,,,,\nmace", "0,false,,,,,Str,5\nmace")).Errors[0],
+                "A support item (the staff) asks nothing.");
+        }
+
+        [Test]
         public void Transform_WhenPassiveAndItsTextDoNotComeTogether_Reports()
         {
             string textOnly = TestCsv.Jobs.Replace("staff,3,,,,,,,,", "staff,3,,,,,,,보호막,Shield");

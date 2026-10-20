@@ -36,7 +36,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 7
     },
     {
       "Id": "abyss_grasp",
@@ -73,7 +75,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 6
     },
     {
       "Id": "abyss_howl",
@@ -110,7 +114,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 7
     },
     {
       "Id": "buckler",
@@ -147,7 +153,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "crude_bow",
@@ -184,7 +192,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
+      "ReqValue": 3
     },
     {
       "Id": "dagger",
@@ -221,7 +231,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
+      "ReqValue": 5
     },
     {
       "Id": "ember_flask",
@@ -258,7 +270,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     },
     {
       "Id": "fire_staff",
@@ -295,7 +309,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
     },
     {
       "Id": "gladius",
@@ -341,7 +357,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 50
+      "CritDamagePercent": 50,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "greataxe",
@@ -378,7 +396,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 50
+      "CritDamagePercent": 50,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "halberd",
@@ -415,7 +435,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 50
+      "CritDamagePercent": 50,
+      "ReqStat": "Str",
+      "ReqValue": 7
     },
     {
       "Id": "healing_staff",
@@ -452,7 +474,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Wis",
+      "ReqValue": 5
     },
     {
       "Id": "herb_pouch",
@@ -489,7 +513,9 @@
       "School": null,
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     },
     {
       "Id": "iron_armor",
@@ -526,7 +552,9 @@
       "School": null,
       "Trigger": "BattleStart",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "iron_helm",
@@ -563,7 +591,9 @@
       "School": null,
       "Trigger": "BattleStart",
       "CritTakenPercent": 3,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 3
     },
     {
       "Id": "lantern_staff",
@@ -600,7 +630,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
     },
     {
       "Id": "longbow",
@@ -637,7 +669,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
+      "ReqValue": 5
     },
     {
       "Id": "longsword",
@@ -674,7 +708,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "mace",
@@ -718,7 +754,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "mending_chant",
@@ -755,7 +793,9 @@
       "School": null,
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     },
     {
       "Id": "overseer_maul",
@@ -792,7 +832,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 7
     },
     {
       "Id": "overseer_roar",
@@ -829,7 +871,9 @@
       "School": "Magic",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 7
     },
     {
       "Id": "rat_bite",
@@ -866,7 +910,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 3
     },
     {
       "Id": "rusty_blade",
@@ -903,7 +949,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 3
     },
     {
       "Id": "spear",
@@ -940,7 +988,9 @@
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
     },
     {
       "Id": "ward_charm",
@@ -977,7 +1027,9 @@
       "School": null,
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     },
     {
       "Id": "whetstone",
@@ -1015,7 +1067,9 @@
       "School": null,
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
-      "CritDamagePercent": 0
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     }
   ]
 }

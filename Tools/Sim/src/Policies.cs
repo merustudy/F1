@@ -324,7 +324,7 @@ namespace F1.Sim
                     }
 
                     ItemData catalyst = data.Items.Get(offer.Id);
-                    int who = MemberWithStarRoomFor(state, catalyst, out Placement at);
+                    int who = MemberWithStarRoomFor(data, state, catalyst, out Placement at);
                     if (who < 0 || !state.Members[who].Board.Items.Exists(i => i.Item.Item.Id == recipe.BaseItem && !StarRules.Sources(state.Members[who].Board, i).Exists(s => s.Item.Item.Id == recipe.Catalyst)))
                     {
                         continue;
@@ -356,7 +356,7 @@ namespace F1.Sim
                 }
 
                 var item = new EquippedItem(data.Items.Get(offer.Id), tier: offer.Tier);
-                if (FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
+                if (FindMergeTarget(data, state, item, out int member, out Placement at) && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
                     ExpeditionRules.BuyToBoard(data, state, slot, member, at);
                     merged = true;
@@ -372,7 +372,7 @@ namespace F1.Sim
                     continue;
                 }
 
-                int member = MemberWithRoomFor(state, data.Items.Get(offer.Id), out Placement at);
+                int member = MemberWithRoomFor(data, state, data.Items.Get(offer.Id), out Placement at);
                 if (member >= 0 && ExpeditionRules.CanBuyToBoard(data, state, slot, member, at))
                 {
                     ExpeditionRules.BuyToBoard(data, state, slot, member, at);
@@ -425,11 +425,13 @@ namespace F1.Sim
         /// up), else one that has room on the bags of a mercenary standing where it works, else one that fits the inventory; a bag goes
         /// where a frame has room for it (stage 19); the rest is left. Without player input there is no merging, only what has room on a
         /// board or fits the inventory. Then merges what can merge and equips from the inventory whatever has room. Returns how many
-        /// merges it made, a drop merged as it was picked up included; <paramref name="taken"/> is how many drops it took.
+        /// merges it made, a drop merged as it was picked up included; <paramref name="taken"/> is how many drops it took;
+        /// <paramref name="keptOffByRequirement"/> is how many drops some living member had room for but no member who could wield them (Slice D stage 42).
         /// </summary>
-        public int PickLoot(StaticData data, ExpeditionState state, out int taken)
+        public int PickLoot(StaticData data, ExpeditionState state, out int taken, out int keptOffByRequirement)
         {
             taken = 0;
+            keptOffByRequirement = 0;
             int merges = 0;
             for (int slot = 0; slot < state.Loot.Count && state.Phase == ExpeditionPhase.PickingLoot; slot++)
             {
@@ -452,7 +454,7 @@ namespace F1.Sim
                 }
 
                 var item = new EquippedItem(data.Items.Get(drop.Id), tier: drop.Tier);
-                if (Active && FindMergeTarget(state, item, out int member, out Placement at) && ExpeditionRules.CanTakeLoot(data, state, slot, member, at))
+                if (Active && FindMergeTarget(data, state, item, out int member, out Placement at) && ExpeditionRules.CanTakeLoot(data, state, slot, member, at))
                 {
                     ExpeditionRules.TakeLoot(data, state, slot, member, at);
                     taken++;
@@ -460,12 +462,17 @@ namespace F1.Sim
                     continue;
                 }
 
-                int room = MemberWithRoomFor(state, item.Item, out Placement free);
+                int room = MemberWithRoomFor(data, state, item.Item, out Placement free);
                 if (room >= 0)
                 {
                     ExpeditionRules.TakeLoot(data, state, slot, room, free);
                     taken++;
                     continue;
+                }
+
+                if (item.Item.HasRequirement && MemberWithRoomFor(data, state, item.Item, out _, heedRequirement: false) >= 0)
+                {
+                    keptOffByRequirement++;
                 }
 
                 if (ExpeditionRules.CanTakeLootToInventory(data, state, slot))
@@ -497,7 +504,7 @@ namespace F1.Sim
                 merged = false;
                 for (int i = 0; i < state.Inventory.Count && !merged; i++)
                 {
-                    if (FindMergeTarget(state, state.Inventory[i], out int member, out Placement at))
+                    if (FindMergeTarget(data, state, state.Inventory[i], out int member, out Placement at))
                     {
                         ExpeditionRules.PlaceFromInventory(data, state, i, member, at);
                         merged = true;
@@ -514,7 +521,7 @@ namespace F1.Sim
                     foreach (BoardItem placed in state.Members[m].Board.PlacedInReadingOrder())
                     {
                         // A base weapon is merged into, never moved away to merge (2026-10-19): the policy keeps every mercenary armed.
-                        if (!placed.Item.IsBase && FindMergeTarget(state, placed.Item, out int member, out Placement at) && (member != m || !at.Equals(placed.At)))
+                        if (!placed.Item.IsBase && FindMergeTarget(data, state, placed.Item, out int member, out Placement at) && (member != m || !at.Equals(placed.At)))
                         {
                             ExpeditionRules.MoveItem(data, state, m, placed.At.X, placed.At.Y, member, at);
                             merged = true;
@@ -530,12 +537,15 @@ namespace F1.Sim
             return merges;
         }
 
-        /// <summary>The first item on a living member's board (from the first member, in reading order) that the given item merges into, and where it lies.</summary>
-        static bool FindMergeTarget(ExpeditionState state, EquippedItem item, out int member, out Placement at)
+        /// <summary>
+        /// The first item on a living member's board (from the first member, in reading order) that the given item merges into, and where it lies. The member
+        /// must wield the item (Slice D stage 42): what lies on its board already says it does, but the rule is asked, not assumed.
+        /// </summary>
+        static bool FindMergeTarget(StaticData data, ExpeditionState state, EquippedItem item, out int member, out Placement at)
         {
             for (member = 0; member < state.Members.Count; member++)
             {
-                if (!state.Members[member].Alive)
+                if (!state.Members[member].Alive || !ExpeditionRules.MeetsRequirement(state,member, item.Item))
                 {
                     continue;
                 }
@@ -555,21 +565,24 @@ namespace F1.Sim
         }
 
         /// <summary>
-        /// The first living member standing where the item works whose bags have room for it, and the first such room; or -1. A star item
-        /// (Slice B stage 20) goes where its stars light the most melee weapons instead, and nowhere when they would light none.
+        /// The first living member standing where the item works, who may wield it (Slice D stage 42: the stat it asks for), whose bags have room for it,
+        /// and the first such room; or -1. A star item (Slice B stage 20) goes where its stars light the most melee weapons instead, and nowhere when they
+        /// would light none.
         /// </summary>
-        static int MemberWithRoomFor(ExpeditionState state, ItemData item, out Placement at)
+        /// <param name="heedRequirement">False to count a member who cannot wield the item (the report's count of drops a requirement kept off a board).</param>
+        static int MemberWithRoomFor(StaticData data, ExpeditionState state, ItemData item, out Placement at, bool heedRequirement = true)
         {
             if (item.Stars.Count > 0)
             {
-                return MemberWithStarRoomFor(state, item, out at);
+                return MemberWithStarRoomFor(data, state, item, out at);
             }
 
             int living = ExpeditionRules.LivingCount(state);
             for (int m = 0; m < state.Members.Count; m++)
             {
                 ExpeditionMember member = state.Members[m];
-                if (member.Alive && item.UsableIn(member.Row, living) && member.Board.FindRoom(item.Width, item.Height, out at))
+                if (member.Alive && (!heedRequirement || ExpeditionRules.MeetsRequirement(state,m, item)) && item.UsableIn(member.Row, living)
+                    && member.Board.FindRoom(item.Width, item.Height, out at))
                 {
                     return m;
                 }
@@ -583,7 +596,7 @@ namespace F1.Sim
         /// For a star item: the living member and the free placement (every turn) whose stars light the most melee weapons, the first such in
         /// member order and then reading order; -1 when no placement lights any.
         /// </summary>
-        static int MemberWithStarRoomFor(ExpeditionState state, ItemData item, out Placement at)
+        static int MemberWithStarRoomFor(StaticData data, ExpeditionState state, ItemData item, out Placement at)
         {
             int best = -1;
             int most = 0;
@@ -591,7 +604,7 @@ namespace F1.Sim
             for (int m = 0; m < state.Members.Count; m++)
             {
                 ExpeditionMember member = state.Members[m];
-                if (!member.Alive)
+                if (!member.Alive || !ExpeditionRules.MeetsRequirement(state,m, item))
                 {
                     continue;
                 }
@@ -666,7 +679,7 @@ namespace F1.Sim
         {
             for (int i = 0; i < state.Inventory.Count;)
             {
-                int member = MemberWithRoomFor(state, state.Inventory[i].Item, out Placement at);
+                int member = MemberWithRoomFor(data, state, state.Inventory[i].Item, out Placement at);
                 if (member < 0)
                 {
                     i++;

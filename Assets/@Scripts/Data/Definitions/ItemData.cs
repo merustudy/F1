@@ -149,7 +149,9 @@ namespace F1.Data
             ItemSchool? school = null,
             ItemTrigger trigger = ItemTrigger.Cooldown,
             int critTakenPercent = 0,
-            int critDamagePercent = 0)
+            int critDamagePercent = 0,
+            Stat? reqStat = null,
+            int reqValue = 0)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             if (dropWeight < 0)
@@ -158,6 +160,25 @@ namespace F1.Data
             }
 
             DropWeight = dropWeight;
+            // What its owner needs to wield it (Slice D stage 42, Docs/Design/02_Combat_System.md §4 "장비 요구 스탯"): a stat and the least value of it, both
+            // or neither, on equipment (a weapon, defensive gear) only. Whether the value lies within StatMin..StatMax is the dataset's check (StaticData).
+            if ((reqStat == null) != (reqValue == 0))
+            {
+                throw new DataException($"{DefinitionName} '{id}': ReqStat and ReqValue come together (both, or neither).");
+            }
+
+            if (reqValue < 0)
+            {
+                throw new DataException($"{DefinitionName} '{id}': ReqValue cannot be negative.");
+            }
+
+            if (reqStat != null && category != ItemCategory.Weapon && category != ItemCategory.Armor)
+            {
+                throw new DataException($"{DefinitionName} '{id}': only equipment (a weapon or defensive gear) has a ReqStat.");
+            }
+
+            ReqStat = reqStat;
+            ReqValue = reqValue;
             // Physical or magic (2026-10-20 스탯 개정, Docs/Design/02_Combat_System.md §4·§5): a weapon and an attack item are physical unless the data says
             // Magic; defensive gear may say (its cooldown then grows with dexterity); a support item and anything else has none (a support item's power
             // grows with wisdom all the same).
@@ -438,6 +459,21 @@ namespace F1.Data
         /// <summary>Percent points a physical weapon adds to the critical multiplier of its hits (2026-10-20 스탯 개정, Docs/Design/02 §4): the heavy weapons. 0 for the rest.</summary>
         [JsonProperty(Order = 21, Required = Required.Always)]
         public int CritDamagePercent { get; }
+
+        /// <summary>
+        /// The stat an owner needs to wield the item (Slice D stage 42, Docs/Design/02_Combat_System.md §4 "장비 요구 스탯"), with <see cref="ReqValue"/> the
+        /// least of it; null for an item anyone wields. Asked wherever an item would go onto a mercenary's board; an enemy, which has no stats, is never asked.
+        /// </summary>
+        [JsonProperty(Order = 22, Required = Required.AllowNull)]
+        public Stat? ReqStat { get; }
+
+        /// <summary>The least the owner needs of <see cref="ReqStat"/>; 0 without one.</summary>
+        [JsonProperty(Order = 23, Required = Required.Always)]
+        public int ReqValue { get; }
+
+        /// <summary>Whether the item asks its owner for a stat (stage 42).</summary>
+        [JsonIgnore]
+        public bool HasRequirement => ReqStat != null;
 
         /// <summary>
         /// The owner's stat that grows the item's power (2026-10-20 스탯 개정, Docs/Design/02_Combat_System.md §4; before, the data's ScalesWith column):

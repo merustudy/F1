@@ -208,6 +208,29 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ItemData_ARequirement_IsAStatAndItsValueTogether_OnEquipmentOnly()
+        {
+            // Slice D stage 42 (Docs/Design/02_Combat_System.md §4 "장비 요구 스탯"): ReqStat and ReqValue come as a pair, on a weapon or defensive gear.
+            ItemEffect damage = TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront);
+            ItemEffect shield = TestData.Effect(EffectKind.Shield, TargetMode.Self);
+            LocalizedText name = TestData.Text("x");
+            RowSpan rows = RowSpan.All;
+
+            var sword = new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { damage }, 0, reqStat: Stat.Str, reqValue: 7);
+            Assert.AreEqual((Stat?)Stat.Str, sword.ReqStat);
+            Assert.AreEqual(7, sword.ReqValue);
+            Assert.IsTrue(sword.HasRequirement);
+            Assert.DoesNotThrow(() => new ItemData("x", name, ItemCategory.Armor, 1, 1, 1000, rows, new[] { shield }, 0, reqStat: Stat.Con, reqValue: 3), "Defensive gear may ask too.");
+            Assert.IsFalse(new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { damage }, 0).HasRequirement, "Nothing asked: anyone wields it.");
+
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { damage }, 0, reqStat: Stat.Str), "A stat without its value.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { damage }, 0, reqValue: 7), "A value without its stat.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Weapon, 2, 1, 1000, rows, new[] { damage }, 0, reqStat: Stat.Str, reqValue: -1), "A negative value.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Support, 1, 1, 1000, rows, new[] { shield }, 0, reqStat: Stat.Wis, reqValue: 5), "A support item asks nothing.");
+            Assert.Throws<DataException>(() => new ItemData("x", name, ItemCategory.Attack, 1, 1, 1000, rows, new[] { damage }, 0, reqStat: Stat.Wis, reqValue: 5), "Nor an attack item.");
+        }
+
+        [Test]
         public void ItemData_Rows_SayWhereTheItemWorks_OnTheLivingLine()
         {
             ItemData melee = TestData.Item("x", 1000, EffectKind.Damage, TargetMode.EnemyFront, rows: RowSpan.Front(2));

@@ -385,6 +385,27 @@ namespace F1.Data
                         problems.Add($"{what}: the weapon '{weapon.Id}' ({weapon.Width}x{weapon.Height}) does not fit the start bag '{StartBag.Id}' ({StartBag.Width}x{StartBag.Height}).");
                     }
                 }
+
+                // Every mercenary of the job wields its base weapon (Slice D stage 42, Docs/Design/05 §2): the job's base values meet what the weapon asks.
+                // A job that names no stats stands at the baseline (StatRules.BaseOf). The stagecoach and the save keep the mercenaries there too.
+                if (Items.Contains(job.WeaponItemId))
+                {
+                    ItemData weapon = Items.Get(job.WeaponItemId);
+                    StatBlock baseStats = job.Stats ?? StatBlock.Uniform(Balance.StatBaseline);
+                    if (weapon.ReqStat != null && baseStats[weapon.ReqStat.Value] < weapon.ReqValue)
+                    {
+                        problems.Add($"{what}: its base {weapon.ReqStat} {baseStats[weapon.ReqStat.Value]} does not meet what its weapon '{weapon.Id}' asks ({weapon.ReqStat} {weapon.ReqValue}): every mercenary of a job wields its base weapon.");
+                    }
+                }
+            }
+
+            // A requirement (stage 42) asks for a value a stat can hold.
+            foreach (ItemData item in Items.Ordered)
+            {
+                if (item.ReqStat != null && (item.ReqValue < Balance.StatMin || item.ReqValue > Balance.StatMax))
+                {
+                    problems.Add($"{ItemData.DefinitionName} '{item.Id}': ReqValue {item.ReqValue} is outside StatMin..StatMax ({Balance.StatMin}..{Balance.StatMax}).");
+                }
             }
 
             foreach (RecipeData recipe in Recipes.Ordered)
@@ -401,6 +422,17 @@ namespace F1.Data
                 if (Items.Contains(recipe.Catalyst) && Items.Get(recipe.Catalyst).Stars.Count == 0)
                 {
                     problems.Add($"{what}: the catalyst '{recipe.Catalyst}' has no stars to be lit on the base.");
+                }
+
+                // The forge puts the result where the base lay without asking (stage 42): the result asks no more of its owner than the base did.
+                if (Items.Contains(recipe.Result) && Items.Contains(recipe.BaseItem))
+                {
+                    ItemData result = Items.Get(recipe.Result);
+                    ItemData baseItem = Items.Get(recipe.BaseItem);
+                    if (result.ReqStat != null && (baseItem.ReqStat != result.ReqStat || baseItem.ReqValue < result.ReqValue))
+                    {
+                        problems.Add($"{what}: the result '{recipe.Result}' asks {result.ReqStat} {result.ReqValue}, more than its base '{recipe.BaseItem}' ({(baseItem.ReqStat == null ? "nothing" : baseItem.ReqStat + " " + baseItem.ReqValue)}): the forge puts it where the base lay.");
+                    }
                 }
             }
 

@@ -606,7 +606,9 @@ namespace F1.Gameplay
                 return CanPlaceBag(state, memberIndex, data.Bags.Get(offer.Id), at);
             }
 
+            // The member must be able to wield it (stage 42), to merge it in as much as to lay it down.
             return offer.Kind == OfferKind.Item
+                && MeetsRequirement(state,memberIndex, data.Items.Get(offer.Id))
                 && (MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item)
                     || CanPlaceItem(data, state, data.Items.Get(offer.Id), memberIndex, at));
         }
@@ -682,10 +684,14 @@ namespace F1.Gameplay
             }
         }
 
-        /// <summary>Whether putting an offer (null for none) with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        /// <summary>
+        /// Whether putting an offer (null for none) with its top-left on a square of a living member's board would merge it into the item there — a member
+        /// who cannot wield the item (stage 42) merges nothing into it either, so the ghost and the command agree.
+        /// </summary>
         static bool OfferMergesAt(ExpeditionState state, ItemOffer offer, int memberIndex, int x, int y)
         {
-            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, LivingItemAt(state, memberIndex, x, y)?.Item);
+            EquippedItem into = LivingItemAt(state, memberIndex, x, y)?.Item;
+            return offer != null && offer.Kind == OfferKind.Item && MergesInto(offer.Id, offer.Tier, into) && MeetsRequirement(state, memberIndex, into.Item);
         }
 
         /// <summary>Whether putting an offer (null for none) with its top-left on a square of the inventory would merge it into the item there (2026-10-18).</summary>
@@ -703,7 +709,24 @@ namespace F1.Gameplay
         /// </summary>
         public static bool CanPlaceItem(StaticData data, ExpeditionState state, ItemData item, int memberIndex, Placement at)
         {
-            return CanPut(state, memberIndex, item, at, null, null);
+            return MeetsRequirement(state,memberIndex, item) && CanPut(state, memberIndex, item, at, null, null);
+        }
+
+        /// <summary>
+        /// Whether a member may wield an item (Slice D stage 42, Docs/Design/02_Combat_System.md §4 "장비 요구 스탯"): the member's stat the item asks for is at
+        /// least the value asked (<see cref="StatRules.MeetsRequirement"/>; <see cref="Create"/> gives every member its stats). Asked wherever an item would go
+        /// onto a board — a drop, a good of the shop, an item of the inventory, an item moved from a board, merged into the same item or laid down — and only
+        /// then: stats never fall on an expedition, so what lies on a board stays wielded. The inventory, the floor and the shop ask nothing; an enemy is never
+        /// asked. False for a member the state does not have.
+        /// </summary>
+        public static bool MeetsRequirement(ExpeditionState state, int memberIndex, ItemData item)
+        {
+            if (!item.HasRequirement)
+            {
+                return true;
+            }
+
+            return memberIndex >= 0 && memberIndex < state.Members.Count && StatRules.MeetsRequirement(state.Members[memberIndex].Stats, item);
         }
 
         /// <param name="moving">The item being moved itself, which is not in its own way (null for an item coming from elsewhere).</param>
@@ -759,6 +782,12 @@ namespace F1.Gameplay
 
             BoardItem moving = state.Members[fromMember].Board.ItemAt(fromX, fromY);
             if (fromMember == toMember && moving.At.Equals(to))
+            {
+                return false;
+            }
+
+            // Laying it down again is laying it down (stage 42): the member it goes to must wield it, the same member included.
+            if (!MeetsRequirement(state,toMember, moving.Item.Item))
             {
                 return false;
             }
@@ -838,6 +867,11 @@ namespace F1.Gameplay
             }
 
             EquippedItem item = state.Inventory[inventoryIndex];
+            if (!MeetsRequirement(state,memberIndex, item.Item))
+            {
+                return false;
+            }
+
             if (CanMerge(item, LivingItemAt(state, memberIndex, at.X, at.Y)?.Item))
             {
                 return true;
@@ -1420,10 +1454,13 @@ namespace F1.Gameplay
             return item != null && !ReferenceEquals(item, into) && MergesInto(item.Item.Id, item.Tier, into);
         }
 
-        /// <summary>Whether putting an item (of a board or the inventory) with its top-left on a square of a living member's board would merge it into the item there.</summary>
+        /// <summary>
+        /// Whether putting an item (of a board or the inventory) with its top-left on a square of a living member's board would merge it into the item there.
+        /// A member who cannot wield the item (stage 42) merges nothing into it.
+        /// </summary>
         public static bool MergesAt(ExpeditionState state, EquippedItem item, int memberIndex, int x, int y)
         {
-            return CanMerge(item, LivingItemAt(state, memberIndex, x, y)?.Item);
+            return CanMerge(item, LivingItemAt(state, memberIndex, x, y)?.Item) && MeetsRequirement(state, memberIndex, item.Item);
         }
 
         /// <summary>

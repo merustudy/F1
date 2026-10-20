@@ -42,6 +42,34 @@ namespace F1.Tests
             }
         }
 
+        /// <summary>
+        /// Slice D stage 42 (Docs/Design/02 §4 "장비 요구 스탯", 05 §2; the user's "모든 무기 장비와 방어 장비", "기본 장비 … 스탯(5)"): every weapon and every piece of
+        /// defensive gear asks its owner for a stat, nothing else does, and a job's base weapon asks 5 of the job's main stat (the one its growth favours),
+        /// which the job's base values meet — so every mercenary of the job wields it.
+        /// </summary>
+        [Test]
+        public void EveryShippedPieceOfEquipment_AsksForAStat_AndABaseWeaponAsksFiveOfItsJobsMainStat()
+        {
+            StaticData data = LoadShipped();
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                bool equipment = item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Armor;
+                Assert.AreEqual(equipment, item.HasRequirement, item.Id + (equipment ? ": equipment asks for a stat." : ": only equipment asks."));
+            }
+
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                ItemData weapon = data.Items.Get(job.WeaponItemId);
+                Stat main = StatBlock.All.OrderByDescending(s => job.Growth[s]).First();
+                Assert.AreEqual((Stat?)main, weapon.ReqStat, $"{job.Id}: its base weapon '{weapon.Id}' asks for the job's main stat.");
+                Assert.AreEqual(5, weapon.ReqValue, weapon.Id);
+                Assert.IsTrue(StatRules.MeetsRequirement(job.Stats, weapon), $"{job.Id}: {main} {job.Stats[main]} meets its base weapon.");
+            }
+
+            Assert.AreEqual((Stat?)Stat.Str, data.Items.Get("iron_armor").ReqStat, "Plate asks for strength.");
+            Assert.AreEqual(data.Items.Get("longsword").ReqValue, data.Items.Get("gladius").ReqValue, "The forge's result asks what the longsword asks.");
+        }
+
         [Test]
         public void TheShippedJobs_AreTheFive_AndTheStartingRosterIsFive()
         {

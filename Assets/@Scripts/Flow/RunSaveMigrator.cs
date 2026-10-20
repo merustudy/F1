@@ -41,6 +41,11 @@ namespace F1.Flow
             {
                 From23To24(save, data);
             }
+
+            if (save.SchemaVersion == 24)
+            {
+                From24To25(save, data);
+            }
         }
 
         /// <summary>
@@ -89,6 +94,53 @@ namespace F1.Flow
             }
 
             save.SchemaVersion = 24;
+        }
+
+        /// <summary>
+        /// Version 25 (Slice D stage 42, 장비 요구 스탯 — Docs/Design/02 §4, 05 §2): equipment asks its owner for a stat, and every mercenary of a job wields its
+        /// base weapon. A roster mercenary's or a candidate's stat its job's base weapon asks for is raised to what it asks when it fell short (a candidate of
+        /// version 24 could roll under it; the stagecoach keeps them above it since). The DTO's shape is the same; nothing else changes. A member of an
+        /// expedition going on takes the roster's stats, so it is lifted with its mercenary.
+        /// </summary>
+        static void From24To25(RunSaveData save, StaticData data)
+        {
+            if (save.Run != null)
+            {
+                foreach (MercenaryRecord mercenary in save.Run.Roster ?? new List<MercenaryRecord>())
+                {
+                    if (mercenary != null)
+                    {
+                        LiftToBaseWeapon(data, mercenary.JobId, mercenary.Stats);
+                    }
+                }
+
+                foreach (RecruitRecord recruit in save.Run.Recruits ?? new List<RecruitRecord>())
+                {
+                    if (recruit != null)
+                    {
+                        LiftToBaseWeapon(data, recruit.JobId, recruit.Stats);
+                    }
+                }
+            }
+
+            save.SchemaVersion = 25;
+        }
+
+        /// <summary>Raises the one stat a job's base weapon asks for to what it asks (<see cref="StatRules.MeetingBaseWeapon"/>). A record the mapper will refuse (no stats, an unknown job) is left to it.</summary>
+        static void LiftToBaseWeapon(StaticData data, string jobId, StatsRecord record)
+        {
+            if (record == null || jobId == null || !data.Jobs.Contains(jobId))
+            {
+                return;
+            }
+
+            StatBlock lifted = StatRules.MeetingBaseWeapon(data, jobId, new StatBlock(record.Str, record.Dex, record.Con, record.Int, record.Wis, record.End));
+            record.Str = lifted.Str;
+            record.Dex = lifted.Dex;
+            record.Con = lifted.Con;
+            record.Int = lifted.Int;
+            record.Wis = lifted.Wis;
+            record.End = lifted.End;
         }
 
         /// <summary>Half, rounded half up, within the balance's range; Spi read into Wis and cleared.</summary>

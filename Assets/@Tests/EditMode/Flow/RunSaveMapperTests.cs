@@ -403,7 +403,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(24, RunSaveData.CurrentSchemaVersion);
+            Assert.AreEqual(25, RunSaveData.CurrentSchemaVersion);
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -434,7 +434,7 @@ namespace F1.Tests
             Assert.IsTrue(run.Recruits.All(r => r.Traits.Count == 2), "The candidates drew two each.");
             kit.Expedition.Depart("cave");
             RunSaveData save = kit.Save.Load<RunSaveData>(RunManager.FileName).Value;
-            Assert.AreEqual(24, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
             CollectionAssert.AreEqual(new[] { "sturdy", "keen" }, save.Run.Roster[0].Traits);
 
             RunSaveMapper.Read(save, kit.Data, out RunState read, out ExpeditionState expedition);
@@ -474,7 +474,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(24, save.SchemaVersion, "Brought on through 22 and 23 to the current version.");
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion, "Brought on through 22, 23 and 24 to the current version.");
             Assert.IsTrue(save.Run.Roster.All(m => m.Traits != null && m.Traits.Count == 0) && save.Run.Recruits.All(r => r.Traits != null && r.Traits.Count == 0));
             RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState _);
             Assert.IsTrue(run.Roster.All(m => m.Traits.Count == 0));
@@ -499,7 +499,7 @@ namespace F1.Tests
             again.SchemaVersion = 22;
             again.Expedition.Members.ForEach(m => m.DeathsDoor = false);
             RunSaveMigrator.Migrate(again, data);
-            Assert.AreEqual(24, again.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, again.SchemaVersion);
             RunSaveMapper.Read(again, data, out RunState _, out ExpeditionState migrated);
             Assert.IsTrue(migrated.Members.All(m => !m.DeathsDoor));
         }
@@ -520,7 +520,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(24, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion);
             Assert.AreEqual((7, 5, 6, 3, 7, 6), (first.Stats.Str, first.Stats.Dex, first.Stats.Con, first.Stats.Int, first.Stats.Wis, first.Stats.End));
             Assert.IsNull(first.Stats.Spi, "Spirit is read once and written no more.");
             Assert.AreEqual((3, 5, 8, 1, 15, 4), (save.Run.Recruits[0].Stats.Str, save.Run.Recruits[0].Stats.Dex, save.Run.Recruits[0].Stats.Con, save.Run.Recruits[0].Stats.Int, save.Run.Recruits[0].Stats.Wis, save.Run.Recruits[0].Stats.End));
@@ -538,6 +538,40 @@ namespace F1.Tests
             weak.Hp = 1;
             RunSaveMigrator.Migrate(low, data);
             Assert.AreEqual(1, weak.Hp);
+        }
+
+        [Test]
+        public void Migrate_From24_RaisesTheStatAJobsBaseWeaponAsks_ForTheRosterAndTheCandidates()
+        {
+            // Version 25 (Slice D stage 42): every mercenary of a job wields its base weapon. The blade asks Str 9 here; the staff (the healer's) asks nothing.
+            StaticDataParts parts = TestData.Parts();
+            parts.Items = parts.Items.Select(i => i.Id == "blade" ? TestData.Item("blade", 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2, reqStat: Stat.Str, reqValue: 9) : i).ToList();
+            var asking = new StaticData(parts);
+            RunSaveData save = ValidSave(out StaticData _, ExpeditionPhase.ChoosingNode);
+            save.SchemaVersion = 24;
+            MercenaryRecord tank = save.Run.Roster.First(m => m.JobId == "tank");
+            MercenaryRecord healer = save.Run.Roster.First(m => m.JobId == "healer");
+            MercenaryRecord striker = save.Run.Roster.First(m => m.JobId == "striker");
+            tank.Stats.Str = 7;
+            healer.Stats.Str = 7;
+            striker.Stats.Str = 12;
+            RecruitRecord candidate = save.Run.Recruits[0];
+            candidate.JobId = "striker";
+            candidate.Stats.Str = 4;
+            candidate.Stats.Dex = 6;
+
+            RunSaveMigrator.Migrate(save, asking);
+
+            Assert.AreEqual(25, save.SchemaVersion);
+            Assert.AreEqual(9, tank.Stats.Str, "Raised to what the blade asks.");
+            Assert.AreEqual(7, healer.Stats.Str, "The staff asks nothing: untouched.");
+            Assert.AreEqual(12, striker.Stats.Str, "Already above: untouched.");
+            Assert.AreEqual((9, 6), (candidate.Stats.Str, candidate.Stats.Dex), "A candidate is lifted the same, and only in that stat.");
+            RunSaveMapper.Read(save, asking, out RunState run, out ExpeditionState expedition);
+            Assert.AreEqual(9, run.Roster.First(m => m.JobId == "tank").Stats.Str);
+            Assert.AreEqual(9, expedition.Members.First(m => m.JobId == "tank").Stats.Str, "A member going on takes the roster's stats.");
+            Assert.IsTrue(run.Roster.Concat(run.Recruits.Select(r => new MercenaryState { JobId = r.JobId, Stats = r.Stats }))
+                .All(m => StatRules.MeetsRequirement(m.Stats, asking.Items.Get(asking.Jobs.Get(m.JobId).WeaponItemId))), "Everyone wields their base weapon.");
         }
 
         [Test]
