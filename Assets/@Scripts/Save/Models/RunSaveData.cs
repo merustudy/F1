@@ -8,6 +8,8 @@ namespace F1.Save
     /// progress. The owner is RunManager. These types hold text and numbers only; enum values are
     /// stored by name and seeds as decimal strings. Rules: Docs/Architecture/07_SAVE.md.
     ///
+    /// Version 26 (Slice D stage 47, 직업군 확대): the same shape; the jobs are the eight (warrior, viking, rogue, archer, mage, occultist, priest, minstrel) and
+    /// the ranger's id is "archer" (RunSaveMigrator renames a version 25 file's job ids; the three new jobs appear in no older file).
     /// Version 25 (Slice D stage 42, 장비 요구 스탯): the same shape; a roster mercenary's or a candidate's stat its job's base weapon asks for stands at
     /// least at what it asks (RunSaveMigrator lifts a version 24 file's; the stagecoach has kept its candidates there since).
     /// Version 24 (2026-10-20 스탯 개정, Slice D stage 41): a stats record's Spi is Wis (wisdom), and the stats stand on the new scale (a job's base values
@@ -37,7 +39,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 25;
+        public const int CurrentSchemaVersion = 26;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;

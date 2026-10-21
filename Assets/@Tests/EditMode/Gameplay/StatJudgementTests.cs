@@ -181,6 +181,32 @@ namespace F1.Tests
         }
 
         [Test]
+        public void TheRoguesPassive_AddsToItsDodge_Everywhere()
+        {
+            // Slice D stage 47 (Docs/Design/02_Combat_System.md §7, Design/20): "회피 확률 +10%" — points on the dodge, no row condition, physical attacks
+            // only like the rest of the dodge (a magic blow rolls nothing: CanMiss).
+            BalanceData balance = Shipped();
+            var passive = new PassiveSpec(PassiveTrigger.Always, PassiveCondition.None, null, PassiveEffect.DodgePercent, PassiveTarget.Self, 10);
+            Assert.AreEqual(10, StatRules.DodgeBonusPercent(passive));
+            Assert.AreEqual(0, StatRules.DodgeBonusPercent(null));
+            Assert.AreEqual(0, StatRules.DodgeBonusPercent(new PassiveSpec(PassiveTrigger.Always, PassiveCondition.None, null, PassiveEffect.CritChancePercent, PassiveTarget.Self, 10)));
+            Assert.AreEqual(1200, StatRules.Dodge(balance, With(Stat.Dex, 14), 0, null, passive), "Dexterity 14's 2 (half a point each) and the passive's 10.");
+            Assert.AreEqual(200, StatRules.Dodge(balance, With(Stat.Dex, 14), 0), "Without it.");
+            Assert.Throws<DataException>(
+                () => new PassiveSpec(PassiveTrigger.Always, PassiveCondition.InRows, RowSpan.Front(1), PassiveEffect.DodgePercent, PassiveTarget.Self, 10),
+                "It holds everywhere: no row condition.");
+
+            // In battle: the enemy's claw rolls against the rogue with the passive's points off its chance — 80 base less 10, and dexterity 10 gives nothing.
+            BattleUnitSetup rogue = Merc("r", 1, 100000, With(Stat.Dex, 10));
+            rogue.Passive = passive;
+            var claw = new EquippedItem(TestData.Item("claw", 1000, EffectKind.Damage, TargetMode.EnemyFront, 10));
+            BattleEngine battle = Battle(Shipped(("HitMaxPercent", 100)), new[] { rogue }, new[] { TestData.Enemy("e", 1, 100000, claw) }, 30000);
+            List<BattleEvent> misses = battle.Events.Where(e => e.Kind == BattleEventKind.Missed).ToList();
+            Assert.IsTrue(misses.Count > 0, "Some of thirty claws missed.");
+            Assert.IsTrue(misses.All(e => e.B == 7000), "The chance in the log: 80 − 10.");
+        }
+
+        [Test]
         public void TheDeathChance_FallsWithEndurance()
         {
             // 2026-10-20 스탯 개정: endurance, before constitution (which gives the HP now).

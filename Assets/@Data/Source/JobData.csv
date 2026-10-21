@@ -1,6 +1,9 @@
 Id,Name.ko-KR,Name.en-US,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Wis,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthWis,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US
 warrior,전사,Warrior,longsword,1,BattleStart,InRows,front:1,Shield,Self,5.45,맨 앞: 전투 시작 때 자신에게 보호막 {0},Front row: gains {0} Shield at the start of battle,unit/job/knight,6,4,6,3,4,6,110,50,90,20,50,50,선봉,Vanguard
 viking,바이킹,Viking,greataxe,1,Always,SelfInDog,,WeaponPowerPercent,Self,100,빈사 상태: 무기 피해 +{0}%,At death's door: weapon damage +{0}%,unit/job/valkyrie,7,5,5,3,4,4,110,90,50,20,50,50,광기,Frenzy
-ranger,방랑자,Ranger,longbow,3,Always,None,,CritChancePercent,Self,10,무기의 치명타 확률 +{0}%,Weapon critical chance +{0}%,unit/job/spellblade,5,7,4,3,4,6,50,110,50,20,50,90,급소,Weak Spot
+archer,궁수,Archer,longbow,3,Always,None,,CritChancePercent,Self,10,무기의 치명타 확률 +{0}%,Weapon critical chance +{0}%,unit/job/archer,5,7,4,3,4,6,50,110,50,20,50,90,급소,Weak Spot
 mage,마법사,Mage,fire_staff,3,Always,InRows,back:2,WeaponPowerPercent,Self,25,뒤에서 2번째 자리까지: 무기 피해 +{0}%,Rear 2 rows: weapon damage +{0}%,unit/job/archmage,3,4,4,8,5,4,20,50,50,110,90,50,후방 영창,Rear Casting
 priest,사제,Priest,healing_staff,3,Heal,None,,Shield,EventTarget,2.73,회복시킨 대상에게 보호막 {0},Healed targets also gain {0} Shield,unit/job/bishop,3,4,5,6,7,5,20,50,50,90,110,50,축복,Blessing
+rogue,도적,Rogue,dagger,2,Always,None,,DodgePercent,Self,10,회피 확률 +{0}%,Dodge chance +{0}%,unit/job/rogue,4,8,4,3,4,5,90,110,50,20,50,50,그림자 걸음,Shadowstep
+occultist,흑마법사,Occultist,cursed_tome,3,BattleStart,None,,Shield,Self,2.73,전투 시작 때 자신에게 보호막 {0},Gains {0} Shield at the start of battle,unit/job/occultist,3,4,4,7,5,5,20,50,50,110,90,50,어둠의 장막,Dark Veil
+minstrel,악사,Minstrel,lute,4,BattleStart,None,,Shield,AllyAll,1.64,전투 시작 때 아군 전체에 보호막 {0},Allies gain {0} Shield at the start of battle,unit/job/minstrel,3,5,4,4,7,6,20,90,50,50,110,50,서곡,Overture

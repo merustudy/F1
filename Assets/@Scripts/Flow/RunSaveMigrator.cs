@@ -46,6 +46,49 @@ namespace F1.Flow
             {
                 From24To25(save, data);
             }
+
+            if (save.SchemaVersion == 25)
+            {
+                From25To26(save);
+            }
+        }
+
+        /// <summary>
+        /// Version 26 (Slice D stage 47, 직업군 확대 — Docs/Design/05 §1, Design/20): the ranger became the archer (the same job under its new id; the rogue,
+        /// the occultist and the minstrel are new and appear in no older file). Every roster mercenary's, candidate's and member's job id "ranger" becomes
+        /// "archer". The DTO's shape is the same; nothing else changes.
+        /// </summary>
+        static void From25To26(RunSaveData save)
+        {
+            const string Ranger = "ranger", Archer = "archer";
+            if (save.Run != null)
+            {
+                foreach (MercenaryRecord mercenary in save.Run.Roster ?? new List<MercenaryRecord>())
+                {
+                    if (mercenary != null && mercenary.JobId == Ranger)
+                    {
+                        mercenary.JobId = Archer;
+                    }
+                }
+
+                foreach (RecruitRecord recruit in save.Run.Recruits ?? new List<RecruitRecord>())
+                {
+                    if (recruit != null && recruit.JobId == Ranger)
+                    {
+                        recruit.JobId = Archer;
+                    }
+                }
+            }
+
+            foreach (MemberRecord member in save.Expedition?.Members ?? new List<MemberRecord>())
+            {
+                if (member != null && member.JobId == Ranger)
+                {
+                    member.JobId = Archer;
+                }
+            }
+
+            save.SchemaVersion = 26;
         }
 
         /// <summary>

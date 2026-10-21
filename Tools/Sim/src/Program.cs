@@ -203,7 +203,7 @@ namespace F1.Sim
             return 0;
         }
 
-        const string DefaultParty = "warrior,ranger,priest,mage";
+        const string DefaultParty = "warrior,archer,priest,mage";
 
         /// <summary>Loads static data exactly as the game does: generated JSON through StaticDataLoader.</summary>
         internal static StaticData LoadGenerated(StaticDataFileStore store)

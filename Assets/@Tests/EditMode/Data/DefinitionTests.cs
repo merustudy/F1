@@ -20,6 +20,8 @@ namespace F1.Tests
         [TestCase(PassiveTrigger.Heal, PassiveCondition.None, PassiveEffect.Shield, PassiveTarget.EventTarget)]
         [TestCase(PassiveTrigger.Always, PassiveCondition.SelfInDog, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self)]
         [TestCase(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.Self)]
+        [TestCase(PassiveTrigger.Always, PassiveCondition.None, PassiveEffect.CritChancePercent, PassiveTarget.Self)]
+        [TestCase(PassiveTrigger.Always, PassiveCondition.None, PassiveEffect.DodgePercent, PassiveTarget.Self)]
         public void PassiveSpec_AcceptsImplementedCombinations(PassiveTrigger trigger, PassiveCondition condition, PassiveEffect effect, PassiveTarget target)
         {
             Assert.DoesNotThrow(() => new PassiveSpec(trigger, condition, RowsFor(condition), effect, target, 5));
@@ -32,6 +34,9 @@ namespace F1.Tests
         [TestCase(PassiveTrigger.Heal, PassiveCondition.None, PassiveEffect.Burn, PassiveTarget.EventTarget)]
         [TestCase(PassiveTrigger.Always, PassiveCondition.None, PassiveEffect.Shield, PassiveTarget.Self)]
         [TestCase(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.WeaponPowerPercent, PassiveTarget.AllyAll)]
+        [TestCase(PassiveTrigger.Always, PassiveCondition.InRows, PassiveEffect.DodgePercent, PassiveTarget.Self)]
+        [TestCase(PassiveTrigger.BattleStart, PassiveCondition.None, PassiveEffect.DodgePercent, PassiveTarget.Self)]
+        [TestCase(PassiveTrigger.Always, PassiveCondition.None, PassiveEffect.DodgePercent, PassiveTarget.AllyAll)]
         public void PassiveSpec_RejectsCombinationsTheEngineDoesNotImplement(PassiveTrigger trigger, PassiveCondition condition, PassiveEffect effect, PassiveTarget target)
         {
             Assert.Throws<DataException>(() => new PassiveSpec(trigger, condition, RowsFor(condition), effect, target, 5));

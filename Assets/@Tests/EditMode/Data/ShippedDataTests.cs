@@ -71,20 +71,41 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheShippedJobs_AreTheFive_AndTheStartingRosterIsFive()
+        public void TheShippedJobs_AreTheEight_AndTheStartingRosterIsFive()
         {
             // Slice D stage 36 (Docs/Design/05_Mercenary_Growth.md §1, Design/15 판정): 전사·바이킹·방랑자·마법사·사제 on their base weapons;
-            // 세드릭 is gone and 카이 is a warrior (the user's decision); the ranger comes from the stagecoach.
+            // 세드릭 is gone and 카이 is a warrior (the user's decision). Stage 47 (Design/20 판정): two jobs an axis — the ranger is the archer, the rogue
+            // (dagger), the occultist (cursed tome) and the minstrel (lute) are new; they all come from the stagecoach.
             StaticData data = LoadShipped();
-            CollectionAssert.AreEquivalent(new[] { "warrior", "viking", "ranger", "mage", "priest" }, data.Jobs.Ordered.Select(j => j.Id));
+            CollectionAssert.AreEquivalent(new[] { "warrior", "viking", "rogue", "archer", "mage", "occultist", "priest", "minstrel" }, data.Jobs.Ordered.Select(j => j.Id));
+            Assert.IsFalse(data.Jobs.Contains("ranger"));
+
+            // Rounds 93 and 94 (2026-10-22, the user's "연결 및 구현"): the four have their own figures, and the four poses follow from them (ArtSetup);
+            // the spellblade's picture, their stand-in until then, is named by no job any more (its files left Assets with it).
+            foreach (string job in new[] { "rogue", "archer", "occultist", "minstrel" })
+            {
+                Assert.AreEqual("unit/job/" + job, data.Jobs.Get(job).Figure, job);
+            }
+
+            Assert.IsFalse(data.Jobs.Ordered.Any(j => j.Figure == "unit/job/spellblade"), "The spellblade's picture was the stand-in until Round 93.");
             Assert.AreEqual("longsword", data.Jobs.Get("warrior").WeaponItemId);
             Assert.AreEqual("greataxe", data.Jobs.Get("viking").WeaponItemId);
-            Assert.AreEqual("longbow", data.Jobs.Get("ranger").WeaponItemId);
+            Assert.AreEqual("dagger", data.Jobs.Get("rogue").WeaponItemId);
+            Assert.AreEqual("longbow", data.Jobs.Get("archer").WeaponItemId);
             Assert.AreEqual("fire_staff", data.Jobs.Get("mage").WeaponItemId);
+            Assert.AreEqual("cursed_tome", data.Jobs.Get("occultist").WeaponItemId);
             Assert.AreEqual("healing_staff", data.Jobs.Get("priest").WeaponItemId);
-            Assert.AreEqual(PassiveEffect.CritChancePercent, data.Jobs.Get("ranger").Passive.Effect);
-            Assert.AreEqual(10, data.Jobs.Get("ranger").Passive.Magnitude);
+            Assert.AreEqual("lute", data.Jobs.Get("minstrel").WeaponItemId);
+            Assert.AreEqual(8, data.Jobs.Ordered.Select(j => j.WeaponItemId).Distinct().Count(), "Every job's base weapon is its own (the user's decision).");
+            Assert.AreEqual(PassiveEffect.CritChancePercent, data.Jobs.Get("archer").Passive.Effect);
+            Assert.AreEqual(10, data.Jobs.Get("archer").Passive.Magnitude);
+            Assert.AreEqual((PassiveTrigger.Always, PassiveEffect.DodgePercent, 10), (data.Jobs.Get("rogue").Passive.Trigger, data.Jobs.Get("rogue").Passive.Effect, data.Jobs.Get("rogue").Passive.Magnitude));
+            Assert.AreEqual((PassiveTrigger.BattleStart, PassiveEffect.Shield, PassiveTarget.Self, 273), (data.Jobs.Get("occultist").Passive.Trigger, data.Jobs.Get("occultist").Passive.Effect, data.Jobs.Get("occultist").Passive.Target, data.Jobs.Get("occultist").Passive.Magnitude));
+            Assert.AreEqual((PassiveTrigger.BattleStart, PassiveEffect.Shield, PassiveTarget.AllyAll, 164), (data.Jobs.Get("minstrel").Passive.Trigger, data.Jobs.Get("minstrel").Passive.Effect, data.Jobs.Get("minstrel").Passive.Target, data.Jobs.Get("minstrel").Passive.Magnitude));
             Assert.AreEqual(3, data.Items.Get("longbow").ShopWeight, "A base weapon's shop weight.");
+            Assert.AreEqual((3, 0), (data.Items.Get("dagger").ShopWeight, data.Items.Get("dagger").DropWeight), "Stage 47: the dagger is the rogue's base weapon — shops only, like the longbow.");
+            Assert.AreEqual((EffectKind.Charge, TargetMode.AllyAll, 1000, 1000), (data.Items.Get("lute").Effects[0].Kind, data.Items.Get("lute").Effects[0].Target, data.Items.Get("lute").Effects[0].Min, data.Items.Get("lute").Effects[0].Max), "The lute pulls the party's cooldowns.");
+            Assert.AreEqual(EffectKind.Vulnerable, data.Items.Get("cursed_tome").Effects[1].Kind, "The tome curses.");
 
             Dictionary<string, string> roster = data.StartingMercenaries.ToDictionary(m => m.Id, m => m.JobId);
             CollectionAssert.AreEquivalent(new[] { "rowan", "astrid", "ella", "mira", "kai" }, roster.Keys);
@@ -274,8 +295,9 @@ namespace F1.Tests
             ItemData axe = data.Items.Get("greataxe");
             Assert.AreEqual("전투도끼", axe.Name.Resolve("ko-KR"));
             Assert.AreEqual((3, 2), (axe.Width, axe.Height), "The viking's battle axe is a base weapon of 3x2.");
-            Assert.AreEqual((2, 2), (data.Items.Get("longbow").Width, data.Items.Get("longbow").Height), "The ranger's longbow (Slice D stage 36) keeps its 2x2.");
-            foreach (JobData job in data.Jobs.Ordered.Where(j => j.WeaponItemId != "greataxe" && j.WeaponItemId != "longbow"))
+            Assert.AreEqual((2, 2), (data.Items.Get("longbow").Width, data.Items.Get("longbow").Height), "The archer's longbow (Slice D stage 36) keeps its 2x2.");
+            Assert.AreEqual((2, 1), (data.Items.Get("dagger").Width, data.Items.Get("dagger").Height), "The rogue's dagger (stage 47) keeps its 2x1: the third exception to 3x1.");
+            foreach (JobData job in data.Jobs.Ordered.Where(j => j.WeaponItemId != "greataxe" && j.WeaponItemId != "longbow" && j.WeaponItemId != "dagger"))
             {
                 ItemData weapon = data.Items.Get(job.WeaponItemId);
                 Assert.AreEqual((3, 1), (weapon.Width, weapon.Height), job.Id);
@@ -345,7 +367,7 @@ namespace F1.Tests
             // Stage 46 (Docs/Design/19, 02 §4 "아이템 목록", 03 §4·§5, 02 §10): 56 items, every one of the thirteen words on at least one item, armour
             // asking for each of the four axes, the two enemy-only items, the four deep bundles swapped, four potions and five bags.
             StaticData data = LoadShipped();
-            Assert.AreEqual(56, data.Items.Ordered.Count);
+            Assert.AreEqual(58, data.Items.Ordered.Count, "56 of stage 46 and the two base weapons of stage 47 (the occultist's tome, the minstrel's lute).");
             foreach (EffectKind word in new[]
             {
                 EffectKind.Bleed, EffectKind.Regen, EffectKind.Thorns, EffectKind.Cleanse, EffectKind.Stagger, EffectKind.Charge,
@@ -377,6 +399,7 @@ namespace F1.Tests
             Assert.AreEqual((3, 2, 24), (data.Bags.Get("big_pack").Width, data.Bags.Get("big_pack").Height, data.Bags.Get("big_pack").Price), "Four coins a square, like the others.");
 
             // Round 92: every shipped item, potion and bag has its picture (item/<kebab-id>, potion/<kebab-id>, bag/<kebab-id>), the uniques a glow too.
+            // Round 93 (2026-10-22, the user's "연결 및 구현"): the occultist's tome and the minstrel's lute have theirs as well.
             foreach (ItemData item in data.Items.Ordered)
             {
                 Assert.AreEqual("item/" + item.Id.Replace('_', '-'), item.Icon, item.Id);
@@ -563,7 +586,9 @@ namespace F1.Tests
             // Round 84 판정 4: 선봉·광기·급소·후방 영창·축복.
             StaticData data = LoadShipped();
             var names = data.Jobs.Ordered.ToDictionary(job => job.Id, job => job.PassiveName?.Resolve("ko-KR"));
-            Assert.AreEqual(("선봉", "광기", "급소", "후방 영창", "축복"), (names["warrior"], names["viking"], names["ranger"], names["mage"], names["priest"]));
+            Assert.AreEqual(("선봉", "광기", "급소", "후방 영창", "축복"), (names["warrior"], names["viking"], names["archer"], names["mage"], names["priest"]));
+            // Stage 47 (Design/20): 그림자 걸음·어둠의 장막·서곡.
+            Assert.AreEqual(("그림자 걸음", "어둠의 장막", "서곡"), (names["rogue"], names["occultist"], names["minstrel"]));
             Assert.IsTrue(data.Jobs.Ordered.All(job => job.Passive != null && job.PassiveName.Resolve("en-US").Length > 0));
         }
 
@@ -583,11 +608,13 @@ namespace F1.Tests
                 Assert.AreEqual(0, weapon.DropWeight, job.Id + ": a base weapon comes from a shop or a camp, never a drop.");
             }
 
-            // Slice D stage 36: the longbow is the ranger's base weapon now — shops only, like the other base weapons.
-            foreach (string id in new[] { "dagger", "spear", "halberd", "buckler", "ward_charm", "herb_pouch", "ember_flask" })
+            // Slice D stage 36: the longbow is the ranger's base weapon now — shops only, like the other base weapons. Stage 47: the dagger is the rogue's.
+            foreach (string id in new[] { "spear", "halberd", "buckler", "ward_charm", "herb_pouch", "ember_flask", "serrated_dagger" })
             {
                 Assert.Greater(data.Items.Get(id).DropWeight, 0, id);
             }
+
+            Assert.AreEqual(0, data.Items.Get("dagger").DropWeight, "Stage 47: a base weapon.");
 
             Assert.AreEqual(0, data.Items.Get("whetstone").DropWeight, "Shops only (round 51).");
             Assert.AreEqual(0, data.Items.Get("gladius").DropWeight);

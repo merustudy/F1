@@ -403,7 +403,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(25, RunSaveData.CurrentSchemaVersion);
+            Assert.AreEqual(26, RunSaveData.CurrentSchemaVersion, "Stage 47 (version 26): the same shape, the jobs are the eight.");
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -562,7 +562,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, asking);
 
-            Assert.AreEqual(25, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion, "Lifted to 25 and on to the current version (26 renames only the ranger).");
             Assert.AreEqual(9, tank.Stats.Str, "Raised to what the blade asks.");
             Assert.AreEqual(7, healer.Stats.Str, "The staff asks nothing: untouched.");
             Assert.AreEqual(12, striker.Stats.Str, "Already above: untouched.");
@@ -572,6 +572,29 @@ namespace F1.Tests
             Assert.AreEqual(9, expedition.Members.First(m => m.JobId == "tank").Stats.Str, "A member going on takes the roster's stats.");
             Assert.IsTrue(run.Roster.Concat(run.Recruits.Select(r => new MercenaryState { JobId = r.JobId, Stats = r.Stats }))
                 .All(m => StatRules.MeetsRequirement(m.Stats, asking.Items.Get(asking.Jobs.Get(m.JobId).WeaponItemId))), "Everyone wields their base weapon.");
+        }
+
+        [Test]
+        public void Migrate_From25_RenamesTheRangerToTheArcher_WhereverAJobIdLives()
+        {
+            // Version 26 (Slice D stage 47, Design/20): the ranger is the archer under its new id — the roster, the candidates and the members going on.
+            RunSaveData save = ValidSave(out StaticData _, ExpeditionPhase.ChoosingNode);
+            save.SchemaVersion = 25;
+            MercenaryRecord ranger = save.Run.Roster[0];
+            MercenaryRecord other = save.Run.Roster[1];
+            string othersJob = other.JobId;
+            ranger.JobId = "ranger";
+            save.Run.Recruits[0].JobId = "ranger";
+            MemberRecord member = save.Expedition.Members[0];
+            member.JobId = "ranger";
+
+            RunSaveMigrator.Migrate(save, new StaticData(TestData.Parts()));
+
+            Assert.AreEqual(26, save.SchemaVersion);
+            Assert.AreEqual("archer", ranger.JobId);
+            Assert.AreEqual("archer", save.Run.Recruits[0].JobId);
+            Assert.AreEqual("archer", member.JobId);
+            Assert.AreEqual(othersJob, other.JobId, "Any other job is untouched.");
         }
 
         [Test]

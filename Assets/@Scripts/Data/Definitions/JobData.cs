@@ -49,8 +49,10 @@ namespace F1.Data
                     break;
                 case PassiveTrigger.Always:
                     // Slice D stage 36: the critical chance holds everywhere (no condition), so a card can count it without knowing the row.
+                    // Stage 47: the rogue's dodge the same — it is read where the hit is rolled, with no row to check.
                     valid = target == PassiveTarget.Self
-                        && (effect == PassiveEffect.WeaponPowerPercent || (effect == PassiveEffect.CritChancePercent && condition == PassiveCondition.None));
+                        && (effect == PassiveEffect.WeaponPowerPercent
+                            || ((effect == PassiveEffect.CritChancePercent || effect == PassiveEffect.DodgePercent) && condition == PassiveCondition.None));
                     break;
                 default:
                     valid = false;

@@ -689,10 +689,11 @@ namespace F1.Gameplay
             // The owner's aim and blind stacks (stage 45) move its accuracy by their points, in ten-thousandths like the rest.
             int accuracy = StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, owner.Setup.Traits)
                 + (owner.Aim * _balance.AimPercentPerStack - owner.Blind * _balance.BlindPercentPerStack) * 100;
+            // The target's traits (stage 37) and its passive (stage 47, the rogue) move its dodge by their points.
             int chance = StatRules.HitChance(
                 _balance,
                 accuracy,
-                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits));
+                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits, target.Setup.Passive));
             // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
             if (chance >= StatRules.Certain)
             {

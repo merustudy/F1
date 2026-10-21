@@ -4,7 +4,7 @@ greataxe,전투도끼,Battle Axe,Weapon,3,2,3600,front:1,Damage,EnemyFront,1,2.0
 mace,메이스,Mace,Weapon,3,1,3200,front:2,Damage,EnemyFront,1,0.82-2.47,Shield,Self,,0.98,3,item/mace,16,true,,,5,,0,Physical,,,,Str,5
 healing_staff,치유의 지팡이,Healing Staff,Weapon,3,1,4000,back:3,Heal,AllyLowestHp,,2.73,,,,,3,item/healing-staff,16,false,,,,,0,Magic,,,,Wis,5
 fire_staff,화염 지팡이,Fire Staff,Weapon,3,1,3500,back:3,Damage,EnemyAll,,1.34-2.68,,,,,3,item/fire-staff,16,false,,,5,,0,Magic,,,,Int,5
-dagger,단검,Dagger,Weapon,2,1,1500,front:2,Damage,EnemyFront,1,0.67-1.34,,,,,10,item/dagger,10,true,,,10,,10,Physical,,,,Dex,5
+dagger,단검,Dagger,Weapon,2,1,1500,front:2,Damage,EnemyFront,1,0.67-1.34,,,,,3,item/dagger,10,true,,,10,,0,Physical,,,,Dex,5
 longbow,장궁,Longbow,Weapon,2,2,3000,back:3,Damage,EnemyBack,2,1.01-1.68,,,,,3,item/longbow,16,false,,,5,,0,Physical,,,,Dex,5
 spear,창,Spear,Weapon,2,2,3200,front:2,Damage,EnemyFront,2,1.07-1.79,,,,,10,item/spear,16,true,,,5,,10,Physical,,,,Str,5
 halberd,미늘창,Halberd,Weapon,2,3,3600,front:1,Damage,EnemyFront,3,0.8-2.41,,,,,10,item/halberd,22,true,,,5,,8,Physical,,,50,Str,7
@@ -55,3 +55,5 @@ bloodgale,피바람,Bloodgale,Weapon,3,2,3600,front:1,Damage,EnemyFront,1,8.32-2
 windcutter,바람가르기,Windcutter,Weapon,2,2,3000,back:3,Damage,EnemyBack,2,4.04-6.72,Vulnerable,EnemyBack,2,3,0,item/windcutter,0,false,,,10,true,0,Physical,,,,Dex,5
 cinder,잿불,Cinder,Weapon,3,1,3500,back:3,Damage,EnemyAll,,5.36-10.72,Burn,EnemyAll,,3,0,item/cinder,0,false,,,5,true,0,Magic,,,,Int,5
 dawnlight,새벽빛,Dawnlight,Weapon,3,1,4000,back:3,Heal,AllyLowestHp,,10.92,Regen,AllyAll,,4,0,item/dawnlight,0,false,,,,true,0,Magic,,,,Wis,5
+cursed_tome,저주의 서,Cursed Tome,Weapon,3,1,4000,back:3,Damage,EnemyFront,1,1.0-2.0,Vulnerable,EnemyFront,1,2,3,item/cursed-tome,16,false,,,5,,0,Magic,,,,Int,5
+lute,낡은 류트,Old Lute,Weapon,3,1,6000,all,Charge,AllyAll,,1000,,,,,3,item/lute,16,false,,,,,0,Magic,,,,Wis,5

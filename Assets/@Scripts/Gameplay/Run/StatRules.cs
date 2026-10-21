@@ -128,11 +128,22 @@ namespace F1.Gameplay
 
         /// <summary>
         /// What the target takes off a hit on it, in ten-thousandths: a mercenary's dexterity above the baseline times DodgePerDexPoint with its traits'
-        /// points (stage 37), an enemy's Dodge.
+        /// points (stage 37) and its passive's points (stage 47, <see cref="DodgeBonusPercent"/>), an enemy's Dodge.
         /// </summary>
-        public static int Dodge(BalanceData balance, StatBlock targetStats, int enemyDodge, TraitBonus traits = null)
+        public static int Dodge(BalanceData balance, StatBlock targetStats, int enemyDodge, TraitBonus traits = null, PassiveSpec passive = null)
         {
-            return targetStats == null ? enemyDodge * 100 : (targetStats.Dex - balance.StatBaseline) * balance.DodgePerDexPoint + (traits?.DodgePercent ?? 0) * 100;
+            return targetStats == null
+                ? enemyDodge * 100
+                : (targetStats.Dex - balance.StatBaseline) * balance.DodgePerDexPoint + ((traits?.DodgePercent ?? 0) + DodgeBonusPercent(passive)) * 100;
+        }
+
+        /// <summary>
+        /// The percent points a passive adds to a mercenary's dodge (Slice D stage 47, the rogue's "회피 +10%"): its magnitude, 0 for any other passive.
+        /// The passive holds everywhere (JobData allows it no condition), and like the rest of the dodge it reaches only what can miss (physical attacks).
+        /// </summary>
+        public static int DodgeBonusPercent(PassiveSpec passive)
+        {
+            return passive != null && passive.Trigger == PassiveTrigger.Always && passive.Effect == PassiveEffect.DodgePercent ? passive.Magnitude : 0;
         }
 
         /// <summary>The hit chance in ten-thousandths: HitBasePercent with the accuracy and less the dodge, within HitMinPercent..HitMaxPercent.</summary>

@@ -654,6 +654,52 @@
       "ReqValue": 3
     },
     {
+      "Id": "cursed_tome",
+      "Name": {
+        "en-US": "Cursed Tome",
+        "ko-KR": "저주의 서"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 4000,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 100,
+          "Max": 200
+        },
+        {
+          "Kind": "Vulnerable",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 3,
+      "Icon": "item/cursed-tome",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 0,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
+    },
+    {
       "Id": "dagger",
       "Name": {
         "en-US": "Dagger",
@@ -676,7 +722,7 @@
           "Max": 134
         }
       ],
-      "ShopWeight": 10,
+      "ShopWeight": 3,
       "Icon": "item/dagger",
       "Price": 10,
       "Melee": true,
@@ -684,7 +730,7 @@
       "StarDamage": 0,
       "CritChancePercent": 10,
       "Unique": false,
-      "DropWeight": 10,
+      "DropWeight": 0,
       "School": "Physical",
       "Trigger": "Cooldown",
       "CritTakenPercent": 0,
@@ -1461,6 +1507,45 @@
       "CritTakenPercent": 0,
       "CritDamagePercent": 0,
       "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "lute",
+      "Name": {
+        "en-US": "Old Lute",
+        "ko-KR": "낡은 류트"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 6000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Charge",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 1000,
+          "Max": 1000
+        }
+      ],
+      "ShopWeight": 3,
+      "Icon": "item/lute",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 0,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Wis",
       "ReqValue": 5
     },
     {

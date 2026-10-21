@@ -255,7 +255,7 @@ namespace F1.Sim
     {
         /// <summary>
         /// Resolves "rowan" (mercenary id) or "warrior" (job id). A job takes the first starting mercenary of that job not already in the party,
-        /// or else (Slice D stage 36: the ranger comes only from the stagecoach) the first name of the recruit pool not in it, on that job.
+        /// or else (Slice D stage 36: the archer — the ranger then — and the stage 47 jobs come only from the stagecoach) the first name of the recruit pool not in it, on that job.
         /// With a row (":1", ":2", ...) on every member the rows are taken as written. Without them the party lines up by the recommended
         /// row of each job (ties keep the order given), one per row from the front.
         /// </summary>
@@ -911,12 +911,42 @@ namespace F1.Sim
             return data.Dungeons.Ordered.FirstOrDefault(d => !d.IsFinal && RunRules.IsUnlocked(state, d));
         }
 
-        /// <summary>Up to PartySize of the living, the least tired first, lined up front to back by each job's recommended row.</summary>
+        /// <summary>
+        /// Up to PartySize of the living, the least tired first, lined up front to back by each job's recommended row.
+        /// Slice D stage 47 (eight jobs, three of them for the front): a party without a healer or without anyone for the front does not get through the mine
+        /// (Design/20 §5), and a player keeps one of each — so does the policy: the least tired healer (a job whose base weapon heals) and the least tired
+        /// front-row job (recommended row 1 or 2) go first when the roster has them, the rest by fatigue as before.
+        /// </summary>
         static List<PartySlot> ChooseParty(StaticData data, RunState state)
         {
-            List<MercenaryState> chosen = state.Roster
-                .OrderBy(m => m.Fatigue).ThenBy(m => m.Id, StringComparer.Ordinal)
-                .Take(data.Balance.PartySize)
+            List<MercenaryState> byFatigue = state.Roster.OrderBy(m => m.Fatigue).ThenBy(m => m.Id, StringComparer.Ordinal).ToList();
+            var picked = new List<MercenaryState>();
+            MercenaryState healer = byFatigue.FirstOrDefault(m => Heals(data, m.JobId));
+            if (healer != null)
+            {
+                picked.Add(healer);
+            }
+
+            MercenaryState front = byFatigue.FirstOrDefault(m => !picked.Contains(m) && data.Jobs.Get(m.JobId).RecommendedRow <= 2);
+            if (front != null)
+            {
+                picked.Add(front);
+            }
+
+            foreach (MercenaryState member in byFatigue)
+            {
+                if (picked.Count >= data.Balance.PartySize)
+                {
+                    break;
+                }
+
+                if (!picked.Contains(member))
+                {
+                    picked.Add(member);
+                }
+            }
+
+            List<MercenaryState> chosen = picked
                 .OrderBy(m => data.Jobs.Get(m.JobId).RecommendedRow).ThenBy(m => m.Id, StringComparer.Ordinal)
                 .ToList();
             var party = new List<PartySlot>();
@@ -926,6 +956,12 @@ namespace F1.Sim
             }
 
             return party;
+        }
+
+        /// <summary>Whether a job's base weapon heals (the priest's staff): the party's healer for <see cref="ChooseParty"/>.</summary>
+        static bool Heals(StaticData data, string jobId)
+        {
+            return data.Items.Get(data.Jobs.Get(jobId).WeaponItemId).Effects.Any(e => e.Kind == EffectKind.Heal);
         }
 
         static int AverageFatigue(RunState state, List<PartySlot> party)

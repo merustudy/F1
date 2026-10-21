@@ -2,6 +2,48 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "archer",
+      "Name": {
+        "en-US": "Archer",
+        "ko-KR": "궁수"
+      },
+      "WeaponItemId": "longbow",
+      "RecommendedRow": 3,
+      "Passive": {
+        "Trigger": "Always",
+        "Condition": "None",
+        "Rows": null,
+        "Effect": "CritChancePercent",
+        "Target": "Self",
+        "Magnitude": 10
+      },
+      "PassiveText": {
+        "en-US": "Weapon critical chance +{0}%",
+        "ko-KR": "무기의 치명타 확률 +{0}%"
+      },
+      "Figure": "unit/job/archer",
+      "Stats": {
+        "Str": 5,
+        "Dex": 7,
+        "Con": 4,
+        "Int": 3,
+        "Wis": 4,
+        "End": 6
+      },
+      "Growth": {
+        "Str": 50,
+        "Dex": 110,
+        "Con": 50,
+        "Int": 20,
+        "Wis": 50,
+        "End": 90
+      },
+      "PassiveName": {
+        "en-US": "Weak Spot",
+        "ko-KR": "급소"
+      }
+    },
+    {
       "Id": "mage",
       "Name": {
         "en-US": "Mage",
@@ -47,6 +89,90 @@
       }
     },
     {
+      "Id": "minstrel",
+      "Name": {
+        "en-US": "Minstrel",
+        "ko-KR": "악사"
+      },
+      "WeaponItemId": "lute",
+      "RecommendedRow": 4,
+      "Passive": {
+        "Trigger": "BattleStart",
+        "Condition": "None",
+        "Rows": null,
+        "Effect": "Shield",
+        "Target": "AllyAll",
+        "Magnitude": 164
+      },
+      "PassiveText": {
+        "en-US": "Allies gain {0} Shield at the start of battle",
+        "ko-KR": "전투 시작 때 아군 전체에 보호막 {0}"
+      },
+      "Figure": "unit/job/minstrel",
+      "Stats": {
+        "Str": 3,
+        "Dex": 5,
+        "Con": 4,
+        "Int": 4,
+        "Wis": 7,
+        "End": 6
+      },
+      "Growth": {
+        "Str": 20,
+        "Dex": 90,
+        "Con": 50,
+        "Int": 50,
+        "Wis": 110,
+        "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Overture",
+        "ko-KR": "서곡"
+      }
+    },
+    {
+      "Id": "occultist",
+      "Name": {
+        "en-US": "Occultist",
+        "ko-KR": "흑마법사"
+      },
+      "WeaponItemId": "cursed_tome",
+      "RecommendedRow": 3,
+      "Passive": {
+        "Trigger": "BattleStart",
+        "Condition": "None",
+        "Rows": null,
+        "Effect": "Shield",
+        "Target": "Self",
+        "Magnitude": 273
+      },
+      "PassiveText": {
+        "en-US": "Gains {0} Shield at the start of battle",
+        "ko-KR": "전투 시작 때 자신에게 보호막 {0}"
+      },
+      "Figure": "unit/job/occultist",
+      "Stats": {
+        "Str": 3,
+        "Dex": 4,
+        "Con": 4,
+        "Int": 7,
+        "Wis": 5,
+        "End": 5
+      },
+      "Growth": {
+        "Str": 20,
+        "Dex": 50,
+        "Con": 50,
+        "Int": 110,
+        "Wis": 90,
+        "End": 50
+      },
+      "PassiveName": {
+        "en-US": "Dark Veil",
+        "ko-KR": "어둠의 장막"
+      }
+    },
+    {
       "Id": "priest",
       "Name": {
         "en-US": "Priest",
@@ -89,45 +215,45 @@
       }
     },
     {
-      "Id": "ranger",
+      "Id": "rogue",
       "Name": {
-        "en-US": "Ranger",
-        "ko-KR": "방랑자"
+        "en-US": "Rogue",
+        "ko-KR": "도적"
       },
-      "WeaponItemId": "longbow",
-      "RecommendedRow": 3,
+      "WeaponItemId": "dagger",
+      "RecommendedRow": 2,
       "Passive": {
         "Trigger": "Always",
         "Condition": "None",
         "Rows": null,
-        "Effect": "CritChancePercent",
+        "Effect": "DodgePercent",
         "Target": "Self",
         "Magnitude": 10
       },
       "PassiveText": {
-        "en-US": "Weapon critical chance +{0}%",
-        "ko-KR": "무기의 치명타 확률 +{0}%"
+        "en-US": "Dodge chance +{0}%",
+        "ko-KR": "회피 확률 +{0}%"
       },
-      "Figure": "unit/job/spellblade",
+      "Figure": "unit/job/rogue",
       "Stats": {
-        "Str": 5,
-        "Dex": 7,
+        "Str": 4,
+        "Dex": 8,
         "Con": 4,
         "Int": 3,
         "Wis": 4,
-        "End": 6
+        "End": 5
       },
       "Growth": {
-        "Str": 50,
+        "Str": 90,
         "Dex": 110,
         "Con": 50,
         "Int": 20,
         "Wis": 50,
-        "End": 90
+        "End": 50
       },
       "PassiveName": {
-        "en-US": "Weak Spot",
-        "ko-KR": "급소"
+        "en-US": "Shadowstep",
+        "ko-KR": "그림자 걸음"
       }
     },
     {

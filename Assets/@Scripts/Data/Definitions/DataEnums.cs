@@ -229,6 +229,8 @@ namespace F1.Data
         WeaponPowerPercent,
         /// <summary>Slice D stage 36 (the ranger): percent points added to the critical chance of the unit's weapon items that have one.</summary>
         CritChancePercent,
+        /// <summary>Slice D stage 47 (the rogue): percent points added to what the unit takes off a hit on it (StatRules.Dodge), physical attacks only like the rest of the dodge.</summary>
+        DodgePercent,
     }
 
     public enum PassiveTarget
