@@ -263,7 +263,12 @@ namespace F1.Tests
             Assert.IsFalse(data.Enemies.Ordered.Any(e => e.Items.Any(g => g.ItemId == "whetstone")), "No enemy carries it: shops only.");
 
             CollectionAssert.AreEquivalent(
-                new[] { "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul", "gladius", "abyss_cleaver" },
+                new[]
+                {
+                    "longsword", "greataxe", "mace", "dagger", "spear", "halberd", "rat_bite", "rusty_blade", "overseer_maul", "gladius", "abyss_cleaver",
+                    // Stage 46 (Docs/Design/02 §4 "아이템 목록"): the new hand weapons and the viking's unique.
+                    "serrated_dagger", "war_hammer", "pickaxe", "berserker_axe", "goblin_sawblade", "bloodgale",
+                },
                 data.Items.Ordered.Where(i => i.Melee).Select(i => i.Id));
 
             ItemData axe = data.Items.Get("greataxe");
@@ -301,8 +306,87 @@ namespace F1.Tests
 
             RecipeData recipe = data.Recipes.Get("gladius");
             Assert.AreEqual(("gladius", "longsword", ItemTier.Tier3, "whetstone", ItemTier.Tier3), (recipe.Result, recipe.BaseItem, recipe.BaseTier, recipe.Catalyst, recipe.CatalystTier));
-            Assert.AreEqual(1, data.Recipes.Count);
-            Assert.AreEqual(1, data.Items.Ordered.Count(i => i.Unique));
+            Assert.AreEqual(5, data.Recipes.Count, "Stage 46: one unique per job's base weapon.");
+            Assert.AreEqual(5, data.Items.Ordered.Count(i => i.Unique));
+        }
+
+        [Test]
+        public void TheStage46Uniques_AreForgedFromTheOtherBaseWeapons_AtTheirTier3Values_PlusOneWordOfTheVocabulary()
+        {
+            // Stage 46 (Docs/Design/02 §4 "아이템 목록", Design/19 판정 8): bloodgale, windcutter, cinder and dawnlight — the base's Tier3 values with a
+            // second effect, no stars (the gladius' star was the user's decision), the base's size, place, cooldown and requirement.
+            StaticData data = LoadShipped();
+            foreach ((string unique, string baseItem, EffectKind word) in new[]
+            {
+                ("bloodgale", "greataxe", EffectKind.Bleed), ("windcutter", "longbow", EffectKind.Vulnerable), ("cinder", "fire_staff", EffectKind.Burn), ("dawnlight", "healing_staff", EffectKind.Regen),
+            })
+            {
+                ItemData forged = data.Items.Get(unique);
+                ItemData from = data.Items.Get(baseItem);
+                Assert.IsTrue(forged.Unique, unique);
+                Assert.AreEqual((0, 0, 0), (forged.ShopWeight, forged.Price, forged.DropWeight), unique + ": forged only.");
+                Assert.IsEmpty(forged.Stars, unique + ": no star of its own.");
+                Assert.AreEqual((from.Width, from.Height, from.CooldownMs, from.ReqStat, from.ReqValue), (forged.Width, forged.Height, forged.CooldownMs, forged.ReqStat, forged.ReqValue), unique + ": the base's place.");
+                for (int row = BattleRows.Front; row <= BattleRows.Count; row++)
+                {
+                    Assert.AreEqual(from.UsableIn(row, BattleRows.Count), forged.UsableIn(row, BattleRows.Count), $"{unique}: usable where the {baseItem} is, row {row}.");
+                }
+                Assert.AreEqual(from.Effects[0].Kind, forged.Effects[0].Kind, unique);
+                Assert.AreEqual((from.Effects[0].Min * 4, from.Effects[0].Max * 4), (forged.Effects[0].Min, forged.Effects[0].Max), unique + ": the base at Tier3 (x4).");
+                Assert.AreEqual(word, forged.Effects[1].Kind, unique + ": one word of the vocabulary as its second effect.");
+                RecipeData recipe = data.Recipes.Get(unique);
+                Assert.AreEqual((unique, baseItem, ItemTier.Tier3, "whetstone", ItemTier.Tier3), (recipe.Result, recipe.BaseItem, recipe.BaseTier, recipe.Catalyst, recipe.CatalystTier));
+            }
+        }
+
+        [Test]
+        public void TheStage46Catalog_CarriesEveryWordOfTheVocabulary_OnTheShelves_AndArmourForEveryAxis()
+        {
+            // Stage 46 (Docs/Design/19, 02 §4 "아이템 목록", 03 §4·§5, 02 §10): 56 items, every one of the thirteen words on at least one item, armour
+            // asking for each of the four axes, the two enemy-only items, the four deep bundles swapped, four potions and five bags.
+            StaticData data = LoadShipped();
+            Assert.AreEqual(56, data.Items.Ordered.Count);
+            foreach (EffectKind word in new[]
+            {
+                EffectKind.Bleed, EffectKind.Regen, EffectKind.Thorns, EffectKind.Cleanse, EffectKind.Stagger, EffectKind.Charge,
+                EffectKind.Freeze, EffectKind.Blind, EffectKind.Aim, EffectKind.Keen, EffectKind.Fury, EffectKind.Haste, EffectKind.Vulnerable,
+            })
+            {
+                Assert.IsTrue(data.Items.Ordered.Any(i => !i.Unique && i.ShopWeight > 0 && i.Effects.Any(e => e.Kind == word)), word + ": on a shop's shelf.");
+            }
+
+            CollectionAssert.AreEquivalent(new[] { Stat.Str, Stat.Dex, Stat.Int, Stat.Wis },
+                data.Items.Ordered.Where(i => i.Category == ItemCategory.Armor && i.ShopWeight > 0).Select(i => i.ReqStat.Value).Distinct().ToList(), "Armour on every axis (08 §49's gap).");
+            Assert.AreEqual((1, 3), (data.Items.Get("banner").Width, data.Items.Get("banner").Height), "The banner is the first 1x3 shape.");
+            Assert.IsTrue(data.Items.Get("spiked_shield").Cycles && data.Items.Get("studded_armor").Trigger == ItemTrigger.BattleStart, "Thorns that stack by the cooldown, and once at the start.");
+            foreach (string id in new[] { "goblin_sawblade", "bristle_hide" })
+            {
+                Assert.AreEqual((0, 0), (data.Items.Get(id).ShopWeight, data.Items.Get(id).DropWeight), id + ": the enemy's own, loot only.");
+                Assert.Greater(data.Items.Get(id).Price, 0, id + ": sells for a little.");
+            }
+
+            CollectionAssert.AreEqual(new[] { "rat_bite", "bristle_hide" }, data.Enemies.Get("cave_rat").ItemsAt(11).Select(g => g.ItemId), "The bristly rat.");
+            CollectionAssert.AreEqual(new[] { "crude_bow", "crude_bow", "ash_pouch" }, data.Enemies.Get("goblin_archer").ItemsAt(21).Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "hex_bone" }, data.Enemies.Get("goblin_hexer").ItemsAt(21).Select(g => g.ItemId));
+
+            CollectionAssert.AreEquivalent(new[] { "healing_potion", "barrier_potion", "cleansing_potion", "regen_potion" }, data.Potions.Ordered.Select(p => p.Id).ToList());
+            Assert.AreEqual((PotionEffect.Cleanse, 3), (data.Potions.Get("cleansing_potion").Effect, data.Potions.Get("cleansing_potion").Magnitude));
+            Assert.AreEqual((PotionEffect.Regen, 8), (data.Potions.Get("regen_potion").Effect, data.Potions.Get("regen_potion").Magnitude), "Stacks: not hundredths.");
+            Assert.AreEqual(5, data.Bags.Ordered.Count);
+            Assert.AreEqual((2, 2, 16), (data.Bags.Get("knapsack").Width, data.Bags.Get("knapsack").Height, data.Bags.Get("knapsack").Price));
+            Assert.AreEqual((3, 2, 24), (data.Bags.Get("big_pack").Width, data.Bags.Get("big_pack").Height, data.Bags.Get("big_pack").Price), "Four coins a square, like the others.");
+
+            // Round 92: every shipped item, potion and bag has its picture (item/<kebab-id>, potion/<kebab-id>, bag/<kebab-id>), the uniques a glow too.
+            foreach (ItemData item in data.Items.Ordered)
+            {
+                Assert.AreEqual("item/" + item.Id.Replace('_', '-'), item.Icon, item.Id);
+                Assert.AreEqual(item.Unique ? item.Icon + "-glow" : null, item.GlowIcon, item.Id);
+            }
+
+            foreach (PotionData potion in data.Potions.Ordered)
+            {
+                Assert.AreEqual("potion/" + potion.Id.Replace('_', '-'), potion.Icon, potion.Id);
+            }
         }
 
         [Test]
@@ -348,7 +432,8 @@ namespace F1.Tests
                 }
             }
 
-            CollectionAssert.AreEqual(new[] { "rusty_blade", "rusty_blade", "ember_flask" }, data.Enemies.Get("goblin_raider").ItemsAt(21).Select(g => g.ItemId));
+            // Stage 46: the raider's second bundle is the saw-blade (the ember flask before).
+            CollectionAssert.AreEqual(new[] { "rusty_blade", "rusty_blade", "goblin_sawblade" }, data.Enemies.Get("goblin_raider").ItemsAt(21).Select(g => g.ItemId));
             CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "ward_charm", "lantern_staff" }, data.Enemies.Get("goblin_shaman").ItemsAt(21).Select(g => g.ItemId));
             Assert.AreEqual(1, data.Enemies.Get("goblin_raider").ItemsAt(10).Count, "The tenth floor is the base alone.");
         }
@@ -406,7 +491,7 @@ namespace F1.Tests
         [Test]
         public void ShippedBags_EachHaveAPicture_AtTheirSquares()
         {
-            // Round 79: every bag has its picture (bag/<kebab-id>), shown where the bag is a thing.
+            // Round 79: every bag has its picture (bag/<kebab-id>), shown where the bag is a thing (stage 46's two since round 92).
             StaticData data = LoadShipped();
             foreach (BagData bag in data.Bags.Ordered)
             {

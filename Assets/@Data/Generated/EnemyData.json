@@ -94,7 +94,7 @@
           "Floor": 11,
           "Items": [
             {
-              "ItemId": "rat_bite",
+              "ItemId": "bristle_hide",
               "PowerPercent": 100
             }
           ]
@@ -134,7 +134,7 @@
           "Floor": 21,
           "Items": [
             {
-              "ItemId": "ember_flask",
+              "ItemId": "ash_pouch",
               "PowerPercent": 100
             }
           ]
@@ -169,7 +169,7 @@
           "Floor": 21,
           "Items": [
             {
-              "ItemId": "ward_charm",
+              "ItemId": "hex_bone",
               "PowerPercent": 100
             }
           ]
@@ -209,7 +209,7 @@
           "Floor": 21,
           "Items": [
             {
-              "ItemId": "ember_flask",
+              "ItemId": "goblin_sawblade",
               "PowerPercent": 100
             }
           ]

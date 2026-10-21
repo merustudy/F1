@@ -1,3 +1,5 @@
 Id,Name.ko-KR,Name.en-US,Effect,Magnitude,ShopWeight,Icon,Price
 healing_potion,치유 포션,Healing Potion,Heal,14,6,potion/healing-potion,8
 barrier_potion,방벽 포션,Barrier Potion,Shield,11,4,potion/barrier-potion,8
+cleansing_potion,정화 포션,Cleansing Potion,Cleanse,3,4,potion/cleansing-potion,6
+regen_potion,재생 포션,Regeneration Potion,Regen,8,4,potion/regen-potion,8

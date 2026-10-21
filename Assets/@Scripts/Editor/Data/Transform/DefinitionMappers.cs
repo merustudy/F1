@@ -269,13 +269,13 @@ namespace F1.Editor.Data
             table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "ShopWeight", RowMapping.Icon, "Price"));
             return RowMapping.MapRows(table, errors, row =>
             {
-                // A heal or a shield is in hundredths ("14"); a cleanse (stage 44) counts stacks, a whole number.
+                // A heal or a shield is in hundredths ("14"); a cleanse (stage 44) and a regen (stage 46) count stacks, a whole number.
                 PotionEffect effect = row.Enum<PotionEffect>("Effect");
                 return new PotionData(
                     row.Id(RowMapping.Id),
                     row.Localized(RowMapping.Name),
                     effect,
-                    effect == PotionEffect.Cleanse ? row.Int("Magnitude") : row.Centi("Magnitude"),
+                    effect == PotionEffect.Cleanse || effect == PotionEffect.Regen ? row.Int("Magnitude") : row.Centi("Magnitude"),
                     row.Int("ShopWeight"),
                     RowMapping.ReadArt(row, RowMapping.Icon),
                     row.Int("Price"));

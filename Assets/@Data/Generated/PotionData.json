@@ -14,6 +14,18 @@
       "Price": 8
     },
     {
+      "Id": "cleansing_potion",
+      "Name": {
+        "en-US": "Cleansing Potion",
+        "ko-KR": "정화 포션"
+      },
+      "Effect": "Cleanse",
+      "Magnitude": 3,
+      "ShopWeight": 4,
+      "Icon": "potion/cleansing-potion",
+      "Price": 6
+    },
+    {
       "Id": "healing_potion",
       "Name": {
         "en-US": "Healing Potion",
@@ -23,6 +35,18 @@
       "Magnitude": 1400,
       "ShopWeight": 6,
       "Icon": "potion/healing-potion",
+      "Price": 8
+    },
+    {
+      "Id": "regen_potion",
+      "Name": {
+        "en-US": "Regeneration Potion",
+        "ko-KR": "재생 포션"
+      },
+      "Effect": "Regen",
+      "Magnitude": 8,
+      "ShopWeight": 4,
+      "Icon": "potion/regen-potion",
       "Price": 8
     }
   ]

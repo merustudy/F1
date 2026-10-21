@@ -119,6 +119,261 @@
       "ReqValue": 7
     },
     {
+      "Id": "ash_pouch",
+      "Name": {
+        "en-US": "Ash Pouch",
+        "ko-KR": "재 주머니"
+      },
+      "Category": "Attack",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Blind",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/ash-pouch",
+      "Price": 10,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "banner",
+      "Name": {
+        "en-US": "Banner",
+        "ko-KR": "깃발"
+      },
+      "Category": "Support",
+      "Width": 1,
+      "Height": 3,
+      "CooldownMs": 6000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Aim",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/banner",
+      "Price": 14,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "berserker_axe",
+      "Name": {
+        "en-US": "Berserker Axe",
+        "ko-KR": "광전사의 도끼"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 3600,
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 121,
+          "Max": 362
+        },
+        {
+          "Kind": "Fury",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 5,
+          "Max": 5
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/berserker-axe",
+      "Price": 20,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 50,
+      "ReqStat": "Str",
+      "ReqValue": 7
+    },
+    {
+      "Id": "bloodgale",
+      "Name": {
+        "en-US": "Bloodgale",
+        "ko-KR": "피바람"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 2,
+      "CooldownMs": 3600,
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 832,
+          "Max": 2500
+        },
+        {
+          "Kind": "Bleed",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 4,
+          "Max": 4
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/bloodgale",
+      "Price": 0,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 10,
+      "Unique": true,
+      "DropWeight": 0,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 50,
+      "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "bloodlust_charm",
+      "Name": {
+        "en-US": "Bloodlust Charm",
+        "ko-KR": "살기의 부적"
+      },
+      "Category": "Support",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Keen",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 3,
+          "Max": 3
+        },
+        {
+          "Kind": "Fury",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/bloodlust-charm",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "bristle_hide",
+      "Name": {
+        "en-US": "Bristle Hide",
+        "ko-KR": "가시 털가죽"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Thorns",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 60,
+          "Max": 60
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/bristle-hide",
+      "Price": 6,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 0,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 3
+    },
+    {
       "Id": "buckler",
       "Name": {
         "en-US": "Buckler",
@@ -155,6 +410,208 @@
       "CritTakenPercent": 0,
       "CritDamagePercent": 0,
       "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "censer",
+      "Name": {
+        "en-US": "Censer",
+        "ko-KR": "향로"
+      },
+      "Category": "Support",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 6000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Regen",
+          "Target": "AllyLowestHp",
+          "Reach": 0,
+          "Min": 4,
+          "Max": 4
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/censer",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "chant_staff",
+      "Name": {
+        "en-US": "Chant Staff",
+        "ko-KR": "성가의 지팡이"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 4500,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Regen",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/chant-staff",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Wis",
+      "ReqValue": 6
+    },
+    {
+      "Id": "cinder",
+      "Name": {
+        "en-US": "Cinder",
+        "ko-KR": "잿불"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 3500,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyAll",
+          "Reach": 0,
+          "Min": 536,
+          "Max": 1072
+        },
+        {
+          "Kind": "Burn",
+          "Target": "EnemyAll",
+          "Reach": 0,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/cinder",
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": true,
+      "DropWeight": 0,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
+    },
+    {
+      "Id": "cloth_hood",
+      "Name": {
+        "en-US": "Cloth Hood",
+        "ko-KR": "천 두건"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 164,
+          "Max": 164
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/cloth-hood",
+      "Price": 10,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 3,
+      "CritDamagePercent": 0,
+      "ReqStat": "Wis",
+      "ReqValue": 3
+    },
+    {
+      "Id": "crossbow",
+      "Name": {
+        "en-US": "Crossbow",
+        "ko-KR": "석궁"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 4000,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyBack",
+          "Reach": 1,
+          "Min": 268,
+          "Max": 447
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/crossbow",
+      "Price": 18,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
       "ReqValue": 5
     },
     {
@@ -236,6 +693,52 @@
       "ReqValue": 5
     },
     {
+      "Id": "dawnlight",
+      "Name": {
+        "en-US": "Dawnlight",
+        "ko-KR": "새벽빛"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 4000,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Heal",
+          "Target": "AllyLowestHp",
+          "Reach": 0,
+          "Min": 1092,
+          "Max": 1092
+        },
+        {
+          "Kind": "Regen",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 4,
+          "Max": 4
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/dawnlight",
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": true,
+      "DropWeight": 0,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Wis",
+      "ReqValue": 5
+    },
+    {
       "Id": "ember_flask",
       "Name": {
         "en-US": "Ember Flask",
@@ -314,6 +817,91 @@
       "ReqValue": 5
     },
     {
+      "Id": "frost_flask",
+      "Name": {
+        "en-US": "Frost Flask",
+        "ko-KR": "얼음 플라스크"
+      },
+      "Category": "Attack",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 4500,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Stagger",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "Min": 1200,
+          "Max": 1200
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/frost-flask",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "frost_staff",
+      "Name": {
+        "en-US": "Frost Staff",
+        "ko-KR": "서리 지팡이"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 3500,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 118,
+          "Max": 234
+        },
+        {
+          "Kind": "Freeze",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/frost-staff",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
+    },
+    {
       "Id": "gladius",
       "Name": {
         "en-US": "Gladius",
@@ -360,6 +948,52 @@
       "CritDamagePercent": 50,
       "ReqStat": "Str",
       "ReqValue": 5
+    },
+    {
+      "Id": "goblin_sawblade",
+      "Name": {
+        "en-US": "Goblin Saw-Blade",
+        "ko-KR": "고블린 톱니 칼"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 3000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 63,
+          "Max": 125
+        },
+        {
+          "Kind": "Bleed",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/goblin-sawblade",
+      "Price": 6,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 0,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 3
     },
     {
       "Id": "greataxe",
@@ -518,6 +1152,84 @@
       "ReqValue": 0
     },
     {
+      "Id": "hex_bone",
+      "Name": {
+        "en-US": "Hex Bone",
+        "ko-KR": "저주의 뼈"
+      },
+      "Category": "Attack",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Vulnerable",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/hex-bone",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "holy_water",
+      "Name": {
+        "en-US": "Holy Water",
+        "ko-KR": "성수"
+      },
+      "Category": "Support",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Cleanse",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/holy-water",
+      "Price": 10,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
       "Id": "iron_armor",
       "Name": {
         "en-US": "Iron Armor",
@@ -632,6 +1344,45 @@
       "CritTakenPercent": 0,
       "CritDamagePercent": 0,
       "ReqStat": "Int",
+      "ReqValue": 5
+    },
+    {
+      "Id": "leather_armor",
+      "Name": {
+        "en-US": "Leather Armor",
+        "ko-KR": "가죽 갑옷"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 436,
+          "Max": 436
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/leather-armor",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
       "ReqValue": 5
     },
     {
@@ -876,6 +1627,52 @@
       "ReqValue": 7
     },
     {
+      "Id": "pickaxe",
+      "Name": {
+        "en-US": "Pickaxe",
+        "ko-KR": "곡괭이"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 2600,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 44,
+          "Max": 131
+        },
+        {
+          "Kind": "Vulnerable",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/pickaxe",
+      "Price": 12,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
       "Id": "rat_bite",
       "Name": {
         "en-US": "Rat Claw",
@@ -913,6 +1710,45 @@
       "CritDamagePercent": 0,
       "ReqStat": "Str",
       "ReqValue": 3
+    },
+    {
+      "Id": "robe",
+      "Name": {
+        "en-US": "Robe",
+        "ko-KR": "로브"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 273,
+          "Max": 273
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/robe",
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 5
     },
     {
       "Id": "rusty_blade",
@@ -954,6 +1790,98 @@
       "ReqValue": 3
     },
     {
+      "Id": "serrated_dagger",
+      "Name": {
+        "en-US": "Serrated Dagger",
+        "ko-KR": "톱니 단검"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 1600,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 54,
+          "Max": 107
+        },
+        {
+          "Kind": "Bleed",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/serrated-dagger",
+      "Price": 10,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 10,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
+      "ReqValue": 5
+    },
+    {
+      "Id": "shadow_staff",
+      "Name": {
+        "en-US": "Shadow Staff",
+        "ko-KR": "그늘 지팡이"
+      },
+      "Category": "Weapon",
+      "Width": 3,
+      "Height": 1,
+      "CooldownMs": 3800,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "Min": 64,
+          "Max": 127
+        },
+        {
+          "Kind": "Blind",
+          "Target": "EnemyFront",
+          "Reach": 2,
+          "Min": 2,
+          "Max": 2
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/shadow-staff",
+      "Price": 16,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": "Magic",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Int",
+      "ReqValue": 6
+    },
+    {
       "Id": "spear",
       "Name": {
         "en-US": "Spear",
@@ -991,6 +1919,261 @@
       "CritDamagePercent": 0,
       "ReqStat": "Str",
       "ReqValue": 5
+    },
+    {
+      "Id": "spiked_shield",
+      "Name": {
+        "en-US": "Spiked Shield",
+        "ko-KR": "가시 방패"
+      },
+      "Category": "Armor",
+      "Width": 1,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 1
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 120,
+          "Max": 120
+        },
+        {
+          "Kind": "Thorns",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 40,
+          "Max": 40
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/spiked-shield",
+      "Price": 14,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "studded_armor",
+      "Name": {
+        "en-US": "Studded Armor",
+        "ko-KR": "징 박은 갑옷"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Shield",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 327,
+          "Max": 327
+        },
+        {
+          "Kind": "Thorns",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 80,
+          "Max": 80
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/studded-armor",
+      "Price": 20,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "throwing_knives",
+      "Name": {
+        "en-US": "Throwing Knives",
+        "ko-KR": "투척 단검"
+      },
+      "Category": "Attack",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 5000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Bleed",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/throwing-knives",
+      "Price": 10,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "war_drum",
+      "Name": {
+        "en-US": "War Drum",
+        "ko-KR": "전투 북"
+      },
+      "Category": "Support",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 8000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Charge",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 1000,
+          "Max": 1000
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/war-drum",
+      "Price": 18,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
+    },
+    {
+      "Id": "war_hammer",
+      "Name": {
+        "en-US": "War Hammer",
+        "ko-KR": "전쟁망치"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 3400,
+      "Rows": {
+        "From": "Front",
+        "Reach": 2
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 114,
+          "Max": 342
+        },
+        {
+          "Kind": "Stagger",
+          "Target": "EnemyFront",
+          "Reach": 1,
+          "Min": 800,
+          "Max": 800
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": "item/war-hammer",
+      "Price": 18,
+      "Melee": true,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 5,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Str",
+      "ReqValue": 6
+    },
+    {
+      "Id": "war_horn",
+      "Name": {
+        "en-US": "War Horn",
+        "ko-KR": "나팔"
+      },
+      "Category": "Support",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 7000,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "Haste",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 6,
+      "Icon": "item/war-horn",
+      "Price": 14,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 6,
+      "School": null,
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": null,
+      "ReqValue": 0
     },
     {
       "Id": "ward_charm",
@@ -1070,6 +2253,52 @@
       "CritDamagePercent": 0,
       "ReqStat": null,
       "ReqValue": 0
+    },
+    {
+      "Id": "windcutter",
+      "Name": {
+        "en-US": "Windcutter",
+        "ko-KR": "바람가르기"
+      },
+      "Category": "Weapon",
+      "Width": 2,
+      "Height": 2,
+      "CooldownMs": 3000,
+      "Rows": {
+        "From": "Back",
+        "Reach": 3
+      },
+      "Effects": [
+        {
+          "Kind": "Damage",
+          "Target": "EnemyBack",
+          "Reach": 2,
+          "Min": 404,
+          "Max": 672
+        },
+        {
+          "Kind": "Vulnerable",
+          "Target": "EnemyBack",
+          "Reach": 2,
+          "Min": 3,
+          "Max": 3
+        }
+      ],
+      "ShopWeight": 0,
+      "Icon": "item/windcutter",
+      "Price": 0,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 10,
+      "Unique": true,
+      "DropWeight": 0,
+      "School": "Physical",
+      "Trigger": "Cooldown",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Dex",
+      "ReqValue": 5
     }
   ]
 }

@@ -16,6 +16,34 @@
       "Icon": "bag/belt-pouch"
     },
     {
+      "Id": "big_pack",
+      "Name": {
+        "en-US": "Big Pack",
+        "ko-KR": "큰 배낭"
+      },
+      "Width": 3,
+      "Height": 2,
+      "Start": false,
+      "Price": 24,
+      "ShopWeight": 2,
+      "LootWeight": 1,
+      "Icon": "bag/big-pack"
+    },
+    {
+      "Id": "knapsack",
+      "Name": {
+        "en-US": "Knapsack",
+        "ko-KR": "등짐"
+      },
+      "Width": 2,
+      "Height": 2,
+      "Start": false,
+      "Price": 16,
+      "ShopWeight": 4,
+      "LootWeight": 2,
+      "Icon": "bag/knapsack"
+    },
+    {
       "Id": "leather_pack",
       "Name": {
         "en-US": "Leather Pack",

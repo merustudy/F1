@@ -1771,28 +1771,42 @@ namespace F1.Tests
             Assert.AreEqual(data.Balance.ShopSlots, goodsCount, "Eight goods (stage 21: Diablo II's merchant).");
             Assert.GreaterOrEqual(stock.Count - goodsCount, 1, "At least one potion at every shop (round 56).");
             CollectionAssert.AreEquivalent(Enumerable.Range(0, stock.Count), map.Merchant.ShownSlots, "Every good on the merchant's one grid: items, bags and potions together.");
-            Assert.AreEqual(MerchantGridView.Height, map.Merchant.Rows, "Ten across and eight down (round 56).");
-            for (int i = 0; i < stock.Count; i++)
+            // Ten across and eight down (round 56); rows are added when the goods need them (MerchantLayout): stage 46's catalog has more
+            // 2x2 and tall pieces and five bags, so the run seed's shop may take a ninth row — the items end above an empty row, the bags
+            // start at the bags' row (moved down when the items overflow their rows) and may take a second row.
+            Assert.GreaterOrEqual(map.Merchant.Rows, MerchantGridView.Height, "Ten across and at least eight down (round 56).");
+            int itemsEnd = 0;
+            int bagStart = int.MaxValue;
+            for (int i = 0; i < goodsCount; i++)
             {
                 Placement at = map.Merchant.PlacementOf(i).Value;
-                if (i >= goodsCount)
-                {
-                    Assert.AreEqual(new Placement(MerchantGridView.PotionColumn, i - goodsCount), at, "The potions down the last column, from the top.");
-                    continue;
-                }
-
                 bool bag = stock[i].Kind == OfferKind.Bag;
                 int width = bag ? data.Bags.Get(stock[i].Id).Width : data.Items.Get(stock[i].Id).Width;
                 int height = bag ? data.Bags.Get(stock[i].Id).Height : data.Items.Get(stock[i].Id).Height;
                 Assert.LessOrEqual(at.X + width, MerchantGridView.GoodsColumns, "The goods keep to the first eight columns; the ninth stays empty.");
                 if (bag)
                 {
-                    Assert.AreEqual(MerchantGridView.BagRow, at.Y, "The bags along the last row (round 58).");
+                    bagStart = System.Math.Min(bagStart, at.Y);
                 }
                 else
                 {
-                    Assert.LessOrEqual(at.Y + height, MerchantGridView.ItemRows, "The items above the empty row over the bags' (round 58).");
+                    itemsEnd = System.Math.Max(itemsEnd, at.Y + height);
                 }
+            }
+
+            for (int i = goodsCount; i < stock.Count; i++)
+            {
+                Assert.AreEqual(new Placement(MerchantGridView.PotionColumn, i - goodsCount), map.Merchant.PlacementOf(i).Value, "The potions down the last column, from the top.");
+            }
+
+            if (bagStart < int.MaxValue)
+            {
+                Assert.GreaterOrEqual(bagStart, MerchantGridView.BagRow, "The bags along the last row (round 58), or lower when the items overflow their rows.");
+                Assert.LessOrEqual(itemsEnd, bagStart - 1, "An empty row between the items and the bags (round 58).");
+            }
+            else
+            {
+                Assert.LessOrEqual(itemsEnd, map.Merchant.Rows);
             }
             Assert.AreEqual("100", UiTestUtil.TextAt(map, UiTestUtil.ShopBox + "/ShopCoins"));
             Assert.AreEqual(data.Balance.ShopRefreshBase.ToString(), UiTestUtil.TextAt(map, UiTestUtil.ShopRefreshCost));
@@ -1822,9 +1836,13 @@ namespace F1.Tests
             // Round 57: the pointer over a good shows Diablo's tooltip over it (its facts without the grade, and its price), centred on its
             // piece; it takes no pointer, and goes when the pointer leaves. An item picked: its piece is the held one's lighter blue, and no
             // tooltip shows (it rides the pointer); no card opens; the panel says how to buy.
-            // One no taller than the start bag's two free rows (Slice B stage 19) and with an effect to read (not the whetstone, stage 20).
-            int slot = Enumerable.Range(0, stock.Count).Where(i => stock[i].Kind == OfferKind.Item && data.Items.Get(stock[i].Id).Height <= 2 && !data.Items.Get(stock[i].Id).IsPassive).DefaultIfEmpty(-1).First();
-            Assert.GreaterOrEqual(slot, 0, "An item on offer fits the start bag's free rows (BootTestUtil.RunSeed).");
+            // One no taller than the start bag's two free rows (Slice B stage 19), with an effect to read (not the whetstone, stage 20), and
+            // one the row-1 member may wield (Slice D stage 42: the stat it asks for — stage 46 fills the shelves with gear for other stats).
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            int frontMember = party.ColumnOfRow(UiTestUtil.FlatRow()).Member;
+            int slot = Enumerable.Range(0, stock.Count).Where(i => stock[i].Kind == OfferKind.Item && data.Items.Get(stock[i].Id).Height <= 2 && !data.Items.Get(stock[i].Id).IsPassive
+                && ExpeditionRules.MeetsRequirement(Managers.Expedition.Expedition, frontMember, data.Items.Get(stock[i].Id))).DefaultIfEmpty(-1).First();
+            Assert.GreaterOrEqual(slot, 0, "An item on offer fits the start bag's free rows and the front member's stats (BootTestUtil.RunSeed).");
             string bought = stock[slot].Id;
             int price = Managers.Expedition.PriceOf(stock[slot]);
             ItemData offeredData = data.Items.Get(bought);
@@ -1863,7 +1881,6 @@ namespace F1.Tests
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(slot, map.PickedOffer);
             Assert.IsTrue(map.Merchant.PieceOf(slot).IsPicked, "The held one's lighter blue.");
-            PartySideView party = map.GetComponentInChildren<PartySideView>();
             Assert.IsFalse(party.Tooltip.IsShown);
             Assert.AreEqual(string.Empty, map.MerchantInfo, "Held, it rides the pointer: no tooltip.");
             Assert.AreEqual("지도 위의 창에서 삽니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));

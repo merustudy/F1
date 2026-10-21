@@ -235,6 +235,10 @@ namespace F1.Gameplay
                 case PotionEffect.Cleanse:
                     Cleanse(target, potion.Magnitude, UnitRef.None, potion.Id);
                     break;
+                case PotionEffect.Regen:
+                    // Stage 46: regen stacks like an item's (02 §5), logged by the potion's id; the ticks heal from the next second.
+                    AddRegen(target, potion.Magnitude, UnitRef.None, potion.Id);
+                    break;
                 default:
                     throw new InvalidOperationException($"Potion effect {potion.Effect} is not implemented.");
             }

@@ -403,6 +403,46 @@ namespace F1.Tests
             Assert.AreEqual(1400, data.Potions.Get("tonic").Magnitude, "A heal stays in hundredths.");
         }
 
+        // ---- The regen potion (stage 46) ----
+
+        [Test]
+        public void ARegenPotion_PutsItsStacksOnTheMercenary_WhichHealTickByTick_AndStopABleed()
+        {
+            // Stage 46 (Docs/Design/02 §10): the potion's stacks are an item's regen — logged by the potion, healing stacks x RegenHealPerStack (1 in
+            // the test balance) at each tick, one stack fewer each tick; and its first tick, a heal, stops a bleed like any heal.
+            var potion = new PotionData("salve", TestData.Text("salve"), PotionEffect.Regen, 3, 1);
+            BattleEngine battle = Battle(
+                new[] { TestData.Mercenary("m", 1, 4000, TestData.Attack(100000, 1)) },
+                new[] { TestData.Enemy("e", 1, 100000, Opening("ember", EffectKind.Burn, 5), Opening("knife", EffectKind.Bleed, 4)) },
+                500,
+                null,
+                potion);
+
+            Assert.IsTrue(battle.TryUsePotion(0, 0));
+            BattleEvent applied = Of(battle, BattleEventKind.RegenApplied).Single();
+            Assert.AreEqual("salve", applied.Id, "Logged by the potion.");
+            Assert.IsTrue(applied.Source.IsNone);
+            Assert.AreEqual(3, applied.A);
+            Assert.AreEqual(3, battle.Party[0].Regen);
+
+            battle.AdvanceTo(3500);
+            CollectionAssert.AreEqual(new[] { 1000, 2000, 3000 }, Of(battle, BattleEventKind.Healed, BattleEvent.CauseRegen).Select(e => e.TimeMs), "Three ticks: 3, 2, 1 stacks.");
+            CollectionAssert.AreEqual(new[] { 3, 2, 1 }, Of(battle, BattleEventKind.Healed, BattleEvent.CauseRegen).Select(e => e.A));
+            Assert.AreEqual(0, battle.Party[0].Regen);
+            Assert.AreEqual(0, battle.Party[0].Bleed, "The first regen tick, a heal, stopped the bleed (02 §5).");
+            // Ticks at 1, 2, 3 s in the order burn -> bleed -> regen: burn 5 + 4 + 3, one bleed tick of 4 before the regen stopped it, regen 3 + 2 + 1.
+            Assert.AreEqual(4000 - 12 - 4 + 6, battle.Party[0].Hp);
+        }
+
+        [Test]
+        public void Transform_ReadsARegenPotionsStacksWhole()
+        {
+            StaticData data = StaticDataTransformer.Transform(TestCsv.With(StaticDataFiles.Potion, TestCsv.Potions + "salve,연고,Salve,Regen,8,2,,8\n")).Data;
+            PotionData salve = data.Potions.Get("salve");
+            Assert.AreEqual(PotionEffect.Regen, salve.Effect);
+            Assert.AreEqual(8, salve.Magnitude, "Stacks, not hundredths.");
+        }
+
         [Test]
         public void TheBalance_HasTheTickValues_InHundredths()
         {

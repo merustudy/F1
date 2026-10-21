@@ -2,9 +2,41 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "bloodgale",
+      "Result": "bloodgale",
+      "BaseItem": "greataxe",
+      "BaseTier": "Tier3",
+      "Catalyst": "whetstone",
+      "CatalystTier": "Tier3"
+    },
+    {
+      "Id": "cinder",
+      "Result": "cinder",
+      "BaseItem": "fire_staff",
+      "BaseTier": "Tier3",
+      "Catalyst": "whetstone",
+      "CatalystTier": "Tier3"
+    },
+    {
+      "Id": "dawnlight",
+      "Result": "dawnlight",
+      "BaseItem": "healing_staff",
+      "BaseTier": "Tier3",
+      "Catalyst": "whetstone",
+      "CatalystTier": "Tier3"
+    },
+    {
       "Id": "gladius",
       "Result": "gladius",
       "BaseItem": "longsword",
+      "BaseTier": "Tier3",
+      "Catalyst": "whetstone",
+      "CatalystTier": "Tier3"
+    },
+    {
+      "Id": "windcutter",
+      "Result": "windcutter",
+      "BaseItem": "longbow",
       "BaseTier": "Tier3",
       "Catalyst": "whetstone",
       "CatalystTier": "Tier3"

@@ -72,6 +72,7 @@ namespace F1.Sim
             }
 
             UsePotionIfNeeded(battle);
+            CleanseIfNeeded(battle);
             if (battle.Result == BattleResult.Ongoing && ShouldRetreat(battle))
             {
                 battle.TryRetreat();
@@ -107,14 +108,50 @@ namespace F1.Sim
                 return;
             }
 
-            // A heal answers low HP and death's door; a shield is only worth it at death's door.
+            // A heal answers low HP and death's door; a shield is only worth it at death's door; a regen (stage 46) is the second heal when
+            // no heal is left (its ticks lift the mercenary out of death's door from the next second).
             int slot = FindPotion(battle, PotionEffect.Heal);
             if (slot < 0 && targetInDog)
             {
                 slot = FindPotion(battle, PotionEffect.Shield);
             }
 
+            if (slot < 0)
+            {
+                slot = FindPotion(battle, PotionEffect.Regen);
+            }
+
             if (slot >= 0)
+            {
+                battle.TryUsePotion(slot, target.Index);
+            }
+        }
+
+        /// <summary>How many harmful stacks (what a cleanse takes off: burn, bleed, freeze, blind, vulnerable) a cleanse potion is worth on a member.</summary>
+        const int CleanseWorthStacks = 4;
+
+        /// <summary>Stage 46: a cleanse potion on the living member carrying the most harmful stacks, when that is at least <see cref="CleanseWorthStacks"/>.</summary>
+        void CleanseIfNeeded(BattleEngine battle)
+        {
+            int slot = FindPotion(battle, PotionEffect.Cleanse);
+            if (slot < 0)
+            {
+                return;
+            }
+
+            BattleUnit target = null;
+            int most = CleanseWorthStacks - 1;
+            foreach (BattleUnit unit in battle.Party)
+            {
+                int harmful = unit.Burn + unit.Bleed + unit.Freeze + unit.Blind + unit.Vulnerable;
+                if (unit.Alive && harmful > most)
+                {
+                    most = harmful;
+                    target = unit;
+                }
+            }
+
+            if (target != null)
             {
                 battle.TryUsePotion(slot, target.Index);
             }
@@ -578,7 +615,7 @@ namespace F1.Sim
             }
 
             int living = ExpeditionRules.LivingCount(state);
-            for (int m = 0; m < state.Members.Count; m++)
+            foreach (int m in MembersInOrderFor(state, item))
             {
                 ExpeditionMember member = state.Members[m];
                 if (member.Alive && (!heedRequirement || ExpeditionRules.MeetsRequirement(state,m, item)) && item.UsableIn(member.Row, living)
@@ -590,6 +627,42 @@ namespace F1.Sim
 
             at = default;
             return -1;
+        }
+
+        /// <summary>
+        /// The members in the order an item is offered to them: front to back, except that an item which sharpens its own holder's critical hits
+        /// (stage 46: keen or fury on Self — the bloodlust charm, the berserker axe) goes first to the member whose weapons have the best critical
+        /// chance, ties front first. Deterministic: a stable order over the member index.
+        /// </summary>
+        static IEnumerable<int> MembersInOrderFor(ExpeditionState state, ItemData item)
+        {
+            bool sharpens = false;
+            foreach (ItemEffect effect in item.Effects)
+            {
+                sharpens |= effect.Target == TargetMode.Self && (effect.Kind == EffectKind.Keen || effect.Kind == EffectKind.Fury);
+            }
+
+            var order = new List<int>();
+            for (int m = 0; m < state.Members.Count; m++)
+            {
+                order.Add(m);
+            }
+
+            if (sharpens)
+            {
+                var crit = new int[state.Members.Count];
+                for (int m = 0; m < state.Members.Count; m++)
+                {
+                    foreach (var placed in state.Members[m].Board.Items)
+                    {
+                        crit[m] = Math.Max(crit[m], placed.Item.Item.CritChancePercent);
+                    }
+                }
+
+                order.Sort((a, b) => crit[b] != crit[a] ? crit[b].CompareTo(crit[a]) : a.CompareTo(b));
+            }
+
+            return order;
         }
 
         /// <summary>

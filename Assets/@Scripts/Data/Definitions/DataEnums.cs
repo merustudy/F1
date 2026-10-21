@@ -239,12 +239,16 @@ namespace F1.Data
         EventTarget,
     }
 
-    /// <summary>What a potion does to the mercenary it is used on (Docs/Design/02 §10). Cleanse (stage 44) takes that many burn and bleed stacks off.</summary>
+    /// <summary>
+    /// What a potion does to the mercenary it is used on (Docs/Design/02 §10). Cleanse (stage 44) takes that many burn and bleed stacks off;
+    /// Regen (stage 46) puts that many regen stacks on, which heal tick by tick like an item's regen.
+    /// </summary>
     public enum PotionEffect
     {
         Heal,
         Shield,
         Cleanse,
+        Regen,
     }
 
     /// <summary>
