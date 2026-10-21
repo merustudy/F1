@@ -35,6 +35,20 @@ namespace F1.Sim
         public int CritsTaken;
         public int MissesDealt;
         public int MissesTaken;
+
+        /// <summary>The effect vocabulary (Slice D stage 44), the party's side: stacks of bleed and regen it put and took, thorns damage it dealt back and took, cleanses, staggers, charges.</summary>
+        public int BleedDealt;
+        public int BleedTaken;
+        public int RegenGiven;
+        public long ThornsDealt;
+        public long ThornsTaken;
+        public int Cleanses;
+        public int Staggers;
+        public int Charges;
+
+        /// <summary>The seven states of stage 45: stacks the party put on anyone, and stacks put on the party, by state.</summary>
+        public readonly Dictionary<EffectKind, int> StatesPut = new Dictionary<EffectKind, int>();
+        public readonly Dictionary<EffectKind, int> StatesTaken = new Dictionary<EffectKind, int>();
         public readonly Dictionary<string, int> DeathsByMercenary = new Dictionary<string, int>();
 
         public void Add(BattleEngine battle)
@@ -88,6 +102,59 @@ namespace F1.Sim
                         }
 
                         break;
+                    case BattleEventKind.BleedApplied:
+                        if (e.Target.Side == BattleSide.Party)
+                        {
+                            BleedTaken += e.A;
+                        }
+                        else
+                        {
+                            BleedDealt += e.A;
+                        }
+
+                        break;
+                    case BattleEventKind.RegenApplied:
+                        if (e.Target.Side == BattleSide.Party)
+                        {
+                            RegenGiven += e.A;
+                        }
+
+                        break;
+                    case BattleEventKind.Damaged:
+                        if (e.Id == BattleEvent.CauseThorns)
+                        {
+                            if (e.Target.Side == BattleSide.Party)
+                            {
+                                ThornsTaken += e.A;
+                            }
+                            else
+                            {
+                                ThornsDealt += e.A;
+                            }
+                        }
+
+                        break;
+                    case BattleEventKind.Cleansed:
+                        if (e.A + e.B > 0)
+                        {
+                            Cleanses++;
+                        }
+
+                        break;
+                    case BattleEventKind.Staggered:
+                        Staggers++;
+                        break;
+                    case BattleEventKind.Charged:
+                        Charges++;
+                        break;
+                    case BattleEventKind.StateApplied:
+                    {
+                        Dictionary<EffectKind, int> by = e.Source.Side == BattleSide.Party ? StatesPut : StatesTaken;
+                        var state = (EffectKind)e.B;
+                        by.TryGetValue(state, out int stacks);
+                        by[state] = stacks + e.A;
+                        break;
+                    }
                     case BattleEventKind.Died:
                         if (e.Target.Side == BattleSide.Party)
                         {
@@ -152,6 +219,19 @@ namespace F1.Sim
             if (Afflictions + Virtues + Collapses > 0)
             {
                 Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths})");
+            }
+            if (BleedDealt + BleedTaken + RegenGiven + Cleanses + Staggers + Charges > 0 || ThornsDealt + ThornsTaken > 0)
+            {
+                // The effect vocabulary (Slice D stage 44), per battle: printed only when a battle used any of it, so older reports read as before.
+                Console.WriteLine($"  effects per battle: bleed stacks put {Ratio(BleedDealt, Battles)}, taken {Ratio(BleedTaken, Battles)}; regen stacks {Ratio(RegenGiven, Battles)}; "
+                    + $"thorns dealt back {Centi.ToText((int)(ThornsDealt / Battles))}, taken {Centi.ToText((int)(ThornsTaken / Battles))}; cleanses {Ratio(Cleanses, Battles)}, staggers {Ratio(Staggers, Battles)}, charges {Ratio(Charges, Battles)}");
+            }
+            if (StatesPut.Count + StatesTaken.Count > 0)
+            {
+                // The seven states of stage 45, stacks per battle: what the party put on anyone / what was put on the party.
+                string put = string.Join(", ", StatesPut.OrderBy(p => p.Key).Select(p => $"{p.Key} {Ratio(p.Value, Battles)}"));
+                string taken = string.Join(", ", StatesTaken.OrderBy(p => p.Key).Select(p => $"{p.Key} {Ratio(p.Value, Battles)}"));
+                Console.WriteLine($"  states per battle (stage 45): put by the party [{put}]; put on the party [{taken}]");
             }
             if (DeathsByMercenary.Count > 0)
             {
@@ -297,6 +377,13 @@ namespace F1.Sim
                     case BattleEventKind.Healed: detail = $"{Name(e.Target)} healed {C(e.B)} by {e.Id} -> hp {C(e.C)}"; break;
                     case BattleEventKind.ShieldGained: detail = $"{Name(e.Target)} shield +{C(e.A)} by {e.Id} -> {C(e.C)}"; break;
                     case BattleEventKind.BurnApplied: detail = $"{Name(e.Target)} burn +{e.A} by {e.Id} -> {e.C}"; break;
+                    case BattleEventKind.BleedApplied: detail = $"{Name(e.Target)} bleed +{e.A} by {e.Id} -> {e.C}"; break;
+                    case BattleEventKind.RegenApplied: detail = $"{Name(e.Target)} regen +{e.A} by {e.Id} -> {e.C}"; break;
+                    case BattleEventKind.ThornsGained: detail = $"{Name(e.Target)} thorns +{C(e.A)} by {e.Id} -> {C(e.C)}"; break;
+                    case BattleEventKind.Cleansed: detail = $"{Name(e.Target)} cleansed by {e.Id}: burn -{e.A}, bleed -{e.B}"; break;
+                    case BattleEventKind.Staggered: detail = $"{Name(e.Target)} staggered {e.A} ms by {e.Id} ({e.B} items)"; break;
+                    case BattleEventKind.Charged: detail = $"{Name(e.Target)} charged {e.A} ms by {e.Id} ({e.B} items)"; break;
+                    case BattleEventKind.StateApplied: detail = $"{Name(e.Target)} {(EffectKind)e.B} +{e.A} by {e.Id} -> {e.C}"; break;
                     case BattleEventKind.DogEntered: detail = $"{Name(e.Target)} at death's door, grace until {e.A}"; break;
                     case BattleEventKind.DogExited: detail = $"{Name(e.Target)} back from death's door"; break;
                     case BattleEventKind.GraceBroken: detail = $"{Name(e.Target)} grace broken after {e.A} hits"; break;

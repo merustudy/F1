@@ -12,7 +12,7 @@ namespace F1.Tests
             "PartySize,3\nMinPartySize,1\nTotalDays,100\nDeathLimit,15\nMaxFatigue,200\nFatigueRecoveryPerDay,10\nFatigueBreakdown,100\nFatigueBattleEntry,3\nFatigueEquipment,1\nFatigueOnHit,2\nFatigueOnDog,10\nFatigueOnAllyDog,5\nFatigueOnAllyDeath,15\nFatigueOnKill,2\nVirtueChancePercent,25\nVirtueFatigue,40\nRestDays,1\n" +
             "DogGraceMs,3000\nDogGraceBreakHits,3\nDogDeathChancePercent,30\nBurnTickMs,1000\n" +
             "StormStartMs,45000\nStormTickMs,1000\nStormBaseDamage,0.55\nStormGrowth,0.55\n" +
-            "BurnDamagePerStack,0.27\nHitMinDamage,0.5\nPhysicalCritDamagePercent,150\nMagicCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
+            "BurnDamagePerStack,0.27\nBleedDamagePerStack,0.27\nRegenHealPerStack,0.27\nHitMinDamage,0.5\nPhysicalCritDamagePercent,150\nMagicCritDamagePercent,150\nCritFatigueTaken,9\nCritFatigueTakenAllies,2\nCritFatigueDealt,3\nCritFatigueDealtAllies,1\n" +
             "PotionSlots,3\nPotionCooldownMs,1500\nRetreatChancePercent,60\nRetreatCooldownMs,5000\n" +
             "PostBattleHealPercent,10\nMinCooldownMs,200\nDropCount,2\nEliteDropCount,3\nInventoryWidth,10\nInventoryHeight,3\nEliteBagPercent,50\nDropTierKeepPercent,50\nCampHealPercent,30\nCampFatigueRelief,20\nTier1Percent,200\nTier2Percent,300\nTier3Percent,400\nMapBranchChancePercent,50\nFinalBossLevel,14\n" +
             "ShopSlots,4\nShopRefreshBase,3\nShopRefreshStep,2\nSellPercent,50\nCoinsPerGold,20\nShopPotionChancePercent,50\nCoinsPerEnemy,2\nCoinsPerFloor,1\nExpeditionStartCoins,20\nEliteCoinPercent,200\n" +
@@ -20,7 +20,8 @@ namespace F1.Tests
             "StatBaseline,10\nStatMin,1\nStatMax,30\nStatPowerPercentPerPoint,10\nPowerBaseline,5\nFatigueBaseline,5\nCooldownPercentPerPoint,1\nHpPerConPointLow,5\nHpPerConPointMid,10\nHpPerConPointHigh,15\nHpBandLow,10\nHpBandMid,20\n" +
             "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerDexPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nCritPerWisPoint,0.5\nDogDeathPercentPerEndPoint,1\nVirtuePerEndPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n" +
             "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\n" +
-            "TraitChanceClearPercent,15\nTraitChanceRetreatPercent,15\nTraitChanceDeathsDoorPercent,25\nTraitChanceAfflictionPercent,40\nTraitChanceVirtuePercent,40\n";
+            "TraitChanceClearPercent,15\nTraitChanceRetreatPercent,15\nTraitChanceDeathsDoorPercent,25\nTraitChanceAfflictionPercent,40\nTraitChanceVirtuePercent,40\n" +
+            "FreezePercentPerStack,10\nBlindPercentPerStack,5\nAimPercentPerStack,5\nKeenPercentPerStack,5\nFuryPercentPerStack,25\nHastePercentPerStack,10\nVulnerablePercentPerStack,10\n";
 
         public const string Jobs =
             "Id,Name.ko-KR,Name.en-US,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Wis,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthWis,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US\n" +

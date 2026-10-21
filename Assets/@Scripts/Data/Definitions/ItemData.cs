@@ -21,7 +21,7 @@ namespace F1.Data
         {
             if (min < 1)
             {
-                throw new DataException($"Effect {kind} must be at least 1 (0.01 for damage, a heal or a shield; one stack for a burn).");
+                throw new DataException($"Effect {kind} must be at least 1 (0.01 for damage, a heal, a shield or thorns; one stack for a burn, a bleed, a regen or a cleanse; one millisecond for a stagger or a charge).");
             }
 
             if (kind == EffectKind.Damage ? max < min : max != min)
@@ -31,12 +31,8 @@ namespace F1.Data
                     : $"Effect {kind} has one value, not a range.");
             }
 
-            bool harmful = kind == EffectKind.Damage || kind == EffectKind.Burn;
-            if (TargetsEnemy(target) != harmful)
-            {
-                throw new DataException($"Effect {kind} cannot target {target}.");
-            }
-
+            // Any kind may go to either side (2026-10-21, the user: "모든 효과는 적/아군 서로 가리지 않고"): the data names the target. A blow on one's
+            // own side never misses and never crits (Docs/Design/02_Combat_System.md §4).
             if (TakesReach(target))
             {
                 if (reach < 1 || reach > BattleRows.Count)
@@ -77,6 +73,38 @@ namespace F1.Data
         public static bool TargetsEnemy(TargetMode target)
         {
             return TakesReach(target) || target == TargetMode.EnemyAll;
+        }
+
+        /// <summary>Whether an effect's value counts stacks (a burn, a bleed, a regen, a cleanse, and the seven states of stage 45): a whole number, rounded half up by a stat.</summary>
+        public static bool CountsStacks(EffectKind kind)
+        {
+            return kind == EffectKind.Burn || kind == EffectKind.Bleed || kind == EffectKind.Regen || kind == EffectKind.Cleanse || IsState(kind);
+        }
+
+        /// <summary>
+        /// Whether the kind is one of the seven states of stage 45 (Docs/Design/02_Combat_System.md §5): stacks on a unit that change a number while they
+        /// last and lose one at every tick.
+        /// </summary>
+        public static bool IsState(EffectKind kind)
+        {
+            return kind == EffectKind.Freeze || kind == EffectKind.Blind || kind == EffectKind.Aim || kind == EffectKind.Keen || kind == EffectKind.Fury
+                || kind == EffectKind.Haste || kind == EffectKind.Vulnerable;
+        }
+
+        /// <summary>
+        /// Whether the kind hurts the unit it lands on: damage, burn, bleed, stagger, freeze, blind, vulnerable. A physical one of these rolls its hit when it
+        /// goes to the other side; a cleanse takes the stacked ones off (Docs/Design/02_Combat_System.md §5).
+        /// </summary>
+        public static bool Hurts(EffectKind kind)
+        {
+            return kind == EffectKind.Damage || kind == EffectKind.Burn || kind == EffectKind.Bleed || kind == EffectKind.Stagger
+                || kind == EffectKind.Freeze || kind == EffectKind.Blind || kind == EffectKind.Vulnerable;
+        }
+
+        /// <summary>Whether an effect's value is a whole number in the data: stacks, or milliseconds (a stagger, a charge). The rest are hundredths.</summary>
+        public static bool CountsWhole(EffectKind kind)
+        {
+            return CountsStacks(kind) || kind == EffectKind.Stagger || kind == EffectKind.Charge;
         }
 
         /// <summary>True for the targets that are counted from one end of the enemy line.</summary>

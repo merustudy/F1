@@ -295,6 +295,22 @@ namespace F1.Gameplay
         /// it. Source, Target, Id = the item, A = the roll 0..9999, B = the hit chance in ten-thousandths.
         /// </summary>
         Missed,
+
+        /// <summary>The effect vocabulary (Slice D stage 44). Source, Target, Id = cause, A = stacks added, C = the target's bleed after.</summary>
+        BleedApplied,
+        /// <summary>Source, Target, Id = cause, A = stacks added, C = the target's regen after.</summary>
+        RegenApplied,
+        /// <summary>Source, Target, Id = cause, A = thorns gained (hundredths), C = the target's thorns after.</summary>
+        ThornsGained,
+        /// <summary>Burn and bleed taken off a unit: by a cleanse, or a bleed stopped by a heal. Source, Target, Id = cause, A = burn stacks off, B = bleed stacks off.</summary>
+        Cleansed,
+        /// <summary>Every cycling item the target can use was pushed back. Source, Target, Id = cause, A = milliseconds, B = items pushed.</summary>
+        Staggered,
+        /// <summary>Every cycling item the target can use was pulled forward. Source, Target, Id = cause, A = milliseconds, B = items pulled.</summary>
+        Charged,
+
+        /// <summary>One of the seven states of stage 45 was stacked on a unit. Source, Target, Id = cause, A = stacks added, B = (int)EffectKind, C = the unit's stacks of it after.</summary>
+        StateApplied,
     }
 
     /// <summary>
@@ -306,6 +322,17 @@ namespace F1.Gameplay
         public const string CauseBurn = "burn";
         public const string CauseStorm = "storm";
         public const string CausePassive = "passive";
+
+        /// <summary>The causes of the effect vocabulary (Slice D stage 44): a bleed tick, a regen tick, thorns dealt back. None names an item.</summary>
+        public const string CauseBleed = "bleed";
+        public const string CauseRegen = "regen";
+        public const string CauseThorns = "thorns";
+
+        /// <summary>Whether a damage cause is a tick or a return (burn, bleed, thorns): a hit that tires nobody (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
+        public static bool IsTickCause(string cause)
+        {
+            return cause == CauseBurn || cause == CauseBleed || cause == CauseThorns;
+        }
 
         /// <summary>The causes of a <see cref="BattleEventKind.FatigueChanged"/> event, in its Id.</summary>
         public const string FatigueHit = "hit";

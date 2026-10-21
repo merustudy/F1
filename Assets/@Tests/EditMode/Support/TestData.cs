@@ -54,6 +54,18 @@ namespace F1.Tests
                 // Slice B stage 22, at the values that keep the arithmetic of these tests as before: a burn stack deals 1, every damage that
                 // gets through is a hit, and no item has a crit chance unless a test gives it one.
                 { "BurnDamagePerStack", 1 },
+                // Slice D stage 44, at the same easy values: a bleed stack deals 1 and a regen stack heals 1 at a tick.
+                { "BleedDamagePerStack", 1 },
+                { "RegenHealPerStack", 1 },
+                // Stage 45, at the shipped values: a stack of freeze or haste moves cooldowns 10%, of blind or aim the hit 5 points, of keen the critical
+                // chance 5 points, of fury the multiplier 25 points, of vulnerable the damage taken 10%.
+                { "FreezePercentPerStack", 10 },
+                { "BlindPercentPerStack", 5 },
+                { "AimPercentPerStack", 5 },
+                { "KeenPercentPerStack", 5 },
+                { "FuryPercentPerStack", 25 },
+                { "HastePercentPerStack", 10 },
+                { "VulnerablePercentPerStack", 10 },
                 { "HitMinDamage", 0 },
                 { "PhysicalCritDamagePercent", 150 },
                 { "MagicCritDamagePercent", 150 },

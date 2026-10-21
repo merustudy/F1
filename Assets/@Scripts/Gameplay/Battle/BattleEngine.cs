@@ -9,8 +9,8 @@ namespace F1.Gameplay
     /// engine jumps from one event to the next, so the outcome depends only on the setup and the
     /// recorded player inputs: never on frame rate, wall clock time or presentation.
     ///
-    /// Order at one timestamp: burn tick, item activations (party first, unit order, slot order),
-    /// storm tick, then player inputs made at that time.
+    /// Order at one timestamp: the ticks (every unit's burn, then every unit's bleed, then every unit's regen: Slice D stage 44),
+    /// item activations (party first, unit order, slot order), storm tick, then player inputs made at that time.
     ///
     /// Rows: each side is a line, one unit per row from row 1 back. When a unit dies, the ones
     /// behind it advance one row at once, before anything else is processed, and every item of
@@ -232,6 +232,9 @@ namespace F1.Gameplay
                 case PotionEffect.Shield:
                     AddShield(target, potion.Magnitude, UnitRef.None, potion.Id);
                     break;
+                case PotionEffect.Cleanse:
+                    Cleanse(target, potion.Magnitude, UnitRef.None, potion.Id);
+                    break;
                 default:
                     throw new InvalidOperationException($"Potion effect {potion.Effect} is not implemented.");
             }
@@ -395,9 +398,15 @@ namespace F1.Gameplay
         }
 
         /// <summary>The cooldown an item of a unit cycles with now: its own, changed by the unit's fatigue state (an affliction slows, a virtue quickens).</summary>
+        /// <summary>
+        /// The cooldown an item of this owner fills next: its own with the fatigue state's percent and, stage 45, the owner's freeze stacks slowing it and
+        /// its haste stacks quickening it (percent points added together), never under MinCooldownMs. Read when the next activation is scheduled, so a
+        /// stack applied mid-cooldown tells from the next one.
+        /// </summary>
         int CooldownOf(BattleUnit owner, BattleItemState item)
         {
-            return owner.State == null ? item.CooldownMs : EffectiveCooldown(item.CooldownMs, owner.State.CooldownPercent * 10);
+            int percent = (owner.State?.CooldownPercent ?? 0) + owner.Freeze * _balance.FreezePercentPerStack - owner.Haste * _balance.HastePercentPerStack;
+            return percent == 0 ? item.CooldownMs : EffectiveCooldown(item.CooldownMs, percent * 10);
         }
 
         /// <summary>Battle time of the next burn tick, item activation or storm tick.</summary>
@@ -435,7 +444,7 @@ namespace F1.Gameplay
             if (now == _nextBurnTickMs)
             {
                 _nextBurnTickMs += _balance.BurnTickMs;
-                BurnTick();
+                Ticks();
                 if (Result != BattleResult.Ongoing)
                 {
                     return;
@@ -508,12 +517,13 @@ namespace F1.Gameplay
                         magnitude += item.StarDamage;
                     }
                 }
-                else if (effect.Kind == EffectKind.Burn)
+                else if (ItemEffect.CountsStacks(effect.Kind))
                 {
                     magnitude = StatRules.ScaleStacks(magnitude, statPercent);
                 }
                 else
                 {
+                    // Hundredths, or a stagger's and a charge's milliseconds (stage 44): rounded down, at least 1.
                     magnitude = StatRules.Scale(magnitude, statPercent);
                 }
 
@@ -529,18 +539,26 @@ namespace F1.Gameplay
                         case EffectKind.Damage:
                         {
                             // Each unit hit rolls its own hit first (Slice D stage 33): a miss deals nothing and triggers nothing.
-                            if (StatRules.CanMiss(data, effect) && !RollHit(owner, target, data))
+                            if (!Lands(owner, target, data, effect))
                             {
                                 continue;
                             }
 
                             int dealt = magnitude;
-                            bool critical = weaponDamage && RollCritical(owner, target, data, ref dealt);
-                            // Roll, stars, critical hit, then the owner's stat, then the weapon-power passive (Docs/Design/02_Combat_System.md §4).
+                            // A blow on one's own side (2026-10-21: any effect may go either way) never crits, triggers no passive and meets no thorns.
+                            bool foe = target.Side != owner.Side;
+                            bool critical = weaponDamage && foe && RollCritical(owner, target, data, ref dealt);
+                            // Roll, stars, critical hit, then the owner's stat, then the weapon-power passive (Docs/Design/02_Combat_System.md §4),
+                            // then what the target's vulnerable stacks add (stage 45).
                             dealt = StatRules.Scale(dealt, statPercent);
                             if (weaponDamage)
                             {
                                 dealt = WithWeaponPower(owner, dealt);
+                            }
+
+                            if (target.Vulnerable > 0)
+                            {
+                                dealt = (int)((long)dealt * (100 + (long)target.Vulnerable * _balance.VulnerablePercentPerStack) / 100);
                             }
 
                             if (critical)
@@ -554,9 +572,21 @@ namespace F1.Gameplay
                                 CriticalFatigue(owner, target);
                             }
 
-                            if (weaponDamage && target.Alive)
+                            if (weaponDamage && foe && target.Alive)
                             {
                                 ApplyTriggeredPassive(owner, PassiveTrigger.WeaponHit, target);
+                            }
+
+                            // Thorns (stage 44): a melee weapon's blow is dealt back by the target's thorns while it stands (a fallen unit's are gone).
+                            // The attacker it fells stops attacking.
+                            if (weaponDamage && foe && data.Melee && target.Alive && target.Thorns > 0 && owner.Alive)
+                            {
+                                ApplyDamage(owner, target.Thorns, UnitRef.None, BattleEvent.CauseThorns);
+                                if (!owner.Alive)
+                                {
+                                    CheckEnd();
+                                    return;
+                                }
                             }
 
                             break;
@@ -569,12 +599,56 @@ namespace F1.Gameplay
                             AddShield(target, magnitude, owner.Ref, data.Id);
                             break;
                         case EffectKind.Burn:
-                            if (StatRules.CanMiss(data, effect) && !RollHit(owner, target, data))
+                            if (!Lands(owner, target, data, effect))
                             {
                                 continue;
                             }
 
                             AddBurn(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Bleed:
+                            // A physical bleed rolls its hit as a burn does (stage 44).
+                            if (!Lands(owner, target, data, effect))
+                            {
+                                continue;
+                            }
+
+                            AddBleed(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Regen:
+                            AddRegen(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Thorns:
+                            AddThorns(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Cleanse:
+                            Cleanse(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Stagger:
+                            if (!Lands(owner, target, data, effect))
+                            {
+                                continue;
+                            }
+
+                            Stagger(target, magnitude, owner.Ref, data.Id);
+                            break;
+                        case EffectKind.Charge:
+                            Charge(target, magnitude, owner.Ref, data.Id, item);
+                            break;
+                        case EffectKind.Freeze:
+                        case EffectKind.Blind:
+                        case EffectKind.Aim:
+                        case EffectKind.Keen:
+                        case EffectKind.Fury:
+                        case EffectKind.Haste:
+                        case EffectKind.Vulnerable:
+                            // The seven states of stage 45: stacks on the unit. One that hurts rolls its hit on the other side, as a burn does.
+                            if (!Lands(owner, target, data, effect))
+                            {
+                                continue;
+                            }
+
+                            AddState(target, effect.Kind, magnitude, owner.Ref, data.Id);
                             break;
                         default:
                             throw new InvalidOperationException($"Effect {effect.Kind} is not implemented.");
@@ -597,11 +671,23 @@ namespace F1.Gameplay
         /// the attacker's accuracy (its dexterity, or an enemy's Accuracy; 2026-10-20 스탯 개정: only a physical blow rolls) and less the target's dodge (its dexterity, or an enemy's Dodge),
         /// within the bounds. A miss is logged; nothing is dealt to that unit.
         /// </summary>
+        /// <summary>
+        /// Whether an effect lands on one unit: everything lands on one's own side; on the other side a physical blow that hurts rolls its hit
+        /// (<see cref="StatRules.CanMiss"/>, stage 33; 2026-10-21: the data may send any effect either way).
+        /// </summary>
+        bool Lands(BattleUnit owner, BattleUnit target, ItemData item, ItemEffect effect)
+        {
+            return target.Side == owner.Side || !StatRules.CanMiss(item, effect) || RollHit(owner, target, item);
+        }
+
         bool RollHit(BattleUnit owner, BattleUnit target, ItemData item)
         {
+            // The owner's aim and blind stacks (stage 45) move its accuracy by their points, in ten-thousandths like the rest.
+            int accuracy = StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, owner.Setup.Traits)
+                + (owner.Aim * _balance.AimPercentPerStack - owner.Blind * _balance.BlindPercentPerStack) * 100;
             int chance = StatRules.HitChance(
                 _balance,
-                StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, owner.Setup.Traits),
+                accuracy,
                 StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits));
             // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
             if (chance >= StatRules.Certain)
@@ -633,7 +719,9 @@ namespace F1.Gameplay
 
             // In ten-thousandths, with the owner's dexterity (Slice D stage 33), the ranger's passive (stage 36), the owner's traits (stage 37) and
             // less what the target's helm takes off (stage 39). The roll is drawn all the same: the stream does not depend on the helm.
-            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon, StatRules.CritBonusPercent(owner.Setup.Passive, weapon), owner.Setup.Traits,
+            // The owner's keen stacks add their points to the chance and its fury stacks to the multiplier (stage 45).
+            _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon,
+                StatRules.CritBonusPercent(owner.Setup.Passive, weapon) + owner.Keen * _balance.KeenPercentPerStack, owner.Setup.Traits,
                 CritTakenPercent(target));
             _lastCritRoll = _damageRng.NextInt(StatRules.Certain);
             if (_lastCritRoll >= _lastCritChance)
@@ -641,7 +729,8 @@ namespace F1.Gameplay
                 return false;
             }
 
-            damage = (int)((long)damage * StatRules.CritDamagePercent(_balance, weapon, owner.Setup.Traits) / 100);
+            int percent = StatRules.CritDamagePercent(_balance, weapon, owner.Setup.Traits) + owner.Fury * _balance.FuryPercentPerStack;
+            damage = (int)((long)damage * percent / 100);
             return true;
         }
 
@@ -913,9 +1002,10 @@ namespace F1.Gameplay
         /// (Docs/Design/04_Lobby_100Day_Economy.md §3): the hit itself, and more for reaching death's door, which tires the
         /// allies too. An enemy killed by a mercenary's item relieves that mercenary a little.
         /// </summary>
-        void ApplyDamage(BattleUnit target, int amount, UnitRef source, string cause)
+        /// <param name="throughShield">True for a bleed tick (stage 44): the wound is inside, the shield absorbs none of it.</param>
+        void ApplyDamage(BattleUnit target, int amount, UnitRef source, string cause, bool throughShield = false)
         {
-            int absorbed = Math.Min(target.Shield, amount);
+            int absorbed = throughShield ? 0 : Math.Min(target.Shield, amount);
             target.Shield -= absorbed;
             int through = amount - absorbed;
             bool wasInDog = target.InDog;
@@ -965,9 +1055,10 @@ namespace F1.Gameplay
             }
 
             // The hit tires the one hit (if it lives) by FatigueOnHit, and death's door tires it and its allies. A burn tick is a hit
-            // (death's door counts it) but tires nobody; a storm tick tires as a hit does (Docs/Design/04_Lobby_100Day_Economy.md §3).
+            // (death's door counts it) but tires nobody, and so are a bleed tick and thorns dealt back (stage 44); a storm tick tires as a hit
+            // does (Docs/Design/04_Lobby_100Day_Economy.md §3).
             // 2026-10-17: FatigueOnHit is 0 in the shipped data, so only a critical hit tires (CriticalFatigue); the rule stays data.
-            if (cause != BattleEvent.CauseBurn)
+            if (!BattleEvent.IsTickCause(cause))
             {
                 ChangeFatigue(target, _balance.FatigueOnHit, BattleEvent.FatigueHit);
             }
@@ -1027,6 +1118,14 @@ namespace F1.Gameplay
             target.Hp = Math.Min(target.MaxHp, target.Hp + amount);
             Log(BattleEventKind.Healed, source, target.Ref, cause, amount, target.Hp - before, target.Hp);
 
+            // A heal binds the wound (stage 44): every stack of bleed stops, logged as a cleanse by the heal's cause.
+            if (amount > 0 && target.Bleed > 0)
+            {
+                int stopped = target.Bleed;
+                target.Bleed = 0;
+                Log(BattleEventKind.Cleansed, source, target.Ref, cause, 0, stopped, 0);
+            }
+
             if (target.InDog && target.Hp > 0)
             {
                 target.InDog = false;
@@ -1047,12 +1146,110 @@ namespace F1.Gameplay
             Log(BattleEventKind.BurnApplied, source, target.Ref, cause, stacks, 0, target.Burn);
         }
 
+        // ---- The effect vocabulary (Slice D stage 44, Docs/Design/02_Combat_System.md §4·§5) ----
+
+        void AddBleed(BattleUnit target, int stacks, UnitRef source, string cause)
+        {
+            target.Bleed += stacks;
+            Log(BattleEventKind.BleedApplied, source, target.Ref, cause, stacks, 0, target.Bleed);
+        }
+
+        void AddRegen(BattleUnit target, int stacks, UnitRef source, string cause)
+        {
+            target.Regen += stacks;
+            Log(BattleEventKind.RegenApplied, source, target.Ref, cause, stacks, 0, target.Regen);
+        }
+
+        void AddThorns(BattleUnit target, int amount, UnitRef source, string cause)
+        {
+            target.Thorns += amount;
+            Log(BattleEventKind.ThornsGained, source, target.Ref, cause, amount, 0, target.Thorns);
+        }
+
+        /// <summary>
+        /// Takes that many stacks of burn, of bleed and (stage 45) of each of freeze, blind and vulnerable off the target: what hurts. Logged with what
+        /// came off the burn (A), the bleed (B) and the three together (C), even when nothing did.
+        /// </summary>
+        void Cleanse(BattleUnit target, int stacks, UnitRef source, string cause)
+        {
+            int burn = Math.Min(stacks, target.Burn);
+            int bleed = Math.Min(stacks, target.Bleed);
+            target.Burn -= burn;
+            target.Bleed -= bleed;
+            int states = 0;
+            foreach (EffectKind state in HarmfulStates)
+            {
+                int off = Math.Min(stacks, target.StacksOf(state));
+                target.SetStacks(state, target.StacksOf(state) - off);
+                states += off;
+            }
+
+            Log(BattleEventKind.Cleansed, source, target.Ref, cause, burn, bleed, states);
+        }
+
+        /// <summary>The seven states of stage 45, in the order their stacks decay at a tick; the three that hurt are what a cleanse takes off.</summary>
+        static readonly EffectKind[] States = { EffectKind.Freeze, EffectKind.Blind, EffectKind.Aim, EffectKind.Keen, EffectKind.Fury, EffectKind.Haste, EffectKind.Vulnerable };
+        static readonly EffectKind[] HarmfulStates = { EffectKind.Freeze, EffectKind.Blind, EffectKind.Vulnerable };
+
+        /// <summary>Stacks one of the seven states on the target (stage 45). It tells from the next thing the stacks touch: the next hit roll, crit roll or cooldown.</summary>
+        void AddState(BattleUnit target, EffectKind state, int stacks, UnitRef source, string cause)
+        {
+            target.SetStacks(state, target.StacksOf(state) + stacks);
+            Log(BattleEventKind.StateApplied, source, target.Ref, cause, stacks, (int)state, target.StacksOf(state));
+        }
+
+        /// <summary>
+        /// Pushes the next activation of every cycling item the target can use back by the milliseconds. It is over at once: nothing is tracked
+        /// and nothing expires, so the log and a replay agree. An item that does not work where its owner stands keeps its reset for when it does.
+        /// </summary>
+        void Stagger(BattleUnit target, int ms, UnitRef source, string cause)
+        {
+            int pushed = 0;
+            foreach (BattleItemState item in target.Items)
+            {
+                if (item.Active && item.Cycles)
+                {
+                    item.NextFireMs += ms;
+                    pushed++;
+                }
+            }
+
+            Log(BattleEventKind.Staggered, source, target.Ref, cause, ms, pushed, 0);
+        }
+
+        /// <summary>
+        /// Pulls the next activation of every cycling item the target can use forward by the milliseconds, never before the next millisecond:
+        /// an item never fires twice at one time, and one pulled to now fires at the next event, in the usual order. The item doing the charging
+        /// never pulls itself (<paramref name="except"/>), or it would fire again every millisecond.
+        /// </summary>
+        void Charge(BattleUnit target, int ms, UnitRef source, string cause, BattleItemState except)
+        {
+            int pulled = 0;
+            foreach (BattleItemState item in target.Items)
+            {
+                if (item.Active && item.Cycles && item != except)
+                {
+                    item.NextFireMs = Math.Max(TimeMs + 1, item.NextFireMs - ms);
+                    pulled++;
+                }
+            }
+
+            Log(BattleEventKind.Charged, source, target.Ref, cause, ms, pulled, 0);
+        }
+
         void Kill(BattleUnit target)
         {
             target.Alive = false;
             target.InDog = false;
             target.Shield = 0;
             target.Burn = 0;
+            target.Bleed = 0;
+            target.Regen = 0;
+            target.Thorns = 0;
+            foreach (EffectKind state in States)
+            {
+                target.SetStacks(state, 0);
+            }
             Log(BattleEventKind.Died, UnitRef.None, target.Ref, null, 0, 0, 0);
             AdvanceBehind(target);
             RefreshSide(SideOf(target));
@@ -1248,11 +1445,30 @@ namespace F1.Gameplay
             }
         }
 
-        void BurnTick()
+        enum Tick
         {
-            if (!TickUnits(_party, isStorm: false, 0))
+            Storm,
+            Burn,
+            Bleed,
+            Regen,
+            States,
+        }
+
+        static readonly Tick[] TimedTicks = { Tick.Burn, Tick.Bleed, Tick.Regen, Tick.States };
+
+        /// <summary>
+        /// The ticks at a burn tick's time (Docs/Design/02_Combat_System.md §3): every unit's burn, then every unit's bleed, then every unit's regen
+        /// (Slice D stage 44 added the two after the burn, so a battle without them logs as it did), then (stage 45) every unit's seven states lose a
+        /// stack, each the party first.
+        /// </summary>
+        void Ticks()
+        {
+            foreach (Tick tick in TimedTicks)
             {
-                TickUnits(_enemies, isStorm: false, 0);
+                if (TickUnits(_party, tick, 0) || TickUnits(_enemies, tick, 0))
+                {
+                    return;
+                }
             }
         }
 
@@ -1261,14 +1477,14 @@ namespace F1.Gameplay
             int damage = NextStormDamage;
             _stormTicks++;
             Log(BattleEventKind.StormTicked, UnitRef.None, UnitRef.None, null, damage, 0, 0);
-            if (!TickUnits(_party, isStorm: true, damage))
+            if (!TickUnits(_party, Tick.Storm, damage))
             {
-                TickUnits(_enemies, isStorm: true, damage);
+                TickUnits(_enemies, Tick.Storm, damage);
             }
         }
 
-        /// <summary>Applies a burn or storm tick to each living unit. Returns true when the battle ended.</summary>
-        bool TickUnits(List<BattleUnit> units, bool isStorm, int stormDamage)
+        /// <summary>Applies one kind of tick to each living unit. Returns true when the battle ended.</summary>
+        bool TickUnits(List<BattleUnit> units, Tick tick, int stormDamage)
         {
             foreach (BattleUnit unit in units)
             {
@@ -1277,17 +1493,55 @@ namespace F1.Gameplay
                     continue;
                 }
 
-                if (isStorm)
+                switch (tick)
                 {
-                    ApplyDamage(unit, stormDamage, UnitRef.None, BattleEvent.CauseStorm);
-                }
-                else if (unit.Burn > 0)
-                {
-                    ApplyDamage(unit, unit.Burn * _balance.BurnDamagePerStack, UnitRef.None, BattleEvent.CauseBurn);
-                    if (unit.Alive)
-                    {
-                        unit.Burn--;
-                    }
+                    case Tick.Storm:
+                        ApplyDamage(unit, stormDamage, UnitRef.None, BattleEvent.CauseStorm);
+                        break;
+                    case Tick.Burn:
+                        if (unit.Burn > 0)
+                        {
+                            ApplyDamage(unit, unit.Burn * _balance.BurnDamagePerStack, UnitRef.None, BattleEvent.CauseBurn);
+                            if (unit.Alive)
+                            {
+                                unit.Burn--;
+                            }
+                        }
+
+                        break;
+                    case Tick.Bleed:
+                        // Through the shield: the wound is inside (stage 44).
+                        if (unit.Bleed > 0)
+                        {
+                            ApplyDamage(unit, unit.Bleed * _balance.BleedDamagePerStack, UnitRef.None, BattleEvent.CauseBleed, throughShield: true);
+                            if (unit.Alive)
+                            {
+                                unit.Bleed--;
+                            }
+                        }
+
+                        break;
+                    case Tick.Regen:
+                        // A heal like any other (stage 44): the fatigue state scales it, it binds a bleed, it brings a unit back from death's door.
+                        if (unit.Regen > 0)
+                        {
+                            ApplyHeal(unit, unit.Regen * _balance.RegenHealPerStack, UnitRef.None, BattleEvent.CauseRegen);
+                            unit.Regen--;
+                        }
+
+                        break;
+                    case Tick.States:
+                        // The seven states of stage 45 lose a stack; nothing happens, so nothing is logged.
+                        foreach (EffectKind state in States)
+                        {
+                            int stacks = unit.StacksOf(state);
+                            if (stacks > 0)
+                            {
+                                unit.SetStacks(state, stacks - 1);
+                            }
+                        }
+
+                        break;
                 }
 
                 CheckEnd();

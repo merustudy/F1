@@ -181,8 +181,9 @@ namespace F1.Editor.Data
             EffectKind kind = row.Enum<EffectKind>(prefix + "Kind");
             int min;
             int max;
-            if (kind == EffectKind.Burn)
+            if (ItemEffect.CountsWhole(kind))
             {
+                // Stacks (a burn, a bleed, a regen, a cleanse) and milliseconds (a stagger, a charge) are whole numbers (stage 44).
                 min = max = row.Int(prefix + "Value");
             }
             else if (kind == EffectKind.Damage)
@@ -266,14 +267,19 @@ namespace F1.Editor.Data
         public static List<PotionData> Map(CsvTable table, List<string> errors)
         {
             table.RequireHeaders(RowMapping.Headers("Effect", "Magnitude", "ShopWeight", RowMapping.Icon, "Price"));
-            return RowMapping.MapRows(table, errors, row => new PotionData(
-                row.Id(RowMapping.Id),
-                row.Localized(RowMapping.Name),
-                row.Enum<PotionEffect>("Effect"),
-                row.Centi("Magnitude"),
-                row.Int("ShopWeight"),
-                RowMapping.ReadArt(row, RowMapping.Icon),
-                row.Int("Price")));
+            return RowMapping.MapRows(table, errors, row =>
+            {
+                // A heal or a shield is in hundredths ("14"); a cleanse (stage 44) counts stacks, a whole number.
+                PotionEffect effect = row.Enum<PotionEffect>("Effect");
+                return new PotionData(
+                    row.Id(RowMapping.Id),
+                    row.Localized(RowMapping.Name),
+                    effect,
+                    effect == PotionEffect.Cleanse ? row.Int("Magnitude") : row.Centi("Magnitude"),
+                    row.Int("ShopWeight"),
+                    RowMapping.ReadArt(row, RowMapping.Icon),
+                    row.Int("Price"));
+            });
         }
     }
 

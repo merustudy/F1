@@ -54,6 +54,8 @@ EliteCoinPercent,200
 SellPercent,25
 CoinsPerGold,10
 BurnDamagePerStack,0.27
+BleedDamagePerStack,0.27
+RegenHealPerStack,0.27
 HitMinDamage,0.5
 PhysicalCritDamagePercent,150
 MagicCritDamagePercent,150
@@ -101,3 +103,10 @@ TraitChanceRetreatPercent,15
 TraitChanceDeathsDoorPercent,25
 TraitChanceAfflictionPercent,40
 TraitChanceVirtuePercent,40
+FreezePercentPerStack,10
+BlindPercentPerStack,5
+AimPercentPerStack,5
+KeenPercentPerStack,5
+FuryPercentPerStack,25
+HastePercentPerStack,10
+VulnerablePercentPerStack,10

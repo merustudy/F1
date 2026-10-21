@@ -119,27 +119,21 @@ namespace F1.Tests
             Assert.IsNull(span);
         }
 
-        [TestCase(EffectKind.Damage, TargetMode.EnemyFront, true)]
-        [TestCase(EffectKind.Damage, TargetMode.EnemyBack, true)]
-        [TestCase(EffectKind.Burn, TargetMode.EnemyBack, true)]
-        [TestCase(EffectKind.Shield, TargetMode.EnemyBack, false)]
-        [TestCase(EffectKind.Burn, TargetMode.EnemyAll, true)]
-        [TestCase(EffectKind.Heal, TargetMode.AllyLowestHp, true)]
-        [TestCase(EffectKind.Shield, TargetMode.Self, true)]
-        [TestCase(EffectKind.Damage, TargetMode.Self, false)]
-        [TestCase(EffectKind.Burn, TargetMode.AllyAll, false)]
-        [TestCase(EffectKind.Heal, TargetMode.EnemyFront, false)]
-        [TestCase(EffectKind.Shield, TargetMode.EnemyAll, false)]
-        public void ItemEffect_HarmfulEffectsTargetEnemies_HelpfulEffectsTargetAllies(EffectKind kind, TargetMode target, bool valid)
+        [TestCase(EffectKind.Damage, TargetMode.EnemyFront)]
+        [TestCase(EffectKind.Damage, TargetMode.EnemyBack)]
+        [TestCase(EffectKind.Burn, TargetMode.EnemyBack)]
+        [TestCase(EffectKind.Shield, TargetMode.EnemyBack)]
+        [TestCase(EffectKind.Burn, TargetMode.EnemyAll)]
+        [TestCase(EffectKind.Heal, TargetMode.AllyLowestHp)]
+        [TestCase(EffectKind.Shield, TargetMode.Self)]
+        [TestCase(EffectKind.Damage, TargetMode.Self)]
+        [TestCase(EffectKind.Burn, TargetMode.AllyAll)]
+        [TestCase(EffectKind.Heal, TargetMode.EnemyFront)]
+        [TestCase(EffectKind.Shield, TargetMode.EnemyAll)]
+        public void ItemEffect_AnyKindMayGoToEitherSide(EffectKind kind, TargetMode target)
         {
-            if (valid)
-            {
-                Assert.DoesNotThrow(() => TestData.Effect(kind, target));
-            }
-            else
-            {
-                Assert.Throws<DataException>(() => TestData.Effect(kind, target));
-            }
+            // 2026-10-21 (the user, stage 45): the data names the target; nothing is kept to one side. A blow on one's own side just never misses or crits.
+            Assert.DoesNotThrow(() => TestData.Effect(kind, target));
         }
 
         [Test]

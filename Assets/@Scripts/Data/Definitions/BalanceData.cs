@@ -83,6 +83,8 @@ namespace F1.Data
             new KeySpec(nameof(StormBaseDamage), 1, Big, centi: true),
             new KeySpec(nameof(StormGrowth), 0, Big, centi: true),
             new KeySpec(nameof(BurnDamagePerStack), 1, Big, centi: true),
+            new KeySpec(nameof(BleedDamagePerStack), 1, Big, centi: true),
+            new KeySpec(nameof(RegenHealPerStack), 1, Big, centi: true),
             new KeySpec(nameof(HitMinDamage), 0, Big, centi: true),
             new KeySpec(nameof(PhysicalCritDamagePercent), 100, 1000),
             new KeySpec(nameof(MagicCritDamagePercent), 100, 1000),
@@ -159,6 +161,14 @@ namespace F1.Data
             new KeySpec(nameof(TraitChanceDeathsDoorPercent), 0, 100),
             new KeySpec(nameof(TraitChanceAfflictionPercent), 0, 100),
             new KeySpec(nameof(TraitChanceVirtuePercent), 0, 100),
+            // The seven states of stage 45 (Docs/Design/02_Combat_System.md §5): what one stack does, in percent or percent points.
+            new KeySpec(nameof(FreezePercentPerStack), 0, 100),
+            new KeySpec(nameof(BlindPercentPerStack), 0, 100),
+            new KeySpec(nameof(AimPercentPerStack), 0, 100),
+            new KeySpec(nameof(KeenPercentPerStack), 0, 100),
+            new KeySpec(nameof(FuryPercentPerStack), 0, 500),
+            new KeySpec(nameof(HastePercentPerStack), 0, 100),
+            new KeySpec(nameof(VulnerablePercentPerStack), 0, 100),
         };
 
         /// <summary>The most things a shop can offer at once (Slice B stage 21: the merchant's grid holds any eight of them; Docs/Architecture/12_UI.md "상인").</summary>
@@ -337,6 +347,12 @@ namespace F1.Data
         /// its allies.
         /// </summary>
         public int BurnDamagePerStack => _values[nameof(BurnDamagePerStack)];
+
+        /// <summary>What one stack of bleed deals at a tick, in hundredths (Slice D stage 44, Docs/Design/02_Combat_System.md §5): through any shield.</summary>
+        public int BleedDamagePerStack => _values[nameof(BleedDamagePerStack)];
+
+        /// <summary>What one stack of regen heals at a tick, in hundredths (stage 44).</summary>
+        public int RegenHealPerStack => _values[nameof(RegenHealPerStack)];
         public int HitMinDamage => _values[nameof(HitMinDamage)];
         public int PhysicalCritDamagePercent => _values[nameof(PhysicalCritDamagePercent)];
         public int MagicCritDamagePercent => _values[nameof(MagicCritDamagePercent)];
@@ -518,5 +534,14 @@ namespace F1.Data
         public int TraitChanceDeathsDoorPercent => _values[nameof(TraitChanceDeathsDoorPercent)];
         public int TraitChanceAfflictionPercent => _values[nameof(TraitChanceAfflictionPercent)];
         public int TraitChanceVirtuePercent => _values[nameof(TraitChanceVirtuePercent)];
+
+        /// <summary>The seven states of stage 45, per stack: freeze slows cooldowns by this percent, haste quickens them; blind takes these points off the hit, aim adds them; keen adds them to the critical chance, fury to its multiplier; vulnerable adds this percent to the damage items deal the unit.</summary>
+        public int FreezePercentPerStack => _values[nameof(FreezePercentPerStack)];
+        public int BlindPercentPerStack => _values[nameof(BlindPercentPerStack)];
+        public int AimPercentPerStack => _values[nameof(AimPercentPerStack)];
+        public int KeenPercentPerStack => _values[nameof(KeenPercentPerStack)];
+        public int FuryPercentPerStack => _values[nameof(FuryPercentPerStack)];
+        public int HastePercentPerStack => _values[nameof(HastePercentPerStack)];
+        public int VulnerablePercentPerStack => _values[nameof(VulnerablePercentPerStack)];
     }
 }

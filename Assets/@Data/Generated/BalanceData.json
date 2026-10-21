@@ -2,6 +2,18 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Key": "AimPercentPerStack",
+      "Value": 5
+    },
+    {
+      "Key": "BleedDamagePerStack",
+      "Value": 27
+    },
+    {
+      "Key": "BlindPercentPerStack",
+      "Value": 5
+    },
+    {
       "Key": "BurnDamagePerStack",
       "Value": 27
     },
@@ -162,12 +174,24 @@
       "Value": 14
     },
     {
+      "Key": "FreezePercentPerStack",
+      "Value": 10
+    },
+    {
+      "Key": "FuryPercentPerStack",
+      "Value": 25
+    },
+    {
       "Key": "GoldClear",
       "Value": 20
     },
     {
       "Key": "GoldPerFloor",
       "Value": 2
+    },
+    {
+      "Key": "HastePercentPerStack",
+      "Value": 10
     },
     {
       "Key": "HirePrice",
@@ -220,6 +244,10 @@
     {
       "Key": "InventoryWidth",
       "Value": 10
+    },
+    {
+      "Key": "KeenPercentPerStack",
+      "Value": 5
     },
     {
       "Key": "MagicCritDamagePercent",
@@ -284,6 +312,10 @@
     {
       "Key": "RecruitTraitWeight2",
       "Value": 20
+    },
+    {
+      "Key": "RegenHealPerStack",
+      "Value": 27
     },
     {
       "Key": "RestDays",
@@ -408,6 +440,10 @@
     {
       "Key": "VirtuePerEndPoint",
       "Value": 1
+    },
+    {
+      "Key": "VulnerablePercentPerStack",
+      "Value": 10
     }
   ]
 }

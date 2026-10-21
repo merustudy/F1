@@ -96,7 +96,52 @@ namespace F1.Gameplay
         public int Hp { get; internal set; }
         public int Shield { get; internal set; }
         public int Burn { get; internal set; }
+
+        /// <summary>The effect vocabulary's states (Slice D stage 44, Docs/Design/02_Combat_System.md §5): bleed and regen stacks, and thorns in hundredths.</summary>
+        public int Bleed { get; internal set; }
+        public int Regen { get; internal set; }
+        public int Thorns { get; internal set; }
+
+        /// <summary>The seven states of stage 45 (Docs/Design/02_Combat_System.md §5), in stacks that lose one at every tick.</summary>
+        public int Freeze { get; internal set; }
+        public int Blind { get; internal set; }
+        public int Aim { get; internal set; }
+        public int Keen { get; internal set; }
+        public int Fury { get; internal set; }
+        public int Haste { get; internal set; }
+        public int Vulnerable { get; internal set; }
         public bool Alive { get; internal set; }
+
+        /// <summary>The unit's stacks of one of the seven states.</summary>
+        public int StacksOf(EffectKind state)
+        {
+            switch (state)
+            {
+                case EffectKind.Freeze: return Freeze;
+                case EffectKind.Blind: return Blind;
+                case EffectKind.Aim: return Aim;
+                case EffectKind.Keen: return Keen;
+                case EffectKind.Fury: return Fury;
+                case EffectKind.Haste: return Haste;
+                case EffectKind.Vulnerable: return Vulnerable;
+                default: throw new System.ArgumentOutOfRangeException(nameof(state), state, "Not a state.");
+            }
+        }
+
+        internal void SetStacks(EffectKind state, int stacks)
+        {
+            switch (state)
+            {
+                case EffectKind.Freeze: Freeze = stacks; break;
+                case EffectKind.Blind: Blind = stacks; break;
+                case EffectKind.Aim: Aim = stacks; break;
+                case EffectKind.Keen: Keen = stacks; break;
+                case EffectKind.Fury: Fury = stacks; break;
+                case EffectKind.Haste: Haste = stacks; break;
+                case EffectKind.Vulnerable: Vulnerable = stacks; break;
+                default: throw new System.ArgumentOutOfRangeException(nameof(state), state, "Not a state.");
+            }
+        }
 
         /// <summary>At 0 HP but not dead. Hits may now trigger death rolls.</summary>
         public bool InDog { get; internal set; }

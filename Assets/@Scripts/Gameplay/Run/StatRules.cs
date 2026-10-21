@@ -108,8 +108,8 @@ namespace F1.Gameplay
         /// </summary>
         public static bool CanMiss(ItemData item, ItemEffect effect)
         {
-            return item.School == ItemSchool.Physical && (item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Attack)
-                && (effect.Kind == EffectKind.Damage || effect.Kind == EffectKind.Burn);
+            // Stage 45: what hurts (damage, burn, bleed, stagger, freeze, blind, vulnerable) rolls when it goes to the other side; the engine checks the side.
+            return item.School == ItemSchool.Physical && (item.Category == ItemCategory.Weapon || item.Category == ItemCategory.Attack) && ItemEffect.Hurts(effect.Kind);
         }
 
         /// <summary>

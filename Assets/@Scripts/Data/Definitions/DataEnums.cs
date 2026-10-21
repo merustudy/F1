@@ -156,12 +156,34 @@ namespace F1.Data
         BattleStart,
     }
 
+    /// <summary>
+    /// What an item's effect does (Docs/Design/02_Combat_System.md §4·§5). The first four are Slice A's. The rest came in with the effect vocabulary
+    /// (Slice D stage 44, Docs/Design/18_Effect_Vocabulary_Proposal.md): Bleed, a physical damage over time that goes through a shield and stops when
+    /// the target is healed; Regen, a heal over time; Thorns, damage dealt back to a melee attacker; Cleanse, which takes burn and bleed off; Stagger,
+    /// which pushes every cycling item of a unit back by its milliseconds; Charge, which pulls them forward.
+    /// The second round (stage 45, Design/18 §10) added seven states that count stacks and lose one at every tick, like a burn: Freeze (cooldowns slower),
+    /// Blind (hit lower), Aim (hit higher), Keen (critical chance higher), Fury (critical multiplier higher), Haste (cooldowns faster), Vulnerable
+    /// (damage from items taken higher). Any effect may go to either side: the data names the target (2026-10-21, the user).
+    /// </summary>
     public enum EffectKind
     {
         Damage,
         Heal,
         Shield,
         Burn,
+        Bleed,
+        Regen,
+        Thorns,
+        Cleanse,
+        Stagger,
+        Charge,
+        Freeze,
+        Blind,
+        Aim,
+        Keen,
+        Fury,
+        Haste,
+        Vulnerable,
     }
 
     /// <summary>
@@ -217,10 +239,12 @@ namespace F1.Data
         EventTarget,
     }
 
+    /// <summary>What a potion does to the mercenary it is used on (Docs/Design/02 §10). Cleanse (stage 44) takes that many burn and bleed stacks off.</summary>
     public enum PotionEffect
     {
         Heal,
         Shield,
+        Cleanse,
     }
 
     /// <summary>
