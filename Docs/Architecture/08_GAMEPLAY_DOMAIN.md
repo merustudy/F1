@@ -319,6 +319,7 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 틱: `Ticks`가 `Tick.Burn`·`Bleed`·`Regen`의 차례로 `TickUnits`를 아군·적에 돌린다. 출혈 틱은 `ApplyDamage(…, throughShield: true)`로 보호막을 건너고, 재생 틱은 `ApplyHeal`이다. `BattleEvent.IsTickCause`(화상·출혈·가시)는 `ApplyDamage`에서 피격의 피로를 막는다.
 - `ApplyHeal`: 크기가 0보다 크면 출혈을 0으로 하고 `Cleansed`(A 0, B 멎은 중첩, 원인은 그 회복의 원인)를 남긴다. 빈사 탈출은 그대로다.
 - `Cleanse`(아이템·포션): 화상·출혈에서 각각 N까지 뺀다. `Stagger`: 대상의 `Active && Cycles` 아이템의 `NextFireMs += N`. `Charge`: `NextFireMs = max(TimeMs + 1, NextFireMs − N)`, 발동한 아이템 자신은 건너뛴다. 모두 그 자리에서 끝나 상태·만료가 없다.
+- 포션(46단계, Design/19): `PotionEffect.Regen`은 `AddRegen`(원인은 포션 id, Source 없음 — 로그의 원인 글은 포션 이름)이다. 정화 포션은 `Cleanse` 그대로. `TryUsePotion`의 갈래 넷.
 - 이벤트: `BleedApplied`·`RegenApplied`·`ThornsGained`·`Cleansed`·`Staggered`·`Charged`; 원인 상수 `CauseBleed`·`CauseRegen`·`CauseThorns`(Source는 None). `Kill`이 세 상태를 0으로 한다.
 - 화면: 카드의 효과 줄(`UiText.Effect`·`EffectValue`: 중첩, 초, 수), 전투 로그의 줄과 원인 글(`BattleLogText`). 유닛 위의 상태 표시와 연출은 목업 뒤(Architecture/12).
 - 시뮬: `BattleStats`에 어휘의 줄(출혈·재생 중첩, 가시의 피해, 정화·경직·충전 수 — 쓰인 전투가 있을 때만 출력), `trace`의 상세. 정책은 그대로(분류로 놓는다).
@@ -392,7 +393,7 @@ dotnet run --project Tools/Sim -- items
 - `items`는 아이템마다 일반 단계의 피해 범위, 한 대상의 평균, 맞히는 수, 칸·초당 피해를 적는다(22단계의 크기 규칙). `trace`는 0.01 단위의 값(HP, 피해, 회복, 보호막, 폭풍)을 수로 적는다.
 - `map`은 원정 시드 하나의 맵을 노드마다 한 줄로 적는다(id, 층, 열, 종류, 무리, 다음 노드). `expedition`의 보고는 원정마다 정예·야영지를 들른 수, 전투 시간(x1),
   합치기(전리품과 상점에서 바로 합친 것과 정리의 합치기)와 정비의 수, 끝날 때 보드의 단계별 아이템 수, 붕괴(고통·각성)와 쓰러짐의 수와 붕괴가 난 원정의 비율, 전리품(떨어진 수, 주운 수), 상점(들른 수, 산 것, 새로고침, 받은·쓴·남은 코인)을 함께 적는다.
-  정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13,
+  정책의 합치기와 야영지의 선택은 `Docs/Design/08_Simulation_Report.md` §10·§11, 상점의 선택(`SimPolicy.ShopAt`: 포션 둘까지, 합쳐지는 것, 자리가 맞는 것을 사고, 쓸 것이 없으면 둘까지 새로고침)은 §13, 전투의 포션(`UsePotionIfNeeded`, 46단계: 치유 → 빈사의 방벽 → 치유가 없을 때의 재생 → 해로운 중첩이 넷 이상인 구성원의 정화)과 자기 버프 아이템의 자리(`MemberWithRoomFor`, 46단계: 자신에게 예리·격분을 거는 아이템은 치명타 확률이 가장 높은 무기를 든 구성원에게)는 §52,
   전리품(`SimPolicy.PickLoot`: 드랍마다 합쳐지는 것, 자리가 맞는 구성원의 빈 칸, 인벤토리의 차례로 줍고 나머지는 둔다)은 §14, 격자의 자리(`ItemBoard.FindRoom`, 가방은 가방 칸이 가장 적은 용병에게. 밀어내기·가방 옮기기는 하지 않는다)와 가방의 수는 §15.
 
 - `run`(25·26단계)은 런 하나를 끝까지 돌린다. 로비 정책(시뮬 도구이지 규칙이 아니다): 로스터가 `PartySize + bench` 아래이고 금이 되면 첫 후보를 고용(해고는 하지 않음), 파티는 피로가 낮은 넷을 직업의 권장 열 차례로,

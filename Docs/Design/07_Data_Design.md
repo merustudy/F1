@@ -41,7 +41,7 @@
 | `JobData.csv` | 직업: 이름, 최대 HP, 보드의 칸 수, 기본 무기와 등급, 패시브(자리 조건 포함)와 그 설명문, 권장 열 |
 | `ItemData.csv` | 아이템(23단계부터 `Unique` 열: 유니크는 상점·전리품에 없다): 분류(무기 장비·방어 장비·공격 아이템·지원 아이템·기타 아이템, 02 §4), 크기(칸), 쿨다운, 쓸 수 있는 자리(앞이나 뒤에서 N번째까지), 효과(타입, 타깃, 깊이, 계수), 상점 가중치 `ShopWeight`(18단계에 보상 가중치에서 이름을 바꿨다. 0이면 상점에 나오지 않음), 상점의 값 `Price`(일반 기준. 0이면 팔지 않음, 17단계). 적의 아이템도 같은 척도다(02 §4). 20단계: 근접 무기 `Melee`(true/false, 무기 장비만 true), 별 칸 `Stars`(돌리지 않은 모양의 왼쪽 위 칸에서 잰 "x:y"를 +로 이음, 아이템 둘레의 칸만), 별의 피해 `StarDamage`(별에 놓인 근접 무기의 피해 +N, 일반 기준이고 단계마다 N씩 더. 별이 있으면 1 이상). 효과가 없는 아이템은 별이 있고 쿨다운이 0이다(발동하지 않음). Slice D 39단계(02 §4 "방어구"): 발동의 때 `Trigger`(비면 쿨다운, `BattleStart`면 전투 시작 때 한 번이고 쿨다운 0), 받는 치명타 감소 `CritTakenPercent`(%p, 방어 장비만, 비면 0). 44단계(02 §4·§5): 효과 종류에 `Bleed`·`Regen`·`Thorns`·`Cleanse`·`Stagger`·`Charge`(중첩·밀리초는 정수, 가시는 0.01 단위). 흡혈 열은 2026-10-21 사용자 지시로 뺐다. 45단계: 효과 종류에 `Freeze`·`Blind`·`Aim`·`Keen`·`Fury`·`Haste`·`Vulnerable`(중첩, 정수)이고 효과의 대상에 편 제한이 없다(어느 종류든 어느 대상이든) |
 | `RecipeData.csv` | 담금질의 레시피(23단계): 결과(유니크 아이템), 바탕 아이템과 단계, 촉매(★ 아이템)와 단계. 이름 열은 없다 | `Id,Result,BaseItem,BaseTier,Catalyst,CatalystTier` |
-| `PotionData.csv` | 포션: 효과와 크기, 상점 가중치 `ShopWeight`(18단계), 병 아이콘, 상점의 값 `Price`(17단계). 44단계: 효과 `Cleanse`(그때 `Magnitude`는 중첩 수, 정수) |
+| `PotionData.csv` | 포션: 효과와 크기, 상점 가중치 `ShopWeight`(18단계), 병 아이콘, 상점의 값 `Price`(17단계). 44단계: 효과 `Cleanse`(그때 `Magnitude`는 중첩 수, 정수). 46단계: 효과 `Regen`(중첩 수, 정수), 행 넷(치유·방벽·정화·재생) |
 | `EnemyData.csv` | 적: 레벨, 최대 HP, 아이템과 등급(적의 힘. 쓰러뜨리면 그 아이템이 던전의 등급으로 떨어진다: 03 §5), 그림과 그림의 크기 배율(보스는 더 크게), 페이즈(28단계, 선택 열 `Phases`: HP 문턱마다 바꿔 드는 아이템 묶음. 02 §9), 깊은 층의 아이템(2026-10-20, 선택 열 `DeepItems`: 층 문턱마다 **더** 드는 묶음, 누적. 03 §4) |
 | `EnemyGroupData.csv` | 적 무리: 던전, 나오는 층, 보스 여부, 정예 여부(Slice B), 서는 순서(앞에서부터, 넷까지) |
 | `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
@@ -64,5 +64,6 @@
   → 42단계(2026-10-20 장비 요구 스탯, 02 §4): `ItemData.csv`의 선택 열 **`ReqStat`**(`Str`·`Dex`·`Con`·`Int`·`Wis`·`End`)·**`ReqValue`**(1..`StatMax`) — 둘은 함께 채우거나 함께 비우고, 무기 장비·방어 장비만 가진다(출고 데이터는 모든 무기·방어 장비가 가진다). 저장 25(값만 올림, 모양은 24 그대로).
   → 44단계(2026-10-20 효과 어휘, Design/18, 02 §4·§5): 위의 효과 종류 여섯, `PotionData`의 `Cleanse`, `BalanceData`의 Key 둘(흡혈 열 `LifestealPercent`는 2026-10-21 사용자 "흡혈은 삭제"로 뺐다). 저장 형식은 그대로(전투 중의 상태는 저장하지 않는다: Architecture/07).
   → 45단계(2026-10-21 2차 어휘, Design/18 §10, 02 §4·§5): 위의 효과 종류 일곱과 `BalanceData`의 Key 일곱. 효과의 대상 검사(해로운 것은 적에게만)를 지웠다. 저장 형식은 그대로.
+  → 46단계(2026-10-21 아이템 목록, Design/19, 02 §4·§10, 03 §4·§5): `ItemData` +29 행(무기 8·공격 4·지원 6·방어 5·적 2·유니크 4 → 56), `RecipeData` +4(→ 5), `PotionData` +2(정화·재생 → 4. 효과 `Regen`은 `Cleanse`처럼 `Magnitude`가 중첩 수), `BagData` +2(등짐 2×2·큰 배낭 3×2 → 5), `EnemyData`의 `DeepItems` 넷 교체. 열·저장 형식은 그대로. 새 행의 `Icon`은 아이콘 라운드까지 비어 있다.
   → 38단계: `TraitData.csv`의 계기 열 `Source`(`Clear`·`Retreat`·`DeathsDoor`·`Affliction`·`Virtue` — 얻은 특성에만, 타고난 것은 빈칸)와 얻은 일곱의 행, `BalanceData`의 `TraitChanceClearPercent`·`TraitChanceRetreatPercent`·`TraitChanceDeathsDoorPercent`·`TraitChanceAfflictionPercent`·`TraitChanceVirtuePercent`(0..100, 05 §6). 상세는 Architecture/05.
 - 위 3절의 "확인된 값" 가운데 Slice A가 쓰는 것은 CSV의 출발값으로 넣었다. 시뮬 결과로 바뀌면 CSV가 기준이다.
