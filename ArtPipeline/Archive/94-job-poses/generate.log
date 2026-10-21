@@ -1,0 +1,97 @@
+[21:27:31] attack rogue (1/12)
+[1/6] 레퍼런스 확인: rogue.reference.png (387,765 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,639 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=rogue, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,518 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.32)
+[5/6] 원본은 rogue.raw.png. 맞추기: tools/fit_pose.py --type attack --key rogue
+[6/6] 저장 완료.
+[21:27:54] attack archer (2/12)
+[1/6] 레퍼런스 확인: archer.reference.png (341,337 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,276 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=archer, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,445 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.35)
+[5/6] 원본은 archer.raw.png. 맞추기: tools/fit_pose.py --type attack --key archer
+[6/6] 저장 완료.
+[21:28:16] attack occultist (3/12)
+[1/6] 레퍼런스 확인: occultist.reference.png (414,771 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,267 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=occultist, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,434 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.38)
+[5/6] 원본은 occultist.raw.png. 맞추기: tools/fit_pose.py --type attack --key occultist
+[6/6] 저장 완료.
+[21:28:37] attack minstrel (4/12)
+[1/6] 레퍼런스 확인: minstrel.reference.png (418,137 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,497 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=minstrel, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,490 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.41)
+[5/6] 원본은 minstrel.raw.png. 맞추기: tools/fit_pose.py --type attack --key minstrel
+[6/6] 저장 완료.
+[21:28:57] hit rogue (5/12)
+[1/6] 레퍼런스 확인: rogue.reference.png (387,853 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,522 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=rogue, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,499 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.44)
+[5/6] 원본은 rogue.raw.png. 맞추기: tools/fit_pose.py --type hit --key rogue
+[6/6] 저장 완료.
+[21:29:23] hit archer (6/12)
+[1/6] 레퍼런스 확인: archer.reference.png (341,514 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,191 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=archer, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,431 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.47)
+[5/6] 원본은 archer.raw.png. 맞추기: tools/fit_pose.py --type hit --key archer
+[6/6] 저장 완료.
+[21:29:43] hit occultist (7/12)
+[1/6] 레퍼런스 확인: occultist.reference.png (414,909 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,229 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=occultist, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,433 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.50)
+[5/6] 원본은 occultist.raw.png. 맞추기: tools/fit_pose.py --type hit --key occultist
+[6/6] 저장 완료.
+[21:30:05] hit minstrel (8/12)
+[1/6] 레퍼런스 확인: minstrel.reference.png (418,256 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,444 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=minstrel, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,485 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $10.53)
+[5/6] 원본은 minstrel.raw.png. 맞추기: tools/fit_pose.py --type hit --key minstrel
+[6/6] 저장 완료.
+[21:30:27] hit rogue_resolute (9/12)
+[1/6] 레퍼런스 확인: rogue.reference.png (387,853 bytes, 보내는 포맷 PNG)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md 로 프롬프트 조립 (6,987 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/94-job-poses/resolute.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=rogue, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,608 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.56)
+[5/6] 원본은 rogue_resolute.raw.png. 맞추기: tools/fit_pose.py --type hit --key rogue
+[6/6] 저장 완료.
+[21:30:49] hit archer_resolute (10/12)
+[1/6] 레퍼런스 확인: archer.reference.png (341,514 bytes, 보내는 포맷 PNG)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md 로 프롬프트 조립 (6,964 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/94-job-poses/resolute.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=archer, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,610 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.59)
+[5/6] 원본은 archer_resolute.raw.png. 맞추기: tools/fit_pose.py --type hit --key archer
+[6/6] 저장 완료.
+[21:31:14] hit occultist_resolute (11/12)
+[1/6] 레퍼런스 확인: occultist.reference.png (414,909 bytes, 보내는 포맷 PNG)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md 로 프롬프트 조립 (6,978 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/94-job-poses/resolute.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=occultist, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,603 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.62)
+[5/6] 원본은 occultist_resolute.raw.png. 맞추기: tools/fit_pose.py --type hit --key occultist
+[6/6] 저장 완료.
+[21:31:37] hit minstrel_resolute (12/12)
+[1/6] 레퍼런스 확인: minstrel.reference.png (418,256 bytes, 보내는 포맷 PNG)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md 로 프롬프트 조립 (6,947 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/94-job-poses/resolute.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=minstrel, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,601 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.65)
+[5/6] 원본은 minstrel_resolute.raw.png. 맞추기: tools/fit_pose.py --type hit --key minstrel
+[6/6] 저장 완료.
+[21:31:58] done: 12 calls

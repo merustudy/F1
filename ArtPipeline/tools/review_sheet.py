@@ -85,7 +85,11 @@ def palette() -> dict:
     pattern = re.compile(r"Color (\w+) = Rgb\(0x([0-9A-Fa-f]{2}), 0x([0-9A-Fa-f]{2}), 0x([0-9A-Fa-f]{2})\)")
     colours = {name: (int(r, 16), int(g, 16), int(b, 16))
                for name, r, g, b in pattern.findall(UI_PALETTE.read_text(encoding="utf-8"))}
-    for needed in ("Background", "Party", "Enemy", "Line", "Text", "TextDim", "Slot"):
+    # 2026-10-20 R18 removed UiPalette.Party and Enemy (nothing on the screens used them): the sheet's side frames fall back to the
+    # button blue and the danger red, which are the party's and the enemy's hues on the screens.
+    colours.setdefault("Party", colours.get("Button", (0x3B, 0x6F, 0xB5)))
+    colours.setdefault("Enemy", colours.get("Danger", (0xC0, 0x39, 0x2B)))
+    for needed in ("Background", "Line", "Text", "TextDim", "Slot"):
         if needed not in colours:
             raise SystemExit(f"실패: UiPalette.cs 에서 {needed} 색을 읽지 못했다.")
     return colours

@@ -1,26 +1,26 @@
 Key,Subject,Reference
 longsword,"the knight's longsword: a broad steel blade, a brass crossguard and a round pommel",Assets/@Art/Unit/Job/knight.png
-greataxe,"the valkyrie's great axe: a wooden haft with one broad steel axe blade",Assets/@Art/Unit/Job/valkyrie.png
-mace,"the paladin's mace: a dark handle with a round steel head studded with spikes",ArtPipeline/Archive/82-barracks-levelup/removed-paladin/paladin.png
-healing_staff,"the bishop's staff: a golden-brown staff topped with a golden sun disc",Assets/@Art/Unit/Job/bishop.png
-fire_staff,"the archmage's staff: a gnarled wooden staff with a red crystal at its top",Assets/@Art/Unit/Job/archmage.png
+greataxe,the valkyrie's great axe: a wooden haft with one broad steel axe blade,Assets/@Art/Unit/Job/valkyrie.png
+mace,the paladin's mace: a dark handle with a round steel head studded with spikes,ArtPipeline/Archive/82-barracks-levelup/removed-paladin/paladin.png
+healing_staff,the bishop's staff: a golden-brown staff topped with a golden sun disc,Assets/@Art/Unit/Job/bishop.png
+fire_staff,the archmage's staff: a gnarled wooden staff with a red crystal at its top,Assets/@Art/Unit/Job/archmage.png
 dagger,"a dagger: a short steel blade, a small crossguard and a leather grip",
-longbow,"a wooden longbow with its string",
-spear,"a spear: a wooden shaft with a leaf-shaped steel head",
+longbow,a wooden longbow with its string,
+spear,a spear: a wooden shaft with a leaf-shaped steel head,
 halberd,"a halberd: a wooden shaft topped with an axe blade, a spike and a back hook",
-buckler,"a small round buckler: a wooden shield with a steel rim and a steel boss in its middle",
+buckler,a small round buckler: a wooden shield with a steel rim and a steel boss in its middle,
 ward_charm,"a ward charm: a brass amulet set with a blue stone, on a leather cord",
 herb_pouch,"a small leather pouch tied with a cord, with green herb leaves sticking out of it",
 ember_flask,"a round glass flask with a cork stopper, holding orange embers",
 rat_bite,"a small clawed weapon made of three long curved dirty-yellow rat claws, their bases bound together with a strip of brown leather at the left, the three claw tips fanning out to the right",
 rusty_blade,"the goblin raider's short sword: a rusty, notched blade with a crude wrapped grip",Assets/@Art/Unit/Enemy/goblin_raider.png
-crude_bow,"the goblin archer's crude short bow: a bent branch with a string",Assets/@Art/Unit/Enemy/goblin_archer.png
-lantern_staff,"the goblin shaman's crooked staff: a gnarled brown wooden staff with a torn cloth strip tied near the top and a rusty tin lantern with yellow glass panes hanging from its hooked tip",Assets/@Art/Unit/Enemy/goblin_shaman.png
-mending_chant,"a charm of small bones and green leaves tied together with a cord",
-overseer_maul,"the overseer's maul: a heavy hammer with a big iron head on a thick wooden shaft",Assets/@Art/Unit/Enemy/mine_overseer.png
+crude_bow,the goblin archer's crude short bow: a bent branch with a string,Assets/@Art/Unit/Enemy/goblin_archer.png
+lantern_staff,the goblin shaman's crooked staff: a gnarled brown wooden staff with a torn cloth strip tied near the top and a rusty tin lantern with yellow glass panes hanging from its hooked tip,Assets/@Art/Unit/Enemy/goblin_shaman.png
+mending_chant,a charm of small bones and green leaves tied together with a cord,
+overseer_maul,the overseer's maul: a heavy hammer with a big iron head on a thick wooden shaft,Assets/@Art/Unit/Enemy/mine_overseer.png
 overseer_roar,"a hobgoblin's open roaring mouth with two tusks, seen from the side, and three curved sound lines in front of it",
 gladius,"a Roman gladius, the unique sword forged from the knight's longsword: a short broad steel blade with a faint gold engraving along its fuller, a bronze crossguard and round pommel, a dark leather grip; richer and rarer-looking than the longsword, the same metal and ink",Assets/@Art/Unit/Job/knight.png
-abyss_cleaver,"the Abyss Lord's cleaver: a huge wide rusted iron blade with a chipped edge on a thick bone-wrapped grip",Assets/@Art/Unit/Enemy/abyss_lord.png
+abyss_cleaver,the Abyss Lord's cleaver: a huge wide rusted iron blade with a chipped edge on a thick bone-wrapped grip,Assets/@Art/Unit/Enemy/abyss_lord.png
 abyss_howl,"a bone-white skull with a huge jutting jaw thrown open in a howl, seen from the side, with three curved sickly green sound lines in front of it",
 abyss_grasp,"a huge bony hand with long cracked fingers reaching out and clawing, bone white with sickly green light between the fingers",
 iron_armor,"an iron armor: a grey steel breastplate with big rounded shoulder plates and a short skirt of overlapping steel bands, brown leather straps at the sides, standing upright, seen from the front, with no one inside it",
@@ -54,3 +54,5 @@ bloodgale,"the valkyrie's battle axe reforged as a unique weapon: a wooden haft 
 windcutter,"a longbow reforged as a unique weapon: a slender pale wooden longbow with its string, its two tips bound with silver bands and a short green ribbon tied at the grip, richer and rarer-looking than a plain bow",
 cinder,"the archmage's fire staff reforged as a unique weapon: a gnarled wooden staff with a bigger, brighter red-orange crystal at its top giving off a few small embers, richer and rarer-looking than the plain staff, the same wood and ink",Assets/@Art/Unit/Job/archmage.png
 dawnlight,"the bishop's healing staff reforged as a unique weapon: a golden-brown staff topped with a larger golden sun disc with short straight rays, richer and rarer-looking than the plain staff, the same metal and ink",Assets/@Art/Unit/Job/bishop.png
+cursed_tome,"a cursed tome: a thick closed book bound in dark violet-black leather with iron corner clasps and a bone-coloured eye sigil on the cover, lying flat on its back with the spine to the left, a faint violet tint at the edges of its pages",
+lute,"an old lute: a rounded pear-shaped wooden body with a round sound hole, a short bent neck with tuning pegs, four strings and a few scuffs, lying level with the neck to the left",

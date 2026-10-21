@@ -1,0 +1,17 @@
+[06:23:06] hit rogue (1/2)
+[1/6] 레퍼런스 확인: rogue.reference.png (371,254 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,988 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=rogue, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,604 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.68)
+[5/6] 원본은 rogue.raw.png. 맞추기: tools/fit_pose.py --type hit --key rogue
+[6/6] 저장 완료.
+[06:23:26] hit rogue_resolute (2/2)
+[1/6] 레퍼런스 확인: rogue.reference.png (371,254 bytes, 보내는 포맷 PNG)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/38-breakdown-fx/STYLE_RUNTIME-statepose.md 로 프롬프트 조립 (7,361 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/94-job-poses/resolute.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=rogue, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,694 + image 1,536, 출력 343 tokens -> 약 $0.031 (누계 약 $10.71)
+[5/6] 원본은 rogue_resolute.raw.png. 맞추기: tools/fit_pose.py --type hit --key rogue
+[6/6] 저장 완료.
+[06:23:46] done: 2 calls

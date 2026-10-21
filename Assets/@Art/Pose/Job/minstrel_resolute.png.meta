@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: ecd1e85d5031c4da899ed31a60f345d2
+guid: cab16c3b00d1348288f13e97113d3f90
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4718371479731625631
-    second: spellblade_resolute_0
+      213: 5904519806145391180
+    second: minstrel_resolute_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: spellblade_resolute_0
+      name: minstrel_resolute_0
       rect:
         serializedVersion: 2
-        x: 793
-        y: 125
-        width: 510
-        height: 822
+        x: 499
+        y: 124
+        width: 583
+        height: 824
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1612340632af48eb0800000000000000
-      internalID: -4718371479731625631
+      spriteID: c4aed8eea7111f150800000000000000
+      internalID: 5904519806145391180
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      spellblade_resolute_0: -4718371479731625631
+      minstrel_resolute_0: 5904519806145391180
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

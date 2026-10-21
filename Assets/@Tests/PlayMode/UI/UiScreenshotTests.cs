@@ -449,6 +449,68 @@ namespace F1.Tests
             yield return Capture("ko_81_battle_armour_card");
         }
 
+        /// <summary>
+        /// The four jobs of stage 47 in their own pictures (Rounds 93 and 94, 2026-10-22): hired at the stagecoach (staged, two of the five dismissed
+        /// for the room) and formed into the party from row 1 — the rogue, the archer, the occultist, the minstrel — the party popup of the
+        /// expedition screen with them on its stage and in its list (the head size, the floor line, the thumbnails), then their first battle,
+        /// the rogue in its attack pose and the archer in its hit pose.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheNewJobs_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+
+            Managers.Run.Dismiss("astrid");
+            Managers.Run.Dismiss("mira");
+            string[] jobs = { "rogue", "archer", "occultist", "minstrel" };
+            List<MercenaryData> names = data.RecruitPool.Take(jobs.Length).ToList();
+            Managers.Run.Run.Recruits = jobs.Select((job, i) => new RecruitState { Id = names[i].Id, JobId = job, Stats = StatRules.BaseOf(data, job) }).ToList();
+            Managers.Run.Run.Gold = data.Balance.HirePrice * jobs.Length;
+            for (int i = 0; i < jobs.Length; i++)
+            {
+                Managers.Run.Hire(0);
+            }
+
+            lobby.Refresh();
+            yield return UiTestUtil.OpenBarracks(lobby);
+            for (int i = 0; i < jobs.Length; i++)
+            {
+                UiTestUtil.PlaceInParty(lobby, names[i].Id, i + 1);
+            }
+
+            UiTestUtil.CloseQuarter(lobby);
+            UiTestUtil.Click(lobby, "Frame/Strip/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            ExpeditionScreen expedition = UiTestUtil.Screen<ExpeditionScreen>();
+            UiTestUtil.Click(expedition, "Frame/Details/Depart");
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_82_expedition_party_new_jobs");
+            UiTestUtil.Click(expedition, "Frame/PartyWindow/PartyDepart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_83_battle_new_jobs");
+            BattleUnitView[] party = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Party)
+                .OrderBy(view => view.Unit.Row).ToArray();
+            party[0].Lunge(1f, withPose: true);
+            yield return Capture("ko_84_battle_new_jobs_attack_pose");
+            yield return new WaitForSeconds(0.5f);
+
+            party[1].Recoil(-1f);
+            yield return Capture("ko_85_battle_new_jobs_hit_pose");
+            yield return new WaitForSeconds(0.5f);
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);

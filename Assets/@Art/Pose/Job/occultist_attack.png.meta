@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cdb68c3bc13004d6e965a9ea2c6070f1
+guid: 83a92d61382b244869321c4e5bb6cca3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3259812215388527956
-    second: spellblade_attack_0
+      213: 1291583448200548180
+    second: occultist_attack_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +126,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: spellblade_attack_0
+      name: occultist_attack_0
       rect:
         serializedVersion: 2
-        x: 732
-        y: 120
-        width: 1194
-        height: 594
+        x: 665
+        y: 125
+        width: 806
+        height: 714
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ca2a943bf02d2c2d0800000000000000
-      internalID: -3259812215388527956
+      spriteID: 45f84c39d40ace110800000000000000
+      internalID: 1291583448200548180
       vertices: []
       indices: 
       edges: []
@@ -161,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      spellblade_attack_0: -3259812215388527956
+      occultist_attack_0: 1291583448200548180
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

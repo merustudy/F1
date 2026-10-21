@@ -1,0 +1,87 @@
+[18:40:18] character rogue (1/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,893 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=rogue, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,356 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $9.88)
+[5/6] 후처리: 원본은 rogue.raw.png, 맞춘 그림은 rogue.png.
+      피사체: 원본 934x952 (생성 캔버스의 93%) -> 648x660 (배율 0.69)
+      키:     660px / 목표 771px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/rogue.png
+      크기:   672x896, 319,185 bytes
+      여백:   좌 9 우 9 상 213 하 17 px
+      알파:   완전투명 72.2% 반투명 2.5% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:40:45] character archer (2/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,576 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=archer, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,290 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $9.91)
+[5/6] 후처리: 원본은 archer.raw.png, 맞춘 그림은 archer.png.
+      피사체: 원본 717x976 (생성 캔버스의 95%) -> 579x788 (배율 0.81)
+      키:     788px / 목표 788px (캔버스 672x896, 바닥 여백 20px)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/archer.png
+      크기:   672x896, 375,639 bytes
+      여백:   좌 43 우 44 상 85 하 17 px
+      알파:   완전투명 68.4% 반투명 3.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:41:10] character occultist (3/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,677 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=occultist, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,309 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $9.95)
+[5/6] 후처리: 원본은 occultist.raw.png, 맞춘 그림은 occultist.png.
+      피사체: 원본 851x996 (생성 캔버스의 97%) -> 648x758 (배율 0.76)
+      키:     758px / 목표 824px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/occultist.png
+      크기:   672x896, 435,989 bytes
+      여백:   좌 9 우 9 상 115 하 17 px
+      알파:   완전투명 58.5% 반투명 3.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:41:36] character minstrel (4/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,907 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=minstrel, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,364 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $9.98)
+[5/6] 후처리: 원본은 minstrel.raw.png, 맞춘 그림은 minstrel.png.
+      피사체: 원본 677x966 (생성 캔버스의 94%) -> 552x788 (배율 0.82)
+      키:     788px / 목표 788px (캔버스 672x896, 바닥 여백 20px)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/minstrel.png
+      크기:   672x896, 471,983 bytes
+      여백:   좌 57 우 57 상 85 하 17 px
+      알파:   완전투명 59.3% 반투명 2.5% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:42:01] item cursed_tome (5/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,940 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=cursed_tome, quality=medium, size=1536x512.
+      사용량: 입력 text 956 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $10.00)
+[5/6] 후처리: 원본은 cursed_tome.raw.png, 맞춘 그림은 cursed_tome.png.
+      조각: 원본 815x500 (생성 캔버스의 98%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 147x90 (폭의 45%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/cursed_tome.png
+      크기:   328x100, 25,687 bytes
+      여백:   좌 86 우 86 상 0 하 0 px
+      알파:   완전투명 65.1% 반투명 1.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:42:18] item lute (6/6)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,882 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=lute, quality=medium, size=1536x512.
+      사용량: 입력 text 944 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $10.02)
+[5/6] 후처리: 원본은 lute.raw.png, 맞춘 그림은 lute.png.
+      조각: 원본 1272x465 (생성 캔버스의 91%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 247x90 (폭의 75%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/lute.png
+      크기:   328x100, 31,872 bytes
+      여백:   좌 36 우 36 상 0 하 0 px
+      알파:   완전투명 52.4% 반투명 2.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[18:42:33] done: 6 calls

@@ -324,9 +324,10 @@ UI의 틀과 아이콘
 2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-attack", "-hit"가 따라 나온다 (ArtAddress.PoseOf)
 3. Entry -> Figure에서 자동으로 나온다 (Group F1-Art, Scope Expedition)
 
-용병의 붕괴·각성 자세 (2026-10-06 Round 38. 직업마다 따로 그린다: 지금은 발키리만)
+용병의 붕괴·각성 자세 (2026-10-06 Round 38. 직업마다 따로 그린다 — 2026-10-22부터 여덟 직업 모두)
 
 > 2026-10-18 Slice D 36단계(직업 재편): 직업의 그림은 `JobData.Figure`가 가리키는 그대로다 — 전사 `unit/job/knight`, 바이킹 `unit/job/valkyrie`(붕괴·각성 자세도 바이킹의 것), 마법사 `unit/job/archmage`, 사제 `unit/job/bishop`, 방랑자는 새 그림(Round 83, 이미지 API는 사용자의 요청으로)이 올 때까지 `unit/job/spellblade`(칼을 든 그림, 임시). 성기사의 그림 다섯(몸·공격·피격·붕괴·각성)은 `Assets`에서 지웠고 `ArtPipeline/Archive/82-barracks-levelup/removed-paladin/`에 남겼다(`Rosters`의 행도 지움, 메이스 아이콘의 참고 그림은 그 사본). 그림의 키(`knight` 등)는 바꾸지 않는다.
+> 2026-10-21 Slice D 47단계(직업군 확대, Design/20) → 2026-10-22 Round 93·94(사용자 "연결 및 구현"): 도적·궁수·흑마법사·악사는 자기 그림이다 — `unit/job/<id>`의 대표 그림과 자세 넷(붕괴 자리는 피격 그림의 복사: 사용자 결정 "붕괴 사진은 피격 사진으로 대체"). 저주의 서·낡은 류트의 아이콘도 연결(`item/cursed-tome`·`item/lute`). 마검사의 그림 다섯은 아무 직업도 가리키지 않게 되어 `Assets`에서 지우고 `ArtPipeline/Archive/93-job-figures/removed-spellblade/`에 남겼다(성기사와 같은 길). 소재 행은 `Rosters/character.csv`·`attack.csv`·`hit.csv`와 `Archive/94-job-poses/resolute.csv`.
 1. PNG   -> Assets/@Art/Pose/Job/<Id>_broken.png, <Id>_resolute.png (fit_pose.py의 산출물 그대로, 2048x1024)
 2. CSV   -> 없다. Figure가 있는 직업마다 "pose/job/<kebab-id>-broken", "-resolute"가 따라 나온다 (JobData.BrokenPose/ResolutePose)
 3. Entry -> 파일이 있는 직업만 (ArtSetup.Files. Group F1-Art, Scope Expedition. ExpeditionArt가 ResourceManager.ExistsAsync로 묻고 읽는다)

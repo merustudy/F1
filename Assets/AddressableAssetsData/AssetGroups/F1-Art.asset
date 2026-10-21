@@ -27,6 +27,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 043e20afa2337471fad3d6f2bfc8fa40
+    m_Address: pose/job/archer-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 04ef4f6f4dba440d4b0e7399f95a565d
     m_Address: unit/enemy/goblin-raider
     m_ReadOnly: 0
@@ -41,6 +47,18 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 06be297a7fc8248258ee9d5b07dd0f39
     m_Address: pose/job/knight-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06f25fea4069943399240a85beec8904
+    m_Address: pose/job/archer-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0941037949e7d4059a883e2f4f418454
+    m_Address: item/cursed-tome
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -243,6 +261,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 43c944325b0664a6d8802a05d6c97ebb
+    m_Address: pose/job/rogue-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46dc0b2cb244c48a3b1033508c9c24b0
     m_Address: pose/enemy/mine-overseer-attack
     m_ReadOnly: 0
@@ -251,12 +275,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 50449636f0b7645628953b7c33cf6b78
     m_Address: pose/job/valkyrie-attack
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 528ece6239c3b42cd8935abc6a14128a
-    m_Address: pose/job/spellblade-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -291,6 +309,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 61dc5d4c590004cc6ac99d3fd8bf0aef
+    m_Address: pose/job/archer-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6291045098c4b410f8e5cdc17f8cf643
     m_Address: pose/enemy/goblin-shaman-hit
     m_ReadOnly: 0
@@ -305,6 +329,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65360ba647f20488f8a94b0778afae14
     m_Address: unit/job/archmage
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 65c2668d4c68644b9bb61901e7a0ac44
+    m_Address: pose/job/minstrel-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -333,8 +363,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6a7dea171cf2f49ddb9151bdc80ffa8e
+    m_Address: pose/job/minstrel-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ca47c34cbab342b494074dc4f262497
     m_Address: pose/enemy/abyss-lord-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6da77a583fb1e42fdac5789f62c909c5
+    m_Address: pose/job/archer-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -405,6 +447,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 83a92d61382b244869321c4e5bb6cca3
+    m_Address: pose/job/occultist-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -423,12 +471,6 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 88054558662394804b778ba0228043e5
-    m_Address: unit/job/spellblade
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 88272b3a22b4a472faa8fc36967b19f9
     m_Address: building/coach-3
     m_ReadOnly: 0
@@ -437,6 +479,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89d12dce7a91e4ea793a9f5380cf70f8
     m_Address: item/frost-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8bb7caaf45302433d85041824b3f4fcc
+    m_Address: pose/job/occultist-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -473,6 +521,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9e5bf5ff7950f439fa56d1d1b76592ab
     m_Address: pose/job/valkyrie-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9f8849668b0604d35bc6cb610fa94f7f
+    m_Address: unit/job/rogue
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -525,6 +579,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac1fa6252a1a54ac8867b605c6b0bbba
+    m_Address: pose/job/rogue-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ad990f5f1691f4415adcf89bd7c7e849
     m_Address: pose/job/archmage-attack
     m_ReadOnly: 0
@@ -573,8 +633,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b3e4e8cffa68a4130ba0de74fccf1fec
+    m_Address: pose/job/rogue-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b407988f231d14721b1e8b6efd67e7c2
     m_Address: item/rusty-blade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b7c955b6f22de4216806225782214dca
+    m_Address: unit/job/archer
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -621,6 +693,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cab16c3b00d1348288f13e97113d3f90
+    m_Address: pose/job/minstrel-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cab7b7c6dd82a43339f4cc893b297e2c
+    m_Address: unit/job/occultist
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: cad3fa1212df04eee81411be7b721fa7
     m_Address: item/buckler
     m_ReadOnly: 0
@@ -651,8 +735,14 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: cdb68c3bc13004d6e965a9ea2c6070f1
-    m_Address: pose/job/spellblade-attack
+  - m_GUID: d39fd7ead1e5a4876ac923103ced1c0f
+    m_Address: pose/job/occultist-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d7662ff3540504696b47599bcbfec8cd
+    m_Address: unit/job/minstrel
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -687,6 +777,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dd88fb9eab1654ec19fa07853c647697
+    m_Address: pose/job/occultist-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e426af557a41d47d0990399ee48adefd
     m_Address: pose/enemy/goblin-archer-attack
     m_ReadOnly: 0
@@ -710,6 +806,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6428a66594f64082a4bdd57611be3e7
+    m_Address: pose/job/rogue-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e6a8f399265ff467eaae11bfdf37614a
     m_Address: item/cloth-hood
@@ -741,6 +843,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: eadbff5875676440d8bd0932d8842900
+    m_Address: item/lute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: eaf46b0b3de9d4192a44b9085e7f5404
     m_Address: item/healing-staff
     m_ReadOnly: 0
@@ -759,26 +867,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ecd1e85d5031c4da899ed31a60f345d2
-    m_Address: pose/job/spellblade-resolute
-    m_ReadOnly: 0
-    m_SerializedLabels:
-    - scope-expedition
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ed1342e1860b14c1db5e83e6b0db4ee6
     m_Address: item/mending-chant
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f33d647ce9e4043b489645316d890fe1
-    m_Address: pose/job/spellblade-hit
+  - m_GUID: f764de12c07144c35bf7b3fba6df7cda
+    m_Address: pose/enemy/goblin-archer-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f764de12c07144c35bf7b3fba6df7cda
-    m_Address: pose/enemy/goblin-archer-hit
+  - m_GUID: fbad2d8ce98f5434baa5375aad2d1e1d
+    m_Address: pose/job/minstrel-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
