@@ -805,6 +805,7 @@ namespace F1.UI
                 case PotionEffect.Heal: return UiStrings.Get(UiKeys.Potion.Heal, Amount(potion.Magnitude));
                 case PotionEffect.Shield: return UiStrings.Get(UiKeys.Potion.Shield, Amount(potion.Magnitude));
                 case PotionEffect.Cleanse: return UiStrings.Get(UiKeys.Potion.Cleanse, potion.Magnitude);
+                case PotionEffect.Regen: return UiStrings.Get(UiKeys.Potion.Regen, potion.Magnitude);
                 default: throw new ArgumentOutOfRangeException(nameof(potion), potion.Effect, "No text for this potion effect.");
             }
         }

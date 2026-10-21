@@ -185,8 +185,11 @@ namespace F1.UI
             _fatigue.SetActive(false);
         }
 
-        /// <summary>A potion among the merchant's goods (stage 21): one square of the boards' blue with its icon, no tier, no fatigue.</summary>
-        public void ShowPotion(Sprite icon)
+        /// <summary>
+        /// A potion among the merchant's goods (stage 21): one square of the boards' blue with its icon, no tier, no fatigue. Without an icon
+        /// (stage 46: a potion before its icon round) the square carries the potion's name, like an item without a picture.
+        /// </summary>
+        public void ShowPotion(PotionData potion, Sprite icon)
         {
             Item = null;
             Bag = null;
@@ -205,7 +208,9 @@ namespace F1.UI
             _icon.sprite = icon;
             _icon.enabled = icon != null;
             _icon.color = Color.white;
-            _text.enabled = false;
+            _text.enabled = icon == null && potion != null;
+            _text.text = _text.enabled ? UiText.Name(potion.Name) : string.Empty;
+            _text.color = UiPalette.Text;
             TierShown = null;
             Pips = 0;
             _tierTag.gameObject.SetActive(false);

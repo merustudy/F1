@@ -2120,6 +2120,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673582821310470
+  - m_Id: 7501874637824000
+    m_Key: Potion.Regen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673584674930688
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4056,3 +4061,8 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: Next to the vulnerable icon (stage 45). {0} = vulnerable stacks.
+    - rid: 8623673584674930688
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A regeneration potion (stage 46): that many regen stacks,
+          healing tick by tick. {0} = stacks.'

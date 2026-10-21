@@ -1938,6 +1938,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 7501874637824000
+    m_Localized: '{0} Regen'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -2166,3 +2171,4 @@ MonoBehaviour:
         - id: 7472216500330499
         - id: 7472216500330500
         - id: 7472216500330501
+        - id: 7501874637824000

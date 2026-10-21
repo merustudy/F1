@@ -446,10 +446,17 @@ namespace F1.Editor.Setup
             UiBuild.Stretch(icon.rectTransform, 7f, 7f, 7f, 7f);
             icon.enabled = false;
 
+            // Stage 46: a potion without a bottle yet shows its name in the pocket (the item piece's rule for a missing picture).
+            TextMeshProUGUI label = UiBuild.Outlined(UiBuild.Label("PotionName", frame.transform, 13f, UiPalette.Text, TextAlignmentOptions.Center));
+            UiBuild.Stretch(label.rectTransform, 4f, 4f, 4f, 4f);
+            label.raycastTarget = false;
+            label.enabled = false;
+
             var view = frame.gameObject.AddComponent<PotionSlotView>();
             UiBuild.SetReference(view, "_button", button);
             UiBuild.SetReference(view, "_frame", frame);
             UiBuild.SetReference(view, "_icon", icon);
+            UiBuild.SetReference(view, "_label", label);
             UiBuild.SetReference(view, "_plain", UiArt.Load(UiArt.PotionSlot));
             UiBuild.SetReference(view, "_selected", UiArt.Load(UiArt.PotionSlotSelected));
 

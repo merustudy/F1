@@ -1997,6 +1997,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
+  - m_Id: 7501874637824000
+    m_Localized: "\uC7AC\uC0DD {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
   references:
     version: 2
     RefIds:
@@ -2225,3 +2230,4 @@ MonoBehaviour:
         - id: 7472216500330499
         - id: 7472216500330500
         - id: 7472216500330501
+        - id: 7501874637824000

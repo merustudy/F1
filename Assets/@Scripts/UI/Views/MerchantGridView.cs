@@ -25,6 +25,8 @@ namespace F1.UI
         public int Height;
         public EquippedItem Item;
         public BagData Bag;
+        /// <summary>The potion on sale (stage 46: named on its square while it has no icon); null for an item or a bag.</summary>
+        public PotionData Potion;
         public Sprite Icon;
         public int Price;
         public MerchantGoodState State;
@@ -149,7 +151,7 @@ namespace F1.UI
                 }
                 else
                 {
-                    piece.ShowPotion(good.Icon);
+                    piece.ShowPotion(good.Potion, good.Icon);
                 }
 
                 piece.ShowUnaffordable(good.State == MerchantGoodState.Unaffordable);

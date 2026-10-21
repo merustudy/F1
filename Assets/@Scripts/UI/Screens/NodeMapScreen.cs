@@ -451,6 +451,7 @@ namespace F1.UI
                 }
                 else
                 {
+                    piece.Potion = data.Potions.Get(offer.Id);
                     piece.Icon = _art.OfPotion(offer.Id);
                 }
 

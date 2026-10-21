@@ -383,6 +383,7 @@ namespace F1.UI
             public const string Heal = "Potion.Heal";
             public const string Shield = "Potion.Shield";
             public const string Cleanse = "Potion.Cleanse";
+            public const string Regen = "Potion.Regen";
         }
 
         public static class Battle
