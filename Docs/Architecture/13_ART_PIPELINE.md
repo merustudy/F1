@@ -74,7 +74,7 @@ MP4는 그 라운드의 목업 스크립트가 다시 만든다(호출 없음). 
 | `background` | 화면의 배경. 불투명, 인물 없음 | `Rosters/background.csv` (던전의 배경은 `Dungeon`이 `DungeonData.Id`) | `scene` |
 | `ui_frame` | UI의 틀: 패널, 제목의 명패, 보드의 머리 띠, 칸, 버튼, 가방. 화면에서 늘여 쓰는 빈 사각형 | `Rosters/ui_frame.csv` (쓰임새의 이름. `Flat`이 no면 그린 결을 남긴다) | `frame` |
 | `ui_piece` | UI의 장식 조각: 양초의 조각, 해골 더미, 보드 머리의 금 징(전에는 폭풍 시계의 다이얼). 늘이지 않고 통째로 보인다 | `Rosters/ui_piece.csv` (쓰임새의 이름) | `glyph` |
-| `ui_icon` | UI의 작은 기호: 상태 아이콘 | `Rosters/ui_icon.csv` (쓰임새의 이름) | `glyph` |
+| `ui_icon` | UI의 작은 기호: 상태 아이콘(2026-10-21 Round 90: 출혈·재생·가시를 더해 일곱, Round 91: 빙결·암흑·조준·예리·격분·가속·취약을 더해 열넷. 상태 줄의 칩은 `UiPrefabSetup.Battle.BuildStateChip`, 18px) | `Rosters/ui_icon.csv` (쓰임새의 이름) | `glyph` |
 | `prop` | 무대 바닥에 서는 소품: 쓰러진 용병의 무덤(2026-10-04 Round 21, C 채택). 전신 그림처럼 바닥선에 세운다 | `Rosters/prop.csv` (쓰임새의 이름. 데이터가 가리키지 않는다) | `figure` |
 | `attack`, `hit` | 용병의 공격 자세와 피격 자세(Round 19·23). 확정 그림을 보고 같은 인물로, 자세와 표정만 바꾼다 | `Rosters/attack.csv`, `Rosters/hit.csv` (`JobData.Id`. `Body`는 그 용병의 `character` 행과 같게) | `pose` (`tools/fit_pose.py`) |
 | `bag` | 가방의 그림(Round 79, 2026-10-17): 위에서 본 열린 가방, 입 안에 칸 수만큼의 칸. 아이템의 §7과 칸 섹션(§19~§21)으로 그리고 데이터·모양은 `BagData.csv`. 맞추기는 가방 조각의 비율의 캔버스(`bag_canvas`: 긴 변 328, 3×1은 328x106·2×1은 328x161·3×3은 328x328)에 아이콘처럼 | `Rosters/bag.csv` (`BagData.Id`) | `cell` (가방의 캔버스) |

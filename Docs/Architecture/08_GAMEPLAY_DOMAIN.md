@@ -310,12 +310,28 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 시뮬: 정책(`Tools/Sim`의 `SimPolicy`)은 요구를 채우는 구성원에게만 놓는다(`MemberWithRoomFor`·`MemberWithStarRoomFor`·`FindMergeTarget`). `expedition`의 보고에 "요구로 보드에 못 놓은 드랍"(어느 구성원은 자리가 있었으나 요구를 채우는 구성원이 없던 것)을 더했다. 전후는 Design/08 §49.
 - Test: `ItemRequirementTests`(식, 다섯 길의 거절과 허용, 합침의 질의, 요구 없는 아이템, 적, 후보의 올림과 난수, `MeetingBaseWeapon`), `DefinitionTests`(짝·분류), `StaticDataValidationTests`(직업 기본값·범위·레시피), `StaticDataTransformerTests`(열 둘), `ShippedDataTests`(모든 장비의 요구, 기본 무기 5와 주 스탯), `RunSaveMapperTests`(25).
 
+### 효과 어휘 (Slice D 44단계)
+
+규칙은 `Docs/Design/02_Combat_System.md` §3·§4·§5(효과 타입 열, 틱의 차례)와 `04_Lobby_100Day_Economy.md` §3(틱·가시의 피로 없음)이 소유한다. 검토와 판정은 `Docs/Design/18_Effect_Vocabulary_Proposal.md`와 00_INDEX "Design/18의 판정". 수치는 `ItemData`의 효과 값, `BalanceData`의 `BleedDamagePerStack`·`RegenHealPerStack`. (흡혈은 2026-10-21 사용자 "흡혈은 삭제"로 뺐다.)
+
+- Type: `EffectKind`에 `Bleed`·`Regen`·`Thorns`·`Cleanse`·`Stagger`·`Charge`, `PotionEffect.Cleanse`. `BattleUnit`의 `Bleed`·`Regen`(중첩)·`Thorns`(0.01 단위). 모두 전투 안의 상태라 저장하지 않는다(07).
+- `Activate`: 중첩 효과(`ItemEffect.CountsStacks`)는 `ScaleStacks`, 나머지(경직·충전의 ms 포함)는 `Scale`로 스탯을 곱한다. 출혈·경직은 물리면 명중을 굴린다(`StatRules.CanMiss`). 피해 갈래의 끝: 피해 → 치명타의 피로 → 무기 적중 패시브 → **가시**(근접 무기이고 대상이 서 있으면 `ApplyDamage(공격자, 대상의 가시, 원인 thorns)`; 공격자가 쓰러지면 `Activate`를 그 자리에서 끝낸다).
+- 틱: `Ticks`가 `Tick.Burn`·`Bleed`·`Regen`의 차례로 `TickUnits`를 아군·적에 돌린다. 출혈 틱은 `ApplyDamage(…, throughShield: true)`로 보호막을 건너고, 재생 틱은 `ApplyHeal`이다. `BattleEvent.IsTickCause`(화상·출혈·가시)는 `ApplyDamage`에서 피격의 피로를 막는다.
+- `ApplyHeal`: 크기가 0보다 크면 출혈을 0으로 하고 `Cleansed`(A 0, B 멎은 중첩, 원인은 그 회복의 원인)를 남긴다. 빈사 탈출은 그대로다.
+- `Cleanse`(아이템·포션): 화상·출혈에서 각각 N까지 뺀다. `Stagger`: 대상의 `Active && Cycles` 아이템의 `NextFireMs += N`. `Charge`: `NextFireMs = max(TimeMs + 1, NextFireMs − N)`, 발동한 아이템 자신은 건너뛴다. 모두 그 자리에서 끝나 상태·만료가 없다.
+- 이벤트: `BleedApplied`·`RegenApplied`·`ThornsGained`·`Cleansed`·`Staggered`·`Charged`; 원인 상수 `CauseBleed`·`CauseRegen`·`CauseThorns`(Source는 None). `Kill`이 세 상태를 0으로 한다.
+- 화면: 카드의 효과 줄(`UiText.Effect`·`EffectValue`: 중첩, 초, 수), 전투 로그의 줄과 원인 글(`BattleLogText`). 유닛 위의 상태 표시와 연출은 목업 뒤(Architecture/12).
+- 시뮬: `BattleStats`에 어휘의 줄(출혈·재생 중첩, 가시의 피해, 정화·경직·충전 수 — 쓰인 전투가 있을 때만 출력), `trace`의 상세. 정책은 그대로(분류로 놓는다).
+- Test: `EffectVocabularyTests`(규칙마다, 틱의 차례, 정의·변환·포션의 검사, 어휘 전부를 쓴 전투의 로그 재현). 어휘를 쓰는 출고 아이템이 아직 없어 출고 데이터의 시뮬은 전후가 같다(08 §50).
+- **2차, 일곱 상태**(Slice D 45단계, Docs/Design/02 §5 "일곱 상태", Design/18 §10): `EffectKind`의 `Freeze`·`Blind`·`Aim`·`Keen`·`Fury`·`Haste`·`Vulnerable`(`ItemEffect.IsState`), `BattleUnit`의 중첩 일곱(`StacksOf`·`SetStacks`). `AddState`가 쌓고 `StateApplied`(B = 종류)를 남긴다. `Tick.States`가 재생 다음에 유닛마다 −1(로그 없음). 끼는 자리: `CooldownOf`(피로 상태 % + 빙결 − 가속, `EffectiveCooldown`의 바닥 그대로), `RollHit`(공격자의 조준 − 암흑, 만분율), `RollCritical`(예리는 확률의 보너스에, 격분은 배수에), `Activate`의 피해 갈래(대상의 취약: 스탯·무기 피해 % 다음에 곱함). `Cleanse`는 `HarmfulStates`(빙결·암흑·취약)도 N씩(C에 합).
+  **대상의 편 제한 없음**(2026-10-21 사용자): `ItemEffect`의 대상 검사를 지웠다. 엔진의 `Lands(owner, target, item, effect)` 하나가 "자기 편이면 언제나, 상대편이면 `CanMiss`일 때 `RollHit`"를 정하고(`StatRules.CanMiss`는 `ItemEffect.Hurts` 종류의 물리), 피해 갈래의 `foe`가 치명타·무기 적중 패시브·가시를 상대편으로 묶는다. 시뮬 `BattleStats`에 상태의 줄(파티가 건 것 / 파티에 걸린 것). Test `SecondVocabularyTests`.
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.
 
 - 시간은 정수 밀리초다. `BattleEngine`은 다음 사건의 시각으로 건너뛴다. `AdvanceTo(t)`를 잘게 여러 번 부르든 한 번에 부르든 결과가 같다.
-- 같은 시각의 순서는 코드 한 곳(`ProcessAutomaticEvents`)에 고정돼 있다: 화상 틱 -> 아이템(아군, 유닛 순서, 칸 순서) -> 폭풍 틱.
+- 같은 시각의 순서는 코드 한 곳(`ProcessAutomaticEvents`)에 고정돼 있다: 틱(`Ticks`: 모든 유닛의 화상 -> 출혈 -> 재생 -> 일곱 상태의 감쇠, 각각 아군 먼저. 44·45단계) -> 아이템(아군, 유닛 순서, 칸 순서) -> 폭풍 틱.
   0ms의 시작은 생성자가 처리한다: `BattleStarted` -> 들어온 피로의 판정 -> 전투 시작 패시브(아군, 적) -> 전투 시작 아이템(아군, 적. 39단계).
   플레이어 입력은 `AdvanceTo`가 끝난 뒤의 현재 시각에 적용되므로, 그 시각의 자동 사건 뒤에 온다.
 - 난수는 `Pcg32`뿐이다. 전투 스트림(사망 판정)과 입력 스트림(후퇴 판정)을 나눠, 후퇴 시도가 사망 판정을 바꾸지 않는다.
