@@ -7,3 +7,13 @@ node_battle,"two crossed swords, steel blades with brass hilts",96x96,6
 node_boss,"a skull seen from the front with a small iron crown on it, cream colored with dark eye sockets",96x96,6
 potion_heal,"a round glass potion bottle with a short neck and a cork, holding deep red liquid, with a small paper tag on a string",96x96,6
 potion_shield,"a round glass potion bottle with a short neck and a cork, holding pale blue liquid, with a small brass shield-shaped tag on a string",96x96,6
+bleed,"a single large drop of dark red blood falling, with two smaller drops beside it and a small light highlight on the big one",96x96,6
+regen,"a green sprout: a short stem with two broad leaves, one on each side, growing upward",96x96,6
+thorns,"two big heavy sharp bramble thorns, bone white, each a broad thick wedge with a wide base and a pointed tip, standing side by side and filling the picture, drawn alone with no branch, no stem and no leaf",96x96,6
+freeze,"a single big six-pointed ice crystal, pale icy blue with a lighter core, its six arms short and thick",96x96,6
+blind,"a single puff of black dust: a rounded billowing cloud of soot, black and dark grey with a slightly lighter grey edge, a few small specks flying off its top, drawn alone",96x96,6
+aim,"a round archery target seen from the front: a red center dot inside one cream ring and one red ring",96x96,6
+keen,"a single big four-pointed star of light, the glint of a sharpened edge: a cream white star with long sharp points, a small deep red core, drawn alone",96x96,6
+fury,"a clenched fist seen from the front, deep red, thick and blocky",96x96,6
+haste,"a single big lightning bolt pointing down, bright yellow with a paler yellow core, thick and zigzagging twice, drawn alone with no cloud",96x96,6
+vulnerable,"a grey heater shield seen from the front, split by one wide jagged crack running from its top edge down through its middle",96x96,6
