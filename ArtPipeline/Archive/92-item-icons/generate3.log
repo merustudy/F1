@@ -1,0 +1,14 @@
+[14:09:45] item throwing_knives
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,867 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=throwing_knives, quality=medium, size=1536x512.
+      사용량: 입력 text 934 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.85)
+[5/6] 후처리: 원본은 throwing_knives.raw.png, 맞춘 그림은 throwing_knives.png.
+      조각: 원본 1081x477 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 204x90 (폭의 62%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/throwing_knives.png
+      크기:   328x100, 32,661 bytes
+      여백:   좌 57 우 57 상 0 하 0 px
+      알파:   완전투명 49.5% 반투명 2.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)

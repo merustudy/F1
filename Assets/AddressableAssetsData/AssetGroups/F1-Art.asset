@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: F1-Art
   m_GUID: ffee4d694673a498abe503b5ec6b7e61
   m_SerializeEntries:
+  - m_GUID: 0147004e3e82842bfb5d7953fbb28ffe
+    m_Address: bag/knapsack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 03a45ed981f33416ba26140f1ff2ce35
     m_Address: item/lantern-staff
     m_ReadOnly: 0
@@ -39,8 +45,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0b75df1a9f4b3443b8de19b95b17877e
+    m_Address: item/robe
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0c8e2268248dc4c56ae29726d630d4da
     m_Address: item/whetstone
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0e0f38c59bbc24c19a06242a47b505d7
+    m_Address: item/war-horn
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -63,14 +81,38 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 12fc04e3866df4d78baf0481ca83a97e
+    m_Address: item/bristle-hide
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14639a84ee64240c1b95acd70d89a84d
+    m_Address: item/censer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 14e902bd6a2744c2b917f8fe8abd3c31
     m_Address: item/abyss-cleaver
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 166af21020e424d4d9c5b2d715f82089
+    m_Address: item/windcutter
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19a13001e06904735970f98c25fbdd23
     m_Address: item/gladius
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a9b1ea5b766f4cdcb23cf48cfdeaa29
+    m_Address: item/leather-armor
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -99,8 +141,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 220f27772008849c0967be082360b486
+    m_Address: item/pickaxe
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 23504f9eb39a942c09f1f2d36f854622
     m_Address: pose/enemy/cave-rat-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 235c47baa19c84672aae505adf9e1bec
+    m_Address: item/chant-staff
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -117,6 +171,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2fd2db0f38ab1450281dd7c96df278fa
+    m_Address: item/bloodgale
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 303483d4b2ada40038fd3579608c68c2
+    m_Address: bag/big-pack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31d9f56cbb2454f63967eb520430338f
     m_Address: unit/enemy/mine-overseer
     m_ReadOnly: 0
@@ -125,6 +191,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 3217c4b83871646d292172b83a53da69
     m_Address: pose/job/archmage-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 33b0e69479d4848199374d0b296b43b9
+    m_Address: item/war-drum
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -189,6 +261,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 53c207fc55e4f4713803e6318971cb09
+    m_Address: item/bloodgale-glow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 56c069291186e44889592ec7a4866f92
     m_Address: unit/enemy/goblin-archer
     m_ReadOnly: 0
@@ -219,6 +297,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 62a268db067ec4038b7a024c14fe218a
+    m_Address: item/cinder
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 65360ba647f20488f8a94b0778afae14
     m_Address: unit/job/archmage
     m_ReadOnly: 0
@@ -243,8 +327,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 69b4f96031349450c85471f9144696cd
+    m_Address: item/spiked-shield
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6ca47c34cbab342b494074dc4f262497
     m_Address: pose/enemy/abyss-lord-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6e26b16db8bcc4bec97ec49eed993b80
+    m_Address: item/throwing-knives
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -261,14 +357,50 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 726a55567de814ec3b454aa69a9008e5
+    m_Address: item/dawnlight-glow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72c3ab7d38d37485cb09e701b537bf79
+    m_Address: item/windcutter-glow
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 72ea9c297924a4805a218a3fb095cfbd
     m_Address: item/overseer-maul
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 73a0ff6e27e2e49a29d9d86b069f0c88
+    m_Address: potion/regen-potion
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 798b4478ae983436ba25dc9f5d1254f9
     m_Address: pose/job/archmage-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7aa879f7ea0064233a02d05ef0035e23
+    m_Address: item/frost-flask
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7b858738cc54d4bea9a38c714a2286cd
+    m_Address: item/berserker-axe
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f7b2e3d78dbf4dcaa6f285f408f479f
+    m_Address: item/goblin-sawblade
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -285,6 +417,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 87fe97fea51cf477e950c84b87caef2d
+    m_Address: item/studded-armor
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 88054558662394804b778ba0228043e5
     m_Address: unit/job/spellblade
     m_ReadOnly: 0
@@ -296,6 +434,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 89d12dce7a91e4ea793a9f5380cf70f8
+    m_Address: item/frost-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8ef6459b91f264e388f97a10281d294d
     m_Address: item/longbow
@@ -369,6 +513,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a82175841ceb84007b35dfc00111e8df
+    m_Address: item/dawnlight
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a8b281629aaf24915b6ee2d0b80bed69
     m_Address: pose/job/valkyrie-broken
     m_ReadOnly: 0
@@ -381,14 +531,32 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ada1ace9ef3b3476a9109bed6519c3fd
+    m_Address: item/serrated-dagger
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae423bcdd72904f2e959d5cec2b446e6
     m_Address: item/iron-armor
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: aecd3b152e0c04f5ebc9d1cf534c7ab3
+    m_Address: item/banner
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: aed91b06bab47424ba9de9c294801f3b
     m_Address: item/halberd
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: af35aa03514904d5dbc1f11b7fc39743
+    m_Address: potion/cleansing-potion
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -411,6 +579,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b85f096e4714c44d5a9d6a175c6db016
+    m_Address: item/holy-water
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: bd819f93ad5824e9cb91d8e2230a3325
     m_Address: pose/enemy/goblin-raider-hit
     m_ReadOnly: 0
@@ -419,6 +593,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c0113b0fa9bee45128af6863872fb88e
     m_Address: pose/job/archmage-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c36c4899ce8b24270bdd9d9a571260e2
+    m_Address: item/crossbow
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -477,6 +657,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d76f46196674b481abec52ff15343173
+    m_Address: item/shadow-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d8a07432a2c1445c98fbed0c797a898f
+    m_Address: item/hex-bone
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d9642ba4c6bcd448b94b2fad11be7669
     m_Address: background/lobby/town
     m_ReadOnly: 0
@@ -485,6 +677,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: db3c27fb55e554ebca237c2ab0368b4f
     m_Address: item/iron-helm
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: dc869fdad25c241498fdbc5dc6e5b7fa
+    m_Address: item/cinder-glow
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -513,6 +711,18 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6a8f399265ff467eaae11bfdf37614a
+    m_Address: item/cloth-hood
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e73adcbdc2ebb4dd8b5b92dab8baeb6c
+    m_Address: item/bloodlust-charm
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e73faa3166dad4cfe8e7aa0c3908bd54
     m_Address: bag/leather-pack
     m_ReadOnly: 0
@@ -539,6 +749,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: eb9166aa2dea54fd994471e5589a3d54
     m_Address: item/overseer-roar
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec0aca4e367bd402ab321fb8c505199e
+    m_Address: item/ash-pouch
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -572,6 +788,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ff4f710f16ba64b71a3c794085aa31fa
+    m_Address: item/war-hammer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: a299c20a8ef58429d832de7bde7daad2, type: 2}

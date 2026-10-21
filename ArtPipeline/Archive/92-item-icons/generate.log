@@ -1,0 +1,461 @@
+[13:05:32] item serrated_dagger (1/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,838 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=serrated_dagger, quality=medium, size=1536x512.
+      사용량: 입력 text 934 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $8.97)
+[5/6] 후처리: 원본은 serrated_dagger.raw.png, 맞춘 그림은 serrated_dagger.png.
+      조각: 원본 1454x432 (생성 캔버스의 95%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 303x90 (폭의 92%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/serrated_dagger.png
+      크기:   328x100, 31,396 bytes
+      여백:   좌 8 우 8 상 0 하 0 px
+      알파:   완전투명 48.8% 반투명 2.9% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:05:47] item war_hammer (2/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,629 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=war_hammer, quality=medium, size=1024x1024.
+      사용량: 입력 text 871 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.00)
+[5/6] 후처리: 원본은 war_hammer.raw.png, 맞춘 그림은 war_hammer.png.
+      조각: 원본 900x975 (생성 캔버스의 95%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 308x333 (폭의 94%, 높이의 96%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/war_hammer.png
+      크기:   328x348, 68,526 bytes
+      여백:   좌 5 우 6 상 3 하 3 px
+      알파:   완전투명 70.0% 반투명 1.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:06:08] item pickaxe (3/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,823 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=pickaxe, quality=medium, size=1536x512.
+      사용량: 입력 text 931 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.02)
+[5/6] 후처리: 원본은 pickaxe.raw.png, 맞춘 그림은 pickaxe.png.
+      조각: 원본 1070x481 (생성 캔버스의 94%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 201x90 (폭의 61%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/pickaxe.png
+      크기:   328x100, 14,761 bytes
+      여백:   좌 59 우 59 상 0 하 0 px
+      알파:   완전투명 76.4% 반투명 2.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:06:22] item berserker_axe (4/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,622 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=berserker_axe, quality=medium, size=1024x1024.
+      사용량: 입력 text 871 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.05)
+[5/6] 후처리: 원본은 berserker_axe.raw.png, 맞춘 그림은 berserker_axe.png.
+      조각: 원본 941x960 (생성 캔버스의 94%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x320 (폭의 96%, 높이의 92%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/berserker_axe.png
+      크기:   328x348, 72,568 bytes
+      여백:   좌 2 우 3 상 9 하 9 px
+      알파:   완전투명 67.9% 반투명 1.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:06:41] item crossbow (5/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,614 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=crossbow, quality=medium, size=1024x1024.
+      사용량: 입력 text 867 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.08)
+[5/6] 후처리: 원본은 crossbow.raw.png, 맞춘 그림은 crossbow.png.
+      조각: 원본 923x886 (생성 캔버스의 90%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x301 (폭의 96%, 높이의 86%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/crossbow.png
+      크기:   328x348, 88,600 bytes
+      여백:   좌 2 우 3 상 19 하 19 px
+      알파:   완전투명 62.4% 반투명 1.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:07:00] item frost_staff (6/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,861 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=frost_staff, quality=medium, size=1536x512.
+      사용량: 입력 text 937 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.10)
+[5/6] 후처리: 원본은 frost_staff.raw.png, 맞춘 그림은 frost_staff.png.
+      조각: 원본 1477x360 (생성 캔버스의 96%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x76 (폭의 96%, 높이의 76%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/frost_staff.png
+      크기:   328x100, 25,892 bytes
+      여백:   좌 2 우 3 상 7 하 7 px
+      알파:   완전투명 66.2% 반투명 2.7% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:07:17] item shadow_staff (7/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,823 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=shadow_staff, quality=medium, size=1536x512.
+      사용량: 입력 text 929 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.13)
+[5/6] 후처리: 원본은 shadow_staff.raw.png, 맞춘 그림은 shadow_staff.png.
+      조각: 원본 1489x374 (생성 캔버스의 97%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x79 (폭의 96%, 높이의 79%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/shadow_staff.png
+      크기:   328x100, 23,232 bytes
+      여백:   좌 2 우 3 상 6 하 6 px
+      알파:   완전투명 63.2% 반투명 2.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:07:32] item chant_staff (8/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,857 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=chant_staff, quality=medium, size=1536x512.
+      사용량: 입력 text 935 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.15)
+[5/6] 후처리: 원본은 chant_staff.raw.png, 맞춘 그림은 chant_staff.png.
+      조각: 원본 1464x375 (생성 캔버스의 95%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x80 (폭의 96%, 높이의 80%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/chant_staff.png
+      크기:   328x100, 25,106 bytes
+      여백:   좌 2 우 3 상 5 하 5 px
+      알파:   완전투명 64.8% 반투명 3.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:07:47] item frost_flask (9/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,823 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=frost_flask, quality=medium, size=1536x512.
+      사용량: 입력 text 929 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.17)
+[5/6] 후처리: 원본은 frost_flask.raw.png, 맞춘 그림은 frost_flask.png.
+      조각: 원본 774x478 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 146x90 (폭의 45%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/frost_flask.png
+      크기:   328x100, 23,596 bytes
+      여백:   좌 86 우 86 상 0 하 0 px
+      알파:   완전투명 67.6% 반투명 1.5% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:08:01] item ash_pouch (10/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,832 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=ash_pouch, quality=medium, size=1536x512.
+      사용량: 입력 text 932 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.19)
+[5/6] 후처리: 원본은 ash_pouch.raw.png, 맞춘 그림은 ash_pouch.png.
+      조각: 원본 1248x417 (생성 캔버스의 81%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 270x90 (폭의 82%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/ash_pouch.png
+      크기:   328x100, 31,604 bytes
+      여백:   좌 24 우 25 상 0 하 0 px
+      알파:   완전투명 52.8% 반투명 2.7% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:08:16] item caltrops (11/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,822 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=caltrops, quality=medium, size=1536x512.
+      사용량: 입력 text 928 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.21)
+[5/6] 후처리: 원본은 caltrops.raw.png, 맞춘 그림은 caltrops.png.
+      조각: 원본 1429x387 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x85 (폭의 96%, 높이의 85%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/caltrops.png
+      크기:   328x100, 29,071 bytes
+      여백:   좌 2 우 3 상 3 하 3 px
+      알파:   완전투명 56.6% 반투명 3.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:08:32] item hex_bone (12/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,838 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=hex_bone, quality=medium, size=1536x512.
+      사용량: 입력 text 933 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.23)
+[5/6] 후처리: 원본은 hex_bone.raw.png, 맞춘 그림은 hex_bone.png.
+      조각: 원본 1373x350 (생성 캔버스의 89%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x80 (폭의 96%, 높이의 80%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/hex_bone.png
+      크기:   328x100, 36,189 bytes
+      여백:   좌 2 우 3 상 5 하 5 px
+      알파:   완전투명 46.9% 반투명 3.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:08:47] item censer (13/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,853 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=censer, quality=medium, size=1536x512.
+      사용량: 입력 text 939 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.25)
+[5/6] 후처리: 원본은 censer.raw.png, 맞춘 그림은 censer.png.
+      조각: 원본 1360x474 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 259x90 (폭의 79%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/censer.png
+      크기:   328x100, 28,611 bytes
+      여백:   좌 30 우 30 상 0 하 0 px
+      알파:   완전투명 64.7% 반투명 2.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:09:02] item holy_water (14/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,843 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=holy_water, quality=medium, size=1536x512.
+      사용량: 입력 text 934 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.27)
+[5/6] 후처리: 원본은 holy_water.raw.png, 맞춘 그림은 holy_water.png.
+      조각: 원본 984x420 (생성 캔버스의 82%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 211x90 (폭의 64%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/holy_water.png
+      크기:   328x100, 32,837 bytes
+      여백:   좌 54 우 54 상 0 하 0 px
+      알파:   완전투명 51.5% 반투명 2.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:09:19] item war_drum (15/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,663 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=war_drum, quality=medium, size=1024x1024.
+      사용량: 입력 text 880 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.30)
+[5/6] 후처리: 원본은 war_drum.raw.png, 맞춘 그림은 war_drum.png.
+      조각: 원본 865x870 (생성 캔버스의 85%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x315 (폭의 96%, 높이의 91%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/war_drum.png
+      크기:   328x348, 156,635 bytes
+      여백:   좌 2 우 3 상 12 하 12 px
+      알파:   완전투명 23.2% 반투명 1.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:09:39] item war_horn (16/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,873 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=war_horn, quality=medium, size=1536x512.
+      사용량: 입력 text 941 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.32)
+[5/6] 후처리: 원본은 war_horn.raw.png, 맞춘 그림은 war_horn.png.
+      조각: 원본 1419x488 (생성 캔버스의 95%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 262x90 (폭의 80%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/war_horn.png
+      크기:   328x100, 27,868 bytes
+      여백:   좌 28 우 28 상 0 하 0 px
+      알파:   완전투명 55.7% 반투명 2.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:09:55] item bloodlust_charm (17/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,888 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=bloodlust_charm, quality=medium, size=1536x512.
+      사용량: 입력 text 946 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.34)
+[5/6] 후처리: 원본은 bloodlust_charm.raw.png, 맞춘 그림은 bloodlust_charm.png.
+      조각: 원본 1504x482 (생성 캔버스의 98%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 281x90 (폭의 86%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/bloodlust_charm.png
+      크기:   328x100, 23,767 bytes
+      여백:   좌 19 우 19 상 0 하 0 px
+      알파:   완전투명 69.2% 반투명 3.3% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:10:10] item spiked_shield (18/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,668 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=spiked_shield, quality=medium, size=1024x1024.
+      사용량: 입력 text 879 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.37)
+[5/6] 후처리: 원본은 spiked_shield.raw.png, 맞춘 그림은 spiked_shield.png.
+      조각: 원본 900x908 (생성 캔버스의 89%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x316 (폭의 96%, 높이의 91%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/spiked_shield.png
+      크기:   328x348, 141,890 bytes
+      여백:   좌 2 우 3 상 11 하 11 px
+      알파:   완전투명 27.5% 반투명 1.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:10:30] item studded_armor (19/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,691 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=studded_armor, quality=medium, size=1024x1024.
+      사용량: 입력 text 880 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.40)
+[5/6] 후처리: 원본은 studded_armor.raw.png, 맞춘 그림은 studded_armor.png.
+      조각: 원본 936x855 (생성 캔버스의 91%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x286 (폭의 96%, 높이의 82%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/studded_armor.png
+      크기:   328x348, 122,729 bytes
+      여백:   좌 2 우 3 상 26 하 26 px
+      알파:   완전투명 38.7% 반투명 1.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:10:50] item leather_armor (20/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,665 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=leather_armor, quality=medium, size=1024x1024.
+      사용량: 입력 text 880 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.43)
+[5/6] 후처리: 원본은 leather_armor.raw.png, 맞춘 그림은 leather_armor.png.
+      조각: 원본 946x982 (생성 캔버스의 96%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x326 (폭의 96%, 높이의 94%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/leather_armor.png
+      크기:   328x348, 106,237 bytes
+      여백:   좌 2 우 3 상 6 하 7 px
+      알파:   완전투명 53.3% 반투명 1.5% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:11:11] item robe (21/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,868 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=robe, quality=medium, size=1536x512.
+      사용량: 입력 text 938 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.45)
+[5/6] 후처리: 원본은 robe.raw.png, 맞춘 그림은 robe.png.
+      조각: 원본 1064x487 (생성 캔버스의 95%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 197x90 (폭의 60%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/robe.png
+      크기:   328x100, 29,056 bytes
+      여백:   좌 61 우 61 상 0 하 0 px
+      알파:   완전투명 56.2% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:11:24] item cloth_hood (22/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,858 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=cloth_hood, quality=medium, size=1536x512.
+      사용량: 입력 text 940 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.47)
+[5/6] 후처리: 원본은 cloth_hood.raw.png, 맞춘 그림은 cloth_hood.png.
+      조각: 원본 1284x474 (생성 캔버스의 93%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 244x90 (폭의 74%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/cloth_hood.png
+      크기:   328x100, 28,471 bytes
+      여백:   좌 37 우 37 상 0 하 0 px
+      알파:   완전투명 59.1% 반투명 2.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:11:38] item goblin_sawblade (23/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,857 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=goblin_sawblade, quality=medium, size=1536x512.
+      사용량: 입력 text 940 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.49)
+[5/6] 후처리: 원본은 goblin_sawblade.raw.png, 맞춘 그림은 goblin_sawblade.png.
+      조각: 원본 1443x317 (생성 캔버스의 94%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x69 (폭의 96%, 높이의 69%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/goblin_sawblade.png
+      크기:   328x100, 29,725 bytes
+      여백:   좌 2 우 3 상 11 하 11 px
+      알파:   완전투명 54.4% 반투명 3.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:11:53] item bristle_hide (24/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,882 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=bristle_hide, quality=medium, size=1536x512.
+      사용량: 입력 text 944 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.51)
+[5/6] 후처리: 원본은 bristle_hide.raw.png, 맞춘 그림은 bristle_hide.png.
+      조각: 원본 1489x378 (생성 캔버스의 97%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x80 (폭의 96%, 높이의 80%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/bristle_hide.png
+      크기:   328x100, 33,945 bytes
+      여백:   좌 2 우 3 상 5 하 6 px
+      알파:   완전투명 49.8% 반투명 3.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:12:08] item bloodgale (25/33)
+[1/6] 레퍼런스 확인: valkyrie.png (515,997 bytes, 보내는 포맷 PNG, 이 아이템을 든 유닛)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,620 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=bloodgale, quality=medium, size=1536x1024.
+      사용량: 입력 text 867 + image 768, 출력 343 tokens -> 약 $0.021 (누계 약 $9.53)
+[5/6] 후처리: 원본은 bloodgale.raw.png, 맞춘 그림은 bloodgale.png.
+      조각: 원본 1425x980 (생성 캔버스의 96%) -> 328x224, 외곽선 4px
+      칸 2개의 캔버스 328x224 안에 308x212 (폭의 94%, 높이의 95%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/bloodgale.png
+      크기:   328x224, 53,295 bytes
+      여백:   좌 5 우 6 상 1 하 2 px
+      알파:   완전투명 65.6% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:12:24] item windcutter (26/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,703 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=windcutter, quality=medium, size=1024x1024.
+      사용량: 입력 text 887 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.56)
+[5/6] 후처리: 원본은 windcutter.raw.png, 맞춘 그림은 windcutter.png.
+      조각: 원본 930x972 (생성 캔버스의 95%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 314x328 (폭의 96%, 높이의 94%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/windcutter.png
+      크기:   328x348, 60,784 bytes
+      여백:   좌 2 우 3 상 5 하 6 px
+      알파:   완전투명 78.0% 반투명 1.6% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:12:41] item cinder (27/33)
+[1/6] 레퍼런스 확인: archmage.png (357,121 bytes, 보내는 포맷 PNG, 이 아이템을 든 유닛)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,837 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=cinder, quality=medium, size=1536x512.
+      사용량: 입력 text 933 + image 768, 출력 134 tokens -> 약 $0.015 (누계 약 $9.58)
+[5/6] 후처리: 원본은 cinder.raw.png, 맞춘 그림은 cinder.png.
+      조각: 원본 1446x249 (생성 캔버스의 94%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x54 (폭의 96%, 높이의 54%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/cinder.png
+      크기:   328x100, 16,878 bytes
+      여백:   좌 2 우 3 상 18 하 18 px
+      알파:   완전투명 72.4% 반투명 2.7% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:12:54] item dawnlight (28/33)
+[1/6] 레퍼런스 확인: bishop.png (503,764 bytes, 보내는 포맷 PNG, 이 아이템을 든 유닛)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,815 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=dawnlight, quality=medium, size=1536x512.
+      사용량: 입력 text 924 + image 768, 출력 134 tokens -> 약 $0.015 (누계 약 $9.59)
+[5/6] 후처리: 원본은 dawnlight.raw.png, 맞춘 그림은 dawnlight.png.
+      조각: 원본 1461x470 (생성 캔버스의 95%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 280x90 (폭의 85%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/dawnlight.png
+      크기:   328x100, 20,441 bytes
+      여백:   좌 19 우 19 상 0 하 0 px
+      알파:   완전투명 68.8% 반투명 2.5% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:13:09] item banner (29/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,886 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=banner, quality=medium, size=1024x1024.
+      사용량: 입력 text 924 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.62)
+[5/6] 후처리: 원본은 banner.raw.png, 맞춘 그림은 banner.png.
+      조각: 원본 229x990 (생성 캔버스의 97%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 77x333 (폭의 23%, 높이의 96%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/banner.png
+      크기:   328x348, 34,032 bytes
+      여백:   좌 121 우 121 상 3 하 3 px
+      알파:   완전투명 84.9% 반투명 1.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:13:27] bag knapsack (30/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,938 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=knapsack, quality=medium, size=1024x1024.
+      사용량: 입력 text 930 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.65)
+[5/6] 후처리: 원본은 knapsack.raw.png, 맞춘 그림은 knapsack.png.
+      조각: 원본 890x889 (생성 캔버스의 87%) -> 328x328, 외곽선 4px
+      칸 3개의 캔버스 328x328 안에 314x313 (폭의 96%, 높이의 95%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/knapsack.png
+      크기:   328x328, 119,551 bytes
+      여백:   좌 2 우 3 상 3 하 3 px
+      알파:   완전투명 14.3% 반투명 1.3% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:13:44] bag big_pack (31/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,931 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=bag, key=big_pack, quality=medium, size=1536x1024.
+      사용량: 입력 text 926 + image 1,508, 출력 343 tokens -> 약 $0.027 (누계 약 $9.68)
+[5/6] 후처리: 원본은 big_pack.raw.png, 맞춘 그림은 big_pack.png.
+      조각: 원본 1490x978 (생성 캔버스의 97%) -> 328x217, 외곽선 4px
+      칸 2개의 캔버스 328x217 안에 312x205 (폭의 95%, 높이의 94%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/bag/big_pack.png
+      크기:   328x217, 71,771 bytes
+      여백:   좌 3 우 3 상 1 하 2 px
+      알파:   완전투명 14.8% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:14:01] ui_icon potion_cleanse (32/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (2,863 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=ui_icon, key=potion_cleanse, quality=medium, size=1024x1024.
+      사용량: 입력 text 679 + image 1,508, 출력 439 tokens -> 약 $0.029 (누계 약 $9.71)
+[5/6] 후처리: 원본은 potion_cleanse.raw.png, 맞춘 그림은 potion_cleanse.png.
+      조각: 원본 672x815 (생성 캔버스의 80%) -> 96x96, 외곽선 6px
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/ui_icon/potion_cleanse.png
+      크기:   96x96, 9,436 bytes
+      여백:   좌 12 우 12 상 6 하 6 px
+      알파:   완전투명 53.3% 반투명 3.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:14:21] ui_icon potion_regen (33/33)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (2,852 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=ui_icon, key=potion_regen, quality=medium, size=1024x1024.
+      사용량: 입력 text 677 + image 1,508, 출력 439 tokens -> 약 $0.029 (누계 약 $9.74)
+[5/6] 후처리: 원본은 potion_regen.raw.png, 맞춘 그림은 potion_regen.png.
+      조각: 원본 692x818 (생성 캔버스의 80%) -> 96x96, 외곽선 6px
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/ui_icon/potion_regen.png
+      크기:   96x96, 9,794 bytes
+      여백:   좌 11 우 12 상 6 하 6 px
+      알파:   완전투명 52.3% 반투명 3.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:14:41] done: 33 calls

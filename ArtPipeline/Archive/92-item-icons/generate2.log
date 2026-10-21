@@ -1,0 +1,56 @@
+[13:58:43] leather_armor -> leather_armor_v2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,758 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=leather_armor, quality=medium, size=1024x1024.
+      사용량: 입력 text 905 + image 1,508, 출력 439 tokens -> 약 $0.030 (누계 약 $9.77)
+[5/6] 후처리: 원본은 leather_armor_v2.raw.png, 맞춘 그림은 leather_armor_v2.png.
+      조각: 원본 858x961 (생성 캔버스의 94%) -> 328x348, 외곽선 4px
+      칸 3개의 캔버스 328x348 안에 297x333 (폭의 91%, 높이의 96%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/leather_armor_v2.png
+      크기:   328x348, 126,515 bytes
+      여백:   좌 11 우 11 상 3 하 3 px
+      알파:   완전투명 39.2% 반투명 1.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:59:03] shadow_staff -> shadow_staff_v2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (4,020 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=shadow_staff, quality=medium, size=1536x512.
+      사용량: 입력 text 970 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.79)
+[5/6] 후처리: 원본은 shadow_staff_v2.raw.png, 맞춘 그림은 shadow_staff_v2.png.
+      조각: 원본 1475x384 (생성 캔버스의 96%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x82 (폭의 96%, 높이의 82%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/shadow_staff_v2.png
+      크기:   328x100, 26,808 bytes
+      여백:   좌 2 우 3 상 4 하 5 px
+      알파:   완전투명 63.3% 반투명 3.0% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:59:19] bloodlust_charm -> bloodlust_charm_v2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (4,090 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=bloodlust_charm, quality=medium, size=1536x512.
+      사용량: 입력 text 992 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.81)
+[5/6] 후처리: 원본은 bloodlust_charm_v2.raw.png, 맞춘 그림은 bloodlust_charm_v2.png.
+      조각: 원본 798x471 (생성 캔버스의 92%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 153x90 (폭의 47%, 높이의 90%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/bloodlust_charm_v2.png
+      크기:   328x100, 18,385 bytes
+      여백:   좌 83 우 83 상 0 하 0 px
+      알파:   완전투명 76.3% 반투명 1.8% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[13:59:33] caltrops -> caltrops_v2
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (3,990 chars).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=item, key=caltrops, quality=medium, size=1536x512.
+      사용량: 입력 text 965 + image 1,508, 출력 134 tokens -> 약 $0.021 (누계 약 $9.83)
+[5/6] 후처리: 원본은 caltrops_v2.raw.png, 맞춘 그림은 caltrops_v2.png.
+      조각: 원본 1379x388 (생성 캔버스의 90%) -> 328x100, 외곽선 4px
+      칸 1개의 캔버스 328x100 안에 314x88 (폭의 96%, 높이의 88%)
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/item/caltrops_v2.png
+      크기:   328x100, 32,799 bytes
+      여백:   좌 2 우 3 상 1 하 1 px
+      알파:   완전투명 53.0% 반투명 3.7% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
