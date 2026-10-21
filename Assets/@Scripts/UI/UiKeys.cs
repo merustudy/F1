@@ -335,6 +335,35 @@ namespace F1.UI
             public const string Heal = "Effect.Heal";
             public const string Shield = "Effect.Shield";
             public const string Burn = "Effect.Burn";
+
+            /// <summary>The effect vocabulary (Slice D stage 44): the card's line for each kind.</summary>
+            public const string Bleed = "Effect.Bleed";
+            public const string Regen = "Effect.Regen";
+            public const string Thorns = "Effect.Thorns";
+            public const string Cleanse = "Effect.Cleanse";
+            public const string Stagger = "Effect.Stagger";
+            public const string Charge = "Effect.Charge";
+
+            /// <summary>The seven states of stage 45: the card's line for each.</summary>
+            public const string Freeze = "Effect.Freeze";
+            public const string Blind = "Effect.Blind";
+            public const string Aim = "Effect.Aim";
+            public const string Keen = "Effect.Keen";
+            public const string Fury = "Effect.Fury";
+            public const string Haste = "Effect.Haste";
+            public const string Vulnerable = "Effect.Vulnerable";
+        }
+
+        /// <summary>The names of the seven states of stage 45, for the battle log's line (and, once their icons are drawn, the state line's chips).</summary>
+        public static class State
+        {
+            public const string Freeze = "State.Freeze";
+            public const string Blind = "State.Blind";
+            public const string Aim = "State.Aim";
+            public const string Keen = "State.Keen";
+            public const string Fury = "State.Fury";
+            public const string Haste = "State.Haste";
+            public const string Vulnerable = "State.Vulnerable";
         }
 
         public static class Target
@@ -353,6 +382,7 @@ namespace F1.UI
         {
             public const string Heal = "Potion.Heal";
             public const string Shield = "Potion.Shield";
+            public const string Cleanse = "Potion.Cleanse";
         }
 
         public static class Battle
@@ -366,6 +396,20 @@ namespace F1.UI
             public const string Hp = "Battle.Hp";
             public const string Shield = "Battle.Shield";
             public const string Burn = "Battle.Burn";
+
+            /// <summary>The state line's chips of the effect vocabulary (Slice D stage 44, Round 90): bleed and regen stacks, thorns.</summary>
+            public const string Bleed = "Battle.Bleed";
+            public const string Regen = "Battle.Regen";
+            public const string Thorns = "Battle.Thorns";
+
+            /// <summary>The state line's chips of the seven states (stage 45, Round 91): each its stacks.</summary>
+            public const string Freeze = "Battle.Freeze";
+            public const string Blind = "Battle.Blind";
+            public const string Aim = "Battle.Aim";
+            public const string Keen = "Battle.Keen";
+            public const string Fury = "Battle.Fury";
+            public const string Haste = "Battle.Haste";
+            public const string Vulnerable = "Battle.Vulnerable";
             public const string DogGrace = "Battle.DogGrace";
             public const string DogRolling = "Battle.DogRolling";
             public const string PartyFallen = "Battle.PartyFallen";
@@ -415,6 +459,11 @@ namespace F1.UI
             public const string SourcePassive = "Log.SourcePassive";
             public const string SourceBurn = "Log.SourceBurn";
             public const string SourceStorm = "Log.SourceStorm";
+
+            /// <summary>The effect vocabulary's sources that name no item (Slice D stage 44): a bleed tick, a regen tick, thorns.</summary>
+            public const string SourceBleed = "Log.SourceBleed";
+            public const string SourceRegen = "Log.SourceRegen";
+            public const string SourceThorns = "Log.SourceThorns";
             public const string Damage = "Log.Damage";
             public const string DamageAbsorbed = "Log.DamageAbsorbed";
             public const string CriticalHit = "Log.CriticalHit";
@@ -422,6 +471,17 @@ namespace F1.UI
             public const string Heal = "Log.Heal";
             public const string Shield = "Log.Shield";
             public const string Burn = "Log.Burn";
+
+            /// <summary>The effect vocabulary's lines (Slice D stage 44).</summary>
+            public const string Bleed = "Log.Bleed";
+            public const string Regen = "Log.Regen";
+            public const string Thorns = "Log.Thorns";
+            public const string Cleansed = "Log.Cleansed";
+            public const string Staggered = "Log.Staggered";
+            public const string Charged = "Log.Charged";
+
+            /// <summary>One of the seven states of stage 45 stacked on a unit: "{source} → {unit}: {state} +{stacks}".</summary>
+            public const string StateApplied = "Log.StateApplied";
             public const string DogEntered = "Log.DogEntered";
             public const string DogExited = "Log.DogExited";
             public const string GraceBroken = "Log.GraceBroken";

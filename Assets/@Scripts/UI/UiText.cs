@@ -650,7 +650,22 @@ namespace F1.UI
                 }
 
                 case EffectKind.Burn:
+                case EffectKind.Bleed:
+                case EffectKind.Regen:
+                case EffectKind.Cleanse:
+                case EffectKind.Freeze:
+                case EffectKind.Blind:
+                case EffectKind.Aim:
+                case EffectKind.Keen:
+                case EffectKind.Fury:
+                case EffectKind.Haste:
+                case EffectKind.Vulnerable:
+                    // Stacks (stage 44 added the bleed, the regen and the cleanse to the burn; stage 45 the seven states): a whole number, rounded half up by the stat.
                     return StatRules.ScaleStacks(item.Magnitude(balance, effect), percent).ToString(CultureInfo.InvariantCulture);
+                case EffectKind.Stagger:
+                case EffectKind.Charge:
+                    // Milliseconds, shown as seconds (stage 44).
+                    return Seconds(StatRules.Scale(item.Magnitude(balance, effect), percent));
                 default:
                     return Amount(StatRules.Scale(item.Magnitude(balance, effect), percent)).ToString(CultureInfo.InvariantCulture);
             }
@@ -789,6 +804,7 @@ namespace F1.UI
             {
                 case PotionEffect.Heal: return UiStrings.Get(UiKeys.Potion.Heal, Amount(potion.Magnitude));
                 case PotionEffect.Shield: return UiStrings.Get(UiKeys.Potion.Shield, Amount(potion.Magnitude));
+                case PotionEffect.Cleanse: return UiStrings.Get(UiKeys.Potion.Cleanse, potion.Magnitude);
                 default: throw new ArgumentOutOfRangeException(nameof(potion), potion.Effect, "No text for this potion effect.");
             }
         }
@@ -801,7 +817,36 @@ namespace F1.UI
                 case EffectKind.Heal: return UiKeys.Effect.Heal;
                 case EffectKind.Shield: return UiKeys.Effect.Shield;
                 case EffectKind.Burn: return UiKeys.Effect.Burn;
+                case EffectKind.Bleed: return UiKeys.Effect.Bleed;
+                case EffectKind.Regen: return UiKeys.Effect.Regen;
+                case EffectKind.Thorns: return UiKeys.Effect.Thorns;
+                case EffectKind.Cleanse: return UiKeys.Effect.Cleanse;
+                case EffectKind.Stagger: return UiKeys.Effect.Stagger;
+                case EffectKind.Charge: return UiKeys.Effect.Charge;
+                case EffectKind.Freeze: return UiKeys.Effect.Freeze;
+                case EffectKind.Blind: return UiKeys.Effect.Blind;
+                case EffectKind.Aim: return UiKeys.Effect.Aim;
+                case EffectKind.Keen: return UiKeys.Effect.Keen;
+                case EffectKind.Fury: return UiKeys.Effect.Fury;
+                case EffectKind.Haste: return UiKeys.Effect.Haste;
+                case EffectKind.Vulnerable: return UiKeys.Effect.Vulnerable;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, "No text for this effect.");
+            }
+        }
+
+        /// <summary>The name of one of the seven states of stage 45 (빙결·암흑·조준·예리·격분·가속·취약), for the battle log.</summary>
+        public static string StateName(EffectKind state)
+        {
+            switch (state)
+            {
+                case EffectKind.Freeze: return UiStrings.Get(UiKeys.State.Freeze);
+                case EffectKind.Blind: return UiStrings.Get(UiKeys.State.Blind);
+                case EffectKind.Aim: return UiStrings.Get(UiKeys.State.Aim);
+                case EffectKind.Keen: return UiStrings.Get(UiKeys.State.Keen);
+                case EffectKind.Fury: return UiStrings.Get(UiKeys.State.Fury);
+                case EffectKind.Haste: return UiStrings.Get(UiKeys.State.Haste);
+                case EffectKind.Vulnerable: return UiStrings.Get(UiKeys.State.Vulnerable);
+                default: throw new ArgumentOutOfRangeException(nameof(state), state, "No name for this state.");
             }
         }
 

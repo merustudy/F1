@@ -238,6 +238,26 @@ Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
 Effect.Shield,{0} = target. {1} = amount.,{0}에게 보호막 {1},{1} Shield to {0}
 Effect.Burn,{0} = target. {1} = stacks.,{0}에게 화상 {1},{1} Burn to {0}
+Effect.Bleed,"An item's effect line (Slice D stage 44): bleed stacks on the target. {0} = target. {1} = stacks.",{0}에게 출혈 {1},{1} Bleed to {0}
+Effect.Regen,"Regen stacks on the target (stage 44). {0} = target. {1} = stacks.",{0}에게 재생 {1},{1} Regen to {0}
+Effect.Thorns,"Thorns on the target (stage 44). {0} = target. {1} = amount.",{0}에게 가시 {1},{1} Thorns to {0}
+Effect.Cleanse,"Takes burn and bleed stacks off the target (stage 44). {0} = target. {1} = stacks of each.",{0}의 화상·출혈 {1} 정화,Cleanses {1} Burn and Bleed from {0}
+Effect.Stagger,"Pushes every cycling item of the target back (stage 44). {0} = target. {1} = seconds.",{0}에게 경직 {1}초,Staggers {0} for {1}s
+Effect.Charge,"Pulls every cycling item of the target forward (stage 44). {0} = target. {1} = seconds.",{0}에게 충전 {1}초,Charges {0} by {1}s
+Effect.Freeze,"A state of stage 45: freeze stacks on the target (cooldowns slower). {0} = target. {1} = stacks.",{0}에게 빙결 {1},{1} Freeze to {0}
+Effect.Blind,"Blind stacks (hit lower). {0} = target. {1} = stacks.",{0}에게 암흑 {1},{1} Blind to {0}
+Effect.Aim,"Aim stacks (hit higher). {0} = target. {1} = stacks.",{0}에게 조준 {1},{1} Aim to {0}
+Effect.Keen,"Keen stacks (critical chance higher). {0} = target. {1} = stacks.",{0}에게 예리 {1},{1} Keen to {0}
+Effect.Fury,"Fury stacks (critical multiplier higher). {0} = target. {1} = stacks.",{0}에게 격분 {1},{1} Fury to {0}
+Effect.Haste,"Haste stacks (cooldowns faster). {0} = target. {1} = stacks.",{0}에게 가속 {1},{1} Haste to {0}
+Effect.Vulnerable,"Vulnerable stacks (damage from items taken higher). {0} = target. {1} = stacks.",{0}에게 취약 {1},{1} Vulnerable to {0}
+State.Freeze,"The name of the freeze state (stage 45), in the battle log.",빙결,Freeze
+State.Blind,The name of the blind state.,암흑,Blind
+State.Aim,The name of the aim state.,조준,Aim
+State.Keen,The name of the keen state.,예리,Keen
+State.Fury,The name of the fury state.,격분,Fury
+State.Haste,The name of the haste state.,가속,Haste
+State.Vulnerable,The name of the vulnerable state.,취약,Vulnerable
 Target.EnemyFront,Used as {0} of Effect.*. The enemy in row 1.,맨 앞 적,the front enemy
 Target.EnemyFrontMany,Used as {0} of Effect.*. {0} = how many enemies are hit counted from the front (2 or more).,앞의 적 {0}명,the front {0} enemies
 Target.EnemyBack,Used as {0} of Effect.*. The rearmost enemy.,맨 뒤 적,the rearmost enemy
@@ -248,6 +268,7 @@ Target.AllyLowestHp,Used as {0} of Effect.*.,HP가 가장 낮은 아군,the weak
 Target.AllyAll,Used as {0} of Effect.*.,아군 전체,all allies
 Potion.Heal,{0} = amount.,HP {0} 회복,Restores {0} HP
 Potion.Shield,{0} = amount.,보호막 {0},{0} Shield
+Potion.Cleanse,"A cleanse potion (stage 44): takes that many burn and bleed stacks off. {0} = stacks.",화상·출혈 {0} 정화,Cleanses {0} Burn and Bleed
 Battle.Time,{0} = battle time in seconds.,{0}초,{0}s
 Battle.StormIn,{0} = seconds until the storm starts.,폭풍까지 {0}초,Storm in {0}s
 Battle.StormActive,{0} = damage of the next storm tick.,폭풍! 다음 피해 {0},Storm! Next hit {0}
@@ -257,6 +278,16 @@ Battle.Speed,{0} = speed multiplier.,x{0},x{0}
 Battle.Hp,On the HP bar under a unit's feet. {0} = HP. {1} = max HP.,{0}/{1},{0}/{1}
 Battle.Shield,Next to the shield icon. {0} = shield points.,{0},{0}
 Battle.Burn,Next to the burn icon. {0} = burn stacks.,{0},{0}
+Battle.Bleed,"Next to the bleed icon on the state line (Slice D stage 44, Round 90). {0} = bleed stacks.",{0},{0}
+Battle.Regen,Next to the regen icon (stage 44). {0} = regen stacks.,{0},{0}
+Battle.Thorns,Next to the thorns icon (stage 44). {0} = thorns (whole).,{0},{0}
+Battle.Freeze,Next to the freeze icon on the state line (Slice D stage 45 / Round 91). {0} = freeze stacks.,{0},{0}
+Battle.Blind,Next to the blind icon (stage 45). {0} = blind stacks.,{0},{0}
+Battle.Aim,Next to the aim icon (stage 45). {0} = aim stacks.,{0},{0}
+Battle.Keen,Next to the keen icon (stage 45). {0} = keen stacks.,{0},{0}
+Battle.Fury,Next to the fury icon (stage 45). {0} = fury stacks.,{0},{0}
+Battle.Haste,Next to the haste icon (stage 45). {0} = haste stacks.,{0},{0}
+Battle.Vulnerable,Next to the vulnerable icon (stage 45). {0} = vulnerable stacks.,{0},{0}
 Battle.DogGrace,Next to the death's door icon: at 0 HP during grace. {0} = seconds of grace left. {1} = hits taken. {2} = hits that break the grace.,유예 {0}초 · 피격 {1}/{2},{0}s left · hits {1}/{2}
 Battle.DogRolling,Next to the death's door icon: at 0 HP after grace. {0} = death chance per hit.,피격마다 사망 {0}%,{0}% death per hit
 Battle.PartyFallen,Mercenaries who died in this battle. {0} = names.,쓰러진 아군: {0},Fallen: {0}
@@ -281,6 +312,9 @@ Log.SourceItem,{0} = unit. {1} = item.,{0}의 {1},{0}'s {1}
 Log.SourcePassive,{0} = unit.,{0}의 패시브,{0}'s passive
 Log.SourceBurn,Damage source.,화상,Burn
 Log.SourceStorm,Damage source.,폭풍,Storm
+Log.SourceBleed,Damage source (stage 44): a bleed tick.,출혈,Bleed
+Log.SourceRegen,Heal source (stage 44): a regen tick.,재생,Regen
+Log.SourceThorns,Damage source (stage 44): thorns dealt back.,가시,Thorns
 Log.Damage,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 피해 {2},{0} → {1}: {2} damage
 Log.DamageAbsorbed,{0} = source. {1} = target. {2} = amount. {3} = absorbed by shield.,{0} → {1}: 피해 {2} (보호막이 {3} 흡수),{0} → {1}: {2} damage ({3} absorbed by Shield)
 Log.CriticalHit,"A critical hit (stage 22), just before its damage line. {0} = source. {1} = target.",{0} → {1}: 치명타!,{0} → {1}: critical hit!
@@ -288,6 +322,13 @@ Log.Missed,"A miss (Slice D stage 33, Round 81): the attack dealt nothing to tha
 Log.Heal,{0} = source. {1} = target. {2} = HP restored.,{0} → {1}: 회복 {2},{0} → {1}: healed {2}
 Log.Shield,{0} = source. {1} = target. {2} = amount.,{0} → {1}: 보호막 +{2},{0} → {1}: Shield +{2}
 Log.Burn,{0} = source. {1} = target. {2} = stacks.,{0} → {1}: 화상 +{2},{0} → {1}: Burn +{2}
+Log.Bleed,"{0} = source. {1} = target. {2} = stacks (stage 44).",{0} → {1}: 출혈 +{2},{0} → {1}: Bleed +{2}
+Log.Regen,"{0} = source. {1} = target. {2} = stacks (stage 44).",{0} → {1}: 재생 +{2},{0} → {1}: Regen +{2}
+Log.Thorns,"{0} = source. {1} = target. {2} = amount (stage 44).",{0} → {1}: 가시 +{2},{0} → {1}: Thorns +{2}
+Log.Cleansed,"{0} = source. {1} = target. {2} = burn stacks off. {3} = bleed stacks off. {4} = freeze, blind and vulnerable stacks off together (stage 45; a heal that binds a bleed reads 0 burn).",{0} → {1}: 정화 (화상 −{2} · 출혈 −{3} · 빙결·암흑·취약 −{4}),{0} → {1}: cleansed (Burn −{2} · Bleed −{3} · Freeze/Blind/Vulnerable −{4})
+Log.Staggered,"{0} = source. {1} = target. {2} = seconds (stage 44).",{0} → {1}: 경직 {2}초,{0} → {1}: staggered {2}s
+Log.Charged,"{0} = source. {1} = target. {2} = seconds (stage 44).",{0} → {1}: 충전 {2}초,{0} → {1}: charged {2}s
+Log.StateApplied,"One of the seven states of stage 45 stacked on a unit. {0} = source. {1} = target. {2} = the state's name. {3} = stacks.",{0} → {1}: {2} +{3},{0} → {1}: {2} +{3}
 Log.DogEntered,{0} = unit. {1} = seconds of grace.,{0}: 빈사 상태! 유예 {1}초,{0} is at death's door! Grace {1}s
 Log.DogExited,{0} = unit.,{0}: 빈사에서 벗어남,{0} is back from death's door
 Log.GraceBroken,{0} = unit. {1} = hits taken.,{0}: 유예가 깨짐 (피격 {1}회),{0}: grace broken ({1} hits)

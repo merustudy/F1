@@ -1742,6 +1742,202 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 7321765448507392
+    m_Localized: '{1} Bleed to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507393
+    m_Localized: '{1} Regen to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507394
+    m_Localized: '{1} Thorns to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507395
+    m_Localized: Cleanses {1} Burn and Bleed from {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507396
+    m_Localized: Staggers {0} for {1}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507397
+    m_Localized: Charges {0} by {1}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507398
+    m_Localized: Cleanses {0} Burn and Bleed
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507399
+    m_Localized: Bleed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7321765448507400
+    m_Localized: Regen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7321765448507401
+    m_Localized: Thorns
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7321765448507403
+    m_Localized: "{0} \u2192 {1}: Bleed +{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507404
+    m_Localized: "{0} \u2192 {1}: Regen +{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507405
+    m_Localized: "{0} \u2192 {1}: Thorns +{2}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507406
+    m_Localized: "{0} \u2192 {1}: cleansed (Burn \u2212{2} \xB7 Bleed \u2212{3} \xB7
+      Freeze/Blind/Vulnerable \u2212{4})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507407
+    m_Localized: "{0} \u2192 {1}: staggered {2}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7321765448507408
+    m_Localized: "{0} \u2192 {1}: charged {2}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7447939646480384
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7447939659063296
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7447939659063297
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341714665472
+    m_Localized: '{1} Freeze to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248384
+    m_Localized: '{1} Blind to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248385
+    m_Localized: '{1} Aim to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248386
+    m_Localized: '{1} Keen to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248387
+    m_Localized: '{1} Fury to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248388
+    m_Localized: '{1} Haste to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248389
+    m_Localized: '{1} Vulnerable to {0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7454341727248390
+    m_Localized: Freeze
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248391
+    m_Localized: Blind
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248392
+    m_Localized: Aim
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248393
+    m_Localized: Keen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248394
+    m_Localized: Fury
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248395
+    m_Localized: Haste
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341727248396
+    m_Localized: Vulnerable
+    m_Metadata:
+      m_Items: []
+  - m_Id: 7454341731442688
+    m_Localized: "{0} \u2192 {1}: {2} +{3}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216487747584
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330496
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330497
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330498
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330499
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330500
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 7472216500330501
+    m_Localized: '{0}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -1939,3 +2135,34 @@ MonoBehaviour:
         - id: 6911573305057280
         - id: 7250864954662912
         - id: 7250864967245824
+        - id: 7321765448507392
+        - id: 7321765448507393
+        - id: 7321765448507394
+        - id: 7321765448507395
+        - id: 7321765448507396
+        - id: 7321765448507397
+        - id: 7321765448507398
+        - id: 7321765448507403
+        - id: 7321765448507404
+        - id: 7321765448507405
+        - id: 7321765448507406
+        - id: 7321765448507407
+        - id: 7321765448507408
+        - id: 7447939646480384
+        - id: 7447939659063296
+        - id: 7447939659063297
+        - id: 7454341714665472
+        - id: 7454341727248384
+        - id: 7454341727248385
+        - id: 7454341727248386
+        - id: 7454341727248387
+        - id: 7454341727248388
+        - id: 7454341727248389
+        - id: 7454341731442688
+        - id: 7472216487747584
+        - id: 7472216500330496
+        - id: 7472216500330497
+        - id: 7472216500330498
+        - id: 7472216500330499
+        - id: 7472216500330500
+        - id: 7472216500330501

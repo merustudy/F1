@@ -66,6 +66,26 @@ namespace F1.UI
         [SerializeField] UiBar _hpBar;
         [SerializeField] GameObject _burnChip;
         [SerializeField] TMP_Text _burn;
+        [SerializeField] GameObject _bleedChip;
+        [SerializeField] TMP_Text _bleed;
+        [SerializeField] GameObject _regenChip;
+        [SerializeField] TMP_Text _regen;
+        [SerializeField] GameObject _thornsChip;
+        [SerializeField] TMP_Text _thorns;
+        [SerializeField] GameObject _freezeChip;
+        [SerializeField] TMP_Text _freeze;
+        [SerializeField] GameObject _blindChip;
+        [SerializeField] TMP_Text _blind;
+        [SerializeField] GameObject _aimChip;
+        [SerializeField] TMP_Text _aim;
+        [SerializeField] GameObject _keenChip;
+        [SerializeField] TMP_Text _keen;
+        [SerializeField] GameObject _furyChip;
+        [SerializeField] TMP_Text _fury;
+        [SerializeField] GameObject _hasteChip;
+        [SerializeField] TMP_Text _haste;
+        [SerializeField] GameObject _vulnerableChip;
+        [SerializeField] TMP_Text _vulnerable;
         [SerializeField] GameObject _statusChip;
         [SerializeField] TMP_Text _status;
         [SerializeField] GameObject _pipsRow;
@@ -76,6 +96,16 @@ namespace F1.UI
         int _shownHp = -1;
         int _shownShield = -1;
         int _shownBurn = -1;
+        int _shownBleed = -1;
+        int _shownRegen = -1;
+        int _shownThorns = -1;
+        int _shownFreeze = -1;
+        int _shownBlind = -1;
+        int _shownAim = -1;
+        int _shownKeen = -1;
+        int _shownFury = -1;
+        int _shownHaste = -1;
+        int _shownVulnerable = -1;
         long _shownStatus = -1;
         int _shownFatigue = -1;
         string _shownState;
@@ -164,12 +194,32 @@ namespace F1.UI
             _pipsRow.SetActive(unit.Side == BattleSide.Party);
         }
 
+        /// <summary>Writes a state's stacks into its chip's text when they changed since the last render.</summary>
+        static void RenderStacks(int stacks, ref int shown, TMP_Text text, string key)
+        {
+            if (stacks != shown)
+            {
+                shown = stacks;
+                text.text = UiStrings.Get(key, stacks);
+            }
+        }
+
         /// <summary>Forgets what was drawn, so the next render rebuilds every text (after a locale change).</summary>
         public void Invalidate()
         {
             _shownHp = -1;
             _shownShield = -1;
             _shownBurn = -1;
+            _shownBleed = -1;
+            _shownRegen = -1;
+            _shownThorns = -1;
+            _shownFreeze = -1;
+            _shownBlind = -1;
+            _shownAim = -1;
+            _shownKeen = -1;
+            _shownFury = -1;
+            _shownHaste = -1;
+            _shownVulnerable = -1;
             _shownStatus = -1;
             _shownFatigue = -1;
             _stateShown = false;
@@ -305,12 +355,50 @@ namespace F1.UI
                 _burn.text = UiStrings.Get(UiKeys.Battle.Burn, _unit.Burn);
             }
 
+            // The effect vocabulary's states (Slice D stage 44, Round 90): stacks of bleed and regen, thorns as a whole number (hundredths, like a shield).
+            if (_unit.Bleed != _shownBleed)
+            {
+                _shownBleed = _unit.Bleed;
+                _bleed.text = UiStrings.Get(UiKeys.Battle.Bleed, _unit.Bleed);
+            }
+
+            if (_unit.Regen != _shownRegen)
+            {
+                _shownRegen = _unit.Regen;
+                _regen.text = UiStrings.Get(UiKeys.Battle.Regen, _unit.Regen);
+            }
+
+            if (_unit.Thorns != _shownThorns)
+            {
+                _shownThorns = _unit.Thorns;
+                _thorns.text = UiStrings.Get(UiKeys.Battle.Thorns, UiText.Amount(_unit.Thorns));
+            }
+
+            // The seven states (stage 45, Round 91): each its stacks.
+            RenderStacks(_unit.Freeze, ref _shownFreeze, _freeze, UiKeys.Battle.Freeze);
+            RenderStacks(_unit.Blind, ref _shownBlind, _blind, UiKeys.Battle.Blind);
+            RenderStacks(_unit.Aim, ref _shownAim, _aim, UiKeys.Battle.Aim);
+            RenderStacks(_unit.Keen, ref _shownKeen, _keen, UiKeys.Battle.Keen);
+            RenderStacks(_unit.Fury, ref _shownFury, _fury, UiKeys.Battle.Fury);
+            RenderStacks(_unit.Haste, ref _shownHaste, _haste, UiKeys.Battle.Haste);
+            RenderStacks(_unit.Vulnerable, ref _shownVulnerable, _vulnerable, UiKeys.Battle.Vulnerable);
+
             RenderStatus(balance, timeMs);
             RenderFatigue(balance);
 
             // The state line holds either the death's door state or what the unit carries, and after it the state of the breakdown.
             SetShown(_statusChip, _unit.InDog);
             SetShown(_burnChip, !_unit.InDog && _unit.Burn > 0);
+            SetShown(_bleedChip, !_unit.InDog && _unit.Bleed > 0);
+            SetShown(_regenChip, !_unit.InDog && _unit.Regen > 0);
+            SetShown(_thornsChip, !_unit.InDog && _unit.Thorns > 0);
+            SetShown(_freezeChip, !_unit.InDog && _unit.Freeze > 0);
+            SetShown(_blindChip, !_unit.InDog && _unit.Blind > 0);
+            SetShown(_aimChip, !_unit.InDog && _unit.Aim > 0);
+            SetShown(_keenChip, !_unit.InDog && _unit.Keen > 0);
+            SetShown(_furyChip, !_unit.InDog && _unit.Fury > 0);
+            SetShown(_hasteChip, !_unit.InDog && _unit.Haste > 0);
+            SetShown(_vulnerableChip, !_unit.InDog && _unit.Vulnerable > 0);
 
             // The badge at the bar's end: the skull at death's door, the shield with its number while there is one.
             Sprite badge = _unit.InDog ? _dangerBadge : _unit.Shield > 0 ? _shieldBadge : null;

@@ -1915,6 +1915,211 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673568986660865
+  - m_Id: 7321765448507392
+    m_Key: Effect.Bleed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943041
+  - m_Id: 7321765448507393
+    m_Key: Effect.Regen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943042
+  - m_Id: 7321765448507394
+    m_Key: Effect.Thorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943043
+  - m_Id: 7321765448507395
+    m_Key: Effect.Cleanse
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943044
+  - m_Id: 7321765448507396
+    m_Key: Effect.Stagger
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943045
+  - m_Id: 7321765448507397
+    m_Key: Effect.Charge
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943046
+  - m_Id: 7321765448507398
+    m_Key: Potion.Cleanse
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943047
+  - m_Id: 7321765448507399
+    m_Key: Log.SourceBleed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943048
+  - m_Id: 7321765448507400
+    m_Key: Log.SourceRegen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943049
+  - m_Id: 7321765448507401
+    m_Key: Log.SourceThorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943050
+  - m_Id: 7321765448507403
+    m_Key: Log.Bleed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943052
+  - m_Id: 7321765448507404
+    m_Key: Log.Regen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943053
+  - m_Id: 7321765448507405
+    m_Key: Log.Thorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943054
+  - m_Id: 7321765448507406
+    m_Key: Log.Cleansed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943055
+  - m_Id: 7321765448507407
+    m_Key: Log.Staggered
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943056
+  - m_Id: 7321765448507408
+    m_Key: Log.Charged
+    m_Metadata:
+      m_Items:
+      - rid: 8623673573417943057
+  - m_Id: 7447939646480384
+    m_Key: Battle.Bleed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581304020992
+  - m_Id: 7447939659063296
+    m_Key: Battle.Regen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581304020993
+  - m_Id: 7447939659063297
+    m_Key: Battle.Thorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581304020994
+  - m_Id: 7454341714665472
+    m_Key: Effect.Freeze
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052736
+  - m_Id: 7454341727248384
+    m_Key: Effect.Blind
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052737
+  - m_Id: 7454341727248385
+    m_Key: Effect.Aim
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052738
+  - m_Id: 7454341727248386
+    m_Key: Effect.Keen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052739
+  - m_Id: 7454341727248387
+    m_Key: Effect.Fury
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052740
+  - m_Id: 7454341727248388
+    m_Key: Effect.Haste
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052741
+  - m_Id: 7454341727248389
+    m_Key: Effect.Vulnerable
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052742
+  - m_Id: 7454341727248390
+    m_Key: State.Freeze
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052743
+  - m_Id: 7454341727248391
+    m_Key: State.Blind
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052744
+  - m_Id: 7454341727248392
+    m_Key: State.Aim
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052745
+  - m_Id: 7454341727248393
+    m_Key: State.Keen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052746
+  - m_Id: 7454341727248394
+    m_Key: State.Fury
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052747
+  - m_Id: 7454341727248395
+    m_Key: State.Haste
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052748
+  - m_Id: 7454341727248396
+    m_Key: State.Vulnerable
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052749
+  - m_Id: 7454341731442688
+    m_Key: Log.StateApplied
+    m_Metadata:
+      m_Items:
+      - rid: 8623673581704052750
+  - m_Id: 7472216487747584
+    m_Key: Battle.Freeze
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310464
+  - m_Id: 7472216500330496
+    m_Key: Battle.Blind
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310465
+  - m_Id: 7472216500330497
+    m_Key: Battle.Aim
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310466
+  - m_Id: 7472216500330498
+    m_Key: Battle.Keen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310467
+  - m_Id: 7472216500330499
+    m_Key: Battle.Fury
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310468
+  - m_Id: 7472216500330500
+    m_Key: Battle.Haste
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310469
+  - m_Id: 7472216500330501
+    m_Key: Battle.Vulnerable
+    m_Metadata:
+      m_Items:
+      - rid: 8623673582821310470
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -3672,3 +3877,182 @@ MonoBehaviour:
           the stat an owner needs to wield it and the least of it. {0} = the stat''s
           name. {1} = the value. In the blood red when the owner falls short, or
           when nobody living of the party meets it on a card without an owner.'
+    - rid: 8623673573417943041
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'An item''s effect line (Slice D stage 44): bleed stacks on
+          the target. {0} = target. {1} = stacks.'
+    - rid: 8623673573417943042
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Regen stacks on the target (stage 44). {0} = target. {1} =
+          stacks.
+    - rid: 8623673573417943043
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Thorns on the target (stage 44). {0} = target. {1} = amount.
+    - rid: 8623673573417943044
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Takes burn and bleed stacks off the target (stage 44). {0}
+          = target. {1} = stacks of each.
+    - rid: 8623673573417943045
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Pushes every cycling item of the target back (stage 44). {0}
+          = target. {1} = seconds.
+    - rid: 8623673573417943046
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Pulls every cycling item of the target forward (stage 44).
+          {0} = target. {1} = seconds.
+    - rid: 8623673573417943047
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A cleanse potion (stage 44): takes that many burn and bleed
+          stacks off. {0} = stacks.'
+    - rid: 8623673573417943048
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Damage source (stage 44): a bleed tick.'
+    - rid: 8623673573417943049
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Heal source (stage 44): a regen tick.'
+    - rid: 8623673573417943050
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Damage source (stage 44): thorns dealt back.'
+    - rid: 8623673573417943052
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = stacks (stage 44).'
+    - rid: 8623673573417943053
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = stacks (stage 44).'
+    - rid: 8623673573417943054
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = amount (stage 44).'
+    - rid: 8623673573417943055
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = burn stacks off. {3} =
+          bleed stacks off. {4} = freeze, blind and vulnerable stacks off together
+          (stage 45; a heal that binds a bleed reads 0 burn).'
+    - rid: 8623673573417943056
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = seconds (stage 44).'
+    - rid: 8623673573417943057
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = source. {1} = target. {2} = seconds (stage 44).'
+    - rid: 8623673581304020992
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the bleed icon on the state line (Slice D stage 44,
+          Round 90). {0} = bleed stacks.
+    - rid: 8623673581304020993
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the regen icon (stage 44). {0} = regen stacks.
+    - rid: 8623673581304020994
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the thorns icon (stage 44). {0} = thorns (whole).
+    - rid: 8623673581704052736
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A state of stage 45: freeze stacks on the target (cooldowns
+          slower). {0} = target. {1} = stacks.'
+    - rid: 8623673581704052737
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Blind stacks (hit lower). {0} = target. {1} = stacks.
+    - rid: 8623673581704052738
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Aim stacks (hit higher). {0} = target. {1} = stacks.
+    - rid: 8623673581704052739
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Keen stacks (critical chance higher). {0} = target. {1} =
+          stacks.
+    - rid: 8623673581704052740
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Fury stacks (critical multiplier higher). {0} = target. {1}
+          = stacks.
+    - rid: 8623673581704052741
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Haste stacks (cooldowns faster). {0} = target. {1} = stacks.
+    - rid: 8623673581704052742
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Vulnerable stacks (damage from items taken higher). {0} =
+          target. {1} = stacks.
+    - rid: 8623673581704052743
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the freeze state (stage 45), in the battle log.
+    - rid: 8623673581704052744
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the blind state.
+    - rid: 8623673581704052745
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the aim state.
+    - rid: 8623673581704052746
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the keen state.
+    - rid: 8623673581704052747
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the fury state.
+    - rid: 8623673581704052748
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the haste state.
+    - rid: 8623673581704052749
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The name of the vulnerable state.
+    - rid: 8623673581704052750
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: One of the seven states of stage 45 stacked on a unit. {0}
+          = source. {1} = target. {2} = the state's name. {3} = stacks.
+    - rid: 8623673582821310464
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the freeze icon on the state line (Slice D stage 45
+          / Round 91). {0} = freeze stacks.
+    - rid: 8623673582821310465
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the blind icon (stage 45). {0} = blind stacks.
+    - rid: 8623673582821310466
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the aim icon (stage 45). {0} = aim stacks.
+    - rid: 8623673582821310467
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the keen icon (stage 45). {0} = keen stacks.
+    - rid: 8623673582821310468
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the fury icon (stage 45). {0} = fury stacks.
+    - rid: 8623673582821310469
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the haste icon (stage 45). {0} = haste stacks.
+    - rid: 8623673582821310470
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Next to the vulnerable icon (stage 45). {0} = vulnerable stacks.

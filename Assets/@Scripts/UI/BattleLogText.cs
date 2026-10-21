@@ -35,6 +35,9 @@ namespace F1.UI
                 {
                     case BattleEvent.CauseBurn: return UiStrings.Get(UiKeys.Log.SourceBurn);
                     case BattleEvent.CauseStorm: return UiStrings.Get(UiKeys.Log.SourceStorm);
+                    case BattleEvent.CauseBleed: return UiStrings.Get(UiKeys.Log.SourceBleed);
+                    case BattleEvent.CauseRegen: return UiStrings.Get(UiKeys.Log.SourceRegen);
+                    case BattleEvent.CauseThorns: return UiStrings.Get(UiKeys.Log.SourceThorns);
                     default: return UiText.Name(data.Potions.Get(cause).Name);
                 }
             }
@@ -112,6 +115,26 @@ namespace F1.UI
                     return UiStrings.Get(UiKeys.Log.Shield, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
                 case BattleEventKind.BurnApplied:
                     return UiStrings.Get(UiKeys.Log.Burn, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
+                case BattleEventKind.BleedApplied:
+                    return UiStrings.Get(UiKeys.Log.Bleed, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
+                case BattleEventKind.RegenApplied:
+                    return UiStrings.Get(UiKeys.Log.Regen, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
+                case BattleEventKind.ThornsGained:
+                    return UiStrings.Get(UiKeys.Log.Thorns, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
+                case BattleEventKind.Cleansed:
+                    // Nothing came off: no line (a cleanse on a clean unit, stage 44).
+                    if (e.A == 0 && e.B == 0 && e.C == 0)
+                    {
+                        return null;
+                    }
+
+                    return UiStrings.Get(UiKeys.Log.Cleansed, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A, e.B, e.C);
+                case BattleEventKind.StateApplied:
+                    return UiStrings.Get(UiKeys.Log.StateApplied, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.StateName((EffectKind)e.B), e.A);
+                case BattleEventKind.Staggered:
+                    return UiStrings.Get(UiKeys.Log.Staggered, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Seconds(e.A));
+                case BattleEventKind.Charged:
+                    return UiStrings.Get(UiKeys.Log.Charged, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Seconds(e.A));
                 case BattleEventKind.DogEntered:
                     return UiStrings.Get(UiKeys.Log.DogEntered, UnitName(engine, e.Target), UiText.Seconds(e.A - e.TimeMs));
                 case BattleEventKind.DogExited:

@@ -739,6 +739,18 @@ namespace F1.Editor.Setup
             line.childControlHeight = true;
             GameObject statusChip = BuildStateChip(states, "UnitStatus", UiArt.DeathsDoor, UiPalette.Text, out TextMeshProUGUI status);
             GameObject burnChip = BuildStateChip(states, "UnitBurn", UiArt.Burn, UiPalette.Burn, out TextMeshProUGUI burn);
+            // The effect vocabulary's states (Slice D stage 44, Round 90): bleed, regen and thorns, each a chip like the burn's, after it in that order.
+            GameObject bleedChip = BuildStateChip(states, "UnitBleed", UiArt.Bleed, UiPalette.Bleed, out TextMeshProUGUI bleed);
+            GameObject regenChip = BuildStateChip(states, "UnitRegen", UiArt.Regen, UiPalette.Regen, out TextMeshProUGUI regen);
+            GameObject thornsChip = BuildStateChip(states, "UnitThorns", UiArt.Thorns, UiPalette.Thorns, out TextMeshProUGUI thorns);
+            // The seven states (stage 45, Round 91): each a chip like the others, after the thorns in this order.
+            GameObject freezeChip = BuildStateChip(states, "UnitFreeze", UiArt.Freeze, UiPalette.Freeze, out TextMeshProUGUI freeze);
+            GameObject blindChip = BuildStateChip(states, "UnitBlind", UiArt.Blind, UiPalette.Blind, out TextMeshProUGUI blind);
+            GameObject aimChip = BuildStateChip(states, "UnitAim", UiArt.Aim, UiPalette.Aim, out TextMeshProUGUI aim);
+            GameObject keenChip = BuildStateChip(states, "UnitKeen", UiArt.Keen, UiPalette.Keen, out TextMeshProUGUI keen);
+            GameObject furyChip = BuildStateChip(states, "UnitFury", UiArt.Fury, UiPalette.Fury, out TextMeshProUGUI fury);
+            GameObject hasteChip = BuildStateChip(states, "UnitHaste", UiArt.Haste, UiPalette.Haste, out TextMeshProUGUI haste);
+            GameObject vulnerableChip = BuildStateChip(states, "UnitVulnerable", UiArt.Vulnerable, UiPalette.Vulnerable, out TextMeshProUGUI vulnerable);
 
             // After them, the state of the breakdown by name in its colour (round 36). Words alone: its pictures are still to be drawn.
             TextMeshProUGUI fatigueState = UiBuild.Outlined(UiBuild.Label("UnitFatigueState", states, 15f, UiPalette.FatigueDanger));
@@ -759,6 +771,26 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_hpBar", marks.HpBar);
             UiBuild.SetReference(view, "_burnChip", burnChip);
             UiBuild.SetReference(view, "_burn", burn);
+            UiBuild.SetReference(view, "_bleedChip", bleedChip);
+            UiBuild.SetReference(view, "_bleed", bleed);
+            UiBuild.SetReference(view, "_regenChip", regenChip);
+            UiBuild.SetReference(view, "_regen", regen);
+            UiBuild.SetReference(view, "_thornsChip", thornsChip);
+            UiBuild.SetReference(view, "_thorns", thorns);
+            UiBuild.SetReference(view, "_freezeChip", freezeChip);
+            UiBuild.SetReference(view, "_freeze", freeze);
+            UiBuild.SetReference(view, "_blindChip", blindChip);
+            UiBuild.SetReference(view, "_blind", blind);
+            UiBuild.SetReference(view, "_aimChip", aimChip);
+            UiBuild.SetReference(view, "_aim", aim);
+            UiBuild.SetReference(view, "_keenChip", keenChip);
+            UiBuild.SetReference(view, "_keen", keen);
+            UiBuild.SetReference(view, "_furyChip", furyChip);
+            UiBuild.SetReference(view, "_fury", fury);
+            UiBuild.SetReference(view, "_hasteChip", hasteChip);
+            UiBuild.SetReference(view, "_haste", haste);
+            UiBuild.SetReference(view, "_vulnerableChip", vulnerableChip);
+            UiBuild.SetReference(view, "_vulnerable", vulnerable);
             UiBuild.SetReference(view, "_statusChip", statusChip);
             UiBuild.SetReference(view, "_status", status);
             UiBuild.SetReference(view, "_pipsRow", marks.PipsRow.gameObject);

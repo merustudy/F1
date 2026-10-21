@@ -27,6 +27,24 @@ namespace F1.UI
         public static readonly Color Shield = Rgb(0x8F, 0xD3, 0xF4);
         public static readonly Color Burn = Rgb(0xF3, 0x9C, 0x12);
 
+        /// <summary>The state line's chips of the effect vocabulary (Slice D stage 44, Round 90 "이걸로 가자 연결"): bleed in the blood's light, regen in the good green, thorns in the plain text white.</summary>
+        public static readonly Color Bleed = Rgb(0xD8, 0x6A, 0x5A);
+        public static readonly Color Regen = Rgb(0x58, 0xB3, 0x68);
+        public static readonly Color Thorns = Rgb(0xEB, 0xEB, 0xE6);
+
+        /// <summary>
+        /// The state line's chips of the seven states (Slice D stage 45, Round 91 "연결", the colours of the approved sample `mock-chips-v2.png`): freeze
+        /// in an icy blue, blind in a dusty violet, aim in a sand yellow, keen in a steel white, fury in a hot red, haste in a pale yellow, vulnerable in
+        /// a worn orange.
+        /// </summary>
+        public static readonly Color Freeze = Rgb(0x9F, 0xD3, 0xF0);
+        public static readonly Color Blind = Rgb(0xB9, 0x8F, 0xE0);
+        public static readonly Color Aim = Rgb(0xF0, 0xD4, 0x7A);
+        public static readonly Color Keen = Rgb(0xDC, 0xE6, 0xF0);
+        public static readonly Color Fury = Rgb(0xF0, 0x6E, 0x5A);
+        public static readonly Color Haste = Rgb(0xF3, 0xE2, 0x9A);
+        public static readonly Color Vulnerable = Rgb(0xE0, 0xA0, 0x60);
+
         /// <summary>
         /// The marks under a unit's feet (2026-10-05 round 29): the rim around the HP bar that tells a shield, death's door or
         /// a potion's target, the light on the floor at a target's feet (the target's rim, faint), and a monster's name on the

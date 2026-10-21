@@ -152,6 +152,23 @@ namespace F1.Editor.Setup
         public const string DeathsDoor = "Icon/deaths_door";
         public const string Storm = "Icon/storm";
 
+        /// <summary>The state line's icons of the effect vocabulary (Slice D stage 44, Round 90 "이걸로 가자 연결"): blood drops, a sprout, two bone-white thorns.</summary>
+        public const string Bleed = "Icon/bleed";
+        public const string Regen = "Icon/regen";
+        public const string Thorns = "Icon/thorns";
+
+        /// <summary>
+        /// The state line's icons of the seven states (Slice D stage 45, Round 91 "연결"): an ice crystal, a puff of black dust, an archery target,
+        /// the glint of an edge, a red fist, a yellow lightning bolt, a cracked shield.
+        /// </summary>
+        public const string Freeze = "Icon/freeze";
+        public const string Blind = "Icon/blind";
+        public const string Aim = "Icon/aim";
+        public const string Keen = "Icon/keen";
+        public const string Fury = "Icon/fury";
+        public const string Haste = "Icon/haste";
+        public const string Vulnerable = "Icon/vulnerable";
+
         /// <summary>Every piece, with the border of each frame in the pixels of its sprite.</summary>
         public static readonly IReadOnlyList<Piece> All = new[]
         {
@@ -194,6 +211,16 @@ namespace F1.Editor.Setup
             new Piece(Burn),
             new Piece(DeathsDoor),
             new Piece(Storm),
+            new Piece(Bleed),
+            new Piece(Regen),
+            new Piece(Thorns),
+            new Piece(Freeze),
+            new Piece(Blind),
+            new Piece(Aim),
+            new Piece(Keen),
+            new Piece(Fury),
+            new Piece(Haste),
+            new Piece(Vulnerable),
             new Piece(Star),
         };
 
