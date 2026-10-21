@@ -246,11 +246,12 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 명중(`StatRules.HitChance`): `HitBasePercent`×100 + 공격자의 정확 − 대상의 회피를 `HitMinPercent`~`HitMaxPercent`(×100)로 자른다. 정확(`Accuracy`)은 용병이면 (**민첩** − `StatBaseline`) × `HitPerDexPoint` + 특성의 명중 %p×100(물리에만 닿으니 특성의 명중도 물리뿐), 적이면 `Accuracy`×100. 회피(`Dodge`)는 용병이면 (민첩 − 기준) × `DodgePerDexPoint` + 특성의 회피 %p×100, 적이면 `Dodge`×100. 확실한 명중(100%)은 굴리지 않는다.
 - 치명타(`StatRules.CritChance`): (아이템의 `CritChancePercent` + 주인의 패시브 %p + 특성의 치명타 %p − 대상의 `CritTakenPercent`)×100 + 학파의 스탯 — 물리 무기는 (민첩 − 기준) × `CritPerDexPoint`, 마법 무기는 (**지혜** − 기준) × `CritPerWisPoint` — 를 0~10000으로 자른다. 값이 0인 무기는 굴리지 않는다. 배수(`StatRules.CritDamagePercent`): 물리는 `PhysicalCritDamagePercent` + 무기의 `CritDamagePercent` + 특성의 `CritDamagePercent`(`TraitBonus`), 마법은 `MagicCritDamagePercent`. `RollCritical`이 피해에 곱한다(회복·보호막은 치명타가 없다).
   패시브 %p(36단계, 방랑자)는 `StatRules.CritBonusPercent(패시브, 아이템)`: 치명타 확률이 있는 **무기 장비**에만.
+  회피의 패시브 %p(47단계, 도적 `DodgePercent`)는 `StatRules.DodgeBonusPercent(패시브)`: `StatRules.Dodge`가 특성의 %p 옆에 더한다(`BattleEngine.RollHit`이 대상의 패시브를 넘김). 회피가 그렇듯 물리 공격에만(마법은 굴리지 않는다).
 - 빈사의 사망 확률(`FatigueRules.DogDeathChancePercent`): 기본값 + 피로 상태의 %p − (**인내** − 기준) × `DogDeathPercentPerEndPoint` + 특성의 %p, 0~100.
 - 각성(`StatRules.VirtueChancePercent`): `VirtueChancePercent` + (**인내** − 기준) × `VirtuePerEndPoint` + 특성의 %p, 0~100. `BrokeDown`의 B가 그 확률이다.
 - 인내(`StatRules.FatigueGain`): 오르는 피로(양수)만 (100 − `FatiguePercentPerEndPoint` × (인내 − **`FatigueBaseline`**) + 특성의 %)%로 곱하고 반올림한다(0 아래 없음). 전투 안은 `ChangeFatigue` 한 곳, 전투에 들어가는 비용은 `ExpeditionRules.BeginBattle`이다.
 - 저장: 24(`Docs/Architecture/07_SAVE.md`)가 `Spi`를 `Wis`로 읽고 스탯을 새 척도로 접는다. 진행 중 전투를 이으면 지금 규칙으로 재현한다(`Diverged`).
-- Test: `StatJudgementTests`(민첩의 명중·회피, 물리만 빗나감과 마법의 명중, 빗나감의 무효, 대상마다의 굴림, 학파별 치명타, 방랑자의 패시브, 인내의 빈사·각성, 인내의 피로), `ArmorTests`(받는 치명타), `TraitRulesTests`.
+- Test: `StatJudgementTests`(민첩의 명중·회피, 물리만 빗나감과 마법의 명중, 빗나감의 무효, 대상마다의 굴림, 학파별 치명타, 방랑자의 패시브, 도적의 회피 패시브(47단계), 인내의 빈사·각성, 인내의 피로), `ArmorTests`(받는 치명타), `TraitRulesTests`.
 
 ### 편차와 성장 (Slice D 34단계)
 

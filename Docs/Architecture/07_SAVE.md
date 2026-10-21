@@ -134,7 +134,8 @@ Primary가 무효면 `.bak`을 같은 방식으로 검증해 쓴다. 둘 다 무
 
 - `RunSaveData.SchemaVersion`은 구조가 바뀔 때 올린다. `RunSaveMigrator`가 옛 버전을 한 단계씩 올린 뒤 검증한다.
 - 지금 버전보다 새로운 파일은 읽지 않는다(무효).
-- 지금 버전은 **25**다(2026-10-20, Slice D 42단계 장비 요구 스탯, `Docs/Design/02_Combat_System.md` §4·`05_Mercenary_Growth.md` §2): DTO의 모양은 24와 같고, 로스터의 용병과 역마차의 후보는 **자기 직업 기본 무기가 요구하는 스탯이 요구값 이상**이다(모든 용병이 기본 무기를 든다).
+- 지금 버전은 **26**이다(2026-10-21, Slice D 47단계 직업군 확대, `Docs/Design/05_Mercenary_Growth.md` §1): DTO의 모양은 25와 같고, 직업 id `ranger`는 **`archer`**다(`RunSaveMigrator.From25To26`이 로스터·후보·원정 구성원의 id를 옮긴다. 새 직업 셋은 옛 파일에 없다).
+- 25(2026-10-20, Slice D 42단계 장비 요구 스탯, `Docs/Design/02_Combat_System.md` §4·`05_Mercenary_Growth.md` §2): DTO의 모양은 24와 같고, 로스터의 용병과 역마차의 후보는 **자기 직업 기본 무기가 요구하는 스탯이 요구값 이상**이다(모든 용병이 기본 무기를 든다).
   24는 `From24To25(save, data)`가 올린다: 그 스탯이 요구값 아래면 요구값으로(`StatRules.MeetingBaseWeapon`. 다른 스탯은 그대로. 진행 중인 원정의 구성원은 로스터의 스탯을 쓰므로 함께 오른다). 보드에 이미 놓인 아이템은 보지 않는다 — 요구는 놓을 때의 규칙이라, 미달인 용병이 들고 있던 것은 집어 들면 제자리에 다시 놓지 못하고 인벤토리로 간다. 값만 바뀌고 모양은 같지만 뜻(불변조건)이 생겨 버전을 올렸다. `RunSaveMapperTests`의 `Migrate_From24_…`.
 - 그 전의 **24**(2026-10-20, Slice D 41단계 스탯 개정, `Docs/Design/05_Mercenary_Growth.md` §2): `StatsRecord`의 **`Spi`가 `Wis`**(지혜)이고 스탯은 새 척도(직업 기본값 1~8, 세기의 기준 5)다. 23은 `From23To24(save, data)`가 올린다: 로스터와 후보의 스탯 여섯을 (옛 + 1) / 2로 접고(옛 10이 새 5, `StatMin`~`StatMax` 안) `Spi`(이제 `int?`, 쓰지 않는 필드)를 `Wis`로 읽어 비우며, 진행 중인 원정의 구성원은 새 체력의 최대 HP(`LevelRules.MaxHpOf`, 특성 포함)를 받고 HP는 비례(있던 사람은 최소 1). `RunSaveMapperTests`의 `Migrate_From23_…`.
 - 그 전의 **23**(2026-10-19, Slice D 38단계: 원정 구성원의 **`DeathsDoor`** — 이 원정의 전투에서 빈사에 들었었는지. 정산이 얻은 특성의 계기로 읽는다, `Docs/Design/05_Mercenary_Growth.md` §6). 22는 `From22To23`이 올린다: 필드가 없으므로 모두 거짓이다(진행 중인 원정은 빈사에 든 사람이 없는 것으로 본다 — 38단계 판정 7). 얻은 특성의 굴림은 정산과 같은 저장에 들어간다(정산이 굴리고 로스터의 `Traits`에 더한 뒤 저장).
