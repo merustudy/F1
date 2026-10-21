@@ -55,7 +55,7 @@
     },
     {
       "Key": "CritFatigueTaken",
-      "Value": 15
+      "Value": 12
     },
     {
       "Key": "CritFatigueTakenAllies",
@@ -291,7 +291,7 @@
     },
     {
       "Key": "PowerBaseline",
-      "Value": 5
+      "Value": 4
     },
     {
       "Key": "RecruitCount",
@@ -355,7 +355,7 @@
     },
     {
       "Key": "StatBaseline",
-      "Value": 10
+      "Value": 7
     },
     {
       "Key": "StatMax",

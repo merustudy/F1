@@ -59,7 +59,7 @@ RegenHealPerStack,0.27
 HitMinDamage,0.5
 PhysicalCritDamagePercent,150
 MagicCritDamagePercent,150
-CritFatigueTaken,15
+CritFatigueTaken,12
 CritFatigueTakenAllies,3
 CritFatigueDealt,3
 CritFatigueDealtAllies,1
@@ -72,11 +72,11 @@ TreatmentPrice,20
 TreatmentRelief,40
 ExpPerFloor,1
 ExpClear,5
-StatBaseline,10
+StatBaseline,7
 StatMin,1
 StatMax,30
 StatPowerPercentPerPoint,10
-PowerBaseline,5
+PowerBaseline,4
 FatigueBaseline,5
 CooldownPercentPerPoint,1
 HpPerConPointLow,5
