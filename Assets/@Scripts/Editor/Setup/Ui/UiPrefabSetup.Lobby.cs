@@ -411,7 +411,7 @@ namespace F1.Editor.Setup
             {
                 float left = Mathf.Round(i * (pipWidth + FatiguePipGap));
                 float right = Mathf.Round(i * (pipWidth + FatiguePipGap) + pipWidth);
-                pips[i] = UiBuild.Bar(namePrefix + i, parent, UiPalette.FatigueBar);
+                pips[i] = UiBuild.PipBar(namePrefix + i, parent);
                 UiBuild.Box(pips[i], left, 0f, right - left, height);
             }
 

@@ -346,15 +346,32 @@ namespace F1.Editor.Setup
         }
 
         /// <summary>A bar: a dark track with a fill whose width code sets at runtime.</summary>
-        public static UiBar Bar(string name, Transform parent, Color fillColor)
+        /// <summary>
+        /// A fatigue pip (Round 95): a bar in the fatigue's violet with a second fill in red over it, for the fatigue past the breakdown threshold.
+        /// <see cref="UI.FatiguePips.Show"/> stretches both.
+        /// </summary>
+        public static UiBar PipBar(string name, Transform parent)
+        {
+            return Bar(name, parent, UiPalette.FatigueBar, UiPalette.FatigueDanger);
+        }
+
+        /// <summary>
+        /// A bar: the slot, its fill and (Round 95) a second fill over it, empty until a screen stretches it — every bar has one so that no reference of
+        /// a UI script is left unset; only the fatigue pips use it. The second fill takes the fill's colour unless one is given.
+        /// </summary>
+        public static UiBar Bar(string name, Transform parent, Color fillColor, Color? overColor = null)
         {
             Image track = Image(name, parent, UiPalette.Slot);
             Image fill = Image(name + "Fill", track.transform, fillColor);
             Stretch(fill.rectTransform);
+            Image over = Image(name + "Over", track.transform, overColor ?? fillColor);
+            UiBar.Fill(over.rectTransform, 0f);
 
             var bar = track.gameObject.AddComponent<UiBar>();
             SetReference(bar, "_fill", fill.rectTransform);
             SetReference(bar, "_fillImage", fill);
+            SetReference(bar, "_overFill", over.rectTransform);
+            SetReference(bar, "_overFillImage", over);
             return bar;
         }
 

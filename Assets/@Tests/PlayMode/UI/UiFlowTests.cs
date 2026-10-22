@@ -727,38 +727,39 @@ namespace F1.Tests
         }
 
         [UnityTest]
-        public IEnumerator Lobby_FatigueShowsAsTenPips_RedFromTheBreakdownOn()
+        public IEnumerator Lobby_FatigueShowsAsTenPips_TheSecondLapRedOverTheFirst()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             BalanceData balance = Managers.Data.Data.Balance;
-            Assume.That(balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 20.");
+            Assume.That(balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 10 a lap.");
             Assume.That(balance.FatigueBreakdown, Is.EqualTo(100));
 
             // A fresh mercenary: ten empty pips, violet words (the barracks' line; the strip's chip has the same pips).
             yield return UiTestUtil.OpenBarracks(lobby);
             RosterEntryView fresh = UiTestUtil.RosterEntries(lobby)[0];
             Assert.AreEqual(10, fresh.FatiguePips.Count);
-            Assert.IsTrue(fresh.FatiguePips.All(p => p.Ratio == 0f));
+            Assert.IsTrue(fresh.FatiguePips.All(p => p.Ratio == 0f && p.OverRatio == 0f));
             Assert.AreEqual(UiPalette.Fatigue, fresh.Fatigue.color);
 
-            // 128: five full violet pips, then one full and one 8/20 red one, then nothing; the words red.
+            // 128 (Round 95): the first lap fills all ten pips violet; the second lap's 28 lies over them in red, two full and one 8/10; the words red.
             RunRules.FindMercenary(Managers.Run.Run, Managers.Run.Run.Roster[0].Id).Fatigue = 128;
             lobby.Refresh();
             yield return null;
             RosterEntryView tired = UiTestUtil.RosterEntries(lobby)[0];
-            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, tired.FatiguePips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f));
-            Assert.IsTrue(tired.FatiguePips.Take(5).All(p => p.FillColor == UiPalette.FatigueBar));
-            Assert.IsTrue(tired.FatiguePips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
+            Assert.IsTrue(tired.FatiguePips.All(p => p.Ratio == 1f && p.FillColor == UiPalette.FatigueBar));
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 0.8f, 0f, 0f, 0f, 0f, 0f, 0f, 0f }, tired.FatiguePips.Select(p => Mathf.Round(p.OverRatio * 10f) / 10f));
+            Assert.IsTrue(tired.FatiguePips.All(p => p.OverColor == UiPalette.FatigueDanger));
             Assert.AreEqual(UiPalette.FatigueDanger, tired.Fatigue.color);
             Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Fatigue, 128, 200), tired.Fatigue.text);
 
             UiTestUtil.CloseQuarter(lobby);
             RosterChipView chip = UiTestUtil.Views<RosterChipView>(lobby)[0];
-            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, chip.Pips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f), "The strip's chip shows the same.");
-            Assert.IsTrue(chip.Pips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
+            Assert.IsTrue(chip.Pips.All(p => p.Ratio == 1f), "The strip's chip shows the same.");
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 0.8f, 0f, 0f, 0f, 0f, 0f, 0f, 0f }, chip.Pips.Select(p => Mathf.Round(p.OverRatio * 10f) / 10f));
+            Assert.IsTrue(chip.Pips.All(p => p.OverColor == UiPalette.FatigueDanger));
         }
 
         /// <summary>A mercenary that came home in an affliction (round 36): its name after the fatigue words, and what it does at the right end of the passive's line.</summary>
@@ -778,7 +779,7 @@ namespace F1.Tests
             yield return null;
 
             RosterChipView[] chips = UiTestUtil.Views<RosterChipView>(lobby);
-            Assert.AreEqual(UiText.JobLine(tired.JobId, fearful), chips[0].Job, "The strip's chip names the affliction after the job.");
+            Assert.AreEqual(UiText.JobLine(tired.JobId, fearful, true), chips[0].Job, "The strip's chip names the affliction after the job (stage 48: and the overwork, at 128).");
             Assert.AreEqual(UiPalette.FatigueDanger, UiTestUtil.At(chips[0], "ChipJob").GetComponent<TMP_Text>().color);
             Assert.AreEqual(UiText.Job(Managers.Run.Run.Roster[1].JobId), chips[1].Job);
 
@@ -1500,7 +1501,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
             StaticData data = Managers.Data.Data;
-            Assume.That(data.Balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 20.");
+            Assume.That(data.Balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 10 a lap.");
             Assume.That(data.Balance.FatigueBreakdown, Is.EqualTo(100));
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
             PartySideView party = map.GetComponentInChildren<PartySideView>();
@@ -1508,24 +1509,24 @@ namespace F1.Tests
             PartyColumnView row2 = party.ColumnOfRow(2);
             ExpeditionMember front = Managers.Expedition.Expedition.Members[row1.Member];
             Assert.AreEqual(10, row1.FatiguePips.Count);
-            Assert.IsTrue(row1.FatiguePips.All(p => p.Ratio == 0f), "Fresh.");
+            Assert.IsTrue(row1.FatiguePips.All(p => p.Ratio == 0f && p.OverRatio == 0f), "Fresh.");
             Assert.AreEqual(UiText.Job(front.JobId), row1.JobLine);
             Assert.IsFalse(row1.StateButton.interactable, "No state: the line takes no click.");
 
-            // 128 and fearful: five full violet pips, one full and one 8/20 red one; the job, then the affliction in red.
+            // 128 and fearful (Round 95): ten full violet pips with two full red ones and one 8/10 over them; the job, then the affliction in red.
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
             front.Fatigue = 128;
             front.StateId = fearful.Id;
             map.Refresh();
             yield return null;
-            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f, 1f, 1f, 1f, 0.4f, 0f, 0f, 0f }, row1.FatiguePips.Select(p => Mathf.Round(p.Ratio * 10f) / 10f));
-            Assert.IsTrue(row1.FatiguePips.Take(5).All(p => p.FillColor == UiPalette.FatigueBar));
-            Assert.IsTrue(row1.FatiguePips.Skip(5).All(p => p.FillColor == UiPalette.FatigueDanger));
-            Assert.AreEqual(UiText.JobLine(front.JobId, fearful), row1.JobLine);
+            Assert.IsTrue(row1.FatiguePips.All(p => p.Ratio == 1f && p.FillColor == UiPalette.FatigueBar));
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 0.8f, 0f, 0f, 0f, 0f, 0f, 0f, 0f }, row1.FatiguePips.Select(p => Mathf.Round(p.OverRatio * 10f) / 10f));
+            Assert.IsTrue(row1.FatiguePips.All(p => p.OverColor == UiPalette.FatigueDanger));
+            Assert.AreEqual(UiText.JobLine(front.JobId, fearful, true), row1.JobLine, "Stage 48: at 128 the breakdown overworks.");
             StringAssert.Contains(UiText.FatigueStateName(fearful), row1.JobLine);
             StringAssert.Contains(ColorUtility.ToHtmlStringRGB(UiPalette.FatigueDanger), row1.JobLine);
             Assert.IsTrue(row1.StateButton.interactable);
-            Assert.IsTrue(row2.FatiguePips.All(p => p.Ratio == 0f), "The others are fresh.");
+            Assert.IsTrue(row2.FatiguePips.All(p => p.Ratio == 0f && p.OverRatio == 0f), "The others are fresh.");
             Assert.IsFalse(row2.StateButton.interactable);
 
             // The click explains the state; another puts it down.
@@ -1567,7 +1568,9 @@ namespace F1.Tests
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             BattleEngine engine = Managers.Expedition.Battle.Engine;
             BalanceData balance = engine.Setup.Balance;
-            float pip = (float)balance.MaxFatigue / FatiguePips.Count;
+            // Round 95: the first lap is a tenth of the threshold a pip, the second a tenth of what lies past it.
+            float first = (float)balance.FatigueBreakdown / FatiguePips.Count;
+            float second = (float)(balance.MaxFatigue - balance.FatigueBreakdown) / FatiguePips.Count;
 
             BattleUnitView[] units = UiTestUtil.Views<BattleUnitView>(battle);
             foreach (BattleUnitView unit in units)
@@ -1575,7 +1578,9 @@ namespace F1.Tests
                 Assert.AreEqual(unit.Unit.Side == BattleSide.Party, unit.PipsShown, "Only a mercenary has fatigue: " + unit.name);
                 if (unit.Unit.Side == BattleSide.Party)
                 {
-                    Assert.AreEqual(unit.Unit.Fatigue / pip, unit.FatiguePips.Sum(p => p.Ratio), 0.01f, "The pips hold the fatigue, a tenth each.");
+                    int fatigue = unit.Unit.Fatigue;
+                    Assert.AreEqual(Mathf.Min(fatigue, balance.FatigueBreakdown) / first, unit.FatiguePips.Sum(p => p.Ratio), 0.01f, "The violet lap holds the fatigue up to the threshold.");
+                    Assert.AreEqual(Mathf.Max(0, fatigue - balance.FatigueBreakdown) / second, unit.FatiguePips.Sum(p => p.OverRatio), 0.01f, "The red lap holds what lies past it.");
                 }
             }
 
@@ -1600,7 +1605,8 @@ namespace F1.Tests
             Assert.IsTrue(battle.Fx.WordShown, "The state's word stands over its head.");
             Assert.AreEqual(UiText.FatigueStateName(state), battle.Fx.WordText);
             Assert.AreEqual(UiPalette.FatigueState(state.Kind), battle.Fx.WordColor);
-            Assert.AreEqual(UiText.FatigueStateName(state), broken.FatigueStateShown, "The state's name under its feet.");
+            // Stage 48: an affliction at the threshold overworks, and "· 과로" follows the name.
+            Assert.AreEqual(UiText.FatigueStateLabel(state, FatigueRules.IsOverworked(Managers.Data.Data.Balance, state, broken.Unit.Fatigue)), broken.FatigueStateShown, "The state's name under its feet.");
             Assert.IsTrue(units.Where(u => u != broken).All(u => u.FatigueStateShown == string.Empty), "Nobody else is in a state.");
             Assert.IsTrue(battle.CaptionsPushed.Any(c => c.Contains(UiText.FatigueStateName(state))),
                 "The breakdown reads as a caption (whether or not the captions of the same moment have pushed it out of the header since).");
@@ -1615,7 +1621,7 @@ namespace F1.Tests
             Assert.IsFalse(battle.Fx.WordShown);
             Assert.IsFalse(broken.HoldsPose);
             Assert.IsFalse(broken.Figure.ShowsPose, "The figure is back.");
-            Assert.AreEqual(UiText.FatigueStateName(state), broken.FatigueStateShown);
+            Assert.AreEqual(UiText.FatigueStateLabel(state, FatigueRules.IsOverworked(Managers.Data.Data.Balance, state, broken.Unit.Fatigue)), broken.FatigueStateShown);
         }
 
         [UnityTest]
@@ -1721,7 +1727,8 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.At(map, "Frame/BoardPanel/Enter").gameObject.activeSelf);
             Assert.AreEqual("지도 위의 창에서 고릅니다.", UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeHint"));
             Assert.AreEqual(UiTestUtil.TextAt(map, "Frame/BoardPanel/NodeHeading/NodeTitle"), UiTestUtil.TextAt(map, "Frame/Map/Camp/CampWindow/CampBox/CampTitle"));
-            Assert.AreEqual($"HP {balance.CampHealPercent}% 회복\n피로도 -{balance.CampFatigueRelief}", UiTestUtil.TextAt(map, UiTestUtil.CampRest + "/RestBody"));
+            // Stage 48: the third line says the rest ends every mental breakdown.
+            Assert.AreEqual($"HP {balance.CampHealPercent}% 회복\n피로도 -{balance.CampFatigueRelief}\n정신 붕괴 해제", UiTestUtil.TextAt(map, UiTestUtil.CampRest + "/RestBody"));
             Assert.IsTrue(InView(map, camp), "The map followed the party up to the camp's floor.");
             Assert.IsFalse(UiTestUtil.PointerReaches(map.NodeView(camp.Id).Button), "The window's shade takes the map's clicks.");
 

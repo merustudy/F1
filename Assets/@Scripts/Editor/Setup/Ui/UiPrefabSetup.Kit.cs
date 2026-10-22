@@ -24,7 +24,7 @@ namespace F1.Editor.Setup
         const float MarksBarHeight = 22f;
         const float MarksBarInset = 10f;
 
-        /// <summary>The fatigue pips under the bar, as wide as the bar: FatiguePips.Count of them with a gap between two (round 36, C).</summary>
+        /// <summary>The fatigue pips under the bar, as wide as the bar: FatiguePips.Count of them with a gap between two (round 36, C); violet under, red over (Round 95).</summary>
         const float MarksPipsTop = 26f;
         const float MarksPipsHeight = 4f;
         const float MarksPipGap = 2f;
@@ -299,10 +299,15 @@ namespace F1.Editor.Setup
 
             Image fill = UiBuild.Image(name + "Fill", area, fillColor);
             UiBuild.Stretch(fill.rectTransform);
+            // Every bar has a second fill, left empty here (Round 95: only the fatigue pips use it).
+            Image over = UiBuild.Image(name + "Over", area, fillColor);
+            UiBar.Fill(over.rectTransform, 0f);
 
             var bar = track.gameObject.AddComponent<UiBar>();
             UiBuild.SetReference(bar, "_fill", fill.rectTransform);
             UiBuild.SetReference(bar, "_fillImage", fill);
+            UiBuild.SetReference(bar, "_overFill", over.rectTransform);
+            UiBuild.SetReference(bar, "_overFillImage", over);
             if (ghost)
             {
                 var trail = track.gameObject.AddComponent<UiBarGhost>();
@@ -377,7 +382,7 @@ namespace F1.Editor.Setup
             var pips = new UiBar[FatiguePips.Count];
             for (int i = 0; i < pips.Length; i++)
             {
-                pips[i] = UiBuild.Bar(prefix + "Pip" + i, pipsRow, UiPalette.FatigueBar);
+                pips[i] = UiBuild.PipBar(prefix + "Pip" + i, pipsRow);
                 var pip = (RectTransform)pips[i].transform;
                 pip.anchorMin = new Vector2((float)i / pips.Length, 0f);
                 pip.anchorMax = new Vector2((float)(i + 1) / pips.Length, 1f);
