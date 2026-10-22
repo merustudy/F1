@@ -66,7 +66,29 @@ namespace F1.UI
                 tag.sizeDelta = new Vector2(Mathf.Ceil(_fatigueTotalText.GetPreferredValues(_fatigueTotalText.text).x) + 2f * FatigueTotalPad, tag.sizeDelta.y);
             }
 
-            _grid.Show(member.Board, art, picked, pickedBag, item => FatigueRules.ItemCost(balance, item), merges, ghost, showFrame, stars, lifted);
+            _grid.Show(member.Board, art, picked, pickedBag, item => FatigueRules.ItemCost(balance, item), merges, ghost, showFrame, stars, lifted, LinksOf(member));
+        }
+
+        /// <summary>The lines between recipes' pieces on this member's board (Slice D stage 50): the party's links, this member's only.</summary>
+        static List<ForgeLink> LinksOf(ExpeditionMember member)
+        {
+            var mine = new List<ForgeLink>();
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            int index = expedition == null ? -1 : expedition.Members.IndexOf(member);
+            if (index < 0)
+            {
+                return mine;
+            }
+
+            foreach (ForgeLink link in Managers.Expedition.ForgeLinks())
+            {
+                if (link.MemberIndex == index)
+                {
+                    mine.Add(link);
+                }
+            }
+
+            return mine;
         }
 
         public void Hide()

@@ -50,6 +50,7 @@ namespace F1.UI
         readonly List<GridStarView> _stars = new List<GridStarView>();
         int _piecesShown;
         int _starsShown;
+        LinkLines _links;
 
         public event Action<int, int> SquareClicked;
         public event Action<int, int> SquareRightClicked;
@@ -144,8 +145,10 @@ namespace F1.UI
         /// <param name="showFrame">Whether the frame's squares outside the bags show: while a bag is held.</param>
         /// <param name="stars">The stars to draw on their squares (Slice B stage 20: the held star item's, or the one the pointer is on), or null for none.</param>
         /// <param name="lifted">Whether the picked item or bag is in the hand (round 54): not drawn, its squares as if it were not there.</param>
+        /// <param name="links">The lines between recipes' pieces on this board (Slice D stage 50), or null for none; a lifted piece's line is left out.</param>
         public void Show(ItemBoard board, ExpeditionArt art, BoardItem picked, BoardBag pickedBag, Func<EquippedItem, int> fatigueCost,
-            Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame, IReadOnlyList<StarMark> stars = null, bool lifted = false)
+            Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame, IReadOnlyList<StarMark> stars = null, bool lifted = false,
+            IReadOnlyList<ForgeLink> links = null)
         {
             EnsureSquares();
             BoardBag liftedBag = lifted ? pickedBag : null;
@@ -197,9 +200,17 @@ namespace F1.UI
                 _pieces[i].gameObject.SetActive(false);
             }
 
+            Links.Show(links, liftedItems);
             ShowStars(stars);
             ShowGhost(ghost);
         }
+
+        /// <summary>The layer the pieces lie in (the grid's own space), and the piece the board copies (Slice D stage 50: the merge draws the pieces as they were).</summary>
+        public RectTransform PieceLayer => _pieceLayer;
+        public ItemSlotView PieceTemplate => _pieceTemplate;
+
+        /// <summary>The lines between recipes' pieces (Slice D stage 50), over the pieces.</summary>
+        public LinkLines Links => _links != null ? _links : (_links = LinkLines.Under(_pieceLayer));
 
         void ShowStars(IReadOnlyList<StarMark> marks)
         {

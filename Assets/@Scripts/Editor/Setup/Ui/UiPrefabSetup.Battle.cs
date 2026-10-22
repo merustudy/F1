@@ -82,6 +82,14 @@ namespace F1.Editor.Setup
         const float BandPadY = 14f;
         const float BandGap = 22f;
         const float LootDropWidth = 260f;
+        const float CoinPileWidth = 120f;
+        const float CoinPileHeight = 80f;
+        const float CoinPileCoin = 34f;
+        const float BandUniqueWidth = 320f;
+        const float BandUniqueHeight = 40f;
+        const float BandUniqueGap = 8f;
+        const float BandUniqueRim = 2f;
+        const float BandUniqueRadius = 6f;
         const float LootDropHeight = 200f;
         const float LootDropWordHeight = 26f;
         const float LootDropPlateTop = 30f;
@@ -302,6 +310,8 @@ namespace F1.Editor.Setup
             }
 
             LootDropView lootDropTemplate = BuildLootDrop(field);
+            // Stage 49 (Round 96 A): the coins a win brings lie on the floor as a pile with their number, then fly into the band. Hidden until then.
+            RectTransform coinPile = BuildCoinPile(field, out TextMeshProUGUI coinPileLabel);
 
             // Under the candle: the battle time, then the storm's words with the storm icon.
             TextMeshProUGUI clockTime = UiBuild.SingleLine(UiBuild.Label("ClockTime", panel.transform, 28f, UiPalette.Text, TextAlignmentOptions.Center));
@@ -413,6 +423,23 @@ namespace F1.Editor.Setup
 
             TextMeshProUGUI bandDetail = UiBuild.Label("BandDetail", band.transform, 18f, UiPalette.Text, TextAlignmentOptions.TopLeft);
             bandDetail.gameObject.SetActive(false);
+
+            // Stage 50 (Round 96): under the band, the unique a won battle made ("유니크: 글라디우스"), a dark plate with a gold rim, out of the band's
+            // layout and hung from its bottom edge. Hidden until a merge shows it.
+            // The rim and the fill are one mesh that does not overlap, so that the fade shows no gold through the plate.
+            GameObject bandUniqueObject = UiBuild.Rect("BandUnique", band.transform).gameObject;
+            bandUniqueObject.AddComponent<CanvasRenderer>();
+            RimmedPlate bandUnique = bandUniqueObject.AddComponent<RimmedPlate>();
+            bandUnique.color = UiPalette.UniquePlate;
+            bandUnique.raycastTarget = false;
+            bandUnique.SetRim(UiPalette.Unique, BandUniqueRim, BandUniqueRadius);
+            bandUnique.gameObject.AddComponent<LayoutElement>().ignoreLayout = true;
+            UiBuild.Place(bandUnique.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 1f), new Vector2(0f, -BandUniqueGap), new Vector2(BandUniqueWidth, BandUniqueHeight));
+            bandUnique.gameObject.AddComponent<CanvasGroup>().blocksRaycasts = false;
+            TextMeshProUGUI bandUniqueText = UiBuild.Label("BandUniqueText", bandUnique.transform, 24f, UiPalette.Unique, TextAlignmentOptions.Center);
+            UiBuild.Stretch(bandUniqueText.rectTransform);
+            bandUniqueText.textWrappingMode = TextWrappingModes.NoWrap;
+            bandUnique.gameObject.SetActive(false);
             band.gameObject.SetActive(false);
 
             // After a win, the inventory window over the party's side of the stage (round 52), as on the node map: over the band's
@@ -505,6 +532,10 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_bandCoins", bandCoins);
             UiBuild.SetReference(screen, "_bandLoot", bandLoot);
             UiBuild.SetReference(screen, "_bandDetail", bandDetail);
+            UiBuild.SetReference(screen, "_bandUnique", bandUnique.gameObject);
+            UiBuild.SetReference(screen, "_bandUniqueText", bandUniqueText);
+            UiBuild.SetReference(screen, "_coinPile", coinPile);
+            UiBuild.SetReference(screen, "_coinPileLabel", coinPileLabel);
             UiBuild.SetReference(screen, "_lootHint", lootHint);
             UiBuild.SetReference(screen, "_lootToInventory", lootToInventory.Button);
             UiBuild.SetReference(screen, "_lootShowLog", lootShowLog.Button);
@@ -524,6 +555,31 @@ namespace F1.Editor.Setup
         /// the plate with the item's title (an ink plate with a brass hairline, as wide as its words; gold while picked), the icon
         /// lying on its side, and the soft light on the floor under it. The whole box is the button, silent; a right click opens the card.
         /// </summary>
+        /// <summary>
+        /// The coin pile on the floor after a win (stage 49, Round 96 A): six region coins heaped up, the number beside them in the coins' gold with a
+        /// dark rim. Anchored like a drop (the field's top-left, its bottom on the floor line); the screen lays it beside the first drop and flies it.
+        /// </summary>
+        static RectTransform BuildCoinPile(Transform field, out TextMeshProUGUI label)
+        {
+            RectTransform root = UiBuild.Rect("CoinPile", field);
+            UiBuild.Place(root, new Vector2(0f, 1f), new Vector2(0.5f, 0f), new Vector2(0f, -BattleFloorY), new Vector2(CoinPileWidth, CoinPileHeight));
+            var spots = new[] { new Vector2(-26f, 0f), new Vector2(24f, 2f), new Vector2(0f, 6f), new Vector2(-12f, 22f), new Vector2(14f, 24f), new Vector2(1f, 40f) };
+            for (int i = 0; i < spots.Length; i++)
+            {
+                Image coin = KitIcon("Coin" + i, root, UiArt.Coin);
+                UiBuild.Place(coin.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), spots[i], new Vector2(CoinPileCoin, CoinPileCoin));
+            }
+
+            label = UiBuild.Outlined(UiBuild.Label("CoinPileLabel", root, 28f, UiPalette.Virtue, TextAlignmentOptions.MidlineLeft));
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            UiBuild.Place(label.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(CoinPileWidth / 2f - 18f, 54f), new Vector2(90f, 36f));
+            CanvasGroup group = root.gameObject.AddComponent<CanvasGroup>();
+            group.blocksRaycasts = false;
+            group.interactable = false;
+            root.gameObject.SetActive(false);
+            return root;
+        }
+
         static LootDropView BuildLootDrop(RectTransform field)
         {
             RectTransform root = UiBuild.Rect("LootDropTemplate", field);

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using F1.Core;
 using F1.Data;
 using F1.Gameplay;
 using TMPro;
@@ -54,6 +55,8 @@ namespace F1.UI
 
         /// <summary>How many empty squares the board shows.</summary>
         public int EmptySquaresShown { get; private set; }
+
+        LinkLines _links;
 
         /// <summary>The stars on show (Round 85), in the order they were given.</summary>
         public IEnumerable<GridStarView> Stars
@@ -166,9 +169,40 @@ namespace F1.UI
                 _drawn.Add(view.gameObject);
             }
 
+            // Slice D stage 50: the lines between a recipe's pieces show in battle too (the board does not change while it is fought).
+            ShowLinks(unit);
+
             // The pieces were laid after the layers that the builder made: the stars go back over them.
             _starLayer.SetAsLastSibling();
         }
+
+        /// <summary>The lines between recipes' pieces on a mercenary's board (Slice D stage 50, from the expedition's board, the same squares); none for an enemy.</summary>
+        void ShowLinks(BattleUnit unit)
+        {
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            int index = unit.Side != BattleSide.Party || expedition == null ? -1 : expedition.Members.FindIndex(m => m.MercenaryId == unit.Setup.SourceId);
+            if (_links == null)
+            {
+                _links = LinkLines.Under(_cells);
+            }
+
+            var mine = new List<ForgeLink>();
+            if (index >= 0)
+            {
+                foreach (ForgeLink link in Managers.Expedition.ForgeLinks())
+                {
+                    if (link.MemberIndex == index)
+                    {
+                        mine.Add(link);
+                    }
+                }
+            }
+
+            _links.Show(mine);
+        }
+
+        /// <summary>The lines between recipes' pieces (Slice D stage 50).</summary>
+        public LinkLines Links => _links;
 
         /// <summary>Draws the board again from the unit's current items: a boss entered a phase and carries others now (stage 28).</summary>
         public void Rebind()

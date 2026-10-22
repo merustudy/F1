@@ -511,6 +511,50 @@ namespace F1.Tests
             yield return new WaitForSeconds(0.5f);
         }
 
+        /// <summary>
+        /// Slice D stage 50 and 49 (Round 96): a 3-star longsword and a 3-star whetstone side by side on the second swordsman's board, the line on the
+        /// map, then the first battle won: the merge at its start (the line, the coin pile on the floor, the input locked), with the gold spreading,
+        /// and over (the band's line, the coins flown). For the mockup's comparison.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheUniqueMerge_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.DepartFromLobby();
+            UiTestUtil.StageChampion();
+            ExpeditionMember smith = Managers.Expedition.Expedition.Members.First(m => m.Row != BattleRows.Front && m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
+            BoardItem sword = smith.Board.ItemAt(0, 0);
+            sword.Item = new EquippedItem(sword.Item.Item, isBase: true, tier: ItemTier.Tier3);
+            UiTestUtil.Put(smith, new EquippedItem(data.Items.Get("whetstone"), tier: ItemTier.Tier3), 0, 1);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            map.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_86_map_recipe_link");
+
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_87_battle_recipe_link");
+            battle.Clock.Paused = true;
+            while (!Managers.Expedition.Battle.IsFinished)
+            {
+                Managers.Expedition.AdvanceBattle(250);
+            }
+
+            yield return UiTestUtil.WaitForResult(battle);
+            yield return Capture("ko_88_battle_merge_start");
+            yield return new WaitForSecondsRealtime(0.45f);
+            yield return Capture("ko_89_battle_merge_gold");
+            yield return new WaitForSecondsRealtime(1.5f);
+            yield return Capture("ko_90_battle_merge_over");
+        }
+
         IEnumerator CaptureLap(string localeCode, string prefix)
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, localeCode);
@@ -862,8 +906,8 @@ namespace F1.Tests
                             UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampMend/MendBack");
                             yield return UiTestUtil.WaitForRedraw();
 
-                            // The forge (stage 23): a 3-star longsword with a 3-star whetstone lit under it makes the third card; its step
-                            // with the sword chosen. Then the staging is undone and the party rests as before.
+                            // Stage 50 (Round 96): a 3-star longsword with a 3-star whetstone under it shows the gold line on the board (the camp
+                            // keeps its two cards: no forge). Then the staging is undone and the party rests as before.
                             ExpeditionMember smith = Managers.Expedition.Expedition.Members.First(m => m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
                             BoardItem smithsSword = smith.Board.ItemAt(0, 0);
                             EquippedItem swordBefore = smithsSword.Item;
@@ -871,12 +915,7 @@ namespace F1.Tests
                             UiTestUtil.Put(smith, new EquippedItem(data.Items.Get("whetstone"), tier: ItemTier.Tier3), 0, 1);
                             map.Refresh();
                             yield return UiTestUtil.WaitForRedraw();
-                            yield return Capture(prefix + "_52_camp_forge");
-                            UiTestUtil.Click(map, UiTestUtil.CampForge);
-                            yield return UiTestUtil.WaitForRedraw();
-                            yield return Capture(prefix + "_53_camp_forge_step");
-                            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeBack");
-                            yield return UiTestUtil.WaitForRedraw();
+                            yield return Capture(prefix + "_52_camp_recipe_link");
                             smith.Board.Items.Remove(smith.Board.ItemAt(0, 1));
                             smithsSword.Item = swordBefore;
                             map.Refresh();

@@ -154,6 +154,10 @@ namespace F1.UI
         [SerializeField] TMP_Text _bandCoins;
         [SerializeField] TMP_Text _bandLoot;
         [SerializeField] TMP_Text _bandDetail;
+        [SerializeField] GameObject _bandUnique;
+        [SerializeField] TMP_Text _bandUniqueText;
+        [SerializeField] RectTransform _coinPile;
+        [SerializeField] TMP_Text _coinPileLabel;
         [SerializeField] TMP_Text _lootHint;
         [SerializeField] Button _lootToInventory;
         [SerializeField] Button _lootShowLog;
@@ -184,6 +188,31 @@ namespace F1.UI
         readonly List<string> _captionLines = new List<string>();
         readonly List<string> _captionsPushed = new List<string>();
         readonly List<LootDropView> _drops = new List<LootDropView>();
+
+        // After a win (Round 96): the uniques the battle made merge on the boards (stage 50, V1 "금빛 번짐") while the input is locked, the band
+        // names them, and the coins (stage 49, A) lie on the floor as a pile that flies into the band. All timed from the win; presentation only.
+        const float MergeLock = 1.3f;
+        const float BandUniqueFrom = 0.95f;
+        const float BandUniqueIn = 0.35f;
+        const float PileFlyAfterMerge = 1.1f;
+        const float PileFlyAlone = 0.4f;
+        const float PileFly = 0.5f;
+        const float PileArc = 120f;
+        const float PileEndScale = 0.4f;
+        const float CoinPulse = 0.15f;
+        const float CoinPulseScale = 1.15f;
+        const float CoinPileGap = 190f;
+        const float DimmedDrop = 0.5f;
+        readonly List<UniqueMergeView> _merges = new List<UniqueMergeView>();
+        float _winAt = -1f;
+        float _lockUntil;
+        float _pileFlyAt;
+        float _coinArrivedAt = -1f;
+        Vector3 _pileFrom;
+        bool _mergeSounded;
+        bool _uniqueNamed;
+        GameObject _blocker;
+        GameObject[] _lockShades;
 
         /// <summary>The battle being fought or just ended; null when the screen shows the loot of a battle the app was closed after (round 47).</summary>
         BattleSession _battle;
@@ -280,6 +309,22 @@ namespace F1.UI
 
         /// <summary>True after a win, while the loot can be picked (round 47).</summary>
         public bool AfterWin => _afterWin;
+
+        /// <summary>Whether the input is locked while a unique merges after the win (stage 50, Round 96 "막음"). For tests.</summary>
+        public bool MergeLocked => _afterWin && Time.unscaledTime < _lockUntil;
+
+        /// <summary>Whether the panel's buttons are shaded by the lock (stage 50). For tests.</summary>
+        public bool ButtonsShaded => _lockShades != null && _lockShades[0].activeSelf;
+
+        /// <summary>How many merges play over the boards now (stage 50). For tests.</summary>
+        public int MergesPlaying => _merges.Count;
+
+        /// <summary>The words under the band naming the uniques the win made, or an empty string while it is hidden (stage 50). For tests.</summary>
+        public string BandUnique => _bandUnique.activeSelf ? _bandUniqueText.text : string.Empty;
+
+        /// <summary>Whether the coin pile lies on the floor (stage 49, Round 96 A), and its words. For tests.</summary>
+        public bool CoinPileShown => _coinPile.gameObject.activeSelf;
+        public string CoinPileText => _coinPileLabel.text;
 
         /// <summary>The drops on the floor, one per slot of the loot (hidden where one was taken). For tests.</summary>
         public IReadOnlyList<LootDropView> Drops => _drops;
@@ -792,20 +837,28 @@ namespace F1.UI
                 _tooltip.Hide();
             }
 
+            // Round 96: the win's show plays on; while a unique merges, the keys do nothing either (the clear cover takes the clicks).
+            if (_afterWin)
+            {
+                AnimateWinShow();
+            }
+
+            bool keys = _afterWin && !MergeLocked;
+
             // Round 52: after a win, I opens and closes the inventory window as its button does.
-            if (_afterWin && InventoryKey.Pressed())
+            if (keys && InventoryKey.Pressed())
             {
                 PressInventoryKey();
             }
 
             // 2026-10-17: after a win, A takes every drop left on the floor into the inventory (those it has room for).
-            if (_afterWin && TakeAllKey.Pressed())
+            if (keys && TakeAllKey.Pressed())
             {
                 PressTakeAllKey();
             }
 
             // Stage 19: after a win, while the hand holds something, the wheel or R turns it; Escape and the right button (2026-10-18) let go.
-            if (_afterWin && _lootHand.Holding)
+            if (keys && _lootHand.Holding)
             {
                 int step = TurnInput.Poll(out bool cancel);
                 if (cancel)
@@ -1426,7 +1479,194 @@ namespace F1.UI
             _band.SetActive(true);
             FillBand();
             RefreshLoot();
+            StartWinShow();
             RenderControls(_engine, _engine.Setup.Balance, false);
+        }
+
+        /// <summary>
+        /// The win's show (Round 96): a merge over the board of each unique the battle made (the state is the unique already; the board's own piece is
+        /// covered by the pieces as they were until the gold has spread), the input locked meanwhile, the band's line under it to name them; and the
+        /// coin pile beside the first drop. Nothing of it for the loot alone (an expedition resumed at its loot).
+        /// </summary>
+        void StartWinShow()
+        {
+            _winAt = Time.unscaledTime;
+            _merges.Clear();
+            _mergeSounded = false;
+            _uniqueNamed = false;
+            _bandUnique.SetActive(false);
+            ExpeditionState expedition = Managers.Expedition.Expedition;
+            var names = new List<string>();
+            if (_battle != null && expedition != null)
+            {
+                foreach (UniqueForged forged in Managers.Expedition.LastForged)
+                {
+                    PartyBoardView board = LootBoardOfRow(expedition.Members[forged.MemberIndex].Row);
+                    if (!board.gameObject.activeSelf)
+                    {
+                        continue;
+                    }
+
+                    _merges.Add(UniqueMergeView.Begin(board.Grid, forged, _art));
+                    names.Add(UiText.Name(Managers.Data.Data.Items.Get(forged.ResultId).Name));
+                }
+            }
+
+            _uniqueNamed = _merges.Count > 0;
+            _bandUniqueText.text = _uniqueNamed ? UiStrings.Get(UiKeys.Battle.UniqueMade, string.Join(", ", names)) : string.Empty;
+            _lockUntil = _uniqueNamed ? _winAt + MergeLock : 0f;
+            Lock(_uniqueNamed);
+
+            int coins = _battle == null ? 0 : Managers.Expedition.BattleCoins;
+            _coinPile.gameObject.SetActive(coins > 0);
+            _coinArrivedAt = -1f;
+            _bandCoins.rectTransform.localScale = Vector3.one;
+            if (coins > 0)
+            {
+                RectTransform first = _enemyRows[0];
+                _coinPile.anchoredPosition = new Vector2(first.anchoredPosition.x + first.sizeDelta.x / 2f - CoinPileGap, _coinPile.anchoredPosition.y);
+                _coinPile.localScale = Vector3.one;
+                _coinPileLabel.text = UiStrings.Get(UiKeys.Battle.CoinPile, coins);
+                _coinPileLabel.gameObject.SetActive(true);
+                _pileFrom = _coinPile.position;
+                _pileFlyAt = _winAt + (_uniqueNamed ? PileFlyAfterMerge : PileFlyAlone);
+            }
+        }
+
+        /// <summary>The win's show as time goes (Round 96): the merges, the merge's sound, the band's line, the lock's end, and the coins' flight.</summary>
+        void AnimateWinShow()
+        {
+            if (_winAt < 0f)
+            {
+                return;
+            }
+
+            float now = Time.unscaledTime;
+            float t = now - _winAt;
+            if (_merges.Count > 0)
+            {
+                if (!_mergeSounded && t >= UniqueMergeView.DrawnIn)
+                {
+                    Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
+                    _mergeSounded = true;
+                }
+
+                bool playing = false;
+                foreach (UniqueMergeView merge in _merges)
+                {
+                    playing |= merge.Apply(t);
+                }
+
+                if (!playing)
+                {
+                    foreach (UniqueMergeView merge in _merges)
+                    {
+                        Destroy(merge.gameObject);
+                    }
+
+                    _merges.Clear();
+                }
+            }
+
+            if (_uniqueNamed && t >= BandUniqueFrom)
+            {
+                _bandUnique.SetActive(true);
+                _bandUnique.GetComponent<CanvasGroup>().alpha = Smooth((t - BandUniqueFrom) / BandUniqueIn);
+            }
+
+            if (_blocker != null && _blocker.activeSelf && now >= _lockUntil)
+            {
+                Lock(false);
+                RefreshLoot();
+            }
+
+            if (_coinPile.gameObject.activeSelf && now >= _pileFlyAt)
+            {
+                float k = Smooth((now - _pileFlyAt) / PileFly);
+                Vector3 position = Vector3.Lerp(_pileFrom, _bandCoins.rectTransform.position, k);
+                position.y += PileArc * _field.lossyScale.y * 4f * k * (1f - k);
+                _coinPile.position = position;
+                _coinPile.localScale = Vector3.one * Mathf.Lerp(1f, PileEndScale, k);
+                _coinPileLabel.gameObject.SetActive(false);
+                if (k >= 1f)
+                {
+                    _coinPile.gameObject.SetActive(false);
+                    _coinArrivedAt = now;
+                }
+            }
+
+            if (_coinArrivedAt >= 0f)
+            {
+                float pulse = (now - _coinArrivedAt) / CoinPulse;
+                _bandCoins.rectTransform.localScale = Vector3.one * (pulse < 1f ? Mathf.Lerp(CoinPulseScale, 1f, pulse) : 1f);
+                if (pulse >= 1f)
+                {
+                    _coinArrivedAt = -1f;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Locks the input while a unique merges (Round 96 "막음"): a clear cover over the screen takes every click and the keys wait
+        /// (<see cref="MergeLocked"/>), a solid shade lies over each of the panel's buttons and the drops dim. The buttons are not turned off: a turned-off
+        /// button is see-through, and the heap of skulls behind the log button would show.
+        /// </summary>
+        void Lock(bool locked)
+        {
+            if (_lockShades == null)
+            {
+                if (!locked)
+                {
+                    return;
+                }
+
+                Button[] buttons = { _lootToInventory, _lootInventoryToggle, _lootShowLog, _lootContinue };
+                _lockShades = new GameObject[buttons.Length];
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    _lockShades[i] = new GameObject("LockShade", typeof(RectTransform), typeof(Image));
+                    var rect = (RectTransform)_lockShades[i].transform;
+                    rect.SetParent(buttons[i].transform, false);
+                    rect.anchorMin = Vector2.zero;
+                    rect.anchorMax = Vector2.one;
+                    rect.offsetMin = Vector2.zero;
+                    rect.offsetMax = Vector2.zero;
+                    var shade = _lockShades[i].GetComponent<Image>();
+                    shade.color = UiPalette.LockShade;
+                    shade.raycastTarget = false;
+                }
+            }
+
+            foreach (GameObject shade in _lockShades)
+            {
+                shade.transform.SetAsLastSibling();
+                shade.SetActive(locked);
+            }
+
+            if (_blocker == null)
+            {
+                if (!locked)
+                {
+                    return;
+                }
+
+                _blocker = new GameObject("MergeLock", typeof(RectTransform), typeof(Image));
+                var rect = (RectTransform)_blocker.transform;
+                rect.SetParent(transform, false);
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+                _blocker.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0f);
+            }
+
+            _blocker.transform.SetAsLastSibling();
+            _blocker.SetActive(locked);
+            foreach (LootDropView drop in _drops)
+            {
+                CanvasGroup group = drop.GetComponent<CanvasGroup>() ?? drop.gameObject.AddComponent<CanvasGroup>();
+                group.alpha = locked ? DimmedDrop : 1f;
+            }
         }
 
         /// <summary>The band: victory, who fell (or that nobody did), the coins, how many drops; under it, how each death went. The loot alone says only that it is the loot.</summary>
@@ -1758,7 +1998,7 @@ namespace F1.UI
         public void PressTakeAllKey()
         {
             ExpeditionManager manager = Managers.Expedition;
-            if (!_afterWin || !manager.LootOpen)
+            if (!_afterWin || !manager.LootOpen || MergeLocked)
             {
                 return;
             }

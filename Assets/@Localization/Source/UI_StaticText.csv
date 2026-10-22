@@ -153,14 +153,6 @@ Map.MendTitle,Title of the camp window while an item is chosen to mend. {0} = fl
 Map.MendHint,In the camp window while an item is chosen to mend.,왼쪽 보드에서 올릴 아이템을 고르세요.,Choose the item to raise on a board on the left.
 Map.MendBack,Leaves the mend step for the camp's two choices.,돌아가기,Back
 Map.MendConfirm,Mends the chosen item and goes on.,정비하기,Mend it
-Map.Forge,"The camp's forge (Slice B stage 23): the title of its card and of its step. Shown only while a recipe is ready on a board.",담금질,Forge
-Map.ForgeBody,"On the forge card. {0} = the mercenary. {1} = the base item with its tier. {2} = the catalyst with its tier. {3} = the unique item made.","{0}의 {1} + {2}
-→ {3}","{0}'s {1} + {2}
-→ {3}"
-Map.ForgeTitle,Title of the camp window in the forge step. {0} = floor.,{0}층 · 야영지 · 담금질,Floor {0} · Camp · Forge
-Map.ForgeHint,"In the camp window in the forge step: the price.",쉬지 않고 담금질합니다. 재료로 쓴 아이템은 사라집니다.,Forge instead of resting. The ingredient used up is gone.
-Map.ForgeChoose,"On the board panel in the forge step: which boards take a click.",왼쪽 보드에서 담금질할 무기를 고르세요.,Choose the weapon to forge on a board on the left.
-Map.ForgeConfirm,Forges the chosen item and goes on.,담금질하기,Forge it
 Map.Shop,"Label of a shop node: items for the region coins, no fight (round 44).",상점,Shop
 Map.ShopHint,Shown when a shop node is selected.,지역 코인으로 아이템을 사는 곳입니다. 싸움은 없습니다.,A place to buy items for region coins. No fight.
 Map.EnterShop,Goes into the selected shop node.,상점으로,Enter the shop
@@ -232,9 +224,9 @@ Item.StarBonus,"On a melee weapon's card under its effects (stage 20), which alr
 Item.StarLit,"On a star item's card (stage 20): how many of its stars a melee weapon lies on, and which. {0} = lit. {1} = all. {2} = the weapons' names.",걸린 ★ {0}/{1} — {2},Stars lit {0}/{1} — {2}
 Item.StarLitNone,On a star item's card when no melee weapon lies on its stars (stage 20). {0} = its stars.,걸린 ★ 0/{0},Stars lit 0/{0}
 Item.Unique,"In a unique item's facts (stage 23), first.",유니크,Unique
-Item.UniqueLine,"Under a unique item's facts (stage 23): the party holds one.",유니크: 파티에 하나,Unique: one per party
+Item.UniqueLine,"Under a unique item's facts (stage 23; stage 50: each unique once, other uniques beside it).",유니크: 같은 것은 파티에 하나,Unique: one of each in the party
 Item.UniqueTitle,"Under the plate of a unique item's card (stage 23). A unique has no tier.",유니크,Unique
-Item.Recipe,"On the card of a recipe's base or catalyst (stage 23). {0} = the base with its tier. {1} = the catalyst with its tier. {2} = the unique item.",담금질(야영지): {0} + {1}(★ 켜짐) → {2},Forge (camp): {0} + {1} (star lit) → {2}
+Item.Recipe,"On the card of a recipe's base or catalyst (stage 23; stage 50: a won battle combines them side by side). {0} = the base with its tier. {1} = the catalyst with its tier. {2} = the unique item.",조합: {0} + {1}(맞닿게 두고 이기면) → {2},"Combine: {0} + {1} (side by side, then win) → {2}"
 Item.Requires,"The last of an item's facts (Slice D stage 42, Round 89): the stat an owner needs to wield it and the least of it. {0} = the stat's name. {1} = the value. In the blood red when the owner falls short, or when nobody living of the party meets it on a card without an owner.",요구 {0} {1},Requires {0} {1}
 Effect.Damage,{0} = target. {1} = amount.,{0}에게 피해 {1},{1} damage to {0}
 Effect.Heal,{0} = target. {1} = amount.,{0}의 HP {1} 회복,Heals {0} for {1}
@@ -303,6 +295,8 @@ Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
 Battle.Retreated,Battle result.,후퇴 성공,Retreated
 Battle.NoDeaths,Shown on the result panel when nobody died.,전사자 없음,No one died
 Battle.Coins,On the result window: the region coins the victory brought (round 44). {0} = coins.,지역 코인 +{0},Region coins +{0}
+Battle.UniqueMade,"Under the band after a win (Slice D stage 50): a unique item the battle made of a recipe's pieces side by side. {0} = the unique.",유니크: {0},Unique: {0}
+Battle.CoinPile,"The number on the coin pile lying on the floor after a win (stage 49, Round 96 A); it flies into the band's coins. {0} = coins.",+{0},+{0}
 Battle.LootCount,"On the band over the stage after a win (round 47): how many drops lie on the floor. {0} = the count.",전리품 {0},Loot {0}
 Battle.LootHint,"On the board panel after a win, while no drop is picked (round 47; the A key 2026-10-17).",전리품을 누르면 고릅니다. A: 남은 전리품을 모두 인벤토리에 넣습니다. 남은 것은 계속을 누르면 두고 갑니다. 우클릭은 아이템 정보입니다.,Click a drop to pick it. A takes every drop left into the inventory. Continue leaves the rest. Right-click for an item's facts.
 Battle.LootPickedHint,"On the board panel after a win, while a drop is picked (round 47, stage 19; 2026-10-19: the right button turns it again, Escape puts it back).",고른 전리품을 왼쪽 보드의 칸에 놓으세요. 든 채로 우클릭·휠·R: 돌리기 · Esc: 내려놓기.,"Click a square on the left to put the drop there. While holding: right-click, wheel or R turns it · Esc puts it back."
@@ -356,7 +350,7 @@ Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2
 Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
 Log.FatigueVirtueEnd,Stage 48: a virtue reached the maximum fatigue and ended there instead of the exhaustion. {0} = unit. {1} = the change (negative). {2} = fatigue after.,{0}: 피로가 가득 차 각성이 다함 · 피로 {1} → {2},{0}: the virtue is spent at full fatigue · fatigue {1} → {2}
 Log.FatigueByState,"Stage 48: an ally's state moved a unit's fatigue as the battle started (abusive tires, courageous eases). {0} = unit. {1} = the ally. {2} = the ally's state. {3} = the change, signed. {4} = fatigue after.",{0}: {1}의 {2} · 피로 {3} → {4},{0}: {1}'s {2} · fatigue {3} → {4}
-Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
+Death.AfterGrace,"Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll. Stage 49: no grace in the shipped data, so the words say only when it fell and died.","{0} — {1}초에 빈사 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.Collapsed,Why a mercenary died when the exhaustion (stage 48; it was the collapse) killed it at death's door: no last hit and no death roll (it may never have been hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle there). {2} = time of death.,{0} — {1}초에 빈사 → 피로가 가득 차 탈진 → {2}초에 사망,{0} — at death's door at {1}s → exhausted → died at {2}s
 Loot.Title,"On the band over the stage when the app comes back to the loot of a won battle (round 47; the loot screen's header before it).",전리품,Loot

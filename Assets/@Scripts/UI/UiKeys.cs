@@ -193,12 +193,6 @@ namespace F1.UI
             public const string MendHint = "Map.MendHint";
             public const string MendBack = "Map.MendBack";
             public const string MendConfirm = "Map.MendConfirm";
-            public const string Forge = "Map.Forge";
-            public const string ForgeBody = "Map.ForgeBody";
-            public const string ForgeTitle = "Map.ForgeTitle";
-            public const string ForgeHint = "Map.ForgeHint";
-            public const string ForgeChoose = "Map.ForgeChoose";
-            public const string ForgeConfirm = "Map.ForgeConfirm";
             public const string Shop = "Map.Shop";
             public const string ShopHint = "Map.ShopHint";
             public const string EnterShop = "Map.EnterShop";
@@ -425,6 +419,8 @@ namespace F1.UI
             public const string Retreated = "Battle.Retreated";
             public const string NoDeaths = "Battle.NoDeaths";
             public const string Coins = "Battle.Coins";
+            public const string UniqueMade = "Battle.UniqueMade";
+            public const string CoinPile = "Battle.CoinPile";
             public const string LootCount = "Battle.LootCount";
             public const string LootHint = "Battle.LootHint";
             public const string LootPickedHint = "Battle.LootPickedHint";

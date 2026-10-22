@@ -363,8 +363,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// On a recipe's base or catalyst (stage 23): what it forges into at a camp, with what, or null for an item in no recipe. The recipe is
-        /// never hidden (Docs/Design/02_Combat_System.md §4 "담금질").
+        /// On a recipe's base or catalyst (stage 23; stage 50: a won battle combines them side by side): what it becomes, with what, or null for an
+        /// item in no recipe. The recipe is never hidden (Docs/Design/02_Combat_System.md §4 "유니크의 조합").
         /// </summary>
         public static string RecipeHint(EquippedItem item)
         {
@@ -382,14 +382,6 @@ namespace F1.UI
             }
 
             return null;
-        }
-
-        /// <summary>The forge card's words (stage 23): whose base, with which catalyst, into what.</summary>
-        public static string ForgeBody(ForgeOption option, ExpeditionMember member)
-        {
-            StaticData data = Managers.Data.Data;
-            string who = Name(data.Mercenaries.Get(member.MercenaryId).Name);
-            return UiStrings.Get(UiKeys.Map.ForgeBody, who, ItemTitle(option.BaseItem.Item), ItemTitle(option.Catalyst.Item), Name(data.Items.Get(option.Recipe.Result).Name));
         }
 
         /// <summary>An item's category, size, cooldown, where it works and its effects on one line, the fatigue last.</summary>

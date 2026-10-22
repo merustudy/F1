@@ -1145,36 +1145,6 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673459348865026
-  - m_Id: 5628931565674496
-    m_Key: Map.Forge
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838208
-  - m_Id: 5628931574063104
-    m_Key: Map.ForgeBody
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838209
-  - m_Id: 5628931578257408
-    m_Key: Map.ForgeTitle
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838210
-  - m_Id: 5628931578257409
-    m_Key: Map.ForgeHint
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838211
-  - m_Id: 5628931578257410
-    m_Key: Map.ForgeChoose
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838212
-  - m_Id: 5628931578257411
-    m_Key: Map.ForgeConfirm
-    m_Metadata:
-      m_Items:
-      - rid: 8623673467615838213
   - m_Id: 5628931578257412
     m_Key: Item.Unique
     m_Metadata:
@@ -2145,6 +2115,16 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673606786514947
+  - m_Id: 7994219623866368
+    m_Key: Battle.UniqueMade
+    m_Metadata:
+      m_Items:
+      - rid: 8623673615446441984
+  - m_Id: 7994219640643584
+    m_Key: Battle.CoinPile
+    m_Metadata:
+      m_Items:
+      - rid: 8623673615446441985
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2496,9 +2476,10 @@ MonoBehaviour:
     - rid: 636489279218909283
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: Why a mercenary died. {0} = name. {1} = time of reaching 0
-          HP. {2} = time of death. {3} = source of the last hit. {4} = death chance.
-          {5} = roll.
+        m_CommentText: 'Why a mercenary died. {0} = name. {1} = time of reaching
+          0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance.
+          {5} = roll. Stage 49: no grace in the shipped data, so the words say only
+          when it fell and died.'
     - rid: 636489279218909284
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3158,34 +3139,6 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: The last tier of an item.
-    - rid: 8623673467615838208
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'The camp''s forge (Slice B stage 23): the title of its card
-          and of its step. Shown only while a recipe is ready on a board.'
-    - rid: 8623673467615838209
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: On the forge card. {0} = the mercenary. {1} = the base item
-          with its tier. {2} = the catalyst with its tier. {3} = the unique item
-          made.
-    - rid: 8623673467615838210
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Title of the camp window in the forge step. {0} = floor.
-    - rid: 8623673467615838211
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'In the camp window in the forge step: the price.'
-    - rid: 8623673467615838212
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: 'On the board panel in the forge step: which boards take a
-          click.'
-    - rid: 8623673467615838213
-      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
-      data:
-        m_CommentText: Forges the chosen item and goes on.
     - rid: 8623673467615838214
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3193,8 +3146,8 @@ MonoBehaviour:
     - rid: 8623673467615838215
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'Under a unique item''s facts (stage 23): the party holds
-          one.'
+        m_CommentText: 'Under a unique item''s facts (stage 23; stage 50: each unique
+          once, other uniques beside it).'
     - rid: 8623673467615838216
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3203,9 +3156,9 @@ MonoBehaviour:
     - rid: 8623673467615838217
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: On the card of a recipe's base or catalyst (stage 23). {0}
-          = the base with its tier. {1} = the catalyst with its tier. {2} = the unique
-          item.
+        m_CommentText: 'On the card of a recipe''s base or catalyst (stage 23; stage
+          50: a won battle combines them side by side). {0} = the base with its tier.
+          {1} = the catalyst with its tier. {2} = the unique item.'
     - rid: 8623673477085003776
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -4115,3 +4068,13 @@ MonoBehaviour:
           battle started (abusive tires, courageous eases). {0} = unit. {1} = the
           ally. {2} = the ally''s state. {3} = the change, signed. {4} = fatigue
           after.'
+    - rid: 8623673615446441984
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Under the band after a win (Slice D stage 50): a unique item
+          the battle made of a recipe''s pieces side by side. {0} = the unique.'
+    - rid: 8623673615446441985
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The number on the coin pile lying on the floor after a win
+          (stage 49, Round 96 A); it flies into the band's coins. {0} = coins.

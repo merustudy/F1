@@ -1279,6 +1279,10 @@ namespace F1.Tests
             Assert.IsTrue(battle.AfterWin);
             Assert.IsFalse(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootToInventory").interactable, "Nothing is picked yet.");
             int item = expedition.Loot.FindIndex(d => d != null);
+            // Stage 49: the mine drops the mercenaries' items, any of them; staged, a rusty blade (Str 3) the front member wields, as the claws were.
+            expedition.Loot[item] = new ItemOffer(OfferKind.Item, "rusty_blade", ItemTier.Common);
+            battle.Refresh();
+            yield return null;
             string rewardId = expedition.Loot[item].Id;
             int drops = expedition.Loot.Count;
             Managers.Sound.ForgetEffects();
@@ -2544,6 +2548,9 @@ namespace F1.Tests
             Assert.AreEqual(-1, battle.PickedDrop);
 
             // Round 52: the last drop taken, the boards still take moves until continue (they froze before).
+            // Stage 49: the first battle drops two; the A key puts the others away, so that every drop is taken.
+            battle.PressTakeAllKey();
+            yield return UiTestUtil.WaitForRedraw();
             Assert.IsFalse(Managers.Expedition.LootOpen, "Every drop was taken.");
             EquippedItem merged = UiTestUtil.ItemAt(expedition.Members[front], 0, 1);
             UiTestUtil.ClickSquare(row1, 0, 1);
@@ -2575,8 +2582,8 @@ namespace F1.Tests
 
             ExpeditionState expedition = Managers.Expedition.Expedition;
             Assert.AreEqual(ExpeditionPhase.PickingLoot, expedition.Phase);
-            ItemOffer first = expedition.Loot[0];
-            expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Tier));
+            // Stage 49 (DropCount 2): the first battle drops two of its own (one was staged beside the single drop before).
+            Assert.AreEqual(2, expedition.Loot.Count);
             yield return UiTestUtil.WaitForResult(battle);
             Assert.AreEqual(2, battle.Drops.Count);
             Assert.IsEmpty(expedition.Inventory.Items);
@@ -2604,7 +2611,7 @@ namespace F1.Tests
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return EnterFirstBattle(champion: true);
 
-            // Staged: a second drop beside the one the first battle drops (an elite drops two, and the first battle never is one).
+            // The first battle drops two (stage 49: DropCount 2; a second drop was staged before).
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
             battle.Clock.Paused = true;
             while (!Managers.Expedition.Battle.IsFinished)
@@ -2614,8 +2621,11 @@ namespace F1.Tests
 
             ExpeditionState expedition = Managers.Expedition.Expedition;
             Assert.AreEqual(ExpeditionPhase.PickingLoot, expedition.Phase);
-            ItemOffer first = expedition.Loot[0];
-            expedition.Loot.Add(new ItemOffer(OfferKind.Item, first.Id, first.Tier));
+            // Stage 49 (DropCount 2): the first battle drops two of its own (one was staged beside the single drop before). The second is staged
+            // as a rusty blade (Str 3) the front member wields: the mine drops any of the mercenaries' items now.
+            Assert.AreEqual(2, expedition.Loot.Count);
+            ItemOffer staged = new ItemOffer(OfferKind.Item, "rusty_blade", ItemTier.Common);
+            expedition.Loot[1] = staged;
             yield return UiTestUtil.WaitForResult(battle);
             Assert.AreEqual(2, battle.Drops.Count, "A drop per slot, at the first two enemy columns.");
             Assert.Less(((RectTransform)battle.Drops[0].transform).anchoredPosition.x, ((RectTransform)battle.Drops[1].transform).anchoredPosition.x);
@@ -2689,7 +2699,7 @@ namespace F1.Tests
             UiTestUtil.ClickSquare(row1, 0, 1);
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(0, expedition.Inventory.Count, "Laid on row 1's empty row.");
-            Assert.AreEqual(first.Id, UiTestUtil.ItemAt(expedition.Members[front], 0, 1).Item.Id);
+            Assert.AreEqual(staged.Id, UiTestUtil.ItemAt(expedition.Members[front], 0, 1).Item.Id);
             UiTestUtil.Click(battle, "Frame/BoardPanel/LootInventoryToggle");
             yield return UiTestUtil.WaitForRedraw();
             Assert.IsFalse(battle.InventoryOpen);
@@ -2698,7 +2708,7 @@ namespace F1.Tests
             UiTestUtil.Click(battle, "Frame/BoardPanel/LootContinue");
             yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
             Assert.IsEmpty(expedition.Loot);
-            Assert.AreEqual(1, expedition.Members[front].Board.Items.Count(i => i.Item.Item.Id == first.Id), "What was taken is kept.");
+            Assert.AreEqual(1, expedition.Members[front].Board.Items.Count(i => i.Item.Item.Id == staged.Id), "What was taken is kept.");
         }
 
         [UnityTest]
@@ -2828,88 +2838,70 @@ namespace F1.Tests
         }
 
         /// <summary>
-        /// Stage 23 (round 70): with a 3-star longsword and a 3-star whetstone lit under it, the camp offers the forge as a third card
-        /// (the three share the window), its step shows what the recipe makes, and forging puts the gladius in the longsword's place as the
-        /// base weapon, with the whetstone gone, the camp spent, the gold rim on its piece and the plate head on its card.
+        /// Slice D stage 50 (Design/29, Round 96): a 3-star longsword with a 3-star whetstone side by side shows the gold line on the board; winning the
+        /// battle merges them into the gladius in the sword's place (the whetstone gone, the state saved at once), the merge plays with the input locked,
+        /// the band names the gladius once the gold has spread, the merge sounds, and the coin pile (stage 49) flies into the band. The camp has no forge.
         /// </summary>
         [UnityTest]
-        public IEnumerator Camp_Forge_OffersTheRecipeAsAThirdCard_ShowsWhatItMakes_AndForgesTheUniqueInPlace()
+        public IEnumerator Win_ARecipeSideBySide_MergesIntoTheUnique_WithTheLineTheGoldAndTheLock()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             yield return DepartToTheMap();
+            UiTestUtil.StageChampion();
             StaticData data = Managers.Data.Data;
-            NodeMap nodes = Managers.Expedition.Expedition.Map;
-            ExpeditionMember smith = Managers.Expedition.Expedition.Members.First(m => m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
+            ExpeditionMember smith = Managers.Expedition.Expedition.Members.FirstOrDefault(m => m.Row != BattleRows.Front && m.Board.ItemAt(0, 0)?.Item.Item.Id == "longsword");
+            Assume.That(smith, Is.Not.Null, "A second swordsman stands behind the champion.");
             BoardItem sword = smith.Board.ItemAt(0, 0);
             sword.Item = new EquippedItem(sword.Item.Item, isBase: true, tier: ItemTier.Tier3);
             UiTestUtil.Put(smith, new EquippedItem(data.Items.Get("whetstone"), tier: ItemTier.Tier3), 0, 1);
-            ItemData gladius = data.Items.Get("gladius");
-
-            MapNode before = nodes.OnFloor(nodes.FloorCount - 2)[0];
-            yield return StandOn(before);
+            BoardItem whetstone = smith.Board.ItemAt(0, 1);
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
-            UiTestUtil.Click(map.NodeView(before.NextNodeIds[0]).Button);
-            yield return null;
+            map.Refresh();
+            yield return UiTestUtil.WaitForRedraw();
+
+            // On the map: one gold line from the sword's middle to the whetstone's.
+            LinkLines lines = map.GetComponentInChildren<PartySideView>().ColumnOfRow(smith.Row).BoardView.Grid.Links;
+            Assert.AreEqual(1, lines.Segments.Count);
+            Assert.IsTrue(lines.Segments[0].Ready, "Gold: the next won battle merges them.");
+            Assert.AreEqual(LinkLines.Middle(sword), lines.Segments[0].From);
+            Assert.AreEqual(LinkLines.Middle(whetstone), lines.Segments[0].To);
+
+            // The win: the state is the gladius already; the merge plays over the board while the input is locked.
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
-            yield return UiTestUtil.WaitForRedraw();
-
-            // Three cards: the forge card names the smith, the recipe and the gladius; rest and mend narrowed to share the window.
-            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampForge).gameObject.activeSelf, "A recipe is ready on a board.");
-            Assert.AreEqual(CampCards.Width(3), ((RectTransform)UiTestUtil.At(map, UiTestUtil.CampRest)).sizeDelta.x, 0.5f);
-            Assert.AreEqual(CampCards.Left(3, 2), ((RectTransform)UiTestUtil.At(map, UiTestUtil.CampForge)).anchoredPosition.x, 0.5f);
-            string body = UiTestUtil.TextAt(map, UiTestUtil.CampForge + "/ForgeBody");
-            StringAssert.Contains(UiText.Name(data.Mercenaries.Get(smith.MercenaryId).Name), body);
-            StringAssert.Contains(UiText.Name(gladius.Name), body);
-
-            // The forge step: the smith's sword is chosen already, the plate says what goes in and what comes out, the boards wait for a click.
-            PartySideView party = map.GetComponentInChildren<PartySideView>();
-            PartyBoardView board = party.ColumnOfRow(smith.Row).BoardView;
-            UiTestUtil.Click(map, UiTestUtil.CampForge);
-            yield return UiTestUtil.WaitForRedraw();
-            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampForge").gameObject.activeSelf);
-            Assert.IsFalse(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampChoices").gameObject.activeSelf);
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.ForgeTitle, nodes.FloorCount - 1), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampTitle"));
-            Assert.AreEqual(UiStrings.Get(UiKeys.Map.ForgeHint), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampHint"));
-            StringAssert.Contains(UiText.ItemTitle(sword.Item), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"), "The chosen sword's facts (the step's hint shows while nothing is chosen).");
-            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampBox + "/CampForge/ForgePlate").gameObject.activeSelf, "The first ready forge is chosen.");
-            Assert.IsTrue(UiTestUtil.ButtonAt(map, UiTestUtil.CampBox + "/CampForge/ForgeConfirm").interactable);
-            Assert.IsTrue(board.PieceAt(0, 0).IsPicked, "The sword is the chosen piece.");
-            string change = UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampForge/ForgePlate/ForgeChange");
-            StringAssert.Contains(UiText.ItemTitle(sword.Item), change);
-            StringAssert.Contains(UiText.Name(gladius.Name), change);
-            var result = new EquippedItem(gladius, isBase: true);
-            StringAssert.Contains(UiText.Effect(gladius.Effects[0], result, data.Balance), UiTestUtil.TextAt(map, UiTestUtil.CampBox + "/CampForge/ForgePlate/ForgeEffects"));
-
-            // Back leaves the step with the three cards; forge again and confirm.
-            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeBack");
-            yield return UiTestUtil.WaitForRedraw();
-            Assert.IsTrue(UiTestUtil.At(map, UiTestUtil.CampForge).gameObject.activeSelf);
-            UiTestUtil.Click(map, UiTestUtil.CampForge);
-            yield return UiTestUtil.WaitForRedraw();
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            Assert.AreEqual(1, UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == smith.MercenaryId).Links.Segments.Count,
+                "The line shows in battle too.");
             Managers.Sound.ForgetEffects();
-            UiTestUtil.Click(map, UiTestUtil.CampBox + "/CampForge/ForgeConfirm");
-            yield return UiTestUtil.WaitForRedraw();
-            Assert.AreEqual(GamePhase.NodeMap, Managers.Expedition.Phase, "The camp is spent.");
+            yield return UiTestUtil.EndBattle(battle);
+            Assert.IsTrue(battle.AfterWin);
             EquippedItem made = UiTestUtil.ItemAt(smith, 0, 0);
             Assert.AreEqual("gladius", made.Item.Id);
             Assert.IsTrue(made.IsBase);
-            Assert.AreEqual(ItemTier.Common, made.Tier, "A unique has no tier (round 70 follow-up 3).");
+            Assert.AreEqual(ItemTier.Common, made.Tier, "A unique has no tier.");
             Assert.IsNull(smith.Board.ItemAt(0, 1), "The whetstone was used up.");
-            CollectionAssert.AreEqual(new[] { SoundEffect.ItemPlace }, Managers.Sound.Asked);
+            Assert.AreEqual(1, Managers.Expedition.LastForged.Count);
+            Assert.AreEqual(1, battle.MergesPlaying);
+            Assert.IsTrue(battle.MergeLocked, "The input is locked while it merges.");
+            Assert.IsTrue(battle.ButtonsShaded, "The panel's buttons are shaded.");
+            Assert.AreEqual(string.Empty, battle.BandUnique, "The band names it once the gold has spread.");
+            Assert.IsTrue(battle.CoinPileShown, "The coins lie on the floor.");
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.CoinPile, Managers.Expedition.BattleCoins), battle.CoinPileText);
+
+            // Over: unlocked, the band's line, the merge's sound, the coins flown into the band, the gladius' gold on its piece, no line left.
+            yield return new WaitForSecondsRealtime(1.8f);
+            Assert.IsFalse(battle.MergeLocked);
+            Assert.AreEqual(0, battle.MergesPlaying);
+            Assert.IsFalse(battle.ButtonsShaded);
+            Assert.IsTrue(UiTestUtil.ButtonAt(battle, "Frame/BoardPanel/LootContinue").interactable);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.UniqueMade, UiText.Name(data.Items.Get("gladius").Name)), battle.BandUnique);
+            CollectionAssert.Contains(Managers.Sound.Asked, SoundEffect.ItemPlace);
+            Assert.IsFalse(battle.CoinPileShown, "The pile flew into the band.");
+            PartyBoardView board = battle.LootBoardOfRow(smith.Row);
             Assert.IsTrue(board.PieceAt(0, 0).UniqueGlowShown, "The unique's gold glow behind its icon.");
             Assert.IsNull(board.PieceAt(0, 0).TierShown, "No pips: a unique has no tier.");
-
-            // Its card: the name on the plate head, "유니크" under it, the one-per-party line in Diablo's tooltip words.
-            UiTestUtil.RightClickSquare(board, 1, 0);
-            yield return null;
-            Assert.IsTrue(party.Tooltip.IsShown);
-            Assert.IsTrue(party.Tooltip.PlateShown);
-            Assert.AreEqual(UiText.Name(gladius.Name), party.Tooltip.Title);
-            StringAssert.Contains(UiStrings.Get(UiKeys.Item.UniqueTitle), UiTestUtil.TextAt(party.Tooltip, "ItemTooltipUnique"));
-            StringAssert.Contains(UiStrings.Get(UiKeys.Item.UniqueLine), UiText.TooltipLines(made));
-            UiTestUtil.PressTheBackground();
-            yield return null;
-            Assert.IsFalse(party.Tooltip.IsShown);
+            Assert.AreEqual(0, board.Grid.Links.Segments.Count, "Nothing left to link.");
         }
 
         [UnityTest]

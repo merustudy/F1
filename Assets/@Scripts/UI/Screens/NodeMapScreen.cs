@@ -53,16 +53,6 @@ namespace F1.UI
         [SerializeField] Button _mendConfirm;
         [SerializeField] RectTransform _restCard;
         [SerializeField] RectTransform _mendCard;
-        [SerializeField] RectTransform _forgeCard;
-        [SerializeField] Button _forge;
-        [SerializeField] TMP_Text _forgeBody;
-        [SerializeField] GameObject _campForge;
-        [SerializeField] GameObject _forgePlate;
-        [SerializeField] Image _forgeIcon;
-        [SerializeField] TMP_Text _forgeChange;
-        [SerializeField] TMP_Text _forgeEffects;
-        [SerializeField] Button _forgeBack;
-        [SerializeField] Button _forgeConfirm;
         [SerializeField] Button _inventoryToggle;
         [SerializeField] TMP_Text _inventoryToggleLabel;
         [SerializeField] PartySideView _party;
@@ -100,12 +90,6 @@ namespace F1.UI
         int _mendX;
         int _mendY;
 
-        /// <summary>The forge step (Slice B stage 23): like the mend step, the boards wait for the weapon to forge; the first ready one is chosen already.</summary>
-        bool _forging;
-        int _forgeMember = -1;
-        int _forgeX;
-        int _forgeY;
-
         /// <summary>The scroll of the map, for tests: where it shows and how far it goes.</summary>
         public ScrollRect MapScroll => _mapScroll;
 
@@ -140,9 +124,6 @@ namespace F1.UI
             _mend.onClick.AddListener(OnMend);
             _mendBack.onClick.AddListener(OnMendBack);
             _mendConfirm.onClick.AddListener(OnMendConfirm);
-            _forge.onClick.AddListener(OnForge);
-            _forgeBack.onClick.AddListener(OnForgeBack);
-            _forgeConfirm.onClick.AddListener(OnForgeConfirm);
             _merchant.GoodClicked += OnGoodClicked;
             _merchant.GoodEntered += slot =>
             {
@@ -227,8 +208,7 @@ namespace F1.UI
             bool atCamp = manager.Phase == GamePhase.Camp;
             bool atShop = manager.Phase == GamePhase.Shop;
             _mending &= atCamp;
-            _forging &= atCamp;
-            bool stepping = _mending || _forging;
+            bool stepping = _mending;
             if (!atShop)
             {
                 _pick = -1;
@@ -258,11 +238,11 @@ namespace F1.UI
                 _party.Hand.Clear();
             }
 
-            _party.SquareClickOverride = _mending ? ChooseMendItem : _forging ? ChooseForgeItem : (Func<int, int, int, bool>)null;
-            _party.ExternalSelectedMember = _mending ? _mendMember : _forging ? _forgeMember : -1;
-            _party.ExternalSelectedX = _forging ? _forgeX : _mendX;
-            _party.ExternalSelectedY = _forging ? _forgeY : _mendY;
-            _party.DetailOverride = _mending ? UiStrings.Get(UiKeys.Map.MendHint) : _forging ? UiStrings.Get(UiKeys.Map.ForgeChoose) : picking ? UiStrings.Get(UiKeys.Map.ShopBuyHint) : _shopNote;
+            _party.SquareClickOverride = _mending ? ChooseMendItem : (Func<int, int, int, bool>)null;
+            _party.ExternalSelectedMember = _mending ? _mendMember : -1;
+            _party.ExternalSelectedX = _mendX;
+            _party.ExternalSelectedY = _mendY;
+            _party.DetailOverride = _mending ? UiStrings.Get(UiKeys.Map.MendHint) : picking ? UiStrings.Get(UiKeys.Map.ShopBuyHint) : _shopNote;
             if (atShop)
             {
                 RefreshShop(manager, data, expedition, picking);
@@ -272,18 +252,18 @@ namespace F1.UI
                 MapNode camp = expedition.Map.Get(expedition.CurrentNodeId);
                 _nodeTitle.text = UiStrings.Get(UiKeys.Map.NodeTitle, camp.Floor, KindText(camp.Kind));
                 _nodeHint.text = UiStrings.Get(UiKeys.Map.AtCamp);
-                _campTitle.text = _mending ? UiStrings.Get(UiKeys.Map.MendTitle, camp.Floor) : _forging ? UiStrings.Get(UiKeys.Map.ForgeTitle, camp.Floor) : _nodeTitle.text;
-                _campHint.text = UiStrings.Get(_mending ? UiKeys.Map.MendHint : _forging ? UiKeys.Map.ForgeHint : UiKeys.Map.CampChoose);
+                _campTitle.text = _mending ? UiStrings.Get(UiKeys.Map.MendTitle, camp.Floor) : _nodeTitle.text;
+                _campHint.text = UiStrings.Get(_mending ? UiKeys.Map.MendHint : UiKeys.Map.CampChoose);
                 _campChoices.SetActive(!stepping);
                 _campMend.SetActive(_mending);
-                _campForge.SetActive(_forging);
                 // Stage 48: the rest also ends every mental breakdown (Docs/Design/04_Lobby_100Day_Economy.md §3).
                 _restBody.text = UiStrings.Get(UiKeys.Map.RestHeal, data.Balance.CampHealPercent) + "\n"
                     + UiStrings.Get(UiKeys.Map.RestFatigue, data.Balance.CampFatigueRelief) + "\n"
                     + UiStrings.Get(UiKeys.Map.RestCure);
-                RefreshForgeCard(manager, expedition);
+                // Slice D stage 50: the camp has no forge any more (a won battle combines a recipe's pieces): rest and mend, side by side.
+                LayCampCard(_restCard, 2, 0);
+                LayCampCard(_mendCard, 2, 1);
                 RefreshMendPlate(manager, data.Balance);
-                RefreshForgePlate(manager, data.Balance);
             }
             else
             {
@@ -300,58 +280,14 @@ namespace F1.UI
             _party.Refresh();
         }
 
-        /// <summary>The chosen item's change on the mend plate: its tier before and after, and each effect's size before and after.</summary>
-        /// <summary>
-        /// The forge card (stage 23) stands beside rest and mend only while a recipe is ready on a board; the three cards share the window's
-        /// width then, the two as before otherwise. The card names the first ready forge.
-        /// </summary>
-        void RefreshForgeCard(ExpeditionManager manager, ExpeditionState expedition)
-        {
-            IReadOnlyList<ForgeOption> options = manager.ForgeOptions();
-            bool ready = options.Count > 0;
-            _forgeCard.gameObject.SetActive(ready);
-            int count = ready ? 3 : 2;
-            LayCampCard(_restCard, count, 0);
-            LayCampCard(_mendCard, count, 1);
-            if (ready)
-            {
-                LayCampCard(_forgeCard, count, 2);
-                _forgeBody.text = UiText.ForgeBody(options[0], expedition.Members[options[0].MemberIndex]);
-            }
-        }
-
+        /// <summary>A card of the camp window, the index-th of count side by side.</summary>
         static void LayCampCard(RectTransform card, int count, int index)
         {
             card.anchoredPosition = new Vector2(CampCards.Left(count, index), -CampCards.Top);
             card.sizeDelta = new Vector2(CampCards.Width(count), CampCards.Height);
         }
 
-        /// <summary>The forge step's plate (stage 23): the chosen base and its catalyst, what they become, and the result's effects.</summary>
-        void RefreshForgePlate(ExpeditionManager manager, BalanceData balance)
-        {
-            ForgeOption option = _forging && _forgeMember >= 0 ? manager.ForgeOptionAt(_forgeMember, _forgeX, _forgeY) : null;
-            bool chosen = option != null;
-            _forgePlate.SetActive(chosen);
-            _forgeConfirm.interactable = chosen;
-            if (!chosen)
-            {
-                return;
-            }
-
-            StaticData data = Managers.Data.Data;
-            EquippedItem result = ForgeRules.Result(data, option);
-            _forgeIcon.sprite = _art.OfItem(option.BaseItem.Item.Item.Id);
-            _forgeIcon.enabled = _forgeIcon.sprite != null;
-            _forgeChange.text = UiText.Change(UiText.ItemTitle(option.BaseItem.Item) + " + " + UiText.ItemTitle(option.Catalyst.Item), UiText.Colored(UiText.ItemTitle(result), UiPalette.Unique));
-            var lines = new List<string>();
-            foreach (ItemEffect effect in result.Item.Effects)
-            {
-                lines.Add(UiText.Effect(effect, result, balance));
-            }
-
-            _forgeEffects.text = string.Join("\n", lines);
-        }
-
+        /// <summary>The chosen item's change on the mend plate: its tier before and after, and each effect's size before and after.</summary>
         void RefreshMendPlate(ExpeditionManager manager, BalanceData balance)
         {
             bool chosen = _mending && _mendMember >= 0 && manager.CanUpgradeAtCamp(_mendMember, _mendX, _mendY);
@@ -925,66 +861,6 @@ namespace F1.UI
         }
 
         /// <summary>Mends the chosen item (a tier up) and sounds it as put in; the party goes on to the next floor.</summary>
-        /// <summary>The forge card (stage 23): the window turns to the forge step with the first ready weapon chosen; another ready one can be clicked.</summary>
-        void OnForge()
-        {
-            IReadOnlyList<ForgeOption> options = Managers.Expedition.ForgeOptions();
-            if (options.Count == 0)
-            {
-                return;
-            }
-
-            _forging = true;
-            _forgeMember = options[0].MemberIndex;
-            _forgeX = options[0].BaseItem.At.X;
-            _forgeY = options[0].BaseItem.At.Y;
-            if (_party.InventoryOpen)
-            {
-                _party.ToggleInventory();
-            }
-
-            _party.ClearSelection();
-            Refresh();
-        }
-
-        void OnForgeBack()
-        {
-            _forging = false;
-            _forgeMember = -1;
-            Refresh();
-        }
-
-        /// <summary>A click on a board square while forging chooses the weapon there, if a recipe is ready on it; the click sounds here.</summary>
-        bool ChooseForgeItem(int member, int x, int y)
-        {
-            if (Managers.Expedition.CanForgeAtCamp(member, x, y))
-            {
-                _forgeMember = member;
-                _forgeX = x;
-                _forgeY = y;
-            }
-
-            Managers.Sound.PlayEffect(SoundEffect.Button);
-            Refresh();
-            return true;
-        }
-
-        void OnForgeConfirm()
-        {
-            ExpeditionManager manager = Managers.Expedition;
-            if (!_forging || !manager.CanForgeAtCamp(_forgeMember, _forgeX, _forgeY))
-            {
-                return;
-            }
-
-            manager.ForgeAtCamp(_forgeMember, _forgeX, _forgeY);
-            Managers.Sound.PlayEffect(SoundEffect.ItemPlace);
-            _forging = false;
-            _forgeMember = -1;
-            SelectTheOnlyWay();
-            Refresh();
-        }
-
         void OnMendConfirm()
         {
             ExpeditionManager manager = Managers.Expedition;

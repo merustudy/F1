@@ -172,10 +172,25 @@ namespace F1.UI
         public static readonly Color TraitIconFill = Rgb(0x14, 0x18, 0x1E);
         public static readonly Color TraitMore = ButtonQuiet;
 
-        /// <summary>A unique item (stage 23): Diablo's unique gold for its name, its plate and the rim round its piece; the forge card's dark gold and its light words.</summary>
+        /// <summary>A unique item (stage 23): Diablo's unique gold for its name, its plate and the rim round its piece.</summary>
         public static readonly Color Unique = DiabloGold;
-        public static readonly Color ForgeCard = Rgb(0x5A, 0x48, 0x1E);
-        public static readonly Color ForgeCardText = Rgb(0xF0, 0xE0, 0xA8);
+
+        /// <summary>
+        /// The line between a recipe's pieces on a board (Slice D stage 50, Round 96): gold when the next won battle combines them, grey when a tier
+        /// is short, a dark rim round both (the mockup's colours).
+        /// </summary>
+        public static readonly Color LinkReady = Rgb(0xF2, 0xC9, 0x4C);
+        public static readonly Color LinkShort = Rgb(0x8E, 0x8E, 0x8A);
+        public static readonly Color LinkRim = Rgb(0x14, 0x10, 0x08);
+
+        /// <summary>The gold that spreads over a base when its recipe merges (Round 96 V1 "금빛 번짐").</summary>
+        public static readonly Color MergeGold = Rgb(0xFF, 0xD6, 0x5A);
+
+        /// <summary>The plate under the band naming the unique a won battle made (Round 96): dark, its rim the unique's gold.</summary>
+        public static readonly Color UniquePlate = new Color(0x12 / 255f, 0x14 / 255f, 0x1C / 255f, 0.9f);
+
+        /// <summary>The shade over the panel's buttons while a unique merges (Round 96 "막음"): dark and solid, the words with them.</summary>
+        public static readonly Color LockShade = new Color(0f, 0f, 0f, 0.5f);
 
         /// <summary>
         /// The one colour of a tier, for its pips and its word (round 49 Diablo II's rarity colours; round 69 the user's ladder on the pips —

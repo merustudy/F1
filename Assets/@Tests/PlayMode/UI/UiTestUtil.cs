@@ -483,7 +483,6 @@ namespace F1.Tests
         public const string CampBox = "Frame/Map/Camp/CampWindow/CampBox";
         public const string CampRest = CampBox + "/CampChoices/Rest";
         public const string CampMend = CampBox + "/CampChoices/Mend";
-        public const string CampForge = CampBox + "/CampChoices/Forge";
 
         /// <summary>The shop's window on the node map (round 44), its refresh and leave buttons, and the cost on the refresh.</summary>
         public const string ShopBox = "Frame/Map/Shop/ShopWindow/ShopBox";
