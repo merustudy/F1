@@ -175,6 +175,12 @@ namespace F1.Gameplay
         public List<ItemOffer> Loot = new List<ItemOffer>();
 
         /// <summary>
+        /// The unique items the last won battle made (Slice D stage 50, ForgeRules.ForgeAfterBattle), for the battle screen's merge. Not saved: an
+        /// expedition resumed shows the uniques on the boards without the effect. Empty when the last battle made none.
+        /// </summary>
+        public List<UniqueForged> LastForged = new List<UniqueForged>();
+
+        /// <summary>
         /// The region coins the expedition has won and not spent (Slice B stage 17, Docs/Design/03_Dungeon_Structure.md §5). They
         /// exist only here: the run has no money, and they go when the expedition ends.
         /// </summary>

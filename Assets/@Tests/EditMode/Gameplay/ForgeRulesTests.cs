@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using F1.Data;
@@ -8,16 +7,19 @@ using NUnit.Framework;
 namespace F1.Tests
 {
     /// <summary>
-    /// The camp's forge (Slice B stage 23): a recipe's base at its tier with its catalyst lit on it makes the unique item in the base's
-    /// place; the catalyst is used up, the camp is spent, and a party holds one unique.
+    /// The combination of unique items (Slice D stage 50, Design/29, Docs/Design/02_Combat_System.md §4 "유니크의 조합"): a recipe's base and catalyst
+    /// at their tiers side by side on one board become the unique when a battle is won; a piece is in one link at most (the first in reading order),
+    /// a grey link has a tier short, and the party holds each unique once. It replaced the camp's forge of stage 23.
     /// </summary>
     public sealed class ForgeRulesTests
     {
         const string Sabre = "sabre_t";
         const string Hone = "hone_t";
         const string Unique = "gladius_t";
+        const string Axe = "axe_t";
+        const string Edge = "edge_t";
 
-        /// <summary>The test data with a melee sabre (2x1), a hone (a star item with a star above and below) and the recipe sabre + hone -> gladius.</summary>
+        /// <summary>The test data with a sabre and an axe (2x1 melee weapons), a hone, and the recipes sabre + hone -> gladius, axe + hone -> edge.</summary>
         static StaticData Data()
         {
             StaticDataParts parts = TestData.Parts();
@@ -27,102 +29,174 @@ namespace F1.Tests
                     new[] { TestData.Effect(EffectKind.Damage, TargetMode.EnemyFront, 10, 1) }, 0, melee: true),
                 new ItemData(Hone, TestData.Text(Hone), ItemCategory.Other, 1, 1, 0, RowSpan.All, new ItemEffect[0], 0,
                     stars: new[] { new StarSquare(0, -1), new StarSquare(0, 1) }, starDamage: 100),
+                TestData.Item(Axe, 2000, EffectKind.Damage, TargetMode.EnemyFront, 10, width: 2, melee: true),
+                TestData.Item(Edge, 2000, EffectKind.Damage, TargetMode.EnemyFront, 30, width: 2, melee: true, unique: true),
             };
             parts.Items = items;
-            parts.Recipes = new List<RecipeData> { new RecipeData(Unique, Unique, Sabre, ItemTier.Tier3, Hone, ItemTier.Tier3) };
+            parts.Recipes = new List<RecipeData>
+            {
+                new RecipeData(Unique, Unique, Sabre, ItemTier.Tier3, Hone, ItemTier.Tier3),
+                new RecipeData(Edge, Edge, Axe, ItemTier.Tier3, Hone, ItemTier.Tier3),
+            };
             return new StaticData(parts);
         }
 
-        static ExpeditionState AtTheCamp(StaticData data, ItemTier sabreTier = ItemTier.Tier3, int honeX = 0, ItemTier honeTier = ItemTier.Tier3)
+        static ExpeditionState Create(StaticData data)
         {
             List<PartyMember> party = data.StartingMercenaries.Take(data.Balance.PartySize)
                 .Select((m, index) => new PartyMember(m.Id, m.JobId, BattleRows.Front + index)).ToList();
-            ExpeditionState state = ExpeditionRules.Create(data, data.Dungeons.Ordered[0].Id, 7, party);
+            return ExpeditionRules.Create(data, data.Dungeons.Ordered[0].Id, 7, party);
+        }
+
+        /// <summary>The first member's board: the sabre at (1, 1) — its squares (1, 1) and (2, 1) — and a hone where asked.</summary>
+        static ExpeditionState WithSabre(StaticData data, int honeX, int honeY, ItemTier sabreTier = ItemTier.Tier3, ItemTier honeTier = ItemTier.Tier3)
+        {
+            ExpeditionState state = Create(data);
             ExpeditionMember anna = state.Members[0];
-            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Sabre), isBase: true, tier: sabreTier), 0, 1);
-            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Hone), tier: honeTier), honeX, 2);
-            state.Phase = ExpeditionPhase.AtCamp;
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Sabre), isBase: true, tier: sabreTier), 1, 1);
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Hone), tier: honeTier), honeX, honeY);
             return state;
         }
 
-        [Test]
-        public void Options_FindTheRecipe_OnABaseAtItsTier_WithTheCatalystAtItsTierLitOnIt()
+        [TestCase(0, 1, TestName = "Links_AHoneOnTheLeft_IsReady")]
+        [TestCase(2, 0, TestName = "Links_AHoneAbove_IsReady")]
+        [TestCase(1, 2, TestName = "Links_AHoneBelow_IsReady")]
+        public void Links_AHoneSideBySide_IsAReadyLink(int honeX, int honeY)
         {
             StaticData data = Data();
-            ExpeditionState state = AtTheCamp(data);
+            ExpeditionState state = WithSabre(data, honeX, honeY);
 
-            List<ForgeOption> options = ForgeRules.Options(data, state);
+            List<ForgeLink> links = ForgeRules.Links(data, state);
 
-            Assert.AreEqual(1, options.Count);
-            Assert.AreEqual(0, options[0].MemberIndex);
-            Assert.AreEqual(Sabre, options[0].BaseItem.Item.Item.Id);
-            Assert.AreEqual(Hone, options[0].Catalyst.Item.Item.Id);
-            Assert.AreEqual(Unique, options[0].Recipe.Result);
-            Assert.IsTrue(ForgeRules.CanForgeAtCamp(data, state, 0, 1, 1), "Any square of the base.");
-            Assert.IsFalse(ForgeRules.CanForgeAtCamp(data, state, 0, 0, 0), "The job weapon is no recipe's base.");
+            Assert.AreEqual(1, links.Count);
+            Assert.IsTrue(links[0].Ready);
+            Assert.AreEqual((0, Sabre, Hone, Unique), (links[0].MemberIndex, links[0].BaseItem.Item.Item.Id, links[0].Catalyst.Item.Item.Id, links[0].Recipe.Result));
         }
 
         [Test]
-        public void Options_AreNone_WhenATierIsShort_WhenTheStarIsNotLit_OrWhenThePartyHoldsAUnique()
+        public void Links_AHoneAcrossACorner_IsNoLink()
         {
             StaticData data = Data();
-            Assert.IsEmpty(ForgeRules.Options(data, AtTheCamp(data, sabreTier: ItemTier.Tier2)), "The base below its tier.");
-            Assert.IsEmpty(ForgeRules.Options(data, AtTheCamp(data, honeTier: ItemTier.Tier2)), "The catalyst below its tier.");
-            Assert.IsEmpty(ForgeRules.Options(data, AtTheCamp(data, honeX: 2)), "The hone's star over an empty square: not lit on the sabre.");
-
-            ExpeditionState holding = AtTheCamp(data);
-            holding.Inventory.Add(new EquippedItem(data.Items.Get(Unique), tier: ItemTier.Tier3), new Placement(0, 0));
-            Assert.IsTrue(ForgeRules.PartyHasUnique(holding));
-            Assert.IsEmpty(ForgeRules.Options(data, holding), "One unique per party.");
+            Assert.IsEmpty(ForgeRules.Links(data, WithSabre(data, 0, 2)), "(0, 2) meets the sabre's (1, 1) only at a corner.");
         }
 
         [Test]
-        public void ForgeAtCamp_UsesTheCatalyst_MakesTheUniqueInTheBasesPlace_KeepsItsStanding_AndLeavesTheCamp()
+        public void Links_ATierShort_IsAGreyLink_AndTheWinMakesNothing()
         {
             StaticData data = Data();
-            ExpeditionState state = AtTheCamp(data);
+            ExpeditionState state = WithSabre(data, 0, 1, honeTier: ItemTier.Tier2);
+
+            List<ForgeLink> links = ForgeRules.Links(data, state);
+            Assert.AreEqual(1, links.Count);
+            Assert.IsFalse(links[0].Ready, "The hone is a tier short: the grey line.");
+            Assert.IsEmpty(ForgeRules.ForgeAfterBattle(data, state));
+            Assert.AreEqual(Sabre, TestBoards.ItemAt(state.Members[0], 1, 1).Item.Id);
+        }
+
+        [Test]
+        public void Links_OneHoneBetweenTwoBases_LinksTheFirstInReadingOrder_Only()
+        {
+            // The user's Design/29 판정 3: a piece in two ready recipes takes part in the one its line shows — the first base in reading order.
+            StaticData data = Data();
+            ExpeditionState state = Create(data);
+            ExpeditionMember anna = state.Members[0];
+            anna.Board.Items.Clear();
+            // The sabre (0, 0)-(1, 0), the hone at (2, 0) beside it, the axe (1, 1)-(2, 1) under the hone: both bases touch the one hone.
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Sabre), tier: ItemTier.Tier3), 0, 0);
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Hone), tier: ItemTier.Tier3), 2, 0);
+            TestBoards.Put(anna, new EquippedItem(data.Items.Get(Axe), tier: ItemTier.Tier3), 1, 1);
+
+            List<ForgeLink> links = ForgeRules.Links(data, state);
+
+            Assert.AreEqual(1, links.Count);
+            Assert.AreEqual(Sabre, links[0].BaseItem.Item.Item.Id, "The upper base is read first.");
+            List<UniqueForged> made = ForgeRules.ForgeAfterBattle(data, state);
+            Assert.AreEqual(new[] { Unique }, made.Select(f => f.ResultId).ToArray());
+            Assert.AreEqual(Axe, TestBoards.ItemAt(anna, 1, 1).Item.Id, "The other base waits for another hone.");
+        }
+
+        [Test]
+        public void Links_AReadyLinkComesFirst_EvenWhenAGreyOneIsReadEarlier()
+        {
+            // A base touching a 2-star hone and a 3-star one links the 3-star one: the ready links are found before the grey ones.
+            StaticData data = Data();
+            ExpeditionState state = WithSabre(data, 0, 1, honeTier: ItemTier.Tier2);
+            TestBoards.Put(state.Members[0], new EquippedItem(data.Items.Get(Hone), tier: ItemTier.Tier3), 2, 0);
+
+            List<ForgeLink> links = ForgeRules.Links(data, state);
+
+            Assert.AreEqual(1, links.Count);
+            Assert.IsTrue(links[0].Ready);
+            Assert.AreEqual(ItemTier.Tier3, links[0].Catalyst.Item.Tier);
+        }
+
+        [Test]
+        public void Links_AUniqueThePartyHolds_IsNotMadeAgain_AnotherUniqueIs()
+        {
+            // The user's Design/29 판정 6: each unique once in the party, other uniques beside it.
+            StaticData data = Data();
+            ExpeditionState state = WithSabre(data, 0, 1);
+            state.Inventory.Items.Add(new BoardItem(new EquippedItem(data.Items.Get(Unique)), new Placement(0, 0)));
+            Assert.IsTrue(ForgeRules.PartyHas(state, Unique));
+            Assert.IsEmpty(ForgeRules.Links(data, state), "The gladius is held already: no line, nothing made.");
+
+            ExpeditionMember bob = state.Members[1];
+            TestBoards.Put(bob, new EquippedItem(data.Items.Get(Axe), tier: ItemTier.Tier3), 0, 1);
+            TestBoards.Put(bob, new EquippedItem(data.Items.Get(Hone), tier: ItemTier.Tier3), 2, 1);
+            List<UniqueForged> made = ForgeRules.ForgeAfterBattle(data, state);
+            Assert.AreEqual(new[] { Edge }, made.Select(f => f.ResultId).ToArray(), "Another unique is made beside the gladius.");
+        }
+
+        [Test]
+        public void Links_TheSameUniqueReadyTwice_MakesTheFirstOnly()
+        {
+            StaticData data = Data();
+            ExpeditionState state = WithSabre(data, 0, 1);
+            ExpeditionMember bob = state.Members[1];
+            TestBoards.Put(bob, new EquippedItem(data.Items.Get(Sabre), tier: ItemTier.Tier3), 0, 1);
+            TestBoards.Put(bob, new EquippedItem(data.Items.Get(Hone), tier: ItemTier.Tier3), 2, 1);
+
+            List<UniqueForged> made = ForgeRules.ForgeAfterBattle(data, state);
+
+            Assert.AreEqual(1, made.Count);
+            Assert.AreEqual(0, made[0].MemberIndex, "The first member's, the party's order.");
+            Assert.AreEqual(Sabre, TestBoards.ItemAt(bob, 0, 1).Item.Id);
+        }
+
+        [Test]
+        public void ForgeAfterBattle_MakesTheUniqueInTheBasesPlace_TheCatalystGone_AndSaysWhatItWas()
+        {
+            StaticData data = Data();
+            ExpeditionState state = WithSabre(data, 0, 1);
             ExpeditionMember anna = state.Members[0];
 
-            ForgeRules.ForgeAtCamp(data, state, 0, 0, 1);
+            List<UniqueForged> made = ForgeRules.ForgeAfterBattle(data, state);
 
-            EquippedItem made = TestBoards.ItemAt(anna, 0, 1);
-            Assert.AreEqual(Unique, made.Item.Id);
-            Assert.AreEqual(ItemTier.Common, made.Tier, "A unique has no tier: it never merges (there is one) and is never mended.");
-            Assert.IsTrue(made.IsBase, "The base's standing: a base weapon stays one (no fatigue).");
-            Assert.AreSame(made, TestBoards.ItemAt(anna, 1, 1), "In the base's place: both squares.");
-            Assert.IsNull(anna.Board.ItemAt(0, 2), "The catalyst is gone.");
-            Assert.AreEqual(ExpeditionPhase.ChoosingNode, state.Phase, "The camp is spent: no rest.");
-            Assert.IsTrue(ForgeRules.PartyHasUnique(state));
-            Assert.IsFalse(ForgeRules.CanForgeAtCamp(data, state, 0, 0, 1), "Not at a camp, and the party holds its unique.");
-
-            state.Phase = ExpeditionPhase.AtCamp;
-            Assert.IsFalse(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0, 1), "A unique is never mended: it has no tier.");
-            Assert.IsTrue(ExpeditionRules.CanUpgradeAtCamp(state, 0, 0, 0), "The job weapon still can be.");
+            Assert.AreEqual(1, made.Count);
+            Assert.AreEqual((Sabre, ItemTier.Tier3, 1, 1), (made[0].BaseBefore.Item.Id, made[0].BaseBefore.Tier, made[0].BaseAt.X, made[0].BaseAt.Y));
+            Assert.AreEqual((Hone, 0, 1), (made[0].Catalyst.Item.Id, made[0].CatalystAt.X, made[0].CatalystAt.Y));
+            EquippedItem result = TestBoards.ItemAt(anna, 1, 1);
+            Assert.AreEqual(Unique, result.Item.Id);
+            Assert.IsTrue(result.IsBase, "The base weapon's standing is kept.");
+            Assert.AreEqual(ItemTier.Common, result.Tier, "A unique has no tier.");
+            Assert.IsNull(anna.Board.ItemAt(0, 1), "The hone is used up.");
+            Assert.IsEmpty(ForgeRules.Links(data, state), "Nothing left to link.");
         }
 
         [Test]
-        public void ForgeAtCamp_Refuses_OffTheCamp_AndWhereNoRecipeIsReady()
+        public void CompleteBattle_AWonBattle_MakesTheUniqueBeforeTheLoot()
         {
             StaticData data = Data();
-            ExpeditionState state = AtTheCamp(data);
-            Assert.Throws<InvalidOperationException>(() => ForgeRules.ForgeAtCamp(data, state, 0, 0, 0), "The job weapon.");
-            state.Phase = ExpeditionPhase.ChoosingNode;
-            Assert.IsFalse(ForgeRules.CanForgeAtCamp(data, state, 0, 0, 1));
-            Assert.Throws<InvalidOperationException>(() => ForgeRules.ForgeAtCamp(data, state, 0, 0, 1));
-        }
+            ExpeditionState state = WithSabre(data, 0, 1);
+            MapNode node = ExpeditionRules.AvailableNodes(state)[0];
+            var battle = new BattleEngine(ExpeditionRules.BeginBattle(data, state, node.Id));
+            battle.RunToEnd();
+            Assume.That(battle.Result, Is.EqualTo(BattleResult.Victory), "The first floor is won.");
 
-        [Test]
-        public void TheData_RefusesARecipe_WhoseResultIsNotUnique_OrWhoseCatalystHasNoStars_AndAUniqueForSale()
-        {
-            Assert.Throws<DataException>(() => new RecipeData("r", Sabre, Sabre, ItemTier.Tier3, Hone, ItemTier.Tier3), "The result is an ingredient.");
-            Assert.Throws<DataException>(() => new ItemData("relic", TestData.Text("relic"), ItemCategory.Other, 1, 1, 1000, RowSpan.All,
-                new[] { TestData.Effect(EffectKind.Shield, TargetMode.Self, 10, TestData.DefaultReach) }, 5, price: 10, unique: true), "A unique item is never sold.");
+            ExpeditionRules.CompleteBattle(data, state, battle);
 
-            StaticDataParts notUnique = TestData.Parts();
-            notUnique.Recipes = new List<RecipeData> { new RecipeData("r", "knife", "blade", ItemTier.Tier3, "charm", ItemTier.Tier3) };
-            DataValidationException problems = Assert.Throws<DataValidationException>(() => new StaticData(notUnique), "The knife is not unique; the charm has no stars.");
-            StringAssert.Contains("not a unique item", problems.Message);
-            StringAssert.Contains("has no stars", problems.Message);
+            Assert.AreEqual(1, state.LastForged.Count);
+            Assert.AreEqual(Unique, TestBoards.ItemAt(state.Members[0], 1, 1).Item.Id);
         }
     }
 }

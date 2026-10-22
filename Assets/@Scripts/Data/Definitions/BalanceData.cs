@@ -106,6 +106,7 @@ namespace F1.Data
             new KeySpec(nameof(InventoryHeight), BoardFrame.MaxSide, 30),
             new KeySpec(nameof(EliteBagPercent), 0, 100),
             new KeySpec(nameof(DropTierKeepPercent), 0, 100),
+            new KeySpec(nameof(DropOwnedPercent), 0, 100),
             new KeySpec(nameof(CampHealPercent), 0, 100),
             new KeySpec(nameof(CampFatigueRelief), 0, Big),
             new KeySpec(nameof(Tier1Percent), 100, Big),
@@ -403,6 +404,13 @@ namespace F1.Data
         /// else it drops a tier lower. Common rolls nothing; 100 is the rule before it.
         /// </summary>
         public int DropTierKeepPercent => _values[nameof(DropTierKeepPercent)];
+
+        /// <summary>
+        /// The chance, in percent, that a drop is the same as an item on a living member's board (Slice D stage 49, Docs/Design/03_Dungeon_Structure.md §5):
+        /// merge fodder, so that the items grow faster. 0 is the rule before it.
+        /// </summary>
+        public int DropOwnedPercent => _values[nameof(DropOwnedPercent)];
+
         /// <summary>Resting at a camp: the share of their maximum HP every living member gets back, and how much their fatigue comes down.</summary>
         public int CampHealPercent => _values[nameof(CampHealPercent)];
         public int CampFatigueRelief => _values[nameof(CampFatigueRelief)];

@@ -406,7 +406,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(26, RunSaveData.CurrentSchemaVersion, "Stage 47 (version 26): the same shape, the jobs are the eight.");
+            Assert.AreEqual(27, RunSaveData.CurrentSchemaVersion, "Stage 49 (version 27): the same shape; the mine's map is another (stage 47's 26 had the eight jobs).");
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -593,11 +593,49 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, new StaticData(TestData.Parts()));
 
-            Assert.AreEqual(26, save.SchemaVersion);
+            Assert.AreEqual(27, save.SchemaVersion, "Lifted to 26 and on to 27 (which touches only an expedition in the mine).");
             Assert.AreEqual("archer", ranger.JobId);
             Assert.AreEqual("archer", save.Run.Recruits[0].JobId);
             Assert.AreEqual("archer", member.JobId);
             Assert.AreEqual(othersJob, other.JobId, "Any other job is untouched.");
+        }
+
+        [Test]
+        public void Migrate_From26_SettlesAnExpeditionInTheMine_AsARetreat_AtTheSameShareOfTheWay()
+        {
+            // Version 27 (Slice D stage 49, Design/26 판정 15): the mine is 19 floors now, so an expedition going on in it ends as a retreat where it stood.
+            F1.Editor.Data.StaticDataFileStore store = F1.Editor.Data.DataTransformMenu.CreateStore();
+            StaticData data = StaticDataLoader.Load(file => store.ReadGenerated(file.GeneratedFileName));
+            RunState run = RunRules.NewRun(data, 7);
+            RunRules.SetParty(data, run, run.Roster.Take(data.Balance.PartySize).Select((m, i) => new PartySlot { MercenaryId = m.Id, Row = i + 1 }).ToList());
+            ExpeditionState expedition = RunRules.BeginExpedition(data, run, "abandoned_mine");
+            RunSaveData save = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            save.SchemaVersion = 26;
+            // A node of the old map's twelfth floor (30 floors of 2..4 nodes drawn from the expedition's seed).
+            save.Expedition.CurrentNodeId = Enumerable.Range(0, 200).First(id => RunSaveMigrator.OldMineFloor(expedition.Seed, id) == 12);
+            save.Expedition.BattlesWon = 11;
+            int day = save.Run.Day, gold = save.Run.Gold, roster = save.Run.Roster.Count;
+
+            RunSaveMigrator.Migrate(save, data);
+
+            Assert.AreEqual(27, save.SchemaVersion);
+            Assert.IsNull(save.Expedition, "Settled: the party is home.");
+            Assert.AreEqual(day + data.Dungeons.Get("abandoned_mine").DurationDays, save.Run.Day);
+            Assert.AreEqual(gold + 8 * data.Balance.GoldPerFloor, save.Run.Gold, "A retreat's gold for floor 8 of 19 — floor 12 of 30 at the same share of the way.");
+            Assert.AreEqual(roster, save.Run.Roster.Count, "Nobody had died.");
+            RunSaveMapper.Read(save, data, out RunState _, out ExpeditionState home);
+            Assert.IsNull(home);
+        }
+
+        [Test]
+        public void Migrate_From26_TheOldMinesFloors_AndTheNewFloorAtTheSameShareOfTheWay()
+        {
+            Assert.AreEqual(0, RunSaveMigrator.OldMineFloor(5, -1), "Before the first floor.");
+            Assert.AreEqual(1, RunSaveMigrator.OldMineFloor(5, 0));
+            int firstOfTheSecond = Enumerable.Range(0, 10).First(id => RunSaveMigrator.OldMineFloor(5, id) == 2);
+            Assert.That(firstOfTheSecond, Is.InRange(2, 4), "The first floor had 2..4 nodes.");
+            Assert.AreEqual(30, RunSaveMigrator.OldMineFloor(5, 500), "The boss counts as the last floor.");
+            CollectionAssert.AreEqual(new[] { 0, 1, 2, 8, 13, 19 }, new[] { 0, 1, 2, 12, 21, 30 }.Select(f => RunSaveMigrator.NewMineFloor(f, 19)));
         }
 
         [Test]

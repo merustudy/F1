@@ -387,9 +387,10 @@ namespace F1.Tests
                 Assert.Greater(data.Items.Get(id).Price, 0, id + ": sells for a little.");
             }
 
-            CollectionAssert.AreEqual(new[] { "rat_bite", "bristle_hide" }, data.Enemies.Get("cave_rat").ItemsAt(11).Select(g => g.ItemId), "The bristly rat.");
-            CollectionAssert.AreEqual(new[] { "crude_bow", "crude_bow", "ash_pouch" }, data.Enemies.Get("goblin_archer").ItemsAt(21).Select(g => g.ItemId));
-            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "hex_bone" }, data.Enemies.Get("goblin_hexer").ItemsAt(21).Select(g => g.ItemId));
+            // Stage 49 (19 floors): the bundles from floors 4, 9 and 14.
+            CollectionAssert.AreEqual(new[] { "rat_bite", "bristle_hide" }, data.Enemies.Get("cave_rat").ItemsAt(4).Select(g => g.ItemId), "The bristly rat.");
+            CollectionAssert.AreEqual(new[] { "crude_bow", "crude_bow", "ash_pouch" }, data.Enemies.Get("goblin_archer").ItemsAt(9).Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "hex_bone" }, data.Enemies.Get("goblin_hexer").ItemsAt(9).Select(g => g.ItemId));
 
             CollectionAssert.AreEquivalent(new[] { "healing_potion", "barrier_potion", "cleansing_potion", "regen_potion" }, data.Potions.Ordered.Select(p => p.Id).ToList());
             Assert.AreEqual((PotionEffect.Cleanse, 3), (data.Potions.Get("cleansing_potion").Effect, data.Potions.Get("cleansing_potion").Magnitude));
@@ -425,20 +426,23 @@ namespace F1.Tests
         }
 
         [Test]
-        public void ShippedMineEnemies_CarryOneMoreFromTheEleventhFloor_AndAnotherFromTheTwentyFirst_AtTheItemsOwnValues()
+        public void ShippedMineEnemies_CarryOneMoreFromFloorsFourNineAndFourteen_AtTheItemsOwnValues()
         {
-            // 2026-10-20 (Docs/Design/03_Dungeon_Structure.md §4, the user's "11층 +1, 21층+2, 보통 세기"): the mine's common enemies carry a bundle from
-            // floor 11 and another from floor 21, each at the item's own values (100); the elites only the second; the bosses, the escort and the abyss none.
+            // Slice D stage 49 (Docs/Design/03_Dungeon_Structure.md §4, Design/26 "권장안 반영"): on the 19 floors the mine's common enemies carry a bundle
+            // from floor 4, 9 and 14 (the rats, who roam to floor 12, the first two; the elites from 9 and 14), each at the item's own values (100); the bosses,
+            // the escort and the abyss none. The drops are the mercenaries' items now (03 §5), so the enemies carry some of those too.
             StaticData data = LoadShipped();
+            Assert.AreEqual(19, data.Dungeons.Get("abandoned_mine").Floors);
             foreach (string id in new[] { "goblin_raider", "goblin_archer", "goblin_shaman" })
             {
-                CollectionAssert.AreEqual(new[] { 11, 21 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
+                CollectionAssert.AreEqual(new[] { 4, 9, 14 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
             }
 
-            CollectionAssert.AreEqual(new[] { 11 }, data.Enemies.Get("cave_rat").DeepItems.Select(bundle => bundle.Floor), "Rats roam to floor 18.");
+            CollectionAssert.AreEqual(new[] { 4, 9 }, data.Enemies.Get("cave_rat").DeepItems.Select(bundle => bundle.Floor), "Rats roam to floor 12.");
+            Assert.AreEqual(12, data.EnemyGroups.Get("rat_pack").MaxFloor);
             foreach (string id in new[] { "goblin_veteran", "goblin_hexer" })
             {
-                CollectionAssert.AreEqual(new[] { 21 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
+                CollectionAssert.AreEqual(new[] { 9, 14 }, data.Enemies.Get(id).DeepItems.Select(bundle => bundle.Floor), id);
             }
 
             foreach (string id in new[] { "mine_overseer", "skeleton_guard", "abyss_lord" })
@@ -455,10 +459,9 @@ namespace F1.Tests
                 }
             }
 
-            // Stage 46: the raider's second bundle is the saw-blade (the ember flask before).
-            CollectionAssert.AreEqual(new[] { "rusty_blade", "rusty_blade", "goblin_sawblade" }, data.Enemies.Get("goblin_raider").ItemsAt(21).Select(g => g.ItemId));
-            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "ward_charm", "lantern_staff" }, data.Enemies.Get("goblin_shaman").ItemsAt(21).Select(g => g.ItemId));
-            Assert.AreEqual(1, data.Enemies.Get("goblin_raider").ItemsAt(10).Count, "The tenth floor is the base alone.");
+            CollectionAssert.AreEqual(new[] { "rusty_blade", "rusty_blade", "goblin_sawblade", "throwing_knives" }, data.Enemies.Get("goblin_raider").ItemsAt(14).Select(g => g.ItemId));
+            CollectionAssert.AreEqual(new[] { "lantern_staff", "mending_chant", "ward_charm", "lantern_staff", "censer" }, data.Enemies.Get("goblin_shaman").ItemsAt(14).Select(g => g.ItemId));
+            Assert.AreEqual(1, data.Enemies.Get("goblin_raider").ItemsAt(3).Count, "The third floor is the base alone.");
         }
 
         [Test]
@@ -598,7 +601,7 @@ namespace F1.Tests
             // 2026-10-17: the jobs' base weapons priced and weighted for the shop (the party's own only: ExpeditionRules), the shop's general
             // items with a drop weight, and nothing else dropping as a general item (the whetstone and the base weapons come from shops).
             StaticData data = LoadShipped();
-            Assert.AreEqual(30, data.Dungeons.Get("abandoned_mine").GeneralDropChancePercent);
+            Assert.AreEqual(100, data.Dungeons.Get("abandoned_mine").GeneralDropChancePercent, "Stage 49: the mine drops the mercenaries' items only.");
             Assert.AreEqual(0, data.Dungeons.Get("abyss").GeneralDropChancePercent, "The pit drops only bones: a general item there made it twice as easy (Design/08 §32).");
             foreach (JobData job in data.Jobs.Ordered)
             {

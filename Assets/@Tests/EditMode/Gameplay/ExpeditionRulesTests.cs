@@ -436,6 +436,42 @@ namespace F1.Tests
         }
 
         [Test]
+        public void DropLoot_WithTheOwnedChance_CopiesAnItemOnALivingMembersBoard_PricedWeightedAndNotUnique()
+        {
+            // Stage 49 (Docs/Design/03_Dungeon_Structure.md §5): a drop is first, with DropOwnedPercent, the same as an item on a living member's board.
+            var node = new MapNode(99, 2, 0, MapNodeKind.Battle, "trio", new int[0]);
+            StaticData always = TestData.Data(("DropCount", 2), ("DropOwnedPercent", 100));
+            StaticData never = TestData.Data(("DropCount", 2));
+            ExpeditionState state = Create(always);
+            Assert.IsEmpty(ExpeditionRules.OwnedDropCandidates(state), "The test's base weapons have no price: nothing to copy.");
+            CollectionAssert.AreEqual(ExpeditionRules.DropLoot(never, Create(never), node).Select(d => d.Id), ExpeditionRules.DropLoot(always, state, node).Select(d => d.Id),
+                "Without a candidate the chance is not rolled: the drops are drawn as before.");
+
+            state.Members[0].Board.Items.Add(new BoardItem(new EquippedItem(always.Items.Get("knife")), new Placement(0, 1)));
+            state.Members[1].Board.Items.Add(new BoardItem(new EquippedItem(always.Items.Get("gladius_t")), new Placement(0, 1)));
+            CollectionAssert.AreEqual(new[] { "knife" }, ExpeditionRules.OwnedDropCandidates(state), "A unique (and anything unpriced) is never copied.");
+            List<ItemOffer> copies = ExpeditionRules.DropLoot(always, state, node);
+            Assert.AreEqual(2, copies.Count);
+            Assert.IsTrue(copies.All(d => d.Kind == OfferKind.Item && d.Id == "knife" && d.Tier == ItemTier.Common), "Both copy the knife, at the floor's tier.");
+
+            // At 50 both kinds come over many nodes, the same for the same seed.
+            StaticData half = TestData.Data(("DropCount", 2), ("DropOwnedPercent", 50));
+            ExpeditionState halfState = Create(half);
+            halfState.Members[0].Board.Items.Add(new BoardItem(new EquippedItem(half.Items.Get("knife")), new Placement(0, 1)));
+            var ids = new List<string>();
+            for (int id = 100; id < 140; id++)
+            {
+                ids.AddRange(ExpeditionRules.DropLoot(half, halfState, new MapNode(id, 2, 0, MapNodeKind.Battle, "trio", new int[0])).Select(d => d.Id));
+            }
+
+            Assert.IsTrue(ids.Contains("knife") && ids.Contains("claw"));
+            CollectionAssert.AreEqual(ExpeditionRules.DropLoot(half, halfState, node).Select(d => d.Id), ExpeditionRules.DropLoot(half, halfState, node).Select(d => d.Id));
+
+            state.Members[0].Alive = false;
+            Assert.IsEmpty(ExpeditionRules.OwnedDropCandidates(state), "The dead carry nothing to copy.");
+        }
+
+        [Test]
         public void DropLoot_AnEliteMayDropABag_InPlaceOfItsLastItem_AndNothingElseDoes()
         {
             StaticData data = TestData.Data(("DropCount", 1), ("EliteDropCount", 2), ("EliteBagPercent", 100));

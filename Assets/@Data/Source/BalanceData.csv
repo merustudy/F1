@@ -6,7 +6,7 @@ DeathLimit,15
 MaxFatigue,200
 FatigueRecoveryPerDay,10
 FatigueBreakdown,100
-FatigueBattleEntry,2
+FatigueBattleEntry,3
 FatigueEquipment,1
 FatigueOnHit,0
 FatigueOnDog,5
@@ -18,7 +18,7 @@ VirtueFatigue,40
 AfflictionRecovery,0
 OverworkCooldownPercent,25
 RestDays,1
-DogGraceMs,3000
+DogGraceMs,0
 DogGraceBreakHits,3
 DogDeathChancePercent,30
 BurnTickMs,1000
@@ -32,12 +32,13 @@ RetreatChancePercent,60
 RetreatCooldownMs,5000
 PostBattleHealPercent,10
 MinCooldownMs,200
-DropCount,1
-EliteDropCount,2
+DropCount,2
+EliteDropCount,3
 InventoryWidth,10
 InventoryHeight,3
 EliteBagPercent,50
 DropTierKeepPercent,50
+DropOwnedPercent,50
 CampHealPercent,30
 CampFatigueRelief,20
 Tier1Percent,200
@@ -49,8 +50,8 @@ ShopSlots,8
 ShopRefreshBase,3
 ShopRefreshStep,2
 ShopPotionChancePercent,50
-CoinsPerEnemy,1
-CoinsPerFloor,1
+CoinsPerEnemy,2
+CoinsPerFloor,2
 ExpeditionStartCoins,20
 EliteCoinPercent,200
 SellPercent,25
@@ -65,7 +66,7 @@ CritFatigueTaken,12
 CritFatigueTakenAllies,3
 CritFatigueDealt,3
 CritFatigueDealtAllies,1
-GoldPerFloor,2
+GoldPerFloor,3
 GoldClear,20
 HirePrice,20
 RecruitCount,3
@@ -73,7 +74,7 @@ RosterLimit,8
 TreatmentPrice,20
 TreatmentRelief,40
 ExpPerFloor,1
-ExpClear,5
+ExpClear,16
 StatBaseline,7
 StatMin,1
 StatMax,30

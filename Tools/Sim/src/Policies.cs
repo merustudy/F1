@@ -231,31 +231,14 @@ namespace F1.Sim
         /// mends (a tier up) the first item below Tier3 that works where its owner stands, from the front member back. Returns
         /// true for mending.
         /// </summary>
-        /// <summary>Whether the last camp the policy decided at was spent on the forge (stage 23).</summary>
-        public bool LastCampForged { get; private set; }
-
         public bool ChooseAtCamp(StaticData data, ExpeditionState state)
         {
-            LastCampForged = false;
             bool hurt = false;
             foreach (ExpeditionMember member in state.Members)
             {
                 // Stage 48: the rest ends an affliction whatever the fatigue, so a member in one makes the party rest too.
                 hurt |= member.Alive && (member.Hp * 100 < member.MaxHp * RestBelowHpPercent || member.Fatigue >= data.Balance.FatigueBreakdown
                     || (member.StateId != null && data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction));
-            }
-
-            // The forge first (stage 23): a recipe ready on a board makes the unique item, at the price of the rest and the mend.
-            if (Active && !hurt)
-            {
-                List<ForgeOption> forges = ForgeRules.Options(data, state);
-                if (forges.Count > 0)
-                {
-                    ForgeOption forge = forges[0];
-                    ForgeRules.ForgeAtCamp(data, state, forge.MemberIndex, forge.BaseItem.At.X, forge.BaseItem.At.Y);
-                    LastCampForged = true;
-                    return true;
-                }
             }
 
             if (Active && !hurt)

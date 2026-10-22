@@ -503,7 +503,7 @@ namespace F1.Sim
             Console.WriteLine($"  per expedition: elites {BattleStats.Ratio(stats.Elites, runs)}, camps {BattleStats.Ratio(stats.Camps, runs)}, battle time {stats.BattleTimeMs / 1000.0 / runs:F1}s at x1");
             Console.WriteLine($"  per expedition (2026-10-17): general drops {BattleStats.Ratio(stats.GeneralDrops, runs)} of the drops, the party's base weapons on offer {BattleStats.Ratio(stats.BaseWeaponsOffered, runs)} (per shop {(stats.Shops > 0 ? (double)stats.BaseWeaponsOffered / stats.Shops : 0):F2})");
             Console.WriteLine($"  per expedition: drops {BattleStats.Ratio(stats.Drops, runs)}, picked up {BattleStats.Ratio(stats.DropsTaken, runs)}, kept off a board by a stat requirement (Slice D stage 42) {BattleStats.Ratio(stats.DropsKeptOffByRequirement, runs)}");
-            Console.WriteLine($"  per expedition: forges at camps {BattleStats.Ratio(stats.Forges, runs)}, expeditions ending with a unique item {BattleStats.Percent(stats.UniqueAtEnd, runs)}");
+            Console.WriteLine($"  per expedition: uniques made after won battles (stage 50) {BattleStats.Ratio(stats.Forges, runs)}, expeditions ending with a unique item {BattleStats.Percent(stats.UniqueAtEnd, runs)}");
             Console.WriteLine($"  per expedition: merges {BattleStats.Ratio(stats.Merges, runs)}, mends at camps {BattleStats.Ratio(stats.Mends, runs)}; on the boards at the end: "
                 + $"common {BattleStats.Ratio(stats.TiersAtEnd[0], runs)}, 1-star {BattleStats.Ratio(stats.TiersAtEnd[1], runs)}, 2-star {BattleStats.Ratio(stats.TiersAtEnd[2], runs)}, 3-star {BattleStats.Ratio(stats.TiersAtEnd[3], runs)}");
             Console.WriteLine($"  per expedition: shops {BattleStats.Ratio(stats.Shops, runs)}, bought {BattleStats.Ratio(stats.Bought, runs)}, refreshes {BattleStats.Ratio(stats.Refreshes, runs)}; "
@@ -592,7 +592,7 @@ namespace F1.Sim
                 if (state.Phase == ExpeditionPhase.AtCamp)
                 {
                     bool didAtCamp = policy.ChooseAtCamp(data, state);
-                    if (policy.LastCampForged) stats.Forges++; else if (didAtCamp) stats.Mends++;
+                    if (didAtCamp) stats.Mends++;
                     continue;
                 }
 
@@ -644,6 +644,7 @@ namespace F1.Sim
                 floorStats.Add(battle);
                 int coinsBeforeBattle = state.Coins;
                 ExpeditionRules.CompleteBattle(data, state, battle);
+                stats.Forges += state.LastForged.Count;
                 stats.CoinsWon += state.Coins - coinsBeforeBattle;
             }
 
@@ -976,6 +977,12 @@ namespace F1.Sim
             return party.Count == 0 ? 0 : (int)party.Average(slot => RunRules.FindMercenary(state, slot.MercenaryId).Fatigue);
         }
 
+        /// <summary>Whether a unique item is on a living member's board or in the inventory at the end (stage 50: the boards may hold more than one).</summary>
+        static bool HoldsAUnique(ExpeditionState state)
+        {
+            return state.Members.Any(m => m.Alive && m.Board.Items.Any(i => i.Item.Item.Unique)) || state.Inventory.Items.Any(i => i.Item.Item.Unique);
+        }
+
         static ExpeditionStats RunExpeditions(StaticData data, string dungeonId, List<PartyMember> party, SimPolicy policy, int runs, ulong baseSeed)
         {
             var stats = new ExpeditionStats { Runs = runs };
@@ -990,7 +997,7 @@ namespace F1.Sim
 
                 stats.CoinsLeft += state.Coins;
 
-                stats.UniqueAtEnd += ForgeRules.PartyHasUnique(state) ? 1 : 0;
+                stats.UniqueAtEnd += HoldsAUnique(state) ? 1 : 0;
                 switch (state.Result)
                 {
                     case ExpeditionResult.Cleared: stats.Cleared++; break;

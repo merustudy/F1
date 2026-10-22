@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using F1.Data;
 using F1.Gameplay;
 using F1.Save;
@@ -51,6 +52,78 @@ namespace F1.Flow
             {
                 From25To26(save);
             }
+
+            if (save.SchemaVersion == 26)
+            {
+                From26To27(save, data);
+            }
+        }
+
+        /// <summary>
+        /// Version 27 (Slice D stage 49, 원정의 밀도 — Docs/Design/03_Dungeon_Structure.md §1, Design/26 판정 15): the mine became 19 floors and a boss, so the map
+        /// an expedition in it rebuilds from its seed is another map. The DTO's shape is the same. An expedition going on in the mine (not a final stand) ends
+        /// as a retreat where it stood and is settled as any retreat is (RunRules.Settle): the floor it had reached on the old map of 30 floors, found from
+        /// the seed by the old widths (2..4 a floor, the generator's first draws), is moved to the new map at the same share of the way (1 + (n − 1) × 18/29,
+        /// rounded), and the party stands on that floor's first node. A battle that was going on is left unfought: the members are as it began. Anything
+        /// else in the file is as it was.
+        /// </summary>
+        static void From26To27(RunSaveData save, StaticData data)
+        {
+            const string Mine = "abandoned_mine";
+            ExpeditionRecord record = save.Expedition;
+            if (record != null && save.Run != null && !record.FinalStand && record.DungeonId == Mine
+                && ulong.TryParse(record.Seed, NumberStyles.None, CultureInfo.InvariantCulture, out ulong seed))
+            {
+                DungeonData mine = data.Dungeons.Get(Mine);
+                int floor = NewMineFloor(OldMineFloor(seed, record.CurrentNodeId), mine.Floors);
+                NodeMap map = MapGenerator.Generate(data, mine, seed);
+                record.CurrentNodeId = floor == 0 ? -1 : map.OnFloor(floor)[0].Id;
+                record.BattlesWon = floor == 0 ? 0 : record.BattlesWon;
+                record.Phase = nameof(ExpeditionPhase.ChoosingNode);
+                record.Battle = null;
+                record.Shop = null;
+                record.Loot = new List<OfferRecord>();
+
+                RunState run = RunSaveMapper.ToRunState(save.Run, data);
+                ExpeditionState expedition = RunSaveMapper.ToExpeditionState(record, data, run);
+                expedition.Result = ExpeditionResult.Retreated;
+                expedition.Phase = ExpeditionPhase.Finished;
+                RunRules.Settle(data, run, expedition);
+                save.Run = RunSaveMapper.ToRecord(run);
+                save.Expedition = null;
+            }
+
+            save.SchemaVersion = 27;
+        }
+
+        /// <summary>The floor of a node on the mine's map of version 26 (30 floors of 2..4 nodes; the boss counts as the last floor); 0 before the first.</summary>
+        internal static int OldMineFloor(ulong seed, int nodeId)
+        {
+            const int OldFloors = 30, OldMinWidth = 2, OldMaxWidth = 4;
+            if (nodeId < 0)
+            {
+                return 0;
+            }
+
+            var rng = new Pcg32(SeedDeriver.Derive(seed, "map", 0), RngStream.Map);
+            int first = 0;
+            for (int floor = 1; floor <= OldFloors; floor++)
+            {
+                first += rng.NextInt(OldMinWidth, OldMaxWidth);
+                if (nodeId < first)
+                {
+                    return floor;
+                }
+            }
+
+            return OldFloors;
+        }
+
+        /// <summary>An old floor of 30 at the same share of the way on a map of <paramref name="floors"/>, rounded half up; 0 stays 0.</summary>
+        internal static int NewMineFloor(int oldFloor, int floors)
+        {
+            const int OldFloors = 30;
+            return oldFloor <= 0 ? 0 : 1 + (2 * (oldFloor - 1) * (floors - 1) + (OldFloors - 1)) / (2 * (OldFloors - 1));
         }
 
         /// <summary>

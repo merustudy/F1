@@ -35,11 +35,11 @@
     },
     {
       "Key": "CoinsPerEnemy",
-      "Value": 1
+      "Value": 2
     },
     {
       "Key": "CoinsPerFloor",
-      "Value": 1
+      "Value": 2
     },
     {
       "Key": "CoinsPerGold",
@@ -95,11 +95,15 @@
     },
     {
       "Key": "DogGraceMs",
-      "Value": 3000
+      "Value": 0
     },
     {
       "Key": "DropCount",
-      "Value": 1
+      "Value": 2
+    },
+    {
+      "Key": "DropOwnedPercent",
+      "Value": 50
     },
     {
       "Key": "DropTierKeepPercent",
@@ -115,11 +119,11 @@
     },
     {
       "Key": "EliteDropCount",
-      "Value": 2
+      "Value": 3
     },
     {
       "Key": "ExpClear",
-      "Value": 5
+      "Value": 16
     },
     {
       "Key": "ExpPerFloor",
@@ -135,7 +139,7 @@
     },
     {
       "Key": "FatigueBattleEntry",
-      "Value": 2
+      "Value": 3
     },
     {
       "Key": "FatigueBreakdown",
@@ -191,7 +195,7 @@
     },
     {
       "Key": "GoldPerFloor",
-      "Value": 2
+      "Value": 3
     },
     {
       "Key": "HastePercentPerStack",

@@ -39,7 +39,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 26;
+        public const int CurrentSchemaVersion = 27;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;

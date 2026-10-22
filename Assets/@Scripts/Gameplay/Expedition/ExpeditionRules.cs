@@ -241,6 +241,7 @@ namespace F1.Gameplay
         public static void CompleteBattle(StaticData data, ExpeditionState state, BattleEngine battle)
         {
             RequirePhase(state, ExpeditionPhase.InBattle);
+            state.LastForged = new List<UniqueForged>();
             if (battle.Result == BattleResult.Ongoing)
             {
                 throw new InvalidOperationException("The battle has not ended.");
@@ -302,6 +303,9 @@ namespace F1.Gameplay
                 return;
             }
 
+            // Slice D stage 50 (Docs/Design/02_Combat_System.md §4 "유니크의 조합"): the recipes' pieces the battle was fought with side by side
+            // become their uniques, before the loot drops (a catalyst used up is no board item to copy any more).
+            state.LastForged = ForgeRules.ForgeAfterBattle(data, state);
             state.Loot = DropLoot(data, state, node);
             state.Phase = state.Loot.Count > 0 ? ExpeditionPhase.PickingLoot : ExpeditionPhase.ChoosingNode;
         }
@@ -316,7 +320,8 @@ namespace F1.Gameplay
         /// each item above Common keeps that tier with the chance <c>DropTierKeepPercent</c>, else it drops a tier lower (<see cref="DropTier"/>).
         /// An elite's loot holds a bag with the
         /// chance <c>EliteBagPercent</c> (Slice B stage 19): its last drop is a bag drawn by loot weight instead. The boss drops nothing: the
-        /// expedition ends there. Nothing for a node that is not fought.
+        /// expedition ends there. Nothing for a node that is not fought. Slice D stage 49: a drop is first, with <c>DropOwnedPercent</c>, the same as an
+        /// item on a living member's board (<see cref="OwnedDropCandidates"/>, the "loot-owned" stream).
         /// </summary>
         public static List<ItemOffer> DropLoot(StaticData data, ExpeditionState state, MapNode node)
         {
@@ -346,8 +351,18 @@ namespace F1.Gameplay
             // else one the enemies carried; a general one when nothing carried is left, a carried one when no item has a drop weight
             // (then the stream is read as before). The same general item may drop twice.
             bool generals = HasGeneralDrops(data);
+            // Stage 49 (Docs/Design/03_Dungeon_Structure.md §5): first, with DropOwnedPercent, the same as an item on a living member's board.
+            // Its own stream, so that it never changes which general or carried item the others draw.
+            List<string> owned = OwnedDropCandidates(state);
+            var ownedRng = new Pcg32(SeedDeriver.Derive(state.Seed, "loot-owned", node.Id), RngStream.Loot);
             while (drops.Count < count && (carried.Count > 0 || generals))
             {
+                if (data.Balance.DropOwnedPercent > 0 && owned.Count > 0 && ownedRng.NextInt(100) < data.Balance.DropOwnedPercent)
+                {
+                    drops.Add(new ItemOffer(OfferKind.Item, owned[ownedRng.NextInt(owned.Count)], DropTier(data, tier, tierRng)));
+                    continue;
+                }
+
                 bool general = generals && (carried.Count == 0 || rng.NextInt(100) < dungeon.GeneralDropChancePercent);
                 if (general)
                 {
@@ -392,6 +407,34 @@ namespace F1.Gameplay
             }
 
             return rng.NextInt(100) < data.Balance.DropTierKeepPercent ? tier : tier - 1;
+        }
+
+        /// <summary>
+        /// The items a drop may copy (Slice D stage 49, Docs/Design/03_Dungeon_Structure.md §5): every item lying on a living member's board, once for each
+        /// that lies there (member by member, the board's own order), that has a price, is not unique and has a shop or a drop weight — a base weapon
+        /// too (a dropped one at its tier merges into it). Enemy-only items have no weight and the uniques none either.
+        /// </summary>
+        public static List<string> OwnedDropCandidates(ExpeditionState state)
+        {
+            var ids = new List<string>();
+            foreach (ExpeditionMember member in state.Members)
+            {
+                if (!member.Alive)
+                {
+                    continue;
+                }
+
+                foreach (BoardItem placed in member.Board.Items)
+                {
+                    ItemData item = placed.Item.Item;
+                    if (item.Price > 0 && !item.Unique && (item.ShopWeight > 0 || item.DropWeight > 0))
+                    {
+                        ids.Add(item.Id);
+                    }
+                }
+            }
+
+            return ids;
         }
 
         /// <summary>A bag drawn by loot weight, or null when no bag drops.</summary>

@@ -89,6 +89,8 @@ namespace F1.Tests
                 { "EliteBagPercent", 0 },
                 // Drops keep the loot's tier (the rule before 2026-10-19), so the tests' drops stay as they were.
                 { "DropTierKeepPercent", 100 },
+                // Stage 49: no drop copies a board's item (the rule before it), so the tests' drops stay as they were.
+                { "DropOwnedPercent", 0 },
                 { "CampHealPercent", 30 },
                 { "CampFatigueRelief", 20 },
                 { "Tier1Percent", 200 },

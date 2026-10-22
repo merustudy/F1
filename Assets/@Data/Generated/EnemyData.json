@@ -91,10 +91,19 @@
       "Dodge": 10,
       "DeepItems": [
         {
-          "Floor": 11,
+          "Floor": 4,
           "Items": [
             {
               "ItemId": "bristle_hide",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 9,
+          "Items": [
+            {
+              "ItemId": "rat_bite",
               "PowerPercent": 100
             }
           ]
@@ -122,7 +131,7 @@
       "Dodge": 0,
       "DeepItems": [
         {
-          "Floor": 11,
+          "Floor": 4,
           "Items": [
             {
               "ItemId": "crude_bow",
@@ -131,10 +140,19 @@
           ]
         },
         {
-          "Floor": 21,
+          "Floor": 9,
           "Items": [
             {
               "ItemId": "ash_pouch",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 14,
+          "Items": [
+            {
+              "ItemId": "frost_flask",
               "PowerPercent": 100
             }
           ]
@@ -166,10 +184,19 @@
       "Dodge": 0,
       "DeepItems": [
         {
-          "Floor": 21,
+          "Floor": 9,
           "Items": [
             {
               "ItemId": "hex_bone",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 14,
+          "Items": [
+            {
+              "ItemId": "frost_flask",
               "PowerPercent": 100
             }
           ]
@@ -197,7 +224,7 @@
       "Dodge": 0,
       "DeepItems": [
         {
-          "Floor": 11,
+          "Floor": 4,
           "Items": [
             {
               "ItemId": "rusty_blade",
@@ -206,10 +233,19 @@
           ]
         },
         {
-          "Floor": 21,
+          "Floor": 9,
           "Items": [
             {
               "ItemId": "goblin_sawblade",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 14,
+          "Items": [
+            {
+              "ItemId": "throwing_knives",
               "PowerPercent": 100
             }
           ]
@@ -241,7 +277,7 @@
       "Dodge": 0,
       "DeepItems": [
         {
-          "Floor": 11,
+          "Floor": 4,
           "Items": [
             {
               "ItemId": "ward_charm",
@@ -250,10 +286,19 @@
           ]
         },
         {
-          "Floor": 21,
+          "Floor": 9,
           "Items": [
             {
               "ItemId": "lantern_staff",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 14,
+          "Items": [
+            {
+              "ItemId": "censer",
               "PowerPercent": 100
             }
           ]
@@ -285,10 +330,19 @@
       "Dodge": 0,
       "DeepItems": [
         {
-          "Floor": 21,
+          "Floor": 9,
           "Items": [
             {
               "ItemId": "rusty_blade",
+              "PowerPercent": 100
+            }
+          ]
+        },
+        {
+          "Floor": 14,
+          "Items": [
+            {
+              "ItemId": "war_horn",
               "PowerPercent": 100
             }
           ]

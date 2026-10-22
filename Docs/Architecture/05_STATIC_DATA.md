@@ -79,6 +79,7 @@ goblin_shaman,고블린 주술사,Goblin Shaman,5,60,lantern_staff:10+mending_ch
   규칙은 `Weapon`인지만 본다(무기 패시브는 무기 장비의 피해에만). 전투 화면은 분류로 주인을 움직인다(`12_UI.md` "연출").
   비워 두면 그 유닛이나 던전, 아이템은 그림이 없다. Data는 이 값을 글자 그대로 나른다. Address의 형식과 파일이 맞는지는 Editor Setup이 검사한다(`13_ART_PIPELINE.md`).
 - 48단계(2026-10-22, Design/04 §3): `FatigueStateData.csv`의 선택 열 여섯 `HitPercent`·`DodgePercent`·`CritPercent`(%p, −100~100), `DamagePercent`·`FatigueGainPercent`(%, −100~200), `AllyFatigueAtStart`(±N, −100~100) — 열이 없거나 비면 0. 상태는 아홉 수 가운데 하나는 바꿔야 한다. `BalanceData`의 `AfflictionRecovery`(정신 붕괴가 풀리는 피로, `FatigueBreakdown` 아래)와 `OverworkCooldownPercent`(과로의 쿨다운 %, 0~100).
+- 49단계(2026-10-22, Design/26·03 §5): `BalanceData`의 `DropOwnedPercent`(같은 아이템 드랍의 %, 0~100). 데이터의 값만 바뀐 것(광산 19층과 층의 열, 무리 범위, `DeepItems`, 드랍 2·3, 코인·금·경험치, `DogGraceMs` 0, 진입 피로 3)은 열을 바꾸지 않는다.
 - `BalanceData`의 `SellPercent`(Round 74, 2026-10-17)는 상점이 파티의 아이템을 사 주는 값의 비율(살 값의 %)이다. `CoinsPerGold`(2026-10-17)는 클리어한 원정의 지역 코인(남은 것 + 아이템의 파는 값)이 금 1이 되는 코인 수다.
 - `ItemData`의 선택 열 `DropWeight`(2026-10-17. 헤더가 없거나 비면 0)는 이긴 전투가 적의 아이템 대신 떨어뜨리는 **일반 아이템**의 가중치다. 유니크는 0이어야 한다. `DungeonData`의 선택 열 `GeneralDropChancePercent`(0..100, 기본 0)는 그 던전의 드랍 자리마다 일반 아이템이 될 확률이다. 직업의 기본 무기는 `ShopWeight`·`Price`가 있어도 그 직업이 파티에 있을 때만 상점에 선다(규칙은 `ExpeditionRules`). `ItemData`의 `Price`는 상점에서 살 값이자 팔 값의 밑이고, `ShopWeight`가 0이면 값이 있어도 상점에 나오지 않는다(적의 아이템).
 - `DungeonData`의 `EnemyHpPerFloorPercent`는 1층보다 한 층 깊어질 때마다 적의 최대 HP에 **곱하는** 비율이다(복리, 2026-10-17. 0이면 자람 없음. `08_GAMEPLAY_DOMAIN.md` "깊은 층의 적"). `EnemyPowerPerFloorPercent`는 층마다 더하는 아이템 세기 %다.

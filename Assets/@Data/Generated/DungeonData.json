@@ -2,7 +2,7 @@
   "SchemaVersion": 1,
   "Items": [
     {
-      "ShopFloor": 4,
+      "ShopFloor": 3,
       "IsFinal": false,
       "UnlockDungeonId": null,
       "UnlockClears": 0,
@@ -14,7 +14,7 @@
         "ko-KR": "버려진 광산"
       },
       "AffinityId": "swift",
-      "Floors": 30,
+      "Floors": 19,
       "MapMinWidth": 2,
       "MapMaxWidth": 4,
       "DurationDays": 5,
@@ -23,19 +23,19 @@
         "healing_potion"
       ],
       "Background": "background/dungeon/abandoned-mine",
-      "EliteMinFloor": 11,
+      "EliteMinFloor": 7,
       "EliteChancePercent": 15,
-      "CampMinFloor": 11,
-      "CampChancePercent": 15,
-      "CampFloor": 30,
-      "EnemyHpPerFloorPercent": 5,
+      "CampMinFloor": 7,
+      "CampChancePercent": 10,
+      "CampFloor": 19,
+      "EnemyHpPerFloorPercent": 8,
       "EnemyPowerPerFloorPercent": 0,
-      "Tier1Floor": 9,
-      "Tier2Floor": 20,
+      "Tier1Floor": 6,
+      "Tier2Floor": 13,
       "Tier3Floor": 0,
-      "ShopMinFloor": 7,
-      "ShopChancePercent": 15,
-      "GeneralDropChancePercent": 30
+      "ShopMinFloor": 5,
+      "ShopChancePercent": 22,
+      "GeneralDropChancePercent": 100
     },
     {
       "ShopFloor": 0,
