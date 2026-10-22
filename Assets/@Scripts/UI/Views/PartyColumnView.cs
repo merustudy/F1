@@ -133,7 +133,7 @@ namespace F1.UI
             BalanceData balance = data.Balance;
             FatigueStateData state = member.StateId == null ? null : data.FatigueStates.Get(member.StateId);
             UI.FatiguePips.Show(_fatiguePips, member.Fatigue, balance.MaxFatigue, balance.FatigueBreakdown);
-            _job.text = UiText.JobLine(member.JobId, state);
+            _job.text = UiText.JobLine(member.JobId, state, FatigueRules.IsOverworked(balance, state, member.Fatigue));
             _state.interactable = state != null;
 
             _board.SetActive(true);

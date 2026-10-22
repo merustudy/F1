@@ -186,6 +186,7 @@ namespace F1.UI
             public const string Rest = "Map.Rest";
             public const string RestHeal = "Map.RestHeal";
             public const string RestFatigue = "Map.RestFatigue";
+            public const string RestCure = "Map.RestCure";
             public const string Mend = "Map.Mend";
             public const string MendBody = "Map.MendBody";
             public const string MendTitle = "Map.MendTitle";
@@ -237,6 +238,7 @@ namespace F1.UI
             public const string MergeInto = "Board.MergeInto";
             public const string FatigueTotal = "Board.FatigueTotal";
             public const string JobState = "Board.JobState";
+            public const string Overwork = "Board.Overwork";
             public const string StateDetail = "Board.StateDetail";
 
             /// <summary>The words over a held thing's ghost (Slice B stage 19): the item it lies over goes to the inventory; a bag is laid.</summary>
@@ -505,6 +507,8 @@ namespace F1.UI
             public const string FatigueAllyDog = "Log.FatigueAllyDog";
             public const string FatigueAllyDeath = "Log.FatigueAllyDeath";
             public const string FatigueVirtue = "Log.FatigueVirtue";
+            public const string FatigueVirtueEnd = "Log.FatigueVirtueEnd";
+            public const string FatigueByState = "Log.FatigueByState";
         }
 
         public static class Death

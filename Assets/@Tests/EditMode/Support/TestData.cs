@@ -42,6 +42,9 @@ namespace F1.Tests
                 { "FatigueOnKill", 0 },
                 { "VirtueChancePercent", 25 },
                 { "VirtueFatigue", 40 },
+                // Stage 48, at the shipped recovery (a mental breakdown ends at 0) and no overwork, so the cooldowns of the older tests stay as they were; the overwork tests set 25.
+                { "AfflictionRecovery", 0 },
+                { "OverworkCooldownPercent", 0 },
                 { "RestDays", 1 },
                 { "DogGraceMs", 3000 },
                 { "DogGraceBreakHits", 3 },

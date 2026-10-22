@@ -6,7 +6,8 @@ namespace F1.Gameplay
 {
     /// <summary>
     /// Fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3): it starts at 0, builds up on an expedition and comes
-    /// down with rest, between 0 and <c>BalanceData.MaxFatigue</c>. When a battle starts, every living member
+    /// down with rest, between 0 and <c>BalanceData.MaxFatigue</c>. At the breakdown threshold a mercenary breaks down (an affliction, a "mental
+    /// breakdown" on the screens since stage 48, or a virtue); at the maximum it is exhausted. When a battle starts, every living member
     /// pays <c>FatigueBattleEntry</c> and <c>FatigueEquipment</c> for each piece of equipment on their board that
     /// is neither a base weapon nor a unique item. Pure functions; the screens ask them too, to show the cost.
     /// </summary>
@@ -51,10 +52,30 @@ namespace F1.Gameplay
             return Math.Max(0, Math.Min(balance.MaxFatigue, fatigue + amount));
         }
 
-        /// <summary>Whether a state is an affliction that has ended: fatigue came back under the threshold (a virtue lasts until the expedition ends).</summary>
+        /// <summary>
+        /// Whether a state is an affliction that has ended: the fatigue came down to AfflictionRecovery or under (stage 48: 0 in the shipped data; before it,
+        /// under the threshold). A virtue lasts until the expedition ends.
+        /// </summary>
         public static bool AfflictionEnds(BalanceData balance, FatigueStateData state, int fatigue)
         {
-            return state != null && state.Kind == FatigueStateKind.Affliction && fatigue < balance.FatigueBreakdown;
+            return state != null && state.Kind == FatigueStateKind.Affliction && fatigue <= balance.AfflictionRecovery;
+        }
+
+        /// <summary>
+        /// Overwork (stage 48, Docs/Design/04_Lobby_100Day_Economy.md §3): an affliction at the breakdown threshold or over. The battle slows every item of
+        /// an overworked unit by OverworkCooldownPercent; the screens add the word to the state's name.
+        /// </summary>
+        public static bool IsOverworked(BalanceData balance, FatigueStateData state, int fatigue)
+        {
+            return state != null && state.Kind == FatigueStateKind.Affliction && fatigue >= balance.FatigueBreakdown;
+        }
+
+        /// <summary>
+        /// What a rest at a camp or a treatment at the inn leaves of a state (stage 48): an affliction ends whatever the fatigue, a virtue stays.
+        /// </summary>
+        public static string Cure(StaticData data, string stateId)
+        {
+            return stateId != null && data.FatigueStates.Get(stateId).Kind == FatigueStateKind.Affliction ? null : stateId;
         }
 
         /// <summary>The state id a mercenary keeps after its fatigue came down: the same, or null when its affliction ended.</summary>

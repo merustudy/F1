@@ -2,18 +2,66 @@
   "SchemaVersion": 1,
   "Items": [
     {
+      "Id": "abusive",
+      "Name": {
+        "en-US": "Abusive",
+        "ko-KR": "난폭"
+      },
+      "Kind": "Affliction",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "HitPercent": 0,
+      "DodgePercent": -10,
+      "CritPercent": 0,
+      "DamagePercent": 10,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 3,
+      "Description": {
+        "en-US": "Allies +3 fatigue each battle. Dodge -10%p. Deals 10% more damage",
+        "ko-KR": "전투마다 동료 피로 +3. 회피 -10%p. 주는 피해 +10%"
+      }
+    },
+    {
+      "Id": "courageous",
+      "Name": {
+        "en-US": "Courageous",
+        "ko-KR": "용기"
+      },
+      "Kind": "Virtue",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 0,
+      "FatigueGainPercent": -33,
+      "AllyFatigueAtStart": -3,
+      "Description": {
+        "en-US": "Gains 33% less fatigue. Allies -3 fatigue each battle",
+        "ko-KR": "오르는 피로 -33%. 전투마다 동료 피로 -3"
+      }
+    },
+    {
       "Id": "fearful",
       "Name": {
         "en-US": "Fearful",
         "ko-KR": "공포"
       },
       "Kind": "Affliction",
-      "CooldownPercent": 25,
+      "CooldownPercent": 0,
       "HealTakenPercent": 0,
       "DeathChanceDelta": 0,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": -25,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
       "Description": {
-        "en-US": "Items cycle 25% slower",
-        "ko-KR": "아이템이 25% 느리게 돈다"
+        "en-US": "Deals 25% less damage",
+        "ko-KR": "주는 피해 -25%"
       }
     },
     {
@@ -23,12 +71,18 @@
         "ko-KR": "집중"
       },
       "Kind": "Virtue",
-      "CooldownPercent": -20,
+      "CooldownPercent": 0,
       "HealTakenPercent": 0,
       "DeathChanceDelta": 0,
+      "HitPercent": 10,
+      "DodgePercent": 0,
+      "CritPercent": 8,
+      "DamagePercent": 0,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
       "Description": {
-        "en-US": "Items cycle 20% faster",
-        "ko-KR": "아이템이 20% 빠르게 돈다"
+        "en-US": "Hit chance +10%p. Critical chance +8%p",
+        "ko-KR": "명중 +10%p. 치명타 +8%p"
       }
     },
     {
@@ -41,9 +95,57 @@
       "CooldownPercent": 0,
       "HealTakenPercent": -50,
       "DeathChanceDelta": 0,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 0,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
       "Description": {
         "en-US": "Takes half the healing",
         "ko-KR": "받는 회복이 절반이다"
+      }
+    },
+    {
+      "Id": "irrational",
+      "Name": {
+        "en-US": "Irrational",
+        "ko-KR": "비이성"
+      },
+      "Kind": "Affliction",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "HitPercent": -15,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 0,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
+      "Description": {
+        "en-US": "Hit chance -15%p",
+        "ko-KR": "명중 -15%p"
+      }
+    },
+    {
+      "Id": "powerful",
+      "Name": {
+        "en-US": "Powerful",
+        "ko-KR": "강력"
+      },
+      "Kind": "Virtue",
+      "CooldownPercent": 0,
+      "HealTakenPercent": 0,
+      "DeathChanceDelta": 0,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 25,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
+      "Description": {
+        "en-US": "Deals 25% more damage",
+        "ko-KR": "주는 피해 +25%"
       }
     },
     {
@@ -56,6 +158,12 @@
       "CooldownPercent": 0,
       "HealTakenPercent": 0,
       "DeathChanceDelta": 25,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 0,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
       "Description": {
         "en-US": "Death chance at death's door +25%p",
         "ko-KR": "빈사의 사망 확률 +25%p"
@@ -71,6 +179,12 @@
       "CooldownPercent": 0,
       "HealTakenPercent": 50,
       "DeathChanceDelta": -15,
+      "HitPercent": 0,
+      "DodgePercent": 0,
+      "CritPercent": 0,
+      "DamagePercent": 0,
+      "FatigueGainPercent": 0,
+      "AllyFatigueAtStart": 0,
       "Description": {
         "en-US": "Takes 50% more healing. Death chance at death's door -15%p",
         "ko-KR": "받는 회복 +50%. 빈사의 사망 확률 -15%p"

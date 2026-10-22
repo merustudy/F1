@@ -285,7 +285,7 @@ namespace F1.UI
                     FigureOf(mercenary.JobId),
                     UiText.Mercenary(slot.MercenaryId),
                     UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
-                    UiText.JobLine(mercenary.JobId, affliction),
+                    UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
                     mercenary.Fatigue,
                     balance.MaxFatigue,
                     balance.FatigueBreakdown,
@@ -320,7 +320,7 @@ namespace F1.UI
                 line.Show(
                     FigureOf(mercenary.JobId),
                     UiText.Mercenary(mercenary.Id),
-                    UiText.JobLine(mercenary.JobId, affliction),
+                    UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
                     affliction != null,
                     UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
                     UiText.TraitChips(data, mercenary.JobId, mercenary.Traits),

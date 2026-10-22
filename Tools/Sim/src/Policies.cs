@@ -227,7 +227,7 @@ namespace F1.Sim
         const int RestBelowHpPercent = 50;
 
         /// <summary>
-        /// At a camp: rests when someone is badly hurt or at or over the fatigue threshold (or without player input); otherwise
+        /// At a camp: rests when someone is badly hurt, at or over the fatigue threshold or (stage 48) in an affliction (or without player input); otherwise
         /// mends (a tier up) the first item below Tier3 that works where its owner stands, from the front member back. Returns
         /// true for mending.
         /// </summary>
@@ -240,7 +240,9 @@ namespace F1.Sim
             bool hurt = false;
             foreach (ExpeditionMember member in state.Members)
             {
-                hurt |= member.Alive && (member.Hp * 100 < member.MaxHp * RestBelowHpPercent || member.Fatigue >= data.Balance.FatigueBreakdown);
+                // Stage 48: the rest ends an affliction whatever the fatigue, so a member in one makes the party rest too.
+                hurt |= member.Alive && (member.Hp * 100 < member.MaxHp * RestBelowHpPercent || member.Fatigue >= data.Balance.FatigueBreakdown
+                    || (member.StateId != null && data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction));
             }
 
             // The forge first (stage 23): a recipe ready on a board makes the unique item, at the price of the rest and the mend.

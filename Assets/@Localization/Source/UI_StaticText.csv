@@ -52,7 +52,7 @@ Lobby.FinalStand,"The gate's plate past the last day (Round 72).",최종 결전,
 Lobby.FinalStandSub,"The second line of the gate's plate past the last day. {0} = the final dungeon.",{0}의 보스와 싸운다,Fight the boss of {0}
 Lobby.InnClosed,"The second line of the inn's plate past the last day: no day is left to rest.",쉴 날이 없다,No day left to rest
 Lobby.BarracksHint,"The bubble over the barracks. {0} = mercenaries in the roster, {1} = the roster limit, {2} = party members.",로스터 {0}/{1} · 파티 {2}명,Roster {0}/{1} · party of {2}
-Lobby.InnHint,"The bubble over the inn. {0} = the breakdown threshold, {1} = mercenaries at or over it, {2} = the treatment's price.",피로 {0} 이상 {1}명 · 치료 금 {2},{1} at fatigue {0} or more · treatment: gold {2}
+Lobby.InnHint,"The bubble over the inn. {0} = the breakdown threshold, {1} = mercenaries at or over it or in a mental breakdown (stage 48: the treatment ends one), {2} = the treatment's price.",피로 {0} 이상·정신 붕괴 {1}명 · 치료 금 {2},{1} at fatigue {0}+ or broken · treatment: gold {2}
 Lobby.CoachHint,"The bubble over the stagecoach. {0} = candidates, {1} = the hire price.",후보 {0}명 · 고용 금 {1},{0} candidates · hire: gold {1}
 Lobby.DungeonLocked,"A locked dungeon in the gate's bubble. {0} = its name.",{0} 잠김,{0} locked
 Lobby.BarracksTitle,Title of the barracks window.,막사 — 로스터,Barracks — Roster
@@ -66,7 +66,7 @@ Lobby.Hire,"The button that hires a candidate. {0} = the price.",고용 금 {0},
 Lobby.NoCandidates,Shown in the stagecoach window when nobody is waiting.,후보가 없습니다,Nobody is waiting
 Lobby.CoachNote,Under the candidates.,귀환 정산마다 새 후보가 온다,New candidates come with every return
 Lobby.Treat,"The button that treats a mercenary at the inn. {0} = the price, {1} = how much fatigue it takes off.",치료 금 {0} · 피로 -{1},Treat · {0} gold · -{1}
-Lobby.InnNote,Under the inn's list: the treatment takes no day.,치료는 날이 가지 않는다,The treatment takes no day
+Lobby.InnNote,Under the inn's list: the treatment takes no day and (stage 48) ends a mental breakdown.,치료는 날이 가지 않고 정신 붕괴를 푼다,The treatment takes no day and ends a breakdown
 Lobby.Level,"A mercenary's level (stage 27), on the strip's chips, the barracks' lines, the candidates and the expedition cards. {0} = the level.",Lv {0},Lv {0}
 Lobby.Exp,"The experience toward the next level, on a barracks line. {0} = the experience, {1} = what the next level takes.",경험치 {0}/{1},XP {0}/{1}
 Lobby.ExpMax,"On a barracks line at the last level.",경험치 최대,XP max
@@ -146,6 +146,7 @@ Map.CampChoose,In the camp window under its title.,하나를 고르면 다음 �
 Map.Rest,The camp's rest: the title of its card.,쉬기,Rest
 Map.RestHeal,On the rest card. {0} = percent of max HP each living mercenary heals.,HP {0}% 회복,Heal {0}% HP
 Map.RestFatigue,On the rest card. {0} = fatigue taken off.,피로도 -{0},Fatigue -{0}
+Map.RestCure,"On the rest card (stage 48): the rest ends every mental breakdown in the party. Short: the card narrows to a third beside the forge.",정신 붕괴 해제,Breakdowns end
 Map.Mend,The camp's upkeep: the title of its card and of its step.,정비,Mend
 Map.MendBody,On the mend card.,보드의 아이템 하나를 한 단계 위로,One item on a board goes a tier up
 Map.MendTitle,Title of the camp window while an item is chosen to mend. {0} = floor.,{0}층 · 야영지 · 정비,Floor {0} · Camp · Mend
@@ -192,6 +193,7 @@ Board.ToInventory,Sends the selected board item to the inventory.,인벤토리�
 Board.FatigueTag,On the violet tag of a board item that costs fatigue when a battle starts. {0} = the cost.,+{0},+{0}
 Board.FatigueTotal,On the violet tag at the right end of a board's head: the fatigue the board's equipment costs when a battle starts. {0} = the total.,피로 +{0},Fatigue +{0}
 Board.JobState,"On the state line under a party member's feet while the member is in a state of the breakdown. {0} = job. {1} = the state's name (an affliction or a virtue).",{0} · {1},{0} · {1}
+Board.Overwork,Stage 48: the word after the state of an overworked mercenary (a mental breakdown at the breakdown threshold or over: its items cycle slower).,과로,Overworked
 Board.StateDetail,"On the detail line when the state's name under a member's feet was clicked. {0} = the state's name. {1} = what it does.",{0}: {1},{0}: {1}
 Board.GhostToInventory,Over a held item's ghost where it would push one item out (Slice B stage 19). {0} = that item's name.,{0} → 인벤토리,{0} → inventory
 Board.GhostBag,Over a held bag's ghost where it can be laid (Slice B stage 19).,가방 놓기,Lay the bag
@@ -342,19 +344,21 @@ Log.PotionUsed,{0} = potion. {1} = target.,포션 {0} → {1},Potion {0} → {1}
 Log.RetreatFailed,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 실패,Retreat {0}% · rolled {1} · failed
 Log.RetreatSucceeded,{0} = success chance. {1} = roll.,후퇴 시도 {0}% · 굴림 {1} · 성공,Retreat {0}% · rolled {1} · succeeded
 Log.Storm,{0} = damage.,폭풍이 모두에게 피해 {0},The storm hits everyone for {0}
-Log.BrokeDown,"{0} = unit. {1} = the affliction. {2} = roll 0..99. {3} = virtue chance (a roll below it is a virtue).",{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 고통 {1},{0}: breakdown (virtue {3}%) · rolled {2} · affliction: {1}
+Log.BrokeDown,{0} = unit. {1} = the affliction (a mental breakdown on the screens since stage 48). {2} = roll 0..99. {3} = virtue chance (a roll below it is a virtue).,{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 정신 붕괴 {1},{0}: breakdown (virtue {3}%) · rolled {2} · broke: {1}
 Log.Virtue,"{0} = unit. {1} = the virtue. {2} = roll. {3} = virtue chance.",{0}: 붕괴 판정 (각성 {3}%) · 굴림 {2} · 각성 {1},{0}: breakdown (virtue {3}%) · rolled {2} · virtue: {1}
-Log.Collapsed,"{0} = unit. Its fatigue reached the maximum: death's door, or death if it was there already (the death is logged after).",{0}: 피로가 가득 차 쓰러짐,{0} collapsed from fatigue
-Log.FatigueStateEnded,"{0} = unit. {1} = the affliction that ended because the fatigue came back under the threshold.",{0}: {1}에서 벗어남,{0} is free of {1}
+Log.Collapsed,"{0} = unit. Its fatigue reached the maximum (the exhaustion, stage 48; it was the collapse): death's door, or death if it was there already (the death is logged after).",{0}: 피로가 가득 차 탈진,{0} is exhausted
+Log.FatigueStateEnded,"{0} = unit. {1} = the state that ended: a mental breakdown whose fatigue came down to the recovery (0 since stage 48), or a virtue spent at the maximum.",{0}: {1}에서 벗어남,{0} is free of {1}
 Log.PhaseChanged,"A boss entered a phase (stage 28): its items were replaced. {0} = unit, {1} = the phase number counting the start as 1, {2} = the HP percent it starts at.",{0}: 페이즈 {1} (HP {2}%) — 아이템이 바뀐다,{0}: phase {1} (HP {2}%): its items change
 Log.FatigueDog,"Fatigue from reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 빈사로 피로 +{1} → {2},{0}: death's door · fatigue +{1} → {2}
 Log.FatigueCritTaken,"Fatigue from taking a critical hit (stage 22). {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 치명타를 맞아 피로 +{1} → {2},{0}: took a critical hit · fatigue +{1} → {2}
 Log.FatigueAllyDog,"Fatigue from an ally reaching death's door. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 빈사로 피로 +{1} → {2},{0}: an ally at death's door · fatigue +{1} → {2}
 Log.FatigueAllyDeath,"Fatigue from an ally's death. {0} = unit. {1} = amount. {2} = fatigue after.",{0}: 동료의 죽음으로 피로 +{1} → {2},{0}: an ally died · fatigue +{1} → {2}
 Log.FatigueVirtue,"A virtue brought the fatigue down. {0} = unit. {1} = the change (negative). {2} = fatigue after.",{0}: 각성으로 피로 {1} → {2},{0}: the virtue · fatigue {1} → {2}
+Log.FatigueVirtueEnd,Stage 48: a virtue reached the maximum fatigue and ended there instead of the exhaustion. {0} = unit. {1} = the change (negative). {2} = fatigue after.,{0}: 피로가 가득 차 각성이 다함 · 피로 {1} → {2},{0}: the virtue is spent at full fatigue · fatigue {1} → {2}
+Log.FatigueByState,"Stage 48: an ally's state moved a unit's fatigue as the battle started (abusive tires, courageous eases). {0} = unit. {1} = the ally. {2} = the ally's state. {3} = the change, signed. {4} = fatigue after.",{0}: {1}의 {2} · 피로 {3} → {4},{0}: {1}'s {2} · fatigue {3} → {4}
 Death.AfterGrace,Why a mercenary died. {0} = name. {1} = time of reaching 0 HP. {2} = time of death. {3} = source of the last hit. {4} = death chance. {5} = roll.,"{0} — {1}초에 빈사 → 유예가 끝난 뒤 {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → died at {2}s after the grace ran out. Last hit: {3} (death chance {4}%, rolled {5})"
 Death.GraceBroken,Why a mercenary died. {0}-{5} as Death.AfterGrace. {6} = hits that broke the grace.,"{0} — {1}초에 빈사 → {6}번 맞아 유예가 깨짐 → {2}초에 사망. 마지막 피격: {3} (사망 확률 {4}%, 굴림 {5})","{0} — at death's door at {1}s → grace broken by {6} hits → died at {2}s. Last hit: {3} (death chance {4}%, rolled {5})"
-Death.Collapsed,Why a mercenary died when the fatigue collapse killed it at death's door: no last hit and no death roll (it may never have been hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle there). {2} = time of death.,{0} — {1}초에 빈사 → 피로가 가득 차 쓰러짐 → {2}초에 사망,{0} — at death's door at {1}s → collapsed from fatigue → died at {2}s
+Death.Collapsed,Why a mercenary died when the exhaustion (stage 48; it was the collapse) killed it at death's door: no last hit and no death roll (it may never have been hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle there). {2} = time of death.,{0} — {1}초에 빈사 → 피로가 가득 차 탈진 → {2}초에 사망,{0} — at death's door at {1}s → exhausted → died at {2}s
 Loot.Title,"On the band over the stage when the app comes back to the loot of a won battle (round 47; the loot screen's header before it).",전리품,Loot
 Loot.Selected,Over the picked drop.,넣을 칸을 누르세요,Click a slot
 Loot.ToInventory,Takes the picked drop (or the shop's picked offer) straight into the inventory.,인벤토리에 넣기,Take to inventory
@@ -393,7 +397,7 @@ Fx.Crit,"The small word over a critical hit's number (stage 22, Round 60 mock A 
 Fx.Miss,"Rises over a unit an attack missed (Slice D stage 33, Round 81), grey, where the damage would have stood.",빗나감,Miss
 Fx.Phase,"Rises over a boss that entered a phase (stage 28). {0} = the phase number.",페이즈 {0},Phase {0}
 Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
-Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its collapse (it went to death's door, or died there). The unit's name is written under it.",피로로 쓰러졌다,Collapsed from fatigue
+Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its exhaustion (stage 48; it was the collapse: it went to death's door, or died there). The unit's name is written under it.",탈진했다,Exhausted
 Stat.Str,"A stat's name (Slice D stage 32, Round 81; 2026-10-20 스탯 개정): the barracks' lines, the candidates, the party popup and the item cards. Strength: the power of physical weapons.",힘,STR
 Stat.Dex,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Dexterity: the speed, hit and critical chance of physical equipment, and dodge.",민첩,DEX
 Stat.Con,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Constitution: the maximum HP.",체력,CON
@@ -412,7 +416,7 @@ Trait.SubFrom,"An acquired trait card's second line (Slice D stage 38): what kin
 Trait.FromClear,What left an acquired trait (Slice D stage 38): a cleared expedition.,클리어한 원정에서,from a cleared expedition
 Trait.FromRetreat,What left an acquired trait (Slice D stage 38): a retreat.,후퇴한 원정에서,from a retreat
 Trait.FromDeathsDoor,What left an acquired trait (Slice D stage 38): coming back alive from death's door.,빈사에서 살아 돌아와,back from death's door
-Trait.FromAffliction,What left an acquired trait (Slice D stage 38): coming home in an affliction.,고통인 채 돌아와,home in an affliction
+Trait.FromAffliction,What left an acquired trait (Slice D stage 38): coming home in a mental breakdown (an affliction).,정신 붕괴인 채 돌아와,home in a breakdown
 Trait.FromVirtue,What left an acquired trait (Slice D stage 38): a virtue on the expedition.,각성한 원정에서,from a virtue
 Trait.More,"The pill at the end of a trait line that does not hold them all (Slice D stage 37, Round 84 판정 3). {0} = how many more.",+{0},+{0}
 Trait.MoreTitle,"The title of the card the more pill opens (Slice D stage 37): the traits the line could not hold, named on the next line. {0} = how many.",그 밖의 특성 {0},{0} more traits

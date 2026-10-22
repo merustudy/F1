@@ -464,7 +464,8 @@ namespace F1.UI
                 int tired = 0;
                 foreach (MercenaryState mercenary in run.Roster)
                 {
-                    tired += mercenary.Fatigue >= balance.FatigueBreakdown ? 1 : 0;
+                    // Stage 48: the treatment ends a mental breakdown too, so one counts whatever the fatigue.
+                    tired += mercenary.Fatigue >= balance.FatigueBreakdown || mercenary.AfflictionId != null ? 1 : 0;
                 }
 
                 detail = UiStrings.Get(UiKeys.Lobby.InnHint, balance.FatigueBreakdown, tired, balance.TreatmentPrice);
@@ -502,7 +503,7 @@ namespace F1.UI
                     UiText.Mercenary(mercenary.Id),
                     UiText.ChipLevel(mercenary.Level, Managers.Run.CanLevelUp(mercenary.Id)),
                     row == 0 ? null : UiStrings.Get(UiText.RowKey(row)),
-                    UiText.JobLine(mercenary.JobId, affliction),
+                    UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
                     affliction != null,
                     mercenary.Fatigue,
                     balance.MaxFatigue,
@@ -611,7 +612,7 @@ namespace F1.UI
                 string words = UiStrings.Get(UiKeys.Lobby.Fatigue, mercenary.Fatigue, balance.MaxFatigue);
                 patient.Show(
                     UiText.Mercenary(mercenary.Id),
-                    UiText.JobLine(mercenary.JobId, affliction),
+                    UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
                     affliction != null,
                     mercenary.Fatigue,
                     balance.MaxFatigue,

@@ -231,7 +231,7 @@ namespace F1.Tests
             yield return Case("MemberFatigueNegative", e => e.Members[0].Fatigue = -1);
             yield return Case("MemberFatigueAboveMaximum", e => e.Members[0].Fatigue = 201);
             yield return Case("MemberStateUnknown", e => e.Members[0].State = "sleepy");
-            yield return Case("MemberAfflictedUnderTheBreakdown", e => { e.Members[0].State = "fearful"; e.Members[0].Fatigue = 50; });
+            yield return Case("MemberAfflictedAtTheRecovery", e => { e.Members[0].State = "fearful"; e.Members[0].Fatigue = 0; });
             yield return Case("FoundItemMarkedAsABaseWeapon", e => e.Inventory.Add(new ItemRecord { ItemId = "ballista", Base = true }));
             yield return Case("ItemOverAnotherItem", e => e.Members[0].Items.Add(Knife(1, 0)));
             yield return Case("ItemOffTheBags", e => e.Members[0].Items.Add(Knife(0, 2)));
@@ -357,7 +357,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Read_Refuses_ARosterWithAVirtue_OrAnAfflictionUnderTheBreakdown_AndKeepsAValidAffliction()
+        public void Read_Refuses_ARosterWithAVirtue_OrAnAfflictionAtTheRecovery_AndKeepsAValidAffliction()
         {
             RunSaveData save = ValidSave(out StaticData data);
             MercenaryRecord dan = save.Run.Roster.Find(m => m.Id == "dan");
@@ -371,6 +371,9 @@ namespace F1.Tests
             AssertRefused(save, data);
             dan.Affliction = "fearful";
             dan.Fatigue = 99;
+            RunSaveMapper.Read(save, data, out run, out ExpeditionState _);
+            Assert.AreEqual("fearful", run.Roster.Find(m => m.Id == "dan").AfflictionId, "Stage 48: a mental breakdown may last under the threshold.");
+            dan.Fatigue = 0;
             AssertRefused(save, data);
             dan.Affliction = "nothing";
             dan.Fatigue = 120;

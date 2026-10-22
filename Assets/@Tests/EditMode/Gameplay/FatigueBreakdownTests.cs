@@ -10,7 +10,8 @@ namespace F1.Tests
     /// Fatigue in battle (Docs/Design/04_Lobby_100Day_Economy.md §3, Slice B stage 15): what tires a mercenary and what
     /// relieves it, the breakdown at the threshold into an affliction or a virtue, what the states do, and the collapse at the
     /// maximum. The states of <see cref="TestData.FatigueStates"/>: fearful (+25% cooldown), hopeless (-50% healing taken),
-    /// reckless (+25 death chance); focused (-20% cooldown), stalwart (+50% healing, -15 death chance).
+    /// reckless (+25 death chance); focused (-20% cooldown), stalwart (+50% healing, -15 death chance). Stage 48's rules (when a mental breakdown ends,
+    /// overwork, a virtue at the maximum, the states' new numbers) are <see cref="FatigueRevisionTests"/>.
     /// </summary>
     public sealed class FatigueBreakdownTests
     {
@@ -292,22 +293,6 @@ namespace F1.Tests
             Assert.AreEqual(0, Of(door, BattleEventKind.DeathRolled).First().A, "10 - 15, not below 0.");
         }
 
-        [Test]
-        public void AnAffliction_EndsWhenTheFatigueComesBackUnderTheThreshold()
-        {
-            BalanceData balance = Balance(("FatigueOnKill", 5));
-            BattleEngine battle = new BattleEngine(TestData.Setup(
-                balance,
-                TestData.Units(TestData.Mercenary("a", 1, 1000, TestData.Attack(1000, 50)).WithFatigue(102, State("fearful"))),
-                TestData.Units(TestData.Enemy("e", 1, 10), TestData.Enemy("f", 2, 1000))));
-
-            battle.AdvanceTo(1250);
-
-            Assert.AreEqual(97, battle.Party[0].Fatigue);
-            Assert.IsNull(battle.Party[0].State);
-            Assert.AreEqual("fearful", Of(battle, BattleEventKind.FatigueStateEnded).Single().Id);
-        }
-
         // ---- The collapse ----------------------------------------------------------------------
 
         [Test]
@@ -376,25 +361,6 @@ namespace F1.Tests
         }
 
         [Test]
-        public void TheCampsRest_EndsAnAffliction_OnceTheFatigueIsUnderTheThreshold()
-        {
-            StaticDataParts parts = TestData.Parts();
-            parts.Dungeons = new List<DungeonData> { TestData.Pit(), new DungeonData("cave", TestData.Text("cave"), "swift", 2, 2, 3, 2, new List<string> { "tonic" }, campFloor: 2) };
-            var data = new StaticData(parts);
-            var party = new[] { new PartyMember("anna", "tank", 1, 110, "fearful"), new PartyMember("ben", "healer", 2, 150, "hopeless") };
-            ExpeditionState state = ExpeditionRules.Create(data, "cave", 1, party);
-            state.CurrentNodeId = state.Map.OnFloor(1)[0].Id;
-            ExpeditionRules.EnterCamp(state, ExpeditionRules.AvailableNodes(state)[0].Id);
-
-            ExpeditionRules.RestAtCamp(data, state);
-
-            Assert.AreEqual(90, state.Members[0].Fatigue);
-            Assert.IsNull(state.Members[0].StateId, "Under the threshold: the affliction ended.");
-            Assert.AreEqual(130, state.Members[1].Fatigue);
-            Assert.AreEqual("hopeless", state.Members[1].StateId, "Still over it.");
-        }
-
-        [Test]
         public void TheSettlement_KeepsAnAfflictionAtHome_DropsAVirtue_AndDaysOffEndTheAffliction()
         {
             StaticData data = TestData.Data();
@@ -420,12 +386,14 @@ namespace F1.Tests
             Assert.IsNull(ben.AfflictionId, "A virtue ends with the expedition.");
             CollectionAssert.AreEqual(new[] { "fearful", null }, report.SurvivorStates, "The report says who came home afflicted, in the survivors' order.");
 
-            // Days off bring the fatigue under the threshold: the affliction ends.
-            while (anna.Fatigue >= data.Balance.FatigueBreakdown)
+            // Days off bring the fatigue down; the affliction ends at the recovery (stage 48: 0), not under the threshold.
+            while (anna.AfflictionId != null && anna.Fatigue > 0)
             {
                 RunRules.Rest(data, run);
+                Assert.IsTrue(anna.AfflictionId == null || anna.Fatigue > data.Balance.AfflictionRecovery);
             }
 
+            Assert.AreEqual(0, anna.Fatigue);
             Assert.IsNull(anna.AfflictionId);
         }
 

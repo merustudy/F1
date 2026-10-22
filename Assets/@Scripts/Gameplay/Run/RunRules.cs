@@ -231,7 +231,7 @@ namespace F1.Gameplay
             return state.Gold >= data.Balance.TreatmentPrice ? TreatCheck.Ok : TreatCheck.NotEnoughGold;
         }
 
-        /// <summary>Treats a mercenary at the inn: the price leaves the gold and TreatmentRelief leaves its fatigue (an affliction ends under the threshold as on a day off).</summary>
+        /// <summary>Treats a mercenary at the inn: the price leaves the gold, TreatmentRelief leaves its fatigue and (stage 48) its affliction ends whatever the fatigue.</summary>
         public static void Treat(StaticData data, RunState state, string mercenaryId)
         {
             TreatCheck check = CanTreat(data, state, mercenaryId);
@@ -243,7 +243,8 @@ namespace F1.Gameplay
             MercenaryState mercenary = FindMercenary(state, mercenaryId);
             state.Gold -= data.Balance.TreatmentPrice;
             mercenary.Fatigue = FatigueRules.Add(data.Balance, mercenary.Fatigue, -BuildingRules.TreatmentRelief(data, state));
-            mercenary.AfflictionId = FatigueRules.StateAfter(data, mercenary.AfflictionId, mercenary.Fatigue);
+            // Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): the treatment ends an affliction whatever the fatigue.
+            mercenary.AfflictionId = FatigueRules.Cure(data, mercenary.AfflictionId);
         }
 
         /// <summary>

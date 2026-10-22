@@ -380,7 +380,9 @@ namespace F1.Editor.Data
     {
         public static List<FatigueStateData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("Kind", "CooldownPercent", "HealTakenPercent", "DeathChanceDelta", "Description.ko-KR", "Description.en-US"));
+            table.RequireHeaders(
+                RowMapping.Headers("Kind", "CooldownPercent", "HealTakenPercent", "DeathChanceDelta", "Description.ko-KR", "Description.en-US"),
+                new[] { "HitPercent", "DodgePercent", "CritPercent", "DamagePercent", "FatigueGainPercent", "AllyFatigueAtStart" });
             return RowMapping.MapRows(table, errors, row => new FatigueStateData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -388,7 +390,14 @@ namespace F1.Editor.Data
                 row.Int("CooldownPercent"),
                 row.Int("HealTakenPercent"),
                 row.Int("DeathChanceDelta"),
-                row.Localized("Description")));
+                row.Localized("Description"),
+                // Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): optional, 0 when the column is missing or empty.
+                row.OptionalInt("HitPercent", 0),
+                row.OptionalInt("DodgePercent", 0),
+                row.OptionalInt("CritPercent", 0),
+                row.OptionalInt("DamagePercent", 0),
+                row.OptionalInt("FatigueGainPercent", 0),
+                row.OptionalInt("AllyFatigueAtStart", 0)));
         }
     }
 

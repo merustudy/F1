@@ -209,11 +209,12 @@ namespace F1.Gameplay
 
         /// <summary>
         /// The fatigue a mercenary gains from one event, after its endurance: a gain (a positive amount) times 100 less FatiguePercentPerEndPoint for each
-        /// point above FatigueBaseline (more below it) with its traits' percent (stage 37), rounded half up, never under 0. What takes fatigue off stays as it is.
+        /// point above FatigueBaseline (more below it) with its traits' percent (stage 37) and its fatigue state's (stage 48), rounded half up, never under 0.
+        /// What takes fatigue off stays as it is.
         /// </summary>
-        public static int FatigueGain(BalanceData balance, StatBlock stats, int amount, TraitBonus traits = null)
+        public static int FatigueGain(BalanceData balance, StatBlock stats, int amount, TraitBonus traits = null, FatigueStateData state = null)
         {
-            int traitPercent = traits?.FatiguePercent ?? 0;
+            int traitPercent = (traits?.FatiguePercent ?? 0) + (state?.FatigueGainPercent ?? 0);
             if (amount <= 0 || (stats == null && traitPercent == 0))
             {
                 return amount;

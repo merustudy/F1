@@ -73,6 +73,8 @@ namespace F1.Data
             new KeySpec(nameof(FatigueOnKill), 0, Big),
             new KeySpec(nameof(VirtueChancePercent), 0, 100),
             new KeySpec(nameof(VirtueFatigue), 0, Big),
+            new KeySpec(nameof(AfflictionRecovery), 0, Big),
+            new KeySpec(nameof(OverworkCooldownPercent), 0, 100),
             new KeySpec(nameof(RestDays), 1, Big),
             new KeySpec(nameof(DogGraceMs), 0, Big),
             new KeySpec(nameof(DogGraceBreakHits), 1, 100),
@@ -230,6 +232,11 @@ namespace F1.Data
                 throw new DataException($"{DefinitionName}: VirtueFatigue must be under FatigueBreakdown, or a virtue would break down again at once.");
             }
 
+            if (AfflictionRecovery >= FatigueBreakdown)
+            {
+                throw new DataException($"{DefinitionName}: AfflictionRecovery must be under FatigueBreakdown, or a breakdown would end the moment it began.");
+            }
+
             if (MinPartySize > PartySize)
             {
                 throw new DataException($"{DefinitionName}: MinPartySize cannot exceed PartySize.");
@@ -306,7 +313,7 @@ namespace F1.Data
 
         /// <summary>Deaths that lose a run (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §4).</summary>
         public int DeathLimit => _values[nameof(DeathLimit)];
-        /// <summary>The most fatigue a mercenary can carry (it builds up from 0). Reaching it is collapsing (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
+        /// <summary>The most fatigue a mercenary can carry (it builds up from 0). Reaching it is collapsing, "exhaustion" on the screens since stage 48, or a virtue's end (Docs/Design/04_Lobby_100Day_Economy.md §3).</summary>
         public int MaxFatigue => _values[nameof(MaxFatigue)];
         /// <summary>How much fatigue comes down for each day a mercenary stays home.</summary>
         public int FatigueRecoveryPerDay => _values[nameof(FatigueRecoveryPerDay)];
@@ -326,6 +333,15 @@ namespace F1.Data
         /// <summary>The breakdown at the threshold: the chance it is a virtue rather than an affliction, and the fatigue a virtue brings the unit down to.</summary>
         public int VirtueChancePercent => _values[nameof(VirtueChancePercent)];
         public int VirtueFatigue => _values[nameof(VirtueFatigue)];
+
+        /// <summary>
+        /// Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): an affliction (a "mental breakdown" on the screens) ends when the fatigue comes down to this
+        /// or under (0 in the shipped data); a rest at a camp and a treatment at the inn end it whatever the fatigue.
+        /// </summary>
+        public int AfflictionRecovery => _values[nameof(AfflictionRecovery)];
+
+        /// <summary>Stage 48: how much slower, in percent, every item of a mercenary cycles while it is overworked: in an affliction at FatigueBreakdown or over.</summary>
+        public int OverworkCooldownPercent => _values[nameof(OverworkCooldownPercent)];
         /// <summary>The fatigue every living member pays when a battle starts.</summary>
         public int FatigueBattleEntry => _values[nameof(FatigueBattleEntry)];
         /// <summary>The fatigue each piece of equipment on a board (not a base weapon) adds when a battle starts.</summary>

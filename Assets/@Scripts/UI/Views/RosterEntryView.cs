@@ -98,7 +98,8 @@ namespace F1.UI
             // words once it is reached, are red. An affliction's name follows the words and what it does stands on the passive's line (round 36).
             string words = UiStrings.Get(UiKeys.Lobby.Fatigue, fatigue, maxFatigue);
             _fatigue.text = affliction == null ? words : UiStrings.Get(UiKeys.Lobby.FatigueState, words, affliction);
-            _fatigue.color = fatigue >= breakdown ? UiPalette.FatigueDanger : UiPalette.Fatigue;
+            // Stage 48: a mental breakdown may last under the threshold now, and its words stay red while it does.
+            _fatigue.color = fatigue >= breakdown || affliction != null ? UiPalette.FatigueDanger : UiPalette.Fatigue;
             _state.text = afflictionEffect ?? string.Empty;
             UI.FatiguePips.Show(_fatiguePips, fatigue, maxFatigue, breakdown);
             float stateWidth = string.IsNullOrEmpty(afflictionEffect) ? 0f : TextWidth.Of(_state, afflictionEffect) + TraitStateGap;

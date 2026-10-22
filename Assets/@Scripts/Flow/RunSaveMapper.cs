@@ -725,7 +725,8 @@ namespace F1.Flow
             Require(data.FatigueStates.Contains(stateId), $"Unknown fatigue state '{stateId}' of {who}.");
             FatigueStateData state = data.FatigueStates.Get(stateId);
             Require(!atHome || state.Kind == FatigueStateKind.Affliction, $"{who} holds the virtue '{stateId}' at home.");
-            Require(state.Kind != FatigueStateKind.Affliction || fatigue >= data.Balance.FatigueBreakdown, $"{who} holds the affliction '{stateId}' under the breakdown.");
+            // Stage 48: an affliction lasts until the fatigue comes down to AfflictionRecovery (0), so it may sit under the threshold now; at the recovery it would have ended.
+            Require(state.Kind != FatigueStateKind.Affliction || fatigue > data.Balance.AfflictionRecovery, $"{who} holds the affliction '{stateId}' at a fatigue that ends it.");
         }
 
         /// <summary>Only names defined by the enum are accepted; numbers are not.</summary>

@@ -277,8 +277,10 @@ namespace F1.UI
                 _campChoices.SetActive(!stepping);
                 _campMend.SetActive(_mending);
                 _campForge.SetActive(_forging);
+                // Stage 48: the rest also ends every mental breakdown (Docs/Design/04_Lobby_100Day_Economy.md §3).
                 _restBody.text = UiStrings.Get(UiKeys.Map.RestHeal, data.Balance.CampHealPercent) + "\n"
-                    + UiStrings.Get(UiKeys.Map.RestFatigue, data.Balance.CampFatigueRelief);
+                    + UiStrings.Get(UiKeys.Map.RestFatigue, data.Balance.CampFatigueRelief) + "\n"
+                    + UiStrings.Get(UiKeys.Map.RestCure);
                 RefreshForgeCard(manager, expedition);
                 RefreshMendPlate(manager, data.Balance);
                 RefreshForgePlate(manager, data.Balance);

@@ -15,6 +15,8 @@ FatigueOnAllyDeath,10
 FatigueOnKill,3
 VirtueChancePercent,25
 VirtueFatigue,40
+AfflictionRecovery,0
+OverworkCooldownPercent,25
 RestDays,1
 DogGraceMs,3000
 DogGraceBreakHits,3

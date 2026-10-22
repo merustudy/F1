@@ -178,7 +178,8 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// A fatigue change worth a line: death's door (the unit's own, or an ally's), an ally's death, a virtue, a critical hit taken (stage 22).
+        /// A fatigue change worth a line: death's door (the unit's own, or an ally's), an ally's death, a virtue, a critical hit taken (stage 22), a virtue
+        /// spent at the maximum and an ally's state as the battle starts (stage 48).
         /// A hit's and a kill's are too many to read, and so are the allies' share of a critical hit; the pips under the unit's feet show them.
         /// </summary>
         static string FatigueLine(BattleEvent e, BattleEngine engine)
@@ -191,7 +192,21 @@ namespace F1.UI
                 case BattleEvent.FatigueAllyDog: key = UiKeys.Log.FatigueAllyDog; break;
                 case BattleEvent.FatigueAllyDeath: key = UiKeys.Log.FatigueAllyDeath; break;
                 case BattleEvent.FatigueVirtue: key = UiKeys.Log.FatigueVirtue; break;
-                default: return null;
+                case BattleEvent.FatigueVirtueEnd: key = UiKeys.Log.FatigueVirtueEnd; break;
+                default:
+                    // Stage 48: an ally's state moved it as the battle started; the cause is that state's id and the source that ally.
+                    if (e.Id != null && !e.Source.IsNone && Managers.Data.Data.FatigueStates.Contains(e.Id))
+                    {
+                        return UiStrings.Get(
+                            UiKeys.Log.FatigueByState,
+                            UnitName(engine, e.Target),
+                            UnitName(engine, e.Source),
+                            UiText.FatigueStateName(Managers.Data.Data.FatigueStates.Get(e.Id)),
+                            (e.A > 0 ? "+" : string.Empty) + e.A,
+                            e.C);
+                    }
+
+                    return null;
             }
 
             return UiStrings.Get(key, UnitName(engine, e.Target), e.A, e.C);

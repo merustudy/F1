@@ -280,10 +280,25 @@ namespace F1.UI
             return UiStrings.Get(UiKeys.Board.StateDetail, FatigueStateWord(state), Name(state.Description));
         }
 
-        /// <summary>The job on the state line under a party member's feet, with the member's state after it while it is in one: "마검사 · 공포".</summary>
-        public static string JobLine(string jobId, FatigueStateData state)
+        /// <summary>
+        /// The job on the state line under a party member's feet, with the member's state after it while it is in one: "마검사 · 공포", and (stage 48) the
+        /// overwork after that while it is overworked: "마검사 · 공포 · 과로".
+        /// </summary>
+        public static string JobLine(string jobId, FatigueStateData state, bool overworked = false)
         {
-            return state == null ? Job(jobId) : UiStrings.Get(UiKeys.Board.JobState, Job(jobId), FatigueStateWord(state));
+            if (state == null)
+            {
+                return Job(jobId);
+            }
+
+            string line = UiStrings.Get(UiKeys.Board.JobState, Job(jobId), FatigueStateWord(state));
+            return overworked ? UiStrings.Get(UiKeys.Board.JobState, line, Colored(UiStrings.Get(UiKeys.Board.Overwork), UiPalette.FatigueDanger)) : line;
+        }
+
+        /// <summary>A state's name for the battle's state line, and (stage 48) "· 과로" after it while the unit is overworked.</summary>
+        public static string FatigueStateLabel(FatigueStateData state, bool overworked)
+        {
+            return overworked ? UiStrings.Get(UiKeys.Board.JobState, FatigueStateName(state), UiStrings.Get(UiKeys.Board.Overwork)) : FatigueStateName(state);
         }
 
         /// <summary>A value before and after a change: "11 → 22".</summary>

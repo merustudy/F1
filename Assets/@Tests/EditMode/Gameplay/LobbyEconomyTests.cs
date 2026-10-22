@@ -329,13 +329,13 @@ namespace F1.Tests
         // ---- The inn -------------------------------------------------------------------------
 
         [Test]
-        public void Treat_TakesThePriceAndTheReliefOffTheFatigue_EndsAnAfflictionUnderTheThreshold_AndNoDayPasses()
+        public void Treat_TakesThePriceAndTheReliefOffTheFatigue_EndsAnAfflictionWhateverTheFatigue_AndNoDayPasses()
         {
             StaticData data = TestData.Data();
             RunState run = RunWithParty(data);
             MercenaryState anna = RunRules.FindMercenary(run, "anna");
             string affliction = data.FatigueStatesOf(FatigueStateKind.Affliction)[0].Id;
-            anna.Fatigue = 128;
+            anna.Fatigue = 168;
             anna.AfflictionId = affliction;
             Assert.AreEqual(TreatCheck.NotEnoughGold, RunRules.CanTreat(data, run, "anna"));
             Assert.Throws<InvalidOperationException>(() => RunRules.Treat(data, run, "anna"));
@@ -345,15 +345,16 @@ namespace F1.Tests
             RunRules.Treat(data, run, "anna");
 
             Assert.AreEqual(30, run.Gold);
-            Assert.AreEqual(88, anna.Fatigue, "128 - 40.");
-            Assert.IsNull(anna.AfflictionId, "Under the breakdown threshold the affliction ends, as on a day off.");
+            Assert.AreEqual(128, anna.Fatigue, "168 - 40.");
+            Assert.IsNull(anna.AfflictionId, "Stage 48: the treatment ends the affliction, still over the threshold.");
             Assert.AreEqual(1, run.Day);
             Assert.AreEqual(0, RunRules.FindMercenary(run, "ben").Fatigue, "The others are untouched.");
 
-            // Treated again: 88 - 40 = 48, and once more to 8, then 0: not below zero and not when there is nothing to take off.
+            // Treated again: 128 - 40 = 88, 48, 8, then 0: not below zero and not when there is nothing to take off.
             RunRules.Treat(data, run, "anna");
-            Assert.AreEqual(48, anna.Fatigue);
+            Assert.AreEqual(88, anna.Fatigue);
             run.Gold = 100;
+            RunRules.Treat(data, run, "anna");
             RunRules.Treat(data, run, "anna");
             RunRules.Treat(data, run, "anna");
             Assert.AreEqual(0, anna.Fatigue);

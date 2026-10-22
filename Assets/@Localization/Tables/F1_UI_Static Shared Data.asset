@@ -2125,6 +2125,26 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673584674930688
+  - m_Id: 7855659239333888
+    m_Key: Map.RestCure
+    m_Metadata:
+      m_Items:
+      - rid: 8623673606786514944
+  - m_Id: 7855659247722496
+    m_Key: Board.Overwork
+    m_Metadata:
+      m_Items:
+      - rid: 8623673606786514945
+  - m_Id: 7855659251916800
+    m_Key: Log.FatigueVirtueEnd
+    m_Metadata:
+      m_Items:
+      - rid: 8623673606786514946
+  - m_Id: 7855659251916801
+    m_Key: Log.FatigueByState
+    m_Metadata:
+      m_Items:
+      - rid: 8623673606786514947
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -2872,8 +2892,9 @@ MonoBehaviour:
     - rid: 8623673243377860611
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = unit. {1} = the affliction. {2} = roll 0..99. {3} =
-          virtue chance (a roll below it is a virtue).'
+        m_CommentText: '{0} = unit. {1} = the affliction (a mental breakdown on the
+          screens since stage 48). {2} = roll 0..99. {3} = virtue chance (a roll
+          below it is a virtue).'
     - rid: 8623673243377860612
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2881,13 +2902,15 @@ MonoBehaviour:
     - rid: 8623673243377860613
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = unit. Its fatigue reached the maximum: death''s door,
-          or death if it was there already (the death is logged after).'
+        m_CommentText: '{0} = unit. Its fatigue reached the maximum (the exhaustion,
+          stage 48; it was the collapse): death''s door, or death if it was there
+          already (the death is logged after).'
     - rid: 8623673243377860614
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: '{0} = unit. {1} = the affliction that ended because the fatigue
-          came back under the threshold.'
+        m_CommentText: '{0} = unit. {1} = the state that ended: a mental breakdown
+          whose fatigue came down to the recovery (0 since stage 48), or a virtue
+          spent at the maximum.'
     - rid: 8623673243377860615
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -2916,9 +2939,9 @@ MonoBehaviour:
     - rid: 8623673243377860622
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: The word over a mercenary whose fatigue reached its maximum,
-          in the moment of its collapse (it went to death's door, or died there).
-          The unit's name is written under it.
+        m_CommentText: 'The word over a mercenary whose fatigue reached its maximum,
+          in the moment of its exhaustion (stage 48; it was the collapse: it went
+          to death''s door, or died there). The unit''s name is written under it.'
     - rid: 8623673257781362689
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3049,10 +3072,10 @@ MonoBehaviour:
     - rid: 8623673318725910528
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'Why a mercenary died when the fatigue collapse killed it
-          at death''s door: no last hit and no death roll (it may never have been
-          hit). {0} = name. {1} = time of reaching 0 HP (0 when it entered the battle
-          there). {2} = time of death.'
+        m_CommentText: 'Why a mercenary died when the exhaustion (stage 48; it was
+          the collapse) killed it at death''s door: no last hit and no death roll
+          (it may never have been hit). {0} = name. {1} = time of reaching 0 HP (0
+          when it entered the battle there). {2} = time of death.'
     - rid: 8623673332876705792
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3360,8 +3383,9 @@ MonoBehaviour:
     - rid: 8623673479834370060
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: The bubble over the inn. {0} = the breakdown threshold, {1}
-          = mercenaries at or over it, {2} = the treatment's price.
+        m_CommentText: 'The bubble over the inn. {0} = the breakdown threshold, {1}
+          = mercenaries at or over it or in a mental breakdown (stage 48: the treatment
+          ends one), {2} = the treatment''s price.'
     - rid: 8623673479834370061
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3422,7 +3446,8 @@ MonoBehaviour:
     - rid: 8623673479834370074
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
-        m_CommentText: 'Under the inn''s list: the treatment takes no day.'
+        m_CommentText: 'Under the inn''s list: the treatment takes no day and (stage
+          48) ends a mental breakdown.'
     - rid: 8623673479834370075
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -3846,7 +3871,7 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: 'What left an acquired trait (Slice D stage 38): coming home
-          in an affliction.'
+          in a mental breakdown (an affliction).'
     - rid: 8623673543694745606
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
@@ -4066,3 +4091,27 @@ MonoBehaviour:
       data:
         m_CommentText: 'A regeneration potion (stage 46): that many regen stacks,
           healing tick by tick. {0} = stacks.'
+    - rid: 8623673606786514944
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'On the rest card (stage 48): the rest ends every mental breakdown
+          in the party. Short: the card narrows to a third beside the forge.'
+    - rid: 8623673606786514945
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Stage 48: the word after the state of an overworked mercenary
+          (a mental breakdown at the breakdown threshold or over: its items cycle
+          slower).'
+    - rid: 8623673606786514946
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Stage 48: a virtue reached the maximum fatigue and ended
+          there instead of the exhaustion. {0} = unit. {1} = the change (negative).
+          {2} = fatigue after.'
+    - rid: 8623673606786514947
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Stage 48: an ally''s state moved a unit''s fatigue as the
+          battle started (abusive tires, courageous eases). {0} = unit. {1} = the
+          ally. {2} = the ally''s state. {3} = the change, signed. {4} = fatigue
+          after.'

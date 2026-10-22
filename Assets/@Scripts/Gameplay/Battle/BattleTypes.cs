@@ -274,7 +274,10 @@ namespace F1.Gameplay
         /// <summary>A = (int)BattleResult.</summary>
         BattleEnded,
 
-        /// <summary>A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue", and the critical hit's four), A = change, C = fatigue after.</summary>
+        /// <summary>
+        /// A party unit's fatigue changed. Target, Id = cause ("hit", "dog", "ally_dog", "ally_death", "kill", "virtue", "virtue_end", and the critical hit's four;
+        /// stage 48: a fatigue state's id when an ally's state moved it as the battle started, and then Source = that ally), A = change, C = fatigue after.
+        /// </summary>
         FatigueChanged,
         /// <summary>The breakdown at the threshold. Target, Id = the state's id, A = roll 0..99, B = virtue chance percent (spirit counted, stage 33), C = 1 for a virtue.</summary>
         BrokeDown,
@@ -282,7 +285,7 @@ namespace F1.Gameplay
         PhaseChanged,
         /// <summary>The unit's fatigue reached its maximum. Target, C = 1 if it died (it was at death's door already), else it went to death's door.</summary>
         Collapsed,
-        /// <summary>An affliction ended: fatigue came back under the threshold. Target, Id = the state's id.</summary>
+        /// <summary>A state ended. Target, Id = the state's id. An affliction: the fatigue came down to AfflictionRecovery or under. A virtue (stage 48): the fatigue reached the maximum.</summary>
         FatigueStateEnded,
         /// <summary>
         /// A weapon's damage on one unit is a critical hit (Slice B stage 22), just before its Damaged. Source, Target, Id = the item, A = the damage
@@ -347,6 +350,9 @@ namespace F1.Gameplay
         public const string FatigueCritDealt = "crit_dealt";
         public const string FatigueAllyCritDealt = "ally_crit_dealt";
         public const string FatigueVirtue = "virtue";
+
+        /// <summary>Stage 48: a virtue that reached the maximum ended, and the fatigue came down to VirtueFatigue instead of the exhaustion.</summary>
+        public const string FatigueVirtueEnd = "virtue_end";
 
         public BattleEvent(int timeMs, BattleEventKind kind, UnitRef source, UnitRef target, string id, int a, int b, int c)
         {

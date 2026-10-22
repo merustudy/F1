@@ -30,6 +30,9 @@ namespace F1.Sim
         public int Collapses;
         public int CollapseDeaths;
 
+        /// <summary>Stage 48: virtues that reached the maximum and ended there instead of the exhaustion.</summary>
+        public int VirtuesSpent;
+
         /// <summary>Critical hits (Slice B stage 22) the party dealt and took.</summary>
         public int CritsDealt;
         public int CritsTaken;
@@ -193,6 +196,9 @@ namespace F1.Sim
                         Collapses++;
                         CollapseDeaths += e.C;
                         break;
+                    case BattleEventKind.FatigueChanged:
+                        VirtuesSpent += e.Id == BattleEvent.FatigueVirtueEnd ? 1 : 0;
+                        break;
                 }
             }
 
@@ -218,7 +224,7 @@ namespace F1.Sim
             Console.WriteLine($"  per battle: critical hits dealt {Ratio(CritsDealt, Battles)}, taken {Ratio(CritsTaken, Battles)}; misses (Slice D stage 33) by the party {Ratio(MissesDealt, Battles)}, by the enemies {Ratio(MissesTaken, Battles)}");
             if (Afflictions + Virtues + Collapses > 0)
             {
-                Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths})");
+                Console.WriteLine($"  fatigue: afflictions {Afflictions}, virtues {Virtues}, collapses {Collapses} (deaths {CollapseDeaths}), virtues spent at the maximum {VirtuesSpent}");
             }
             if (BleedDealt + BleedTaken + RegenGiven + Cleanses + Staggers + Charges > 0 || ThornsDealt + ThornsTaken > 0)
             {
@@ -699,7 +705,8 @@ namespace F1.Sim
                     foreach (PartySlot slot in party)
                     {
                         MercenaryState member = RunRules.FindMercenary(state, slot.MercenaryId);
-                        while (member.Fatigue >= treatAbove && RunRules.CanTreat(data, state, member.Id) == TreatCheck.Ok)
+                        // Stage 48: the treatment ends an affliction whatever the fatigue, so the policy treats a member in one too.
+                        while ((member.Fatigue >= treatAbove || member.AfflictionId != null) && RunRules.CanTreat(data, state, member.Id) == TreatCheck.Ok)
                         {
                             RunRules.Treat(data, state, member.Id);
                             treatments++;
@@ -849,7 +856,7 @@ namespace F1.Sim
                 }
             }
 
-            Console.WriteLine($"runs {runs}, policy {policy.Name}, rest when the party's fatigue averages {restAbove} or more, hire up to {data.Balance.PartySize + bench} in the roster, treat a member at {treatAbove} or more, seed {baseSeed}");
+            Console.WriteLine($"runs {runs}, policy {policy.Name}, rest when the party's fatigue averages {restAbove} or more, hire up to {data.Balance.PartySize + bench} in the roster, treat a member at {treatAbove} or more or in an affliction, seed {baseSeed}");
             Console.WriteLine($"  victories {BattleStats.Percent(victories, runs)} (before the last day {BattleStats.Percent(earlyWins, runs)}, at the final stand {BattleStats.Percent(finalStandsWon, runs)}); "
                 + $"defeats: final stand lost {BattleStats.Percent(finalStandsLost, runs)}, death limit {BattleStats.Percent(deathLimits, runs)}, wipeout {BattleStats.Percent(wipeouts, runs)}");
             Console.WriteLine($"  per run: days at the end {Average(days, runs)}, expeditions {Average(expeditions, runs)}, rests {Average(rests, runs)}, deaths {Average(deaths, runs)}; "

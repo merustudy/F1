@@ -129,9 +129,9 @@ namespace F1.Gameplay
             {
                 if (member.Alive)
                 {
-                    // One event (entry and equipment together), after the member's endurance (Slice D stage 33) and its traits (stage 37).
+                    // One event (entry and equipment together), after the member's endurance (Slice D stage 33), its traits (stage 37) and its fatigue state (stage 48).
                     int cost = StatRules.FatigueGain(data.Balance, member.Stats, FatigueRules.BattleEntryCost(data.Balance, member.Board.InReadingOrder()),
-                        TraitRules.BonusOf(data, member.Traits));
+                        TraitRules.BonusOf(data, member.Traits), member.StateId == null ? null : data.FatigueStates.Get(member.StateId));
                     member.Fatigue = FatigueRules.Add(data.Balance, member.Fatigue, cost);
                 }
             }
@@ -230,7 +230,8 @@ namespace F1.Gameplay
 
                 member.Hp = Math.Min(member.MaxHp, member.Hp + member.MaxHp * balance.CampHealPercent / 100);
                 member.Fatigue = FatigueRules.Add(balance, member.Fatigue, -balance.CampFatigueRelief);
-                member.StateId = FatigueRules.StateAfter(data, member.StateId, member.Fatigue);
+                // Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): the rest ends an affliction whatever the fatigue; a virtue stays.
+                member.StateId = FatigueRules.Cure(data, member.StateId);
             }
 
             state.Phase = ExpeditionPhase.ChoosingNode;

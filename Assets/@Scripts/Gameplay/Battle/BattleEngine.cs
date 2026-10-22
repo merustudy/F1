@@ -96,6 +96,16 @@ namespace F1.Gameplay
                 ResolveFatigue(unit);
             }
 
+            // Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): a state may tire (abusive) or ease (courageous) every ally as the battle starts, in party
+            // order, after every member's fatigue was judged. The allies' endurance softens a gain like any other.
+            foreach (BattleUnit unit in _party.ToArray())
+            {
+                if (unit.Alive && unit.State != null && unit.State.AllyFatigueAtStart != 0)
+                {
+                    ChangeAlliesFatigue(unit, unit.State.AllyFatigueAtStart, unit.State.Id, unit.Ref);
+                }
+            }
+
             CheckEnd();
             if (Result != BattleResult.Ongoing)
             {
@@ -403,13 +413,15 @@ namespace F1.Gameplay
 
         /// <summary>The cooldown an item of a unit cycles with now: its own, changed by the unit's fatigue state (an affliction slows, a virtue quickens).</summary>
         /// <summary>
-        /// The cooldown an item of this owner fills next: its own with the fatigue state's percent and, stage 45, the owner's freeze stacks slowing it and
+        /// The cooldown an item of this owner fills next: its own with the fatigue state's percent (and, stage 48, the overwork's) and, stage 45, the owner's freeze stacks slowing it and
         /// its haste stacks quickening it (percent points added together), never under MinCooldownMs. Read when the next activation is scheduled, so a
         /// stack applied mid-cooldown tells from the next one.
         /// </summary>
         int CooldownOf(BattleUnit owner, BattleItemState item)
         {
-            int percent = (owner.State?.CooldownPercent ?? 0) + owner.Freeze * _balance.FreezePercentPerStack - owner.Haste * _balance.HastePercentPerStack;
+            // Stage 48: an overworked unit (an affliction at the threshold or over) cycles every item OverworkCooldownPercent slower.
+            int overwork = FatigueRules.IsOverworked(_balance, owner.State, owner.Fatigue) ? _balance.OverworkCooldownPercent : 0;
+            int percent = (owner.State?.CooldownPercent ?? 0) + overwork + owner.Freeze * _balance.FreezePercentPerStack - owner.Haste * _balance.HastePercentPerStack;
             return percent == 0 ? item.CooldownMs : EffectiveCooldown(item.CooldownMs, percent * 10);
         }
 
@@ -552,9 +564,13 @@ namespace F1.Gameplay
                             // A blow on one's own side (2026-10-21: any effect may go either way) never crits, triggers no passive and meets no thorns.
                             bool foe = target.Side != owner.Side;
                             bool critical = weaponDamage && foe && RollCritical(owner, target, data, ref dealt);
-                            // Roll, stars, critical hit, then the owner's stat, then the weapon-power passive (Docs/Design/02_Combat_System.md §4),
-                            // then what the target's vulnerable stacks add (stage 45).
+                            // Roll, stars, critical hit, then the owner's stat, then (stage 48) its fatigue state's percent on the other side, then the
+                            // weapon-power passive (Docs/Design/02_Combat_System.md §4), then what the target's vulnerable stacks add (stage 45).
                             dealt = StatRules.Scale(dealt, statPercent);
+                            if (foe && owner.State != null && owner.State.DamagePercent != 0)
+                            {
+                                dealt = FatigueRules.Scaled(dealt, owner.State.DamagePercent);
+                            }
                             if (weaponDamage)
                             {
                                 dealt = WithWeaponPower(owner, dealt);
@@ -687,13 +703,14 @@ namespace F1.Gameplay
         bool RollHit(BattleUnit owner, BattleUnit target, ItemData item)
         {
             // The owner's aim and blind stacks (stage 45) move its accuracy by their points, in ten-thousandths like the rest.
+            // Stage 48: so do the owner's fatigue state's points, and the target's state's on its dodge.
             int accuracy = StatRules.Accuracy(_balance, owner.Setup.Stats, owner.Setup.Accuracy, owner.Setup.Traits)
-                + (owner.Aim * _balance.AimPercentPerStack - owner.Blind * _balance.BlindPercentPerStack) * 100;
+                + (owner.Aim * _balance.AimPercentPerStack - owner.Blind * _balance.BlindPercentPerStack + (owner.State?.HitPercent ?? 0)) * 100;
             // The target's traits (stage 37) and its passive (stage 47, the rogue) move its dodge by their points.
             int chance = StatRules.HitChance(
                 _balance,
                 accuracy,
-                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits, target.Setup.Passive));
+                StatRules.Dodge(_balance, target.Setup.Stats, target.Setup.Dodge, target.Setup.Traits, target.Setup.Passive) + (target.State?.DodgePercent ?? 0) * 100);
             // A certain hit rolls nothing (HitMaxPercent 100: the test data), so the damage stream stays as it was without misses.
             if (chance >= StatRules.Certain)
             {
@@ -726,7 +743,7 @@ namespace F1.Gameplay
             // less what the target's helm takes off (stage 39). The roll is drawn all the same: the stream does not depend on the helm.
             // The owner's keen stacks add their points to the chance and its fury stacks to the multiplier (stage 45).
             _lastCritChance = StatRules.CritChance(_balance, owner.Setup.Stats, weapon,
-                StatRules.CritBonusPercent(owner.Setup.Passive, weapon) + owner.Keen * _balance.KeenPercentPerStack, owner.Setup.Traits,
+                StatRules.CritBonusPercent(owner.Setup.Passive, weapon) + owner.Keen * _balance.KeenPercentPerStack + (owner.State?.CritPercent ?? 0), owner.Setup.Traits,
                 CritTakenPercent(target));
             _lastCritRoll = _damageRng.NextInt(StatRules.Certain);
             if (_lastCritRoll >= _lastCritChance)
@@ -1269,18 +1286,24 @@ namespace F1.Gameplay
         // ---- Fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3) --------------------------------
 
         /// <summary>
-        /// Moves a mercenary's fatigue (an enemy's never moves) and judges it: at the maximum it collapses; at the threshold without
-        /// a state it breaks down; under the threshold an affliction ends. Logged only when it moved.
+        /// Moves a mercenary's fatigue (an enemy's never moves) and judges it: at the maximum it is exhausted (a virtue ends instead, stage 48); at the
+        /// threshold without a state it breaks down; at AfflictionRecovery or under an affliction ends. Logged only when it moved.
         /// </summary>
         void ChangeFatigue(BattleUnit unit, int amount, string cause)
+        {
+            ChangeFatigue(unit, amount, cause, UnitRef.None);
+        }
+
+        void ChangeFatigue(BattleUnit unit, int amount, string cause, UnitRef source)
         {
             if (unit.Side != BattleSide.Party || !unit.Alive || amount == 0)
             {
                 return;
             }
 
-            // A gain is softened (or hardened) by the unit's endurance (Slice D stage 33) and its traits (stage 37); what takes fatigue off stays as it is.
-            amount = StatRules.FatigueGain(_balance, unit.Setup.Stats, amount, unit.Setup.Traits);
+            // A gain is softened (or hardened) by the unit's endurance (Slice D stage 33), its traits (stage 37) and its fatigue state (stage 48); what takes
+            // fatigue off stays as it is.
+            amount = StatRules.FatigueGain(_balance, unit.Setup.Stats, amount, unit.Setup.Traits, unit.State);
             if (amount == 0)
             {
                 return;
@@ -1290,25 +1313,30 @@ namespace F1.Gameplay
             unit.Fatigue = FatigueRules.Add(_balance, before, amount);
             if (unit.Fatigue != before)
             {
-                Log(BattleEventKind.FatigueChanged, UnitRef.None, unit.Ref, cause, unit.Fatigue - before, 0, unit.Fatigue);
+                Log(BattleEventKind.FatigueChanged, source, unit.Ref, cause, unit.Fatigue - before, 0, unit.Fatigue);
             }
             else if (amount < 0 || before < _balance.MaxFatigue)
             {
                 return;
             }
 
-            // Unchanged at the maximum by more fatigue: it collapses again (Docs/Design/04_Lobby_100Day_Economy.md §3).
+            // Unchanged at the maximum by more fatigue: it is exhausted again (Docs/Design/04_Lobby_100Day_Economy.md §3).
             ResolveFatigue(unit);
         }
 
         /// <summary>Tires every other living mercenary.</summary>
         void ChangeAlliesFatigue(BattleUnit of, int amount, string cause)
         {
+            ChangeAlliesFatigue(of, amount, cause, UnitRef.None);
+        }
+
+        void ChangeAlliesFatigue(BattleUnit of, int amount, string cause, UnitRef source)
+        {
             foreach (BattleUnit ally in _party)
             {
                 if (ally != of)
                 {
-                    ChangeFatigue(ally, amount, cause);
+                    ChangeFatigue(ally, amount, cause, source);
                 }
             }
         }
@@ -1322,6 +1350,17 @@ namespace F1.Gameplay
 
             if (unit.Fatigue >= _balance.MaxFatigue)
             {
+                // Stage 48 (the user's "각성 상태에서 피로도 200 도달시 각성 해제와 피로도 40으로 내림"): a virtue spends itself instead of the exhaustion.
+                if (unit.State != null && unit.State.Kind == FatigueStateKind.Virtue)
+                {
+                    Log(BattleEventKind.FatigueStateEnded, UnitRef.None, unit.Ref, unit.State.Id, 0, 0, 0);
+                    unit.State = null;
+                    int before = unit.Fatigue;
+                    unit.Fatigue = _balance.VirtueFatigue;
+                    Log(BattleEventKind.FatigueChanged, UnitRef.None, unit.Ref, BattleEvent.FatigueVirtueEnd, unit.Fatigue - before, 0, unit.Fatigue);
+                    return;
+                }
+
                 Collapse(unit);
                 return;
             }

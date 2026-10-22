@@ -109,6 +109,7 @@ namespace F1.UI
         long _shownStatus = -1;
         int _shownFatigue = -1;
         string _shownState;
+        bool _shownOverwork;
         bool _stateShown;
         Rim _shownRim = Rim.None;
 
@@ -550,18 +551,21 @@ namespace F1.UI
                 UI.FatiguePips.Show(_fatiguePips, _unit.Fatigue, balance.MaxFatigue, balance.FatigueBreakdown);
             }
 
+            // Stage 48: "· 과로" follows the state's name while the unit is overworked (Docs/Architecture/12_UI.md "피로도와 붕괴의 상태").
             string stateId = _unit.State?.Id;
-            if (_stateShown && stateId == _shownState)
+            bool overworked = FatigueRules.IsOverworked(balance, _unit.State, _unit.Fatigue);
+            if (_stateShown && stateId == _shownState && overworked == _shownOverwork)
             {
                 return;
             }
 
             _stateShown = true;
             _shownState = stateId;
+            _shownOverwork = overworked;
             SetShown(_fatigueState.gameObject, _unit.State != null);
             if (_unit.State != null)
             {
-                _fatigueState.text = UiText.FatigueStateName(_unit.State);
+                _fatigueState.text = UiText.FatigueStateLabel(_unit.State, overworked);
                 _fatigueState.color = UiPalette.FatigueState(_unit.State.Kind);
             }
         }
