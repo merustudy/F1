@@ -109,6 +109,12 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 붕괴 판정의 난수는 `RngStream.Fatigue`(사망 판정의 `Battle` 스트림과 다름)다: 각성인지, 어느 상태인지 두 번 뽑는다. 상태의 목록은 `BattleSetup.FatigueStates`(데이터의 id 순)에서 온다.
 - 상태의 효과는 `FatigueStateData`의 세 수치다: 쿨다운은 `CooldownOf(유닛, 아이템)`이 발동 때마다 센다(들어온 상태는 첫 쿨다운부터), 받는 회복은 `ApplyHeal`에서 `FatigueRules.Scaled`,
   빈사의 사망 확률은 `FatigueRules.DogDeathChancePercent`가 더해 0~100에 묶는다(`DogHit`이 굴리고, 전투 화면의 상태 줄이 같은 값을 보인다). 고통이 풀리는 세 자리(전투의 처치, 야영지의 쉬기, 로비의 쉬는 날)는 모두 `FatigueRules.AfflictionEnds`·`StateAfter`로 묻는다.
+- **48단계 피로 개정**(2026-10-22, Design/04 §3·21 §8): 고통은 화면에서 **정신 붕괴**, 쓰러짐은 **탈진**이다(코드의 이름 `Affliction`·`Collapse`는 그대로).
+  - 풀림: `AfflictionEnds`는 피로가 `AfflictionRecovery`(0) 이하일 때다. 야영지의 쉬기(`RestAtCamp`)와 쉼터의 치료(`RunRules.Treat`)는 피로와 상관없이 정신 붕괴를 푼다(`FatigueRules.Cure`: 정신 붕괴면 null, 각성은 그대로).
+  - 최대(`MaxFatigue`)에서 `ResolveFatigue`는 각성이면 탈진 대신 각성을 풀고 피로를 `VirtueFatigue`로 내린다(`FatigueStateEnded` + `FatigueChanged` 원인 `virtue_end`). 그 밖에는 탈진(`Collapse`) 그대로.
+  - **과로**: `FatigueRules.IsOverworked`(정신 붕괴이고 피로가 `FatigueBreakdown` 이상)면 `CooldownOf`가 `OverworkCooldownPercent`를 더한다(상태의 %·빙결·가속과 같은 자리, 다음 발동부터). 화면도 같은 함수로 "· 과로"를 붙인다.
+  - 상태의 효과 여섯을 더했다(`FatigueStateData`): 명중(`RollHit`의 주인)·회피(`RollHit`의 대상)·치명타(`RollCritical`의 보너스)는 %p, 주는 피해는 적에게 준 피해에 주인의 스탯 다음·무기 세기 패시브 앞에서 `FatigueRules.Scaled`, 오르는 피로는 `StatRules.FatigueGain`의 % 항(인내·특성과 더함 — 엔진의 `ChangeFatigue`와 `ExpeditionRules.BeginBattle`의 진입 비용 모두), 전투 시작의 동료 피로는 시작의 판정 뒤·패시브 앞에 파티 차례로 `ChangeAlliesFatigue`(원인은 상태의 id, Source는 그 유닛).
+  - 상태의 `CooldownPercent`는 데이터에서 모두 0이지만 `CooldownOf`는 그대로 더한다(다시 켤 수 있게).
 
 ## 긴 원정: 노드 종류와 깊은 층
 

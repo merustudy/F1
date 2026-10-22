@@ -47,7 +47,7 @@
 | `AffinityData.csv` | 지역 속성: 적 쿨다운 수정 |
 | `DungeonData.csv` | 던전: 속성, 층 수, 맵 너비, 일수, 보상 등급, 시작 포션, 정예·야영지가 나오는 층과 확률과 야영지 층, 깊은 층의 적, 보상의 단계가 시작하는 층(Slice B), 상점이 나오는 층과 확률 `ShopMinFloor`·`ShopChancePercent`(17단계) (피로도 비용은 Slice B에서 없앴다), 최종 던전과 해금(25단계: `IsFinal`, `UnlockDungeonId`, `UnlockClears`), 원정 지도의 표식 자리(Round 71 E2: `MapX`, `MapY`), 상점 층 `ShopFloor`(2026-10-19, 03 §1) |
 | `MercenaryData.csv` | 시작 로스터(`Starting` 참: 이름, 직업)와 역마차의 **이름 풀**(26단계. `Starting` 거짓: 이름만, `JobId` 비움 — 후보를 뽑을 때 직업을 굴린다). 고용된 용병의 id는 풀의 id이고 직업은 런의 상태가 가진다 |
-| `FatigueStateData.csv` | 피로의 붕괴 판정이 주는 상태(Slice B): 종류(고통·각성), 쿨다운·받는 회복·빈사 사망 확률의 변화, 이름과 설명 |
+| `FatigueStateData.csv` | 피로의 붕괴 판정이 주는 상태(Slice B): 종류(고통·각성), 쿨다운·받는 회복·빈사 사망 확률의 변화, 이름과 설명. 48단계(2026-10-22): 종류의 이름은 정신 붕괴·각성, 열 여섯을 더함 — `HitPercent`·`DodgePercent`·`CritPercent`(%p), `DamagePercent`·`FatigueGainPercent`(%), `AllyFatigueAtStart`(±N); 행은 정신 붕괴 다섯·각성 넷, `CooldownPercent`는 모두 0 |
 | `LevelData.csv` | 레벨의 사다리(27단계, 05 §2): `Level`(1부터), `ExpToNext`(다음 레벨까지의 경험치, 마지막은 0), `MaxHpBonusPercent`. 이름 열이 없다. 경험치의 양은 `BalanceData`의 `ExpPerFloor`·`ExpClear` |
 
 - 【확정】 `items`와 `relics`는 반드시 별도 분류 (06_Relic_System §4). 유물은 Slice A 밖이라 파일이 없다.
