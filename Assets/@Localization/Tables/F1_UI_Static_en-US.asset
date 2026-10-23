@@ -69,7 +69,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864196
-    m_Localized: Day {0} / {1}
+    m_Localized: Week {0} / {1}
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -87,7 +87,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 9766393864206
-    m_Localized: "Rest (fatigue -{0} \xB7 {1}d)"
+    m_Localized: "Rest (fatigue -{0} \xB7 {1}w)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -431,7 +431,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864307
-    m_Localized: '{0} days passed. It is now day {1}'
+    m_Localized: '{0} weeks passed. It is now week {1}'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1063,7 +1063,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5780436994220032
-    m_Localized: The last day has passed. Only the final stand is left
+    m_Localized: The last week has passed. Only the final stand is left
     m_Metadata:
       m_Items: []
   - m_Id: 5780437002608640
@@ -1104,7 +1104,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 5786696208605186
-    m_Localized: "Cleared {0} \xB7 {1} days"
+    m_Localized: "Cleared {0} \xB7 {1} weeks"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1119,7 +1119,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5786696208605189
-    m_Localized: "{0} days (\u2192 day {1})"
+    m_Localized: "{0} weeks (\u2192 week {1})"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1134,7 +1134,8 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5786696208605192
-    m_Localized: 'The final dungeon: past the last day the party must fight its boss'
+    m_Localized: 'The final dungeon: past the last week the party must fight its
+      boss'
     m_Metadata:
       m_Items: []
   - m_Id: 5786696208605194
@@ -1176,12 +1177,12 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5803759337725958
-    m_Localized: Past day {0}, the boss of {1} must be fought
+    m_Localized: Past week {0}, the boss of {1} must be fought
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5824427131396096
-    m_Localized: "Day {0} / {1} \u2014 the final stand"
+    m_Localized: "Week {0} / {1} \u2014 the final stand"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1224,7 +1225,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5824427143979017
-    m_Localized: No day left to rest
+    m_Localized: No week left to rest
     m_Metadata:
       m_Items: []
   - m_Id: 5824427143979018
@@ -1298,15 +1299,15 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5824427143979033
-    m_Localized: The treatment takes no day and ends a breakdown
+    m_Localized: The treatment takes no week and ends a breakdown
     m_Metadata:
       m_Items: []
   - m_Id: 5824427143979034
-    m_Localized: Ended on
+    m_Localized: Ended in
     m_Metadata:
       m_Items: []
   - m_Id: 5824427143979035
-    m_Localized: Day {0}
+    m_Localized: Week {0}
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1410,7 +1411,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 6078818543460352
-    m_Localized: "{0} \xB7 {1} days (\u2192 day {2})"
+    m_Localized: "{0} \xB7 {1} weeks (\u2192 week {2})"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1459,7 +1460,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6151713177198592
-    m_Localized: "Under construction \xB7 {0} days left"
+    m_Localized: "Under construction \xB7 {0} weeks left"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1469,12 +1470,12 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6151713181392897
-    m_Localized: "Lv {0} \u2192 Lv {1}: {2} \xB7 gold {3} \xB7 {4} days"
+    m_Localized: "Lv {0} \u2192 Lv {1}: {2} \xB7 gold {3} \xB7 {4} weeks"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6151713181392898
-    m_Localized: "Upgrade \xB7 gold {0} \xB7 {1} days"
+    m_Localized: "Upgrade \xB7 gold {0} \xB7 {1} weeks"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1484,7 +1485,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 6151713181392900
-    m_Localized: "Lv {0} \u2192 Lv {1} under construction \xB7 {2} days left"
+    m_Localized: "Lv {0} \u2192 Lv {1} under construction \xB7 {2} weeks left"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1946,6 +1947,26 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 8173488056557568
+    m_Localized: Gold +{0} (test)
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8223467345272832
+    m_Localized: +{1} Max HP to {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8223467357855744
+    m_Localized: "{0} \u2192 {1}: Max HP +{2} ({3}/{4})"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8223467357855745
+    m_Localized: Max HP +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -2177,3 +2198,7 @@ MonoBehaviour:
         - id: 7855659251916801
         - id: 7994219623866368
         - id: 7994219640643584
+        - id: 8173488056557568
+        - id: 8223467345272832
+        - id: 8223467357855744
+        - id: 8223467357855745

@@ -106,7 +106,7 @@ namespace F1.UI
             {
                 BattleEvent e = events[i];
                 bool armour = e.Id != null && _data.Items.Contains(e.Id) && _data.Items.Get(e.Id).Trigger == ItemTrigger.BattleStart;
-                if (armour && (e.Kind == BattleEventKind.ItemActivated || e.Kind == BattleEventKind.ShieldGained))
+                if (armour && (e.Kind == BattleEventKind.ItemActivated || e.Kind == BattleEventKind.ShieldGained || e.Kind == BattleEventKind.MaxHpRaised))
                 {
                     _opening.Add(i);
                 }
@@ -201,6 +201,10 @@ namespace F1.UI
                     }
 
                     _unitView(e.Target)?.Flash(HealTint);
+                    Sound(SoundEffect.Heal);
+                    break;
+                case BattleEventKind.MaxHpRaised:
+                    FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.MaxHp, UiText.Amount(e.A)), UiPalette.Good, false);
                     Sound(SoundEffect.Heal);
                     break;
                 case BattleEventKind.ShieldGained:

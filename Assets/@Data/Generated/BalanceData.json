@@ -7,19 +7,19 @@
     },
     {
       "Key": "AimPercentPerStack",
-      "Value": 5
+      "Value": 1
     },
     {
       "Key": "BleedDamagePerStack",
-      "Value": 27
+      "Value": 100
     },
     {
       "Key": "BlindPercentPerStack",
-      "Value": 5
+      "Value": 1
     },
     {
       "Key": "BurnDamagePerStack",
-      "Value": 27
+      "Value": 100
     },
     {
       "Key": "BurnTickMs",
@@ -183,11 +183,11 @@
     },
     {
       "Key": "FreezePercentPerStack",
-      "Value": 10
+      "Value": 1
     },
     {
       "Key": "FuryPercentPerStack",
-      "Value": 25
+      "Value": 5
     },
     {
       "Key": "GoldClear",
@@ -199,7 +199,7 @@
     },
     {
       "Key": "HastePercentPerStack",
-      "Value": 10
+      "Value": 1
     },
     {
       "Key": "HirePrice",
@@ -255,7 +255,7 @@
     },
     {
       "Key": "KeenPercentPerStack",
-      "Value": 5
+      "Value": 1
     },
     {
       "Key": "MagicCritDamagePercent",
@@ -327,7 +327,7 @@
     },
     {
       "Key": "RegenHealPerStack",
-      "Value": 27
+      "Value": 100
     },
     {
       "Key": "RestDays",
@@ -411,7 +411,7 @@
     },
     {
       "Key": "TotalDays",
-      "Value": 100
+      "Value": 99
     },
     {
       "Key": "TraitChanceAfflictionPercent",
@@ -455,7 +455,7 @@
     },
     {
       "Key": "VulnerablePercentPerStack",
-      "Value": 10
+      "Value": 5
     }
   ]
 }

@@ -390,6 +390,7 @@ namespace F1.Sim
                     case BattleEventKind.Staggered: detail = $"{Name(e.Target)} staggered {e.A} ms by {e.Id} ({e.B} items)"; break;
                     case BattleEventKind.Charged: detail = $"{Name(e.Target)} charged {e.A} ms by {e.Id} ({e.B} items)"; break;
                     case BattleEventKind.StateApplied: detail = $"{Name(e.Target)} {(EffectKind)e.B} +{e.A} by {e.Id} -> {e.C}"; break;
+                    case BattleEventKind.MaxHpRaised: detail = $"{Name(e.Target)} max hp +{C(e.A)} by {e.Id} -> hp {C(e.B)}/{C(e.C)}"; break;
                     case BattleEventKind.DogEntered: detail = $"{Name(e.Target)} at death's door, grace until {e.A}"; break;
                     case BattleEventKind.DogExited: detail = $"{Name(e.Target)} back from death's door"; break;
                     case BattleEventKind.GraceBroken: detail = $"{Name(e.Target)} grace broken after {e.A} hits"; break;

@@ -2125,6 +2125,26 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673615446441985
+  - m_Id: 8173488056557568
+    m_Key: Lobby.TestGold
+    m_Metadata:
+      m_Items:
+      - rid: 8623673626650738688
+  - m_Id: 8223467345272832
+    m_Key: Effect.MaxHp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673629774446592
+  - m_Id: 8223467357855744
+    m_Key: Log.MaxHp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673629774446593
+  - m_Id: 8223467357855745
+    m_Key: Fx.MaxHp
+    m_Metadata:
+      m_Items:
+      - rid: 8623673629774446594
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4078,3 +4098,22 @@ MonoBehaviour:
       data:
         m_CommentText: The number on the coin pile lying on the floor after a win
           (stage 49, Round 96 A); it flies into the band's coins. {0} = coins.
+    - rid: 8623673626650738688
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The test button of the editor and development builds (Round
+          97). {0} = the gold it adds.
+    - rid: 8623673629774446592
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The maximum HP for the battle (Design/35), the HP rising in
+          proportion. {0} = target. {1} = amount.
+    - rid: 8623673629774446593
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: The maximum HP rose for the battle (Design/35). {0} = source.
+          {1} = target. {2} = the rise. {3} = HP after. {4} = maximum after.
+    - rid: 8623673629774446594
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: '{0} = the maximum HP gained for the battle (Design/35).'

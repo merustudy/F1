@@ -85,7 +85,10 @@ namespace F1.Gameplay
         }
 
         public UnitRef Ref => new UnitRef(Side, Index);
-        public int MaxHp => Setup.MaxHp;
+        public int MaxHp => Setup.MaxHp + MaxHpBonus;
+
+        /// <summary>What the maximum HP items raised it by for this battle (Design/35 판정 6). The expedition's own maximum is <see cref="BattleUnitSetup.MaxHp"/>.</summary>
+        public int MaxHpBonus { get; internal set; }
 
         /// <summary>
         /// The row the unit stands in now. It starts at Setup.Row and goes down when the rows in

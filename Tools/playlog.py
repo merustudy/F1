@@ -5,6 +5,8 @@
 
 A line of the log is: time <tab> screen <tab> state. A screen's time runs until the next line; the last line has none.
 Lines are grouped by screen and, when the state names a different phase (phase=), by that too.
+A line whose name starts with "!" is an event, not a screen (Round 97: "!TestGold" for the test gold button): it is counted apart
+and does not cut the screen's time.
 """
 import glob
 import os
@@ -38,7 +40,9 @@ def key_of(screen, state):
 
 
 def report(path):
-    rows = parse(path)
+    all_rows = parse(path)
+    rows = [row for row in all_rows if not row[1].startswith("!")]
+    events = [row for row in all_rows if row[1].startswith("!")]
     print(path)
     if len(rows) < 2:
         print("  fewer than two lines")
@@ -57,8 +61,13 @@ def report(path):
     print(f"  {'total':<22}{total / 60:>9.1f}")
     print(f"  from {rows[0][1]} [{rows[0][2]}] at {rows[0][0]:%H:%M:%S}")
     print(f"  to   {rows[-1][1]} [{rows[-1][2]}] at {rows[-1][0]:%H:%M:%S}")
+    if events:
+        names = {}
+        for _, screen, _ in events:
+            names[screen[1:]] = names.get(screen[1:], 0) + 1
+        print("  events: " + ", ".join(f"{name} x{count}" for name, count in sorted(names.items())))
     print("  timeline:")
-    for at, screen, state in rows:
+    for at, screen, state in all_rows:
         print(f"    {at:%H:%M:%S} {screen:<11} {state}")
 
 

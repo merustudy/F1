@@ -239,6 +239,22 @@ namespace F1.Tests
         /// activates once when a battle starts, everywhere, with no stat; the helm takes points off the critical chance. Sold and dropped; no enemy wears them.
         /// </summary>
         [Test]
+        public void TheMaximumHpItems_AreArmourThatRaisesItWhenTheBattleStarts()
+        {
+            // 2026-10-23 (Design/35 판정 6): the leather belt and the guardian's amulet, asking for constitution.
+            StaticData data = LoadShipped();
+            foreach ((string id, int value, int req) in new[] { ("leather_belt", 600, 3), ("guardian_amulet", 400, 5) })
+            {
+                ItemData item = data.Items.Get(id);
+                Assert.AreEqual(ItemCategory.Armor, item.Category, id);
+                Assert.AreEqual(ItemTrigger.BattleStart, item.Trigger, id);
+                Assert.AreEqual((EffectKind.MaxHp, TargetMode.Self, value), (item.Effects.Single().Kind, item.Effects.Single().Target, item.Effects.Single().Min), id);
+                Assert.AreEqual(((Stat?)Stat.Con, req), (item.ReqStat, item.ReqValue), id);
+                Assert.IsTrue(item.ShopWeight > 0 && item.DropWeight > 0 && item.Price > 0, id + ": sold and dropped.");
+            }
+        }
+
+        [Test]
         public void TheShippedArmour_IsTheIronArmourAndTheIronHelm()
         {
             StaticData data = LoadShipped();
@@ -367,7 +383,7 @@ namespace F1.Tests
             // Stage 46 (Docs/Design/19, 02 §4 "아이템 목록", 03 §4·§5, 02 §10): 56 items, every one of the thirteen words on at least one item, armour
             // asking for each of the four axes, the two enemy-only items, the four deep bundles swapped, four potions and five bags.
             StaticData data = LoadShipped();
-            Assert.AreEqual(58, data.Items.Ordered.Count, "56 of stage 46 and the two base weapons of stage 47 (the occultist's tome, the minstrel's lute).");
+            Assert.AreEqual(60, data.Items.Ordered.Count, "56 of stage 46, the two base weapons of stage 47 (the occultist's tome, the minstrel's lute) and the two maximum HP items of 2026-10-23 (Design/35).");
             foreach (EffectKind word in new[]
             {
                 EffectKind.Bleed, EffectKind.Regen, EffectKind.Thorns, EffectKind.Cleanse, EffectKind.Stagger, EffectKind.Charge,
@@ -377,7 +393,8 @@ namespace F1.Tests
                 Assert.IsTrue(data.Items.Ordered.Any(i => !i.Unique && i.ShopWeight > 0 && i.Effects.Any(e => e.Kind == word)), word + ": on a shop's shelf.");
             }
 
-            CollectionAssert.AreEquivalent(new[] { Stat.Str, Stat.Dex, Stat.Int, Stat.Wis },
+            // 2026-10-23 (Design/35): the maximum HP items are armour asking for constitution.
+            CollectionAssert.AreEquivalent(new[] { Stat.Str, Stat.Dex, Stat.Int, Stat.Wis, Stat.Con },
                 data.Items.Ordered.Where(i => i.Category == ItemCategory.Armor && i.ShopWeight > 0).Select(i => i.ReqStat.Value).Distinct().ToList(), "Armour on every axis (08 §49's gap).");
             Assert.AreEqual((1, 3), (data.Items.Get("banner").Width, data.Items.Get("banner").Height), "The banner is the first 1x3 shape.");
             Assert.IsTrue(data.Items.Get("spiked_shield").Cycles && data.Items.Get("studded_armor").Trigger == ItemTrigger.BattleStart, "Thorns that stack by the cooldown, and once at the start.");
@@ -394,15 +411,23 @@ namespace F1.Tests
 
             CollectionAssert.AreEquivalent(new[] { "healing_potion", "barrier_potion", "cleansing_potion", "regen_potion" }, data.Potions.Ordered.Select(p => p.Id).ToList());
             Assert.AreEqual((PotionEffect.Cleanse, 3), (data.Potions.Get("cleansing_potion").Effect, data.Potions.Get("cleansing_potion").Magnitude));
-            Assert.AreEqual((PotionEffect.Regen, 8), (data.Potions.Get("regen_potion").Effect, data.Potions.Get("regen_potion").Magnitude), "Stacks: not hundredths.");
+            Assert.AreEqual((PotionEffect.Regen, 4), (data.Potions.Get("regen_potion").Effect, data.Potions.Get("regen_potion").Magnitude), "Stacks: not hundredths (halved 2026-10-23, Design/35).");
             Assert.AreEqual(5, data.Bags.Ordered.Count);
             Assert.AreEqual((2, 2, 16), (data.Bags.Get("knapsack").Width, data.Bags.Get("knapsack").Height, data.Bags.Get("knapsack").Price));
             Assert.AreEqual((3, 2, 24), (data.Bags.Get("big_pack").Width, data.Bags.Get("big_pack").Height, data.Bags.Get("big_pack").Price), "Four coins a square, like the others.");
 
             // Round 92: every shipped item, potion and bag has its picture (item/<kebab-id>, potion/<kebab-id>, bag/<kebab-id>), the uniques a glow too.
             // Round 93 (2026-10-22, the user's "연결 및 구현"): the occultist's tome and the minstrel's lute have theirs as well.
+            // 2026-10-23 (Design/35): the two maximum HP items wait for their picture round; till then the name stands in (no icon).
+            string[] noPictureYet = { "leather_belt", "guardian_amulet" };
             foreach (ItemData item in data.Items.Ordered)
             {
+                if (noPictureYet.Contains(item.Id))
+                {
+                    Assert.IsNull(item.Icon, item.Id);
+                    continue;
+                }
+
                 Assert.AreEqual("item/" + item.Id.Replace('_', '-'), item.Icon, item.Id);
                 Assert.AreEqual(item.Unique ? item.Icon + "-glow" : null, item.GlowIcon, item.Id);
             }

@@ -44,7 +44,7 @@
         "ko-KR": "재생 포션"
       },
       "Effect": "Regen",
-      "Magnitude": 8,
+      "Magnitude": 4,
       "ShopWeight": 4,
       "Icon": "potion/regen-potion",
       "Price": 8

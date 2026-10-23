@@ -13,6 +13,9 @@ namespace F1.Core
     {
         public const string FolderName = "Logs";
 
+        /// <summary>Starts the name of a line that is an event, not a screen (Round 97: the test gold). Tools/playlog.py counts these apart.</summary>
+        public const string EventPrefix = "!";
+
         readonly string _folder;
         readonly Func<DateTime> _now;
 

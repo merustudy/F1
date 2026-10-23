@@ -20,6 +20,10 @@ namespace F1.UI
 
         public static readonly Color Button = Rgb(0x3B, 0x6F, 0xB5);
         public static readonly Color ButtonQuiet = Rgb(0x3A, 0x41, 0x50);
+
+        /// <summary>The development builds' test tools (Round 97): a plum plate with a pink rim, a colour no button of the game uses.</summary>
+        public static readonly Color TestTool = Rgb(0x4A, 0x20, 0x40);
+        public static readonly Color TestToolRim = Rgb(0xE8, 0x5C, 0xC8);
         public static readonly Color Selected = Rgb(0x80, 0x66, 0x14);
 
         public static readonly Color Good = Rgb(0x58, 0xB3, 0x68);

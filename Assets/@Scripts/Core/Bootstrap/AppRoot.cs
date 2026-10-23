@@ -188,6 +188,10 @@ namespace F1.Core
                 // screen, beside the saves and never in them. Tests keep it inside their temporary save root.
                 var playLog = new PlayLog(Path.Combine(SaveRootOverride != null ? saveRoot : Application.persistentDataPath, PlayLog.FolderName));
                 ui.ScreenShown += id => playLog.Append(id.ToString(), PlayLogState(run, expedition));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+                // Round 97: the test gold is an event line ("!" before the name), so that Tools/playlog.py counts it apart from the screens' time.
+                run.TestGoldGranted += amount => playLog.Append(PlayLog.EventPrefix + "TestGold", $"+{amount} gold={run.Run.Gold} " + PlayLogState(run, expedition));
+#endif
                 playLog.Append("Boot", $"locale={setting.LocaleCode} run={run.LoadStatus}");
                 await ui.ShowAsync(ScreenId.Title);
 

@@ -260,7 +260,7 @@ namespace F1.Gameplay
             {
                 ExpeditionMember member = FindMember(state, unit.Setup.SourceId);
                 member.Alive = unit.Alive;
-                member.Hp = unit.Alive ? unit.Hp : 0;
+                member.Hp = unit.Alive ? HpAfterBattle(unit) : 0;
                 // Slice D stage 38: who went to death's door in the battle (one who started at 0 HP went in an earlier one and is marked already).
                 member.DeathsDoor |= atDeathsDoor.Contains(unit.Ref);
 
@@ -407,6 +407,21 @@ namespace F1.Gameplay
             }
 
             return rng.NextInt(100) < data.Balance.DropTierKeepPercent ? tier : tier - 1;
+        }
+
+        /// <summary>
+        /// A survivor's HP when the battle ends: what the maximum HP items raised goes back in proportion (Design/35 판정 6), rounded down, at least 1
+        /// while it had any (death's door at 0 stays 0).
+        /// </summary>
+        public static int HpAfterBattle(BattleUnit unit)
+        {
+            if (unit.MaxHpBonus <= 0 || unit.Hp <= 0)
+            {
+                return unit.Hp;
+            }
+
+            int hp = (int)((long)unit.Hp * unit.Setup.MaxHp / unit.MaxHp);
+            return Math.Max(1, hp);
         }
 
         /// <summary>

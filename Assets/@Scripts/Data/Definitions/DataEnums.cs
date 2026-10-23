@@ -184,6 +184,12 @@ namespace F1.Data
         Fury,
         Haste,
         Vulnerable,
+
+        /// <summary>
+        /// The maximum HP rises for the battle (2026-10-23, Design/35 판정 6): an item that activates when a battle starts, in hundredths. The HP rises
+        /// in proportion, and when the battle ends the HP goes back in the same proportion.
+        /// </summary>
+        MaxHp,
     }
 
     /// <summary>

@@ -231,6 +231,25 @@ namespace F1.Gameplay
             return state.Gold >= data.Balance.TreatmentPrice ? TreatCheck.Ok : TreatCheck.NotEnoughGold;
         }
 
+        /// <summary>
+        /// Adds gold to a run that goes on. Only the development builds' test button calls it (Round 97, 2026-10-23: "로비 화면에서 금화 테스트 버튼");
+        /// no rule of the game grants gold this way.
+        /// </summary>
+        public static void GrantGold(RunState state, int amount)
+        {
+            if (amount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(amount), amount, "Grant a positive amount of gold.");
+            }
+
+            if (state.IsOver)
+            {
+                throw new InvalidOperationException("The run is over.");
+            }
+
+            state.Gold += amount;
+        }
+
         /// <summary>Treats a mercenary at the inn: the price leaves the gold, TreatmentRelief leaves its fatigue and (stage 48) its affliction ends whatever the fatigue.</summary>
         public static void Treat(StaticData data, RunState state, string mercenaryId)
         {

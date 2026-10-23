@@ -61,6 +61,7 @@ namespace F1.UI
             public const string DefeatDeathLimit = "Lobby.DefeatDeathLimit";
             public const string DefeatFinalStand = "Lobby.DefeatFinalStand";
             public const string ToTitle = "Lobby.ToTitle";
+            public const string TestGold = "Lobby.TestGold";
 
             // The town (Round 71): the buildings' plates and bubbles.
             public const string Barracks = "Lobby.Barracks";
@@ -348,6 +349,7 @@ namespace F1.UI
             public const string Fury = "Effect.Fury";
             public const string Haste = "Effect.Haste";
             public const string Vulnerable = "Effect.Vulnerable";
+            public const string MaxHp = "Effect.MaxHp";
         }
 
         /// <summary>The names of the seven states of stage 45, for the battle log's line (and, once their icons are drawn, the state line's chips).</summary>
@@ -437,6 +439,7 @@ namespace F1.UI
             public const string Absorbed = "Fx.Absorbed";
             public const string Heal = "Fx.Heal";
             public const string Shield = "Fx.Shield";
+            public const string MaxHp = "Fx.MaxHp";
             public const string Burn = "Fx.Burn";
             public const string DogEntered = "Fx.DogEntered";
             public const string Survived = "Fx.Survived";
@@ -481,6 +484,7 @@ namespace F1.UI
 
             /// <summary>One of the seven states of stage 45 stacked on a unit: "{source} → {unit}: {state} +{stacks}".</summary>
             public const string StateApplied = "Log.StateApplied";
+            public const string MaxHp = "Log.MaxHp";
             public const string DogEntered = "Log.DogEntered";
             public const string DogExited = "Log.DogExited";
             public const string GraceBroken = "Log.GraceBroken";

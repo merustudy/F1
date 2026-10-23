@@ -314,6 +314,12 @@ namespace F1.Gameplay
 
         /// <summary>One of the seven states of stage 45 was stacked on a unit. Source, Target, Id = cause, A = stacks added, B = (int)EffectKind, C = the unit's stacks of it after.</summary>
         StateApplied,
+
+        /// <summary>
+        /// The maximum HP rose for the battle (Design/35 판정 6). Source, Target, Id = cause, A = the rise (hundredths), B = the HP after (it rose in
+        /// proportion), C = the maximum after.
+        /// </summary>
+        MaxHpRaised,
     }
 
     /// <summary>

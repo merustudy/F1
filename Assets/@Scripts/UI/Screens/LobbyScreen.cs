@@ -80,6 +80,8 @@ namespace F1.UI
         [SerializeField] Image _town;
         [SerializeField] TMP_Text _day;
         [SerializeField] TMP_Text _gold;
+        [SerializeField] Button _testGold;
+        [SerializeField] TMP_Text _testGoldLabel;
         [SerializeField] Button _toTitle;
         [SerializeField] BuildingView _barracks;
         [SerializeField] BuildingView _inn;
@@ -136,6 +138,19 @@ namespace F1.UI
 
         /// <summary>The quarter whose window is open, or None.</summary>
         public Quarter OpenQuarter => _open;
+
+        /// <summary>
+        /// Whether the test tools show (Round 97): in the editor and development builds. The screenshot fixture turns them off so that its
+        /// pictures stay those of the game; a build without the tools never shows them.
+        /// </summary>
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        public static bool TestToolsShown = true;
+#else
+        public static bool TestToolsShown => false;
+#endif
+
+        /// <summary>The test gold button (Round 97), for the tests.</summary>
+        public Button TestGold => _testGold;
 
         public bool BubbleShown => _bubble.gameObject.activeSelf;
         public string BubbleName => _bubbleName.text;
@@ -215,6 +230,9 @@ namespace F1.UI
         {
             _town.sprite = _townArt;
             _toTitle.onClick.AddListener(() => GoTo(ScreenId.Title));
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _testGold.onClick.AddListener(OnTestGold);
+#endif
             _barracks.Button.onClick.AddListener(() => Open(Quarter.Barracks));
             _inn.Button.onClick.AddListener(() => Open(Quarter.Inn));
             _coach.Button.onClick.AddListener(() => Open(Quarter.Coach));
@@ -274,6 +292,10 @@ namespace F1.UI
             _day.text = due ? UiStrings.Get(UiKeys.Lobby.DayFinalStand, run.Day, balance.TotalDays) : UiStrings.Get(UiKeys.Lobby.Day, run.Day, balance.TotalDays);
             _day.color = due ? UiPalette.Virtue : UiPalette.Text;
             _gold.text = UiStrings.Get(UiKeys.Lobby.Gold, run.Gold);
+            _testGold.gameObject.SetActive(TestToolsShown && !run.IsOver);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            _testGoldLabel.text = UiStrings.Get(UiKeys.Lobby.TestGold, RunManager.TestGoldAmount);
+#endif
 
             RefreshTown(data, run, due);
             RefreshStrip(data, run, due);
@@ -794,6 +816,18 @@ namespace F1.UI
                 Refresh();
             }
         }
+
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>The test gold (Round 97): the run manager adds it and saves; the header's gold shows it.</summary>
+        void OnTestGold()
+        {
+            if (Managers.Run.CanGrantTestGold)
+            {
+                Managers.Run.GrantTestGold();
+                Refresh();
+            }
+        }
+#endif
 
         void OnRest()
         {

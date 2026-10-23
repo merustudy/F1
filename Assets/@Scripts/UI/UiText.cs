@@ -838,6 +838,7 @@ namespace F1.UI
                 case EffectKind.Fury: return UiKeys.Effect.Fury;
                 case EffectKind.Haste: return UiKeys.Effect.Haste;
                 case EffectKind.Vulnerable: return UiKeys.Effect.Vulnerable;
+                case EffectKind.MaxHp: return UiKeys.Effect.MaxHp;
                 default: throw new ArgumentOutOfRangeException(nameof(kind), kind, "No text for this effect.");
             }
         }

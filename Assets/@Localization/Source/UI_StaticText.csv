@@ -25,32 +25,33 @@ Title.VolumeLow,Volume step: low (about half as loud).,작게,Low
 Title.VolumeOff,Volume step: silent.,끔,Off
 Title.VolumeNotSaved,Shown when changing a volume failed because settings could not be written.,설정을 저장하지 못해 소리 크기를 바꾸지 않았습니다.,"The setting could not be saved, so the volume was not changed."
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
-Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
-Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day counter, then that only the final stand is left. {0} = current day, {1} = total days.",{0}일차 / {1}일 — 최종 결전,Day {0} / {1} — the final stand
+Lobby.Day,{0} = current day. {1} = total days.,{0}주차 / {1}주,Week {0} / {1}
+Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day counter, then that only the final stand is left. {0} = current day, {1} = total days.",{0}주차 / {1}주 — 최종 결전,Week {0} / {1} — the final stand
 Lobby.Gold,"The company's gold in the header and the windows (stage 26). {0} = gold.",금 {0},Gold {0}
 Lobby.Fatigue,{0} = fatigue (0 is fresh; it builds up on expeditions). {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
 Lobby.FatigueState,"On a roster line of a mercenary in an affliction: the fatigue words, then the affliction's name. {0} = the fatigue words (Lobby.Fatigue). {1} = the affliction.",{0} · {1},{0} · {1}
 Lobby.Dismiss,"Dismisses a mercenary from the roster for good (stage 26, the barracks).",내보내기,Dismiss
 Lobby.Expedition,Header of the expedition panel.,원정,Expedition
 Lobby.EmptyRow,Shown for a row with nobody in it.,비어 있음,Empty
-Lobby.Rest,{0} = how much fatigue comes down. {1} = days that pass.,쉬기 (피로도 -{0} · {1}일),Rest (fatigue -{0} · {1}d)
+Lobby.Rest,{0} = how much fatigue comes down. {1} = days that pass.,쉬기 (피로도 -{0} · {1}주),Rest (fatigue -{0} · {1}w)
 Lobby.Depart,Opens the expedition screen (round 71 E2); the departure is there.,원정 화면으로,To the expedition
 Lobby.ToFinalStand,"The strip's button past the last day: it opens the expedition screen where only the final stand is left.",최종 결전으로,To the final stand
 Lobby.DepartOk,The party can leave.,출발할 수 있습니다,Ready to depart
 Lobby.PartyTooSmall,{0} = minimum party size.,파티에 용병을 {0}명 이상 넣으세요,The party needs at least {0}
 Lobby.RunOver,No mercenary is left alive.,용병단이 전멸했습니다,The company has fallen
-Lobby.FinalStandDue,Past the last day: the only expedition left is the final stand against the final dungeon's boss.,기한이 지났습니다. 최종 결전으로 출발합니다,The last day has passed. Only the final stand is left
+Lobby.FinalStandDue,Past the last day: the only expedition left is the final stand against the final dungeon's boss.,기한이 지났습니다. 최종 결전으로 출발합니다,The last week has passed. Only the final stand is left
 Lobby.Victory,The run was won: the final boss fell.,최종 보스를 쓰러뜨렸습니다 — 승리,The final boss has fallen: victory
 Lobby.DefeatDeathLimit,{0} = the death limit.,전사자가 {0}명에 닿았습니다 — 패배,{0} mercenaries have fallen: defeat
 Lobby.DefeatFinalStand,The final stand was lost.,최종 결전에서 졌습니다 — 패배,The final stand was lost: defeat
 Lobby.ToTitle,Goes back to the title screen.,타이틀로,To Title
+Lobby.TestGold,"The test button of the editor and development builds (Round 97). {0} = the gold it adds.",금 +{0} (테스트),Gold +{0} (test)
 Lobby.Barracks,"The plate of the barracks (Round 71): the roster, the party and dismissing.",막사,Barracks
 Lobby.Inn,"The plate of the inn: resting and the treatment.",쉼터,Inn
 Lobby.Coach,"The plate of the stagecoach: hiring.",역마차,Stagecoach
 Lobby.Gate,"The plate of the gate: the way to the expedition screen (no level: the gate is not upgraded, 2026-10-18).",원정,Expedition
 Lobby.FinalStand,"The gate's plate past the last day (Round 72).",최종 결전,Final stand
 Lobby.FinalStandSub,"The second line of the gate's plate past the last day. {0} = the final dungeon.",{0}의 보스와 싸운다,Fight the boss of {0}
-Lobby.InnClosed,"The second line of the inn's plate past the last day: no day is left to rest.",쉴 날이 없다,No day left to rest
+Lobby.InnClosed,The second line of the inn's plate past the last day: no day is left to rest.,쉴 시간이 없다,No week left to rest
 Lobby.BarracksHint,"The bubble over the barracks. {0} = mercenaries in the roster, {1} = the roster limit, {2} = party members.",로스터 {0}/{1} · 파티 {2}명,Roster {0}/{1} · party of {2}
 Lobby.InnHint,"The bubble over the inn. {0} = the breakdown threshold, {1} = mercenaries at or over it or in a mental breakdown (stage 48: the treatment ends one), {2} = the treatment's price.",피로 {0} 이상·정신 붕괴 {1}명 · 치료 금 {2},{1} at fatigue {0}+ or broken · treatment: gold {2}
 Lobby.CoachHint,"The bubble over the stagecoach. {0} = candidates, {1} = the hire price.",후보 {0}명 · 고용 금 {1},{0} candidates · hire: gold {1}
@@ -66,7 +67,7 @@ Lobby.Hire,"The button that hires a candidate. {0} = the price.",고용 금 {0},
 Lobby.NoCandidates,Shown in the stagecoach window when nobody is waiting.,후보가 없습니다,Nobody is waiting
 Lobby.CoachNote,Under the candidates.,귀환 정산마다 새 후보가 온다,New candidates come with every return
 Lobby.Treat,"The button that treats a mercenary at the inn. {0} = the price, {1} = how much fatigue it takes off.",치료 금 {0} · 피로 -{1},Treat · {0} gold · -{1}
-Lobby.InnNote,Under the inn's list: the treatment takes no day and (stage 48) ends a mental breakdown.,치료는 날이 가지 않고 정신 붕괴를 푼다,The treatment takes no day and ends a breakdown
+Lobby.InnNote,Under the inn's list: the treatment takes no day and (stage 48) ends a mental breakdown.,치료는 시간이 들지 않고 정신 붕괴를 푼다,The treatment takes no week and ends a breakdown
 Lobby.Level,"A mercenary's level (stage 27), on the strip's chips, the barracks' lines, the candidates and the expedition cards. {0} = the level.",Lv {0},Lv {0}
 Lobby.Exp,"The experience toward the next level, on a barracks line. {0} = the experience, {1} = what the next level takes.",경험치 {0}/{1},XP {0}/{1}
 Lobby.ExpMax,"On a barracks line at the last level.",경험치 최대,XP max
@@ -74,8 +75,8 @@ Lobby.LevelUp,"The button on a barracks line whose experience meets its level (S
 Lobby.LevelUpCount,"The small gold count at the barracks' plate (Slice D stage 35): how many mercenaries can level up. {0} = the count.",▲{0},▲{0}
 Lobby.LevelUpMark,"Before the level on a strip chip of a mercenary who can level up (Slice D stage 35).",▲,▲
 Lobby.StatGain,"After a stat value on a barracks line that the level-up just grew (Slice D stage 35). {0} = points.",+{0},+{0}
-Lobby.EndedOn,Row of the result window: the day the run ended.,끝난 날,Ended on
-Lobby.DayValue,"A day as a value. {0} = the day.",{0}일차,Day {0}
+Lobby.EndedOn,Row of the result window: the day the run ended.,끝난 주,Ended in
+Lobby.DayValue,A day as a value. {0} = the day.,{0}주차,Week {0}
 Lobby.Expeditions,Row of the result window: how many expeditions.,원정,Expeditions
 Lobby.Times,"A count of expeditions. {0} = the count.",{0}회,{0}
 Lobby.ExpeditionsValue,"The expeditions with their split by dungeon. {0} = the count, {1} = the split (Lobby.ExpeditionsOf joined by commas).",{0}회 ({1}),{0} ({1})
@@ -84,12 +85,12 @@ Lobby.FallenLabel,Row of the result window: how many died.,전사자,Fallen
 Lobby.FallenValue,"The dead as a count. {0} = the count.",{0}명,{0}
 Lobby.Survivors,Row of the result window: who is still alive.,살아남은 용병,Still alive
 Lobby.BuildingPlate,"The plate of a building with its level (stage 30, Round 78). {0} = the building's name, {1} = its level.",{0}  Lv {1},{0}  Lv {1}
-Lobby.Construction,"The badge under a building under construction, and its bubble's second line. {0} = the days left.",건설 중 · {0}일 남음,Under construction · {0} days left
+Lobby.Construction,"The badge under a building under construction, and its bubble's second line. {0} = the days left.",건설 중 · {0}주 남음,Under construction · {0} weeks left
 Lobby.UpgradeHint,"The end of a building's bubble when it can be upgraded. {0} = the next level's price.",업그레이드 금 {0},upgrade: gold {0}
-Lobby.UpgradeLine,"The building line of a window: the level and what the next level gives. {0} = the level, {1} = the next level, {2} = the effect (Lobby.Effect*), {3} = the price, {4} = the days.",Lv {0} → Lv {1}: {2} · 금 {3} · {4}일,Lv {0} → Lv {1}: {2} · gold {3} · {4} days
-Lobby.UpgradeButton,"The button that starts a building's next level. {0} = the price, {1} = the days.",업그레이드 금 {0} · {1}일,Upgrade · gold {0} · {1} days
+Lobby.UpgradeLine,"The building line of a window: the level and what the next level gives. {0} = the level, {1} = the next level, {2} = the effect (Lobby.Effect*), {3} = the price, {4} = the days.",Lv {0} → Lv {1}: {2} · 금 {3} · {4}주,Lv {0} → Lv {1}: {2} · gold {3} · {4} weeks
+Lobby.UpgradeButton,"The button that starts a building's next level. {0} = the price, {1} = the days.",업그레이드 금 {0} · {1}주,Upgrade · gold {0} · {1} weeks
 Lobby.MaxLevelLine,"The building line of a window at the last level. {0} = the level, {1} = the effect at this level (Lobby.Effect* with the same value twice).",Lv {0} · 최고 레벨 · {1},Lv {0} · top level · {1}
-Lobby.ConstructionLine,"The building line of a window while its level is being built. {0} = the level, {1} = the level being built, {2} = the days left.",Lv {0} → Lv {1} 건설 중 · {2}일 남음,Lv {0} → Lv {1} under construction · {2} days left
+Lobby.ConstructionLine,"The building line of a window while its level is being built. {0} = the level, {1} = the level being built, {2} = the days left.",Lv {0} → Lv {1} 건설 중 · {2}주 남음,Lv {0} → Lv {1} under construction · {2} weeks left
 Lobby.LockedNote,"Under the lists of a window whose building is under construction: its commands are off.",건설 중이라 쓸 수 없다,Closed while under construction
 Lobby.BarracksLockedNote,"Under the barracks' list while it is under construction (Slice D stage 35): dismissing is off, the level-up is not.",건설 중이라 내보낼 수 없다 (레벨 업은 된다),No dismissing while under construction (levelling up still works)
 Lobby.EffectBarracks,"What the barracks' level gives. {0} = the roster limit now, {1} = at the next level.",로스터 상한 {0} → {1},roster limit {0} → {1}
@@ -98,13 +99,13 @@ Lobby.EffectCoach,"What the stagecoach's level gives. {0} = the candidates now, 
 Expedition.Title,Header of the expedition screen (round 71 E2).,원정,Expedition
 Expedition.ToLobby,Back to the lobby.,로비로,To the lobby
 Expedition.Home,The company's town on the map.,본부,Home
-Expedition.MarkerOpen,"Under a dungeon's marker. {0} = clears, {1} = days it takes.",클리어 {0}회 · {1}일,Cleared {0} · {1} days
+Expedition.MarkerOpen,"Under a dungeon's marker. {0} = clears, {1} = days it takes.",클리어 {0}회 · {1}주,Cleared {0} · {1} weeks
 Expedition.MarkerLocked,"Under a locked dungeon's marker. {0} = the dungeon whose clears open it, {1} = how many.",잠김 · {0} {1}회 클리어,Locked · clear {0} ×{1}
 Expedition.Floors,{0} = map floors before the boss.,{0}층 + 보스,{0} floors + boss
-Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back.",{0}일 (→ {1}일차),{0} days (→ day {1})
+Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back.",{0}주 (→ {1}주차),{0} weeks (→ week {1})
 Expedition.Potions,"One kind of starting potion in the details. {0} = its name, {1} = how many.",{0} ×{1},{0} ×{1}
 Expedition.UnlockHint,"Under an open dungeon's details, one line per dungeon its clears open. {0} = that dungeon, {1} = the clears it takes.",{0} 해금: 이 던전을 {1}회 클리어,Opens {0}: clear this dungeon {1} times
-Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last day the party must fight its boss
+Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last week the party must fight its boss
 Expedition.Depart,Starts the expedition.,출발,Depart
 Expedition.Locked,The chosen dungeon is still locked.,아직 잠긴 던전입니다,This dungeon is still locked
 Expedition.FinalName,On the final dungeon's marker. {0} = its name.,{0} (최종 던전),{0} (final dungeon)
@@ -114,11 +115,11 @@ Expedition.DaysLabel,Row label in the details.,소요,Takes
 Expedition.PotionsLabel,Row label in the details.,시작 포션,Starting potions
 Expedition.ClearedLabel,Row label in the details.,클리어,Clears
 Expedition.ClearedCount,{0} = times the dungeon was cleared.,{0}회,{0}
-Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}일을 넘기면 {1}의 보스와 강제로 싸운다,"Past day {0}, the boss of {1} must be fought"
+Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}주를 넘기면 {1}의 보스와 강제로 싸운다,"Past week {0}, the boss of {1} must be fought"
 Expedition.RewardLabel,Row label in the details (stage 26).,보상,Reward
 Expedition.Reward,"What the settlement pays for the dungeon. {0} = gold per map floor reached, {1} = gold for a clear.",층마다 금 {0} · 클리어 금 {1},{0} gold per floor · {1} for a clear
 Expedition.PartyTitle,Title of the party popup the departure opens (round 75 B).,원정 파티,Expedition party
-Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = days it takes, {2} = the day the party is back.",{0} · {1}일 (→ {2}일차),"{0} · {1} days (→ day {2})"
+Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = days it takes, {2} = the day the party is back.",{0} · {1}주 (→ {2}주차),{0} · {1} weeks (→ week {2})
 Expedition.RosterHeader,"Over the roster's list in the popup (round 76 D). {0} = roster size, {1} = its limit.","로스터 {0}/{1} — 넣기로 비어 있는 맨 앞 열에 서고, 빼면 뒤가 전진한다",Roster {0}/{1} — In takes the next row; take one out and those behind advance
 Expedition.EmptyRowHint,Under an empty row of the popup's stage (round 76 D).,오른쪽 목록에서 넣으세요,Add from the list at the right
 Expedition.Join,The list's button that puts a mercenary in the party (round 76 D).,넣기,In
@@ -245,6 +246,7 @@ Effect.Keen,"Keen stacks (critical chance higher). {0} = target. {1} = stacks.",
 Effect.Fury,"Fury stacks (critical multiplier higher). {0} = target. {1} = stacks.",{0}에게 격분 {1},{1} Fury to {0}
 Effect.Haste,"Haste stacks (cooldowns faster). {0} = target. {1} = stacks.",{0}에게 가속 {1},{1} Haste to {0}
 Effect.Vulnerable,"Vulnerable stacks (damage from items taken higher). {0} = target. {1} = stacks.",{0}에게 취약 {1},{1} Vulnerable to {0}
+Effect.MaxHp,"The maximum HP for the battle (Design/35), the HP rising in proportion. {0} = target. {1} = amount.",{0}에게 최대 체력 +{1},+{1} Max HP to {0}
 State.Freeze,"The name of the freeze state (stage 45), in the battle log.",빙결,Freeze
 State.Blind,The name of the blind state.,암흑,Blind
 State.Aim,The name of the aim state.,조준,Aim
@@ -325,6 +327,7 @@ Log.Thorns,"{0} = source. {1} = target. {2} = amount (stage 44).",{0} → {1}: �
 Log.Cleansed,"{0} = source. {1} = target. {2} = burn stacks off. {3} = bleed stacks off. {4} = freeze, blind and vulnerable stacks off together (stage 45; a heal that binds a bleed reads 0 burn).",{0} → {1}: 정화 (화상 −{2} · 출혈 −{3} · 빙결·암흑·취약 −{4}),{0} → {1}: cleansed (Burn −{2} · Bleed −{3} · Freeze/Blind/Vulnerable −{4})
 Log.Staggered,"{0} = source. {1} = target. {2} = seconds (stage 44).",{0} → {1}: 경직 {2}초,{0} → {1}: staggered {2}s
 Log.Charged,"{0} = source. {1} = target. {2} = seconds (stage 44).",{0} → {1}: 충전 {2}초,{0} → {1}: charged {2}s
+Log.MaxHp,"The maximum HP rose for the battle (Design/35). {0} = source. {1} = target. {2} = the rise. {3} = HP after. {4} = maximum after.",{0} → {1}: 최대 체력 +{2} ({3}/{4}),{0} → {1}: Max HP +{2} ({3}/{4})
 Log.StateApplied,"One of the seven states of stage 45 stacked on a unit. {0} = source. {1} = target. {2} = the state's name. {3} = stacks.",{0} → {1}: {2} +{3},{0} → {1}: {2} +{3}
 Log.DogEntered,{0} = unit. {1} = seconds of grace.,{0}: 빈사 상태! 유예 {1}초,{0} is at death's door! Grace {1}s
 Log.DogExited,{0} = unit.,{0}: 빈사에서 벗어남,{0} is back from death's door
@@ -363,7 +366,7 @@ Settle.Survivors,{0} = names.,생환: {0},Returned: {0}
 Settle.Fallen,{0} = names.,전사: {0},Fallen: {0}
 Settle.Fatigue,"{0} = each survivor's name and the fatigue they came back with, separated by commas.",생환자의 피로도: {0},Fatigue of those who returned: {0}
 Settle.SurvivorState,"One survivor in Settle.Fatigue who came back in an affliction. {0} = name and fatigue. {1} = the affliction.",{0} ({1}),{0} ({1})
-Settle.Days,{0} = days passed. {1} = the new day.,{0}일이 지나 {1}일차가 되었습니다,{0} days passed. It is now day {1}
+Settle.Days,{0} = days passed. {1} = the new day.,{0}주가 지나 {1}주차가 되었습니다,{0} weeks passed. It is now week {1}
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
 Settle.Victory,The run was won with this expedition: the final boss fell.,최종 보스를 쓰러뜨렸습니다. 런이 끝났습니다,The final boss has fallen. The run is over
@@ -380,6 +383,7 @@ Fx.Damage,{0} = HP lost. Rises from the unit hit.,-{0},-{0}
 Fx.Absorbed,{0} = damage the shield took.,막힘 {0},Blocked {0}
 Fx.Heal,{0} = HP restored.,+{0},+{0}
 Fx.Shield,{0} = shield gained.,방어 +{0},Shield +{0}
+Fx.MaxHp,{0} = the maximum HP gained for the battle (Design/35).,최대 체력 +{0},Max HP +{0}
 Fx.Burn,{0} = burn stacks applied.,화상 +{0},Burn +{0}
 Fx.DogEntered,A mercenary reached death's door.,빈사!,Death's door!
 Fx.Survived,A mercenary at death's door survived a death roll.,버텼다,Held on

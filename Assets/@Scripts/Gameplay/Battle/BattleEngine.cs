@@ -655,6 +655,9 @@ namespace F1.Gameplay
                         case EffectKind.Charge:
                             Charge(target, magnitude, owner.Ref, data.Id, item);
                             break;
+                        case EffectKind.MaxHp:
+                            RaiseMaxHp(target, magnitude, owner.Ref, data.Id);
+                            break;
                         case EffectKind.Freeze:
                         case EffectKind.Blind:
                         case EffectKind.Aim:
@@ -1140,11 +1143,12 @@ namespace F1.Gameplay
             target.Hp = Math.Min(target.MaxHp, target.Hp + amount);
             Log(BattleEventKind.Healed, source, target.Ref, cause, amount, target.Hp - before, target.Hp);
 
-            // A heal binds the wound (stage 44): every stack of bleed stops, logged as a cleanse by the heal's cause.
-            if (amount > 0 && target.Bleed > 0)
+            // A heal binds the wound (stage 44): logged as a cleanse by the heal's cause. 2026-10-23 (Design/35 판정 1 "아이템 및 포션"): a heal of an
+            // item or a potion takes one stack off, a regen tick none.
+            if (amount > 0 && target.Bleed > 0 && cause != BattleEvent.CauseRegen)
             {
-                int stopped = target.Bleed;
-                target.Bleed = 0;
+                int stopped = 1;
+                target.Bleed -= stopped;
                 Log(BattleEventKind.Cleansed, source, target.Ref, cause, 0, stopped, 0);
             }
 
@@ -1160,6 +1164,19 @@ namespace F1.Gameplay
         {
             target.Shield += amount;
             Log(BattleEventKind.ShieldGained, source, target.Ref, cause, amount, 0, target.Shield);
+        }
+
+        /// <summary>
+        /// Raises the target's maximum HP for this battle (2026-10-23, Design/35 판정 6: "전투 시작시에 최대 체력, 현재 체력은 비율로 올라감"): the HP
+        /// rises in the same proportion, rounded down. When the battle ends the expedition takes the HP back in that proportion
+        /// (<see cref="ExpeditionRules"/>), so equipping and unequipping such an item never heals.
+        /// </summary>
+        void RaiseMaxHp(BattleUnit target, int amount, UnitRef source, string cause)
+        {
+            int before = target.MaxHp;
+            target.MaxHpBonus += amount;
+            target.Hp = (int)((long)target.Hp * target.MaxHp / before);
+            Log(BattleEventKind.MaxHpRaised, source, target.Ref, cause, amount, target.Hp, target.MaxHp);
         }
 
         void AddBurn(BattleUnit target, int stacks, UnitRef source, string cause)

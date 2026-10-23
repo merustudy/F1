@@ -27,6 +27,35 @@ namespace F1.Tests
         }
 
         [Test]
+        public void GrantTestGold_AddsTheTestGold_SavesIt_AndTellsAfterTheSave()
+        {
+            FlowTestKit kit = new FlowTestKit().InLobby();
+            int before = kit.Run.Run.Gold;
+            int told = 0;
+            kit.Run.TestGoldGranted += amount => told += amount;
+
+            Assert.IsTrue(kit.Run.CanGrantTestGold);
+            kit.Run.GrantTestGold();
+            kit.Run.GrantTestGold();
+
+            Assert.AreEqual(before + 2 * RunManager.TestGoldAmount, kit.Run.Run.Gold);
+            Assert.AreEqual(2 * RunManager.TestGoldAmount, told);
+            Assert.AreEqual(before + 2 * RunManager.TestGoldAmount, kit.Restart().Run.Run.Gold, "Saved like any lobby command (Round 97).");
+        }
+
+        [Test]
+        public void GrantTestGold_IsClosedAwayAndOnceTheRunIsOver()
+        {
+            FlowTestKit kit = new FlowTestKit().OnNodeMap();
+            Assert.IsFalse(kit.Run.CanGrantTestGold);
+            Assert.Throws<InvalidOperationException>(() => kit.Run.GrantTestGold());
+
+            var run = new RunState { Outcome = RunOutcome.Victory };
+            Assert.Throws<InvalidOperationException>(() => RunRules.GrantGold(run, 100));
+            Assert.Throws<ArgumentOutOfRangeException>(() => RunRules.GrantGold(new RunState(), 0));
+        }
+
+        [Test]
         public void StartNewRun_CreatesDayOneFromTheSeedSource_AndRaisesRunStarted()
         {
             var kit = new FlowTestKit(seed: 1234);

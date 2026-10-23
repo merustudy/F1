@@ -176,8 +176,8 @@
           "Kind": "Aim",
           "Target": "AllyAll",
           "Reach": 0,
-          "Min": 3,
-          "Max": 3
+          "Min": 8,
+          "Max": 8
         }
       ],
       "ShopWeight": 6,
@@ -268,8 +268,8 @@
           "Kind": "Bleed",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 4,
-          "Max": 4
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 0,
@@ -307,15 +307,15 @@
           "Kind": "Keen",
           "Target": "Self",
           "Reach": 0,
-          "Min": 3,
-          "Max": 3
+          "Min": 8,
+          "Max": 8
         },
         {
           "Kind": "Fury",
           "Target": "Self",
           "Reach": 0,
-          "Min": 3,
-          "Max": 3
+          "Min": 8,
+          "Max": 8
         }
       ],
       "ShopWeight": 6,
@@ -392,8 +392,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 175,
-          "Max": 175
+          "Min": 263,
+          "Max": 263
         }
       ],
       "ShopWeight": 10,
@@ -431,8 +431,8 @@
           "Kind": "Regen",
           "Target": "AllyLowestHp",
           "Reach": 0,
-          "Min": 4,
-          "Max": 4
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 8,
@@ -470,8 +470,8 @@
           "Kind": "Regen",
           "Target": "AllyAll",
           "Reach": 0,
-          "Min": 2,
-          "Max": 2
+          "Min": 1,
+          "Max": 1
         }
       ],
       "ShopWeight": 6,
@@ -516,8 +516,8 @@
           "Kind": "Burn",
           "Target": "EnemyAll",
           "Reach": 0,
-          "Min": 3,
-          "Max": 3
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 0,
@@ -555,8 +555,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 164,
-          "Max": 164
+          "Min": 246,
+          "Max": 246
         }
       ],
       "ShopWeight": 8,
@@ -764,8 +764,8 @@
           "Kind": "Regen",
           "Target": "AllyAll",
           "Reach": 0,
-          "Min": 4,
-          "Max": 4
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 0,
@@ -803,8 +803,8 @@
           "Kind": "Burn",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 2,
-          "Max": 2
+          "Min": 1,
+          "Max": 1
         }
       ],
       "ShopWeight": 8,
@@ -881,8 +881,8 @@
           "Kind": "Stagger",
           "Target": "EnemyFront",
           "Reach": 2,
-          "Min": 1200,
-          "Max": 1200
+          "Min": 800,
+          "Max": 800
         }
       ],
       "ShopWeight": 8,
@@ -1021,8 +1021,8 @@
           "Kind": "Bleed",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 2,
-          "Max": 2
+          "Min": 1,
+          "Max": 1
         }
       ],
       "ShopWeight": 0,
@@ -1078,6 +1078,45 @@
       "CritTakenPercent": 0,
       "CritDamagePercent": 50,
       "ReqStat": "Str",
+      "ReqValue": 5
+    },
+    {
+      "Id": "guardian_amulet",
+      "Name": {
+        "en-US": "Guardian Amulet",
+        "ko-KR": "수호자의 목걸이"
+      },
+      "Category": "Armor",
+      "Width": 1,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "MaxHp",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 400,
+          "Max": 400
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": null,
+      "Price": 14,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Con",
       "ReqValue": 5
     },
     {
@@ -1177,8 +1216,8 @@
           "Kind": "Heal",
           "Target": "Self",
           "Reach": 0,
-          "Min": 131,
-          "Max": 131
+          "Min": 200,
+          "Max": 200
         }
       ],
       "ShopWeight": 10,
@@ -1294,8 +1333,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 545,
-          "Max": 545
+          "Min": 818,
+          "Max": 818
         }
       ],
       "ShopWeight": 10,
@@ -1333,8 +1372,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 218,
-          "Max": 218
+          "Min": 436,
+          "Max": 436
         }
       ],
       "ShopWeight": 10,
@@ -1372,8 +1411,8 @@
           "Kind": "Burn",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 2,
-          "Max": 2
+          "Min": 1,
+          "Max": 1
         }
       ],
       "ShopWeight": 0,
@@ -1411,8 +1450,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 436,
-          "Max": 436
+          "Min": 654,
+          "Max": 654
         }
       ],
       "ShopWeight": 8,
@@ -1430,6 +1469,45 @@
       "CritDamagePercent": 0,
       "ReqStat": "Dex",
       "ReqValue": 5
+    },
+    {
+      "Id": "leather_belt",
+      "Name": {
+        "en-US": "Leather Belt",
+        "ko-KR": "가죽 허리띠"
+      },
+      "Category": "Armor",
+      "Width": 2,
+      "Height": 1,
+      "CooldownMs": 0,
+      "Rows": {
+        "From": "Front",
+        "Reach": 4
+      },
+      "Effects": [
+        {
+          "Kind": "MaxHp",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 600,
+          "Max": 600
+        }
+      ],
+      "ShopWeight": 8,
+      "Icon": null,
+      "Price": 12,
+      "Melee": false,
+      "Stars": [],
+      "StarDamage": 0,
+      "CritChancePercent": 0,
+      "Unique": false,
+      "DropWeight": 8,
+      "School": null,
+      "Trigger": "BattleStart",
+      "CritTakenPercent": 0,
+      "CritDamagePercent": 0,
+      "ReqStat": "Con",
+      "ReqValue": 3
     },
     {
       "Id": "longbow",
@@ -1815,8 +1893,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 273,
-          "Max": 273
+          "Min": 546,
+          "Max": 546
         }
       ],
       "ShopWeight": 8,
@@ -1900,8 +1978,8 @@
           "Kind": "Bleed",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 2,
-          "Max": 2
+          "Min": 1,
+          "Max": 1
         }
       ],
       "ShopWeight": 8,
@@ -2024,8 +2102,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 120,
-          "Max": 120
+          "Min": 180,
+          "Max": 180
         },
         {
           "Kind": "Thorns",
@@ -2070,8 +2148,8 @@
           "Kind": "Shield",
           "Target": "Self",
           "Reach": 0,
-          "Min": 327,
-          "Max": 327
+          "Min": 491,
+          "Max": 491
         },
         {
           "Kind": "Thorns",
@@ -2116,8 +2194,8 @@
           "Kind": "Bleed",
           "Target": "EnemyFront",
           "Reach": 1,
-          "Min": 3,
-          "Max": 3
+          "Min": 2,
+          "Max": 2
         }
       ],
       "ShopWeight": 8,

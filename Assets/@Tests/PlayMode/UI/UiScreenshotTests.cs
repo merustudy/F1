@@ -33,6 +33,8 @@ namespace F1.Tests
         public void SetUp()
         {
             _saveRoot = BootTestUtil.UseTemporarySaveRoot();
+            // Round 97: the pictures are the game's; the editor's test tools stay out of them (TheTestGold_Korean shows them on purpose).
+            LobbyScreen.TestToolsShown = false;
             _outputDirectory = Environment.GetEnvironmentVariable("F1_SCREENSHOT_DIR");
             if (string.IsNullOrEmpty(_outputDirectory))
             {
@@ -45,7 +47,24 @@ namespace F1.Tests
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            LobbyScreen.TestToolsShown = true;
             yield return BootTestUtil.ShutdownApp();
+        }
+
+        /// <summary>The lobby's test gold button (Round 97 A, beside the gold in the header), before and after two clicks. For the mockup's comparison.</summary>
+        [UnityTest]
+        public IEnumerator TheTestGold_Korean()
+        {
+            LobbyScreen.TestToolsShown = true;
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            yield return Capture("ko_91_lobby_test_gold");
+            UiTestUtil.Click(lobby, "Frame/Header/TestGold");
+            UiTestUtil.Click(lobby, "Frame/Header/TestGold");
+            yield return null;
+            yield return Capture("ko_92_lobby_test_gold_after");
         }
 
         /// <summary>

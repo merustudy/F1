@@ -67,7 +67,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Bleed_StopsWhenTheUnitIsHealed_ByAnyHeal()
+        public void Bleed_LosesOneStackToEachHealOfAnItemOrAPotion()
         {
             PotionData potion = TestData.HealPotion(100);
             BattleEngine battle = Battle(
@@ -78,15 +78,17 @@ namespace F1.Tests
                 potion);
             Assert.AreEqual(4, battle.Party[0].Bleed, "One tick took one stack.");
 
+            // 2026-10-23 (Design/35 판정 1 "아이템 및 포션"): a heal takes one stack off, no longer all of them.
             Assert.IsTrue(battle.TryUsePotion(0, 0));
-            Assert.AreEqual(0, battle.Party[0].Bleed);
+            Assert.AreEqual(3, battle.Party[0].Bleed);
             BattleEvent bound = Of(battle, BattleEventKind.Cleansed).Single();
             Assert.AreEqual(potion.Id, bound.Id, "Logged as a cleanse by the heal's cause.");
             Assert.AreEqual(0, bound.A);
-            Assert.AreEqual(4, bound.B);
+            Assert.AreEqual(1, bound.B);
 
             battle.AdvanceTo(6000);
-            Assert.AreEqual(1, Of(battle, BattleEventKind.Damaged, BattleEvent.CauseBleed).Count, "Only the tick before the heal.");
+            CollectionAssert.AreEqual(new[] { 5, 3, 2, 1 }, Of(battle, BattleEventKind.Damaged, BattleEvent.CauseBleed).Select(e => e.A),
+                "The tick before the heal (five stacks), then the three left after it, one fewer each tick.");
         }
 
         [Test]
@@ -135,10 +137,10 @@ namespace F1.Tests
         }
 
         [Test]
-        public void AtOneTick_BurnThenBleedThenRegen_AndTheRegenBindsTheBleed()
+        public void AtOneTick_BurnThenBleedThenRegen_AndTheRegenLeavesTheBleed()
         {
             // The enemy opens with 2 bleed and 1 burn on the mercenary; the mercenary brings 1 regen. At 1 s: the burn deals 1, the bleed deals 2 and
-            // falls to 1, then the regen heals 1 and binds what is left of the bleed.
+            // falls to 1, then the regen heals 1. A regen tick takes no bleed off (2026-10-23, Design/35 판정 1: only an item's or a potion's heal does).
             BattleEngine battle = Battle(
                 new[] { TestData.Mercenary("m", 1, 4000, new EquippedItem(StartItem("herb", EffectKind.Regen, TargetMode.Self, 1))) },
                 new[] { TestData.Enemy("e", 1, 100000, Opening("knife", EffectKind.Bleed, 2), Opening("ember", EffectKind.Burn, 1)) },
@@ -146,15 +148,49 @@ namespace F1.Tests
 
             List<BattleEvent> atTheTick = battle.Events.Where(e => e.TimeMs == 1000 && e.Kind != BattleEventKind.ItemActivated).ToList();
             CollectionAssert.AreEqual(
-                new[] { BattleEvent.CauseBurn, BattleEvent.CauseBleed, BattleEvent.CauseRegen, BattleEvent.CauseRegen },
+                new[] { BattleEvent.CauseBurn, BattleEvent.CauseBleed, BattleEvent.CauseRegen },
                 atTheTick.Select(e => e.Id),
-                "Damaged by the burn, Damaged by the bleed, Healed by the regen, the bleed Cleansed by it.");
-            Assert.AreEqual(BattleEventKind.Cleansed, atTheTick[3].Kind);
-            Assert.AreEqual(1, atTheTick[3].B, "One stack was left to bind.");
-            Assert.AreEqual(0, battle.Party[0].Bleed);
+                "Damaged by the burn, Damaged by the bleed, Healed by the regen.");
+            Assert.AreEqual(1, battle.Party[0].Bleed, "The regen left the bleed.");
             Assert.AreEqual(0, battle.Party[0].Burn);
             Assert.AreEqual(0, battle.Party[0].Regen);
             Assert.AreEqual(4000 - 1 - 2 + 1, battle.Party[0].Hp);
+        }
+
+        // ---- The maximum HP (2026-10-23, Design/35 판정 6) ----
+
+        [Test]
+        public void MaxHp_RisesWhenTheBattleStarts_TheHpInProportion_AndGoesBackInProportionAfterIt()
+        {
+            BattleUnitSetup hurt = TestData.Mercenary("m", 1, 3000, new EquippedItem(StartItem("belt", EffectKind.MaxHp, TargetMode.Self, 1000, ItemCategory.Armor)));
+            hurt.Hp = 1500;
+            BattleEngine battle = Battle(new[] { hurt }, new[] { TestData.Enemy("e", 1, 100000) }, 0);
+
+            BattleUnit unit = battle.Party[0];
+            Assert.AreEqual(4000, unit.MaxHp);
+            Assert.AreEqual(1000, unit.MaxHpBonus);
+            Assert.AreEqual(2000, unit.Hp, "Half of the maximum before, half of it after.");
+            BattleEvent raised = Of(battle, BattleEventKind.MaxHpRaised).Single();
+            Assert.AreEqual(("belt", 1000, 2000, 4000), (raised.Id, raised.A, raised.B, raised.C));
+
+            // When the battle ends the expedition takes it back in proportion: a heal in the battle stays a heal, the item itself heals nothing.
+            Assert.AreEqual(1500, ExpeditionRules.HpAfterBattle(unit));
+            unit.Hp = 4000;
+            Assert.AreEqual(3000, ExpeditionRules.HpAfterBattle(unit));
+            unit.Hp = 1;
+            Assert.AreEqual(1, ExpeditionRules.HpAfterBattle(unit), "Never down to 0 while it had any.");
+            unit.Hp = 0;
+            Assert.AreEqual(0, ExpeditionRules.HpAfterBattle(unit), "Death's door stays at 0.");
+        }
+
+        [Test]
+        public void MaxHp_BelongsToAnItemThatActivatesWhenTheBattleStarts()
+        {
+            var effects = new List<ItemEffect> { TestData.Effect(EffectKind.MaxHp, TargetMode.Self, 500) };
+            Assert.Throws<DataException>(() => new ItemData("loop", TestData.Text("loop"), ItemCategory.Armor, 1, 1, 3000, RowSpan.All, effects, 0,
+                school: TestData.DefaultSchool(ItemCategory.Armor)));
+            Assert.DoesNotThrow(() => StartItem("belt", EffectKind.MaxHp, TargetMode.Self, 500, ItemCategory.Armor));
+            Assert.IsFalse(ItemEffect.CountsWhole(EffectKind.MaxHp) || ItemEffect.Hurts(EffectKind.MaxHp), "Hundredths, and it helps.");
         }
 
         // ---- Thorns ----
@@ -406,10 +442,10 @@ namespace F1.Tests
         // ---- The regen potion (stage 46) ----
 
         [Test]
-        public void ARegenPotion_PutsItsStacksOnTheMercenary_WhichHealTickByTick_AndStopABleed()
+        public void ARegenPotion_PutsItsStacksOnTheMercenary_WhichHealTickByTick_AndLeaveTheBleed()
         {
             // Stage 46 (Docs/Design/02 §10): the potion's stacks are an item's regen — logged by the potion, healing stacks x RegenHealPerStack (1 in
-            // the test balance) at each tick, one stack fewer each tick; and its first tick, a heal, stops a bleed like any heal.
+            // the test balance) at each tick, one stack fewer each tick. 2026-10-23 (Design/35 판정 1): its ticks take no bleed off.
             var potion = new PotionData("salve", TestData.Text("salve"), PotionEffect.Regen, 3, 1);
             BattleEngine battle = Battle(
                 new[] { TestData.Mercenary("m", 1, 4000, TestData.Attack(100000, 1)) },
@@ -429,9 +465,9 @@ namespace F1.Tests
             CollectionAssert.AreEqual(new[] { 1000, 2000, 3000 }, Of(battle, BattleEventKind.Healed, BattleEvent.CauseRegen).Select(e => e.TimeMs), "Three ticks: 3, 2, 1 stacks.");
             CollectionAssert.AreEqual(new[] { 3, 2, 1 }, Of(battle, BattleEventKind.Healed, BattleEvent.CauseRegen).Select(e => e.A));
             Assert.AreEqual(0, battle.Party[0].Regen);
-            Assert.AreEqual(0, battle.Party[0].Bleed, "The first regen tick, a heal, stopped the bleed (02 §5).");
-            // Ticks at 1, 2, 3 s in the order burn -> bleed -> regen: burn 5 + 4 + 3, one bleed tick of 4 before the regen stopped it, regen 3 + 2 + 1.
-            Assert.AreEqual(4000 - 12 - 4 + 6, battle.Party[0].Hp);
+            Assert.AreEqual(1, battle.Party[0].Bleed, "The regen ticks left the bleed; it lost one stack a tick on its own.");
+            // Ticks at 1, 2, 3 s in the order burn -> bleed -> regen: burn 5 + 4 + 3, bleed 4 + 3 + 2, regen 3 + 2 + 1.
+            Assert.AreEqual(4000 - 12 - 9 + 6, battle.Party[0].Hp);
         }
 
         [Test]

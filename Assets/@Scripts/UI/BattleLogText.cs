@@ -121,6 +121,8 @@ namespace F1.UI
                     return UiStrings.Get(UiKeys.Log.Regen, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), e.A);
                 case BattleEventKind.ThornsGained:
                     return UiStrings.Get(UiKeys.Log.Thorns, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A));
+                case BattleEventKind.MaxHpRaised:
+                    return UiStrings.Get(UiKeys.Log.MaxHp, Source(engine, e.Source, e.Id), UnitName(engine, e.Target), UiText.Amount(e.A), UiText.Amount(e.B), UiText.Amount(e.C));
                 case BattleEventKind.Cleansed:
                     // Nothing came off: no line (a cleanse on a clean unit, stage 44).
                     if (e.A == 0 && e.B == 0 && e.C == 0)

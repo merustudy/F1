@@ -211,6 +211,29 @@ namespace F1.Flow
 
         public bool CanRest => RunRules.CanRest(_data.Data, Run);
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+        /// <summary>What the lobby's test button grants (Round 97). A tool of the editor and development builds, not a value of the game's balance.</summary>
+        public const int TestGoldAmount = 100;
+
+        /// <summary>Raised after the test gold was granted and saved (Round 97). AppRoot writes it to the play log.</summary>
+        public event Action<int> TestGoldGranted;
+
+        /// <summary>Whether the test button can grant gold now: at home, the run goes on and the last change is saved.</summary>
+        public bool CanGrantTestGold => HasRun && !IsAway && !_run.IsOver && !IsSaveBlocked;
+
+        /// <summary>The lobby's test button (Round 97, editor and development builds only): +<see cref="TestGoldAmount"/> gold, then saves like any lobby command.</summary>
+        public void GrantTestGold()
+        {
+            RequireAtHome();
+            RunRules.GrantGold(_run, TestGoldAmount);
+            Save(null);
+            if (!IsSaveBlocked)
+            {
+                TestGoldGranted?.Invoke(TestGoldAmount);
+            }
+        }
+#endif
+
         // ---- The town's buildings (Slice C stage 30, BuildingRules) ----
 
         public int BuildingLevel(string buildingId)

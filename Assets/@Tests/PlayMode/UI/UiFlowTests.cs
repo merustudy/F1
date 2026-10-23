@@ -312,7 +312,7 @@ namespace F1.Tests
             Assert.AreEqual("버려진 광산", mineMarker.Name);
             Assert.IsFalse(mineMarker.Locked);
             Assert.IsTrue(mineMarker.Selected, "The first open dungeon is chosen.");
-            Assert.AreEqual($"클리어 0회 · {mine.DurationDays}일", UiTestUtil.TextAt(mineMarker, "MarkerPlate/MarkerDetail"));
+            Assert.AreEqual($"클리어 0회 · {mine.DurationDays}주", UiTestUtil.TextAt(mineMarker, "MarkerPlate/MarkerDetail"));
             Assert.AreEqual("심연 (최종 던전)", abyssMarker.Name, "The final dungeon's marker says so.");
             Assert.IsTrue(abyssMarker.Locked);
             Assert.IsFalse(abyssMarker.Button.interactable, "A locked dungeon takes no click.");
@@ -323,13 +323,13 @@ namespace F1.Tests
             Assert.AreEqual("버려진 광산", UiTestUtil.TextAt(screen, "Frame/Details/Name"));
             Assert.AreEqual(UiText.Name(data.Affinities.Get(mine.AffinityId).Name), UiTestUtil.TextAt(screen, "Frame/Details/Affinity"));
             Assert.AreEqual($"{mine.Floors}층 + 보스", UiTestUtil.TextAt(screen, "Frame/Details/Floors"));
-            Assert.AreEqual($"{mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/Details/Days"));
+            Assert.AreEqual($"{mine.DurationDays}주 (→ {1 + mine.DurationDays}주차)", UiTestUtil.TextAt(screen, "Frame/Details/Days"));
             Assert.AreEqual("치유 포션 ×2", UiTestUtil.TextAt(screen, "Frame/Details/Potions"), "The potions by kind, with their count.");
             Assert.AreEqual("0회", UiTestUtil.TextAt(screen, "Frame/Details/Cleared"));
             Assert.AreEqual($"층마다 금 {data.Balance.GoldPerFloor} · 클리어 금 {data.Balance.GoldClear}", UiTestUtil.TextAt(screen, "Frame/Details/Reward"), "What the settlement pays (stage 26).");
             Assert.AreEqual("금 0", UiTestUtil.TextAt(screen, "Frame/Header/Gold"));
             Assert.AreEqual(
-                $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n{data.Balance.TotalDays}일을 넘기면 심연의 보스와 강제로 싸운다",
+                $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n{data.Balance.TotalDays}주를 넘기면 심연의 보스와 강제로 싸운다",
                 UiTestUtil.TextAt(screen, "Frame/Details/Hint"),
                 "What this dungeon's clears open, and the final stand past the last day.");
             RunState run = Managers.Run.Run;
@@ -411,7 +411,7 @@ namespace F1.Tests
             Assert.IsTrue(screen.IsPartyOpen);
             Assert.IsTrue(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf, "The map is shaded under the popup.");
             Assert.AreEqual("원정 파티", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyWindowTitle"));
-            Assert.AreEqual($"버려진 광산 · {mine.DurationDays}일 (→ {1 + mine.DurationDays}일차)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
+            Assert.AreEqual($"버려진 광산 · {mine.DurationDays}주 (→ {1 + mine.DurationDays}주차)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
             PartyRowSlotView[] slots = UiTestUtil.Views<PartyRowSlotView>(screen);
             Assert.AreEqual(balance.PartySize, slots.Length);
             Assert.IsTrue(slots.All(s => s.IsEmpty));
@@ -3359,12 +3359,12 @@ namespace F1.Tests
             Assert.AreEqual(UiPalette.Virtue, UiTestUtil.At(lobby, "Frame/Header/Day").GetComponent<TMP_Text>().color);
             Assert.AreEqual("최종 결전", lobby.Gate.Name);
             Assert.AreEqual("심연의 보스와 싸운다", lobby.Gate.Sub);
-            Assert.AreEqual("쉴 날이 없다", lobby.Inn.Sub);
+            Assert.AreEqual("쉴 시간이 없다", lobby.Inn.Sub);
             Assert.AreEqual("최종 결전으로", UiTestUtil.TextAt(lobby, "Frame/Strip/Depart/DepartLabel"));
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
             yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Inn);
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/InnWindow/Rest").interactable, "No day is left to rest.");
-            Assert.AreEqual("쉴 날이 없다", UiTestUtil.TextAt(lobby, "Frame/InnWindow/InnNote"));
+            Assert.AreEqual("쉴 시간이 없다", UiTestUtil.TextAt(lobby, "Frame/InnWindow/InnNote"));
             UiTestUtil.CloseQuarter(lobby);
             Assert.IsNull(lobby.transform.Find("Frame/GateWindow"), "The gate has no window (2026-10-18): it is the way out, nothing to upgrade.");
             lobby.Gate.Hover();
@@ -3398,15 +3398,15 @@ namespace F1.Tests
 
             yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
             Assert.AreEqual("Lv 1", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachLevel"));
-            Assert.AreEqual("Lv 1 → Lv 2: 후보 3명 → 4명 · 금 40 · 3일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
-            Assert.AreEqual("업그레이드 금 40 · 3일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade/CoachUpgradeLabel"));
+            Assert.AreEqual("Lv 1 → Lv 2: 후보 3명 → 4명 · 금 40 · 3주", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.AreEqual("업그레이드 금 40 · 3주", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade/CoachUpgradeLabel"));
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable);
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLocked").gameObject.activeSelf);
             UiTestUtil.Click(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade");
             yield return UiTestUtil.WaitForRedraw();
             Assert.AreEqual(60, run.Gold);
             Assert.AreEqual(1, Managers.Run.BuildingLevel(BuildingId.Coach), "The level comes with the days.");
-            Assert.AreEqual("Lv 1 → Lv 2 건설 중 · 3일 남음", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.AreEqual("Lv 1 → Lv 2 건설 중 · 3주 남음", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").gameObject.activeSelf, "No second upgrade while one is built.");
             Assert.IsTrue(UiTestUtil.At(lobby, "Frame/CoachWindow/CoachLocked").gameObject.activeSelf, "Closed while under construction.");
             Assert.IsTrue(lobby.Candidates.All(c => !c.Hire.interactable), "No hiring at a stagecoach being built.");
@@ -3416,10 +3416,10 @@ namespace F1.Tests
             // The town: the scaffold and the badge on the stagecoach, its plate dimmed, its bubble saying the days.
             Assert.IsTrue(lobby.Coach.ScaffoldShown);
             Assert.IsTrue(lobby.Coach.BadgeShown);
-            Assert.AreEqual("건설 중 · 3일 남음", lobby.Coach.BadgeWords);
+            Assert.AreEqual("건설 중 · 3주 남음", lobby.Coach.BadgeWords);
             Assert.IsFalse(lobby.Barracks.ScaffoldShown);
             lobby.Coach.Hover();
-            Assert.AreEqual("건설 중 · 3일 남음", lobby.BubbleDetail);
+            Assert.AreEqual("건설 중 · 3주 남음", lobby.BubbleDetail);
             lobby.Coach.Leave();
 
             // The gate is never built (2026-10-18): no scaffold, no level, and the way out stays open while the stagecoach is built.
@@ -3443,7 +3443,7 @@ namespace F1.Tests
             Assert.IsTrue(UiTestUtil.ButtonAt(lobby, "Frame/Strip/Depart").interactable);
             Assert.AreEqual(HireCheck.Ok, Managers.Run.CanHire(0));
             yield return UiTestUtil.OpenQuarter(lobby, LobbyScreen.Quarter.Coach);
-            Assert.AreEqual("Lv 2 → Lv 3: 후보 4명 → 5명 · 금 80 · 5일", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
+            Assert.AreEqual("Lv 2 → Lv 3: 후보 4명 → 5명 · 금 80 · 5주", UiTestUtil.TextAt(lobby, "Frame/CoachWindow/CoachLine/CoachEffect"));
             Assert.IsFalse(UiTestUtil.ButtonAt(lobby, "Frame/CoachWindow/CoachLine/CoachUpgrade").interactable, "60 gold does not cover level 3.");
             UiTestUtil.CloseQuarter(lobby);
         }
@@ -4392,6 +4392,41 @@ namespace F1.Tests
             UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
             UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
             yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+        }
+
+        [UnityTest]
+        public IEnumerator Lobby_TestGoldButton_AddsAHundredGold_SavesIt_AndWritesAnEventLine()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+
+            // Round 97 A: left of the gold in the header, in the editor (and development builds).
+            Assert.IsTrue(lobby.TestGold.gameObject.activeSelf);
+            Assert.AreEqual("금 +100 (테스트)", UiTestUtil.TextAt(lobby, "Frame/Header/TestGold/TestGoldLabel"));
+            Assert.AreEqual("금 0", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
+
+            UiTestUtil.Click(lobby, "Frame/Header/TestGold");
+            UiTestUtil.Click(lobby, "Frame/Header/TestGold");
+            yield return null;
+
+            Assert.AreEqual("금 200", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
+            Assert.AreEqual(200, Managers.Run.Run.Gold);
+            Assert.IsFalse(Managers.Run.IsSaveBlocked, "Saved like any lobby command.");
+            string log = System.IO.Directory.GetFiles(System.IO.Path.Combine(_saveRoot, PlayLog.FolderName), "play-*.log").Single();
+            Assert.AreEqual(2, System.IO.File.ReadAllLines(log).Count(line => line.Contains("\t!TestGold\t+100 gold=")), "An event line per grant, apart from the screens.");
+
+            LobbyScreen.TestToolsShown = false;
+            try
+            {
+                lobby.Refresh();
+                Assert.IsFalse(lobby.TestGold.gameObject.activeSelf, "The screenshot fixture hides the tools.");
+            }
+            finally
+            {
+                LobbyScreen.TestToolsShown = true;
+            }
         }
     }
 }

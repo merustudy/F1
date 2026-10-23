@@ -43,7 +43,12 @@ namespace F1.Editor.Setup
             TextMeshProUGUI day = UiBuild.Label("Day", header.transform, 40f, UiPalette.Text, TextAlignmentOptions.Center);
             UiBuild.Box(day, 540f, 22f, 840f, 56f);
             TextMeshProUGUI gold = UiBuild.Label("Gold", header.transform, 32f, UiPalette.DiabloGold, TextAlignmentOptions.Right);
-            UiBuild.Box(gold, 1340f, 26f, 280f, 48f);
+            // Round 97: the gold's box gives the test button room; "금 99999" still fits.
+            UiBuild.Box(gold, 1480f, 26f, 140f, 48f);
+            // The test gold button (Round 97 A): left of the gold, the screen shows it in the editor and development builds only.
+            ButtonParts testGold = UiBuild.Button("TestGold", header.transform, UiPalette.TestTool, 22f);
+            UiBuild.Box(testGold.Rect, 1290f, 26f, 176f, 48f);
+            AddLine(testGold.Frame, UiPalette.TestToolRim, 3f);
             ButtonParts toTitle = UiBuild.LocalizedButton("ToTitle", header.transform, UiKeys.Lobby.ToTitle, UiPalette.ButtonQuiet, 28f);
             UiBuild.Box(toTitle.Rect, 1640f, 22f, 240f, 56f);
 
@@ -119,6 +124,8 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_town", town);
             UiBuild.SetReference(screen, "_day", day);
             UiBuild.SetReference(screen, "_gold", gold);
+            UiBuild.SetReference(screen, "_testGold", testGold.Button);
+            UiBuild.SetReference(screen, "_testGoldLabel", testGold.Label);
             UiBuild.SetReference(screen, "_toTitle", toTitle.Button);
             UiBuild.SetReference(screen, "_barracks", barracks);
             UiBuild.SetReference(screen, "_inn", inn);
@@ -194,7 +201,7 @@ namespace F1.Editor.Setup
             TextMeshProUGUI plateSub = UiBuild.Box(UiBuild.SingleLine(UiBuild.Label(name + "Sub", plate.transform, 20f, UiPalette.TextDim, TextAlignmentOptions.Center)), 0f, 44f, BuildingView.PlateWidth, 30f);
             plateSub.gameObject.SetActive(false);
 
-            // The badge of a construction (the mock: "건설 중 · 2일 남음" in brass over a thin brass bar), a brass line round it.
+            // The badge of a construction (the mock: "건설 중 · 2주 남음" in brass over a thin brass bar), a brass line round it.
             Image badge = UiBuild.Panel(name + "Badge", picture.transform, UiPalette.StonePlate);
             UiBuild.Box(badge, 0f, 0f, BuildingView.BadgeWidth, BuildingView.BadgeHeight);
             AddLine(badge, UiPalette.Brass, 2f);

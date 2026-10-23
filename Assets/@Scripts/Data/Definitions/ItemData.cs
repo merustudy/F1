@@ -232,6 +232,14 @@ namespace F1.Data
 
             // An item without effects never activates (stage 20): only a star item may be one, and it has no cooldown.
             // An item that activates when a battle starts (stage 39) has effects and no cooldown.
+            foreach (ItemEffect effect in effects ?? new List<ItemEffect>())
+            {
+                if (effect != null && effect.Kind == EffectKind.MaxHp && trigger != ItemTrigger.BattleStart)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': a maximum HP effect belongs to an item that activates when a battle starts.");
+                }
+            }
+
             if (trigger == ItemTrigger.BattleStart)
             {
                 if (effects.Count == 0)
