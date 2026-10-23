@@ -26,6 +26,9 @@ pose/enemy/<key>-attack  pose/enemy/<key>-hit  # 몬스터의 공격·피격 자
 background/dungeon/<key>                       # 던전의 배경
 item/<key>                                     # 아이템의 아이콘
 potion/<key>                                   # 포션의 병 아이콘
+story/<sequence>/<key>                         # 이야기 장면의 그림 (55단계: 인트로는 story/intro/<key>. StorySceneData.Image가 가리킨다)
+unit/npc/<key>                                 # NPC의 전신 그림 (55단계: 리넷. NpcData.Figure)
+portrait/npc/<key>-<expression>                # NPC의 대화 그림, 표정마다 (55단계. NpcData.Portraits)
 sound/sfx/<key>                                # 효과음 (14_SOUND.md. SoundCatalog가 가리킨다)
 sound/bgm/<key>                                # 배경음
 <domain>/<category>/<key>                      # 그 밖의 것이 들어올 때
@@ -42,6 +45,9 @@ Scope는 "언제 필요하고 언제 버려도 되는가"로 정한다. Entry마
 | `App` | `scope-app` | 앱이 떠 있는 동안 | Static Data, 어느 화면에서나 쓰는 UI, 소리(효과음과 배경음. `14_SOUND.md`) |
 | `Lobby` | `scope-lobby` | 로비 화면이나 원정 화면이 떠 있는 동안 | 로비 UI, 원정 화면 UI, 마을 터 그림(`background/lobby/town`, Round 71·26단계 → Round 78 먼 시점), 건물의 그림(`building/<id>-<level>` 열둘과 비계 `building/scaffold`, Round 78·30단계: `ArtAddress.Building`·`Scaffold`), 원정 지도의 그림(`background/expedition/map`, Round 71 E2) |
 | `Expedition` | `scope-expedition` | 원정 출발부터 귀환까지 | 노드 맵, 전투, 전리품, 결과 UI, 유닛의 그림, 던전의 배경 |
+| `Story` | `scope-story` | 이야기 화면(인트로)이 떠 있는 동안 (55단계) | 인트로 화면 UI, 장면의 그림(`story/intro/*`: 2304x1536 열넷. 화면을 떠나면 놓는다) |
+
+- 55단계(2026-10-23 Round 101 판정): NPC의 그림(`unit/npc/*`, `portrait/npc/*`)은 로비가 쓰므로 `Lobby`다. 인트로의 마지막 장면은 그림 없이 로비 화면 위의 띠라서 `Story` Scope가 로비 그림을 읽지 않는다.
 
 - 기획의 "런"(100일 전체)은 Scope가 아니다. 런의 Static Data는 작아서 `App`에 둔다.
 - 여러 Scope가 쓰는 Asset은 더 긴 수명의 Scope로 올린다.

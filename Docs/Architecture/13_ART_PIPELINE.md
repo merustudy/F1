@@ -342,6 +342,23 @@ UI의 틀과 아이콘
 2. CSV   -> BagData.csv 의 Icon = "bag/<kebab-id>"
 3. Entry -> CSV의 Icon에서 자동으로 나온다 (Group F1-Art, Scope Expedition. Import 정책은 아이템 아이콘과 같다)
 
+이야기 장면의 그림 (Slice D 55단계, 2026-10-23 Round 101 판정. 지금은 Round 98 02판의 콘티 — 본 그림 라운드에서 같은 이름으로 바꾼다)
+1. PNG   -> Assets/@Art/Story/<Sequence>/<key>.png (2304x1536 불투명, 배경과 같은 캔버스. 콘티는 output/background/<Round 98 key>[_v02].png — 02판 v02/scenes/가 고른 것과 같은 파일)
+2. CSV   -> StorySceneData.csv 의 Image = "story/<sequence>/<kebab-key>" (인트로: story/intro/mural 등 열넷)
+3. Entry -> CSV의 Image에서 자동으로 나온다 (Group F1-Art, Scope Story. Import 정책은 배경과 같다: 불투명, Mipmap 없음, MaxSize 4096, 압축)
+
+NPC의 전신 그림 (55단계: 리넷. 직업이 아니다)
+1. PNG   -> Assets/@Art/Unit/Npc/<Id>.png (character와 같은 맞춘 그림 672x896, 오른쪽을 봄. 리넷은 output/character/linette_ingame_dhair.png — 승인 원본 Archive/99-linette/approved/linette_ingame_dhair.png의 --refit)
+2. CSV   -> NpcData.csv 의 Figure = "unit/npc/<kebab-id>"
+3. Entry -> CSV의 Figure에서 자동으로 나온다 (Group F1-Art, Scope Lobby. Import 정책은 전신 그림과 같다)
+
+NPC의 대화 그림 (55단계: 표정마다 한 장)
+1. PNG   -> Assets/@Art/Portrait/Npc/<Id>_<expression>.png (생성 크기 1024x1536 투명 그대로. 리넷: neutral = linette_portrait8b, cold = linette_portrait7, smile = linette_portrait8 — Archive/99-linette/approved/)
+2. CSV   -> NpcData.csv 의 Portraits = "neutral:portrait/npc/linette-neutral+cold:…" (표정을 더하면 이 칸과 PNG만)
+3. Entry -> CSV의 Portraits에서 자동으로 나온다 (Group F1-Art, Scope Lobby. Import 정책 Portrait: 투명, Mipmap 없음 — 거의 제 크기로 보이고 압축되게, MaxSize 2048)
+
+- NPC 그림의 생성(55단계에서 정함, 도구는 다음 NPC를 그릴 때 고친다): Round 99는 `character` 타입의 Key 검사(`JobData.Id`)를 지나려고 Key `rogue`를 자리표로 썼다. 다음 NPC부터 타입 **`npc`**(전신, Key = `NpcData.Id`, Roster `Rosters/npc.csv`, 후처리 `figure`)와 **`portrait`**(대화 그림, Key = `<npc>_<expression>`, 1024x1536 투명, 후처리 없음)를 `gen_image.py`에 더한다. 그때까지 리넷의 그림은 Round 99의 원본 그대로다.
+
 포션의 병 아이콘
 1. PNG   -> Assets/@Art/Potion/<Id>.png (ui_icon으로 생성한 96x96)
 2. CSV   -> PotionData.csv 의 Icon = "potion/<kebab-id>"

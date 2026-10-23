@@ -341,6 +341,12 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - **2차, 일곱 상태**(Slice D 45단계, Docs/Design/02 §5 "일곱 상태", Design/18 §10): `EffectKind`의 `Freeze`·`Blind`·`Aim`·`Keen`·`Fury`·`Haste`·`Vulnerable`(`ItemEffect.IsState`), `BattleUnit`의 중첩 일곱(`StacksOf`·`SetStacks`). `AddState`가 쌓고 `StateApplied`(B = 종류)를 남긴다. `Tick.States`가 재생 다음에 유닛마다 −1(로그 없음). 끼는 자리: `CooldownOf`(피로 상태 % + 빙결 − 가속, `EffectiveCooldown`의 바닥 그대로), `RollHit`(공격자의 조준 − 암흑, 만분율), `RollCritical`(예리는 확률의 보너스에, 격분은 배수에), `Activate`의 피해 갈래(대상의 취약: 스탯·무기 피해 % 다음에 곱함). `Cleanse`는 `HarmfulStates`(빙결·암흑·취약)도 N씩(C에 합).
   **대상의 편 제한 없음**(2026-10-21 사용자): `ItemEffect`의 대상 검사를 지웠다. 엔진의 `Lands(owner, target, item, effect)` 하나가 "자기 편이면 언제나, 상대편이면 `CanMiss`일 때 `RollHit`"를 정하고(`StatRules.CanMiss`는 `ItemEffect.Hurts` 종류의 물리), 피해 갈래의 `foe`가 치명타·무기 적중 패시브·가시를 상대편으로 묶는다. 시뮬 `BattleStats`에 상태의 줄(파티가 건 것 / 파티에 걸린 것). Test `SecondVocabularyTests`.
 
+### 이야기의 대화 (Slice D 55단계, 2026-10-23 Round 101 판정)
+
+- `RunState.SeenDialogues`: 이 런에서 들은 대화의 id(들은 차례). 바꾸는 것은 `StoryRules.MarkSeen`뿐이다.
+- `StoryRules.DueDialogue(run, data)`: 지금 로비에서 나올 대화. 데이터 차례(`DialogueData.Order`)로 보아 듣지 않았고 계기가 선 첫 대화다: `RunStart`는 언제나, `DungeonUnlocked`는 그 던전이 열렸으면(`RunRules`의 해금과 같은 판단). 없으면 없음.
+- 대화는 전투·경제·시뮬에 닿지 않는다. 시뮬은 대화를 부르지 않는다. 난수를 쓰지 않는다.
+
 ## 전투: 결정론
 
 전투 결과는 `BattleSetup`(시드 포함)과 입력 기록(`BattleInput` 목록)만의 함수다.

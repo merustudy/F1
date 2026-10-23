@@ -69,6 +69,14 @@ Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 - Definition과 `LocalizedText`는 `Managers`, `SettingManager`, Unity Localization을 참조하지 않는다. 화면이 현재 Locale 코드를 넘긴다.
 - 변환기가 `Name.*` Header 집합이 `LocalePolicy.SupportedCodes`와 같은지 검사한다(`05_STATIC_DATA.md`).
 
+## 이야기의 글 (Slice D 55단계, 2026-10-23 Round 101 판정)
+
+- 인트로의 자막과 리넷의 대사는 **Game Data 문구**다: `StorySceneData`·`DialogueLineData`의 `LocalizedText`, NPC의 이름은 `NpcData.Name`(`05_STATIC_DATA.md` "이야기").
+  까닭: 자막은 그 장면의 그림·시간·목소리와 같은 행, 같은 diff에서 고친다. String Table로 두면 장면을 더할 때마다 `UiKeys`의 상수(코드)가 늘어 "데이터만 고친다"가 깨진다.
+- UI 문구로 두는 것은 이야기가 아닌 틀뿐이다: 건너뛰기·다음의 안내, 타이틀의 [인트로 보기], 남은 주 "일식까지 {0}주"(`Story.WeeksLeft` — 뒤에 로비 머리의 표시도 같은 Key를 쓴다).
+- 글자는 Font의 Corpus(Static Data CSV의 모든 글자)에 저절로 들어간다. 따옴표(“ ”)와 줄표(—)도 CSV에 있어 구워진다.
+- 혼잣말의 손글씨 서체(Design/33 §9)는 아직 없다. 두 목소리 모두 Pretendard이고 색으로 가른다(흰색·옅은 금색). 서체는 Deferred("Locale별 Font"와 함께).
+
 ## Runtime Locale
 
 `LocalizationManager`를 만들지 않는다.

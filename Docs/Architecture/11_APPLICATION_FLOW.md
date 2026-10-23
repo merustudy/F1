@@ -118,6 +118,13 @@ Application 계층이 하는 일은 넷이다.
 - 시드는 `AppRoot`가 넣어 준 시드 공급자에서 온다(OS 난수). Test는 고정값을 넣는다. Domain과 Application은 시드를 만들지 않는다.
 - 새 런은 진행 중인 원정, 전투, 보고를 모두 버린다. `RunManager.RunStarted`를 `ExpeditionManager`가 듣는다.
 
+## 이야기 (Slice D 55단계, 2026-10-23 Round 101 판정)
+
+- 인트로는 게임 단계가 아니다. 타이틀의 [새 런]이 `StartNewRun`(저장)을 끝낸 뒤 화면이 인트로를 보이고, 끝나면 `GoToCurrentPhase`(로비)로 간다. 런의 상태는 인트로를 모른다.
+  본편인지 짧은 판인지는 화면이 설정의 `IntroSeen`으로 고른다(`12_UI.md` "인트로"). 타이틀의 [인트로 보기]는 런과 상관없이 본편을 보이고 타이틀로 돌아간다.
+- 로비의 대화: 질의 `RunManager.DueDialogue()`(→ `StoryRules.DueDialogue`, 없으면 null)와 명령 `RunManager.MarkDialogueSeen(id)`(`Lobby` 단계, 막힘 확인, 끝에서 저장). 다시 듣기의 질의 `RunManager.LastHeardDialogue()`(들은 것 가운데 데이터 차례의 마지막).
+  대화를 끝까지 보거나 건너뛰면 화면이 `MarkDialogueSeen`을 부른다. 대화를 보는 동안 로비의 다른 명령은 화면이 막는다(창이 열린 것과 같다).
+
 ## 알림
 
 - 명령은 직접 호출이고, 부른 화면이 돌아온 뒤 상태를 읽어 다시 그린다.

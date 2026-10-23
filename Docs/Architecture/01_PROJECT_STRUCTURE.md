@@ -39,7 +39,7 @@ Assets
 ├─ @Fonts           # Source/<Family>/ (ttf + LICENSE + README), TMP/
 ├─ @Prefabs         # UI/ (화면 Prefab과 실루엣 재질 Silhouette.mat. Setup 코드가 만든 생성물)
 ├─ @Shaders         # 손으로 쓴 셰이더. Silhouette.shader(UI의 실루엣: 아이템 단계의 외곽선. Round 41) 하나
-├─ @Art             # Unit/Job, Unit/Enemy, Pose/Job, Pose/Enemy, Background/Dungeon, Item, UI/Frame, UI/Icon (승인된 그림. ArtPipeline에서 온다 -> 13_ART_PIPELINE.md)
+├─ @Art             # Unit/Job, Unit/Enemy, Unit/Npc, Pose/Job, Pose/Enemy, Portrait/Npc, Story/<Sequence>, Background/Dungeon, Item, UI/Frame, UI/Icon (승인된 그림. ArtPipeline에서 온다 -> 13_ART_PIPELINE.md. Unit/Npc·Portrait/Npc·Story는 55단계: 이야기의 그림)
 ├─ @Audio           # Sfx, Bgm (승인된 소리. SoundPipeline에서 온다 -> 14_SOUND.md)
 │
 ├─ AddressableAssetsData   # Package가 만든 경로 그대로
