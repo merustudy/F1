@@ -9,8 +9,8 @@
       "DurationMs": 10000,
       "ShortDurationMs": 7000,
       "ShortLines": [
-        1,
-        2
+        2,
+        3
       ],
       "CameraFrom": {
         "X": 550,
@@ -26,6 +26,10 @@
       "Transition": "Cross",
       "Countdown": false,
       "Lines": [
+        {
+          "en-US": "The treasure ran dry once I had bought her and an abandoned village.",
+          "ko-KR": "보물은 그 아이와 버려진 마을 하나를 사자 바닥이 났다."
+        },
         {
           "en-US": "The Lily Company is dead.",
           "ko-KR": "백합단은 죽었다."
@@ -196,12 +200,12 @@
       "Countdown": false,
       "Lines": [
         {
-          "en-US": "The first thing I bought with the treasure was a person.",
-          "ko-KR": "보물로 맨 먼저 산 것은 사람이었다."
+          "en-US": "The first thing I bought with the treasure was that child.",
+          "ko-KR": "보물로 맨 먼저 산 것은 그 아이였다."
         },
         {
-          "en-US": "Linette, the girl who kept the king's tribute ledger.",
-          "ko-KR": "왕의 공물 장부를 쓰던 아이, 리넷."
+          "en-US": "Linette, the slave who kept the king's tribute ledger.",
+          "ko-KR": "왕의 공물 장부를 쓰던 노예, 리넷."
         }
       ],
       "SoundNote": "market crowd, chains"
@@ -312,8 +316,8 @@
           "ko-KR": "나는 하루도 빠짐없이 금을 그었다. 그날까지 남은 날을."
         },
         {
-          "en-US": "Through the wall, an old knight kept me alive, and told me where his treasure lay.",
-          "ko-KR": "벽 너머 늙은 기사가 나를 버티게 했고, 숨긴 보물의 자리를 알려 주었다."
+          "en-US": "Through the wall, an old knight kept me alive, and told me where his treasure lay, and a child's name.",
+          "ko-KR": "벽 너머 늙은 기사가 나를 버티게 했고, 보물의 자리와 한 아이의 이름을 알려 주었다."
         },
         {
           "en-US": "Eighteen years. With ninety-nine weeks left, he died.",
