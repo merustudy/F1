@@ -1,0 +1,14 @@
+{
+ "linette_portrait4": {
+  "style": "STYLE_RUNTIME-portrait.md",
+  "extra": "This is a front-facing portrait for the dialogue box. The second attached image is an illustration of the woman to draw: take her face, her expression, her hairstyle with the violet streaks, the beauty mark below her left eye, her red lips and her strapless black top from it. Redraw it in our cartoon style with the hand-drawn ink line and flat colors of the first image; do not copy its soft rendering or its background."
+ },
+ "linette_portrait5": {
+  "style": "STYLE_RUNTIME-portrait.md",
+  "extra": "This is a front-facing portrait for the dialogue box. The second attached image is an illustration of the woman to draw: take her face, her expression, her hairstyle with the violet streaks, the beauty mark below her left eye, her red lips and her strapless black top from it. Redraw it in our cartoon style with the hand-drawn ink line and flat colors of the first image; do not copy its soft rendering or its background."
+ },
+ "linette_portrait6": {
+  "style": "STYLE_RUNTIME-portrait-soft.md",
+  "extra": "This is a front-facing portrait for the dialogue box. The second attached image is an illustration of the woman to draw: take her face, her expression, her hairstyle with the violet streaks, the beauty mark below her left eye, her red lips and her strapless black top from it. Keep the clean fine linework and the soft cel shading of the second image; do not copy its background."
+ }
+}
