@@ -191,6 +191,8 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 ## 런의 끝 (Slice C 25단계)
 
 - 시간의 한 칸(52단계, 2026-10-23): `RunState.Day`·`BalanceData.TotalDays`(99)·`DungeonData.DurationDays`·`RestDays`·건설의 일수는 이름 그대로 **주**를 센다(04 §2). 규칙과 저장은 바뀌지 않았다.
+- 원정의 날(53단계, 2026-10-23): 정산이 보내는 주는 `RunRules.DaysFor`다. `IsEarlyRetreat`(후퇴, 최종 결전 아님, 파티가 선 층 × 100 < (층 + 1) × `BalanceData.FreeRetreatPercent`)면 0이고 아니면 `DurationDays`다. 저장 형식 그대로(정산 보고의 `DaysPassed`가 0일 수 있다).
+- 조기 퇴각의 패널티(54단계, Design/36): `IsEarlyRetreat`인 정산은 `ExpEarned`·`GoldEarned`가 0이고, `TraitRules.DrawAcquired`가 굴린 것에서 `TraitPolarity.Positive`를 버린다(같은 스트림, 같은 굴림). 화면은 보고의 결과(후퇴)와 `DaysPassed` 0으로 알아본다. 저장 형식 그대로.
 
 규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §2·§4·§8, 최종 던전은 `03_Dungeon_Structure.md` §1. 모두 `RunRules`다.
 
