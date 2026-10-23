@@ -149,7 +149,8 @@ namespace F1.UI
             StaticData data = Managers.Data.Data;
             BalanceData balance = data.Balance;
             RunState run = Managers.Run.Run;
-            _day.text = UiStrings.Get(UiKeys.Lobby.Day, run.Day, balance.TotalDays);
+            int weeksLeft = Managers.Run.WeeksLeft;
+            _day.text = weeksLeft > 0 ? UiStrings.Get(UiKeys.Story.WeeksLeft, weeksLeft) : UiStrings.Get(UiKeys.Lobby.DayFinalStand);
             _gold.text = UiStrings.Get(UiKeys.Lobby.Gold, run.Gold);
 
             foreach (DungeonMarkerView marker in _markers)
@@ -196,7 +197,10 @@ namespace F1.UI
             _name.text = UiText.Name(dungeon.Name);
             _affinity.text = UiText.Name(data.Affinities.Get(dungeon.AffinityId).Name);
             _floors.text = UiStrings.Get(UiKeys.Expedition.Floors, dungeon.Floors);
-            _days.text = UiStrings.Get(UiKeys.Expedition.Days, dungeon.DurationDays, run.Day + dungeon.DurationDays);
+            int backLeft = StoryRules.WeeksLeftOn(data, run.Day + dungeon.DurationDays);
+            _days.text = backLeft > 0
+                ? UiStrings.Get(UiKeys.Expedition.Days, dungeon.DurationDays, backLeft)
+                : UiStrings.Get(UiKeys.Expedition.DaysEclipse, dungeon.DurationDays);
             _potions.text = PotionsText(data, dungeon);
             run.ClearedDungeons.TryGetValue(dungeon.Id, out int cleared);
             _cleared.text = UiStrings.Get(UiKeys.Expedition.ClearedCount, cleared);
@@ -220,7 +224,7 @@ namespace F1.UI
 
                 if (data.FinalDungeon != null)
                 {
-                    hints.Add(UiStrings.Get(UiKeys.Expedition.FinalStandHint, data.Balance.TotalDays, UiText.Name(data.FinalDungeon.Name)));
+                    hints.Add(UiStrings.Get(UiKeys.Expedition.FinalStandHint, UiText.Name(data.FinalDungeon.Name)));
                 }
             }
 
@@ -265,7 +269,10 @@ namespace F1.UI
             BalanceData balance = data.Balance;
             DungeonData dungeon = data.Dungeons.Get(_selectedId);
             string dungeonName = dungeon.IsFinal ? UiStrings.Get(UiKeys.Expedition.FinalName, UiText.Name(dungeon.Name)) : UiText.Name(dungeon.Name);
-            _partyDungeon.text = UiStrings.Get(UiKeys.Expedition.PartyDungeon, dungeonName, dungeon.DurationDays, run.Day + dungeon.DurationDays);
+            int backLeft = StoryRules.WeeksLeftOn(data, run.Day + dungeon.DurationDays);
+            _partyDungeon.text = backLeft > 0
+                ? UiStrings.Get(UiKeys.Expedition.PartyDungeon, dungeonName, dungeon.DurationDays, backLeft)
+                : UiStrings.Get(UiKeys.Expedition.PartyDungeonEclipse, dungeonName, dungeon.DurationDays);
 
             for (int i = 0; i < _slots.Length; i++)
             {

@@ -91,10 +91,16 @@ namespace F1.UI
             _fallen.text = UiStrings.Get(UiKeys.Settle.Fallen, UiText.MercenaryList(report.FallenIds));
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
-            // Stage 53: an early retreat passes no days.
-            _days.text = report.DaysPassed > 0
-                ? UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter)
-                : UiStrings.Get(UiKeys.Settle.NoDays, report.DayAfter);
+            // Stage 53: an early retreat passes no days. Round 103: the week is told as the weeks left to the eclipse.
+            int weeksLeft = StoryRules.WeeksLeftOn(Managers.Data.Data, report.DayAfter);
+            if (report.DaysPassed > 0)
+            {
+                _days.text = weeksLeft > 0 ? UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, weeksLeft) : UiStrings.Get(UiKeys.Settle.DaysEclipse, report.DaysPassed);
+            }
+            else
+            {
+                _days.text = weeksLeft > 0 ? UiStrings.Get(UiKeys.Settle.NoDays, weeksLeft) : UiStrings.Get(UiKeys.Settle.NoDaysEclipse);
+            }
             // Stage 54 (Design/36): an early retreat — a retreat that passed no days — earned nothing; the line says so where the gold stood.
             bool early = report.Result == ExpeditionResult.Retreated && report.DaysPassed == 0;
             _gold.text = early

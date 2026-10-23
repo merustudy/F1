@@ -68,11 +68,6 @@ MonoBehaviour:
     m_Localized: Company Hall
     m_Metadata:
       m_Items: []
-  - m_Id: 9766393864196
-    m_Localized: Week {0} / {1}
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
   - m_Id: 9766393864198
     m_Localized: Fatigue {0}/{1}
     m_Metadata:
@@ -431,7 +426,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 9766393864307
-    m_Localized: '{0} weeks passed. It is now week {1}'
+    m_Localized: '{0} weeks passed. {1} weeks to the eclipse'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1119,7 +1114,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5786696208605189
-    m_Localized: "{0} weeks (\u2192 week {1})"
+    m_Localized: "{0} weeks (\u2192 {1} left)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1177,15 +1172,14 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5803759337725958
-    m_Localized: Past week {0}, the boss of {1} must be fought
+    m_Localized: On the day of the eclipse, the boss of {0} must be fought
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 5824427131396096
-    m_Localized: "Week {0} / {1} \u2014 the final stand"
+    m_Localized: "The day of the eclipse \u2014 the final stand"
     m_Metadata:
-      m_Items:
-      - rid: 636489278608375844
+      m_Items: []
   - m_Id: 5824427143979008
     m_Localized: Gold {0}
     m_Metadata:
@@ -1411,7 +1405,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 6078818543460352
-    m_Localized: "{0} \xB7 {1} weeks (\u2192 week {2})"
+    m_Localized: "{0} \xB7 {1} weeks (\u2192 {2} left)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -1968,7 +1962,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375844
   - m_Id: 8269975956480000
-    m_Localized: 'Back early: no time passed (week {0})'
+    m_Localized: 'Back early: no time passed ({0} weeks to the eclipse)'
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
@@ -2002,6 +1996,25 @@ MonoBehaviour:
     m_Localized: Click to hear the last words again
     m_Metadata:
       m_Items: []
+  - m_Id: 8369793743708160
+    m_Localized: "{0} weeks (\u2192 eclipse day)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8369793756291072
+    m_Localized: "{0} \xB7 {1} weeks (\u2192 eclipse day)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8369793756291073
+    m_Localized: '{0} weeks passed. The day of the eclipse has come'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8369793756291074
+    m_Localized: 'Back early: no time passed (the day of the eclipse)'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -2011,7 +2024,6 @@ MonoBehaviour:
         m_Entries: 
         m_SharedEntries:
         - id: 275767302
-        - id: 9766393864196
         - id: 9766393864198
         - id: 9766393864206
         - id: 9766393864209
@@ -2131,7 +2143,7 @@ MonoBehaviour:
         - id: 5803759325143040
         - id: 5803759337725957
         - id: 5803759337725958
-        - id: 5824427131396096
+        - id: 8369793743708160
         - id: 5824427143979008
         - id: 5824427143979016
         - id: 5824427143979018
@@ -2240,3 +2252,5 @@ MonoBehaviour:
         - id: 8269975956480000
         - id: 8319612088213504
         - id: 8319612088213506
+        - id: 8369793756291072
+        - id: 8369793756291073

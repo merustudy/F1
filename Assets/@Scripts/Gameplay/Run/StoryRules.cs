@@ -70,7 +70,13 @@ namespace F1.Gameplay
         /// <summary>The weeks left to the run's end (the eclipse, Design/33 §7): the last week counts, so the first week has all of them; never below 0.</summary>
         public static int WeeksLeft(StaticData data, RunState state)
         {
-            return Math.Max(0, data.Balance.TotalDays - state.Day + 1);
+            return WeeksLeftOn(data, state.Day);
+        }
+
+        /// <summary>The weeks left on a given week (an expedition's return, a settlement's new week); 0 is the day of the eclipse.</summary>
+        public static int WeeksLeftOn(StaticData data, int day)
+        {
+            return Math.Max(0, data.Balance.TotalDays - day + 1);
         }
     }
 }

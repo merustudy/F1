@@ -52,7 +52,6 @@ namespace F1.UI
         public static class Lobby
         {
             public const string Title = "Lobby.Title";
-            public const string Day = "Lobby.Day";
             public const string DayFinalStand = "Lobby.DayFinalStand";
             public const string Gold = "Lobby.Gold";
             public const string Fatigue = "Lobby.Fatigue";
@@ -146,6 +145,7 @@ namespace F1.UI
             public const string MarkerLocked = "Expedition.MarkerLocked";
             public const string Floors = "Expedition.Floors";
             public const string Days = "Expedition.Days";
+            public const string DaysEclipse = "Expedition.DaysEclipse";
             public const string Potions = "Expedition.Potions";
             public const string UnlockHint = "Expedition.UnlockHint";
             public const string FinalHint = "Expedition.FinalHint";
@@ -165,6 +165,7 @@ namespace F1.UI
             // The party popup (Round 75 B, 2026-10-17; the stage and the list, Round 76 D).
             public const string PartyTitle = "Expedition.PartyTitle";
             public const string PartyDungeon = "Expedition.PartyDungeon";
+            public const string PartyDungeonEclipse = "Expedition.PartyDungeonEclipse";
             public const string RosterHeader = "Expedition.RosterHeader";
             public const string EmptyRowHint = "Expedition.EmptyRowHint";
             public const string Forward = "Expedition.Forward";
@@ -547,7 +548,9 @@ namespace F1.UI
             public const string Fatigue = "Settle.Fatigue";
             public const string SurvivorState = "Settle.SurvivorState";
             public const string Days = "Settle.Days";
+            public const string DaysEclipse = "Settle.DaysEclipse";
             public const string NoDays = "Settle.NoDays";
+            public const string NoDaysEclipse = "Settle.NoDaysEclipse";
             public const string EarlyRetreat = "Settle.EarlyRetreat";
             public const string ItemsLost = "Settle.ItemsLost";
             public const string RunOver = "Settle.RunOver";

@@ -324,13 +324,13 @@ namespace F1.Tests
             Assert.AreEqual("버려진 광산", UiTestUtil.TextAt(screen, "Frame/Details/Name"));
             Assert.AreEqual(UiText.Name(data.Affinities.Get(mine.AffinityId).Name), UiTestUtil.TextAt(screen, "Frame/Details/Affinity"));
             Assert.AreEqual($"{mine.Floors}층 + 보스", UiTestUtil.TextAt(screen, "Frame/Details/Floors"));
-            Assert.AreEqual($"{mine.DurationDays}주 (→ {1 + mine.DurationDays}주차)", UiTestUtil.TextAt(screen, "Frame/Details/Days"));
+            Assert.AreEqual($"{mine.DurationDays}주 (→ 일식까지 {data.Balance.TotalDays - mine.DurationDays}주)", UiTestUtil.TextAt(screen, "Frame/Details/Days"), "Round 103: the return as the weeks left.");
             Assert.AreEqual("치유 포션 ×2", UiTestUtil.TextAt(screen, "Frame/Details/Potions"), "The potions by kind, with their count.");
             Assert.AreEqual("0회", UiTestUtil.TextAt(screen, "Frame/Details/Cleared"));
             Assert.AreEqual($"층마다 금 {data.Balance.GoldPerFloor} · 클리어 금 {data.Balance.GoldClear}", UiTestUtil.TextAt(screen, "Frame/Details/Reward"), "What the settlement pays (stage 26).");
             Assert.AreEqual("금 0", UiTestUtil.TextAt(screen, "Frame/Header/Gold"));
             Assert.AreEqual(
-                $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n{data.Balance.TotalDays}주를 넘기면 심연의 보스와 강제로 싸운다",
+                $"심연 해금: 이 던전을 {abyss.UnlockClears}회 클리어\n일식의 날에는 심연의 보스와 강제로 싸운다",
                 UiTestUtil.TextAt(screen, "Frame/Details/Hint"),
                 "What this dungeon's clears open, and the final stand past the last day.");
             RunState run = Managers.Run.Run;
@@ -411,7 +411,7 @@ namespace F1.Tests
             Assert.IsTrue(screen.IsPartyOpen);
             Assert.IsTrue(UiTestUtil.At(screen, "Frame/Shade").gameObject.activeSelf, "The map is shaded under the popup.");
             Assert.AreEqual("원정 파티", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyWindowTitle"));
-            Assert.AreEqual($"버려진 광산 · {mine.DurationDays}주 (→ {1 + mine.DurationDays}주차)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
+            Assert.AreEqual($"버려진 광산 · {mine.DurationDays}주 (→ 일식까지 {balance.TotalDays - mine.DurationDays}주)", UiTestUtil.TextAt(screen, "Frame/PartyWindow/PartyDungeon"));
             PartyRowSlotView[] slots = UiTestUtil.Views<PartyRowSlotView>(screen);
             Assert.AreEqual(balance.PartySize, slots.Length);
             Assert.IsTrue(slots.All(s => s.IsEmpty));
@@ -1000,7 +1000,7 @@ namespace F1.Tests
             Assert.AreEqual("조기에 퇴각하여 아무것도 얻을 수 없었습니다", UiTestUtil.TextAt(settlement, "Frame/Panel/Gold"));
             Assert.AreEqual(UiPalette.Text, UiTestUtil.At(settlement, "Frame/Panel/Gold").GetComponent<TMP_Text>().color);
             Assert.AreEqual(string.Empty, UiTestUtil.TextAt(settlement, "Frame/Panel/Exp"));
-            Assert.AreEqual($"일찍 돌아와 시간이 흐르지 않았습니다 ({report.DayAfter}주차)", UiTestUtil.TextAt(settlement, "Frame/Panel/Days"));
+            Assert.AreEqual($"일찍 돌아와 시간이 흐르지 않았습니다 (일식까지 {Managers.Data.Data.Balance.TotalDays - report.DayAfter + 1}주)", UiTestUtil.TextAt(settlement, "Frame/Panel/Days"));
 
             (report.Result, report.DaysPassed) = (result, days);
             settlement.Refresh();
@@ -3259,7 +3259,7 @@ namespace F1.Tests
             Assert.IsFalse(lobby.BubbleShown);
             Assert.AreEqual(LobbyScreen.Quarter.None, lobby.OpenQuarter);
             Assert.AreEqual("금 0", UiTestUtil.TextAt(lobby, "Frame/Header/Gold"));
-            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.Day, 1, balance.TotalDays), UiTestUtil.TextAt(lobby, "Frame/Header/Day"));
+            Assert.AreEqual($"일식까지 {balance.TotalDays}주", UiTestUtil.TextAt(lobby, "Frame/Header/Day"), "Round 103: the header counts the weeks left, the first week counting.");
 
             // The pointer over the stagecoach: the wash and the bubble with the candidates and the price.
             lobby.Coach.Hover();
@@ -3376,7 +3376,7 @@ namespace F1.Tests
             run.Day = balance.TotalDays + 1;
             lobby.Refresh();
             yield return UiTestUtil.WaitForRedraw();
-            Assert.AreEqual(UiStrings.Get(UiKeys.Lobby.DayFinalStand, balance.TotalDays + 1, balance.TotalDays), UiTestUtil.TextAt(lobby, "Frame/Header/Day"));
+            Assert.AreEqual("일식의 날 — 최종 결전", UiTestUtil.TextAt(lobby, "Frame/Header/Day"));
             Assert.AreEqual(UiPalette.Virtue, UiTestUtil.At(lobby, "Frame/Header/Day").GetComponent<TMP_Text>().color);
             Assert.AreEqual("최종 결전", lobby.Gate.Name);
             Assert.AreEqual("심연의 보스와 싸운다", lobby.Gate.Sub);

@@ -25,13 +25,12 @@ Title.VolumeLow,Volume step: low (about half as loud).,작게,Low
 Title.VolumeOff,Volume step: silent.,끔,Off
 Title.VolumeNotSaved,Shown when changing a volume failed because settings could not be written.,설정을 저장하지 못해 소리 크기를 바꾸지 않았습니다.,"The setting could not be saved, so the volume was not changed."
 Title.Intro,Button of the settings row (Slice D stage 55) that plays the full intro and comes back to the title.,인트로 보기,Watch Intro
-Story.WeeksLeft,The countdown of the story (Slice D stage 55): the weeks left to the eclipse that ends the run. {0} = weeks.,일식까지 {0}주,{0} weeks to the eclipse
+Story.WeeksLeft,"The countdown of the story (Slice D stage 55): the weeks left to the eclipse that ends the run, the current week counting — the lobby's banner and, from Round 103, the lobby's and the expedition's header. {0} = weeks.",일식까지 {0}주,{0} weeks to the eclipse
 Story.IntroHint,"Faint hint at the bottom right of the intro (Slice D stage 55): how to go on.",클릭: 다음 · Esc: 건너뛰기,Click: next · Esc: skip
 Story.DialogueHint,At the bottom right of a dialogue box (Slice D stage 55). {0} = this line's number. {1} = the lines of the dialogue.,{0}/{1}    클릭: 다음 · Esc: 건너뛰기,{0}/{1}    Click: next · Esc: skip
 Story.NpcHint,Second line of the bubble over a speaker standing in the town (Slice D stage 55).,누르면 마지막 말을 다시 듣는다,Click to hear the last words again
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
-Lobby.Day,{0} = current day. {1} = total days.,{0}주차 / {1}주,Week {0} / {1}
-Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day counter, then that only the final stand is left. {0} = current day, {1} = total days.",{0}주차 / {1}주 — 최종 결전,Week {0} / {1} — the final stand
+Lobby.DayFinalStand,"The header once no week is left (Docs/Design/04 §2, Round 103): the day of the eclipse, when only the final stand is left.",일식의 날 — 최종 결전,The day of the eclipse — the final stand
 Lobby.Gold,"The company's gold in the header and the windows (stage 26). {0} = gold.",금 {0},Gold {0}
 Lobby.Fatigue,{0} = fatigue (0 is fresh; it builds up on expeditions). {1} = maximum.,피로도 {0}/{1},Fatigue {0}/{1}
 Lobby.FatigueState,"On a roster line of a mercenary in an affliction: the fatigue words, then the affliction's name. {0} = the fatigue words (Lobby.Fatigue). {1} = the affliction.",{0} · {1},{0} · {1}
@@ -107,7 +106,8 @@ Expedition.Home,The company's town on the map.,본부,Home
 Expedition.MarkerOpen,"Under a dungeon's marker. {0} = clears, {1} = days it takes.",클리어 {0}회 · {1}주,Cleared {0} · {1} weeks
 Expedition.MarkerLocked,"Under a locked dungeon's marker. {0} = the dungeon whose clears open it, {1} = how many.",잠김 · {0} {1}회 클리어,Locked · clear {0} ×{1}
 Expedition.Floors,{0} = map floors before the boss.,{0}층 + 보스,{0} floors + boss
-Expedition.Days,"{0} = days the dungeon takes, {1} = the day the party is back.",{0}주 (→ {1}주차),{0} weeks (→ week {1})
+Expedition.Days,"{0} = weeks the dungeon takes, {1} = the weeks left to the eclipse when the party is back (Round 103).",{0}주 (→ 일식까지 {1}주),{0} weeks (→ {1} left)
+Expedition.DaysEclipse,In place of Expedition.Days when the party is back on the day of the eclipse (Round 103). {0} = weeks the dungeon takes.,{0}주 (→ 일식의 날),{0} weeks (→ eclipse day)
 Expedition.Potions,"One kind of starting potion in the details. {0} = its name, {1} = how many.",{0} ×{1},{0} ×{1}
 Expedition.UnlockHint,"Under an open dungeon's details, one line per dungeon its clears open. {0} = that dungeon, {1} = the clears it takes.",{0} 해금: 이 던전을 {1}회 클리어,Opens {0}: clear this dungeon {1} times
 Expedition.FinalHint,Under the final dungeon's details.,최종 던전 — 기한을 넘기면 이 던전의 보스와 강제로 싸운다,The final dungeon: past the last week the party must fight its boss
@@ -120,11 +120,12 @@ Expedition.DaysLabel,Row label in the details.,소요,Takes
 Expedition.PotionsLabel,Row label in the details.,시작 포션,Starting potions
 Expedition.ClearedLabel,Row label in the details.,클리어,Clears
 Expedition.ClearedCount,{0} = times the dungeon was cleared.,{0}회,{0}
-Expedition.FinalStandHint,"Under every open dungeon's details. {0} = the last day, {1} = the final dungeon.",{0}주를 넘기면 {1}의 보스와 강제로 싸운다,"Past week {0}, the boss of {1} must be fought"
+Expedition.FinalStandHint,Under every open dungeon's details (Round 103). {0} = the final dungeon.,일식의 날에는 {0}의 보스와 강제로 싸운다,"On the day of the eclipse, the boss of {0} must be fought"
 Expedition.RewardLabel,Row label in the details (stage 26).,보상,Reward
 Expedition.Reward,"What the settlement pays for the dungeon. {0} = gold per map floor reached, {1} = gold for a clear.",층마다 금 {0} · 클리어 금 {1},{0} gold per floor · {1} for a clear
 Expedition.PartyTitle,Title of the party popup the departure opens (round 75 B).,원정 파티,Expedition party
-Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = days it takes, {2} = the day the party is back.",{0} · {1}주 (→ {2}주차),{0} · {1} weeks (→ week {2})
+Expedition.PartyDungeon,"Under the popup's title. {0} = the chosen dungeon, {1} = weeks it takes, {2} = the weeks left to the eclipse when the party is back (Round 103).",{0} · {1}주 (→ 일식까지 {2}주),{0} · {1} weeks (→ {2} left)
+Expedition.PartyDungeonEclipse,"In place of Expedition.PartyDungeon when the party is back on the day of the eclipse (Round 103). {0} = the chosen dungeon, {1} = weeks it takes.",{0} · {1}주 (→ 일식의 날),{0} · {1} weeks (→ eclipse day)
 Expedition.RosterHeader,"Over the roster's list in the popup (round 76 D). {0} = roster size, {1} = its limit.","로스터 {0}/{1} — 넣기로 비어 있는 맨 앞 열에 서고, 빼면 뒤가 전진한다",Roster {0}/{1} — In takes the next row; take one out and those behind advance
 Expedition.EmptyRowHint,Under an empty row of the popup's stage (round 76 D).,오른쪽 목록에서 넣으세요,Add from the list at the right
 Expedition.Join,The list's button that puts a mercenary in the party (round 76 D).,넣기,In
@@ -372,8 +373,10 @@ Settle.Survivors,{0} = names.,생환: {0},Returned: {0}
 Settle.Fallen,{0} = names.,전사: {0},Fallen: {0}
 Settle.Fatigue,"{0} = each survivor's name and the fatigue they came back with, separated by commas.",생환자의 피로도: {0},Fatigue of those who returned: {0}
 Settle.SurvivorState,"One survivor in Settle.Fatigue who came back in an affliction. {0} = name and fatigue. {1} = the affliction.",{0} ({1}),{0} ({1})
-Settle.Days,{0} = days passed. {1} = the new day.,{0}주가 지나 {1}주차가 되었습니다,{0} weeks passed. It is now week {1}
-Settle.NoDays,"Stage 53: an early retreat passed no days, in place of Settle.Days. {0} = the day, unchanged.",일찍 돌아와 시간이 흐르지 않았습니다 ({0}주차),Back early: no time passed (week {0})
+Settle.Days,{0} = weeks passed. {1} = the weeks left to the eclipse after them (Round 103).,{0}주가 지나 일식까지 {1}주 남았습니다,{0} weeks passed. {1} weeks to the eclipse
+Settle.DaysEclipse,In place of Settle.Days when the weeks bring the day of the eclipse (Round 103). {0} = weeks passed.,{0}주가 지나 일식의 날이 되었습니다,{0} weeks passed. The day of the eclipse has come
+Settle.NoDays,"Stage 53: an early retreat passed no days, in place of Settle.Days. {0} = the weeks left to the eclipse, unchanged (Round 103).",일찍 돌아와 시간이 흐르지 않았습니다 (일식까지 {0}주),Back early: no time passed ({0} weeks to the eclipse)
+Settle.NoDaysEclipse,In place of Settle.NoDays on the day of the eclipse (Round 103).,일찍 돌아와 시간이 흐르지 않았습니다 (일식의 날),Back early: no time passed (the day of the eclipse)
 Settle.EarlyRetreat,"Stage 54: an early retreat earned nothing, in place of Settle.Gold (the experience line is empty).",조기에 퇴각하여 아무것도 얻을 수 없었습니다,The early retreat brought back nothing
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company

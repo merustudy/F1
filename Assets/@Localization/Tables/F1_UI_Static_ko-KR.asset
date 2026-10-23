@@ -69,11 +69,6 @@ MonoBehaviour:
     m_Localized: "\uC6A9\uBCD1\uB2E8 \uBCF8\uBD80"
     m_Metadata:
       m_Items: []
-  - m_Id: 9766393864196
-    m_Localized: "{0}\uC8FC\uCC28 / {1}\uC8FC"
-    m_Metadata:
-      m_Items:
-      - rid: 636489278608375845
   - m_Id: 9766393864198
     m_Localized: "\uD53C\uB85C\uB3C4 {0}/{1}"
     m_Metadata:
@@ -439,7 +434,8 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375845
   - m_Id: 9766393864307
-    m_Localized: "{0}\uC8FC\uAC00 \uC9C0\uB098 {1}\uC8FC\uCC28\uAC00 \uB418\uC5C8\uC2B5\uB2C8\uB2E4"
+    m_Localized: "{0}\uC8FC\uAC00 \uC9C0\uB098 \uC77C\uC2DD\uAE4C\uC9C0 {1}\uC8FC
+      \uB0A8\uC558\uC2B5\uB2C8\uB2E4"
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
@@ -1167,7 +1163,7 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375845
   - m_Id: 5786696208605189
-    m_Localized: "{0}\uC8FC (\u2192 {1}\uC8FC\uCC28)"
+    m_Localized: "{0}\uC8FC (\u2192 \uC77C\uC2DD\uAE4C\uC9C0 {1}\uC8FC)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
@@ -1225,16 +1221,15 @@ MonoBehaviour:
       m_Items:
       - rid: 636489278608375845
   - m_Id: 5803759337725958
-    m_Localized: "{0}\uC8FC\uB97C \uB118\uAE30\uBA74 {1}\uC758 \uBCF4\uC2A4\uC640
+    m_Localized: "\uC77C\uC2DD\uC758 \uB0A0\uC5D0\uB294 {0}\uC758 \uBCF4\uC2A4\uC640
       \uAC15\uC81C\uB85C \uC2F8\uC6B4\uB2E4"
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
   - m_Id: 5824427131396096
-    m_Localized: "{0}\uC8FC\uCC28 / {1}\uC8FC \u2014 \uCD5C\uC885 \uACB0\uC804"
+    m_Localized: "\uC77C\uC2DD\uC758 \uB0A0 \u2014 \uCD5C\uC885 \uACB0\uC804"
     m_Metadata:
-      m_Items:
-      - rid: 636489278608375845
+      m_Items: []
   - m_Id: 5824427143979008
     m_Localized: "\uAE08 {0}"
     m_Metadata:
@@ -1465,7 +1460,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 6078818543460352
-    m_Localized: "{0} \xB7 {1}\uC8FC (\u2192 {2}\uC8FC\uCC28)"
+    m_Localized: "{0} \xB7 {1}\uC8FC (\u2192 \uC77C\uC2DD\uAE4C\uC9C0 {2}\uC8FC)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
@@ -2027,7 +2022,7 @@ MonoBehaviour:
       - rid: 636489278608375845
   - m_Id: 8269975956480000
     m_Localized: "\uC77C\uCC0D \uB3CC\uC544\uC640 \uC2DC\uAC04\uC774 \uD750\uB974\uC9C0
-      \uC54A\uC558\uC2B5\uB2C8\uB2E4 ({0}\uC8FC\uCC28)"
+      \uC54A\uC558\uC2B5\uB2C8\uB2E4 (\uC77C\uC2DD\uAE4C\uC9C0 {0}\uC8FC)"
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
@@ -2063,6 +2058,26 @@ MonoBehaviour:
       \uB4E3\uB294\uB2E4"
     m_Metadata:
       m_Items: []
+  - m_Id: 8369793743708160
+    m_Localized: "{0}\uC8FC (\u2192 \uC77C\uC2DD\uC758 \uB0A0)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8369793756291072
+    m_Localized: "{0} \xB7 {1}\uC8FC (\u2192 \uC77C\uC2DD\uC758 \uB0A0)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8369793756291073
+    m_Localized: "{0}\uC8FC\uAC00 \uC9C0\uB098 \uC77C\uC2DD\uC758 \uB0A0\uC774 \uB418\uC5C8\uC2B5\uB2C8\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8369793756291074
+    m_Localized: "\uC77C\uCC0D \uB3CC\uC544\uC640 \uC2DC\uAC04\uC774 \uD750\uB974\uC9C0
+      \uC54A\uC558\uC2B5\uB2C8\uB2E4 (\uC77C\uC2DD\uC758 \uB0A0)"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -2072,7 +2087,6 @@ MonoBehaviour:
         m_Entries: 
         m_SharedEntries:
         - id: 275767302
-        - id: 9766393864196
         - id: 9766393864198
         - id: 9766393864206
         - id: 9766393864209
@@ -2192,7 +2206,7 @@ MonoBehaviour:
         - id: 5803759325143040
         - id: 5803759337725957
         - id: 5803759337725958
-        - id: 5824427131396096
+        - id: 8369793743708160
         - id: 5824427143979008
         - id: 5824427143979016
         - id: 5824427143979018
@@ -2301,3 +2315,5 @@ MonoBehaviour:
         - id: 8269975956480000
         - id: 8319612088213504
         - id: 8319612088213506
+        - id: 8369793756291072
+        - id: 8369793756291073

@@ -80,5 +80,16 @@ namespace F1.Tests
             run.Day = total + 3;
             Assert.AreEqual(0, StoryRules.WeeksLeft(data, run));
         }
+
+        [Test]
+        public void WeeksLeftOn_TellsAnyWeek_TheDayOfTheEclipseIsZero()
+        {
+            StaticData data = Data();
+            int total = data.Balance.TotalDays;
+
+            Assert.AreEqual(total - 1, StoryRules.WeeksLeftOn(data, 2), "An expedition from the first week is back with one week fewer.");
+            Assert.AreEqual(1, StoryRules.WeeksLeftOn(data, total));
+            Assert.AreEqual(0, StoryRules.WeeksLeftOn(data, total + 1));
+        }
     }
 }

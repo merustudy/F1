@@ -435,7 +435,6 @@ namespace F1.UI
         public override void Refresh()
         {
             StaticData data = Managers.Data.Data;
-            BalanceData balance = data.Balance;
             RunState run = Managers.Run.Run;
             bool due = Managers.Run.IsFinalStandDue;
             if (run.IsOver)
@@ -443,7 +442,8 @@ namespace F1.UI
                 _open = Quarter.None;
             }
 
-            _day.text = due ? UiStrings.Get(UiKeys.Lobby.DayFinalStand, run.Day, balance.TotalDays) : UiStrings.Get(UiKeys.Lobby.Day, run.Day, balance.TotalDays);
+            // Round 103 (Docs/Design/33 §7): the header counts the weeks left to the eclipse.
+            _day.text = due ? UiStrings.Get(UiKeys.Lobby.DayFinalStand) : UiStrings.Get(UiKeys.Story.WeeksLeft, Managers.Run.WeeksLeft);
             _day.color = due ? UiPalette.Virtue : UiPalette.Text;
             _gold.text = UiStrings.Get(UiKeys.Lobby.Gold, run.Gold);
             _testGold.gameObject.SetActive(TestToolsShown && !run.IsOver);
