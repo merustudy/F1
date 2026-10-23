@@ -283,6 +283,40 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Settle_AnEarlyRetreatPassesNoDays_ALaterOneAndAWipeTheirDays()
+        {
+            // Stage 53: the cave's 2 floors and its boss make 3; at 50% a retreat on floor 1 is early, one on floor 2 is not.
+            StaticData data = TestData.Data(("FreeRetreatPercent", 50), ("FatigueRecoveryPerDay", 10));
+            RunState run = RunWithParty(data);
+            RunRules.FindMercenary(run, "dan").Fatigue = 50;
+            ExpeditionState early = FinishedExpedition(data, run, ExpeditionResult.Retreated);
+            early.CurrentNodeId = early.Map.OnFloor(1)[0].Id;
+
+            SettlementReport report = RunRules.Settle(data, run, early);
+
+            Assert.AreEqual(0, report.DaysPassed);
+            Assert.AreEqual(1, run.Day, "No day passed.");
+            Assert.AreEqual(50, RunRules.FindMercenary(run, "dan").Fatigue, "Nobody at home recovered either.");
+            Assert.AreEqual((0, 0), (report.GoldEarned, report.ExpEarned), "Stage 54: an early retreat earns nothing.");
+
+            ExpeditionState later = FinishedExpedition(data, run, ExpeditionResult.Retreated);
+            later.CurrentNodeId = later.Map.OnFloor(2)[0].Id;
+            Assert.IsFalse(RunRules.IsEarlyRetreat(data, later));
+            Assert.AreEqual(2, RunRules.DaysFor(data, later));
+            // Round 100: what the retreat button asks before the retreat — the floor alone; the final stand is never early.
+            Assert.IsTrue(RunRules.RetreatWouldBeEarly(data, early));
+            Assert.IsFalse(RunRules.RetreatWouldBeEarly(data, later));
+            early.FinalStand = true;
+            Assert.IsFalse(RunRules.RetreatWouldBeEarly(data, early));
+            early.FinalStand = false;
+
+            ExpeditionState wiped = FinishedExpedition(data, run, ExpeditionResult.Wiped);
+            wiped.CurrentNodeId = wiped.Map.OnFloor(1)[0].Id;
+            Assert.AreEqual(2, RunRules.DaysFor(data, wiped), "A wipe is no retreat.");
+            Assert.AreEqual(2, RunRules.DaysFor(TestData.Data(), early), "0% makes every retreat take its days.");
+        }
+
+        [Test]
         public void Settle_TheDeadLeaveTheRosterAndThePartyForGood()
         {
             StaticData data = TestData.Data();

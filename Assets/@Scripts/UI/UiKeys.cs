@@ -416,6 +416,7 @@ namespace F1.UI
             public const string PotionArmed = "Battle.PotionArmed";
             public const string Retreat = "Battle.Retreat";
             public const string RetreatWait = "Battle.RetreatWait";
+            public const string EarlyRetreatNote = "Battle.EarlyRetreatNote";
             public const string Victory = "Battle.Victory";
             public const string Defeat = "Battle.Defeat";
             public const string Retreated = "Battle.Retreated";
@@ -536,6 +537,8 @@ namespace F1.UI
             public const string Fatigue = "Settle.Fatigue";
             public const string SurvivorState = "Settle.SurvivorState";
             public const string Days = "Settle.Days";
+            public const string NoDays = "Settle.NoDays";
+            public const string EarlyRetreat = "Settle.EarlyRetreat";
             public const string ItemsLost = "Settle.ItemsLost";
             public const string RunOver = "Settle.RunOver";
             public const string Victory = "Settle.Victory";

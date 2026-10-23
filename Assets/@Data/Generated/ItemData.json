@@ -178,6 +178,13 @@
           "Reach": 0,
           "Min": 8,
           "Max": 8
+        },
+        {
+          "Kind": "Shield",
+          "Target": "AllyAll",
+          "Reach": 0,
+          "Min": 150,
+          "Max": 150
         }
       ],
       "ShopWeight": 6,
@@ -1099,8 +1106,8 @@
           "Kind": "MaxHp",
           "Target": "Self",
           "Reach": 0,
-          "Min": 400,
-          "Max": 400
+          "Min": 1200,
+          "Max": 1200
         }
       ],
       "ShopWeight": 8,
@@ -1489,8 +1496,8 @@
           "Kind": "MaxHp",
           "Target": "Self",
           "Reach": 0,
-          "Min": 600,
-          "Max": 600
+          "Min": 2400,
+          "Max": 2400
         }
       ],
       "ShopWeight": 8,
@@ -1895,6 +1902,13 @@
           "Reach": 0,
           "Min": 546,
           "Max": 546
+        },
+        {
+          "Kind": "Charge",
+          "Target": "Self",
+          "Reach": 0,
+          "Min": 1500,
+          "Max": 1500
         }
       ],
       "ShopWeight": 8,

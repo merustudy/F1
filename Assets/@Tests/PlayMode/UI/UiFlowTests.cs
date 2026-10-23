@@ -236,6 +236,7 @@ namespace F1.Tests
             }
 
             yield return StagedNewTraits(settlement);
+            yield return StagedEarlyRetreat(settlement);
             UiTestUtil.Click(settlement, "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
 
@@ -618,6 +619,12 @@ namespace F1.Tests
             Assert.AreEqual(1200, engine.Inputs[0].TimeMs, "The input carries the battle time it was made at, even while paused.");
             Assert.IsNull(engine.Potions[0]);
 
+            // Round 100: on floor 1 a retreat would be early (stage 54): the button says so on a second line, its own label smaller above it.
+            Assert.IsTrue(Managers.Expedition.RetreatIsEarly);
+            Assert.IsTrue(UiTestUtil.At(screen, "Frame/Header/Retreat/RetreatNote").gameObject.activeSelf);
+            Assert.AreEqual("조기 퇴각 · 얻는 것 없음", UiTestUtil.TextAt(screen, "Frame/Header/Retreat/RetreatNote"));
+            Assert.AreEqual(22f, UiTestUtil.At(screen, "Frame/Header/Retreat/RetreatLabel").GetComponent<TMP_Text>().fontSize);
+
             // Retreat is an attempt; whatever the roll, it is recorded.
             UiTestUtil.Click(screen, "Frame/Header/Retreat");
             Assert.AreEqual(2, engine.Inputs.Count);
@@ -980,6 +987,32 @@ namespace F1.Tests
             settlement.Refresh();
             yield return null;
             Assert.AreEqual(newTraits.Count, settlement.NewTraitRows.Count(row => row.gameObject.activeSelf));
+        }
+
+        /// <summary>
+        /// An early retreat (stages 53·54, Design/36), staged on the report: a retreat that passed no days says no time passed and, where the gold
+        /// stood, that it earned nothing, in the plain colour; the experience line is empty. Then the report as it was.
+        /// </summary>
+        IEnumerator StagedEarlyRetreat(SettlementScreen settlement)
+        {
+            SettlementReport report = Managers.Expedition.Report;
+            (ExpeditionResult result, int days) = (report.Result, report.DaysPassed);
+            string gold = UiTestUtil.TextAt(settlement, "Frame/Panel/Gold");
+            report.Result = ExpeditionResult.Retreated;
+            report.DaysPassed = 0;
+            settlement.Refresh();
+            yield return null;
+
+            Assert.AreEqual("조기에 퇴각하여 아무것도 얻을 수 없었습니다", UiTestUtil.TextAt(settlement, "Frame/Panel/Gold"));
+            Assert.AreEqual(UiPalette.Text, UiTestUtil.At(settlement, "Frame/Panel/Gold").GetComponent<TMP_Text>().color);
+            Assert.AreEqual(string.Empty, UiTestUtil.TextAt(settlement, "Frame/Panel/Exp"));
+            Assert.AreEqual($"일찍 돌아와 시간이 흐르지 않았습니다 ({report.DayAfter}주차)", UiTestUtil.TextAt(settlement, "Frame/Panel/Days"));
+
+            (report.Result, report.DaysPassed) = (result, days);
+            settlement.Refresh();
+            yield return null;
+            Assert.AreEqual(gold, UiTestUtil.TextAt(settlement, "Frame/Panel/Gold"));
+            Assert.AreEqual(UiPalette.DiabloGold, UiTestUtil.At(settlement, "Frame/Panel/Gold").GetComponent<TMP_Text>().color);
         }
 
         /// <summary>A right click on a trait's chip, as the test kit clicks: the press, then the click.</summary>

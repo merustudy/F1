@@ -91,11 +91,19 @@ namespace F1.UI
             _fallen.text = UiStrings.Get(UiKeys.Settle.Fallen, UiText.MercenaryList(report.FallenIds));
             _fallen.color = report.FallenIds.Count > 0 ? UiPalette.Danger : UiPalette.Text;
             _fatigue.text = report.SurvivorIds.Count > 0 ? UiStrings.Get(UiKeys.Settle.Fatigue, SurvivorFatigue(report)) : string.Empty;
-            _days.text = UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter);
-            _gold.text = report.CoinsConverted > 0
-                ? UiStrings.Get(UiKeys.Settle.GoldWithCoins, report.GoldEarned, report.FloorsReached, report.CoinsConverted, report.GoldFromCoins, report.GoldAfter)
-                : UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
-            _exp.text = ExpText(report);
+            // Stage 53: an early retreat passes no days.
+            _days.text = report.DaysPassed > 0
+                ? UiStrings.Get(UiKeys.Settle.Days, report.DaysPassed, report.DayAfter)
+                : UiStrings.Get(UiKeys.Settle.NoDays, report.DayAfter);
+            // Stage 54 (Design/36): an early retreat — a retreat that passed no days — earned nothing; the line says so where the gold stood.
+            bool early = report.Result == ExpeditionResult.Retreated && report.DaysPassed == 0;
+            _gold.text = early
+                ? UiStrings.Get(UiKeys.Settle.EarlyRetreat)
+                : report.CoinsConverted > 0
+                    ? UiStrings.Get(UiKeys.Settle.GoldWithCoins, report.GoldEarned, report.FloorsReached, report.CoinsConverted, report.GoldFromCoins, report.GoldAfter)
+                    : UiStrings.Get(UiKeys.Settle.Gold, report.GoldEarned, report.FloorsReached, report.GoldAfter);
+            _gold.color = early ? UiPalette.Text : UiPalette.DiabloGold;
+            _exp.text = early ? string.Empty : ExpText(report);
             ShowLines(report);
             _runOver.text = RunOverText(report);
         }

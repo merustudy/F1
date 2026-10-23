@@ -18,6 +18,7 @@ VirtueFatigue,40
 AfflictionRecovery,0
 OverworkCooldownPercent,25
 RestDays,1
+FreeRetreatPercent,33
 DogGraceMs,0
 DogGraceBreakHits,3
 DogDeathChancePercent,30

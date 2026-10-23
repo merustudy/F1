@@ -182,6 +182,10 @@
       "Value": 14
     },
     {
+      "Key": "FreeRetreatPercent",
+      "Value": 33
+    },
+    {
       "Key": "FreezePercentPerStack",
       "Value": 1
     },

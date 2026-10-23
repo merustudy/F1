@@ -46,6 +46,7 @@ namespace F1.Tests
                 { "AfflictionRecovery", 0 },
                 { "OverworkCooldownPercent", 0 },
                 { "RestDays", 1 },
+                { "FreeRetreatPercent", 0 },
                 { "DogGraceMs", 3000 },
                 { "DogGraceBreakHits", 3 },
                 { "DogDeathChancePercent", 100 },

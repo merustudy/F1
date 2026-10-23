@@ -137,6 +137,31 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Settle_AnEarlyRetreat_KeepsTheNegativeTraitsRolled_AndThrowsThePositiveOnesAway()
+        {
+            // Stage 54 (Design/36 판정 2): rolled as after any retreat, on the same stream; the positive ones (lucky_t, steel_t) are thrown away.
+            StaticData data = Data(("FreeRetreatPercent", 50), ("TraitChanceRetreatPercent", 100), ("TraitChanceDeathsDoorPercent", 100), ("TraitChanceVirtuePercent", 100));
+            RunState run = RunRules.NewRun(data, 7);
+            RunRules.SetParty(data, run, FlowTestKit.Party(("anna", 1), ("ben", 2)));
+            ExpeditionState expedition = Ended(data, run, ExpeditionResult.Retreated);
+            expedition.CurrentNodeId = expedition.Map.Nodes.First(n => n.Floor == 1).Id;
+            ExpeditionMember anna = expedition.Members.Single(m => m.MercenaryId == "anna");
+            anna.DeathsDoor = true;
+            anna.StateId = "focused";
+
+            SettlementReport report = RunRules.Settle(data, run, expedition);
+
+            List<string> rolled = TraitRules.DrawAcquired(data, new string[0], new[] { TraitSource.Retreat, TraitSource.DeathsDoor, TraitSource.Virtue },
+                TraitRules.AcquiredStream(run.Seed, "anna", run.ExpeditionCount));
+            CollectionAssert.Contains(rolled, "steel_t", "The virtue's one was rolled ...");
+            CollectionAssert.AreEqual(rolled.Where(id => data.Traits.Get(id).Polarity == TraitPolarity.Negative).ToList(), RunRules.FindMercenary(run, "anna").Traits,
+                "... and only the negative ones stay.");
+            CollectionAssert.Contains(RunRules.FindMercenary(run, "anna").Traits, "grit_t");
+            CollectionAssert.AreEqual(new[] { "grit_t" }, RunRules.FindMercenary(run, "ben").Traits);
+            Assert.AreEqual((0, 0, 0), (report.GoldEarned, report.ExpEarned, report.DaysPassed));
+        }
+
+        [Test]
         public void CompleteBattle_MarksWhoWentToDeathsDoor()
         {
             // Unarmed, the front member takes the hits to death's door (where it cannot die here); the retreat ends the battle with both alive.

@@ -292,6 +292,7 @@ Battle.EnemyFallen,Enemies killed in this battle. {0} = names.,쓰러뜨린 적:
 Battle.PotionArmed,{0} = potion name; {1} = its effect. Shown only while the potion is chosen.,{0} · {1}: 쓸 아군을 누르세요,{0} · {1}: click an ally
 Battle.Retreat,{0} = success chance.,후퇴 ({0}%),Retreat ({0}%)
 Battle.RetreatWait,{0} = seconds until retreat can be tried again.,후퇴 대기 {0}초,Retreat in {0}s
+Battle.EarlyRetreatNote,"Round 100: the retreat button's second line while a retreat would be early (stage 54: it earns nothing).",조기 퇴각 · 얻는 것 없음,Early retreat · nothing gained
 Battle.Victory,Battle result.,승리,Victory
 Battle.Defeat,Battle result: everyone died.,전멸,Wiped out
 Battle.Retreated,Battle result.,후퇴 성공,Retreated
@@ -367,6 +368,8 @@ Settle.Fallen,{0} = names.,전사: {0},Fallen: {0}
 Settle.Fatigue,"{0} = each survivor's name and the fatigue they came back with, separated by commas.",생환자의 피로도: {0},Fatigue of those who returned: {0}
 Settle.SurvivorState,"One survivor in Settle.Fatigue who came back in an affliction. {0} = name and fatigue. {1} = the affliction.",{0} ({1}),{0} ({1})
 Settle.Days,{0} = days passed. {1} = the new day.,{0}주가 지나 {1}주차가 되었습니다,{0} weeks passed. It is now week {1}
+Settle.NoDays,"Stage 53: an early retreat passed no days, in place of Settle.Days. {0} = the day, unchanged.",일찍 돌아와 시간이 흐르지 않았습니다 ({0}주차),Back early: no time passed (week {0})
+Settle.EarlyRetreat,"Stage 54: an early retreat earned nothing, in place of Settle.Gold (the experience line is empty).",조기에 퇴각하여 아무것도 얻을 수 없었습니다,The early retreat brought back nothing
 Settle.ItemsLost,Reminder that expedition items do not last.,원정에서 얻은 아이템과 포션은 모두 사라졌습니다,Items and potions from the expedition are gone
 Settle.RunOver,The run ended with this expedition.,용병단에 남은 용병이 없습니다,No mercenary is left in the company
 Settle.Victory,The run was won with this expedition: the final boss fell.,최종 보스를 쓰러뜨렸습니다. 런이 끝났습니다,The final boss has fallen. The run is over

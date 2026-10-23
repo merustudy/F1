@@ -201,6 +201,9 @@ namespace F1.Flow
         /// <summary>What the next refresh costs at the shop the party is at; 0 elsewhere.</summary>
         public int RefreshCost => Phase == GamePhase.Shop ? ExpeditionRules.RefreshCost(_data.Data, Expedition) : 0;
 
+        /// <summary>Whether a retreat now would be early and earn nothing (stage 54, Round 100: the retreat button says so).</summary>
+        public bool RetreatIsEarly => Expedition != null && RunRules.RetreatWouldBeEarly(_data.Data, Expedition);
+
         /// <summary>True when the coins cover the offer in a slot.</summary>
         public bool CanAfford(int slot)
         {

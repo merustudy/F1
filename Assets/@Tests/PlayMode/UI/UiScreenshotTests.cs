@@ -69,16 +69,17 @@ namespace F1.Tests
 
         /// <summary>
         /// The settlement with the traits an expedition left (Slice D stage 38), staged on the report for one picture as the Round 84 mock has it — 아스트리드
-        /// home from a retreat with fatigue 64, ready to level up — with the lines given, then as it was.
+        /// home from a retreat with fatigue 64, ready to level up — with the lines given, then as it was. An early one (stage 54, Design/36) passed no
+        /// days and earned nothing: no experience, nobody ready.
         /// </summary>
-        IEnumerator StagedNewTraits(SettlementScreen screen, string name, List<AcquiredTraits> newTraits)
+        IEnumerator StagedNewTraits(SettlementScreen screen, string name, List<AcquiredTraits> newTraits, bool early = false)
         {
             SettlementReport report = Managers.Expedition.Report;
             ExpeditionResult result = report.Result;
             List<string> survivors = report.SurvivorIds, fallen = report.FallenIds, states = report.SurvivorStates, ready = report.ReadyToLevelUp;
             List<int> fatigue = report.SurvivorFatigue;
             List<AcquiredTraits> was = report.NewTraits;
-            int exp = report.ExpEarned;
+            int exp = report.ExpEarned, days = report.DaysPassed;
 
             List<string> home = newTraits.Select(n => n.MercenaryId).ToList();
             report.Result = ExpeditionResult.Retreated;
@@ -86,9 +87,10 @@ namespace F1.Tests
             report.FallenIds = new List<string>();
             report.SurvivorFatigue = home.Select(_ => 64).ToList();
             report.SurvivorStates = home.Select(_ => (string)null).ToList();
-            report.ExpEarned = 20;
-            report.ReadyToLevelUp = new List<string> { "astrid" };
+            report.ExpEarned = early ? 0 : 20;
+            report.ReadyToLevelUp = early ? new List<string>() : new List<string> { "astrid" };
             report.NewTraits = newTraits;
+            report.DaysPassed = early ? 0 : days;
             screen.Refresh();
             yield return Capture(name);
 
@@ -98,6 +100,7 @@ namespace F1.Tests
             report.SurvivorFatigue = fatigue;
             report.SurvivorStates = states;
             report.ExpEarned = exp;
+            report.DaysPassed = days;
             report.ReadyToLevelUp = ready;
             report.NewTraits = was;
             screen.Refresh();
@@ -1079,6 +1082,12 @@ namespace F1.Tests
                 new AcquiredTraits { MercenaryId = "ella", TraitIds = new List<string> { "shaken", "limp" } },
                 new AcquiredTraits { MercenaryId = "mira", TraitIds = new List<string> { "seasoned" } },
             });
+
+            // Stage 54 (Design/36): an early retreat — nothing earned where the gold stood, no experience, the negative traits it left all the same.
+            yield return StagedNewTraits(UiTestUtil.Screen<SettlementScreen>(), prefix + "_86_settlement_early_retreat", new List<AcquiredTraits>
+            {
+                new AcquiredTraits { MercenaryId = "astrid", TraitIds = new List<string> { "shaken", "scarred" } },
+            }, early: true);
 
             UiTestUtil.Click(UiTestUtil.Screen<SettlementScreen>(), "Frame/Panel/Confirm");
             yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);

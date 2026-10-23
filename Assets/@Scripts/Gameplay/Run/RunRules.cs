@@ -280,6 +280,39 @@ namespace F1.Gameplay
             return Math.Min(expedition.Map.Nodes[expedition.CurrentNodeId].Floor, data.Dungeons.Get(expedition.DungeonId).Floors);
         }
 
+        /// <summary>
+        /// The days an ended expedition takes (stage 53, the user's "원정 한번을 1주로 변경하고(원정 진행 1/3 전 조기 포기시에는 미소요)"):
+        /// the dungeon's DurationDays, or none for an early retreat (<see cref="IsEarlyRetreat"/>).
+        /// </summary>
+        public static int DaysFor(StaticData data, ExpeditionState expedition)
+        {
+            return IsEarlyRetreat(data, expedition) ? 0 : data.Dungeons.Get(expedition.DungeonId).DurationDays;
+        }
+
+        /// <summary>
+        /// A retreat whose floor (the one the party stood on; 0 before the first node) is below FreeRetreatPercent of the expedition's floors,
+        /// the boss's included: a mine of 19 floors and its boss frees a retreat up to floor 6. A wipe, a clear and the final stand take their days.
+        /// </summary>
+        public static bool IsEarlyRetreat(StaticData data, ExpeditionState expedition)
+        {
+            return expedition.Result == ExpeditionResult.Retreated && RetreatWouldBeEarly(data, expedition);
+        }
+
+        /// <summary>
+        /// Whether a retreat now would be early (Round 100: the retreat button says so): the expedition is no final stand and the party
+        /// stands below FreeRetreatPercent of its floors, the boss's included.
+        /// </summary>
+        public static bool RetreatWouldBeEarly(StaticData data, ExpeditionState expedition)
+        {
+            if (expedition.FinalStand)
+            {
+                return false;
+            }
+
+            int floor = expedition.CurrentNodeId < 0 ? 0 : expedition.Map.Nodes[expedition.CurrentNodeId].Floor;
+            return floor * 100 < (data.Dungeons.Get(expedition.DungeonId).Floors + 1) * data.Balance.FreeRetreatPercent;
+        }
+
         /// <summary>What the return settlement pays for an ended expedition: GoldPerFloor for each floor reached, and GoldClear for a clear.</summary>
         /// <summary>
         /// What the shop would pay for the items the party brings home (2026-10-17): every item on the living members' boards and in the
@@ -550,11 +583,13 @@ namespace F1.Gameplay
             {
                 DungeonId = dungeon.Id,
                 Result = expedition.Result,
-                DaysPassed = dungeon.DurationDays,
+                DaysPassed = DaysFor(data, expedition),
             };
 
             var participants = new HashSet<string>();
-            report.ExpEarned = LevelRules.ExpFor(data, expedition);
+            // Stage 54 (the user's "조기 퇴각 패널티", Design/36): an early retreat earns nothing — no experience, no gold, no positive trait.
+            bool early = IsEarlyRetreat(data, expedition);
+            report.ExpEarned = early ? 0 : LevelRules.ExpFor(data, expedition);
             foreach (ExpeditionMember member in expedition.Members)
             {
                 participants.Add(member.MercenaryId);
@@ -581,6 +616,12 @@ namespace F1.Gameplay
                     // Slice D stage 38: what the expedition leaves on the survivor (05 §6), on the survivor's own stream for this expedition.
                     List<string> acquired = TraitRules.DrawAcquired(data, mercenary.Traits, TraitRules.SourcesOf(data, expedition.Result, member),
                         TraitRules.AcquiredStream(state.Seed, member.MercenaryId, state.ExpeditionCount));
+                    if (early)
+                    {
+                        // Rolled as always, so a negative trait comes as often as after any retreat; a positive one is thrown away.
+                        acquired.RemoveAll(id => data.Traits.Get(id).Polarity == TraitPolarity.Positive);
+                    }
+
                     if (acquired.Count > 0)
                     {
                         mercenary.Traits.AddRange(acquired);
@@ -598,7 +639,7 @@ namespace F1.Gameplay
 
             // The lobby party keeps the formation chosen before leaving; those behind the dead advance.
             CloseGaps(state);
-            report.BuildingsCompleted = PassDays(data, state, dungeon.DurationDays, participants);
+            report.BuildingsCompleted = PassDays(data, state, report.DaysPassed, participants);
 
             if (expedition.Result == ExpeditionResult.Cleared)
             {
@@ -607,7 +648,7 @@ namespace F1.Gameplay
             }
 
             report.FloorsReached = FloorsReached(data, expedition);
-            report.GoldEarned = GoldFor(data, expedition);
+            report.GoldEarned = early ? 0 : GoldFor(data, expedition);
             if (expedition.Result == ExpeditionResult.Cleared)
             {
                 // 2026-10-17 (the user's request): a cleared expedition's region coins come home as gold — the coins left plus what the shop

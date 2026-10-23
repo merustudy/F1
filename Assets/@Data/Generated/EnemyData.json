@@ -8,7 +8,7 @@
         "ko-KR": "심연의 군주"
       },
       "Level": 14,
-      "MaxHp": 36400,
+      "MaxHp": 62000,
       "Items": [
         {
           "ItemId": "abyss_cleaver",

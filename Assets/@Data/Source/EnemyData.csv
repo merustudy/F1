@@ -7,4 +7,4 @@ mine_overseer,광산 감독관,Mine Overseer,9,120,overseer_maul:100+overseer_ro
 goblin_veteran,고블린 고참,Goblin Veteran,6,41,rusty_blade:328+buckler:175,unit/enemy/goblin-raider,115,,,,9=rusty_blade:100|14=war_horn:100
 goblin_hexer,고블린 주술 대가,Goblin Hexer,7,30,lantern_staff:225+mending_chant:225,unit/enemy/goblin-shaman,115,,,,9=hex_bone:100|14=frost_flask:100
 skeleton_guard,스켈레톤 호위,Skeleton Guard,8,42,rusty_blade:220+buckler:120,unit/enemy/skeleton-guard,100,,,,
-abyss_lord,심연의 군주,Abyss Lord,14,364,abyss_cleaver:100,unit/enemy/abyss-lord,150,75=abyss_cleaver:100+abyss_howl:100|50=abyss_cleaver:115+abyss_howl:115+abyss_grasp:100|25=abyss_cleaver:140+abyss_howl:140+abyss_grasp:140,10,,
+abyss_lord,심연의 군주,Abyss Lord,14,620,abyss_cleaver:100,unit/enemy/abyss-lord,150,75=abyss_cleaver:100+abyss_howl:100|50=abyss_cleaver:115+abyss_howl:115+abyss_grasp:100|25=abyss_cleaver:140+abyss_howl:140+abyss_grasp:140,10,,

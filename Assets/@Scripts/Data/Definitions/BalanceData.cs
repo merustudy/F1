@@ -76,6 +76,7 @@ namespace F1.Data
             new KeySpec(nameof(AfflictionRecovery), 0, Big),
             new KeySpec(nameof(OverworkCooldownPercent), 0, 100),
             new KeySpec(nameof(RestDays), 1, Big),
+            new KeySpec(nameof(FreeRetreatPercent), 0, 100),
             new KeySpec(nameof(DogGraceMs), 0, Big),
             new KeySpec(nameof(DogGraceBreakHits), 1, 100),
             new KeySpec(nameof(DogDeathChancePercent), 0, 100),
@@ -348,6 +349,11 @@ namespace F1.Data
         /// <summary>The fatigue each piece of equipment on a board (not a base weapon) adds when a battle starts.</summary>
         public int FatigueEquipment => _values[nameof(FatigueEquipment)];
         public int RestDays => _values[nameof(RestDays)];
+        /// <summary>
+        /// Stage 53: a retreat that reached fewer than this share of an expedition's floors (the boss's included) passes no days; 0 makes every
+        /// retreat take its days.
+        /// </summary>
+        public int FreeRetreatPercent => _values[nameof(FreeRetreatPercent)];
         public int DogGraceMs => _values[nameof(DogGraceMs)];
         public int DogGraceBreakHits => _values[nameof(DogGraceBreakHits)];
         public int DogDeathChancePercent => _values[nameof(DogDeathChancePercent)];

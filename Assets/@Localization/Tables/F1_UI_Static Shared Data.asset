@@ -2145,6 +2145,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673629774446594
+  - m_Id: 8269975956480000
+    m_Key: Settle.NoDays
+    m_Metadata:
+      m_Items:
+      - rid: 8623673632681099264
+  - m_Id: 8280476539150336
+    m_Key: Settle.EarlyRetreat
+    m_Metadata:
+      m_Items:
+      - rid: 8623673633337507840
+  - m_Id: 8298227316023296
+    m_Key: Battle.EarlyRetreatNote
+    m_Metadata:
+      m_Items:
+      - rid: 8623673634446901248
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4117,3 +4132,18 @@ MonoBehaviour:
       type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
       data:
         m_CommentText: '{0} = the maximum HP gained for the battle (Design/35).'
+    - rid: 8623673632681099264
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Stage 53: an early retreat passed no days, in place of Settle.Days.
+          {0} = the day, unchanged.'
+    - rid: 8623673633337507840
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Stage 54: an early retreat earned nothing, in place of Settle.Gold
+          (the experience line is empty).'
+    - rid: 8623673634446901248
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Round 100: the retreat button''s second line while a retreat
+          would be early (stage 54: it earns nothing).'

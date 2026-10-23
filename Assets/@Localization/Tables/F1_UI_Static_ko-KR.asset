@@ -2025,6 +2025,21 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375845
+  - m_Id: 8269975956480000
+    m_Localized: "\uC77C\uCC0D \uB3CC\uC544\uC640 \uC2DC\uAC04\uC774 \uD750\uB974\uC9C0
+      \uC54A\uC558\uC2B5\uB2C8\uB2E4 ({0}\uC8FC\uCC28)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8280476539150336
+    m_Localized: "\uC870\uAE30\uC5D0 \uD1F4\uAC01\uD558\uC5EC \uC544\uBB34\uAC83\uB3C4
+      \uC5BB\uC744 \uC218 \uC5C6\uC5C8\uC2B5\uB2C8\uB2E4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8298227316023296
+    m_Localized: "\uC870\uAE30 \uD1F4\uAC01 \xB7 \uC5BB\uB294 \uAC83 \uC5C6\uC74C"
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -2260,3 +2275,4 @@ MonoBehaviour:
         - id: 8223467345272832
         - id: 8223467357855744
         - id: 8223467357855745
+        - id: 8269975956480000

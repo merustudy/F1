@@ -242,8 +242,9 @@ namespace F1.Tests
         public void TheMaximumHpItems_AreArmourThatRaisesItWhenTheBattleStarts()
         {
             // 2026-10-23 (Design/35 판정 6): the leather belt and the guardian's amulet, asking for constitution.
+            // Their values since stage 43 round 2 (the user's "깃발·로브·최대 체력 아이템 조정"): 24 and 12.
             StaticData data = LoadShipped();
-            foreach ((string id, int value, int req) in new[] { ("leather_belt", 600, 3), ("guardian_amulet", 400, 5) })
+            foreach ((string id, int value, int req) in new[] { ("leather_belt", 2400, 3), ("guardian_amulet", 1200, 5) })
             {
                 ItemData item = data.Items.Get(id);
                 Assert.AreEqual(ItemCategory.Armor, item.Category, id);
@@ -252,6 +253,23 @@ namespace F1.Tests
                 Assert.AreEqual(((Stat?)Stat.Con, req), (item.ReqStat, item.ReqValue), id);
                 Assert.IsTrue(item.ShopWeight > 0 && item.DropWeight > 0 && item.Price > 0, id + ": sold and dropped.");
             }
+        }
+
+        /// <summary>
+        /// Stage 43 round 2 (the user's "깃발·로브·최대 체력 아이템 조정"; Docs/Design/02_Combat_System.md §4): the banner and the robe each gained a
+        /// second effect, their own first effect and shape kept — the banner shields the party, the robe charges its wearer's cooldowns when a battle starts.
+        /// </summary>
+        [Test]
+        public void TheBannerAndTheRobe_HaveTheirSecondEffect()
+        {
+            StaticData data = LoadShipped();
+            ItemData banner = data.Items.Get("banner");
+            Assert.AreEqual((EffectKind.Aim, TargetMode.AllyAll), (banner.Effects[0].Kind, banner.Effects[0].Target));
+            Assert.AreEqual((EffectKind.Shield, TargetMode.AllyAll, 150), (banner.Effects[1].Kind, banner.Effects[1].Target, banner.Effects[1].Min));
+            ItemData robe = data.Items.Get("robe");
+            Assert.AreEqual(ItemTrigger.BattleStart, robe.Trigger);
+            Assert.AreEqual((EffectKind.Shield, TargetMode.Self), (robe.Effects[0].Kind, robe.Effects[0].Target));
+            Assert.AreEqual((EffectKind.Charge, TargetMode.Self, 1500), (robe.Effects[1].Kind, robe.Effects[1].Target, robe.Effects[1].Min));
         }
 
         [Test]

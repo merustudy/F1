@@ -44,6 +44,11 @@ namespace F1.UI
         /// <summary>The candle's flame gutters and its light pulls in over this long before the storm, until it is here.</summary>
         const int StormDuskMs = 10000;
 
+        // The retreat button's label (UiPrefabSetup.Battle: 28) and, with the early retreat's second line (Round 100), smaller and lifted.
+        const float RetreatLabelSize = 28f;
+        const float RetreatNoteLabelSize = 22f;
+        const float RetreatNoteRoom = 18f;
+
         /// <summary>
         /// Seconds a fallen mercenary's grave stands at x1 and then takes to fade out (2026-10-04, round 21 mockup 2B). At a
         /// higher speed both are shorter by as much, so that the battle does not run far ahead of what is shown.
@@ -132,6 +137,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _potionHint;
         [SerializeField] Button _retreat;
         [SerializeField] TMP_Text _retreatLabel;
+        [SerializeField] TMP_Text _retreatNote;
         [SerializeField] GameObject _resultPanel;
         [SerializeField] TMP_Text _resultTitle;
         [SerializeField] TMP_Text _resultDetail;
@@ -1317,9 +1323,17 @@ namespace F1.UI
             _potionHint.transform.parent.gameObject.SetActive(armed);
 
             _retreat.interactable = engine.CanRetreat;
-            _retreatLabel.text = ongoing && !engine.CanRetreat
+            bool waiting = ongoing && !engine.CanRetreat;
+            _retreatLabel.text = waiting
                 ? UiStrings.Get(UiKeys.Battle.RetreatWait, UiText.Seconds(engine.RetreatReadyMs - engine.TimeMs))
                 : UiStrings.Get(UiKeys.Battle.Retreat, balance.RetreatChancePercent);
+
+            // Round 100: while a retreat would be early (stage 54) the button says on a second line that it earns nothing; the wait after a
+            // failed try keeps its one line.
+            bool note = !waiting && Managers.Expedition.RetreatIsEarly;
+            _retreatNote.gameObject.SetActive(note);
+            _retreatLabel.fontSize = note ? RetreatNoteLabelSize : RetreatLabelSize;
+            _retreatLabel.margin = note ? new Vector4(0f, 0f, 0f, RetreatNoteRoom) : Vector4.zero;
         }
 
         /// <summary>

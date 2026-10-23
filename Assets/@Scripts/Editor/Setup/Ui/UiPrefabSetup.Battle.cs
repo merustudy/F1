@@ -198,6 +198,10 @@ namespace F1.Editor.Setup
             UiBuild.Box(header, 0f, 0f, 1920f, 84f);
             ButtonParts retreat = KitButton("Retreat", header.transform, UiPalette.Danger, 28f);
             UiBuild.Box(retreat.Rect, 40f, 16f, 300f, 52f);
+            // Round 100: the second line an early retreat shows (BattleScreen turns it on and makes room above it).
+            TextMeshProUGUI retreatNote = UiBuild.SingleLine(UiBuild.LocalizedLabel("RetreatNote", retreat.Frame.transform, UiKeys.Battle.EarlyRetreatNote, 15f, UiPalette.Bone, TextAlignmentOptions.Center));
+            UiBuild.Box(retreatNote, 8f, 30f, 284f, 18f);
+            retreatNote.gameObject.SetActive(false);
             // The captions: the last few events, the newest at the bottom and brightest (BattleScreen.RenderCaptions), next to the retreat button.
             var captions = new TextMeshProUGUI[CaptionLines];
             for (int i = 0; i < CaptionLines; i++)
@@ -510,6 +514,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_potionHint", potionHint);
             UiBuild.SetReference(screen, "_retreat", retreat.Button);
             UiBuild.SetReference(screen, "_retreatLabel", retreat.Label);
+            UiBuild.SetReference(screen, "_retreatNote", retreatNote);
             UiBuild.SetReference(screen, "_resultPanel", overlay.gameObject);
             UiBuild.SetReference(screen, "_resultTitle", resultTitle);
             UiBuild.SetReference(screen, "_resultDetail", resultDetail);

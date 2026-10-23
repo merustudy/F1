@@ -17,7 +17,7 @@
       "Floors": 19,
       "MapMinWidth": 2,
       "MapMaxWidth": 4,
-      "DurationDays": 5,
+      "DurationDays": 1,
       "StartingPotions": [
         "healing_potion",
         "healing_potion"
@@ -29,7 +29,7 @@
       "CampChancePercent": 10,
       "CampFloor": 19,
       "EnemyHpPerFloorPercent": 8,
-      "EnemyPowerPerFloorPercent": 0,
+      "EnemyPowerPerFloorPercent": 1,
       "Tier1Floor": 6,
       "Tier2Floor": 13,
       "Tier3Floor": 0,
@@ -53,7 +53,7 @@
       "Floors": 5,
       "MapMinWidth": 1,
       "MapMaxWidth": 2,
-      "DurationDays": 3,
+      "DurationDays": 1,
       "StartingPotions": [
         "healing_potion",
         "healing_potion"
