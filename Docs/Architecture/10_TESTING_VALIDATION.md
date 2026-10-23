@@ -74,6 +74,8 @@ Tools/chain.sh editmode   # 단계 이름을 주면 그 단계만
 - 파일: `<persistentDataPath>/Logs/play-<시작 시각>.log`. 앱을 켤 때마다 하나이고 첫 줄을 쓸 때 만든다.
   macOS에서는 `~/Library/Application Support/funitup/F1/Logs/`. 저장 폴더(`Saves/`)와 Git 밖이다. PlayMode Test는 임시 저장 루트 안의 `Logs/`에 써서 루트와 함께 지워진다.
 - 쓰기에 실패하면 조용히 멈춘다(게임에 영향 없음). Test: `PlayLogTests`(EditMode).
+- **사건 줄**(Round 97): 이름이 `!`(`PlayLog.EventPrefix`)로 시작하는 줄은 화면이 아니라 사건이다. 지금은 금화 테스트 버튼의 `!TestGold`(`+100 gold=<뒤의 금>` 다음에 화면 줄과 같은 상태)뿐이다.
+  `RunManager.TestGoldGranted`(저장이 성공한 뒤)에 `AppRoot`가 묶는다(에디터·개발 빌드만). 집계는 사건 줄을 화면의 시간에서 빼고 "events: TestGold xN"으로 따로 센다.
 - 집계: `Tools/playlog.py [파일]`(없으면 가장 새 파일) — 화면별 분·횟수·비율, 처음과 끝, 시간순 줄. 야영지 창과 인벤토리 팝업은 화면이 아니라 노드 맵의 시간에 든다.
 
 ## Deferred and Forbidden

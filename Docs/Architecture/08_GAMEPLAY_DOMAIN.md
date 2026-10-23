@@ -190,6 +190,8 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 
 ## 런의 끝 (Slice C 25단계)
 
+- 시간의 한 칸(52단계, 2026-10-23): `RunState.Day`·`BalanceData.TotalDays`(99)·`DungeonData.DurationDays`·`RestDays`·건설의 일수는 이름 그대로 **주**를 센다(04 §2). 규칙과 저장은 바뀌지 않았다.
+
 규칙은 `Docs/Design/04_Lobby_100Day_Economy.md` §2·§4·§8, 최종 던전은 `03_Dungeon_Structure.md` §1. 모두 `RunRules`다.
 
 - **최종 결전**(`IsFinalStandDue`): 날이 `TotalDays`를 넘으면(101일째부터) 쉬기가 안 되고(`CanRest`), 출발은 최종 던전(`DungeonData.IsFinal`)으로만 된다(`CanDepart`: 다른 던전은 `FinalStandDue`). 그 출발은 `ExpeditionRules.Create(finalStand: true)`로, 지도가 보스 노드 하나(`MapGenerator.Generate(bossOnly)`, 시드를 쓰지 않음)이고 `ExpeditionState.FinalStand`가 참이다. 해금되지 않은 최종 던전도 최종 결전에는 열린다.
@@ -326,7 +328,8 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - Type: `EffectKind`에 `Bleed`·`Regen`·`Thorns`·`Cleanse`·`Stagger`·`Charge`, `PotionEffect.Cleanse`. `BattleUnit`의 `Bleed`·`Regen`(중첩)·`Thorns`(0.01 단위). 모두 전투 안의 상태라 저장하지 않는다(07).
 - `Activate`: 중첩 효과(`ItemEffect.CountsStacks`)는 `ScaleStacks`, 나머지(경직·충전의 ms 포함)는 `Scale`로 스탯을 곱한다. 출혈·경직은 물리면 명중을 굴린다(`StatRules.CanMiss`). 피해 갈래의 끝: 피해 → 치명타의 피로 → 무기 적중 패시브 → **가시**(근접 무기이고 대상이 서 있으면 `ApplyDamage(공격자, 대상의 가시, 원인 thorns)`; 공격자가 쓰러지면 `Activate`를 그 자리에서 끝낸다).
 - 틱: `Ticks`가 `Tick.Burn`·`Bleed`·`Regen`의 차례로 `TickUnits`를 아군·적에 돌린다. 출혈 틱은 `ApplyDamage(…, throughShield: true)`로 보호막을 건너고, 재생 틱은 `ApplyHeal`이다. `BattleEvent.IsTickCause`(화상·출혈·가시)는 `ApplyDamage`에서 피격의 피로를 막는다.
-- `ApplyHeal`: 크기가 0보다 크면 출혈을 0으로 하고 `Cleansed`(A 0, B 멎은 중첩, 원인은 그 회복의 원인)를 남긴다. 빈사 탈출은 그대로다.
+- `ApplyHeal`: 크기가 0보다 크고 원인이 재생 틱(`CauseRegen`)이 아니면 출혈을 **1** 빼고 `Cleansed`(A 0, B 1, 원인은 그 회복의 원인)를 남긴다(2026-10-23, Design/35 판정 1: 그 전에는 모두 멎었다). 빈사 탈출은 그대로다.
+- **최대 체력**(2026-10-23, Design/35 판정 6): `EffectKind.MaxHp`(0.01 단위, `ItemData`가 전투 시작 아이템에만 허용). `Activate`의 `RaiseMaxHp`가 `BattleUnit.MaxHpBonus`를 더하고 `Hp = Hp × 새 최대 / 옛 최대`(내림), `MaxHpRaised`(A 오른 값, B 뒤의 HP, C 뒤의 최대)를 남긴다. `BattleUnit.MaxHp` = `Setup.MaxHp + MaxHpBonus`. 전투가 끝나면 `ExpeditionRules.HpAfterBattle`이 `Hp × Setup.MaxHp / MaxHp`(내림, HP가 있었으면 최소 1)로 구성원의 HP를 쓴다(그다음 이긴 전투의 회복). 원정의 최대 HP·저장은 그대로다. Test: `EffectVocabularyTests.MaxHp_…` 둘, `ShippedDataTests.TheMaximumHpItems_…`.
 - `Cleanse`(아이템·포션): 화상·출혈에서 각각 N까지 뺀다. `Stagger`: 대상의 `Active && Cycles` 아이템의 `NextFireMs += N`. `Charge`: `NextFireMs = max(TimeMs + 1, NextFireMs − N)`, 발동한 아이템 자신은 건너뛴다. 모두 그 자리에서 끝나 상태·만료가 없다.
 - 포션(46단계, Design/19): `PotionEffect.Regen`은 `AddRegen`(원인은 포션 id, Source 없음 — 로그의 원인 글은 포션 이름)이다. 정화 포션은 `Cleanse` 그대로. `TryUsePotion`의 갈래 넷.
 - 이벤트: `BleedApplied`·`RegenApplied`·`ThornsGained`·`Cleansed`·`Staggered`·`Charged`; 원인 상수 `CauseBleed`·`CauseRegen`·`CauseThorns`(Source는 None). `Kill`이 세 상태를 0으로 한다.
