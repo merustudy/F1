@@ -73,9 +73,9 @@ Lobby.Day,{0} = current day. {1} = total days.,{0}일차 / {1}일,Day {0} / {1}
 
 - 인트로의 자막과 리넷의 대사는 **Game Data 문구**다: `StorySceneData`·`DialogueLineData`의 `LocalizedText`, NPC의 이름은 `NpcData.Name`(`05_STATIC_DATA.md` "이야기").
   까닭: 자막은 그 장면의 그림·시간·목소리와 같은 행, 같은 diff에서 고친다. String Table로 두면 장면을 더할 때마다 `UiKeys`의 상수(코드)가 늘어 "데이터만 고친다"가 깨진다.
-- UI 문구로 두는 것은 이야기가 아닌 틀뿐이다: 건너뛰기·다음의 안내, 타이틀의 [인트로 보기], 남은 주 "일식까지 {0}주"(`Story.WeeksLeft` — 뒤에 로비 머리의 표시도 같은 Key를 쓴다).
+- UI 문구로 두는 것은 이야기가 아닌 틀뿐이다: 건너뛰기·다음의 안내, 타이틀의 [인트로 보기], 남은 주 "일식까지 {0}주"(`Story.WeeksLeft` — 로비의 띠와 로비·원정의 머리줄이 같은 Key를 쓴다, Round 103).
 - 글자는 Font의 Corpus(Static Data CSV의 모든 글자)에 저절로 들어간다. 따옴표(“ ”)와 줄표(—)도 CSV에 있어 구워진다.
-- 혼잣말의 손글씨 서체(Design/33 §9)는 아직 없다. 두 목소리 모두 Pretendard이고 색으로 가른다(흰색·옅은 금색). 서체는 Deferred("Locale별 Font"와 함께).
+- 두 목소리(단장의 혼잣말, 따옴표 안의 남의 말) 모두 Pretendard이고 색으로 가른다(흰색·옅은 금색). 손글씨 서체는 두지 않는다(2026-10-23 Round 103 사용자 "지금 유지", Design/33 §9).
 
 ## Runtime Locale
 
