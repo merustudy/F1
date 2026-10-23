@@ -1,0 +1,7 @@
+Id,Dialogue,Order,Speaker,Expression,Text.ko-KR,Text.en-US
+first_lobby_1,first_lobby,10,linette,neutral,장부의 첫 줄은 광산 마을입니다. 무너진 갱의 광부들이 구덩이에 떨어졌습니다.,The ledger's first line is the mining village. The miners of the fallen shaft went into the pit.
+first_lobby_2,first_lobby,20,linette,cold,당신은 갈 수 없지요. 그 손목으로는.,"You cannot go, of course. Not with that wrist."
+first_lobby_3,first_lobby,30,linette,neutral,"칼을 사세요. 역마차에 떠돌이들이 와 있습니다. 성문을 나서면 광산입니다.","Buy blades. Drifters have come on the coach. Past the gate lies the mine."
+abyss_unlocked_1,abyss_unlocked,10,linette,cold,광산 마을의 종이 돌아왔습니다. 장부의 한 줄을 지웁니다.,The mining village's bell is back. I strike one line from the ledger.
+abyss_unlocked_2,abyss_unlocked,20,linette,neutral,다음 장은… 심연. 왕이 구덩이로 달아났다는 소문입니다.,"The next page… the abyss. They say the king has fled into the pit."
+abyss_unlocked_3,abyss_unlocked,30,linette,smile,겁이 많은 사람이니까요.,He always was a coward.
