@@ -100,6 +100,9 @@ namespace F1.Gameplay
         /// <summary>The constructions going on, at most one per building (stage 30).</summary>
         public List<ConstructionState> Constructions = new List<ConstructionState>();
 
+        /// <summary>The story's dialogues heard in this run, in the order they were heard (Slice D stage 55). Only StoryRules changes it.</summary>
+        public List<string> SeenDialogues = new List<string>();
+
         /// <summary>How the run stands (Slice C stage 25, Docs/Design/04_Lobby_100Day_Economy.md §8): ongoing, won at the final boss, or lost.</summary>
         public RunOutcome Outcome;
 

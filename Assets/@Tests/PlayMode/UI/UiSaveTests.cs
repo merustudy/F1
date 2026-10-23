@@ -26,19 +26,21 @@ namespace F1.Tests
         public void SetUp()
         {
             _saveRoot = BootTestUtil.UseTemporarySaveRoot();
+            // Slice D stage 55: the story stays off the lobby these tests stage; the story's own tests turn it on.
+            LobbyScreen.StoryShown = false;
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            LobbyScreen.StoryShown = true;
             yield return BootTestUtil.ShutdownApp();
         }
 
         /// <summary>New run and a party of the first mercenaries of the roster, one per row.</summary>
         static IEnumerator NewRunWithParty()
         {
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
         }
 
@@ -274,8 +276,7 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.At(title, "Frame/Buttons/Continue").gameObject.activeSelf);
             Assert.AreEqual(UiStrings.Get(UiKeys.Title.SaveUnreadable), UiTestUtil.TextAt(title, "Frame/Notice"));
 
-            UiTestUtil.Click(title, "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             Assert.AreEqual(1, Managers.Run.Run.Day);
         }
     }

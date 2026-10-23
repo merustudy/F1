@@ -35,6 +35,8 @@ namespace F1.Tests
             _saveRoot = BootTestUtil.UseTemporarySaveRoot();
             // Round 97: the pictures are the game's; the editor's test tools stay out of them (TheTestGold_Korean shows them on purpose).
             LobbyScreen.TestToolsShown = false;
+            // Slice D stage 55: the story stays off the staged lobbies (the story's pictures turn it on).
+            LobbyScreen.StoryShown = false;
             _outputDirectory = Environment.GetEnvironmentVariable("F1_SCREENSHOT_DIR");
             if (string.IsNullOrEmpty(_outputDirectory))
             {
@@ -48,6 +50,7 @@ namespace F1.Tests
         public IEnumerator TearDown()
         {
             LobbyScreen.TestToolsShown = true;
+            LobbyScreen.StoryShown = true;
             yield return BootTestUtil.ShutdownApp();
         }
 
@@ -57,14 +60,61 @@ namespace F1.Tests
         {
             LobbyScreen.TestToolsShown = true;
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             yield return Capture("ko_91_lobby_test_gold");
             UiTestUtil.Click(lobby, "Frame/Header/TestGold");
             UiTestUtil.Click(lobby, "Frame/Header/TestGold");
             yield return null;
             yield return Capture("ko_92_lobby_test_gold_after");
+        }
+
+        /// <summary>
+        /// The story (Slice D stage 55, Round 101; the intro is the Round 98 motion mockup): the title's [인트로 보기], frames of the intro at the moments
+        /// of the mockups (the opening with its hint, #3 with the king's words in gold, #4-2, #8 Linette, #10 the heartbeat), the lobby's banner, Linette's
+        /// first dialogue with her three faces, and Linette standing in the town under the pointer. For the comparison with the mockups.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheStory_Korean()
+        {
+            LobbyScreen.StoryShown = true;
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return Capture("ko_93_title_intro");
+            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Intro);
+            IntroScreen intro = UiTestUtil.Screen<IntroScreen>();
+
+            foreach ((string scene, float at, string name) in new[]
+            {
+                ("intro_mural", 1500f, "ko_94_intro_opening"),
+                ("intro_throne", 7000f, "ko_95_intro_throne"),
+                ("intro_kings_voice", 9000f, "ko_96_intro_kings_voice"),
+                ("intro_market", 9000f, "ko_97_intro_market"),
+                ("intro_wrist", 4000f, "ko_98_intro_wrist"),
+            })
+            {
+                IntroTimeline.Shot shot = intro.Timeline.Shots.First(s => s.Scene.Id == scene);
+                intro.Advance(shot.Start + at - intro.Time);
+                yield return Capture(name);
+            }
+
+            intro.Skip();
+            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            lobby.StoryBanner.Advance(3500f);
+            yield return Capture("ko_99_lobby_banner");
+            lobby.StoryBanner.Close();
+            yield return new WaitForSecondsRealtime(0.5f);
+            yield return Capture("ko_100_dialogue_neutral");
+            lobby.Dialogue.Next();
+            yield return new WaitForSecondsRealtime(0.3f);
+            yield return Capture("ko_101_dialogue_cold");
+            lobby.Dialogue.Next();
+            lobby.Dialogue.Close();
+            yield return null;
+            lobby.TownNpc.Hover();
+            yield return null;
+            yield return Capture("ko_102_lobby_linette");
         }
 
         /// <summary>
@@ -373,8 +423,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             StaticData data = Managers.Data.Data;
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             string[] ids = { "rowan", "kai", "ella", "mira" };
             yield return UiTestUtil.OpenBarracks(lobby);
@@ -425,8 +474,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             StaticData data = Managers.Data.Data;
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             string[] ids = { "rowan", "kai", "ella", "mira" };
             yield return UiTestUtil.OpenBarracks(lobby);
@@ -482,8 +530,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             StaticData data = Managers.Data.Data;
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
 
             Managers.Run.Dismiss("astrid");
@@ -543,8 +590,7 @@ namespace F1.Tests
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
             StaticData data = Managers.Data.Data;
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
             UiTestUtil.StageChampion();
@@ -583,8 +629,7 @@ namespace F1.Tests
             StaticData data = Managers.Data.Data;
             yield return Capture(prefix + "_01_title");
 
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             yield return Capture(prefix + "_02_lobby_empty");
 

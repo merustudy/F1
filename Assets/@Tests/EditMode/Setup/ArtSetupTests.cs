@@ -48,8 +48,8 @@ namespace F1.Tests
             Assert.AreEqual(entries.Count, entries.Select(e => e.Address).Distinct().Count(), "A picture is listed once.");
             Assert.IsTrue(entries.Any(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)), "The figures of the units.");
 
-            // A figure comes with its attack and hit poses, a mercenary's and a monster's (Docs/Design/10 §5).
-            foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/", StringComparison.Ordinal)))
+            // A figure comes with its attack and hit poses, a mercenary's and a monster's (Docs/Design/10 §5). A speaker of the story (stage 55) only stands in the town.
+            foreach (AddressEntry figure in entries.Where(e => e.Address.StartsWith("unit/job/", StringComparison.Ordinal) || e.Address.StartsWith("unit/enemy/", StringComparison.Ordinal)))
             {
                 Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.PoseOf(figure.Address, F1.Data.ArtAddress.Attack)), $"{figure.Address} has its attack pose.");
                 Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.PoseOf(figure.Address, F1.Data.ArtAddress.Hit)), $"{figure.Address} has its hit pose.");
@@ -61,14 +61,18 @@ namespace F1.Tests
             Assert.IsFalse(entries.Any(e => e.Address.StartsWith("building/gate", StringComparison.Ordinal)), "The gate is painted on the town (2026-10-18): no picture of its own.");
             Assert.IsTrue(entries.Any(e => e.Address == F1.Data.ArtAddress.Scaffold), "The scaffold (stage 30).");
             Assert.IsTrue(entries.Any(e => e.Address == "bag/leather-pouch"), "The bags' pictures (round 79), in the expedition scope like an item's icon.");
+            Assert.IsTrue(entries.Any(e => e.Address == "story/intro/mural"), "The intro's pictures (stage 55), in the story's scope.");
+            Assert.IsTrue(entries.Any(e => e.Address == "unit/npc/linette") && entries.Any(e => e.Address == "portrait/npc/linette-cold"), "Linette's figure and faces (stage 55), in the lobby's scope.");
             foreach (AddressEntry entry in entries)
             {
                 Assert.AreEqual(ArtSetup.ArtGroup, entry.Group, entry.Address);
                 // The map of the lands is shown by the expedition screen, which is the lobby's (round 71 E2), the town by the lobby itself (stage 26),
                 // and the town's buildings and the scaffold stand on it (round 78, stage 30).
                 bool lobbys = entry.Address == F1.Data.ArtAddress.ExpeditionMap || entry.Address == F1.Data.ArtAddress.LobbyTown
-                    || entry.Address.StartsWith("building/", StringComparison.Ordinal);
-                ResourceScope scope = lobbys ? ResourceScope.Lobby : ResourceScope.Expedition;
+                    || entry.Address.StartsWith("building/", StringComparison.Ordinal)
+                    || entry.Address.StartsWith("unit/npc/", StringComparison.Ordinal) || entry.Address.StartsWith("portrait/", StringComparison.Ordinal);
+                bool storys = entry.Address.StartsWith("story/", StringComparison.Ordinal);
+                ResourceScope scope = storys ? ResourceScope.Story : lobbys ? ResourceScope.Lobby : ResourceScope.Expedition;
                 Assert.AreEqual(scope, entry.Scope, entry.Address);
                 Assert.AreEqual(ArtSetup.AssetPath(entry.Address), entry.AssetPath, entry.Address);
             }

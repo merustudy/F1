@@ -34,6 +34,10 @@ namespace F1.Data
                 Levels = Read<LevelData>(StaticDataFiles.Level, readJson),
                 Buildings = Read<BuildingData>(StaticDataFiles.Building, readJson),
                 Traits = Read<TraitData>(StaticDataFiles.Trait, readJson),
+                StoryScenes = Read<StorySceneData>(StaticDataFiles.StoryScene, readJson),
+                Npcs = Read<NpcData>(StaticDataFiles.Npc, readJson),
+                Dialogues = Read<DialogueData>(StaticDataFiles.Dialogue, readJson),
+                DialogueLines = Read<DialogueLineData>(StaticDataFiles.DialogueLine, readJson),
             });
         }
 
@@ -57,6 +61,10 @@ namespace F1.Data
                 { StaticDataFiles.Level.GeneratedFileName, StaticDataJson.Serialize(new List<LevelData>(data.Levels)) },
                 { StaticDataFiles.Building.GeneratedFileName, StaticDataJson.Serialize(new List<BuildingData>(data.Buildings)) },
                 { StaticDataFiles.Trait.GeneratedFileName, StaticDataJson.Serialize(new List<TraitData>(data.Traits.Ordered)) },
+                { StaticDataFiles.StoryScene.GeneratedFileName, StaticDataJson.Serialize(new List<StorySceneData>(data.StoryScenes.Ordered)) },
+                { StaticDataFiles.Npc.GeneratedFileName, StaticDataJson.Serialize(new List<NpcData>(data.Npcs.Ordered)) },
+                { StaticDataFiles.Dialogue.GeneratedFileName, StaticDataJson.Serialize(new List<DialogueData>(data.Dialogues.Ordered)) },
+                { StaticDataFiles.DialogueLine.GeneratedFileName, StaticDataJson.Serialize(new List<DialogueLineData>(data.DialogueLines.Ordered)) },
             };
         }
 

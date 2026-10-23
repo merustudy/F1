@@ -45,6 +45,10 @@ namespace F1.Data
         public static readonly Entry Level = new Entry(LevelData.DefinitionName, "level");
         public static readonly Entry Building = new Entry(BuildingData.DefinitionName, "building");
         public static readonly Entry Trait = new Entry(TraitData.DefinitionName, "trait");
+        public static readonly Entry StoryScene = new Entry(StorySceneData.DefinitionName, "story-scene");
+        public static readonly Entry Npc = new Entry(NpcData.DefinitionName, "npc");
+        public static readonly Entry Dialogue = new Entry(DialogueData.DefinitionName, "dialogue");
+        public static readonly Entry DialogueLine = new Entry(DialogueLineData.DefinitionName, "dialogue-line");
 
         public static readonly IReadOnlyList<Entry> All = new[]
         {
@@ -63,6 +67,10 @@ namespace F1.Data
             Level,
             Building,
             Trait,
+            StoryScene,
+            Npc,
+            Dialogue,
+            DialogueLine,
         };
     }
 }

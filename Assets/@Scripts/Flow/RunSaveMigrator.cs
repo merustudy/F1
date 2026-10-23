@@ -57,6 +57,29 @@ namespace F1.Flow
             {
                 From26To27(save, data);
             }
+
+            if (save.SchemaVersion == 27)
+            {
+                From27To28(save, data);
+            }
+        }
+
+        /// <summary>
+        /// Version 28 (Slice D stage 55, the story): the run's SeenDialogues. A run of version 27 began before the story came into the game, so every
+        /// dialogue of the data counts as heard: none breaks into it (Round 101 판정 13).
+        /// </summary>
+        static void From27To28(RunSaveData save, StaticData data)
+        {
+            if (save.Run != null)
+            {
+                save.Run.SeenDialogues = new List<string>();
+                foreach (DialogueData dialogue in data.DialoguesInOrder)
+                {
+                    save.Run.SeenDialogues.Add(dialogue.Id);
+                }
+            }
+
+            save.SchemaVersion = 28;
         }
 
         /// <summary>

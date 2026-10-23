@@ -61,6 +61,10 @@ namespace F1.Editor.Data
                 Levels = Map(StaticDataFiles.Level, readSource, LevelMapper.Map, errors),
                 Buildings = Map(StaticDataFiles.Building, readSource, BuildingMapper.Map, errors),
                 Traits = Map(StaticDataFiles.Trait, readSource, TraitMapper.Map, errors),
+                StoryScenes = Map(StaticDataFiles.StoryScene, readSource, StorySceneMapper.Map, errors),
+                Npcs = Map(StaticDataFiles.Npc, readSource, NpcMapper.Map, errors),
+                Dialogues = Map(StaticDataFiles.Dialogue, readSource, DialogueMapper.Map, errors),
+                DialogueLines = Map(StaticDataFiles.DialogueLine, readSource, DialogueLineMapper.Map, errors),
             };
 
             // Row errors are reported before data set checks: a broken row would only cause

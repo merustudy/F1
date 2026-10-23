@@ -1,0 +1,27 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "linette",
+      "Name": {
+        "en-US": "Linette",
+        "ko-KR": "리넷"
+      },
+      "Figure": "unit/npc/linette",
+      "Portraits": [
+        {
+          "Expression": "neutral",
+          "Image": "portrait/npc/linette-neutral"
+        },
+        {
+          "Expression": "cold",
+          "Image": "portrait/npc/linette-cold"
+        },
+        {
+          "Expression": "smile",
+          "Image": "portrait/npc/linette-smile"
+        }
+      ]
+    }
+  ]
+}

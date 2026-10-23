@@ -11,7 +11,7 @@ namespace F1.UI
     /// </summary>
     public sealed class UIManager
     {
-        static readonly ResourceScope[] ScreenScopes = { ResourceScope.Lobby, ResourceScope.Expedition };
+        static readonly ResourceScope[] ScreenScopes = { ResourceScope.Lobby, ResourceScope.Expedition, ResourceScope.Story };
 
         readonly ResourceManager _resource;
         RectTransform _root;

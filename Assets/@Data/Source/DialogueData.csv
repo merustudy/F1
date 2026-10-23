@@ -1,0 +1,3 @@
+Id,Order,Trigger,Dungeon
+first_lobby,10,RunStart,
+abyss_unlocked,20,DungeonUnlocked,abyss

@@ -13,6 +13,9 @@ namespace F1.UI
         NodeMap,
         Battle,
         Settlement,
+
+        /// <summary>The intro (Slice D stage 55): no game phase opens it; the title does, after a new run or from [인트로 보기].</summary>
+        Intro,
     }
 
     /// <summary>Where each screen's prefab is and when it is loaded. One screen is shown at a time. The expedition screen (Round 71 E2) belongs to the lobby's scope: the lobby opens it and it departs or goes back.</summary>
@@ -30,6 +33,7 @@ namespace F1.UI
                 case ScreenId.NodeMap: return "ui/expedition/node-map-screen";
                 case ScreenId.Battle: return "ui/expedition/battle-screen";
                 case ScreenId.Settlement: return "ui/expedition/settlement-screen";
+                case ScreenId.Intro: return "ui/story/intro-screen";
                 default: throw new ArgumentOutOfRangeException(nameof(id), id, null);
             }
         }
@@ -41,6 +45,7 @@ namespace F1.UI
                 case ScreenId.Title: return ResourceScope.App;
                 case ScreenId.Lobby: return ResourceScope.Lobby;
                 case ScreenId.Expedition: return ResourceScope.Lobby;
+                case ScreenId.Intro: return ResourceScope.Story;
                 default: return ResourceScope.Expedition;
             }
         }

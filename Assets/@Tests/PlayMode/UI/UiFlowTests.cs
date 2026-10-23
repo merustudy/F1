@@ -26,11 +26,14 @@ namespace F1.Tests
         public void SetUp()
         {
             _saveRoot = BootTestUtil.UseTemporarySaveRoot();
+            // Slice D stage 55: the story stays off the lobby these tests stage; the story's own tests turn it on.
+            LobbyScreen.StoryShown = false;
         }
 
         [UnityTearDown]
         public IEnumerator TearDown()
         {
+            LobbyScreen.StoryShown = true;
             yield return BootTestUtil.ShutdownApp();
         }
 
@@ -112,8 +115,7 @@ namespace F1.Tests
             Assert.IsNotNull(Managers.Sound.Output.MusicClip, "The lobby's music plays on the title.");
             AudioClip lobbyMusic = Managers.Sound.Output.MusicClip;
 
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             Assert.AreEqual(MusicTrack.Lobby, Managers.Sound.Track);
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             Managers.Sound.ForgetEffects();
@@ -165,8 +167,7 @@ namespace F1.Tests
             string dungeonId = data.Dungeons.Ordered[0].Id;
 
             // Title -> lobby
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             Assert.IsTrue(Managers.Resource.IsScopeOpen(ResourceScope.Lobby));
             Assert.AreEqual(data.StartingMercenaries.Count, UiTestUtil.Views<RosterChipView>(lobby).Length, "A chip per mercenary on the strip (stage 26).");
@@ -288,8 +289,7 @@ namespace F1.Tests
             DungeonData abyss = data.Dungeons.Get("abyss");
             Assume.That(abyss.IsFinal && abyss.UnlockDungeonId == mine.Id, "The shipped data: clears of the mine open the final abyss.");
 
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             Assert.AreEqual("원정 화면으로", UiTestUtil.TextAt(lobby, "Frame/Strip/Depart/DepartLabel"), "The lobby's button opens the screen; the departure is there.");
             yield return UiTestUtil.FillParty(lobby);
@@ -380,8 +380,7 @@ namespace F1.Tests
             DungeonData mine = data.Dungeons.Get("abandoned_mine");
             Assume.That(data.StartingMercenaries.Count > balance.PartySize, "The shipped roster is larger than a party.");
 
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
             Assert.AreEqual(0, run.Party.Count);
@@ -636,8 +635,7 @@ namespace F1.Tests
         public IEnumerator Lobby_WhenNoMercenaryIsLeft_ShowsTheEndAndOffersANewRun()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             StaticData data = Managers.Data.Data;
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverWindow").gameObject.activeSelf);
@@ -673,8 +671,9 @@ namespace F1.Tests
             Assert.IsFalse(UiTestUtil.PointerReaches(UiTestUtil.ButtonAt(lobby, "Frame/Barracks")), "The shade takes the town's clicks.");
 
             UiTestUtil.Click(lobby, "Frame/RunOverWindow/RunOverNewRun");
-            yield return null;
-            yield return null;
+            // A new run plays the intro first (Slice D stage 55), then a new lobby.
+            yield return UiTestUtil.PassTheIntro();
+            lobby = UiTestUtil.Screen<LobbyScreen>();
 
             Assert.IsFalse(Managers.Run.Run.IsOver);
             Assert.IsFalse(UiTestUtil.At(lobby, "Frame/RunOverWindow").gameObject.activeSelf);
@@ -687,8 +686,7 @@ namespace F1.Tests
         public IEnumerator Title_NewRunOverARunInProgress_AsksFirst()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             Managers.Run.Rest();
             UiTestUtil.Click(UiTestUtil.Screen<LobbyScreen>(), "Frame/Header/ToTitle");
             yield return UiTestUtil.WaitForScreen(ScreenId.Title);
@@ -708,7 +706,7 @@ namespace F1.Tests
             UiTestUtil.Click(title, "Frame/Buttons/NewRun");
             yield return UiTestUtil.WaitForRedraw();
             UiTestUtil.Click(title, "Frame/ConfirmPanel/ConfirmBox/Yes");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.PassTheIntro();
 
             Assert.AreEqual(1, Managers.Run.Run.Day);
         }
@@ -737,8 +735,7 @@ namespace F1.Tests
         public IEnumerator Lobby_FatigueShowsAsTenPips_TheSecondLapRedOverTheFirst()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             BalanceData balance = Managers.Data.Data.Balance;
             Assume.That(balance.MaxFatigue, Is.EqualTo(200), "The cases below count pips of 10 a lap.");
@@ -774,8 +771,7 @@ namespace F1.Tests
         public IEnumerator Lobby_AMercenaryThatCameHomeAfflicted_IsNamedWithItsStateAndWhatItDoes()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             StaticData data = Managers.Data.Data;
             FatigueStateData fearful = data.FatigueStates.Get("fearful");
@@ -808,8 +804,7 @@ namespace F1.Tests
         public IEnumerator Lobby_Barracks_ShowsTheSixStats_WhereTheRowButtonsWere()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
             StaticData data = Managers.Data.Data;
@@ -853,8 +848,7 @@ namespace F1.Tests
         public IEnumerator Lobby_Barracks_AndTheStagecoach_ShowTheTraits_AndTheirCards()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
             StaticData data = Managers.Data.Data;
@@ -1031,8 +1025,7 @@ namespace F1.Tests
         public IEnumerator Lobby_Barracks_LevelsUpWhoseExperienceMeetsTheLevel_ShowsTheRoll_AndTheLobbySaysWhoCan()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             RunState run = Managers.Run.Run;
             StaticData data = Managers.Data.Data;
@@ -1088,8 +1081,7 @@ namespace F1.Tests
         public IEnumerator PartySide_ForwardAndBack_TradePlacesWithTheNextRow_AndTheColumnsFollowTheRows()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
             NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
@@ -1277,8 +1269,7 @@ namespace F1.Tests
         public IEnumerator PartySide_InventoryPopup_TakesADropAndItemsMoveBetweenTheBoardsAndTheInventory()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
             UiTestUtil.StageChampion();
@@ -1485,8 +1476,7 @@ namespace F1.Tests
         public IEnumerator PartySide_EquipmentShowsItsFatigue_OnItsCell_AndInAllOnTheHeadOfTheBoard()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
@@ -3195,8 +3185,7 @@ namespace F1.Tests
         public IEnumerator Lobby_ShowsTheLevelAndExperience_OnTheChipAndTheBarracksLine()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             StaticData data = Managers.Data.Data;
             RunState run = Managers.Run.Run;
@@ -3238,8 +3227,7 @@ namespace F1.Tests
         public IEnumerator Lobby_TheTown_LightsABuildingUnderThePointer_OpensItsWindows_HiresTreatsAndDismisses_AndSaysFinalStandPastTheLastDay()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             StaticData data = Managers.Data.Data;
             BalanceData balance = data.Balance;
@@ -3414,8 +3402,7 @@ namespace F1.Tests
             // Stage 30 (Round 78): the stagecoach's window carries the building line; [업그레이드] pays 40 gold and puts the scaffold and the badge
             // on the stagecoach for 3 days, during which it does not hire; a gate being built keeps the party home; three days of rest finish both.
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             StaticData data = Managers.Data.Data;
             RunState run = Managers.Run.Run;
@@ -3492,8 +3479,7 @@ namespace F1.Tests
 
         static IEnumerator DepartToTheMap()
         {
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
         }
@@ -3519,8 +3505,7 @@ namespace F1.Tests
         public IEnumerator Figures_ShowTheArtTheDataNames_OnThePartySideAndInBattle_AndThePlaceholderWithoutArt()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
@@ -3680,8 +3665,7 @@ namespace F1.Tests
         public IEnumerator Battle_ACriticalHit_RisesAsItsNumberWithTheWord_AndTheLogSaysSo()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
             yield return UiTestUtil.DepartFromLobby();
 
@@ -4410,8 +4394,7 @@ namespace F1.Tests
         /// <param name="champion">Staged so that the battle is won (<see cref="UiTestUtil.StageChampion"/>), for a test that needs the win.</param>
         static IEnumerator EnterFirstBattle(bool champion = false)
         {
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
             yield return UiTestUtil.FillParty(lobby);
 
@@ -4431,8 +4414,7 @@ namespace F1.Tests
         public IEnumerator Lobby_TestGoldButton_AddsAHundredGold_SavesIt_AndWritesAnEventLine()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
-            UiTestUtil.Click(UiTestUtil.Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return UiTestUtil.WaitForScreen(ScreenId.Lobby);
+            yield return UiTestUtil.NewRunToLobby();
             LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
 
             // Round 97 A: left of the gold in the header, in the editor (and development builds).

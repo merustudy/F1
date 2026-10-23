@@ -501,6 +501,39 @@ namespace F1.Tests
             return new DungeonData("pit", Text("pit"), "swift", 1, 1, 1, 1, new List<string> { "tonic" }, isFinal: true, unlockDungeonId: "cave", unlockClears: 1, mapX: 55, mapY: 10);
         }
 
+        /// <summary>
+        /// The story (Slice D stage 55) added to the parts: a sequence "tale" of a scene with two lines and the lobby's banner, a speaker "clerk"
+        /// with two faces, a dialogue at the run's start (two lines) and one when the pit opens (one line).
+        /// </summary>
+        public static StaticDataParts WithStory(StaticDataParts parts)
+        {
+            parts.StoryScenes = new List<StorySceneData>
+            {
+                new StorySceneData("tale_one", "tale", 10, "story/tale/one", 4000, 2000, new List<int> { 2 }, new StoryCamera(500, 500, 100), new StoryCamera(400, 400, 120),
+                    StoryEffect.None, StoryTransition.Cross, false, new List<LocalizedText> { Text("one"), Text("“two”") }, null),
+                new StorySceneData("tale_two", "tale", 20, "story/tale/two", 3000, 0, new List<int>(), new StoryCamera(500, 500, 100), new StoryCamera(500, 500, 100),
+                    StoryEffect.Heartbeat, StoryTransition.Black, false, new List<LocalizedText> { Text("three") }, null),
+                new StorySceneData("tale_end", "tale", 30, null, 5000, 4000, new List<int> { 1 }, null, null,
+                    StoryEffect.None, StoryTransition.Cross, true, new List<LocalizedText> { Text("end") }, null),
+            };
+            parts.Npcs = new List<NpcData>
+            {
+                new NpcData("clerk", Text("clerk"), "unit/npc/clerk", new List<NpcPortrait> { new NpcPortrait("calm", "portrait/npc/clerk-calm"), new NpcPortrait("smile", "portrait/npc/clerk-smile") }),
+            };
+            parts.Dialogues = new List<DialogueData>
+            {
+                new DialogueData("pit_open", 20, DialogueTrigger.DungeonUnlocked, "pit"),
+                new DialogueData("hello", 10, DialogueTrigger.RunStart, null),
+            };
+            parts.DialogueLines = new List<DialogueLineData>
+            {
+                new DialogueLineData("hello_2", "hello", 20, "clerk", "smile", Text("hello two")),
+                new DialogueLineData("hello_1", "hello", 10, "clerk", "calm", Text("hello one")),
+                new DialogueLineData("pit_open_1", "pit_open", 10, "clerk", "calm", Text("the pit")),
+            };
+            return parts;
+        }
+
         public static StaticData Data(params (string Key, int Value)[] balanceOverrides)
         {
             return new StaticData(Parts(balanceOverrides));

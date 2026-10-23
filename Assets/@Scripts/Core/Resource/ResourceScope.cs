@@ -9,6 +9,9 @@ namespace F1.Core
         App,
         Lobby,
         Expedition,
+
+        /// <summary>The story's screen (Slice D stage 55): the intro and its scenes' pictures, released when it closes.</summary>
+        Story,
     }
 
     /// <summary>
@@ -41,6 +44,7 @@ namespace F1.Core
                 case ResourceScope.App: return "scope-app";
                 case ResourceScope.Lobby: return "scope-lobby";
                 case ResourceScope.Expedition: return "scope-expedition";
+                case ResourceScope.Story: return "scope-story";
                 default: throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
             }
         }
@@ -53,6 +57,7 @@ namespace F1.Core
                 case ResourceScope.App: return "app";
                 case ResourceScope.Lobby: return "lobby";
                 case ResourceScope.Expedition: return "expedition";
+                case ResourceScope.Story: return "story";
                 default: throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
             }
         }

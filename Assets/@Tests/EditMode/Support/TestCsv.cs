@@ -101,6 +101,25 @@ namespace F1.Tests
             "inn,1,0,0,0\ninn,2,40,2,20\n" +
             "coach,1,0,0,0\ncoach,2,40,3,1\n";
 
+        /// <summary>The story (Slice D stage 55): one scene of a sequence, a speaker with two faces, a dialogue at the run's start with two lines.</summary>
+        public const string StoryScenes =
+            "Id,Sequence,Order,Image,DurationMs,ShortDurationMs,ShortLines,CameraFrom,CameraTo,Effect,Transition,Countdown,Line1.ko-KR,Line1.en-US,Line2.ko-KR,Line2.en-US,Line3.ko-KR,Line3.en-US,SoundNote\n" +
+            "tale_one,tale,10,story/tale/one,4000,2000,2,500:500:100,500:500:120,,Cross,false,하나,One,둘,Two,,,\n" +
+            "tale_end,tale,20,,3000,3000,all,,,,Cross,true,끝,End,,,,,\n";
+
+        public const string Npcs =
+            "Id,Name.ko-KR,Name.en-US,Figure,Portraits\n" +
+            "clerk,서기,Clerk,,calm:portrait/npc/clerk-calm+smile:portrait/npc/clerk-smile\n";
+
+        public const string Dialogues =
+            "Id,Order,Trigger,Dungeon\n" +
+            "hello,10,RunStart,\n";
+
+        public const string DialogueLines =
+            "Id,Dialogue,Order,Speaker,Expression,Text.ko-KR,Text.en-US\n" +
+            "hello_1,hello,10,clerk,calm,안녕,Hello\n" +
+            "hello_2,hello,20,clerk,smile,또 봐요,See you\n";
+
         /// <summary>Source file name -> CSV text for every definition.</summary>
         public static Dictionary<string, string> ValidSources()
         {
@@ -121,6 +140,10 @@ namespace F1.Tests
                 { StaticDataFiles.Level.SourceFileName, Levels },
                 { StaticDataFiles.Building.SourceFileName, Buildings },
                 { StaticDataFiles.Trait.SourceFileName, Traits },
+                { StaticDataFiles.StoryScene.SourceFileName, StoryScenes },
+                { StaticDataFiles.Npc.SourceFileName, Npcs },
+                { StaticDataFiles.Dialogue.SourceFileName, Dialogues },
+                { StaticDataFiles.DialogueLine.SourceFileName, DialogueLines },
             };
         }
 

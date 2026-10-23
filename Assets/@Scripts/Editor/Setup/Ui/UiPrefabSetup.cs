@@ -114,6 +114,7 @@ namespace F1.Editor.Setup
                 Save(BuildNodeMap(holder.transform), PrefabPath(ScreenId.NodeMap));
                 Save(BuildBattle(holder.transform), PrefabPath(ScreenId.Battle));
                 Save(BuildSettlement(holder.transform), PrefabPath(ScreenId.Settlement));
+                Save(BuildIntro(holder.transform), PrefabPath(ScreenId.Intro));
                 Save(BuildSaveErrorOverlay(holder.transform), SaveErrorOverlayPath);
             }
             finally

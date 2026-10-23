@@ -12,6 +12,8 @@ namespace F1.Save
     /// the ranger's id is "archer" (RunSaveMigrator renames a version 25 file's job ids; the three new jobs appear in no older file).
     /// Version 25 (Slice D stage 42, 장비 요구 스탯): the same shape; a roster mercenary's or a candidate's stat its job's base weapon asks for stands at
     /// least at what it asks (RunSaveMigrator lifts a version 24 file's; the stagecoach has kept its candidates there since).
+    /// Version 28 (Slice D stage 55, the story — Docs/Design/33 §12): the run's SeenDialogues (the dialogues heard in it, in the order heard).
+    /// RunSaveMigrator gives a version 27 file every dialogue of the data as heard, so that no dialogue breaks into a run already going on.
     /// Version 24 (2026-10-20 스탯 개정, Slice D stage 41): a stats record's Spi is Wis (wisdom), and the stats stand on the new scale (a job's base values
     /// 1..8 around the power baseline 5): RunSaveMigrator rescales a version 23 file's roster and candidates ((old + 1) / 2) and gives a member of an
     /// expedition going on the maximum HP of its new constitution, its HP in proportion.
@@ -39,7 +41,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 27;
+        public const int CurrentSchemaVersion = 28;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -79,6 +81,9 @@ namespace F1.Save
 
         /// <summary>The constructions going on (version 16), at most one per building.</summary>
         public List<ConstructionRecord> Constructions;
+
+        /// <summary>The story's dialogues heard in this run, in the order heard (version 28).</summary>
+        public List<string> SeenDialogues;
     }
 
     public sealed class BuildingLevelRecord

@@ -274,6 +274,36 @@ namespace F1.Flow
             return RunRules.IsUnlocked(Run, _data.Data.Dungeons.Get(dungeonId));
         }
 
+        // ---- The story (Slice D stage 55, StoryRules) ----
+
+        /// <summary>The dialogue the lobby should play now, or null (at home only: none is due while the party is away).</summary>
+        public DialogueData DueDialogue()
+        {
+            return HasRun && !IsAway ? StoryRules.DueDialogue(_data.Data, Run) : null;
+        }
+
+        /// <summary>The heard dialogue the speaker in the town repeats, or null.</summary>
+        public DialogueData LastHeardDialogue()
+        {
+            return HasRun ? StoryRules.LastHeard(_data.Data, Run) : null;
+        }
+
+        /// <summary>The weeks left to the run's end, for the countdown of the story (Design/33 §7).</summary>
+        public int WeeksLeft => StoryRules.WeeksLeft(_data.Data, Run);
+
+        /// <summary>A dialogue was played to its end or skipped: it is heard for this run, and saved like any lobby command.</summary>
+        public void MarkDialogueSeen(string dialogueId)
+        {
+            RequireAtHome();
+            if (Run.SeenDialogues.Contains(dialogueId))
+            {
+                return;
+            }
+
+            StoryRules.MarkSeen(_data.Data, _run, dialogueId);
+            Save(null);
+        }
+
         /// <summary>
         /// Writes again the snapshot that could not be saved: the same bytes, nothing newer.
         /// Returns true when saving is no longer blocked.

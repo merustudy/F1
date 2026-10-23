@@ -342,6 +342,109 @@ namespace F1.Editor.Data
             }
         }
 
+        /// <summary>A localized field that may be left out (Slice D stage 55, a story scene's lines): null when every locale is empty; one empty locale beside a filled one is an error.</summary>
+        public LocalizedText OptionalLocalized(string field)
+        {
+            foreach (string code in LocalePolicy.SupportedCodes)
+            {
+                if (!IsEmpty(LocalizedHeader(field, code)))
+                {
+                    return Localized(field);
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>Text a file may leave empty: null for an empty value. Surrounding whitespace is still an error.</summary>
+        public string OptionalText(string header)
+        {
+            return IsEmpty(header) ? null : Text(header);
+        }
+
+        /// <summary>A story camera (stage 55): "x:y:zoom" — the centre in thousandths of the picture, the zoom in percent ("500:500:100"). Null for an empty cell.</summary>
+        public StoryCamera OptionalCamera(string header)
+        {
+            if (IsEmpty(header))
+            {
+                return null;
+            }
+
+            string value = Text(header);
+            string[] parts = value.Split(':');
+            if (parts.Length != 3 || !TryParseInt(parts[0], out int x) || !TryParseInt(parts[1], out int y) || !TryParseInt(parts[2], out int zoom))
+            {
+                throw new DataException($"{Where(header)}: '{value}' is not 'x:y:zoom' (thousandths, thousandths, percent).");
+            }
+
+            try
+            {
+                return new StoryCamera(x, y, zoom);
+            }
+            catch (DataException exception)
+            {
+                throw new DataException($"{Where(header)}: {exception.Message}");
+            }
+        }
+
+        /// <summary>The lines a story scene keeps in the short cut (stage 55): "all" for every one of <paramref name="lineCount"/>, line numbers joined with '+' ("2", "1+2"), or empty for none.</summary>
+        public List<int> LineNumbers(string header, int lineCount)
+        {
+            var numbers = new List<int>();
+            if (IsEmpty(header))
+            {
+                return numbers;
+            }
+
+            string value = Text(header);
+            if (value == "all")
+            {
+                for (int n = 1; n <= lineCount; n++)
+                {
+                    numbers.Add(n);
+                }
+
+                return numbers;
+            }
+
+            foreach (string part in value.Split(ListSeparator))
+            {
+                if (!TryParseInt(part, out int number))
+                {
+                    throw new DataException($"{Where(header)}: '{value}' is not 'all' or line numbers joined with '+'.");
+                }
+
+                numbers.Add(number);
+            }
+
+            return numbers;
+        }
+
+        /// <summary>A speaker's faces (stage 55): "expression:address" joined with '+' ("neutral:portrait/npc/linette-neutral+cold:…").</summary>
+        public List<NpcPortrait> PortraitList(string header)
+        {
+            var portraits = new List<NpcPortrait>();
+            foreach (string part in Text(header).Split(ListSeparator))
+            {
+                int colon = part.IndexOf(':');
+                if (colon <= 0 || colon == part.Length - 1)
+                {
+                    throw new DataException($"{Where(header)}: '{part}' is not 'expression:address'.");
+                }
+
+                try
+                {
+                    portraits.Add(new NpcPortrait(part.Substring(0, colon), part.Substring(colon + 1)));
+                }
+                catch (DataException exception)
+                {
+                    throw new DataException($"{Where(header)}: {exception.Message}");
+                }
+            }
+
+            return portraits;
+        }
+
         public static string LocalizedHeader(string field, string localeCode)
         {
             return field + "." + localeCode;

@@ -15,6 +15,12 @@ MonoBehaviour:
   m_GroupName: F1-Data
   m_GUID: 03abbd2b47e32490184befb84e2c4ba2
   m_SerializeEntries:
+  - m_GUID: 1d5d87219a82247f0a39c4d70da7d54b
+    m_Address: data/app/story-scene
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31ff8c8608dd144d3be280db3e53072b
     m_Address: data/app/building
     m_ReadOnly: 0
@@ -33,6 +39,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-app
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3f731fea6043047c29f1df0b30395e19
+    m_Address: data/app/npc
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 428f1b074905d4401937c0474e11104f
     m_Address: data/app/trait
     m_ReadOnly: 0
@@ -47,6 +59,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 49ff3dae55fb74c83b126a7dc6deb3f6
     m_Address: data/app/enemy-group
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4a6795b13971145e3ad0cb3cd8b67565
+    m_Address: data/app/dialogue-line
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-app
@@ -95,6 +113,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: d876a3ade078b419b8c4ef59761cb2ab
     m_Address: data/app/balance
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-app
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: df69c522faa8742919f5773c6b1edad6
+    m_Address: data/app/dialogue
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-app

@@ -54,6 +54,7 @@ namespace F1.Flow
                 Expeditions = new List<ExpeditionCountRecord>(),
                 Buildings = new List<BuildingLevelRecord>(),
                 Constructions = new List<ConstructionRecord>(),
+                SeenDialogues = new List<string>(run.SeenDialogues),
             };
 
             foreach (KeyValuePair<string, int> building in run.BuildingLevels)
@@ -238,7 +239,7 @@ namespace F1.Flow
             Require(record.ExpeditionCount >= 0, "ExpeditionCount is negative.");
             Require(record.Roster != null && record.Fallen != null && record.Party != null && record.ClearedDungeons != null, "A list of the run is missing.");
             Require(record.Recruits != null && record.Dismissed != null && record.Expeditions != null, "A list of the run is missing.");
-            Require(record.Buildings != null && record.Constructions != null, "A list of the run is missing.");
+            Require(record.Buildings != null && record.Constructions != null && record.SeenDialogues != null, "A list of the run is missing.");
             Require(record.Gold >= 0, "Gold is negative.");
 
             var run = new RunState
@@ -348,6 +349,14 @@ namespace F1.Flow
                 Require(visits.Count >= 1, $"Expedition count of '{visits.DungeonId}' must be at least 1.");
                 Require(!run.ExpeditionsByDungeon.ContainsKey(visits.DungeonId), $"Dungeon '{visits.DungeonId}' is listed twice.");
                 run.ExpeditionsByDungeon.Add(visits.DungeonId, visits.Count);
+            }
+
+            // The dialogues heard (Slice D stage 55): dialogues of the data, each once.
+            foreach (string dialogue in record.SeenDialogues)
+            {
+                Require(data.Dialogues.Contains(dialogue), $"Unknown dialogue '{dialogue}'.");
+                Require(!run.SeenDialogues.Contains(dialogue), $"Dialogue '{dialogue}' is listed twice.");
+                run.SeenDialogues.Add(dialogue);
             }
 
             run.Outcome = Parse<RunOutcome>(record.Outcome);

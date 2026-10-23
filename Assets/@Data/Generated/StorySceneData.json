@@ -1,0 +1,532 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "intro_banner",
+      "Sequence": "intro",
+      "Order": 140,
+      "Image": "story/intro/banner",
+      "DurationMs": 10000,
+      "ShortDurationMs": 7000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 550,
+        "Y": 620,
+        "Zoom": 125
+      },
+      "CameraTo": {
+        "X": 450,
+        "Y": 340,
+        "Zoom": 125
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The Lily Company is dead.",
+          "ko-KR": "백합단은 죽었다."
+        },
+        {
+          "en-US": "Now there is the Black Lily. I will buy the blades that go in my place.",
+          "ko-KR": "이제 검은 백합이다. 나 대신 갈 칼을 산다."
+        }
+      ],
+      "SoundNote": "coach wheels, into the lobby song"
+    },
+    {
+      "Id": "intro_brooch",
+      "Sequence": "intro",
+      "Order": 20,
+      "Image": "story/intro/brooch",
+      "DurationMs": 8000,
+      "ShortDurationMs": 6000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 480,
+        "Zoom": 105
+      },
+      "CameraTo": {
+        "X": 420,
+        "Y": 400,
+        "Zoom": 132
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "We were the Lily Company, a hundred strong.",
+          "ko-KR": "우리는 백합단. 백 명이었다."
+        },
+        {
+          "en-US": "And there was Marianne. When I came back, we would marry.",
+          "ko-KR": "그리고 마리안이 있었다. 돌아오면 혼인하기로 했다."
+        }
+      ],
+      "SoundNote": "one guitar (Marianne's theme)"
+    },
+    {
+      "Id": "intro_kings_voice",
+      "Sequence": "intro",
+      "Order": 50,
+      "Image": "story/intro/kings-voice",
+      "DurationMs": 10000,
+      "ShortDurationMs": 8000,
+      "ShortLines": [
+        1,
+        2,
+        3
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 520,
+        "Zoom": 100
+      },
+      "CameraTo": {
+        "X": 470,
+        "Y": 380,
+        "Zoom": 125
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "“A hundred, as promised.”",
+          "ko-KR": "“약속대로 백 명입니다.”"
+        },
+        {
+          "en-US": "“Twenty years from now, on the day the sun is eaten, I will give you the whole kingdom.”",
+          "ko-KR": "“스무 해 뒤 해가 먹히는 날, 왕국을 통째로 드리지요.”"
+        },
+        {
+          "en-US": "I heard that day.",
+          "ko-KR": "그날을, 나는 들었다."
+        }
+      ],
+      "SoundNote": "a torch burning, the pit breathing"
+    },
+    {
+      "Id": "intro_ledger",
+      "Sequence": "intro",
+      "Order": 110,
+      "Image": "story/intro/ledger",
+      "DurationMs": 10000,
+      "ShortDurationMs": 0,
+      "ShortLines": [],
+      "CameraFrom": {
+        "X": 600,
+        "Y": 620,
+        "Zoom": 130
+      },
+      "CameraTo": {
+        "X": 600,
+        "Y": 340,
+        "Zoom": 130
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The ledger's last page held that day too.",
+          "ko-KR": "장부의 마지막 장에도 그날이 적혀 있었다."
+        },
+        {
+          "en-US": "The day of the eclipse. To be offered: the whole kingdom.",
+          "ko-KR": "일식의 날. 바칠 것: 왕국 전부."
+        }
+      ],
+      "SoundNote": "low drum"
+    },
+    {
+      "Id": "intro_lobby",
+      "Sequence": "intro",
+      "Order": 150,
+      "Image": null,
+      "DurationMs": 5000,
+      "ShortDurationMs": 4000,
+      "ShortLines": [
+        1
+      ],
+      "CameraFrom": null,
+      "CameraTo": null,
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": true,
+      "Lines": [
+        {
+          "en-US": "First village — the mining village",
+          "ko-KR": "첫 마을 — 광산 마을"
+        }
+      ],
+      "SoundNote": "lobby song"
+    },
+    {
+      "Id": "intro_market",
+      "Sequence": "intro",
+      "Order": 100,
+      "Image": "story/intro/market",
+      "DurationMs": 10000,
+      "ShortDurationMs": 7000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 100
+      },
+      "CameraTo": {
+        "X": 600,
+        "Y": 420,
+        "Zoom": 130
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The first thing I bought with the treasure was a person.",
+          "ko-KR": "보물로 맨 먼저 산 것은 사람이었다."
+        },
+        {
+          "en-US": "Linette, the girl who kept the king's tribute ledger.",
+          "ko-KR": "왕의 공물 장부를 쓰던 아이, 리넷."
+        }
+      ],
+      "SoundNote": "market crowd, chains"
+    },
+    {
+      "Id": "intro_massacre",
+      "Sequence": "intro",
+      "Order": 40,
+      "Image": "story/intro/massacre",
+      "DurationMs": 12000,
+      "ShortDurationMs": 9000,
+      "ShortLines": [
+        1,
+        2,
+        3
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 100
+      },
+      "CameraTo": {
+        "X": 380,
+        "Y": 400,
+        "Zoom": 122
+      },
+      "Effect": "Shake",
+      "Transition": "Black",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "At the pit, the soldiers beside us changed their faces.",
+          "ko-KR": "구덩이 앞에서, 함께 간 병사들의 얼굴이 바뀌었다."
+        },
+        {
+          "en-US": "A hundred fell.",
+          "ko-KR": "백 명이 쓰러졌다."
+        },
+        {
+          "en-US": "When the creature tore off my right hand, I understood. The king had offered us up.",
+          "ko-KR": "괴물이 내 오른손을 물어뜯었을 때 알았다. 왕이 우리를 바쳤다."
+        }
+      ],
+      "SoundNote": "steel, beasts, screams only as sound, then silence"
+    },
+    {
+      "Id": "intro_mural",
+      "Sequence": "intro",
+      "Order": 10,
+      "Image": "story/intro/mural",
+      "DurationMs": 8000,
+      "ShortDurationMs": 6000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 100
+      },
+      "CameraTo": {
+        "X": 420,
+        "Y": 400,
+        "Zoom": 125
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "In the days when the pit's creatures devoured village after village,",
+          "ko-KR": "구덩이의 괴물이 마을을 하나씩 먹던 시절."
+        },
+        {
+          "en-US": "a young prince held them back. Everyone called him a hero.",
+          "ko-KR": "젊은 왕자가 괴물을 막았다. 모두가 그를 영웅이라 불렀다."
+        }
+      ],
+      "SoundNote": "low strings, a distant bell"
+    },
+    {
+      "Id": "intro_prison",
+      "Sequence": "intro",
+      "Order": 70,
+      "Image": "story/intro/prison",
+      "DurationMs": 12000,
+      "ShortDurationMs": 5500,
+      "ShortLines": [
+        3
+      ],
+      "CameraFrom": {
+        "X": 450,
+        "Y": 340,
+        "Zoom": 125
+      },
+      "CameraTo": {
+        "X": 400,
+        "Y": 600,
+        "Zoom": 125
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "I scored the wall every single day, counting down to that day.",
+          "ko-KR": "나는 하루도 빠짐없이 금을 그었다. 그날까지 남은 날을."
+        },
+        {
+          "en-US": "Through the wall, an old knight kept me alive, and told me where his treasure lay.",
+          "ko-KR": "벽 너머 늙은 기사가 나를 버티게 했고, 숨긴 보물의 자리를 알려 주었다."
+        },
+        {
+          "en-US": "Eighteen years. With ninety-nine weeks left, he died.",
+          "ko-KR": "열여덟 해. 아흔아홉 주가 남았을 때 그가 죽었다."
+        }
+      ],
+      "SoundNote": "dripping water, stone scraping"
+    },
+    {
+      "Id": "intro_queen",
+      "Sequence": "intro",
+      "Order": 130,
+      "Image": "story/intro/queen",
+      "DurationMs": 8000,
+      "ShortDurationMs": 5000,
+      "ShortLines": [
+        1
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 105
+      },
+      "CameraTo": {
+        "X": 400,
+        "Y": 400,
+        "Zoom": 130
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "Marianne had become queen.",
+          "ko-KR": "마리안은 왕비가 되어 있었다."
+        }
+      ],
+      "SoundNote": "Marianne's theme on low strings"
+    },
+    {
+      "Id": "intro_sack",
+      "Sequence": "intro",
+      "Order": 80,
+      "Image": "story/intro/sack",
+      "DurationMs": 8000,
+      "ShortDurationMs": 6000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 550,
+        "Y": 360,
+        "Zoom": 120
+      },
+      "CameraTo": {
+        "X": 600,
+        "Y": 640,
+        "Zoom": 120
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The night he died, I took his place in the burial sack.",
+          "ko-KR": "그가 죽던 밤, 나는 그의 시체 자루에 들어갔다."
+        },
+        {
+          "en-US": "The prison throws its dead into the river.",
+          "ko-KR": "감옥은 시체를 강에 버린다."
+        }
+      ],
+      "SoundNote": "a fall, water"
+    },
+    {
+      "Id": "intro_throne",
+      "Sequence": "intro",
+      "Order": 30,
+      "Image": "story/intro/throne",
+      "DurationMs": 8000,
+      "ShortDurationMs": 0,
+      "ShortLines": [],
+      "CameraFrom": {
+        "X": 615,
+        "Y": 420,
+        "Zoom": 130
+      },
+      "CameraTo": {
+        "X": 385,
+        "Y": 420,
+        "Zoom": 130
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The king summoned us. “Strike the pit. My soldiers will march with you.”",
+          "ko-KR": "왕이 우리를 불렀다. “구덩이를 쳐라. 내 병사들을 붙여 주마.”"
+        },
+        {
+          "en-US": "I never saw whom his eyes were on that day.",
+          "ko-KR": "그날 왕의 눈이 누구를 보고 있었는지, 나는 몰랐다."
+        }
+      ],
+      "SoundNote": "hall echo"
+    },
+    {
+      "Id": "intro_treasure",
+      "Sequence": "intro",
+      "Order": 90,
+      "Image": "story/intro/treasure",
+      "DurationMs": 8000,
+      "ShortDurationMs": 5000,
+      "ShortLines": [
+        1
+      ],
+      "CameraFrom": {
+        "X": 550,
+        "Y": 370,
+        "Zoom": 115
+      },
+      "CameraTo": {
+        "X": 520,
+        "Y": 550,
+        "Zoom": 135
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "I followed the river down to the place the old knight had told me of.",
+          "ko-KR": "강을 따라 내려가, 늙은 기사가 알려 준 곳을 찾았다."
+        },
+        {
+          "en-US": "A ruined hunting lodge, the bottom of a dry well. Just as he had said.",
+          "ko-KR": "무너진 사냥 별장, 마른 우물 밑. 그가 말한 그대로였다."
+        }
+      ],
+      "SoundNote": "dripping, iron hinges, coins"
+    },
+    {
+      "Id": "intro_trial",
+      "Sequence": "intro",
+      "Order": 60,
+      "Image": "story/intro/trial",
+      "DurationMs": 8000,
+      "ShortDurationMs": 4000,
+      "ShortLines": [
+        2
+      ],
+      "CameraFrom": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 100
+      },
+      "CameraTo": {
+        "X": 420,
+        "Y": 480,
+        "Zoom": 120
+      },
+      "Effect": "None",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "“For leading the king's soldiers to their deaths.”",
+          "ko-KR": "“병사들을 모두 죽게 한 죄.”"
+        },
+        {
+          "en-US": "I was jailed for the crime of surviving.",
+          "ko-KR": "나는 살아남은 죄로 갇혔다."
+        }
+      ],
+      "SoundNote": "the gavel, murmuring"
+    },
+    {
+      "Id": "intro_wrist",
+      "Sequence": "intro",
+      "Order": 120,
+      "Image": "story/intro/wrist",
+      "DurationMs": 8000,
+      "ShortDurationMs": 6000,
+      "ShortLines": [
+        1,
+        2
+      ],
+      "CameraFrom": {
+        "X": 450,
+        "Y": 420,
+        "Zoom": 135
+      },
+      "CameraTo": {
+        "X": 500,
+        "Y": 500,
+        "Zoom": 105
+      },
+      "Effect": "Heartbeat",
+      "Transition": "Cross",
+      "Countdown": false,
+      "Lines": [
+        {
+          "en-US": "The pit stayed in the wound.",
+          "ko-KR": "물린 자리에 구덩이가 남았다."
+        },
+        {
+          "en-US": "If I go near one, I become one of them.",
+          "ko-KR": "가까이 가면, 나는 그것들이 된다."
+        }
+      ],
+      "SoundNote": "humming, heartbeat"
+    }
+  ]
+}

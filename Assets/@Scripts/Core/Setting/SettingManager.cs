@@ -41,11 +41,14 @@ namespace F1.Core
         /// <summary>The effects' volume, 0..100.</summary>
         public int EffectVolume => Require().EffectVolume;
 
+        /// <summary>Whether the intro was seen once (Slice D stage 55): a new run then shows its short cut.</summary>
+        public bool IntroSeen => Require().IntroSeen;
+
         /// <summary>
         /// Loads settings. On first run (or when the file is unreadable) the system locale is used if it is
         /// supported, otherwise the default, and both volumes are full. A stored locale that is no longer valid
         /// is normalized, a volume out of 0..100 is brought to the nearer end, and an older file is brought to the
-        /// current version (version 1 had no volumes: they read as full); any of these is saved.
+        /// current version (version 1 had no volumes: they read as full; version 2 had not seen the intro); any of these is saved.
         /// </summary>
         public void Load(string systemLocaleCode)
         {
@@ -145,6 +148,24 @@ namespace F1.Core
             Commit(next);
         }
 
+        /// <summary>
+        /// Records that the intro was seen (to its end or skipped). If saving fails nothing changes and it throws: the next new run shows the
+        /// full intro again, which is all that is lost (Architecture/07 "이야기의 표시").
+        /// </summary>
+        public void MarkIntroSeen()
+        {
+            SettingsData current = Require();
+            if (current.IntroSeen)
+            {
+                return;
+            }
+
+            SettingsData next = Copy(current);
+            next.IntroSeen = true;
+            _save.Save(FileName, next);
+            _data = next;
+        }
+
         void Commit(SettingsData next)
         {
             SettingsData current = Require();
@@ -176,6 +197,7 @@ namespace F1.Core
                 LocaleCode = data.LocaleCode,
                 MusicVolume = data.MusicVolume,
                 EffectVolume = data.EffectVolume,
+                IntroSeen = data.IntroSeen,
             };
         }
 

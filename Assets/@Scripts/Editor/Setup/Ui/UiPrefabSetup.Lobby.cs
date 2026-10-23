@@ -36,6 +36,9 @@ namespace F1.Editor.Setup
             BuildingView barracks = BuildBuilding(frame, "Barracks");
             BuildingView coach = BuildBuilding(frame, "Coach");
 
+            // A speaker of the story standing in the town (Slice D stage 55, Round 101 안 B): by the gate, nearer than the buildings.
+            TownNpcView townNpc = BuildTownNpc(frame);
+
             // Header: the title, the day (past the last day: "— 최종 결전", the screen sets it), the gold, the way to the title.
             Image header = UiBuild.Panel("Header", frame, UiPalette.Background);
             UiBuild.Box(header, 0f, 0f, 1920f, 100f);
@@ -121,6 +124,10 @@ namespace F1.Editor.Setup
             UiBuild.Box(newRun.Rect, 250f, 400f, 400f, 70f);
             runOverWindow.gameObject.SetActive(false);
 
+            // The story over everything (Slice D stage 55): the intro's last scene as a banner, and a dialogue of Linette.
+            StoryBannerView storyBanner = BuildStoryBanner(frame);
+            DialogueView dialogue = BuildDialogue(frame);
+
             UiBuild.SetReference(screen, "_town", town);
             UiBuild.SetReference(screen, "_day", day);
             UiBuild.SetReference(screen, "_gold", gold);
@@ -168,6 +175,9 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_runOverFallen", runOverFallen);
             UiBuild.SetReference(screen, "_runOverSurvivors", runOverSurvivors);
             UiBuild.SetReference(screen, "_runOverNewRun", newRun.Button);
+            UiBuild.SetReference(screen, "_townNpc", townNpc);
+            UiBuild.SetReference(screen, "_storyBanner", storyBanner);
+            UiBuild.SetReference(screen, "_dialogue", dialogue);
             return screen;
         }
 

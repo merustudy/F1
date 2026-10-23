@@ -1,0 +1,17 @@
+{
+  "SchemaVersion": 1,
+  "Items": [
+    {
+      "Id": "abyss_unlocked",
+      "Order": 20,
+      "Trigger": "DungeonUnlocked",
+      "Dungeon": "abyss"
+    },
+    {
+      "Id": "first_lobby",
+      "Order": 10,
+      "Trigger": "RunStart",
+      "Dungeon": null
+    }
+  ]
+}

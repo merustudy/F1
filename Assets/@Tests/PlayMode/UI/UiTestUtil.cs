@@ -30,6 +30,21 @@ namespace F1.Tests
             Assert.AreEqual(ScreenId.Title, Managers.UI.CurrentId);
         }
 
+        /// <summary>From the title: [새 런], then the intro (Slice D stage 55) skipped at once, on to the lobby.</summary>
+        public static IEnumerator NewRunToLobby()
+        {
+            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
+            yield return PassTheIntro();
+        }
+
+        /// <summary>The intro a new run plays (Slice D stage 55): skipped (Esc) once it shows, then the lobby.</summary>
+        public static IEnumerator PassTheIntro()
+        {
+            yield return WaitForScreen(ScreenId.Intro);
+            Screen<IntroScreen>().Skip();
+            yield return WaitForScreen(ScreenId.Lobby);
+        }
+
         public static IEnumerator WaitForScreen(ScreenId id, float timeoutSeconds = DefaultTimeoutSeconds)
         {
             float deadline = Time.realtimeSinceStartup + timeoutSeconds;
@@ -517,8 +532,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator EnterTheBossBattle()
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
@@ -575,8 +589,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator EnterTheAbyssBossBattle(int bossPowerPercent = 999)
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
 
             StaticData data = Managers.Data.Data;
@@ -683,8 +696,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator ReachDeathsDoorInTheFirstBattle()
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
@@ -720,8 +732,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator ReachABreakdownInTheFirstBattle()
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
@@ -778,8 +789,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator EnterALongFirstBattle()
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 
@@ -804,8 +814,7 @@ namespace F1.Tests
         /// </summary>
         public static IEnumerator EnterAFirstBattleWhereRow1Falls()
         {
-            Click(Screen<TitleScreen>(), "Frame/Buttons/NewRun");
-            yield return WaitForScreen(ScreenId.Lobby);
+            yield return NewRunToLobby();
             yield return FillParty(Screen<LobbyScreen>());
             yield return DepartFromLobby();
 

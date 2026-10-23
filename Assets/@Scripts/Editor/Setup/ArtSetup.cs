@@ -89,6 +89,9 @@ namespace F1.Editor.Setup
         /// (2016x1008), in a file of 2048x1024 (scaled by 64/63, powers of two) so that it is compressed (2026-10-05).
         /// Kept at its size, so that it is as sharp as the figure it stands in for (2026-10-04).
         /// </summary>
+        // A speaker's dialogue picture (Slice D stage 55): cut out, seen near its own size (1024x1536), so no mipmaps, which lets it compress.
+        static readonly ImportPolicy Portrait = new ImportPolicy(cutOut: true, mipMaps: false, compressed: true, maxTextureSize: 2048, pixelsPerUnit: 100f);
+
         static readonly ImportPolicy Pose = new ImportPolicy(cutOut: true, mipMaps: true, compressed: true, maxTextureSize: 2048, pixelsPerUnit: 100f);
 
         readonly struct ArtFile
@@ -219,6 +222,20 @@ namespace F1.Editor.Setup
                 files.Add(new ArtFile(address, AssetPath(address), Building, new AddressEntry(AssetPath(address), address, ResourceScope.Lobby, ArtGroup)));
             }
 
+            // The story (Slice D stage 55): the scenes' pictures, scenes like a dungeon's background, in the story's scope; the speakers' figures and
+            // their dialogue pictures, which the lobby shows, in the lobby's.
+            var story = data.StoryScenes.Ordered.Where(s => s.Image != null).Select(s => (s.Image, Scene, ResourceScope.Story))
+                .Concat(data.Npcs.Ordered.Where(n => n.Figure != null).Select(n => (n.Figure, Figure, ResourceScope.Lobby)))
+                .Concat(data.Npcs.Ordered.SelectMany(n => n.Portraits).Select(p => (p.Image, Portrait, ResourceScope.Lobby)));
+            foreach ((string address, ImportPolicy policy, ResourceScope scope) in story)
+            {
+                if (seen.Add(address))
+                {
+                    string path = LogicalAddress.IsValid(address) ? AssetPath(address) : ArtDirectory + "/" + address;
+                    files.Add(new ArtFile(address, path, policy, new AddressEntry(path, address, scope, ArtGroup)));
+                }
+            }
+
             foreach (UiArt.Piece piece in UiArt.All)
             {
                 files.Add(new ArtFile(piece.Name, piece.AssetPath, Interface(piece.Border), null));
@@ -297,7 +314,7 @@ namespace F1.Editor.Setup
                     string path = file.Replace('\\', '/');
                     if (!listed.Contains(path))
                     {
-                        problems.Add($"{path}: nothing names this image: no Figure (or its poses), Background or Icon (of an item or a potion, or the glow of a unique item) in the static data and no piece of UiArt.");
+                        problems.Add($"{path}: nothing names this image: no Figure (or its poses), Background or Icon (of an item or a potion, or the glow of a unique item), story scene Image or speaker's portrait in the static data and no piece of UiArt.");
                     }
                 }
             }

@@ -242,6 +242,19 @@ namespace F1.UI
             return Color.Lerp(RimStone, Bag(bagId), 0.45f);
         }
 
+        /// <summary>The story's words (Slice D stage 55, the Round 98 motion mockup): the captain's own voice is a warm white, another's (in quotation marks) a pale gold.</summary>
+        public static readonly Color StoryWhite = Rgb(238, 232, 220);
+        public static readonly Color StoryGold = Rgb(214, 190, 130);
+
+        /// <summary>The "#rrggbb" of <see cref="StoryGold"/> for the rich text of a line.</summary>
+        public const string StoryGoldHex = "#D6BE82";
+
+        /// <summary>The dark under the subtitles and behind the lobby's banner (the mockup's 170/255 and 190/255 of it).</summary>
+        public static readonly Color StoryShade = Rgb(14, 12, 12);
+
+        /// <summary>The faint hint at the intro's bottom right (the mockup's 120/255).</summary>
+        public static readonly Color StoryHint = new Color(200f / 255f, 192f / 255f, 180f / 255f, 120f / 255f);
+
         static Color Rgb(int r, int g, int b)
         {
             return new Color(r / 255f, g / 255f, b / 255f, 1f);

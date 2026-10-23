@@ -284,7 +284,7 @@ namespace F1.Tests
         }
 
         [Test]
-        public void Load_AVersion1File_ReadsBothVolumesAsFull_AndSavesVersion2()
+        public void Load_AVersion1File_ReadsBothVolumesAsFull_AndSavesTheCurrentVersion()
         {
             // Version 1 (before 2026-10-05) had the locale only.
             File.WriteAllText(Path.Combine(_root, SettingManager.FileName), "{\"SchemaVersion\":1,\"LocaleCode\":\"en-US\"}");
@@ -295,8 +295,44 @@ namespace F1.Tests
             Assert.AreEqual("en-US", setting.LocaleCode);
             Assert.AreEqual(VolumeLevels.Full, setting.MusicVolume);
             Assert.AreEqual(VolumeLevels.Full, setting.EffectVolume);
-            Assert.AreEqual(2, ReadSaved().SchemaVersion);
+            Assert.AreEqual(SettingsData.CurrentSchemaVersion, ReadSaved().SchemaVersion);
             Assert.AreEqual(VolumeLevels.Full, ReadSaved().EffectVolume);
+        }
+
+        [Test]
+        public void Load_AVersion2File_HasNotSeenTheIntro_AndSavesVersion3()
+        {
+            // Slice D stage 55: version 2 knew nothing of the intro; it is read as not seen (the next new run shows the full cut once).
+            File.WriteAllText(Path.Combine(_root, SettingManager.FileName), "{\"SchemaVersion\":2,\"LocaleCode\":\"ko-KR\",\"MusicVolume\":30,\"EffectVolume\":100}");
+            var setting = new SettingManager(_save);
+
+            setting.Load("ko-KR");
+
+            Assert.IsFalse(setting.IntroSeen);
+            Assert.AreEqual(30, setting.MusicVolume);
+            Assert.AreEqual(3, ReadSaved().SchemaVersion);
+            Assert.IsFalse(ReadSaved().IntroSeen);
+        }
+
+        [Test]
+        public void MarkIntroSeen_SavesIt_KeepsTheOtherSettings_AndIsKeptByALaterChange()
+        {
+            var setting = new SettingManager(_save);
+            setting.Load("ko-KR");
+            setting.ChangeMusicVolume(VolumeLevels.Low);
+
+            setting.MarkIntroSeen();
+
+            Assert.IsTrue(setting.IntroSeen);
+            Assert.IsTrue(ReadSaved().IntroSeen);
+            Assert.AreEqual(VolumeLevels.Low, ReadSaved().MusicVolume);
+
+            setting.ChangeEffectVolume(VolumeLevels.Off);
+            Assert.IsTrue(ReadSaved().IntroSeen, "A volume change copies the intro's mark along.");
+
+            var again = new SettingManager(_save);
+            again.Load("ko-KR");
+            Assert.IsTrue(again.IntroSeen);
         }
 
         [Test]

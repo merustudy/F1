@@ -406,7 +406,7 @@ namespace F1.Tests
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(27, RunSaveData.CurrentSchemaVersion, "Stage 49 (version 27): the same shape; the mine's map is another (stage 47's 26 had the eight jobs).");
+            Assert.AreEqual(28, RunSaveData.CurrentSchemaVersion, "Stage 55 (version 28): the dialogues heard (stage 49's 27 had the mine's new map).");
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;
@@ -593,7 +593,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, new StaticData(TestData.Parts()));
 
-            Assert.AreEqual(27, save.SchemaVersion, "Lifted to 26 and on to 27 (which touches only an expedition in the mine).");
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion, "Lifted to 26 and on (27 touches only an expedition in the mine, 28 adds the dialogues heard).");
             Assert.AreEqual("archer", ranger.JobId);
             Assert.AreEqual("archer", save.Run.Recruits[0].JobId);
             Assert.AreEqual("archer", member.JobId);
@@ -618,7 +618,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(27, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion, "On to 27, then 28 (the dialogues heard, stage 55).");
             Assert.IsNull(save.Expedition, "Settled: the party is home.");
             Assert.AreEqual(day + data.Dungeons.Get("abandoned_mine").DurationDays, save.Run.Day);
             Assert.AreEqual(gold + 8 * data.Balance.GoldPerFloor, save.Run.Gold, "A retreat's gold for floor 8 of 19 — floor 12 of 30 at the same share of the way.");

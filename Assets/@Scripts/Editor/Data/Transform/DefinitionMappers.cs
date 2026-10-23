@@ -416,6 +416,100 @@ namespace F1.Editor.Data
     }
 
     /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none, an empty Source (stage 38) is an innate trait's.</summary>
+    /// <summary>The story's scenes (Slice D stage 55): no name; three lines, each localized, filled from the first.</summary>
+    internal static class StorySceneMapper
+    {
+        static readonly string[] LineFields = { "Line1", "Line2", "Line3" };
+
+        public static List<StorySceneData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[]
+                {
+                    RowMapping.Id, "Sequence", "Order", "Image", "DurationMs", "ShortDurationMs", "ShortLines",
+                    "CameraFrom", "CameraTo", "Effect", "Transition", "Countdown", "SoundNote",
+                }
+                .Concat(LineFields.SelectMany(CsvRow.LocalizedHeaders)));
+            return RowMapping.MapRows(table, errors, row =>
+            {
+                var lines = new List<LocalizedText>();
+                bool gap = false;
+                foreach (string field in LineFields)
+                {
+                    LocalizedText line = row.OptionalLocalized(field);
+                    if (line == null)
+                    {
+                        gap = true;
+                    }
+                    else if (gap)
+                    {
+                        throw new DataException($"{row.Where(field)}: the lines are filled from the first, without a gap.");
+                    }
+                    else
+                    {
+                        lines.Add(line);
+                    }
+                }
+
+                return new StorySceneData(
+                    row.Id(RowMapping.Id),
+                    row.Id("Sequence"),
+                    row.Int("Order"),
+                    RowMapping.ReadArt(row, "Image"),
+                    row.Int("DurationMs"),
+                    row.Int("ShortDurationMs"),
+                    row.LineNumbers("ShortLines", lines.Count),
+                    row.OptionalCamera("CameraFrom"),
+                    row.OptionalCamera("CameraTo"),
+                    row.OptionalEnum<StoryEffect>("Effect") ?? StoryEffect.None,
+                    row.Enum<StoryTransition>("Transition"),
+                    row.Bool("Countdown"),
+                    lines,
+                    row.OptionalText("SoundNote"));
+            });
+        }
+    }
+
+    internal static class NpcMapper
+    {
+        public static List<NpcData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(RowMapping.Headers(RowMapping.Figure, "Portraits"));
+            return RowMapping.MapRows(table, errors, row => new NpcData(
+                row.Id(RowMapping.Id),
+                row.Localized(RowMapping.Name),
+                RowMapping.ReadArt(row, RowMapping.Figure),
+                row.PortraitList("Portraits")));
+        }
+    }
+
+    internal static class DialogueMapper
+    {
+        public static List<DialogueData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[] { RowMapping.Id, "Order", "Trigger", "Dungeon" });
+            return RowMapping.MapRows(table, errors, row => new DialogueData(
+                row.Id(RowMapping.Id),
+                row.Int("Order"),
+                row.Enum<DialogueTrigger>("Trigger"),
+                row.OptionalId("Dungeon")));
+        }
+    }
+
+    internal static class DialogueLineMapper
+    {
+        public static List<DialogueLineData> Map(CsvTable table, List<string> errors)
+        {
+            table.RequireHeaders(new[] { RowMapping.Id, "Dialogue", "Order", "Speaker", "Expression" }.Concat(CsvRow.LocalizedHeaders("Text")));
+            return RowMapping.MapRows(table, errors, row => new DialogueLineData(
+                row.Id(RowMapping.Id),
+                row.Id("Dialogue"),
+                row.Int("Order"),
+                row.Id("Speaker"),
+                row.Id("Expression"),
+                row.Localized("Text")));
+        }
+    }
+
     internal static class TraitMapper
     {
         static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent", "CritDamagePercent" };

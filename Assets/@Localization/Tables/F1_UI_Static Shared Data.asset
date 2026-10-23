@@ -2160,6 +2160,31 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673634446901248
+  - m_Id: 8319612075630592
+    m_Key: Title.Intro
+    m_Metadata:
+      m_Items:
+      - rid: 8623673635784359936
+  - m_Id: 8319612088213504
+    m_Key: Story.WeeksLeft
+    m_Metadata:
+      m_Items:
+      - rid: 8623673635784359937
+  - m_Id: 8319612088213505
+    m_Key: Story.IntroHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673635784359938
+  - m_Id: 8319612088213506
+    m_Key: Story.DialogueHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673635784359939
+  - m_Id: 8319612088213507
+    m_Key: Story.NpcHint
+    m_Metadata:
+      m_Items:
+      - rid: 8623673635784359940
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4147,3 +4172,28 @@ MonoBehaviour:
       data:
         m_CommentText: 'Round 100: the retreat button''s second line while a retreat
           would be early (stage 54: it earns nothing).'
+    - rid: 8623673635784359936
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Button of the settings row (Slice D stage 55) that plays the
+          full intro and comes back to the title.
+    - rid: 8623673635784359937
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'The countdown of the story (Slice D stage 55): the weeks
+          left to the eclipse that ends the run. {0} = weeks.'
+    - rid: 8623673635784359938
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Faint hint at the bottom right of the intro (Slice D stage
+          55): how to go on.'
+    - rid: 8623673635784359939
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: At the bottom right of a dialogue box (Slice D stage 55).
+          {0} = this line's number. {1} = the lines of the dialogue.
+    - rid: 8623673635784359940
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: Second line of the bubble over a speaker standing in the town
+          (Slice D stage 55).

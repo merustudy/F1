@@ -669,6 +669,32 @@ namespace F1.Tests
                 "An enemy's own item (one no shop sells) drops only as the enemy's; the buckler is both a shop's general item and the veteran's.");
         }
 
+        [Test]
+        public void TheShippedStory_IsTheIntroOfDesign33_AndLinettesDialogues()
+        {
+            // Slice D stage 55 (Design/33 §9, §12; the Round 98 motion mockup's cut): fifteen scenes, the last the lobby's banner with the countdown,
+            // 128 s + the banner's 5 s in full and 74.5 s + 4 s short; Linette with her three faces and her figure; two dialogues.
+            StaticData data = LoadShipped();
+            List<StorySceneData> intro = data.ScenesOf("intro");
+            Assert.AreEqual(15, intro.Count);
+            Assert.AreEqual(133000, intro.Sum(scene => scene.DurationMs));
+            Assert.AreEqual(78500, intro.Sum(scene => scene.ShortDurationMs));
+            Assert.IsTrue(intro.Last().IsLobbyBanner);
+            Assert.IsTrue(intro.Last().Countdown);
+            Assert.IsTrue(intro.Take(14).All(scene => scene.Image != null && scene.Image.StartsWith("story/intro/")));
+            Assert.AreEqual(StoryEffect.Shake, data.StoryScenes.Get("intro_massacre").Effect);
+            Assert.AreEqual(StoryTransition.Black, data.StoryScenes.Get("intro_massacre").Transition);
+            Assert.AreEqual(StoryEffect.Heartbeat, data.StoryScenes.Get("intro_wrist").Effect);
+            Assert.AreEqual(0, data.StoryScenes.Get("intro_throne").ShortDurationMs, "§9: #3 and #9 are left out of the short cut.");
+
+            NpcData linette = data.Npcs.Get("linette");
+            CollectionAssert.AreEqual(new[] { "neutral", "cold", "smile" }, linette.Portraits.Select(p => p.Expression));
+            Assert.AreEqual("unit/npc/linette", linette.Figure);
+            CollectionAssert.AreEqual(new[] { "first_lobby", "abyss_unlocked" }, data.DialoguesInOrder.Select(d => d.Id));
+            Assert.AreEqual(3, data.LinesOf("first_lobby").Count);
+            Assert.AreEqual(3, data.LinesOf("abyss_unlocked").Count);
+        }
+
         static StaticData LoadShipped()
         {
             StaticDataFileStore store = DataTransformMenu.CreateStore();

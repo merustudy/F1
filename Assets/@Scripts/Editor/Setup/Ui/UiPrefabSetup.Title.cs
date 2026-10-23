@@ -29,12 +29,13 @@ namespace F1.Editor.Setup
             ButtonParts quit = UiBuild.LocalizedButton("Quit", buttons, UiKeys.Title.Quit, UiPalette.ButtonQuiet, 32f);
             UiBuild.Size(quit.Rect, width, height);
 
-            // The settings in one row under the column (2026-10-05, mockup plan 2): the language, the music, the effects.
+            // The settings in one row under the column (2026-10-05, mockup plan 2): the language, the music, the effects; Slice D stage 55 adds
+            // [인트로 보기] at the end (Round 101), the row centred.
             const float settingWidth = 260f;
             const float settingHeight = 64f;
             const float settingGap = 20f;
-            RectTransform settings = UiBuild.Box(UiBuild.Rect("Settings", frame), (1920f - 3f * settingWidth - 2f * settingGap) / 2f, 800f,
-                3f * settingWidth + 2f * settingGap, settingHeight);
+            RectTransform settings = UiBuild.Box(UiBuild.Rect("Settings", frame), (1920f - 4f * settingWidth - 3f * settingGap) / 2f, 800f,
+                4f * settingWidth + 3f * settingGap, settingHeight);
             UiBuild.Horizontal(settings, settingGap);
 
             ButtonParts language = UiBuild.Button("Language", settings, UiPalette.ButtonQuiet, 28f);
@@ -45,6 +46,9 @@ namespace F1.Editor.Setup
 
             ButtonParts effects = UiBuild.Button("Effects", settings, UiPalette.ButtonQuiet, 28f);
             UiBuild.Size(effects.Rect, settingWidth, settingHeight);
+
+            ButtonParts intro = UiBuild.LocalizedButton("Intro", settings, UiKeys.Title.Intro, UiPalette.ButtonQuiet, 28f);
+            UiBuild.Size(intro.Rect, settingWidth, settingHeight);
 
             TextMeshProUGUI notice = UiBuild.Label("Notice", frame, 26f, UiPalette.Burn, TextAlignmentOptions.Center);
             UiBuild.Box(notice, 260f, 900f, 1400f, 80f);
@@ -69,6 +73,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_musicLabel", music.Label);
             UiBuild.SetReference(screen, "_effects", effects.Button);
             UiBuild.SetReference(screen, "_effectsLabel", effects.Label);
+            UiBuild.SetReference(screen, "_intro", intro.Button);
             UiBuild.SetReference(screen, "_quit", quit.Button);
             UiBuild.SetReference(screen, "_notice", notice);
             UiBuild.SetReference(screen, "_confirmPanel", overlay.gameObject);

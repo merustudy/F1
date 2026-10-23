@@ -24,6 +24,12 @@ namespace F1.Data
 
         /// <summary>The mercenaries' traits (Slice D stage 37). Null is none (test data).</summary>
         public IEnumerable<TraitData> Traits;
+
+        /// <summary>The story (Slice D stage 55): the scenes, the speakers, the dialogues and their lines. Null is none (test data).</summary>
+        public IEnumerable<StorySceneData> StoryScenes;
+        public IEnumerable<NpcData> Npcs;
+        public IEnumerable<DialogueData> Dialogues;
+        public IEnumerable<DialogueLineData> DialogueLines;
     }
 
     /// <summary>
@@ -102,6 +108,10 @@ namespace F1.Data
             Levels = LevelLadder(parts.Levels, problems);
             Buildings = BuildingLadders(parts.Buildings, problems);
             Traits = Index(parts.Traits ?? new List<TraitData>(), x => x.Id, TraitData.DefinitionName, problems);
+            StoryScenes = Index(parts.StoryScenes ?? new List<StorySceneData>(), x => x.Id, StorySceneData.DefinitionName, problems);
+            Npcs = Index(parts.Npcs ?? new List<NpcData>(), x => x.Id, NpcData.DefinitionName, problems);
+            Dialogues = Index(parts.Dialogues ?? new List<DialogueData>(), x => x.Id, DialogueData.DefinitionName, problems);
+            DialogueLines = Index(parts.DialogueLines ?? new List<DialogueLineData>(), x => x.Id, DialogueLineData.DefinitionName, problems);
 
             if (Balance != null)
             {
@@ -138,6 +148,32 @@ namespace F1.Data
 
         /// <summary>The forge recipes (Slice B stage 23); empty until a dungeon has one.</summary>
         public DataTable<RecipeData> Recipes { get; }
+
+        /// <summary>The story's scenes (Slice D stage 55), in id order; <see cref="ScenesOf"/> gives a sequence in its order.</summary>
+        public DataTable<StorySceneData> StoryScenes { get; }
+
+        /// <summary>The story's speakers who are not mercenaries (stage 55).</summary>
+        public DataTable<NpcData> Npcs { get; }
+
+        /// <summary>The story's dialogues (stage 55), in id order; <see cref="DialoguesInOrder"/> gives them in their order.</summary>
+        public DataTable<DialogueData> Dialogues { get; }
+
+        public DataTable<DialogueLineData> DialogueLines { get; }
+
+        /// <summary>The scenes of a sequence ("intro") in their order; empty when there is none.</summary>
+        public List<StorySceneData> ScenesOf(string sequence)
+        {
+            return StoryScenes.Ordered.Where(scene => scene.Sequence == sequence).OrderBy(scene => scene.Order).ToList();
+        }
+
+        /// <summary>The dialogues in their order.</summary>
+        public List<DialogueData> DialoguesInOrder => Dialogues.Ordered.OrderBy(dialogue => dialogue.Order).ToList();
+
+        /// <summary>The lines of a dialogue in their order.</summary>
+        public List<DialogueLineData> LinesOf(string dialogueId)
+        {
+            return DialogueLines.Ordered.Where(line => line.Dialogue == dialogueId).OrderBy(line => line.Order).ToList();
+        }
 
         /// <summary>The levels in order from 1 (Slice C stage 27): what each takes to leave and what it adds to the maximum HP.</summary>
         public IReadOnlyList<LevelData> Levels { get; }
@@ -611,6 +647,79 @@ namespace F1.Data
             if (!Items.Ordered.Any(item => item.ShopWeight > 0) && !Potions.Ordered.Any(potion => potion.ShopWeight > 0))
             {
                 problems.Add("No item or potion has a ShopWeight above 0, so no shop could stock anything.");
+            }
+
+            CheckStory(problems);
+        }
+
+        /// <summary>
+        /// The story (Slice D stage 55): a sequence's orders are distinct and only its last scene may be the lobby's banner; the dialogues' orders
+        /// are distinct, an unlocking dungeon exists and is one that unlocks, every dialogue has a line; a line's dialogue and speaker exist, its
+        /// expression is one of the speaker's faces, and the orders within a dialogue are distinct.
+        /// </summary>
+        void CheckStory(List<string> problems)
+        {
+            foreach (string sequence in StoryScenes.Ordered.Select(scene => scene.Sequence).Distinct())
+            {
+                List<StorySceneData> scenes = ScenesOf(sequence);
+                if (scenes.Select(scene => scene.Order).Distinct().Count() != scenes.Count)
+                {
+                    problems.Add($"{StorySceneData.DefinitionName}: two scenes of '{sequence}' share an Order.");
+                }
+
+                for (int i = 0; i < scenes.Count - 1; i++)
+                {
+                    if (scenes[i].IsLobbyBanner)
+                    {
+                        problems.Add($"{StorySceneData.DefinitionName} '{scenes[i].Id}': only the last scene of '{sequence}' may be without a picture (the lobby's banner).");
+                    }
+                }
+            }
+
+            List<DialogueData> dialogues = DialoguesInOrder;
+            if (dialogues.Select(dialogue => dialogue.Order).Distinct().Count() != dialogues.Count)
+            {
+                problems.Add($"{DialogueData.DefinitionName}: two dialogues share an Order.");
+            }
+
+            foreach (DialogueData dialogue in dialogues)
+            {
+                string what = $"{DialogueData.DefinitionName} '{dialogue.Id}'";
+                if (dialogue.Trigger == DialogueTrigger.DungeonUnlocked)
+                {
+                    if (!Dungeons.Contains(dialogue.Dungeon))
+                    {
+                        problems.Add($"{what} Dungeon: '{dialogue.Dungeon}' does not exist.");
+                    }
+                    else if (Dungeons.Get(dialogue.Dungeon).UnlockDungeonId == null)
+                    {
+                        problems.Add($"{what}: dungeon '{dialogue.Dungeon}' is open from the start, so it is never unlocked.");
+                    }
+                }
+
+                List<DialogueLineData> lines = LinesOf(dialogue.Id);
+                if (lines.Count == 0)
+                {
+                    problems.Add($"{what}: it has no line.");
+                }
+                else if (lines.Select(line => line.Order).Distinct().Count() != lines.Count)
+                {
+                    problems.Add($"{what}: two of its lines share an Order.");
+                }
+            }
+
+            foreach (DialogueLineData line in DialogueLines.Ordered)
+            {
+                string what = $"{DialogueLineData.DefinitionName} '{line.Id}'";
+                Require(Dialogues, line.Dialogue, what + " Dialogue", problems);
+                if (!Npcs.Contains(line.Speaker))
+                {
+                    problems.Add($"{what} Speaker: '{line.Speaker}' does not exist.");
+                }
+                else if (Npcs.Get(line.Speaker).PortraitOf(line.Expression) == null)
+                {
+                    problems.Add($"{what}: '{line.Speaker}' has no expression '{line.Expression}'.");
+                }
             }
         }
 

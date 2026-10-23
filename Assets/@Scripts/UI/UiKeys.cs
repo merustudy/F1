@@ -37,6 +37,16 @@ namespace F1.UI
             public const string VolumeLow = "Title.VolumeLow";
             public const string VolumeOff = "Title.VolumeOff";
             public const string VolumeNotSaved = "Title.VolumeNotSaved";
+            public const string Intro = "Title.Intro";
+        }
+
+        /// <summary>The frame of the story (Slice D stage 55). The story's own words are game data (StorySceneData, DialogueLineData).</summary>
+        public static class Story
+        {
+            public const string WeeksLeft = "Story.WeeksLeft";
+            public const string IntroHint = "Story.IntroHint";
+            public const string DialogueHint = "Story.DialogueHint";
+            public const string NpcHint = "Story.NpcHint";
         }
 
         public static class Lobby

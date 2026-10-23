@@ -24,6 +24,11 @@ Title.VolumeOn,Volume step: full.,켬,On
 Title.VolumeLow,Volume step: low (about half as loud).,작게,Low
 Title.VolumeOff,Volume step: silent.,끔,Off
 Title.VolumeNotSaved,Shown when changing a volume failed because settings could not be written.,설정을 저장하지 못해 소리 크기를 바꾸지 않았습니다.,"The setting could not be saved, so the volume was not changed."
+Title.Intro,Button of the settings row (Slice D stage 55) that plays the full intro and comes back to the title.,인트로 보기,Watch Intro
+Story.WeeksLeft,The countdown of the story (Slice D stage 55): the weeks left to the eclipse that ends the run. {0} = weeks.,일식까지 {0}주,{0} weeks to the eclipse
+Story.IntroHint,"Faint hint at the bottom right of the intro (Slice D stage 55): how to go on.",클릭: 다음 · Esc: 건너뛰기,Click: next · Esc: skip
+Story.DialogueHint,At the bottom right of a dialogue box (Slice D stage 55). {0} = this line's number. {1} = the lines of the dialogue.,{0}/{1}    클릭: 다음 · Esc: 건너뛰기,{0}/{1}    Click: next · Esc: skip
+Story.NpcHint,Second line of the bubble over a speaker standing in the town (Slice D stage 55).,누르면 마지막 말을 다시 듣는다,Click to hear the last words again
 Lobby.Title,Header of the lobby screen.,용병단 본부,Company Hall
 Lobby.Day,{0} = current day. {1} = total days.,{0}주차 / {1}주,Week {0} / {1}
 Lobby.DayFinalStand,"The header past the last day (Docs/Design/04 §2): the day counter, then that only the final stand is left. {0} = current day, {1} = total days.",{0}주차 / {1}주 — 최종 결전,Week {0} / {1} — the final stand

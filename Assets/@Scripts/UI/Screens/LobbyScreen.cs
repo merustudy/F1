@@ -124,6 +124,9 @@ namespace F1.UI
         [SerializeField] TMP_Text _runOverFallen;
         [SerializeField] TMP_Text _runOverSurvivors;
         [SerializeField] Button _runOverNewRun;
+        [SerializeField] TownNpcView _townNpc;
+        [SerializeField] StoryBannerView _storyBanner;
+        [SerializeField] DialogueView _dialogue;
 
         readonly Dictionary<string, RosterEntryView> _entries = new Dictionary<string, RosterEntryView>();
         readonly Dictionary<string, RosterChipView> _chips = new Dictionary<string, RosterChipView>();
@@ -132,8 +135,12 @@ namespace F1.UI
         readonly Dictionary<string, StatBlock> _grown = new Dictionary<string, StatBlock>();
         readonly List<CandidateView> _candidates = new List<CandidateView>();
         readonly Dictionary<string, Sprite> _pictures = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
+        // The story's pictures (Slice D stage 55): the speakers' figures and dialogue faces, by address.
+        readonly Dictionary<string, Sprite> _storyArt = new Dictionary<string, Sprite>(System.StringComparer.Ordinal);
         Sprite _townArt;
         Sprite _scaffoldArt;
+        // The dialogue playing now (to mark it heard when it closes), and whether it is a replay of the speaker in the town (nothing to mark).
+        DialogueData _playing;
         Quarter _open;
 
         /// <summary>The quarter whose window is open, or None.</summary>
@@ -148,6 +155,17 @@ namespace F1.UI
 #else
         public static bool TestToolsShown => false;
 #endif
+
+        /// <summary>The story's views (Slice D stage 55), for the tests.</summary>
+        public StoryBannerView StoryBanner => _storyBanner;
+        public DialogueView Dialogue => _dialogue;
+        public TownNpcView TownNpc => _townNpc;
+
+        /// <summary>
+        /// Whether the story plays over the lobby (Slice D stage 55): the banner and the dialogues. The test fixtures that stage a lobby directly turn
+        /// it off so that their pictures and clicks are the lobby's; the story's own tests leave it on. The game never turns it off.
+        /// </summary>
+        public static bool StoryShown = true;
 
         /// <summary>The test gold button (Round 97), for the tests.</summary>
         public Button TestGold => _testGold;
@@ -201,6 +219,29 @@ namespace F1.UI
                 {
                     string address = ArtAddress.Building(buildingId, level);
                     _pictures[address] = await Managers.Resource.LoadAsync<Sprite>(address, ResourceScope.Lobby);
+                }
+            }
+
+            // The story's speakers (Slice D stage 55): their figures for the town and every face for the dialogues.
+            foreach (NpcData npc in data.Npcs.Ordered)
+            {
+                var addresses = new List<string>();
+                if (npc.Figure != null)
+                {
+                    addresses.Add(npc.Figure);
+                }
+
+                foreach (NpcPortrait portrait in npc.Portraits)
+                {
+                    addresses.Add(portrait.Image);
+                }
+
+                foreach (string address in addresses)
+                {
+                    if (!_storyArt.ContainsKey(address))
+                    {
+                        _storyArt[address] = await Managers.Resource.LoadAsync<Sprite>(address, ResourceScope.Lobby);
+                    }
                 }
             }
         }
@@ -262,7 +303,120 @@ namespace F1.UI
             _gate.HideConstruction();
 
             _bubble.gameObject.SetActive(false);
+            _townNpc.Button.onClick.AddListener(ReplayLastDialogue);
+            _townNpc.Entered += ShowNpcBubble;
+            _townNpc.Exited += _ => _bubble.gameObject.SetActive(false);
             Managers.Sound.PlayMusic(MusicTrack.Lobby);
+
+            // The story (Slice D stage 55): the intro's last scene as a banner if the intro just ended, then the dialogue that is due.
+            StorySceneData banner = StoryHandoff.TakeBanner(out bool shortCut);
+            if (!StoryShown)
+            {
+                return;
+            }
+
+            if (banner != null && !Managers.Run.Run.IsOver)
+            {
+                string guide = banner.Lines.Count > 0 ? UiText.Name(banner.Lines[0]) : null;
+                string countdown = banner.Countdown ? UiStrings.Get(UiKeys.Story.WeeksLeft, Managers.Run.WeeksLeft) : null;
+                _storyBanner.Play(countdown, guide, banner.DurationOf(shortCut), PlayDueDialogue);
+            }
+            else
+            {
+                PlayDueDialogue();
+            }
+        }
+
+        // ---- The story (Slice D stage 55) -------------------------------------------------------
+
+        /// <summary>Plays the dialogue that is due (Round 101 안 A), if any and no window is open.</summary>
+        void PlayDueDialogue()
+        {
+            DialogueData due = StoryShown ? Managers.Run.DueDialogue() : null;
+            if (due == null || _open != Quarter.None || Managers.Run.IsSaveBlocked)
+            {
+                return;
+            }
+
+            Play(due, replay: false);
+        }
+
+        /// <summary>The speaker in the town (Round 101 안 B): the last dialogue heard again, nothing saved.</summary>
+        void ReplayLastDialogue()
+        {
+            DialogueData last = Managers.Run.LastHeardDialogue();
+            if (last != null && !_dialogue.IsOpen)
+            {
+                Play(last, replay: true);
+            }
+        }
+
+        void Play(DialogueData dialogue, bool replay)
+        {
+            StaticData data = Managers.Data.Data;
+            _bubble.gameObject.SetActive(false);
+            _playing = replay ? null : dialogue;
+            _dialogue.Play(data.LinesOf(dialogue.Id), Face, id => UiText.Name(data.Npcs.Get(id).Name), DialogueClosed);
+        }
+
+        /// <summary>A speaker's dialogue picture for an expression (loaded before the screen opened), or null.</summary>
+        Sprite Face(string speaker, string expression)
+        {
+            string address = Managers.Data.Data.Npcs.Get(speaker).PortraitOf(expression);
+            return address != null && _storyArt.TryGetValue(address, out Sprite sprite) ? sprite : null;
+        }
+
+        void DialogueClosed()
+        {
+            DialogueData heard = _playing;
+            _playing = null;
+            if (heard != null && !Managers.Run.IsSaveBlocked)
+            {
+                Managers.Run.MarkDialogueSeen(heard.Id);
+                Refresh();
+                // Another may be due as well (a dungeon unlocked on the run's first lobby): it follows.
+                PlayDueDialogue();
+            }
+        }
+
+        /// <summary>
+        /// The speaker in the town: whoever said the first line of the last dialogue heard, if that speaker has a figure; nobody before the first
+        /// dialogue, or once the run is over.
+        /// </summary>
+        void RefreshTownNpc(StaticData data, RunState run)
+        {
+            DialogueData last = Managers.Run.LastHeardDialogue();
+            NpcData speaker = null;
+            if (last != null && !run.IsOver)
+            {
+                List<DialogueLineData> lines = data.LinesOf(last.Id);
+                speaker = lines.Count > 0 ? data.Npcs.Get(lines[0].Speaker) : null;
+            }
+
+            Sprite figure = null;
+            if (speaker?.Figure != null)
+            {
+                _storyArt.TryGetValue(speaker.Figure, out figure);
+            }
+
+            _townNpc.Show(figure, speaker == null ? null : UiText.Name(speaker.Name));
+        }
+
+        void ShowNpcBubble(TownNpcView npc)
+        {
+            if (_open != Quarter.None || Managers.Run.Run.IsOver || _dialogue.IsOpen)
+            {
+                return;
+            }
+
+            _bubbleName.text = npc.Name;
+            _bubbleDetail.text = UiStrings.Get(UiKeys.Story.NpcHint);
+            RectTransform rect = npc.Rect;
+            float x = rect.anchoredPosition.x + rect.sizeDelta.x / 2f;
+            float top = -rect.anchoredPosition.y;
+            float y = Mathf.Max(100f + _bubble.sizeDelta.y / 2f + 8f, top - BubbleAbove);
+            _bubble.anchoredPosition = new Vector2(Mathf.Min(x - _bubble.sizeDelta.x / 2f, 1920f - _bubble.sizeDelta.x - 8f), -(y - _bubble.sizeDelta.y / 2f));
+            _bubble.gameObject.SetActive(true);
         }
 
         /// <summary>Opens a quarter's window over the town, or closes it (None). The bubble goes with the pointer leaving the building.</summary>
@@ -298,6 +452,7 @@ namespace F1.UI
 #endif
 
             RefreshTown(data, run, due);
+            RefreshTownNpc(data, run);
             RefreshStrip(data, run, due);
             RefreshBarracks(data, run);
             RefreshInn(data, run, due);
@@ -860,6 +1015,14 @@ namespace F1.UI
         void OnNewRun()
         {
             Managers.Run.StartNewRun();
+
+            // A new run plays the intro first (Slice D stage 55), as from the title.
+            if (Managers.Data.Data.ScenesOf(IntroScreen.Sequence).Count > 0)
+            {
+                StoryHandoff.Intro = StoryHandoff.IntroMode.NewRun;
+                GoTo(ScreenId.Intro);
+                return;
+            }
 
             // The roster of the old run is gone: start the lists over.
             foreach (RosterEntryView entry in _entries.Values)
