@@ -1,0 +1,33 @@
+[21:16:57] character knightf_small_v4 (1/2)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[1/6] 추가 레퍼런스 확인: knight.raw.png (1,213,238 bytes, 보내는 포맷 PNG, --extra-reference 로 받은 것)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/STYLE_RUNTIME-longsword.md 로 프롬프트 조립 (6,671 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-small-v4.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,537 + image 2,532, 출력 439 tokens -> 약 $0.041 (누계 약 $13.31)
+[5/6] 후처리: 원본은 knightf_small_v4.raw.png, 맞춘 그림은 knightf_small_v4.png.
+      피사체: 원본 937x918 (생성 캔버스의 92%) -> 648x635 (배율 0.69)
+      키:     635px / 목표 645px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_small_v4.png
+      크기:   672x896, 386,198 bytes
+      여백:   좌 9 우 9 상 238 하 17 px
+      알파:   완전투명 68.7% 반투명 2.4% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[21:17:22] character knightf_normal_v3 (2/2)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[1/6] 추가 레퍼런스 확인: knight.raw.png (1,213,238 bytes, 보내는 포맷 PNG, --extra-reference 로 받은 것)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/STYLE_RUNTIME-longsword.md 로 프롬프트 조립 (6,724 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-normal-v3.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,545 + image 2,532, 출력 439 tokens -> 약 $0.041 (누계 약 $13.35)
+[5/6] 후처리: 원본은 knightf_normal_v3.raw.png, 맞춘 그림은 knightf_normal_v3.png.
+      피사체: 원본 911x1005 (생성 캔버스의 98%) -> 648x715 (배율 0.71)
+      키:     715px / 목표 806px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_normal_v3.png
+      크기:   672x896, 369,544 bytes
+      여백:   좌 9 우 9 상 158 하 17 px
+      알파:   완전투명 67.0% 반투명 2.3% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[21:17:48] done: 2 calls

@@ -51,6 +51,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 06ef75fb8cc4b4a6dbd05eee8e03a0db
+    m_Address: pose/job/spellblade-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 06f25fea4069943399240a85beec8904
     m_Address: pose/job/archer-resolute
     m_ReadOnly: 0
@@ -99,6 +105,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 10d46a0d534ec46ae89049c17b79d8b3
+    m_Address: pose/job/swordswoman-giant-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 11102349196d34ef9924c294f1138643
     m_Address: item/rat-bite
     m_ReadOnly: 0
@@ -110,6 +122,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-story
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 11d75085026a74678933d2bc8b4ea10c
+    m_Address: pose/job/swordswoman-small-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12fc04e3866df4d78baf0481ca83a97e
     m_Address: item/bristle-hide
@@ -135,6 +153,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 14f1d8c63b9574416937ce30c2f11976
+    m_Address: unit/job/knight-small
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 166af21020e424d4d9c5b2d715f82089
     m_Address: item/windcutter
     m_ReadOnly: 0
@@ -143,6 +167,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 19a13001e06904735970f98c25fbdd23
     m_Address: item/gladius
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1a094257ed76142cca60aaf3334706aa
+    m_Address: pose/job/swordswoman-small-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -213,6 +243,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2c13ffd8157a7436bb948a1c792890ae
+    m_Address: pose/job/knight-small-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2fd2db0f38ab1450281dd7c96df278fa
     m_Address: item/bloodgale
     m_ReadOnly: 0
@@ -279,6 +315,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 420c10050f1cf42b7a788a31d046b162
+    m_Address: pose/job/swordswoman-giant-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 43311083f1a004e15b97c2a3b48afe21
     m_Address: pose/job/bishop-hit
     m_ReadOnly: 0
@@ -297,8 +339,26 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4c125b553214f40019fe1226b46ffb28
+    m_Address: pose/job/knight-small-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 50449636f0b7645628953b7c33cf6b78
     m_Address: pose/job/valkyrie-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 52a4a18cdf90845739d3a45af4581f58
+    m_Address: pose/job/knight-giant-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 535c8a68644654eb6ac62b8012955b72
+    m_Address: pose/job/swordswoman-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -317,6 +377,24 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 56c069291186e44889592ec7a4866f92
     m_Address: unit/enemy/goblin-archer
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 58bb1d8a7b34540ee96bccc08f565688
+    m_Address: pose/job/swordswoman-small-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 59dcba26c298542338c7ccdcb9ae16b4
+    m_Address: unit/job/swordswoman
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a5a0658da01e4c31a284e24a7080d9b
+    m_Address: unit/job/knight-giant
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -359,6 +437,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 62a268db067ec4038b7a024c14fe218a
     m_Address: item/cinder
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 652ab55873d4e46b3a263e3c36c88c24
+    m_Address: pose/job/knight-small-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -417,8 +501,20 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6dac67aaa9271447a880820da593c871
+    m_Address: unit/job/spellblade
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6e26b16db8bcc4bec97ec49eed993b80
     m_Address: item/throwing-knives
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6eb8b024954b541508e3e0091bf078d9
+    m_Address: pose/job/knight-small-resolute
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -431,6 +527,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 70632e28bad6c46469c934fd033bd9e1
     m_Address: item/ember-flask
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 706663114bbf74896b53f3440bd377bc
+    m_Address: pose/job/swordswoman-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -459,6 +561,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 767201c52c92d410eb33933265cd11ce
+    m_Address: pose/job/swordswoman-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 798b4478ae983436ba25dc9f5d1254f9
     m_Address: pose/job/archmage-resolute
     m_ReadOnly: 0
@@ -483,6 +591,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7f6cbaf1a2b1b4083afb02b199c88a56
+    m_Address: pose/job/swordswoman-small-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7f7b2e3d78dbf4dcaa6f285f408f479f
     m_Address: item/goblin-sawblade
     m_ReadOnly: 0
@@ -495,6 +609,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 83d0b5ad264a946fda63faecaeeddccb
+    m_Address: pose/job/knight-giant-broken
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 85d07dc708b9d4f7799392eafc18962d
     m_Address: item/ward-charm
     m_ReadOnly: 0
@@ -503,6 +623,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8694b92fa8fd04ff8b244fafed781ce2
     m_Address: pose/job/bishop-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8701c3948daf44be3b4b2fdf8403cfc0
+    m_Address: pose/job/swordswoman-giant-broken
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -521,6 +647,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 89d12dce7a91e4ea793a9f5380cf70f8
     m_Address: item/frost-staff
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a0b76029513a457d97e0aec45a6e3b3
+    m_Address: pose/job/knight-giant-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -609,6 +741,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a64035ebf3ecd40daa92c6b7c9bd44e5
+    m_Address: pose/job/knight-giant-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a79f44c774fcf4c97a89202a3e027ade
     m_Address: potion/barrier-potion
     m_ReadOnly: 0
@@ -627,6 +765,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a869c0160e5b74760959b333dc6473d0
+    m_Address: pose/job/swordswoman-resolute
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: a8b281629aaf24915b6ee2d0b80bed69
     m_Address: pose/job/valkyrie-broken
     m_ReadOnly: 0
@@ -641,6 +785,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ac1fa6252a1a54ac8867b605c6b0bbba
     m_Address: pose/job/rogue-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ac466654cfb634487b3e03c4dfd96c8c
+    m_Address: pose/job/spellblade-attack
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -705,6 +855,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b76f2532e0a994e83b7cd6ff7ee5f3c5
+    m_Address: unit/job/swordswoman-giant
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b78bf447c43de4c858ba1d04547c60bc
     m_Address: story/intro/wrist
     m_ReadOnly: 0
@@ -749,6 +905,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c5ae6265ac877410580b3cc52b8e169a
     m_Address: item/abyss-howl
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c75a6395611f841939ffcc112264f3b2
+    m_Address: pose/job/spellblade-hit
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition
@@ -848,6 +1010,12 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-lobby
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: da0b7807df5824960b7d367a9dc40b9d
+    m_Address: pose/job/swordswoman-giant-attack
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: db3c27fb55e554ebca237c2ab0368b4f
     m_Address: item/iron-helm
@@ -975,6 +1143,12 @@ MonoBehaviour:
     m_SerializedLabels:
     - scope-lobby
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f0a4c6d39fbd348dab63b9a9af1a4cc3
+    m_Address: unit/job/swordswoman-small
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f764de12c07144c35bf7b3fba6df7cda
     m_Address: pose/enemy/goblin-archer-hit
     m_ReadOnly: 0
@@ -983,6 +1157,12 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: fbad2d8ce98f5434baa5375aad2d1e1d
     m_Address: pose/job/minstrel-hit
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - scope-expedition
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd4e0c8442e784b969fa3777eb3cdb3b
+    m_Address: pose/job/spellblade-resolute
     m_ReadOnly: 0
     m_SerializedLabels:
     - scope-expedition

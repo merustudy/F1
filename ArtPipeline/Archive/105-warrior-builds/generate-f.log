@@ -1,0 +1,46 @@
+[19:42:06] character knightf_normal (1/3)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,915 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-normal.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,360 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $13.08)
+[5/6] 후처리: 원본은 knightf_normal.raw.png, 맞춘 그림은 knightf_normal.png.
+      피사체: 원본 908x974 (생성 캔버스의 95%) -> 648x695 (배율 0.71)
+      키:     695px / 목표 806px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_normal.png
+      크기:   672x896, 377,475 bytes
+      여백:   좌 9 우 9 상 178 하 17 px
+      알파:   완전투명 69.1% 반투명 2.2% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:42:32] character knightf_giant (2/3)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,898 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-giant.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,348 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $13.11)
+[5/6] 후처리: 원본은 knightf_giant.raw.png, 맞춘 그림은 knightf_giant.png.
+      피사체: 원본 989x997 (생성 캔버스의 97%) -> 648x653 (배율 0.66)
+      키:     653px / 목표 869px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_giant.png
+      크기:   672x896, 427,167 bytes
+      여백:   좌 9 우 9 상 220 하 17 px
+      알파:   완전투명 64.2% 반투명 2.1% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:42:57] character knightf_small (3/3)
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (5,809 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-small.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,337 + image 1,508, 출력 439 tokens -> 약 $0.032 (누계 약 $13.14)
+[5/6] 후처리: 원본은 knightf_small.raw.png, 맞춘 그림은 knightf_small.png.
+      피사체: 원본 898x806 (생성 캔버스의 88%) -> 648x582 (배율 0.72)
+      키:     582px / 목표 645px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_small.png
+      크기:   672x896, 339,620 bytes
+      여백:   좌 9 우 9 상 291 하 17 px
+      알파:   완전투명 73.0% 반투명 1.9% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
+[19:43:23] done: 3 calls

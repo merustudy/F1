@@ -1,0 +1,49 @@
+[22:04:36] attack knightf_normal_v3 (1/6)
+[1/6] 레퍼런스 확인: knightf_normal_v3.reference.png (387,770 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,312 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_normal_v3-attack.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,445 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.43)
+[5/6] 원본은 knightf_normal_v3.raw.png. 맞추기: tools/fit_pose.py --type attack --key warrior
+[6/6] 저장 완료.
+[22:04:58] attack knightf_giant_v3 (2/6)
+[1/6] 레퍼런스 확인: knightf_giant_v3.reference.png (473,053 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,290 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_giant_v3-attack.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,446 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.46)
+[5/6] 원본은 knightf_giant_v3.raw.png. 맞추기: tools/fit_pose.py --type attack --key warrior
+[6/6] 저장 완료.
+[22:05:24] attack knightf_small_v4 (3/6)
+[1/6] 레퍼런스 확인: knightf_small_v4.reference.png (489,304 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,241 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_small_v4-attack.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=attack, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,433 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.49)
+[5/6] 원본은 knightf_small_v4.raw.png. 맞추기: tools/fit_pose.py --type attack --key warrior
+[6/6] 저장 완료.
+[22:05:45] hit knightf_normal_v3 (4/6)
+[1/6] 레퍼런스 확인: knightf_normal_v3.reference.png (387,867 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,174 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_normal_v3-hit.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,416 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.52)
+[5/6] 원본은 knightf_normal_v3.raw.png. 맞추기: tools/fit_pose.py --type hit --key warrior
+[6/6] 저장 완료.
+[22:06:08] hit knightf_giant_v3 (5/6)
+[1/6] 레퍼런스 확인: knightf_giant_v3.reference.png (473,084 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,152 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_giant_v3-hit.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,417 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.55)
+[5/6] 원본은 knightf_giant_v3.raw.png. 맞추기: tools/fit_pose.py --type hit --key warrior
+[6/6] 저장 완료.
+[22:06:30] hit knightf_small_v4 (6/6)
+[1/6] 레퍼런스 확인: knightf_small_v4.reference.png (489,371 bytes, 보내는 포맷 PNG, --reference 로 받은 것)
+[2/6] STYLE_RUNTIME.md 로 프롬프트 조립 (6,103 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-knightf_small_v4-hit.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=hit, key=warrior, quality=medium, size=1536x1024.
+      사용량: 입력 text 1,404 + image 1,536, 출력 343 tokens -> 약 $0.030 (누계 약 $13.58)
+[5/6] 원본은 knightf_small_v4.raw.png. 맞추기: tools/fit_pose.py --type hit --key warrior
+[6/6] 저장 완료.
+[22:06:50] done: 6 calls

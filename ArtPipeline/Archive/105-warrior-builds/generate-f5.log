@@ -1,0 +1,16 @@
+[1/6] 레퍼런스 확인: style_ref_roster.png (1,245,829 bytes, 보내는 포맷 PNG)
+[1/6] 추가 레퍼런스 확인: knightf_giant_v2.raw.png (1,175,336 bytes, 보내는 포맷 PNG, --extra-reference 로 받은 것)
+[1/6] 추가 레퍼런스 확인: knight.raw.png (1,213,238 bytes, 보내는 포맷 PNG, --extra-reference 로 받은 것)
+[2/6] /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/STYLE_RUNTIME-redraw.md 로 프롬프트 조립 (7,172 chars, 소재는 /Users/funitup/Projects/F1/ArtPipeline/Archive/105-warrior-builds/roster-f-giant-v3.csv).
+[3/6] Keychain에서 키를 읽었다 (서비스 OPENAI_API_KEY, 계정 funitup).
+[4/6] 생성 요청 1회: type=character, key=warrior, quality=medium, size=1024x1024.
+      사용량: 입력 text 1,664 + image 3,556, 출력 439 tokens -> 약 $0.050 (누계 약 $13.40)
+[5/6] 후처리: 원본은 knightf_giant_v3.raw.png, 맞춘 그림은 knightf_giant_v3.png.
+      피사체: 원본 852x1000 (생성 캔버스의 98%) -> 648x761 (배율 0.76)
+      키:     761px / 목표 869px (캔버스 672x896, 바닥 여백 20px)
+      참고: 폭이 캔버스를 넘어 폭에 맞춰 줄였다. 키가 목표보다 작다.
+[6/6] 저장 완료.
+      경로:   /Users/funitup/Projects/F1/ArtPipeline/output/character/knightf_giant_v3.png
+      크기:   672x896, 504,430 bytes
+      여백:   좌 9 우 9 상 112 하 17 px
+      알파:   완전투명 56.6% 반투명 2.7% (반투명이 8%를 넘으면 글로우나 부드러운 그림자가 있다)
