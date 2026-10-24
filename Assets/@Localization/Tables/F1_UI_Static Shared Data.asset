@@ -2385,6 +2385,46 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673653953560576
+  - m_Id: 8702588710019072
+    m_Key: Trait.FromAllyDied
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680000
+  - m_Id: 8702588722601984
+    m_Key: Trait.Rare
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680001
+  - m_Id: 8702588722601985
+    m_Key: Trait.Stat
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680002
+  - m_Id: 8702588722601986
+    m_Key: Trait.CritDamage
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680003
+  - m_Id: 8702588722601987
+    m_Key: Trait.Growth
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680004
+  - m_Id: 8702588722601988
+    m_Key: Trait.Damage
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680005
+  - m_Id: 8702588722601989
+    m_Key: Trait.HealTaken
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680006
+  - m_Id: 8702588722601990
+    m_Key: Trait.AllyFatigue
+    m_Metadata:
+      m_Items:
+      - rid: 8623673659719680007
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4637,3 +4677,43 @@ MonoBehaviour:
         m_CommentText: 'In an item''s facts in place of its cooldown (Slice D stage
           56, Design/38): an item that only raises the maximum HP, which shows on
           the board at once.'
+    - rid: 8623673659719680000
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'What left an acquired trait (stage 57): a member of the party
+          died on the expedition and this one came home.'
+    - rid: 8623673659719680001
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "After a trait's kind and strength or weakness on its card
+          (stage 57, Docs/Design/39 \xA72-5): the trait is rare."
+    - rid: 8623673659719680002
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (stage 57): on one of the mercenary''s
+          stats. {0} = the stat''s name, {1} = signed points.'
+    - rid: 8623673659719680003
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect: on the critical multiplier of the mercenary''s
+          physical weapons. {0} = signed percent points.'
+    - rid: 8623673659719680004
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (stage 57): on every growth grade of the
+          mercenary''s job at a level-up. {0} = signed percent.'
+    - rid: 8623673659719680005
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (stage 57): on the damage the mercenary''s
+          items deal enemies. {0} = signed percent.'
+    - rid: 8623673659719680006
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (stage 57): on the healing the mercenary
+          takes. {0} = signed percent.'
+    - rid: 8623673659719680007
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'A trait''s effect (stage 57): on each ally''s fatigue as
+          every battle starts. {0} = signed fatigue.'

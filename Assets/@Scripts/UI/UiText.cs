@@ -76,6 +76,12 @@ namespace F1.UI
                 string kind = UiStrings.Get(trait.Kind == TraitKind.Innate ? UiKeys.Trait.KindInnate : UiKeys.Trait.KindAcquired);
                 string polarity = UiStrings.Get(strength ? UiKeys.Trait.Strength : UiKeys.Trait.Weakness);
                 string sub = UiStrings.Get(UiKeys.Trait.Sub, kind, polarity);
+                if (trait.Rare)
+                {
+                    // Stage 57 (Docs/Design/39 §2-5): a rare trait says so on its card's second line.
+                    sub = UiStrings.Get(UiKeys.Trait.Sub, sub, UiStrings.Get(UiKeys.Trait.Rare));
+                }
+
                 if (trait.Source != null)
                 {
                     sub = UiStrings.Get(UiKeys.Trait.SubFrom, sub, UiStrings.Get(SourceKey(trait.Source.Value)));
@@ -95,6 +101,7 @@ namespace F1.UI
                 case TraitSource.Retreat: return UiKeys.Trait.FromRetreat;
                 case TraitSource.DeathsDoor: return UiKeys.Trait.FromDeathsDoor;
                 case TraitSource.Affliction: return UiKeys.Trait.FromAffliction;
+                case TraitSource.AllyDied: return UiKeys.Trait.FromAllyDied;
                 default: return UiKeys.Trait.FromVirtue;
             }
         }
@@ -117,15 +124,27 @@ namespace F1.UI
             return new TraitChip(UiStrings.Get(UiKeys.Trait.More, count), null, UiPalette.TraitMore, names, string.Empty, count);
         }
 
-        /// <summary>What a trait does, each term it moves in turn ("명중 +5%p", "최대 HP -10%").</summary>
+        /// <summary>What a trait does, each term it moves in turn ("힘 +2", "명중 +5%p", "최대 HP -10%"): the stats first (stage 57), then the rest.</summary>
         public static string TraitEffect(TraitData trait)
         {
             string line = string.Empty;
+            foreach (Stat stat in StatBlock.All)
+            {
+                int shift = TraitRules.ShiftOf(trait, stat);
+                if (shift != 0)
+                {
+                    string term = UiStrings.Get(UiKeys.Trait.Stat, StatName(stat), Signed(shift));
+                    line = line.Length == 0 ? term : UiStrings.Get(UiKeys.Trait.Sub, line, term);
+                }
+            }
+
             foreach ((string key, int value) in new[]
             {
                 (UiKeys.Trait.Hit, trait.HitPercent), (UiKeys.Trait.Dodge, trait.DodgePercent), (UiKeys.Trait.Crit, trait.CritPercent),
+                (UiKeys.Trait.CritDamage, trait.CritDamagePercent),
                 (UiKeys.Trait.DogDeath, trait.DogDeathPercent), (UiKeys.Trait.Virtue, trait.VirtuePercent), (UiKeys.Trait.Fatigue, trait.FatiguePercent),
-                (UiKeys.Trait.MaxHp, trait.MaxHpPercent),
+                (UiKeys.Trait.MaxHp, trait.MaxHpPercent), (UiKeys.Trait.Growth, trait.GrowthPercent), (UiKeys.Trait.Damage, trait.DamagePercent),
+                (UiKeys.Trait.HealTaken, trait.HealTakenPercent), (UiKeys.Trait.AllyFatigue, trait.AllyFatigueAtStart),
             })
             {
                 if (value == 0)

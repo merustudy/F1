@@ -782,7 +782,7 @@ namespace F1.Sim
                     expeditions++;
                     foreach (ExpeditionMember member in expedition.Members)
                     {
-                        foreach (TraitSource source in TraitRules.SourcesOf(data, expedition.Result, member))
+                        foreach (TraitSource source in TraitRules.SourcesOf(data, expedition.Result, member, expedition.Members.Any(m => !m.Alive)))
                         {
                             sourcesMet[(int)source]++;
                         }

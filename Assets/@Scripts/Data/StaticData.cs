@@ -337,7 +337,10 @@ namespace F1.Data
         public DataTable<TraitData> Traits { get; }
 
         /// <summary>The traits a candidate of the stagecoach can be born with: the innate ones of a weight above 0, in id order.</summary>
-        public List<TraitData> InnateTraits => Traits.Ordered.Where(trait => trait.Kind == TraitKind.Innate && trait.Weight > 0).ToList();
+        public List<TraitData> InnateTraits => Traits.Ordered.Where(trait => trait.Kind == TraitKind.Innate && !trait.Build && trait.Weight > 0).ToList();
+
+        /// <summary>The builds a candidate draws one of (stage 57): innate builds with a weight, in id order. The build slot's "none" weight is BalanceData.BuildWeightNone.</summary>
+        public List<TraitData> BuildTraits => Traits.Ordered.Where(trait => trait.Build && trait.Weight > 0).ToList();
 
         /// <summary>The states of a kind, in id order: what the breakdown at the fatigue threshold picks from.</summary>
         public List<FatigueStateData> FatigueStatesOf(FatigueStateKind kind)
@@ -587,11 +590,31 @@ namespace F1.Data
                 {
                     Require(Traits, trait.Excludes, $"{TraitData.DefinitionName} '{trait.Id}' Excludes", problems);
                 }
+
+                // The state an acquired trait of a breakdown or a virtue marks (stage 57) is one of that kind.
+                if (trait.SourceState != null)
+                {
+                    Require(FatigueStates, trait.SourceState, $"{TraitData.DefinitionName} '{trait.Id}' SourceState", problems);
+                }
+
+                if (trait.SourceState != null && FatigueStates.Contains(trait.SourceState))
+                {
+                    FatigueStateKind kind = FatigueStates.Get(trait.SourceState).Kind;
+                    if ((trait.Source == TraitSource.Affliction) != (kind == FatigueStateKind.Affliction))
+                    {
+                        problems.Add($"{TraitData.DefinitionName} '{trait.Id}': SourceState '{trait.SourceState}' is not of its Source's kind.");
+                    }
+                }
             }
 
             foreach (MercenaryData mercenary in StartingMercenaries)
             {
                 Require(Jobs, mercenary.JobId, $"{MercenaryData.DefinitionName} '{mercenary.Id}' JobId", problems);
+                // Stage 57: a starting mercenary's figure is one of its job's.
+                if (mercenary.Figure != null && Jobs.Contains(mercenary.JobId) && !Jobs.Get(mercenary.JobId).HasFigure(mercenary.Figure))
+                {
+                    problems.Add($"{MercenaryData.DefinitionName} '{mercenary.Id}': Figure '{mercenary.Figure}' is not one of its job's figures.");
+                }
                 // The starting roster's traits (stage 37): each exists, none twice, no two that clash.
                 var held = new List<TraitData>();
                 foreach (string traitId in mercenary.Traits)

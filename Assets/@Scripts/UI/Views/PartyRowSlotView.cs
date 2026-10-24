@@ -74,8 +74,9 @@ namespace F1.UI
         /// <param name="art">The job's figure, or null for a job without one (the placeholder stands in).</param>
         /// <param name="stats">The mercenary's stats (Slice D stage 32).</param>
         /// <param name="traits">Its traits (Slice D stage 37): icons after the job's words, as many as the line's end holds.</param>
+        /// <param name="figureScale">How large the figure stands (stage 57: a giant larger, as in battle); 1 for most.</param>
         public void Show(string mercenaryId, Sprite art, string name, string level, string detail, int fatigue, int maxFatigue, int breakdown, StatBlock stats,
-            IReadOnlyList<TraitChip> traits, bool canForward, bool canBack)
+            IReadOnlyList<TraitChip> traits, bool canForward, bool canBack, float figureScale = 1f)
         {
             for (int i = 0; i < StatBlock.All.Length; i++)
             {
@@ -86,6 +87,7 @@ namespace F1.UI
             _empty.SetActive(false);
             _figure.gameObject.SetActive(true);
             _figure.Show(art);
+            _figure.SetScale(figureScale);
             _name.text = name;
             _level.text = level;
             _detail.text = detail;

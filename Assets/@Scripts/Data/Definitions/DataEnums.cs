@@ -297,6 +297,16 @@ namespace F1.Data
     }
 
     /// <summary>
+    /// A mercenary's gender (stage 57, the user's "이름의 성별로"): a name of the data has one, and a candidate's figure is drawn among its job's
+    /// figures of that gender (Docs/Design/10 §2). A job without a figure of the gender shows its own.
+    /// </summary>
+    public enum Gender
+    {
+        Male,
+        Female,
+    }
+
+    /// <summary>
     /// Where a mercenary's trait comes from (Slice D stage 37, Docs/Design/05_Mercenary_Growth.md §6): it was born with it (a candidate of the
     /// stagecoach draws it, the starting roster's are in the data) or an expedition left it (stage 38). The job's trait is the job's passive.
     /// </summary>
@@ -318,6 +328,9 @@ namespace F1.Data
         DeathsDoor,
         Affliction,
         Virtue,
+
+        /// <summary>A member of the survivor's party died on the expedition (stage 57).</summary>
+        AllyDied,
     }
 
     /// <summary>Whether a trait is a strength or a weakness (05 §6). A strength may carry a small drawback; the data says which it is.</summary>

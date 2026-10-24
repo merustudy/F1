@@ -98,11 +98,18 @@ namespace F1.Gameplay
 
             // Stage 48 (Docs/Design/04_Lobby_100Day_Economy.md §3): a state may tire (abusive) or ease (courageous) every ally as the battle starts, in party
             // order, after every member's fatigue was judged. The allies' endurance softens a gain like any other.
+            // Stage 57 (Docs/Design/39 §3·§4-2): so may a member's traits (bad temper, valiant), right after its state.
             foreach (BattleUnit unit in _party.ToArray())
             {
                 if (unit.Alive && unit.State != null && unit.State.AllyFatigueAtStart != 0)
                 {
                     ChangeAlliesFatigue(unit, unit.State.AllyFatigueAtStart, unit.State.Id, unit.Ref);
+                }
+
+                int byTraits = unit.Setup.Traits?.AllyFatigueAtStart ?? 0;
+                if (unit.Alive && byTraits != 0)
+                {
+                    ChangeAlliesFatigue(unit, byTraits, BattleEvent.FatigueTrait, unit.Ref);
                 }
             }
 
@@ -567,9 +574,11 @@ namespace F1.Gameplay
                             // Roll, stars, critical hit, then the owner's stat, then (stage 48) its fatigue state's percent on the other side, then the
                             // weapon-power passive (Docs/Design/02_Combat_System.md §4), then what the target's vulnerable stacks add (stage 45).
                             dealt = StatRules.Scale(dealt, statPercent);
-                            if (foe && owner.State != null && owner.State.DamagePercent != 0)
+                            // Stage 57: the owner's traits' damage percent counts with its state's (Docs/Design/39 §5).
+                            int dealtPercent = (owner.State?.DamagePercent ?? 0) + (owner.Setup.Traits?.DamagePercent ?? 0);
+                            if (foe && dealtPercent != 0)
                             {
-                                dealt = FatigueRules.Scaled(dealt, owner.State.DamagePercent);
+                                dealt = FatigueRules.Scaled(dealt, dealtPercent);
                             }
                             if (weaponDamage)
                             {
@@ -1131,12 +1140,13 @@ namespace F1.Gameplay
             }
         }
 
-        /// <summary>Heals the target, by less or more under a fatigue state (hopeless takes half, stalwart half again).</summary>
+        /// <summary>Heals the target, by less or more under a fatigue state (hopeless takes half, stalwart half again) and by its traits (stage 57: resigned, unbreakable).</summary>
         void ApplyHeal(BattleUnit target, int amount, UnitRef source, string cause)
         {
-            if (target.State != null)
+            int takenPercent = (target.State?.HealTakenPercent ?? 0) + (target.Setup.Traits?.HealTakenPercent ?? 0);
+            if (takenPercent != 0)
             {
-                amount = FatigueRules.Scaled(amount, target.State.HealTakenPercent);
+                amount = FatigueRules.Scaled(amount, takenPercent);
             }
 
             int before = target.Hp;

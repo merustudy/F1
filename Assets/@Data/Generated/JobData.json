@@ -41,7 +41,9 @@
       "PassiveName": {
         "en-US": "Weak Spot",
         "ko-KR": "급소"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "mage",
@@ -86,7 +88,9 @@
       "PassiveName": {
         "en-US": "Rear Casting",
         "ko-KR": "후방 영창"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "minstrel",
@@ -128,7 +132,9 @@
       "PassiveName": {
         "en-US": "Overture",
         "ko-KR": "서곡"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "occultist",
@@ -170,7 +176,9 @@
       "PassiveName": {
         "en-US": "Dark Veil",
         "ko-KR": "어둠의 장막"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "priest",
@@ -212,7 +220,9 @@
       "PassiveName": {
         "en-US": "Blessing",
         "ko-KR": "축복"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "rogue",
@@ -254,7 +264,9 @@
       "PassiveName": {
         "en-US": "Shadowstep",
         "ko-KR": "그림자 걸음"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "viking",
@@ -296,7 +308,9 @@
       "PassiveName": {
         "en-US": "Frenzy",
         "ko-KR": "광기"
-      }
+      },
+      "FiguresMale": [],
+      "FiguresFemale": []
     },
     {
       "Id": "warrior",
@@ -341,7 +355,14 @@
       "PassiveName": {
         "en-US": "Vanguard",
         "ko-KR": "선봉"
-      }
+      },
+      "FiguresMale": [
+        "unit/job/knight",
+        "unit/job/spellblade"
+      ],
+      "FiguresFemale": [
+        "unit/job/swordswoman"
+      ]
     }
   ]
 }

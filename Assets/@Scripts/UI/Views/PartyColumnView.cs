@@ -125,7 +125,9 @@ namespace F1.UI
         {
             Member = memberIndex;
             _figure.SetActive(true);
-            _figureView.Show(art.OfJob(member.JobId));
+            // Stage 57: the member in its build where drawn for its job, at the build's scale (a giant stands larger, as in battle).
+            _figureView.Show(art.OfMercenary(member.JobId, member.Figure, member.Traits));
+            _figureView.SetScale(art.ScaleOfMercenary(member.JobId, member.Figure, member.Traits));
             _info.SetActive(true);
             _hp.text = UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(hp.Hp), UiText.Hp(hp.MaxHp));
             _hpBar.Set(hp.Hp, hp.MaxHp);

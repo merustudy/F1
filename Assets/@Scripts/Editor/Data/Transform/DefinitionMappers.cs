@@ -68,7 +68,7 @@ namespace F1.Editor.Data
                 "WeaponItemId", "RecommendedRow",
                 "PassiveTrigger", "PassiveCondition", "PassiveRows", "PassiveEffect", "PassiveTarget", "PassiveMagnitude",
                 RowMapping.Figure, "Str", "Dex", "Con", "Int", "Wis", "End",
-                "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthWis", "GrowthEnd")
+                "GrowthStr", "GrowthDex", "GrowthCon", "GrowthInt", "GrowthWis", "GrowthEnd", FiguresMale, FiguresFemale)
                 .Concat(CsvRow.LocalizedHeaders(PassiveText))
                 .Concat(CsvRow.LocalizedHeaders(PassiveName)));
 
@@ -84,9 +84,14 @@ namespace F1.Editor.Data
                 new StatBlock(row.Int("Str"), row.Int("Dex"), row.Int("Con"), row.Int("Int"), row.Int("Wis"), row.Int("End")),
                 // The growth grades (Slice D stage 34), every one required; JobData checks 0..200.
                 new StatBlock(row.Int("GrowthStr"), row.Int("GrowthDex"), row.Int("GrowthCon"), row.Int("GrowthInt"), row.Int("GrowthWis"), row.Int("GrowthEnd")),
-                CsvRow.LocalizedHeaders(PassiveName).All(row.IsEmpty) ? null : row.Localized(PassiveName)));
+                CsvRow.LocalizedHeaders(PassiveName).All(row.IsEmpty) ? null : row.Localized(PassiveName),
+                // Stage 57: the figures by gender, "+"-joined addresses; empty for the job's own.
+                row.TextList(FiguresMale),
+                row.TextList(FiguresFemale)));
         }
 
+        const string FiguresMale = "FiguresMale";
+        const string FiguresFemale = "FiguresFemale";
         const string PassiveText = "PassiveText";
         const string PassiveName = "PassiveName";
 
@@ -405,17 +410,21 @@ namespace F1.Editor.Data
     {
         public static List<MercenaryData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers("JobId", "Starting", "Traits"));
+            // Stage 57: every name has a gender; a starting mercenary may name its figure.
+            table.RequireHeaders(RowMapping.Headers("JobId", "Starting", "Traits", "Gender", RowMapping.Figure));
             return RowMapping.MapRows(table, errors, row => new MercenaryData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
                 row.OptionalId("JobId"),
                 row.Bool("Starting"),
-                row.IdList("Traits")));
+                row.IdList("Traits"),
+                row.Enum<Gender>("Gender"),
+                RowMapping.ReadArt(row, RowMapping.Figure)));
         }
     }
 
-    /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none, an empty Source (stage 38) is an innate trait's.</summary>
+    /// <summary>TraitData.csv (Slice D stage 37): an empty effect cell is 0, an empty Excludes is none, an empty Source (stage 38) is an innate trait's.
+    /// Stage 57: an empty Build or Rare is false, an empty Figure or SourceState is none, an empty FigureScale is 100, an empty stat or effect cell is 0.</summary>
     /// <summary>The story's scenes (Slice D stage 55): no name; three lines, each localized, filled from the first.</summary>
     internal static class StorySceneMapper
     {
@@ -512,11 +521,15 @@ namespace F1.Editor.Data
 
     internal static class TraitMapper
     {
-        static readonly string[] Effects = { "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent", "CritDamagePercent" };
+        static readonly string[] Effects =
+        {
+            "HitPercent", "DodgePercent", "CritPercent", "DogDeathPercent", "VirtuePercent", "FatiguePercent", "MaxHpPercent", "CritDamagePercent",
+            "Str", "Dex", "Con", "Int", "Wis", "End", "GrowthPercent", "DamagePercent", "HealTakenPercent", "AllyFatigueAtStart",
+        };
 
         public static List<TraitData> Map(CsvTable table, List<string> errors)
         {
-            table.RequireHeaders(RowMapping.Headers(new[] { "Kind", "Polarity", "Source", "Weight", "Excludes" }.Concat(Effects).ToArray()));
+            table.RequireHeaders(RowMapping.Headers(new[] { "Kind", "Polarity", "Source", "Weight", "Excludes", "Build", "Rare", "Figure", "FigureScale", "SourceState" }.Concat(Effects).ToArray()));
             return RowMapping.MapRows(table, errors, row => new TraitData(
                 row.Id(RowMapping.Id),
                 row.Localized(RowMapping.Name),
@@ -532,7 +545,22 @@ namespace F1.Editor.Data
                 row.OptionalInt("VirtuePercent", 0),
                 row.OptionalInt("FatiguePercent", 0),
                 row.OptionalInt("MaxHpPercent", 0),
-                row.OptionalInt("CritDamagePercent", 0)));
+                row.OptionalInt("CritDamagePercent", 0),
+                row.OptionalBool("Build", false),
+                row.OptionalBool("Rare", false),
+                row.OptionalId("Figure"),
+                row.OptionalId("SourceState"),
+                row.OptionalInt("Str", 0),
+                row.OptionalInt("Dex", 0),
+                row.OptionalInt("Con", 0),
+                row.OptionalInt("Int", 0),
+                row.OptionalInt("Wis", 0),
+                row.OptionalInt("End", 0),
+                row.OptionalInt("GrowthPercent", 0),
+                row.OptionalInt("DamagePercent", 0),
+                row.OptionalInt("HealTakenPercent", 0),
+                row.OptionalInt("AllyFatigueAtStart", 0),
+                row.OptionalInt("FigureScale", 100)));
         }
     }
 }

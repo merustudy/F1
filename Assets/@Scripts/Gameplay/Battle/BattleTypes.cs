@@ -360,6 +360,9 @@ namespace F1.Gameplay
         /// <summary>Stage 48: a virtue that reached the maximum ended, and the fatigue came down to VirtueFatigue instead of the exhaustion.</summary>
         public const string FatigueVirtueEnd = "virtue_end";
 
+        /// <summary>Stage 57: an ally's traits tired or eased the unit as the battle started (the source is that ally).</summary>
+        public const string FatigueTrait = "trait";
+
         public BattleEvent(int timeMs, BattleEventKind kind, UnitRef source, UnitRef target, string id, int a, int b, int c)
         {
             TimeMs = timeMs;

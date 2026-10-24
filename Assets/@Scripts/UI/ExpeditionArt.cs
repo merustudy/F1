@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using F1.Core;
 using F1.Data;
+using F1.Gameplay;
 using UnityEngine;
 
 namespace F1.UI
@@ -59,12 +61,82 @@ namespace F1.UI
         {
             foreach (JobData job in data.Jobs.Ordered)
             {
-                if (job.Figure != null)
+                foreach (string figure in FiguresOf(job))
                 {
-                    yield return job.BrokenPose;
-                    yield return job.ResolutePose;
+                    yield return ArtAddress.PoseOf(figure, ArtAddress.Broken);
+                    yield return ArtAddress.PoseOf(figure, ArtAddress.Resolute);
                 }
             }
+
+            // Stage 57 (Docs/Design/39 §2-4): a job drawn in a build, with its poses, where that build is drawn for the job.
+            foreach (string address in BuildAddresses(data))
+            {
+                yield return address;
+            }
+        }
+
+        /// <summary>A job's figures (stage 57): its own, then those of each gender, each once.</summary>
+        public static IEnumerable<string> FiguresOf(JobData job)
+        {
+            var seen = new HashSet<string>();
+            foreach (string figure in new[] { job.Figure }.Concat(job.FiguresMale).Concat(job.FiguresFemale))
+            {
+                if (figure != null && seen.Add(figure))
+                {
+                    yield return figure;
+                }
+            }
+        }
+
+        /// <summary>The figure of every job's figure in every build that names a variant, each followed by its four poses (stage 57). Drawn figure by figure: loaded where registered.</summary>
+        public static IEnumerable<string> BuildAddresses(StaticData data)
+        {
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                foreach (string baseFigure in FiguresOf(job))
+                {
+                    foreach (TraitData build in data.Traits.Ordered)
+                    {
+                        string figure = build.Build ? ArtAddress.BuildFigure(baseFigure, build.Figure) : null;
+                        if (figure != null)
+                        {
+                            yield return figure;
+                            yield return ArtAddress.PoseOf(figure, ArtAddress.Attack);
+                            yield return ArtAddress.PoseOf(figure, ArtAddress.Hit);
+                            yield return ArtAddress.PoseOf(figure, ArtAddress.Broken);
+                            yield return ArtAddress.PoseOf(figure, ArtAddress.Resolute);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// The figure a mercenary stands in before its build (stage 57): its own figure where it is one of its job's and drawn, its job's otherwise.
+        /// </summary>
+        public static string BaseFigureOf(StaticData data, string jobId, string figure, System.Func<string, bool> drawn)
+        {
+            JobData job = data.Jobs.Get(jobId);
+            return figure != null && job.HasFigure(figure) && drawn(figure) ? figure : job.Figure;
+        }
+
+        /// <summary>
+        /// The figure a mercenary is shown in (stage 57): its figure (or its job's) drawn in its build where that is drawn, that figure otherwise. Static,
+        /// so a screen that loads the figures itself (the expedition's party) asks the same.
+        /// </summary>
+        public static string FigureAddressOf(StaticData data, string jobId, string figure, IReadOnlyList<string> traitIds, System.Func<string, bool> drawn)
+        {
+            string baseFigure = BaseFigureOf(data, jobId, figure, drawn);
+            TraitData build = TraitRules.BuildOf(data, traitIds);
+            string variant = build == null ? null : ArtAddress.BuildFigure(baseFigure, build.Figure);
+            return variant != null && drawn(variant) ? variant : baseFigure;
+        }
+
+        /// <summary>How large a mercenary's figure stands (stage 57): its build's FigureScale where its build is drawn for its figure, 1 otherwise.</summary>
+        public static float ScaleOf(StaticData data, string jobId, string figure, IReadOnlyList<string> traitIds, System.Func<string, bool> drawn)
+        {
+            TraitData build = TraitRules.BuildOf(data, traitIds);
+            return build != null && FigureAddressOf(data, jobId, figure, traitIds, drawn) != BaseFigureOf(data, jobId, figure, drawn) ? build.FigureScale / 100f : 1f;
         }
 
         /// <summary>The address of every picture the data names: the jobs and the enemies (each figure with its two poses), then the items (a unique item's icon with its glow), then the potions, each in id order.</summary>
@@ -72,11 +144,12 @@ namespace F1.UI
         {
             foreach (JobData job in data.Jobs.Ordered)
             {
-                if (job.Figure != null)
+                // Stage 57: a job's figures by gender as well, each with its attack and hit poses.
+                foreach (string figure in FiguresOf(job))
                 {
-                    yield return job.Figure;
-                    yield return job.AttackPose;
-                    yield return job.HitPose;
+                    yield return figure;
+                    yield return ArtAddress.PoseOf(figure, ArtAddress.Attack);
+                    yield return ArtAddress.PoseOf(figure, ArtAddress.Hit);
                 }
             }
 
@@ -131,6 +204,48 @@ namespace F1.UI
         public Sprite OfJob(string jobId)
         {
             return Of(_data.Jobs.Get(jobId).Figure);
+        }
+
+        /// <summary>The figure of a mercenary (stage 57): its job's in its build where drawn, its job's otherwise; null when the job has none.</summary>
+        public Sprite OfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return Of(MercenaryFigure(jobId, figure, traitIds));
+        }
+
+        /// <summary>How large a mercenary's figure stands (stage 57): its build's FigureScale where its build is drawn, 1 otherwise.</summary>
+        public float ScaleOfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return ScaleOf(_data, jobId, figure, traitIds, _sprites.ContainsKey);
+        }
+
+        /// <summary>A mercenary's attack pose: its figure's (stage 57: its build's where drawn). Null when the job has no figure.</summary>
+        public Sprite AttackPoseOfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return Of(ArtAddress.PoseOf(MercenaryFigure(jobId, figure, traitIds), ArtAddress.Attack));
+        }
+
+        /// <summary>A mercenary's hit pose, as <see cref="AttackPoseOfMercenary"/>.</summary>
+        public Sprite HitPoseOfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return Of(ArtAddress.PoseOf(MercenaryFigure(jobId, figure, traitIds), ArtAddress.Hit));
+        }
+
+        /// <summary>A mercenary's breakdown pose, as <see cref="BrokenPoseOfJob"/> for its figure (stage 57: its build's where drawn).</summary>
+        public Sprite BrokenPoseOfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return OfOptional(ArtAddress.PoseOf(MercenaryFigure(jobId, figure, traitIds), ArtAddress.Broken));
+        }
+
+        /// <summary>A mercenary's virtue pose, as <see cref="BrokenPoseOfMercenary"/>.</summary>
+        public Sprite ResolutePoseOfMercenary(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            return OfOptional(ArtAddress.PoseOf(MercenaryFigure(jobId, figure, traitIds), ArtAddress.Resolute));
+        }
+
+        string MercenaryFigure(string jobId, string figure, IReadOnlyList<string> traitIds)
+        {
+            // A figure (and a build drawn for it) is loaded with its attack and hit poses (ArtSetup registers them with the figure).
+            return FigureAddressOf(_data, jobId, figure, traitIds, _sprites.ContainsKey);
         }
 
 

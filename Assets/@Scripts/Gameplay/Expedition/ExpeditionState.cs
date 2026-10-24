@@ -97,6 +97,9 @@ namespace F1.Gameplay
 
         /// <summary>Whether the member was at death's door in a battle of this expedition (Slice D stage 38): coming home alive from it may leave a trait.</summary>
         public bool DeathsDoor;
+
+        /// <summary>The figure the mercenary is shown in (stage 57), or null for its job's own. Only the screens read it.</summary>
+        public string Figure;
     }
 
     /// <summary>
@@ -120,10 +123,12 @@ namespace F1.Gameplay
     {
         /// <param name="stats">The mercenary's stats (Slice D stage 32); null for the job's base values.</param>
         /// <param name="traits">The mercenary's traits (Slice D stage 37); null for none.</param>
+        /// <param name="figure">The mercenary's figure (stage 57); null for its job's own.</param>
         public PartyMember(string mercenaryId, string jobId, int row, int fatigue = 0, string afflictionId = null, int level = LevelRules.FirstLevel, StatBlock stats = null,
-            IReadOnlyList<string> traits = null)
+            IReadOnlyList<string> traits = null, string figure = null)
         {
             Traits = traits ?? new List<string>();
+            Figure = figure;
             MercenaryId = mercenaryId;
             JobId = jobId;
             Row = row;
@@ -151,6 +156,9 @@ namespace F1.Gameplay
 
         /// <summary>The mercenary's traits (Slice D stage 37); empty for none.</summary>
         public IReadOnlyList<string> Traits { get; }
+
+        /// <summary>The mercenary's figure (stage 57), or null for its job's own.</summary>
+        public string Figure { get; }
     }
 
     /// <summary>

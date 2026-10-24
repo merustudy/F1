@@ -159,11 +159,13 @@ namespace F1.Data
             new KeySpec(nameof(RecruitTraitWeight0), 0, 1000),
             new KeySpec(nameof(RecruitTraitWeight1), 0, 1000),
             new KeySpec(nameof(RecruitTraitWeight2), 0, 1000),
+            new KeySpec(nameof(BuildWeightNone), 0, 1000),
             new KeySpec(nameof(TraitChanceClearPercent), 0, 100),
             new KeySpec(nameof(TraitChanceRetreatPercent), 0, 100),
             new KeySpec(nameof(TraitChanceDeathsDoorPercent), 0, 100),
             new KeySpec(nameof(TraitChanceAfflictionPercent), 0, 100),
             new KeySpec(nameof(TraitChanceVirtuePercent), 0, 100),
+            new KeySpec(nameof(TraitChanceAllyDiedPercent), 0, 100),
             // The seven states of stage 45 (Docs/Design/02_Combat_System.md §5): what one stack does, in percent or percent points.
             new KeySpec(nameof(FreezePercentPerStack), 0, 100),
             new KeySpec(nameof(BlindPercentPerStack), 0, 100),
@@ -552,6 +554,9 @@ namespace F1.Data
         public int RecruitTraitWeight1 => _values[nameof(RecruitTraitWeight1)];
         public int RecruitTraitWeight2 => _values[nameof(RecruitTraitWeight2)];
 
+        /// <summary>The weight of "no build" in a candidate's build slot (stage 57, Docs/Design/39 §2-1), beside each build's own Weight.</summary>
+        public int BuildWeightNone => _values[nameof(BuildWeightNone)];
+
         /// <summary>
         /// The chance, in percent, that a survivor acquires a trait of each source at the return settlement (Slice D stage 38, Docs/Design/05 §6):
         /// a cleared expedition, a retreat, a return from death's door, coming home in an affliction, a virtue. Rolled only when a trait of the
@@ -562,6 +567,9 @@ namespace F1.Data
         public int TraitChanceDeathsDoorPercent => _values[nameof(TraitChanceDeathsDoorPercent)];
         public int TraitChanceAfflictionPercent => _values[nameof(TraitChanceAfflictionPercent)];
         public int TraitChanceVirtuePercent => _values[nameof(TraitChanceVirtuePercent)];
+
+        /// <summary>The chance, in percent, that a survivor of an expedition on which a member of its party died acquires a trait of that source (stage 57).</summary>
+        public int TraitChanceAllyDiedPercent => _values[nameof(TraitChanceAllyDiedPercent)];
 
         /// <summary>The seven states of stage 45, per stack: freeze slows cooldowns by this percent, haste quickens them; blind takes these points off the hit, aim adds them; keen adds them to the critical chance, fury to its multiplier; vulnerable adds this percent to the damage items deal the unit.</summary>
         public int FreezePercentPerStack => _values[nameof(FreezePercentPerStack)];

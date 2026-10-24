@@ -128,6 +128,19 @@ namespace F1.Tests
             TraitData sturdy = data.Traits.Get("sturdy");
             Assert.AreEqual((5, (string)null, -5, 3, -10, 8), (sturdy.Weight, sturdy.Excludes, sturdy.DogDeathPercent, sturdy.VirtuePercent, sturdy.FatiguePercent, sturdy.MaxHpPercent));
             Assert.AreEqual("둔함", data.Traits.Get("dull").Name.Resolve("ko-KR"));
+            // Stage 57: a build drawn in its figure that shifts stats, a virtue's mark with the new effects; empty cells are false, none, 100 and 0.
+            TraitData huge = data.Traits.Get("huge");
+            Assert.AreEqual((true, true, "huge", 130, 2, -1, 0), (huge.Build, huge.Rare, huge.Figure, huge.FigureScale, huge.Str, huge.Dex, huge.Con));
+            TraitData calm = data.Traits.Get("calm");
+            Assert.AreEqual(((TraitSource?)TraitSource.Virtue, "focused", 10, 5, -10, -1), (calm.Source, calm.SourceState, calm.GrowthPercent, calm.DamagePercent, calm.HealTakenPercent, calm.AllyFatigueAtStart));
+            Assert.AreEqual((false, false, (string)null, 100, (string)null), (keen.Build, keen.Rare, keen.Figure, keen.FigureScale, keen.SourceState));
+            CollectionAssert.AreEqual(new[] { "huge" }, data.BuildTraits.Select(t => t.Id).ToList());
+            // Stage 57: a job's figures by gender ("+"-joined addresses, empty for none), a name's gender and a starting mercenary's figure.
+            CollectionAssert.AreEqual(new[] { "unit/job/knight", "unit/job/blade" }, data.Jobs.Get("knight").FiguresMale);
+            CollectionAssert.AreEqual(new[] { "unit/job/dame" }, data.Jobs.Get("knight").FiguresFemale);
+            Assert.IsEmpty(data.Jobs.Get("bishop").FiguresMale);
+            Assert.AreEqual((Gender.Male, "unit/job/blade"), (data.Mercenaries.Get("rowan").Gender, data.Mercenaries.Get("rowan").Figure));
+            Assert.AreEqual((Gender.Female, (string)null), (data.Mercenaries.Get("ella").Gender, data.Mercenaries.Get("ella").Figure));
             CollectionAssert.AreEqual(new[] { "keen", "sturdy" }, data.Mercenaries.Get("rowan").Traits);
             Assert.AreEqual(0, data.Mercenaries.Get("teo").Traits.Count);
             Assert.AreEqual("unit/job/knight", knight.Figure);

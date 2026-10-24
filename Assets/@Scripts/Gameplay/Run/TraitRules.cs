@@ -12,9 +12,14 @@ namespace F1.Gameplay
     {
         public static readonly TraitBonus None = new TraitBonus(0, 0, 0, 0, 0, 0, 0);
 
-        public TraitBonus(int hitPercent, int dodgePercent, int critPercent, int dogDeathPercent, int virtuePercent, int fatiguePercent, int maxHpPercent, int critDamagePercent = 0)
+        public TraitBonus(int hitPercent, int dodgePercent, int critPercent, int dogDeathPercent, int virtuePercent, int fatiguePercent, int maxHpPercent, int critDamagePercent = 0,
+            int growthPercent = 0, int damagePercent = 0, int healTakenPercent = 0, int allyFatigueAtStart = 0)
         {
             CritDamagePercent = critDamagePercent;
+            GrowthPercent = growthPercent;
+            DamagePercent = damagePercent;
+            HealTakenPercent = healTakenPercent;
+            AllyFatigueAtStart = allyFatigueAtStart;
             HitPercent = hitPercent;
             DodgePercent = dodgePercent;
             CritPercent = critPercent;
@@ -34,6 +39,18 @@ namespace F1.Gameplay
 
         /// <summary>Percent points the traits add to the physical critical multiplier (2026-10-20 스탯 개정).</summary>
         public int CritDamagePercent { get; }
+
+        /// <summary>Percent the traits add to every growth grade at a level-up (stage 57).</summary>
+        public int GrowthPercent { get; }
+
+        /// <summary>Percent the traits add to the damage the mercenary deals (stage 57), beside a breakdown's or a virtue's.</summary>
+        public int DamagePercent { get; }
+
+        /// <summary>Percent the traits add to the healing the mercenary takes (stage 57), beside a breakdown's or a virtue's.</summary>
+        public int HealTakenPercent { get; }
+
+        /// <summary>The fatigue each ally takes at the start of a battle from the mercenary's traits (stage 57), beside a breakdown's or a virtue's.</summary>
+        public int AllyFatigueAtStart { get; }
     }
 
     /// <summary>
@@ -54,7 +71,7 @@ namespace F1.Gameplay
                 return TraitBonus.None;
             }
 
-            int hit = 0, dodge = 0, crit = 0, dogDeath = 0, virtue = 0, fatigue = 0, maxHp = 0, critDamage = 0;
+            int hit = 0, dodge = 0, crit = 0, dogDeath = 0, virtue = 0, fatigue = 0, maxHp = 0, critDamage = 0, growth = 0, damage = 0, healTaken = 0, allyFatigue = 0;
             foreach (string id in traitIds)
             {
                 TraitData trait = data.Traits.Get(id);
@@ -66,9 +83,13 @@ namespace F1.Gameplay
                 fatigue += trait.FatiguePercent;
                 maxHp += trait.MaxHpPercent;
                 critDamage += trait.CritDamagePercent;
+                growth += trait.GrowthPercent;
+                damage += trait.DamagePercent;
+                healTaken += trait.HealTakenPercent;
+                allyFatigue += trait.AllyFatigueAtStart;
             }
 
-            return new TraitBonus(hit, dodge, crit, dogDeath, virtue, fatigue, maxHp, critDamage);
+            return new TraitBonus(hit, dodge, crit, dogDeath, virtue, fatigue, maxHp, critDamage, growth, damage, healTaken, allyFatigue);
         }
 
         /// <summary>Whether a mercenary holding these traits can take another: it does not hold it yet and none of them clashes with it.</summary>
@@ -86,13 +107,115 @@ namespace F1.Gameplay
         }
 
         /// <summary>
+        /// The build a candidate is born with (stage 57, Docs/Design/39 §2-1), on the stagecoach's stream after its stats and before its other
+        /// innate traits: one draw among "none" (BalanceData.BuildWeightNone) and the builds by their Weight, in id order. Null for none. Nothing is
+        /// rolled when the data has no build, so data without builds draws as before.
+        /// </summary>
+        public static string DrawBuild(StaticData data, Pcg32 rng)
+        {
+            List<TraitData> builds = data.BuildTraits;
+            int total = data.Balance.BuildWeightNone;
+            foreach (TraitData build in builds)
+            {
+                total += build.Weight;
+            }
+
+            if (builds.Count == 0 || total == 0)
+            {
+                return null;
+            }
+
+            int pick = rng.NextInt(total) - data.Balance.BuildWeightNone;
+            foreach (TraitData build in builds)
+            {
+                if (pick < 0)
+                {
+                    break;
+                }
+
+                if (pick < build.Weight)
+                {
+                    return build.Id;
+                }
+
+                pick -= build.Weight;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// The stats with what the traits shift added (stage 57), each kept within StatMin..StatMax. A trait's stat shift is added once, when
+        /// the mercenary gets the trait (a candidate's build at the stagecoach), so the stats a mercenary keeps are the ones every formula reads.
+        /// </summary>
+        public static StatBlock Shifted(StaticData data, StatBlock stats, IReadOnlyList<string> traitIds)
+        {
+            if (traitIds == null)
+            {
+                return stats;
+            }
+
+            foreach (string id in traitIds)
+            {
+                TraitData trait = data.Traits.Get(id);
+                if (!trait.ShiftsStats)
+                {
+                    continue;
+                }
+
+                foreach (Stat stat in StatBlock.All)
+                {
+                    int value = stats[stat] + ShiftOf(trait, stat);
+                    stats = stats.With(stat, value < data.Balance.StatMin ? data.Balance.StatMin : value > data.Balance.StatMax ? data.Balance.StatMax : value);
+                }
+            }
+
+            return stats;
+        }
+
+        /// <summary>What a trait adds to one stat (stage 57).</summary>
+        public static int ShiftOf(TraitData trait, Stat stat)
+        {
+            switch (stat)
+            {
+                case Stat.Str: return trait.Str;
+                case Stat.Dex: return trait.Dex;
+                case Stat.Con: return trait.Con;
+                case Stat.Int: return trait.Int;
+                case Stat.Wis: return trait.Wis;
+                default: return trait.End;
+            }
+        }
+
+        /// <summary>The build among a mercenary's traits (stage 57), or null.</summary>
+        public static TraitData BuildOf(StaticData data, IReadOnlyList<string> traitIds)
+        {
+            if (traitIds == null)
+            {
+                return null;
+            }
+
+            foreach (string id in traitIds)
+            {
+                TraitData trait = data.Traits.Get(id);
+                if (trait.Build)
+                {
+                    return trait;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// The innate traits a candidate is born with (05 §6, 04 §6), on the stagecoach's stream after its stats: how many by the weights
         /// RecruitTraitWeight0..2, then each by its Weight among the innate traits it can still take, in id order. Nothing is rolled when no trait
         /// can be drawn or no count above none has a weight, so data without traits draws as before. The order is the draw's.
         /// </summary>
-        public static List<string> DrawInnate(StaticData data, Pcg32 rng)
+        public static List<string> DrawInnate(StaticData data, Pcg32 rng, IReadOnlyList<string> held = null)
         {
             var drawn = new List<string>();
+            var holding = new List<string>(held ?? new List<string>());
             BalanceData balance = data.Balance;
             List<TraitData> pool = data.InnateTraits;
             if (pool.Count == 0 || balance.RecruitTraitWeight1 + balance.RecruitTraitWeight2 == 0)
@@ -108,7 +231,7 @@ namespace F1.Gameplay
                 int total = 0;
                 foreach (TraitData trait in pool)
                 {
-                    if (CanTake(data, drawn, trait))
+                    if (CanTake(data, holding, trait))
                     {
                         open.Add(trait);
                         total += trait.Weight;
@@ -126,6 +249,7 @@ namespace F1.Gameplay
                     if (pick < trait.Weight)
                     {
                         drawn.Add(trait.Id);
+                        holding.Add(trait.Id);
                         break;
                     }
 
@@ -139,9 +263,9 @@ namespace F1.Gameplay
         /// <summary>
         /// The sources of acquired traits a survivor of an ended expedition meets at the settlement (stage 38, 05 §6), in the order they are rolled:
         /// the clear or the retreat, death's door if it went there, then the affliction it came home in or the virtue it had (a virtue lasts to the
-        /// end of the expedition, so one state at most). The dead meet none.
+        /// end of the expedition, so one state at most), then (stage 57) the death of a member of its party on the expedition. The dead meet none.
         /// </summary>
-        public static List<TraitSource> SourcesOf(StaticData data, ExpeditionResult result, ExpeditionMember member)
+        public static List<TraitSource> SourcesOf(StaticData data, ExpeditionResult result, ExpeditionMember member, bool allyDied = false)
         {
             var sources = new List<TraitSource>();
             if (!member.Alive)
@@ -168,6 +292,11 @@ namespace F1.Gameplay
                 sources.Add(data.FatigueStates.Get(member.StateId).Kind == FatigueStateKind.Affliction ? TraitSource.Affliction : TraitSource.Virtue);
             }
 
+            if (allyDied)
+            {
+                sources.Add(TraitSource.AllyDied);
+            }
+
             return sources;
         }
 
@@ -180,6 +309,7 @@ namespace F1.Gameplay
                 case TraitSource.Retreat: return balance.TraitChanceRetreatPercent;
                 case TraitSource.DeathsDoor: return balance.TraitChanceDeathsDoorPercent;
                 case TraitSource.Affliction: return balance.TraitChanceAfflictionPercent;
+                case TraitSource.AllyDied: return balance.TraitChanceAllyDiedPercent;
                 default: return balance.TraitChanceVirtuePercent;
             }
         }
@@ -198,7 +328,7 @@ namespace F1.Gameplay
         /// source it can still take (beside those it holds and those this draw gave it), one roll of the source's chance and, when it hits, one
         /// of them by Weight in id order. A source with none to take or a chance of 0 rolls nothing. Each source gives one at most.
         /// </summary>
-        public static List<string> DrawAcquired(StaticData data, IReadOnlyList<string> held, IReadOnlyList<TraitSource> sources, Pcg32 rng)
+        public static List<string> DrawAcquired(StaticData data, IReadOnlyList<string> held, IReadOnlyList<TraitSource> sources, Pcg32 rng, string stateId = null)
         {
             var drawn = new List<string>();
             var holding = new List<string>(held);
@@ -208,7 +338,7 @@ namespace F1.Gameplay
                 int total = 0;
                 foreach (TraitData trait in data.Traits.Ordered)
                 {
-                    if (trait.Kind == TraitKind.Acquired && trait.Source == source && trait.Weight > 0 && CanTake(data, holding, trait))
+                    if (trait.Kind == TraitKind.Acquired && trait.Source == source && trait.Weight > 0 && Marks(trait, stateId) && CanTake(data, holding, trait))
                     {
                         open.Add(trait);
                         total += trait.Weight;
@@ -236,6 +366,12 @@ namespace F1.Gameplay
             }
 
             return drawn;
+        }
+
+        /// <summary>Whether a trait of a breakdown or a virtue can come from the state the survivor had (stage 57): its SourceState is that state or none.</summary>
+        static bool Marks(TraitData trait, string stateId)
+        {
+            return trait.SourceState == null || trait.SourceState == stateId;
         }
     }
 }

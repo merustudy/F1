@@ -44,6 +44,45 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Stage57_ABuildIsInnate_OnlyABuildNamesAFigure_AMarkNamesAStateOfItsSourcesKind_AndTwoBuildsClash()
+        {
+            LocalizedText t = TestData.Text("x");
+            Assert.Throws<DataException>(() => new TraitData("cut", t, TraitKind.Acquired, TraitPolarity.Negative, TraitSource.DeathsDoor, 10, null, 0, 0, 0, 0, 0, 0, -5, build: true),
+                "A build is innate.");
+            Assert.Throws<DataException>(() => new TraitData("odd", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 1, 0, 0, 0, 0, 0, 0, figure: "odd"), "Only a build names a figure.");
+            Assert.Throws<DataException>(() => new TraitData("big", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 0, 0, 0, 0, 0, 0, 0, build: true, str: 1, figureScale: 130),
+                "Only a build drawn in a figure scales it.");
+            Assert.Throws<DataException>(() => new TraitData("big", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 0, 0, 0, 0, 0, 0, 0, build: true, figure: "big", str: 1, figureScale: 301));
+            Assert.Throws<DataException>(() => new TraitData("won", t, TraitKind.Acquired, TraitPolarity.Positive, TraitSource.Clear, 10, null, 1, 0, 0, 0, 0, 0, 0, sourceState: "focused"),
+                "Only a mark of a breakdown or a virtue names a state.");
+            Assert.Throws<DataException>(() => new TraitData("ox", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 0, 0, 0, 0, 0, 0, 0, str: 11), "A stat moves 10 at most.");
+            Assert.Throws<DataException>(() => new TraitData("nag", t, TraitKind.Innate, TraitPolarity.Negative, null, 10, null, 0, 0, 0, 0, 0, 0, 0, allyFatigueAtStart: 11));
+            var bulk = new TraitData("bulk", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 0, 0, 0, 0, 0, 0, 0, build: true, con: 1);
+            var slim = new TraitData("slim", t, TraitKind.Innate, TraitPolarity.Positive, null, 10, null, 0, 0, 0, 0, 0, 0, 0, build: true, dex: 1);
+            Assert.IsTrue(bulk.Clashes(slim) && slim.Clashes(bulk) && !bulk.Clashes(bulk), "One build at most.");
+
+            StringAssert.Contains("SourceState: 'ghost' does not exist", ProblemOf(parts => parts.Traits = new List<TraitData>
+            {
+                new TraitData("mark", t, TraitKind.Acquired, TraitPolarity.Negative, TraitSource.Affliction, 10, null, -1, 0, 0, 0, 0, 0, 0, sourceState: "ghost"),
+            }));
+            StringAssert.Contains("is not of its Source's kind", ProblemOf(parts => parts.Traits = new List<TraitData>
+            {
+                new TraitData("mark", t, TraitKind.Acquired, TraitPolarity.Negative, TraitSource.Affliction, 10, null, -1, 0, 0, 0, 0, 0, 0, sourceState: "focused"),
+            }));
+        }
+
+        [Test]
+        public void Stage57_AJobsFiguresByGender_NeedItsOwn_AreNamedOnce_AndAStartingMercenarysFigureIsOneOfItsJobs()
+        {
+            LocalizedText t = TestData.Text("x");
+            Assert.Throws<DataException>(() => new JobData("solo", t, "blade", 1, null, figuresMale: new[] { "unit/job/solo" }), "Figures by gender beside its own.");
+            Assert.Throws<DataException>(() => new JobData("twin", t, "blade", 1, null, figure: "unit/job/twin", figuresMale: new[] { "unit/job/a", "unit/job/a" }));
+            Assert.Throws<DataException>(() => new MercenaryData("eve", t, null, false, null, Gender.Female, "unit/job/tank"), "A candidate draws its own figure.");
+            StringAssert.Contains("is not one of its job's figures", ProblemOf(parts =>
+                parts.Mercenaries = Replace(parts.Mercenaries, m => m.Id == "anna", new MercenaryData("anna", TestData.Text("anna"), "tank", true, null, Gender.Female, "unit/job/ghost"))));
+        }
+
+        [Test]
         public void ATrait_MustChangeSomething_WithinItsBounds_AndAPoolNameHasNoTraits()
         {
             Assert.Throws<DataException>(() => TestData.Trait("idle", TraitPolarity.Positive), "Changes nothing.");

@@ -84,9 +84,22 @@ namespace F1.UI
             _mapArt = await Managers.Resource.LoadAsync<Sprite>(ArtAddress.ExpeditionMap, ResourceScope.Lobby);
             foreach (JobData job in Managers.Data.Data.Jobs.Ordered)
             {
-                if (job.Figure != null)
+                // Stage 57: every figure of the job (its own and those of each gender).
+                foreach (string figure in ExpeditionArt.FiguresOf(job))
                 {
-                    _figures[job.Id] = await Managers.Resource.LoadAsync<Sprite>(job.Figure, ResourceScope.Lobby);
+                    if (!_figures.ContainsKey(figure))
+                    {
+                        _figures[figure] = await Managers.Resource.LoadAsync<Sprite>(figure, ResourceScope.Lobby);
+                    }
+                }
+            }
+
+            // Stage 57: the jobs drawn in a build, where drawn (Docs/Design/39 §2-4). The figure only: the party stands, it does not fight here.
+            foreach (string address in ExpeditionArt.BuildAddresses(Managers.Data.Data))
+            {
+                if (!address.StartsWith("pose/", System.StringComparison.Ordinal) && !_figures.ContainsKey(address) && await Managers.Resource.ExistsAsync(address))
+                {
+                    _figures[address] = await Managers.Resource.LoadAsync<Sprite>(address, ResourceScope.Lobby);
                 }
             }
         }
@@ -289,7 +302,7 @@ namespace F1.UI
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 _slots[i].Show(
                     slot.MercenaryId,
-                    FigureOf(mercenary.JobId),
+                    FigureOf(mercenary),
                     UiText.Mercenary(slot.MercenaryId),
                     UiStrings.Get(UiKeys.Lobby.Level, mercenary.Level),
                     UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
@@ -299,7 +312,8 @@ namespace F1.UI
                     mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId),
                     UiText.TraitChips(data, mercenary.JobId, mercenary.Traits),
                     canForward: Managers.Run.CanPlaceInParty(slot.MercenaryId, row - 1),
-                    canBack: Managers.Run.CanPlaceInParty(slot.MercenaryId, row + 1));
+                    canBack: Managers.Run.CanPlaceInParty(slot.MercenaryId, row + 1),
+                    figureScale: ScaleOf(mercenary));
             }
 
             // The list is drawn again: a tooltip left open would speak of a line that may have moved (Round 81).
@@ -325,7 +339,7 @@ namespace F1.UI
                 int row = RowOf(run, mercenary.Id);
                 FatigueStateData affliction = mercenary.AfflictionId == null ? null : data.FatigueStates.Get(mercenary.AfflictionId);
                 line.Show(
-                    FigureOf(mercenary.JobId),
+                    FigureOf(mercenary),
                     UiText.Mercenary(mercenary.Id),
                     UiText.JobLine(mercenary.JobId, affliction, FatigueRules.IsOverworked(data.Balance, affliction, mercenary.Fatigue)),
                     affliction != null,
@@ -383,10 +397,17 @@ namespace F1.UI
             _partyDepart.interactable = chosen == DepartCheck.Ok;
         }
 
-        /// <summary>A job's figure, loaded before the screen opened; null for a job without one.</summary>
-        Sprite FigureOf(string jobId)
+        /// <summary>A mercenary's figure (stage 57: its job's in its build where drawn), loaded before the screen opened; null for a job without one.</summary>
+        Sprite FigureOf(MercenaryState mercenary)
         {
-            return _figures.TryGetValue(jobId, out Sprite art) ? art : null;
+            string address = ExpeditionArt.FigureAddressOf(Managers.Data.Data, mercenary.JobId, mercenary.Figure, mercenary.Traits, _figures.ContainsKey);
+            return address != null && _figures.TryGetValue(address, out Sprite art) ? art : null;
+        }
+
+        /// <summary>How large a mercenary's figure stands on the party's stage (stage 57: a giant larger).</summary>
+        float ScaleOf(MercenaryState mercenary)
+        {
+            return ExpeditionArt.ScaleOf(Managers.Data.Data, mercenary.JobId, mercenary.Figure, mercenary.Traits, _figures.ContainsKey);
         }
 
         static PartySlot SlotInRow(RunState run, int row)

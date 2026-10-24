@@ -17,6 +17,8 @@ namespace F1.Save
     /// Version 24 (2026-10-20 스탯 개정, Slice D stage 41): a stats record's Spi is Wis (wisdom), and the stats stand on the new scale (a job's base values
     /// 1..8 around the power baseline 5): RunSaveMigrator rescales a version 23 file's roster and candidates ((old + 1) / 2) and gives a member of an
     /// expedition going on the maximum HP of its new constitution, its HP in proportion.
+    /// Version 29 (Slice D stage 57): a mercenary's and a candidate's Figure (the address of the figure it is shown in, drawn by its name's gender); a version 28
+    /// file has none (null: the job's own figure).
     /// Version 23 (Slice D stage 38): a member's DeathsDoor (it was at death's door on this expedition: the settlement may leave a trait). A version 22
     /// file's members were at none (false, as the field is missing).
     /// Version 22 (Slice D stage 37): a mercenary's and a candidate's Traits (TraitData ids). A version 21 file has none: RunSaveMigrator gives every
@@ -41,7 +43,7 @@ namespace F1.Save
     /// </summary>
     public sealed class RunSaveData
     {
-        public const int CurrentSchemaVersion = 28;
+        public const int CurrentSchemaVersion = 29;
 
         public int SchemaVersion = CurrentSchemaVersion;
         public RunRecord Run;
@@ -109,6 +111,9 @@ namespace F1.Save
 
         /// <summary>The innate traits the candidate was born with (version 22), in their order.</summary>
         public List<string> Traits;
+
+        /// <summary>Version 29 (stage 57): the figure's address, or null for the job's own.</summary>
+        public string Figure;
     }
 
     /// <summary>The six stats (version 18, Slice D stage 32): strength, dexterity, constitution, intellect, spirit, endurance.</summary>
@@ -152,6 +157,9 @@ namespace F1.Save
 
         /// <summary>Its traits (version 22, TraitData ids), in the order it got them. An expedition member takes them from here too.</summary>
         public List<string> Traits;
+
+        /// <summary>Version 29 (stage 57): the figure's address, or null for the job's own.</summary>
+        public string Figure;
     }
 
     public sealed class PartySlotRecord

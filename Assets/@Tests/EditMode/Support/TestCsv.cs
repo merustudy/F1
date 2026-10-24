@@ -19,14 +19,14 @@ namespace F1.Tests
             "GoldPerFloor,2\nGoldClear,20\nHirePrice,30\nRecruitCount,2\nRosterLimit,8\nTreatmentPrice,20\nTreatmentRelief,40\nExpPerFloor,1\nExpClear,5\n" +
             "StatBaseline,10\nStatMin,1\nStatMax,30\nStatPowerPercentPerPoint,10\nPowerBaseline,5\nFatigueBaseline,5\nCooldownPercentPerPoint,1\nHpPerConPointLow,5\nHpPerConPointMid,10\nHpPerConPointHigh,15\nHpBandLow,10\nHpBandMid,20\n" +
             "HitBasePercent,80\nHitMinPercent,5\nHitMaxPercent,95\nHitPerDexPoint,1\nDodgePerDexPoint,0.5\nCritPerDexPoint,0.5\nCritPerWisPoint,0.5\nDogDeathPercentPerEndPoint,1\nVirtuePerEndPoint,1\nFatiguePercentPerEndPoint,3\nRecruitStatSpread,2\n" +
-            "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\n" +
-            "TraitChanceClearPercent,15\nTraitChanceRetreatPercent,15\nTraitChanceDeathsDoorPercent,25\nTraitChanceAfflictionPercent,40\nTraitChanceVirtuePercent,40\n" +
+            "RecruitTraitWeight0,30\nRecruitTraitWeight1,50\nRecruitTraitWeight2,20\nBuildWeightNone,50\n" +
+            "TraitChanceClearPercent,15\nTraitChanceRetreatPercent,15\nTraitChanceDeathsDoorPercent,25\nTraitChanceAfflictionPercent,40\nTraitChanceVirtuePercent,40\nTraitChanceAllyDiedPercent,30\n" +
             "FreezePercentPerStack,10\nBlindPercentPerStack,5\nAimPercentPerStack,5\nKeenPercentPerStack,5\nFuryPercentPerStack,25\nHastePercentPerStack,10\nVulnerablePercentPerStack,10\n";
 
         public const string Jobs =
-            "Id,Name.ko-KR,Name.en-US,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Wis,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthWis,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US\n" +
-            "knight,기사,Knight,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50,선봉,Vanguard\n" +
-            "bishop,주교,Bishop,staff,3,,,,,,,,,,7,8,9,11,14,10,20,50,50,90,110,50,,\n";
+            "Id,Name.ko-KR,Name.en-US,WeaponItemId,RecommendedRow,PassiveTrigger,PassiveCondition,PassiveRows,PassiveEffect,PassiveTarget,PassiveMagnitude,PassiveText.ko-KR,PassiveText.en-US,Figure,Str,Dex,Con,Int,Wis,End,GrowthStr,GrowthDex,GrowthCon,GrowthInt,GrowthWis,GrowthEnd,PassiveName.ko-KR,PassiveName.en-US,FiguresMale,FiguresFemale\n" +
+            "knight,기사,Knight,sword,1,BattleStart,InRows,front:1,Shield,Self,5.45,보호막 {0},Shield {0},unit/job/knight,12,9,12,6,9,11,110,50,90,20,50,50,선봉,Vanguard,unit/job/knight+unit/job/blade,unit/job/dame\n" +
+            "bishop,주교,Bishop,staff,3,,,,,,,,,,7,8,9,11,14,10,20,50,50,90,110,50,,,,\n";
 
         public const string Items =
             "Id,Name.ko-KR,Name.en-US,Category,Width,Height,CooldownMs,Rows,Effect1Kind,Effect1Target,Effect1Reach,Effect1Value,Effect2Kind,Effect2Target,Effect2Reach,Effect2Value,ShopWeight,Icon,Price,Melee,Stars,StarDamage,CritChancePercent,School\n" +
@@ -60,19 +60,25 @@ namespace F1.Tests
             "mine,광산,Mine,swift,2,2,3,2,tonic,background/dungeon/mine,2,20,0,0,0,5,10,2,0,0,2,20\n";
 
         public const string Mercenaries =
-            "Id,Name.ko-KR,Name.en-US,JobId,Starting,Traits\n" +
-            "rowan,로언,Rowan,knight,true,keen+sturdy\n" +
-            "ella,엘라,Ella,bishop,true,\n" +
-            "teo,테오,Teo,,false,\n" +
-            "bran,브란,Bran,,false,\n";
+            "Id,Name.ko-KR,Name.en-US,JobId,Starting,Traits,Gender,Figure\n" +
+            "rowan,로언,Rowan,knight,true,keen+sturdy,Male,unit/job/blade\n" +
+            "ella,엘라,Ella,bishop,true,,Female,\n" +
+            "teo,테오,Teo,,false,,Male,\n" +
+            "bran,브란,Bran,,false,,Male,\n";
 
-        /// <summary>Four traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two, and scar acquired at death's door (stage 38).</summary>
+        /// <summary>
+        /// Six traits (Slice D stage 37): keen against dull, sturdy with an empty effect cell or two, and scar acquired at death's door (stage 38);
+        /// stage 57: huge, a rare build drawn in its own figure at 130% that shifts two stats, and calm, a focused virtue's mark with the new effects.
+        /// </summary>
         public const string Traits =
-            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent,CritDamagePercent\n" +
-            "dull,둔함,Dull,Innate,Negative,,10,,-5,,,,,,,\n" +
-            "keen,예리함,Keen,Innate,Positive,,10,dull,5,2,1,,,,,10\n" +
-            "scar,흉터,Scar,Acquired,Negative,DeathsDoor,10,,,,,,,,-5,\n" +
-            "sturdy,강골,Sturdy,Innate,Positive,,5,,,,,-5,3,-10,8,\n";
+            "Id,Name.ko-KR,Name.en-US,Kind,Polarity,Source,Weight,Excludes,HitPercent,DodgePercent,CritPercent,DogDeathPercent,VirtuePercent,FatiguePercent,MaxHpPercent,CritDamagePercent," +
+            "Build,Rare,Figure,FigureScale,SourceState,Str,Dex,Con,Int,Wis,End,GrowthPercent,DamagePercent,HealTakenPercent,AllyFatigueAtStart\n" +
+            "calm,침착,Calm,Acquired,Positive,Virtue,20,,,,,,,,,,,,,,focused,,,,,,,10,5,-10,-1\n" +
+            "dull,둔함,Dull,Innate,Negative,,10,,-5,,,,,,,,,,,,,,,,,,,,,,\n" +
+            "huge,거구,Huge,Innate,Positive,,3,,,,,,,,,,true,true,huge,130,,2,-1,,,,,,,,\n" +
+            "keen,예리함,Keen,Innate,Positive,,10,dull,5,2,1,,,,,10,,,,,,,,,,,,,,,\n" +
+            "scar,흉터,Scar,Acquired,Negative,DeathsDoor,10,,,,,,,,-5,,,,,,,,,,,,,,,,\n" +
+            "sturdy,강골,Sturdy,Innate,Positive,,5,,,,,-5,3,-10,8,,,,,,,,,,,,,,,,\n";
 
         public const string Bags =
             "Id,Name.ko-KR,Name.en-US,Width,Height,Start,Price,ShopWeight,LootWeight\n" +

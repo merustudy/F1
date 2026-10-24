@@ -78,7 +78,7 @@ namespace F1.Tests
 
             RunSaveMigrator.Migrate(save, data);
 
-            Assert.AreEqual(28, save.SchemaVersion);
+            Assert.AreEqual(RunSaveData.CurrentSchemaVersion, save.SchemaVersion, "Brought on through 28 to the current version.");
             CollectionAssert.AreEqual(new[] { "hello", "pit_open" }, save.Run.SeenDialogues, "In the dialogues' order.");
             RunSaveMapper.Read(save, data, out RunState read, out ExpeditionState _);
             Assert.IsNull(StoryRules.DueDialogue(data, read), "No dialogue breaks into a run already going on.");

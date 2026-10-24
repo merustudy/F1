@@ -2187,6 +2187,44 @@ MonoBehaviour:
     m_Localized: While equipped
     m_Metadata:
       m_Items: []
+  - m_Id: 8702588710019072
+    m_Localized: after losing a comrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8702588722601984
+    m_Localized: Rare
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8702588722601985
+    m_Localized: '{0} {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8702588722601986
+    m_Localized: Critical damage {0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8702588722601987
+    m_Localized: Growth grades {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8702588722601988
+    m_Localized: Damage dealt {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8702588722601989
+    m_Localized: Healing taken {0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8702588722601990
+    m_Localized: Allies' fatigue each battle {0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -2449,3 +2487,9 @@ MonoBehaviour:
         - id: 8550042431381536
         - id: 8550042431381537
         - id: 8550042431381538
+        - id: 8702588722601985
+        - id: 8702588722601986
+        - id: 8702588722601987
+        - id: 8702588722601988
+        - id: 8702588722601989
+        - id: 8702588722601990

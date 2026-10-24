@@ -915,7 +915,8 @@ namespace F1.Tests
             for (int i = 0; i < run.Recruits.Count; i++)
             {
                 RecruitState recruit = run.Recruits[i];
-                Assert.LessOrEqual(recruit.Traits.Count, 2, "Born with 0~2.");
+                Assert.LessOrEqual(recruit.Traits.Count(id => !data.Traits.Get(id).Build), 2, "Born with 0~2.");
+                Assert.LessOrEqual(recruit.Traits.Count(id => data.Traits.Get(id).Build), 1, "And a build at most (stage 57).");
                 CollectionAssert.AreEqual(UiText.TraitChips(data, recruit.JobId, recruit.Traits).Select(c => c.Name).ToList(),
                     lobby.Candidates[i].Traits.Shown.Select(c => c.Name).ToList(), recruit.Id);
                 // A candidate is a fresh clone shown at once: its chips are as wide as their names (TMP's measure answered 0 there).
@@ -3632,7 +3633,8 @@ namespace F1.Tests
             foreach (ExpeditionMember member in Managers.Expedition.Expedition.Members)
             {
                 PartyColumnView column = party.ColumnOfRow(member.Row);
-                string jobFigure = data.Jobs.Get(member.JobId).Figure;
+                // Stage 57: the member's own figure where it has one (카이 in the spellblade's), its job's otherwise.
+                string jobFigure = member.Figure ?? data.Jobs.Get(member.JobId).Figure;
                 AssertShows(column.Figure, jobFigure, member.MercenaryId);
 
                 // The row's board in the panel is shown with the column.
@@ -3674,7 +3676,7 @@ namespace F1.Tests
             {
                 string id = unit.Unit.Setup.SourceId;
                 string address = unit.Unit.Side == BattleSide.Party
-                    ? data.Jobs.Get(unit.Unit.Setup.JobId).Figure
+                    ? Managers.Expedition.Expedition.Members.Find(m => m.MercenaryId == id).Figure ?? data.Jobs.Get(unit.Unit.Setup.JobId).Figure
                     : data.Enemies.Get(id).Figure;
                 AssertShows(unit.Figure, address, id);
 
@@ -4037,6 +4039,69 @@ namespace F1.Tests
         /// as wide and an eighth deeper, with the floor line 112 of 1008 up. A lunge that is not a weapon's shows no pose.
         /// </summary>
         [UnityTest]
+        public IEnumerator Builds_AWarriorStandsInItsFigure_AndItsBuildWhereDrawn_AtTheBuildsScale_OnTheMapAndInBattle_WithTheirPoses()
+        {
+            // Stage 57 (Docs/Design/39 §2-4, Round 105, Docs/Design/10 §2): 로언 a giant knight at 138% of its place; 카이 in the spellblade's (the data's),
+            // whose small build is not drawn, at its own size; a staged swordswoman giant at 138%; 미라 a giant mage, not drawn, in the mage's own.
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.NewRunToLobby();
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            StaticData data = Managers.Data.Data;
+            RunState run = Managers.Run.Run;
+            RunRules.FindMercenary(run, "rowan").Traits.Insert(0, "giant");
+            RunRules.FindMercenary(run, "kai").Traits.Insert(0, "small");
+            RunRules.FindMercenary(run, "mira").Traits.Insert(0, "giant");
+            run.Recruits.RemoveAll(r => r.Id == "johanna");
+            run.Roster.Add(new MercenaryState
+            {
+                Id = "johanna", JobId = "warrior", Stats = StatRules.BaseOf(data, "warrior"), Traits = new List<string> { "giant" }, Figure = "unit/job/swordswoman",
+            });
+            yield return UiTestUtil.OpenBarracks(lobby);
+            UiTestUtil.PlaceInParty(lobby, "rowan", 1);
+            UiTestUtil.PlaceInParty(lobby, "kai", 2);
+            UiTestUtil.PlaceInParty(lobby, "johanna", 3);
+            UiTestUtil.PlaceInParty(lobby, "mira", 4);
+            UiTestUtil.CloseQuarter(lobby);
+            yield return UiTestUtil.DepartFromLobby();
+
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            yield return null;
+            List<ExpeditionMember> members = Managers.Expedition.Expedition.Members;
+            PartyColumnView ColumnOf(string id) => UiTestUtil.Views<PartyColumnView>(map).Single(c => c.Member >= 0 && members[c.Member].MercenaryId == id);
+            Vector2 common = ColumnOf("kai").Figure.ArtImage.rectTransform.sizeDelta;
+            Assert.AreEqual("knight_giant", ColumnOf("rowan").Figure.Art.name);
+            Assert.AreEqual("spellblade", ColumnOf("kai").Figure.Art.name, "Its figure; the small build is not drawn for it.");
+            Assert.AreEqual("swordswoman_giant", ColumnOf("johanna").Figure.Art.name);
+            Assert.AreEqual("archmage", ColumnOf("mira").Figure.Art.name, "The giant is not drawn for the mage: her job's own figure.");
+            Assert.AreEqual(common * 1.38f, ColumnOf("rowan").Figure.ArtImage.rectTransform.sizeDelta, "The giant stands larger than its place.");
+            Assert.AreEqual(common * 1.38f, ColumnOf("johanna").Figure.ArtImage.rectTransform.sizeDelta);
+            Assert.AreEqual(common, ColumnOf("mira").Figure.ArtImage.rectTransform.sizeDelta, "Not drawn: its own size.");
+
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            yield return null;
+            BattleUnitView giant = UiTestUtil.Views<BattleUnitView>(battle).Single(view => view.Unit.Setup.SourceId == "rowan");
+            BattleUnitView blade = UiTestUtil.Views<BattleUnitView>(battle).Single(view => view.Unit.Setup.SourceId == "kai");
+            BattleUnitView dame = UiTestUtil.Views<BattleUnitView>(battle).Single(view => view.Unit.Setup.SourceId == "johanna");
+            Assert.AreEqual("knight_giant", giant.Figure.Art.name);
+            Assert.AreEqual("spellblade", blade.Figure.Art.name);
+            Assert.AreEqual("swordswoman_giant", dame.Figure.Art.name);
+            Assert.AreEqual(blade.FigureArt.rectTransform.sizeDelta * 1.38f, giant.FigureArt.rectTransform.sizeDelta);
+            yield return UntilStill(giant);
+            giant.Lunge(1f, withPose: true);
+            yield return null;
+            Assert.AreEqual("knight_giant_attack", giant.Figure.Art.name, "Its build's attack pose.");
+            yield return UntilStill(giant);
+            yield return UntilFigure(giant);
+            blade.Recoil(-1f);
+            yield return null;
+            Assert.AreEqual("spellblade_hit", blade.Figure.Art.name, "Its figure's hit pose.");
+        }
+
+        [UnityTest]
         public IEnumerator Battle_AMercenaryShowsItsAttackPoseWhileItsWeaponLunges_AndItsHitPoseWhileItRecoils()
         {
             yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
@@ -4046,7 +4111,8 @@ namespace F1.Tests
             yield return null;
             BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).First(view => view.Unit.Side == BattleSide.Party);
             // The poses are named after the figure, which a job may share with an older one (Slice D stage 36: the mage stands in the archmage's).
-            string figureAddress = Managers.Data.Data.Jobs.Get(unit.Unit.Setup.JobId).Figure;
+            string figureAddress = Managers.Expedition.Expedition.Members.Find(m => m.MercenaryId == unit.Unit.Setup.SourceId).Figure
+                ?? Managers.Data.Data.Jobs.Get(unit.Unit.Setup.JobId).Figure;
             string job = figureAddress.Substring(figureAddress.LastIndexOf('/') + 1);
             Sprite figure = unit.Figure.Art;
             RectTransform art = unit.FigureArt.rectTransform;

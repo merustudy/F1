@@ -402,11 +402,44 @@ namespace F1.Tests
         }
 
         [Test]
+        public void Save_KeepsTheFigures_OfTheRosterAndTheCandidates_AndAFigureTheJobNoLongerHasIsItsOwn()
+        {
+            // Stage 57 (version 29): a mercenary's and a candidate's figure written and read back; the members take the roster's.
+            RunSaveData save = ValidSave(out StaticData plain);
+            StaticDataParts parts = TestData.Parts();
+            parts.Jobs = parts.Jobs
+                .Select(job => new JobData(job.Id, job.Name, job.WeaponItemId, job.RecommendedRow, job.Passive, job.PassiveText, "unit/job/" + job.Id, job.Stats, job.Growth,
+                    job.PassiveName, new[] { "unit/job/" + job.Id, "unit/job/" + job.Id + "2" }))
+                .ToList();
+            var data = new StaticData(parts);
+            string job0 = save.Run.Roster[0].JobId;
+            save.Run.Roster[0].Figure = "unit/job/" + job0 + "2";
+            save.Run.Roster[1].Figure = "unit/job/ghost";
+            save.Run.Recruits[0].Figure = "unit/job/" + save.Run.Recruits[0].JobId + "2";
+
+            RunSaveMapper.Read(save, data, out RunState run, out ExpeditionState expedition);
+
+            Assert.AreEqual("unit/job/" + job0 + "2", run.Roster[0].Figure);
+            Assert.IsNull(run.Roster[1].Figure, "Not one of its job's: the job's own.");
+            Assert.AreEqual("unit/job/" + run.Recruits[0].JobId + "2", run.Recruits[0].Figure);
+            ExpeditionMember member = expedition.Members.FirstOrDefault(m => m.MercenaryId == run.Roster[0].Id);
+            if (member != null)
+            {
+                Assert.AreEqual(run.Roster[0].Figure, member.Figure);
+            }
+
+            RunSaveData again = RunSaveMapper.ToSave(run, RunSaveMapper.ToRecord(expedition, null));
+            Assert.AreEqual("unit/job/" + job0 + "2", again.Run.Roster[0].Figure);
+            Assert.AreEqual(run.Recruits[0].Figure, again.Run.Recruits[0].Figure);
+            Assert.IsNotNull(plain);
+        }
+
+        [Test]
         public void Save_KeepsTheStats_OfTheRosterAndTheCandidates_AndTheMembersTakeTheRosters()
         {
             // Slice D stage 32 (version 18, stage 34 version 19): the stats written and read back; a member has none of its own in the file.
             RunSaveData save = ValidSave(out StaticData data);
-            Assert.AreEqual(28, RunSaveData.CurrentSchemaVersion, "Stage 55 (version 28): the dialogues heard (stage 49's 27 had the mine's new map).");
+            Assert.AreEqual(29, RunSaveData.CurrentSchemaVersion, "Stage 57 (version 29): the figures (stage 55's 28 had the dialogues heard).");
             Assert.IsTrue(save.Run.Roster.All(m => m.Stats != null) && save.Run.Recruits.All(r => r.Stats != null));
             save.Run.Roster[0].Stats.Str = 13;
             save.Run.Roster[0].Stats.End = 7;

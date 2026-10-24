@@ -69,7 +69,7 @@ namespace F1.Flow
 
             foreach (RecruitState recruit in run.Recruits)
             {
-                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId, Stats = ToRecord(recruit.Stats), Traits = new List<string>(recruit.Traits) });
+                record.Recruits.Add(new RecruitRecord { Id = recruit.Id, JobId = recruit.JobId, Stats = ToRecord(recruit.Stats), Traits = new List<string>(recruit.Traits), Figure = recruit.Figure });
             }
 
             foreach (KeyValuePair<string, int> visits in run.ExpeditionsByDungeon)
@@ -82,7 +82,7 @@ namespace F1.Flow
                 record.Roster.Add(new MercenaryRecord
                 {
                     Id = mercenary.Id, JobId = mercenary.JobId, Fatigue = mercenary.Fatigue, Affliction = mercenary.AfflictionId, Level = mercenary.Level, Exp = mercenary.Exp,
-                    Stats = ToRecord(mercenary.Stats), Traits = new List<string>(mercenary.Traits),
+                    Stats = ToRecord(mercenary.Stats), Traits = new List<string>(mercenary.Traits), Figure = mercenary.Figure,
                 });
             }
 
@@ -291,6 +291,7 @@ namespace F1.Flow
                     Exp = mercenary.Exp,
                     Stats = ToStats(mercenary.Stats, data, $"'{mercenary.Id}'"),
                     Traits = ToTraits(mercenary.Traits, data, $"'{mercenary.Id}'"),
+                    Figure = ToFigure(mercenary.Figure, data, mercenary.JobId),
                 });
             }
 
@@ -321,6 +322,7 @@ namespace F1.Flow
                 {
                     Id = recruit.Id, JobId = recruit.JobId, Stats = ToStats(recruit.Stats, data, $"candidate '{recruit.Id}'"),
                     Traits = ToTraits(recruit.Traits, data, $"candidate '{recruit.Id}'"),
+                    Figure = ToFigure(recruit.Figure, data, recruit.JobId),
                 });
             }
 
@@ -435,6 +437,8 @@ namespace F1.Flow
                     // A member's stats and traits are the roster's (versions 18 and 22): they do not change on an expedition, so the file does not repeat them.
                     Stats = mercenary.Stats,
                     Traits = new List<string>(mercenary.Traits),
+                    // The figure too (stage 57, version 29).
+                    Figure = mercenary.Figure,
                 });
             }
 
@@ -692,6 +696,15 @@ namespace F1.Flow
             Stat? outside = stats.FirstOutside(data.Balance.StatMin, data.Balance.StatMax);
             Require(outside == null, $"{outside} of {who} is out of range.");
             return stats;
+        }
+
+        /// <summary>
+        /// A mercenary's figure (version 29, stage 57): one of its job's, or null for the job's own. A figure the data no longer gives the job (or an
+        /// unknown job, which the caller refuses) is read as the job's own: the look is not worth refusing a run for.
+        /// </summary>
+        static string ToFigure(string figure, StaticData data, string jobId)
+        {
+            return figure != null && data.Jobs.Contains(jobId) && data.Jobs.Get(jobId).HasFigure(figure) ? figure : null;
         }
 
         /// <summary>The traits of a mercenary or a candidate (version 22): present, each known, none twice, no two that clash.</summary>

@@ -350,7 +350,7 @@ namespace F1.Data
 
         [JsonConstructor]
         /// <param name="traits">A starting mercenary's traits (Slice D stage 37, Docs/Design/05 §6: the data sets them, nothing rolls them). Null is none.</param>
-        public MercenaryData(string id, LocalizedText name, string jobId, bool starting = true, IReadOnlyList<string> traits = null)
+        public MercenaryData(string id, LocalizedText name, string jobId, bool starting = true, IReadOnlyList<string> traits = null, Gender gender = Gender.Male, string figure = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -376,6 +376,13 @@ namespace F1.Data
             }
 
             Traits = list;
+            Gender = gender;
+            // A starting mercenary may name its figure among its job's (stage 57: 카이 in the spellblade's); a candidate draws its own.
+            Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
+            if (!starting && Figure != null)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a name of the recruit pool has no Figure; a candidate draws its own.");
+            }
         }
 
         [JsonProperty(Order = 1, Required = Required.Always)]
@@ -395,5 +402,13 @@ namespace F1.Data
         /// <summary>The traits a starting mercenary has from the first day (Slice D stage 37), in the data's order; empty for a name of the pool.</summary>
         [JsonProperty(Order = 5)]
         public IReadOnlyList<string> Traits { get; }
+
+        /// <summary>The name's gender (stage 57): a candidate of it is drawn in a figure of that gender.</summary>
+        [JsonProperty(Order = 6)]
+        public Gender Gender { get; }
+
+        /// <summary>A starting mercenary's figure among its job's (stage 57), or null for the job's own.</summary>
+        [JsonProperty(Order = 7)]
+        public string Figure { get; }
     }
 }

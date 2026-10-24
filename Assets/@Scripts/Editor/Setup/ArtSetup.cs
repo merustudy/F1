@@ -188,15 +188,61 @@ namespace F1.Editor.Setup
                 }
             }
 
-            // The poses of a breakdown and of a virtue (2026-10-06 round 38) are drawn job by job: a job whose file is there gets its entry,
-            // one whose file is not drawn yet is left out, and the screen shows its figure in that moment (ExpeditionArt).
+            // A job's figures by gender (stage 57, Docs/Design/10 §2: the warrior's spellblade and swordswoman) are named by the data like its own: each
+            // with its attack and hit poses.
             foreach (JobData job in data.Jobs.Ordered)
             {
-                foreach (string address in new[] { job.BrokenPose, job.ResolutePose })
+                foreach (string figure in job.FiguresMale.Concat(job.FiguresFemale))
                 {
-                    if (address != null && LogicalAddress.IsValid(address) && seen.Add(address) && File.Exists(AssetPath(address)))
+                    foreach ((string address, ImportPolicy policy) in new[] { (figure, Figure), (ArtAddress.PoseOf(figure, ArtAddress.Attack), Pose), (ArtAddress.PoseOf(figure, ArtAddress.Hit), Pose) })
                     {
-                        files.Add(new ArtFile(address, AssetPath(address), Pose, new AddressEntry(AssetPath(address), address, ResourceScope.Expedition, ArtGroup)));
+                        if (seen.Add(address))
+                        {
+                            string path = LogicalAddress.IsValid(address) ? AssetPath(address) : ArtDirectory + "/" + address;
+                            files.Add(new ArtFile(address, path, policy, new AddressEntry(path, address, ResourceScope.Expedition, ArtGroup)));
+                        }
+                    }
+                }
+            }
+
+            // The poses of a breakdown and of a virtue (2026-10-06 round 38) are drawn job by job: a job whose file is there gets its entry,
+            // one whose file is not drawn yet is left out, and the screen shows its figure in that moment (ExpeditionArt). Stage 57: of every figure of the job.
+            foreach (JobData job in data.Jobs.Ordered)
+            {
+                foreach (string figure in new[] { job.Figure }.Concat(job.FiguresMale).Concat(job.FiguresFemale).Where(f => f != null))
+                {
+                    foreach (string address in new[] { ArtAddress.PoseOf(figure, ArtAddress.Broken), ArtAddress.PoseOf(figure, ArtAddress.Resolute) })
+                    {
+                        if (LogicalAddress.IsValid(address) && seen.Add(address) && File.Exists(AssetPath(address)))
+                        {
+                            files.Add(new ArtFile(address, AssetPath(address), Pose, new AddressEntry(AssetPath(address), address, ResourceScope.Expedition, ArtGroup)));
+                        }
+                    }
+                }
+            }
+
+            // A job drawn in a build (stage 57, Docs/Design/39 §2-4: Round 105's giant and small warrior) is drawn job by job: where the figure's file is
+            // there, it and its attack and hit poses get their entries (the poses of a breakdown and of a virtue where their files are), and the screen
+            // shows the job's own figure for a build not drawn for that job (ExpeditionArt).
+            foreach (string baseFigure in data.Jobs.Ordered.SelectMany(job => new[] { job.Figure }.Concat(job.FiguresMale).Concat(job.FiguresFemale)).Where(f => f != null).Distinct())
+            {
+                foreach (TraitData build in data.Traits.Ordered.Where(trait => trait.Build && trait.Figure != null))
+                {
+                    string figure = ArtAddress.BuildFigure(baseFigure, build.Figure);
+                    if (figure == null || !LogicalAddress.IsValid(figure) || !File.Exists(AssetPath(figure)) || !seen.Add(figure))
+                    {
+                        continue;
+                    }
+
+                    files.Add(new ArtFile(figure, AssetPath(figure), Figure, new AddressEntry(AssetPath(figure), figure, ResourceScope.Expedition, ArtGroup)));
+                    foreach (string pose in new[] { ArtAddress.Attack, ArtAddress.Hit, ArtAddress.Broken, ArtAddress.Resolute })
+                    {
+                        string address = ArtAddress.PoseOf(figure, pose);
+                        bool required = pose == ArtAddress.Attack || pose == ArtAddress.Hit;
+                        if (seen.Add(address) && (required || File.Exists(AssetPath(address))))
+                        {
+                            files.Add(new ArtFile(address, AssetPath(address), Pose, new AddressEntry(AssetPath(address), address, ResourceScope.Expedition, ArtGroup)));
+                        }
                     }
                 }
             }

@@ -62,6 +62,12 @@ namespace F1.Flow
             {
                 From27To28(save, data);
             }
+
+            if (save.SchemaVersion == 28)
+            {
+                // Version 29 (stage 57): a mercenary's and a candidate's Figure; a version 28 file has none (the job's own figure). The shape is otherwise the same.
+                save.SchemaVersion = 29;
+            }
         }
 
         /// <summary>

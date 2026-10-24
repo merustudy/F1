@@ -76,6 +76,16 @@ namespace F1.Data
         }
 
         /// <summary>
+        /// The address of a job's figure drawn in a build (stage 57, Docs/Design/39 §2-4): the job's figure with the build's variant after its last segment
+        /// ("unit/job/knight" in "giant" is "unit/job/knight-giant", the file knight_giant.png). Its poses follow from it as any figure's (<see cref="PoseOf"/>).
+        /// Null for a job without a figure or a build without a variant.
+        /// </summary>
+        public static string BuildFigure(string figure, string variant)
+        {
+            return figure == null || variant == null ? null : figure + "-" + variant;
+        }
+
+        /// <summary>
         /// The address of the gold glow behind a unique item's icon (stage 23): the icon's address with "-glow" ("item/gladius" is
         /// "item/gladius-glow", the file gladius_glow.png). The art pipeline makes the glow from the icon (tools/glow_items.py), so the data names only the icon.
         /// Null for an item without an icon.

@@ -283,6 +283,8 @@ namespace F1.UI
             public const string FromDeathsDoor = "Trait.FromDeathsDoor";
             public const string FromAffliction = "Trait.FromAffliction";
             public const string FromVirtue = "Trait.FromVirtue";
+            public const string FromAllyDied = "Trait.FromAllyDied";
+            public const string Rare = "Trait.Rare";
             public const string More = "Trait.More";
             public const string MoreTitle = "Trait.MoreTitle";
             public const string Hit = "Trait.Hit";
@@ -292,6 +294,12 @@ namespace F1.UI
             public const string Virtue = "Trait.Virtue";
             public const string Fatigue = "Trait.Fatigue";
             public const string MaxHp = "Trait.MaxHp";
+            public const string Stat = "Trait.Stat";
+            public const string CritDamage = "Trait.CritDamage";
+            public const string Growth = "Trait.Growth";
+            public const string Damage = "Trait.Damage";
+            public const string HealTaken = "Trait.HealTaken";
+            public const string AllyFatigue = "Trait.AllyFatigue";
         }
 
         public static class Item

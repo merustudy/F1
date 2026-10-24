@@ -357,6 +357,23 @@ namespace F1.Editor.Data
         }
 
         /// <summary>Text a file may leave empty: null for an empty value. Surrounding whitespace is still an error.</summary>
+        /// <summary>A "+"-joined list of texts (stage 57: art addresses, which are not ids); empty for an empty cell. The definition checks each.</summary>
+        public List<string> TextList(string header)
+        {
+            var list = new List<string>();
+            if (IsEmpty(header))
+            {
+                return list;
+            }
+
+            foreach (string part in Text(header).Split(ListSeparator))
+            {
+                list.Add(part.Trim());
+            }
+
+            return list;
+        }
+
         public string OptionalText(string header)
         {
             return IsEmpty(header) ? null : Text(header);

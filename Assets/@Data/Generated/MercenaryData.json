@@ -9,7 +9,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "astrid",
@@ -22,7 +24,9 @@
       "Traits": [
         "iron_bones",
         "clumsy"
-      ]
+      ],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "bran",
@@ -32,7 +36,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "dagny",
@@ -42,7 +48,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "edda",
@@ -52,7 +60,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "ella",
@@ -64,7 +74,9 @@
       "Starting": true,
       "Traits": [
         "frail"
-      ]
+      ],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "finn",
@@ -74,7 +86,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "greta",
@@ -84,7 +98,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "gudrun",
@@ -94,7 +110,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "halvar",
@@ -104,7 +122,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "hugo",
@@ -114,7 +134,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "ingrid",
@@ -124,7 +146,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "ivo",
@@ -134,7 +158,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "johanna",
@@ -144,7 +170,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "jorun",
@@ -154,7 +182,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "kai",
@@ -164,7 +194,9 @@
       },
       "JobId": "warrior",
       "Starting": true,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": "unit/job/spellblade"
     },
     {
       "Id": "karin",
@@ -174,7 +206,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "lars",
@@ -184,7 +218,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "leif",
@@ -194,7 +230,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "liv",
@@ -204,7 +242,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "magda",
@@ -214,7 +254,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "maren",
@@ -224,7 +266,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "mira",
@@ -237,7 +281,9 @@
       "Traits": [
         "eagle_eye",
         "timid"
-      ]
+      ],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "nils",
@@ -247,7 +293,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "nora",
@@ -257,7 +305,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "orla",
@@ -267,7 +317,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "oskar",
@@ -277,7 +329,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "otto",
@@ -287,7 +341,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "piet",
@@ -297,7 +353,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "ragna",
@@ -307,7 +365,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "rowan",
@@ -319,7 +379,9 @@
       "Starting": true,
       "Traits": [
         "steady"
-      ]
+      ],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "runa",
@@ -329,7 +391,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "sigrid",
@@ -339,7 +403,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "sven",
@@ -349,7 +415,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "teo",
@@ -359,7 +427,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "thea",
@@ -369,7 +439,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "tove",
@@ -379,7 +451,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "ulf",
@@ -389,7 +463,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "una",
@@ -399,7 +475,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "vera",
@@ -409,7 +487,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "viggo",
@@ -419,7 +499,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Male",
+      "Figure": null
     },
     {
       "Id": "wren",
@@ -429,7 +511,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "ylva",
@@ -439,7 +523,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "yrsa",
@@ -449,7 +535,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     },
     {
       "Id": "zelda",
@@ -459,7 +547,9 @@
       },
       "JobId": null,
       "Starting": false,
-      "Traits": []
+      "Traits": [],
+      "Gender": "Female",
+      "Figure": null
     }
   ]
 }

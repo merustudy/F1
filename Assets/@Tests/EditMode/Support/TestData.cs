@@ -150,12 +150,15 @@ namespace F1.Tests
                 { "RecruitTraitWeight0", 1 },
                 { "RecruitTraitWeight1", 0 },
                 { "RecruitTraitWeight2", 0 },
+                // No build by default (stage 57): the data's builds, if any, are never drawn.
+                { "BuildWeightNone", 1 },
                 // No acquired traits by default (Slice D stage 38): the settlement rolls nothing, so it settles as before.
                 { "TraitChanceClearPercent", 0 },
                 { "TraitChanceRetreatPercent", 0 },
                 { "TraitChanceDeathsDoorPercent", 0 },
                 { "TraitChanceAfflictionPercent", 0 },
                 { "TraitChanceVirtuePercent", 0 },
+                { "TraitChanceAllyDiedPercent", 0 },
             };
             foreach ((string key, int value) in overrides)
             {

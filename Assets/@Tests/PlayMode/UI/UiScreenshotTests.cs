@@ -586,6 +586,67 @@ namespace F1.Tests
         }
 
         /// <summary>
+        /// Stage 57 (Docs/Design/39 §2-4, Round 105, the mockup ArtPipeline/Archive/105-warrior-builds/mock-battle.png 안 A, Docs/Design/10 §2): 로언 a giant
+        /// knight in row 1, 카이 in the spellblade's in row 2, a giant and a small swordswoman in rows 3 and 4 (staged), the giant's card in the barracks
+        /// (a rare build), the party popup's stage, the node map's party and the battle at 7.3 seconds, then row 1's attack pose and row 2's hit pose.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheBuilds_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return UiTestUtil.NewRunToLobby();
+            LobbyScreen lobby = UiTestUtil.Screen<LobbyScreen>();
+            RunState run = Managers.Run.Run;
+            RunRules.FindMercenary(run, "rowan").Traits.Insert(0, "giant");
+            // 카이 stands in the spellblade's (the data's); two swordswomen are staged, a giant and a small one (Docs/Design/10 §2, Round 105 v2).
+            run.Recruits.RemoveAll(r => r.Id == "johanna" || r.Id == "greta");
+            foreach ((string id, string build) in new[] { ("johanna", "giant"), ("greta", "small") })
+            {
+                run.Roster.Add(new MercenaryState
+                {
+                    Id = id, JobId = "warrior", Stats = StatRules.BaseOf(Managers.Data.Data, "warrior"), Traits = new List<string> { build }, Figure = "unit/job/swordswoman",
+                });
+            }
+
+            yield return UiTestUtil.OpenBarracks(lobby);
+            UiTestUtil.PlaceInParty(lobby, "rowan", 1);
+            UiTestUtil.PlaceInParty(lobby, "kai", 2);
+            UiTestUtil.PlaceInParty(lobby, "johanna", 3);
+            UiTestUtil.PlaceInParty(lobby, "greta", 4);
+            yield return UiTestUtil.WaitForRedraw();
+            int rowan = run.Roster.FindIndex(m => m.Id == "rowan");
+            UiTestUtil.PressTheBackground();
+            UiTestUtil.RosterEntries(lobby)[rowan].Traits.Chips[1].RightClickNow();
+            yield return Capture("ko_106_barracks_giant_card");
+            UiTestUtil.PressTheBackground();
+            UiTestUtil.CloseQuarter(lobby);
+
+            UiTestUtil.Click(lobby, "Frame/Strip/Depart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Expedition);
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/Details/Depart");
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_107_builds_party");
+            UiTestUtil.Click(UiTestUtil.Screen<ExpeditionScreen>(), "Frame/PartyWindow/PartyDepart");
+            yield return UiTestUtil.WaitForScreen(ScreenId.NodeMap);
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            yield return Capture("ko_108_builds_map");
+
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            battle.Clock.Paused = true;
+            Managers.Expedition.AdvanceBattle(7300 - Managers.Expedition.Battle.Engine.TimeMs);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_109_builds_battle");
+
+            BattleUnitView[] party = UiTestUtil.Views<BattleUnitView>(battle).Where(view => view.Unit.Side == BattleSide.Party).OrderBy(view => view.Unit.Row).ToArray();
+            party[0].Lunge(1f, withPose: true);
+            party[1].Recoil(-1f);
+            yield return Capture("ko_110_builds_poses");
+        }
+
+        /// <summary>
         /// The four jobs of stage 47 in their own pictures (Rounds 93 and 94, 2026-10-22): hired at the stagecoach (staged, two of the five dismissed
         /// for the room) and formed into the party from row 1 — the rogue, the archer, the occultist, the minstrel — the party popup of the
         /// expedition screen with them on its stage and in its list (the head size, the floor line, the thumbnails), then their first battle,

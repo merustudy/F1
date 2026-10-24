@@ -65,6 +65,7 @@ namespace F1.Gameplay
                     StateId = member.AfflictionId,
                     Stats = stats,
                     Traits = new List<string>(member.Traits),
+                    Figure = member.Figure,
                 });
             }
 

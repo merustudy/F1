@@ -653,7 +653,8 @@ namespace F1.UI
             }
 
             string jobId = view.Unit.Setup.JobId;
-            view.HoldPose(virtue ? _art.ResolutePoseOfJob(jobId) : _art.BrokenPoseOfJob(jobId), BreakdownLength / pace);
+            ExpeditionMember held = MemberOf(view.Unit.Setup.SourceId);
+            view.HoldPose(virtue ? _art.ResolutePoseOfMercenary(jobId, held?.Figure, held?.Traits) : _art.BrokenPoseOfMercenary(jobId, held?.Figure, held?.Traits), BreakdownLength / pace);
             if (virtue)
             {
                 view.Pulse();
@@ -1059,18 +1060,29 @@ namespace F1.UI
             return false;
         }
 
+        /// <summary>A member of the expedition by its mercenary id (stage 57: its figure and its build pick what it is shown in), or null.</summary>
+        static ExpeditionMember MemberOf(string mercenaryId)
+        {
+            return Managers.Expedition.Expedition?.Members.Find(m => m.MercenaryId == mercenaryId);
+        }
+
         BattleUnitView CreateUnit(BattleUnit unit, Transform parent)
         {
             BattleUnitView view = Instantiate(_unitTemplate, parent);
             view.gameObject.SetActive(true);
 
-            // A party unit is a mercenary and is shown as its job; an enemy has its own figure, drawn at its own
-            // scale (a boss stands larger than its place, its poses too). Both show their attack and hit poses.
+            // A party unit is a mercenary and is shown as its job (stage 57: in its build where that is drawn for the job, at the build's scale — a giant
+            // stands larger than its place); an enemy has its own figure, drawn at its own scale (a boss stands larger than its place, its poses too).
+            // Both show their attack and hit poses.
             string id = unit.Setup.SourceId;
             if (unit.Side == BattleSide.Party)
             {
                 string job = unit.Setup.JobId;
-                view.Bind(unit, _art.OfJob(job), 1f, _art.AttackPoseOfJob(job), _art.HitPoseOfJob(job));
+                ExpeditionMember member = MemberOf(id);
+                string figure = member?.Figure;
+                IReadOnlyList<string> traits = member?.Traits;
+                view.Bind(unit, _art.OfMercenary(job, figure, traits), _art.ScaleOfMercenary(job, figure, traits), _art.AttackPoseOfMercenary(job, figure, traits),
+                    _art.HitPoseOfMercenary(job, figure, traits));
             }
             else
             {

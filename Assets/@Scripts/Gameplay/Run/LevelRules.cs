@@ -36,10 +36,12 @@ namespace F1.Gameplay
         /// time, <see cref="LevelUp"/>): for each level, every
         /// stat gains its job's growth grade ÷ 100 points and, when the remainder is above 0, one more by that percent chance (one roll of the
         /// stream), up to StatMax. A job without grades grows nothing and rolls nothing. Returns what each stat gained.
+        /// Stage 57: the mercenary's traits add their GrowthPercent to every grade (never under 0).
         /// </summary>
         public static StatBlock Grow(StaticData data, MercenaryState mercenary, int levels, Pcg32 rng)
         {
             StatBlock grades = data.Jobs.Get(mercenary.JobId).Growth;
+            int traitGrowth = TraitRules.BonusOf(data, mercenary.Traits).GrowthPercent;
             StatBlock stats = mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId);
             StatBlock before = stats;
             if (grades != null)
@@ -48,7 +50,7 @@ namespace F1.Gameplay
                 {
                     foreach (Stat stat in StatBlock.All)
                     {
-                        int grade = grades[stat];
+                        int grade = Math.Max(0, grades[stat] + traitGrowth);
                         int points = grade / 100;
                         if (grade % 100 > 0 && rng.NextInt(100) < grade % 100)
                         {

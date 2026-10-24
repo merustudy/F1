@@ -27,8 +27,9 @@ namespace F1.Gameplay
                     JobId = mercenary.JobId,
                     Fatigue = 0,
                     Level = LevelRules.FirstLevel,
-                    Stats = StatRules.BaseOf(data, mercenary.JobId),
+                    Stats = TraitRules.Shifted(data, StatRules.BaseOf(data, mercenary.JobId), mercenary.Traits),
                     Traits = new List<string>(mercenary.Traits),
+                    Figure = mercenary.Figure,
                 });
             }
 
@@ -78,14 +79,39 @@ namespace F1.Gameplay
                 MercenaryData name = pool[rng.NextInt(pool.Count)];
                 pool.Remove(name);
                 JobData job = jobs[rng.NextInt(jobs.Count)];
-                // The spread, then (Slice D stage 42, Docs/Design/04 §6) the candidate meets its job's base weapon: the stat the weapon asks for is raised to what
-                // it asks when the spread took it under, no draw spent (the traits below draw the same numbers either way).
-                StatBlock stats = StatRules.MeetingBaseWeapon(data, job.Id, Spread(data, StatRules.BaseOf(data, job.Id), rng));
-                // Then the innate traits it was born with (Slice D stage 37), on the same stream.
-                drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = stats, Traits = TraitRules.DrawInnate(data, rng) });
+                // The spread, then its build (stage 57, Docs/Design/39 §2-1) with what the build shifts added, then (Slice D stage 42, Docs/Design/04 §6) the
+                // candidate meets its job's base weapon: the stat the weapon asks for is raised to what it asks when the spread and the build took it under
+                // (Docs/Design/39 §2-3), no draw spent (the traits below draw the same numbers either way).
+                StatBlock stats = Spread(data, StatRules.BaseOf(data, job.Id), rng);
+                var traits = new List<string>();
+                string build = TraitRules.DrawBuild(data, rng);
+                if (build != null)
+                {
+                    traits.Add(build);
+                }
+
+                stats = StatRules.MeetingBaseWeapon(data, job.Id, TraitRules.Shifted(data, stats, traits));
+                // Then the other innate traits it was born with (Slice D stage 37), on the same stream; then (stage 57) its figure by its name's gender.
+                traits.AddRange(TraitRules.DrawInnate(data, rng, traits));
+                drawn.Add(new RecruitState { Id = name.Id, JobId = job.Id, Stats = stats, Traits = traits, Figure = DrawFigure(job, name.Gender, rng) });
             }
 
             state.Recruits = drawn;
+        }
+
+        /// <summary>
+        /// A candidate's figure (stage 57, Docs/Design/10 §2, the user's "이름의 성별로"): one of its job's figures of its name's gender, drawn on the
+        /// stagecoach's stream when there are two or more; null (the job's own) when the job has none of that gender. One figure draws nothing.
+        /// </summary>
+        public static string DrawFigure(JobData job, Gender gender, Pcg32 rng)
+        {
+            IReadOnlyList<string> figures = job.FiguresFor(gender);
+            if (figures.Count == 0)
+            {
+                return null;
+            }
+
+            return figures.Count == 1 ? figures[0] : figures[rng.NextInt(figures.Count)];
         }
 
         /// <summary>
@@ -155,6 +181,7 @@ namespace F1.Gameplay
                 Level = LevelRules.FirstLevel,
                 Stats = candidate.Stats ?? StatRules.BaseOf(data, candidate.JobId),
                 Traits = new List<string>(candidate.Traits ?? new List<string>()),
+                Figure = candidate.Figure,
             };
             state.Roster.Add(hired);
             return hired;
@@ -552,7 +579,7 @@ namespace F1.Gameplay
             foreach (PartySlot slot in state.Party)
             {
                 MercenaryState mercenary = FindMercenary(state, slot.MercenaryId);
-                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level, mercenary.Stats, mercenary.Traits));
+                party.Add(new PartyMember(slot.MercenaryId, mercenary.JobId, slot.Row, mercenary.Fatigue, mercenary.AfflictionId, mercenary.Level, mercenary.Stats, mercenary.Traits, mercenary.Figure));
             }
 
             ulong seed = SeedDeriver.Derive(state.Seed, "expedition", state.ExpeditionCount);
@@ -587,6 +614,7 @@ namespace F1.Gameplay
             };
 
             var participants = new HashSet<string>();
+            bool allyDied = expedition.Members.Exists(member => !member.Alive);
             // Stage 54 (the user's "조기 퇴각 패널티", Design/36): an early retreat earns nothing — no experience, no gold, no positive trait.
             bool early = IsEarlyRetreat(data, expedition);
             report.ExpEarned = early ? 0 : LevelRules.ExpFor(data, expedition);
@@ -614,8 +642,9 @@ namespace F1.Gameplay
                     }
 
                     // Slice D stage 38: what the expedition leaves on the survivor (05 §6), on the survivor's own stream for this expedition.
-                    List<string> acquired = TraitRules.DrawAcquired(data, mercenary.Traits, TraitRules.SourcesOf(data, expedition.Result, member),
-                        TraitRules.AcquiredStream(state.Seed, member.MercenaryId, state.ExpeditionCount));
+                    // Stage 57: a breakdown or a virtue leaves its own mark (the state it had), and the death of a member of the party is a source of its own.
+                    List<string> acquired = TraitRules.DrawAcquired(data, mercenary.Traits, TraitRules.SourcesOf(data, expedition.Result, member, allyDied),
+                        TraitRules.AcquiredStream(state.Seed, member.MercenaryId, state.ExpeditionCount), member.StateId);
                     if (early)
                     {
                         // Rolled as always, so a negative trait comes as often as after any retreat; a positive one is thrown away.
@@ -624,6 +653,12 @@ namespace F1.Gameplay
 
                     if (acquired.Count > 0)
                     {
+                        // A trait that shifts a stat adds it when it comes (stage 57); none of the acquired ones does yet.
+                        if (acquired.Exists(id => data.Traits.Get(id).ShiftsStats))
+                        {
+                            mercenary.Stats = TraitRules.Shifted(data, mercenary.Stats ?? StatRules.BaseOf(data, mercenary.JobId), acquired);
+                        }
+
                         mercenary.Traits.AddRange(acquired);
                         report.NewTraits.Add(new AcquiredTraits { MercenaryId = member.MercenaryId, TraitIds = acquired });
                     }

@@ -109,7 +109,9 @@ namespace F1.Data
             string figure = null,
             StatBlock stats = null,
             StatBlock growth = null,
-            LocalizedText passiveName = null)
+            LocalizedText passiveName = null,
+            IReadOnlyList<string> figuresMale = null,
+            IReadOnlyList<string> figuresFemale = null)
         {
             Id = DataId.Require(id, DefinitionName + " Id");
             Name = name ?? throw new DataException($"{DefinitionName} '{id}': Name is missing.");
@@ -135,6 +137,13 @@ namespace F1.Data
             PassiveText = passiveText;
             PassiveName = passiveName;
             Figure = ArtAddress.Optional(figure, $"{DefinitionName} '{id}'", nameof(Figure));
+            // Stage 57 (Docs/Design/10 §2, the user's "이름의 성별로"): the figures a candidate of each gender is drawn among; none means the job's own.
+            FiguresMale = Addresses(figuresMale, $"{DefinitionName} '{id}'", nameof(FiguresMale));
+            FiguresFemale = Addresses(figuresFemale, $"{DefinitionName} '{id}'", nameof(FiguresFemale));
+            if ((FiguresMale.Count > 0 || FiguresFemale.Count > 0) && Figure == null)
+            {
+                throw new DataException($"{DefinitionName} '{id}': a job with figures by gender has its own Figure as well.");
+            }
             Stats = stats;
             // The growth grades (Slice D stage 34): the percent chance of a point per level-up, stat by stat; 100 is a sure point.
             Stat? outside = growth?.FirstOutside(0, MaxGrowthPercent);
@@ -201,6 +210,63 @@ namespace F1.Data
         /// </summary>
         [JsonProperty(Order = 12, Required = Required.AllowNull)]
         public LocalizedText PassiveName { get; }
+
+        /// <summary>The figures a male candidate of the job is drawn among (stage 57), in the data's order; empty for the job's own <see cref="Figure"/>.</summary>
+        [JsonProperty(Order = 13, Required = Required.Always)]
+        public IReadOnlyList<string> FiguresMale { get; }
+
+        /// <summary>The figures a female candidate of the job is drawn among (stage 57); empty for the job's own <see cref="Figure"/>.</summary>
+        [JsonProperty(Order = 14, Required = Required.Always)]
+        public IReadOnlyList<string> FiguresFemale { get; }
+
+        /// <summary>The figures of a gender (stage 57).</summary>
+        public IReadOnlyList<string> FiguresFor(Gender gender)
+        {
+            return gender == Gender.Female ? FiguresFemale : FiguresMale;
+        }
+
+        /// <summary>Whether an address is one of the job's figures: its own or one of a gender's (stage 57).</summary>
+        public bool HasFigure(string address)
+        {
+            if (address == null)
+            {
+                return false;
+            }
+
+            foreach (string figure in FiguresMale)
+            {
+                if (figure == address)
+                {
+                    return true;
+                }
+            }
+
+            foreach (string figure in FiguresFemale)
+            {
+                if (figure == address)
+                {
+                    return true;
+                }
+            }
+
+            return address == Figure;
+        }
+
+        static IReadOnlyList<string> Addresses(IReadOnlyList<string> values, string owner, string column)
+        {
+            var list = new List<string>();
+            foreach (string value in values ?? new List<string>())
+            {
+                if (list.Contains(value))
+                {
+                    throw new DataException($"{owner}: {column} names '{value}' twice.");
+                }
+
+                list.Add(ArtAddress.Optional(value, owner, column) ?? throw new DataException($"{owner}: {column} has an empty address."));
+            }
+
+            return list;
+        }
 
         /// <summary>The address of the attack pose drawn after the figure (<see cref="ArtAddress.PoseOf"/>). Null when the job has no figure.</summary>
         [JsonIgnore]

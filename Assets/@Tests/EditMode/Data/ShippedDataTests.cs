@@ -609,10 +609,12 @@ namespace F1.Tests
         {
             // Slice D stage 37 (Design/16 판정 14, Docs/Design/05 §6): the six innate traits of the first batch, strengths and weaknesses three each,
             // eagle eye against clumsy and steady against timid; the starting roster's set in the data.
+            // Stage 57 (Docs/Design/39 §2·§3): frail moved to the build slot, and three more pairs of character came beside them.
             StaticData data = LoadShipped();
-            CollectionAssert.AreEquivalent(new[] { "eagle_eye", "clumsy", "iron_bones", "frail", "steady", "timid" }, data.InnateTraits.Select(t => t.Id).ToList());
+            CollectionAssert.AreEquivalent(new[] { "eagle_eye", "clumsy", "iron_bones", "steady", "timid", "optimist", "pessimist", "hot_blooded", "coward", "diligent", "lazy" },
+                data.InnateTraits.Select(t => t.Id).ToList());
             Assert.IsTrue(data.InnateTraits.All(t => t.Weight > 0 && t.Source == null));
-            Assert.AreEqual(3, data.InnateTraits.Count(t => t.Polarity == TraitPolarity.Positive));
+            Assert.AreEqual(6, data.InnateTraits.Count(t => t.Polarity == TraitPolarity.Positive));
             Assert.IsTrue(data.Traits.Get("eagle_eye").Clashes(data.Traits.Get("clumsy")));
             Assert.IsTrue(data.Traits.Get("steady").Clashes(data.Traits.Get("timid")));
             Assert.AreEqual((5, -5, -5, -10, -10, 10), (data.Traits.Get("eagle_eye").HitPercent, data.Traits.Get("clumsy").HitPercent, data.Traits.Get("iron_bones").DogDeathPercent,
@@ -624,6 +626,58 @@ namespace F1.Tests
         }
 
         [Test]
+        public void ShippedTraits_Stage57_BuildsCharacterExperienceAndBreakdowns_AreTheDesignsStartingValues()
+        {
+            // Stage 57 (Docs/Design/39, 2026-10-24 "특성도 구현" — 판정 권장안): the build slot (none 50, giant 3 rare at 138%, muscular and sturdy 12,
+            // lithe 10, small 8 drawn in its own figure, frail moved here at 5), three pairs of character, two more of a clear and a retreat, the death of
+            // an ally at 30%, and each breakdown's and virtue's small mark at weight 20 beside the common nightmares and hardened.
+            StaticData data = LoadShipped();
+            Assert.AreEqual(50, data.Balance.BuildWeightNone);
+            CollectionAssert.AreEquivalent(new[] { "giant:3", "muscular:12", "sturdy:12", "lithe:10", "small:8", "frail:5" }, data.BuildTraits.Select(t => $"{t.Id}:{t.Weight}").ToList());
+            TraitData giant = data.Traits.Get("giant");
+            Assert.AreEqual((2, -2, 2, true, "giant", 138, TraitPolarity.Positive), (giant.Str, giant.Dex, giant.Con, giant.Rare, giant.Figure, giant.FigureScale, giant.Polarity));
+            TraitData small = data.Traits.Get("small");
+            Assert.AreEqual((-1, 4, "small", 100, TraitPolarity.Negative), (small.Con, small.DodgePercent, small.Figure, small.FigureScale, small.Polarity));
+            Assert.AreEqual((1, 1, 1), (data.Traits.Get("muscular").Str, data.Traits.Get("sturdy").Con, data.Traits.Get("lithe").Dex));
+            Assert.IsTrue(data.Traits.Get("giant").Clashes(data.Traits.Get("frail")), "One build at most.");
+            Assert.IsTrue(data.Traits.Get("optimist").Clashes(data.Traits.Get("pessimist")));
+            Assert.IsTrue(data.Traits.Get("hot_blooded").Clashes(data.Traits.Get("coward")));
+            Assert.IsTrue(data.Traits.Get("diligent").Clashes(data.Traits.Get("lazy")));
+            Assert.AreEqual((8, -8, 5, -3, 3, -5, 10, -10), (data.Traits.Get("optimist").VirtuePercent, data.Traits.Get("pessimist").VirtuePercent,
+                data.Traits.Get("hot_blooded").DamagePercent, data.Traits.Get("hot_blooded").DodgePercent, data.Traits.Get("coward").DodgePercent,
+                data.Traits.Get("coward").DamagePercent, data.Traits.Get("diligent").GrowthPercent, data.Traits.Get("lazy").GrowthPercent));
+            Assert.AreEqual((TraitSource.Clear, 3, TraitSource.Retreat, -3), (data.Traits.Get("battle_sense").Source.Value, data.Traits.Get("battle_sense").DodgePercent,
+                data.Traits.Get("hesitant").Source.Value, data.Traits.Get("hesitant").HitPercent));
+            Assert.AreEqual(30, data.Balance.TraitChanceAllyDiedPercent);
+            CollectionAssert.AreEquivalent(new[] { "vengeful", "grief" }, data.Traits.Ordered.Where(t => t.Source == TraitSource.AllyDied).Select(t => t.Id).ToList());
+            CollectionAssert.AreEquivalent(
+                new[] { "shaky_hands:fearful", "resigned:hopeless", "death_wish:reckless", "bad_temper:abusive", "voices:irrational",
+                    "unbreakable:stalwart", "valiant:courageous", "cool_headed:focused", "fighting_spirit:powerful" },
+                data.Traits.Ordered.Where(t => t.SourceState != null).Select(t => $"{t.Id}:{t.SourceState}").ToList());
+            Assert.IsTrue(data.Traits.Ordered.Where(t => t.SourceState != null).All(t => t.Weight == 20));
+            CollectionAssert.AreEquivalent(data.FatigueStates.Ordered.Select(state => state.Id).ToList(),
+                data.Traits.Ordered.Where(t => t.SourceState != null).Select(t => t.SourceState).ToList(), "Every breakdown and every virtue leaves its own mark.");
+            Assert.AreEqual((1, -1, -10, 10), (data.Traits.Get("bad_temper").AllyFatigueAtStart, data.Traits.Get("valiant").AllyFatigueAtStart,
+                data.Traits.Get("resigned").HealTakenPercent, data.Traits.Get("unbreakable").HealTakenPercent));
+        }
+
+        [Test]
+        public void ShippedFigures_TheWarriorIsDrawnAmongTheKnightAndTheSpellblade_OrTheSwordswoman_AndEveryNameHasAGender()
+        {
+            // Stage 57 (the user's "이전 마검사 이미지도 전사로 편입" and "이름의 성별로", Docs/Design/10 §2): 카이 stands in the spellblade's.
+            StaticData data = LoadShipped();
+            JobData warrior = data.Jobs.Get("warrior");
+            CollectionAssert.AreEqual(new[] { "unit/job/knight", "unit/job/spellblade" }, warrior.FiguresMale);
+            CollectionAssert.AreEqual(new[] { "unit/job/swordswoman" }, warrior.FiguresFemale);
+            Assert.IsTrue(data.Jobs.Ordered.Where(job => job.Id != "warrior").All(job => job.FiguresMale.Count == 0 && job.FiguresFemale.Count == 0));
+            Assert.AreEqual("unit/job/spellblade", data.Mercenaries.Get("kai").Figure);
+            Assert.IsTrue(data.StartingMercenaries.Where(m => m.Id != "kai").All(m => m.Figure == null));
+            CollectionAssert.AreEquivalent(new[] { "rowan:Male", "astrid:Female", "ella:Female", "mira:Female", "kai:Male" },
+                data.StartingMercenaries.Select(m => m.Id + ":" + m.Gender).ToList());
+            Assert.IsTrue(data.RecruitPool.Any(m => m.Gender == Gender.Female) && data.RecruitPool.Any(m => m.Gender == Gender.Male));
+        }
+
+        [Test]
         public void ShippedTraits_TheAcquiredSeven_ComeFromTheirSources_AtTheStartingChances()
         {
             // Slice D stage 38 (Docs/Design/05 §6 and the stage's 판정 1~3, 2026-10-19 "권장안 대로"): seasoned from a clear, shaken from a retreat,
@@ -631,9 +685,12 @@ namespace F1.Tests
             // clashing pairs; the chances 15, 15, 25, 40, 40.
             StaticData data = LoadShipped();
             List<TraitData> acquired = data.Traits.Ordered.Where(t => t.Kind == TraitKind.Acquired).ToList();
+            // Stage 57 added more of them (the next test); the first seven stay as they were.
+            string[] first = { "seasoned", "shaken", "survivor", "scarred", "limp", "nightmares", "hardened" };
+            acquired = acquired.Where(t => first.Contains(t.Id)).ToList();
             CollectionAssert.AreEquivalent(new[] { "seasoned:Clear:Positive", "shaken:Retreat:Negative", "survivor:DeathsDoor:Positive", "scarred:DeathsDoor:Negative",
                 "limp:DeathsDoor:Negative", "nightmares:Affliction:Negative", "hardened:Virtue:Positive" }, acquired.Select(t => $"{t.Id}:{t.Source}:{t.Polarity}").ToList());
-            Assert.IsTrue(acquired.All(t => t.Weight == 10 && t.Excludes == null));
+            Assert.IsTrue(acquired.All(t => t.Weight == 10 && t.Excludes == null && t.SourceState == null));
             Assert.IsFalse(acquired.Any(t => data.Traits.Ordered.Any(other => other.Excludes == t.Id)));
             Assert.AreEqual((2, -10, -10, -5, -5, 10, 10), (data.Traits.Get("seasoned").CritPercent, data.Traits.Get("shaken").VirtuePercent, data.Traits.Get("survivor").DogDeathPercent,
                 data.Traits.Get("scarred").MaxHpPercent, data.Traits.Get("limp").DodgePercent, data.Traits.Get("nightmares").FatiguePercent, data.Traits.Get("hardened").VirtuePercent));

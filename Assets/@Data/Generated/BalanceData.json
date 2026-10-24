@@ -18,6 +18,10 @@
       "Value": 1
     },
     {
+      "Key": "BuildWeightNone",
+      "Value": 50
+    },
+    {
       "Key": "BurnDamagePerStack",
       "Value": 100
     },
@@ -416,6 +420,10 @@
     {
       "Key": "TraitChanceAfflictionPercent",
       "Value": 40
+    },
+    {
+      "Key": "TraitChanceAllyDiedPercent",
+      "Value": 30
     },
     {
       "Key": "TraitChanceClearPercent",
