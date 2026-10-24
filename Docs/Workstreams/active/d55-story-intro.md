@@ -1,6 +1,6 @@
 # Slice D 55단계: 인트로와 리넷의 대화
 
-Snapshot: 2026-10-24 아침, 세션 정리 뒤 (Round 103과 4판의 인트로 줄: 커밋·푸시 — `96e13db` 기획·Architecture·목업 / `c7b3003` 구현 / `e529b77` 4판의 줄 / Roadmap·Handoff). 10-24 직접 플레이: 광산 원정 13분 42초, 클리어. 그 전: 2026-10-23 밤 세션 정리 뒤 (구현·체인·스크린샷 대조 끝. 커밋·푸시 — 기획·Architecture `893fcf4` / 구현 `62119e0` / Round 101 `81d13a8` / Roadmap·Handoff). 그 전: 같은 날 저녁 설계와 Round 101 목업 → 사용자 **"다른 세션 인트로 목업이 더 마음에 들어서 그걸로 변경. 나머지는 권장안 구현"**.
+Snapshot: 2026-10-24 낮, Round 104(전투의 플레이 피드백 셋) 세션 정리 뒤 (커밋·푸시 — `c9ff1e4` 목업·판정·Architecture / `3be4d2c` 구현 / Roadmap·Handoff). 그 전: 2026-10-24 아침, 세션 정리 뒤 (Round 103과 4판의 인트로 줄: 커밋·푸시 — `96e13db` 기획·Architecture·목업 / `c7b3003` 구현 / `e529b77` 4판의 줄 / Roadmap·Handoff). 10-24 직접 플레이: 광산 원정 13분 42초, 클리어. 그 전: 2026-10-23 밤 세션 정리 뒤 (구현·체인·스크린샷 대조 끝. 커밋·푸시 — 기획·Architecture `893fcf4` / 구현 `62119e0` / Round 101 `81d13a8` / Roadmap·Handoff). 그 전: 같은 날 저녁 설계와 Round 101 목업 → 사용자 **"다른 세션 인트로 목업이 더 마음에 들어서 그걸로 변경. 나머지는 권장안 구현"**.
 
 ## Goal
 Design/33 「검은 백합」의 인트로(§9)와 리넷의 대화 그림(Round 99)을 게임에 넣는다. 이야기가 바뀌면 Design/33을 먼저 고치고 그다음 **데이터만** 고친다(코드에 이야기의 글·이름·장면 차례·시간·카메라·그림 주소·화자·표정이 없다).
@@ -34,10 +34,11 @@ Design/33 「검은 백합」의 인트로(§9)와 리넷의 대화 그림(Round
 - 남은 것(Design/33 §11의 4): 본 그림 라운드(콘티 → 본 그림, 같은 주소; #3·#5 백합 문장 → 금빛 해, #7-2·#10 붕대 끝의 방울, #10의 옷), 소리(인트로 곡·장면 효과음 — `SoundNote`), 마을의 이름, 왕궁 장면과 끝, NPC 생성 타입(`npc`·`portrait`)을 `gen_image.py`에.
 
 ## Next Action
+- **Round 104**(2026-10-24, 10-24 플레이의 피드백 셋 → 사용자 "2. … 살짝 커졌다가 원래 크기로 돌아오는 이펙트로 적용 / 나머지 권고안 적용 구현", `ArtPipeline/Archive/104-battle-feedback/`, 00 "Round 104의 판정", Architecture/12 "전투 화면"): 경직의 별(`StunStarsView`·`ArtTop`), 전투 시작의 차례(`BattleOpening`, 시계 0.0초에 멈춤, 걸음마다 배지·칩이 오름, 뒤 걸음의 글은 앞 글 위 — `BattleFxLayer.Float`의 `overRising`), 효과 칩·배지의 우클릭 카드(`EffectTooltipView`, 문구 `EffectCard.*`). 화면만, 규칙·시뮬·저장 그대로. 체인 `20261024-091911` CHAIN OK, PlayMode `20261024-103937` 103/120, setup·EditMode `20261024-115549` 1154/1154, 스크린샷 `20261024-r104c`(ko_80·103·104·105). 커밋 `c9ff1e4`·`3be4d2c`. 사후 검토: 판정의 권장안 스물하나, 별의 가로 자리(그림 자리의 가운데 — 왼쪽을 보는 쥐는 머리와 등 사이).
 - 직접 플레이(사용자): 새 런의 인트로(본편 → 두 번째부터 짧은 판), 로비의 띠, 리넷의 대화와 표정, 마을의 리넷, 타이틀의 [인트로 보기]. 플레이 기록이 생기면 `Tools/playlog.py`로 먼저 읽는다.
 - 다음 걸음 후보(지시 때): 본 그림 라운드(유료), 소리 라운드, 마을의 이름.
 - 직접 플레이 `play-20261024-074251`(Round 103·4판 줄이 든 판): 인트로 본편 2분 7초, 광산 원정 13분 42초(노드 20·전투 13, 전투 9.2분·노드 맵 4.5분), 클리어 1·2주차. 원정 15~30분의 목표에 조금 못 미친다. 사용자 피드백은 아직 없다.
 - 커밋하지 않은 것(스토리 세션의 작업): Design/33 4판의 문서(§2~§11의 4판 줄과 §11의 4 "4판의 인트로 줄 … → 옮겼다" 줄), 37, 00의 37 줄, Round 98 README·`make_storyboard.py`·`make_motion.py`·`motion/`, `102-marianne/`, `calls.csv`, `d-story-review.md`, `73-abyss/rejected/`, `99-linette/refs/`. 세션 전부터 바뀐 설정 셋(URP 둘·ProjectSettings).
 - 세션 정리의 체인: EditMode `20261023-194852` 1149/1149(마지막 코드 변경 뒤), setup·PlayMode `20261023-184100`.
 - 다른 세션의 미커밋 작업은 커밋하지 않았다: Design/33 §4 마리안 줄(Round 102), `102-marianne/`, Round 98 README·`make_motion.py`·`motion/`, `calls.csv`, `d-story-review.md`.
-- **다음 세션의 시작**: `CLAUDE.md → Docs/Roadmap.md(맨 위 요약, 날짜 표, 55단계 절) → Docs/Workstreams/active/d55-story-intro.md → Docs/Design/33_Black_Lily_Story_Summary.md(§9·§11·§12)` 순서로 읽고 상태를 복구한다. 새 직접 플레이 기록이 있으면 먼저 읽는다. 열린 판정은 없다. 사후 검토 거리(Round 101의 권장안 열넷과 판정 9의 해석, 대사 여섯)와 남은 것(본 그림 라운드, 소리, 마을의 이름, 왕궁 장면과 끝), 10-24 플레이의 원정 시간(13분 42초)을 요약하고 지시를 기다린다.
+- **다음 세션의 시작**: `CLAUDE.md → Docs/Roadmap.md(맨 위 요약, 날짜 표, 43·55단계 절) → Docs/Workstreams/active/d55-story-intro.md → ArtPipeline/Archive/104-battle-feedback/README.md(판정) → Docs/Design/33_Black_Lily_Story_Summary.md(§9·§11·§12)` 순서로 읽고 상태를 복구한다. 새 직접 플레이 기록이 있으면 `Tools/playlog.py`로 먼저 읽는다. 열린 판정은 없다. Round 104(경직의 별·전투 시작의 차례·효과 칩의 카드)를 직접 플레이로 확인할 곳, 사후 검토 거리(Round 104의 권장안 스물하나, Round 101의 권장안 열넷과 판정 9의 해석, 대사 여섯), 남은 것(본 그림 라운드, 소리, 마을의 이름, 왕궁 장면과 끝), 10-24 플레이의 원정 시간(13분 42초)을 요약하고 지시를 기다린다.
