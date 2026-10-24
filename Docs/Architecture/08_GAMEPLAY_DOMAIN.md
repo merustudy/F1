@@ -300,6 +300,19 @@ Assets/@Scripts/Gameplay        Namespace F1.Gameplay. 순수 C#. Unity, Manager
 - 시뮬: `run`의 보고에 계기를 만난 생환자 수와 계기마다 얻은 수(런마다), 끝에 산 용병의 얻은 장점·약점. 정책은 그대로(Design/08 §45).
 - Test: `AcquiredTraitTests`(계기와 그 차례·죽은 이, 계기마다 하나·가진 것과 막는 짝은 제외·굴리지 않는 경우와 스트림, 확률과 가중치의 비율·같은 시드, 정산이 로스터와 보고에 남김·용병의 스트림·죽은 이 없음, 확률 0·후퇴의 특성, `CompleteBattle`의 빈사 표시), `ShippedDataTests`(얻은 일곱의 계기·극성·효과·확률), `StaticDataValidationTests`(계기 열의 검증), `StaticDataTransformerTests`(`Source` 열), `RunSaveMapperTests`(23의 빈사 표시·22 → 23).
 
+### 특성의 확장 (Slice D 57단계)
+
+규칙은 `Docs/Design/05_Mercenary_Growth.md` §6(2026-10-24 줄, Design/39 판정)이 소유한다. 수치는 `TraitData`의 새 열과 `BalanceData`(`BuildWeightNone`, `TraitChanceAllyDiedPercent`).
+
+- Type: `TraitData`에 `Build`·`Rare`·`Figure`·`FigureScale`·`SourceState`와 효과 `Str`~`End`(±10)·`GrowthPercent`·`DamagePercent`·`HealTakenPercent`(±100)·`AllyFatigueAtStart`(±10). 체격 둘은 `Clashes`(체격 칸은 하나). `TraitBonus`에 `GrowthPercent`·`DamagePercent`·`HealTakenPercent`·`AllyFatigueAtStart`의 합. `StaticData.BuildTraits`(가중치 0 초과의 체격), `InnateTraits`는 체격을 뺀다. `TraitSource.AllyDied`.
+- 체격(`TraitRules.DrawBuild`): 후보의 스탯 다음 같은 `Recruit` 스트림에서 한 번, "없음" `BuildWeightNone`과 체격의 가중치(id 차례). 체격이 없는 데이터는 굴리지 않는다. 그다음 `TraitRules.Shifted`(스탯 더하기, `StatMin`~`StatMax`)와 `StatRules.MeetingBaseWeapon`, 그다음 `DrawInnate(data, rng, held)`.
+  **스탯의 이동은 특성이 붙을 때 한 번 스탯에 더한다**(저장된 스탯이 더한 값이라 모든 식이 그대로 읽는다. 시작 로스터는 `NewRun`, 얻은 특성은 정산에서 — 지금 얻은 특성에는 없다). 판정 5의 바닥이 그 위에 선다. 저장 형식은 그대로(런 28).
+- 성장(`LevelRules.Grow`): 직업의 등급에 특성의 `GrowthPercent`를 더하고 0 아래로 내려가지 않는다. 특성이 없으면 굴림은 그대로다.
+- 얻은 특성: `SourcesOf(..., allyDied)`가 그 원정에서 파티원이 죽었으면 `AllyDied`를 마지막에 더한다(정산이 `Members`에서 셈). `DrawAcquired(..., stateId)`는 `SourceState`가 있는 특성을 그 상태(구성원의 `StateId`)에서만 고른다(없는 것은 공통).
+- 전투(`BattleEngine`): 주는 피해는 `owner.State.DamagePercent + owner.Setup.Traits.DamagePercent`(다른 편에, 같은 자리), 받는 회복은 `ApplyHeal`에서 상태와 특성의 % 합, 동료 피로는 시작에 상태의 것 다음에 특성의 것(`BattleEvent.FatigueTrait`, 전투 로그 줄은 없음 — 권장안). 특성이 없는 유닛의 셈은 바이트 단위로 같다(08 §64).
+- 그림(57단계 이어서, Design/10 §2 "이름의 성별로"): `RunRules.DrawFigure(job, gender, rng)`가 후보의 마지막 굴림으로 그 직업·성별의 그림 가운데 하나(둘 이상일 때만 굴림, 없으면 null = 직업의 그림). `MercenaryState.Figure`·`RecruitState.Figure`(고용이 옮김, 시작 로스터는 `MercenaryData.Figure`), `PartyMember.Figure` → `ExpeditionMember.Figure`(화면만 읽음; 저장은 로스터의 것을 다시 넣음). 규칙의 셈에는 닿지 않는다.
+- Test: `TraitExpansionTests`(체격의 차례·스탯·바닥, 체격 없는 데이터, 한 번의 굴림의 비율, `Shifted`·`BuildOf`, 성장, 동료의 죽음과 정산, 상태의 표시, 주는 피해·받는 회복·동료 피로, 그림의 주소와 배율), `StaticDataValidationTests`(새 열의 검사), `ShippedDataTests`(57단계의 값).
+
 ### 방어구 (Slice D 39단계)
 
 규칙은 `Docs/Design/02_Combat_System.md` §3·§4 "방어구"가 소유한다. 수치는 `ItemData`(효과의 보호막, `Trigger`, `CritTakenPercent`).

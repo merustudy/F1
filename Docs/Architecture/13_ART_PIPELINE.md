@@ -383,6 +383,17 @@ NPC의 대화 그림 (55단계: 표정마다 한 장)
   정책과 다르면 다시 Import한다. Inspector에서 고치지 않는다. 체인의 setup 단계가 부른다.
 - 화면은 열리기 전에 쓸 그림을 `ResourceManager`로 읽어 둔다. Addressables를 직접 부르지 않는다(`12_UI.md` "유닛의 그림", "전투 화면").
 
+### 체격의 그림 (Slice D 57단계, Round 105)
+
+- 파일: 직업 그림의 파일 이름 + `_` + 체격의 `Figure`(`Assets/@Art/Unit/Job/knight_giant.png` = `unit/job/knight-giant`), 자세는 그 뒤에 `_attack`·`_hit`(필수)·`_broken`·`_resolute`(있으면)(`Pose/Job/knight_giant_attack.png`). `ArtSetup.Files`가 직업 × 체격(`Figure`가 있는 것)마다 그림 파일이 있으면 그림과 자세를 등록한다(정책 `Figure`·`Pose`, Scope Expedition). 그려지지 않은 직업은 등록하지 않고 화면은 직업의 그림이다.
+- 맞추기는 공통 캔버스(672x896, 자세 2048x1024) 그대로다. 그림 자리보다 큰 체격은 **목표 키 ÷ `FigureScale`의 Height**로 맞추고 화면이 `FigureScale`로 키운다(거인: 목표 Height 95 ÷ 1.38 → 69). 작은 체격은 목표 Height 그대로(왜소 62, 100%). 넓은 캔버스(916x1000)는 Import 정책(2의 거듭제곱 자세 파일)과 화면의 자리 셈에 맞지 않아 쓰지 않는다.
+- 생성: 대기 그림은 `character` 타입(Key는 직업 id — 이 라운드의 소재 파일을 `--roster`로, 출력 이름은 `--name knight_<체격>`), 자세는 `attack`·`hit` 타입에 v1 원본을 `gen_image.pose_reference`로 놓은 기준 그림을 `--reference`로(Key가 직업 id라 기준 그림을 그 이름으로 찾지 못함). `fit_pose.fit_pose`는 `roster_heights`를 그 체격의 Height로 두고 돌린다. 금 장식으로 잰 배율이 틀리면(기본 그림의 장식이 적을 때) 면적으로 잰 Scale을 준다(왜소 1.126·1.081). 기록은 `ArtPipeline/Archive/105-warrior-builds/README.md`.
+
+### 직업의 그림 여럿 (57단계 이어서)
+
+- 직업의 성별별 그림(`JobData.FiguresMale`·`FiguresFemale`)은 직업의 그림과 같은 규칙의 파일이다: `Unit/Job/<이름>.png`와 `Pose/Job/<이름>_attack.png`·`_hit.png`(필수), `_broken`·`_resolute`(있으면). 체격의 변형은 그 이름 뒤에 `_<체격>`(`swordswoman_giant.png`). `ArtSetup`이 데이터의 목록으로 등록한다.
+- 옛 마검사(`spellblade`)는 `Archive/93-job-figures/removed-spellblade/`의 게임 파일 다섯을 그대로 되돌렸다. 여자 전사(`swordswoman`)는 Round 105의 원본을 보통 Height 90·거인 v2 Height 69(화면 138%)·왜소 v2 Height 62로 맞췄고, 자세 넷은 아직 대기 그림을 자세 캔버스에 놓은 것(`fit_pose.idle_wide`)이다.
+
 ## Test와 검사
 
 - EditMode: `ArtSetup.FindProblems`가 비어 있다(`Figure`와 직업과 적의 두 자세, `Background`, `Icon`이 가리키는 파일, `UiArt`의 파일이 있고 Import 정책이 맞다. `Assets/@Art`에 아무도 가리키지 않는 PNG가 없다).
