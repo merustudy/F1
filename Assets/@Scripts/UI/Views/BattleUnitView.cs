@@ -30,6 +30,10 @@ namespace F1.UI
     /// A lunge and a recoil move the figure (and the shadow under it) only: the marks stay in the
     /// column so that they can be read while the figure acts (2026-10-04, round 19). A walk moves
     /// both: the unit has moved to another column. No motion moves the column itself.
+    ///
+    /// Round 104 (2026-10-24): stars turn over the head of a unit a stagger pushed back (<see cref="Stagger"/>), the shield and thorns of the
+    /// battle's opening still to come are held back from its marks (<see cref="HoldBack"/>), and a right click on a chip of its state line or
+    /// on its badge asks for that effect's card (<see cref="EffectRightClicked"/>).
     /// </summary>
     public sealed class BattleUnitView : MonoBehaviour
     {
@@ -43,6 +47,28 @@ namespace F1.UI
 
         /// <summary>How long a pose stays after its lunge or recoil has ended.</summary>
         const float PoseExtra = 0.05f;
+
+        /// <summary>Round 104: how long the stagger's stars fade out at the end, in battle milliseconds, and how far over the head they turn.</summary>
+        const int StarsFadeMs = 150;
+        const float StarsOverHead = 16f;
+
+        /// <summary>Round 104 (판정 3-2): what a right click on the marks opens a card of — the badge's shield or death's door, or a chip of the state line.</summary>
+        public enum EffectChip
+        {
+            Shield,
+            DeathsDoor,
+            Burn,
+            Bleed,
+            Regen,
+            Thorns,
+            Freeze,
+            Blind,
+            Aim,
+            Keen,
+            Fury,
+            Haste,
+            Vulnerable,
+        }
 
         /// <summary>What the rim around the HP bar says, the first that applies: death's door, a potion's target, a shield, or nothing.</summary>
         public enum Rim
@@ -91,6 +117,7 @@ namespace F1.UI
         [SerializeField] GameObject _pipsRow;
         [SerializeField] UiBar[] _fatiguePips;
         [SerializeField] TMP_Text _fatigueState;
+        [SerializeField] StunStarsView _stars;
 
         BattleUnit _unit;
         int _shownHp = -1;
@@ -112,6 +139,9 @@ namespace F1.UI
         bool _shownOverwork;
         bool _stateShown;
         Rim _shownRim = Rim.None;
+        int _heldShield;
+        int _heldThorns;
+        int _stunEndMs = -1;
 
         Vector2 _marksBase;
         bool _marksBaseKnown;
@@ -132,6 +162,18 @@ namespace F1.UI
 
         public Button Button => _button;
         public BattleUnit Unit => _unit;
+
+        /// <summary>Round 104: a right click on the badge or a chip of the state line, with the effect it shows.</summary>
+        public event System.Action<BattleUnitView, EffectChip> EffectRightClicked;
+
+        /// <summary>The stagger's stars over the head (Round 104).</summary>
+        public StunStarsView Stars => _stars;
+
+        /// <summary>The badge's shield as the marks show it: the unit's, less what the opening still holds back.</summary>
+        public int ShieldShown => System.Math.Max(0, _unit.Shield - _heldShield);
+
+        /// <summary>The thorns as the marks show them, less what the opening still holds back.</summary>
+        public int ThornsShown => System.Math.Max(0, _unit.Thorns - _heldThorns);
 
         /// <summary>The unit's art, or its placeholder.</summary>
         public FigureView Figure => _figureView;
@@ -193,6 +235,111 @@ namespace F1.UI
 
             // Only a mercenary has fatigue (Docs/Design/04_Lobby_100Day_Economy.md §3).
             _pipsRow.SetActive(unit.Side == BattleSide.Party);
+
+            // Round 104: the stars stand over the head, whatever the figure's height.
+            _stars.Hide();
+            var stars = (RectTransform)_stars.transform;
+            stars.anchoredPosition = new Vector2(stars.anchoredPosition.x, _figureView.HeadHeight + StarsOverHead);
+            _stunEndMs = -1;
+            _heldShield = 0;
+            _heldThorns = 0;
+        }
+
+        void Awake()
+        {
+            // Round 104 (판정 3-2·3-3): the badge and every chip of the state line open the card of what they show on a right click.
+            Listen(_badge.gameObject, () => _unit.InDog ? EffectChip.DeathsDoor : EffectChip.Shield);
+            Listen(_statusChip, () => EffectChip.DeathsDoor);
+            Listen(_burnChip, () => EffectChip.Burn);
+            Listen(_bleedChip, () => EffectChip.Bleed);
+            Listen(_regenChip, () => EffectChip.Regen);
+            Listen(_thornsChip, () => EffectChip.Thorns);
+            Listen(_freezeChip, () => EffectChip.Freeze);
+            Listen(_blindChip, () => EffectChip.Blind);
+            Listen(_aimChip, () => EffectChip.Aim);
+            Listen(_keenChip, () => EffectChip.Keen);
+            Listen(_furyChip, () => EffectChip.Fury);
+            Listen(_hasteChip, () => EffectChip.Haste);
+            Listen(_vulnerableChip, () => EffectChip.Vulnerable);
+        }
+
+        void Listen(GameObject chip, System.Func<EffectChip> effect)
+        {
+            chip.GetComponent<RightClick>().Clicked += () => EffectRightClicked?.Invoke(this, effect());
+        }
+
+        /// <summary>The badge or the chip that shows an effect: where its card points.</summary>
+        public RectTransform ChipRect(EffectChip chip)
+        {
+            return (RectTransform)ChipObject(chip).transform;
+        }
+
+        /// <summary>Whether the marks show an effect now: its card closes when it goes (판정 3-4).</summary>
+        public bool ChipShown(EffectChip chip)
+        {
+            if (_unit == null || !_unit.Alive)
+            {
+                return false;
+            }
+
+            switch (chip)
+            {
+                case EffectChip.Shield:
+                    return !_unit.InDog && ShieldShown > 0;
+                case EffectChip.DeathsDoor:
+                    return _unit.InDog;
+                default:
+                    return ChipObject(chip).activeInHierarchy;
+            }
+        }
+
+        GameObject ChipObject(EffectChip chip)
+        {
+            switch (chip)
+            {
+                case EffectChip.Shield: return _badge.gameObject;
+                case EffectChip.DeathsDoor: return _statusChip;
+                case EffectChip.Burn: return _burnChip;
+                case EffectChip.Bleed: return _bleedChip;
+                case EffectChip.Regen: return _regenChip;
+                case EffectChip.Thorns: return _thornsChip;
+                case EffectChip.Freeze: return _freezeChip;
+                case EffectChip.Blind: return _blindChip;
+                case EffectChip.Aim: return _aimChip;
+                case EffectChip.Keen: return _keenChip;
+                case EffectChip.Fury: return _furyChip;
+                case EffectChip.Haste: return _hasteChip;
+                case EffectChip.Vulnerable: return _vulnerableChip;
+                default: throw new System.ArgumentOutOfRangeException(nameof(chip), chip, null);
+            }
+        }
+
+        /// <summary>Tests: as if the chip (or the badge) had been right-clicked.</summary>
+        internal void RightClickChip(EffectChip chip)
+        {
+            ChipObject(chip).GetComponent<RightClick>().Simulate();
+        }
+
+        /// <summary>
+        /// Round 104 (판정 1): a stagger pushed this unit's items back by <paramref name="ms"/> at <paramref name="atMs"/>: the stars turn until the
+        /// battle reaches the end of the push. A stagger while they turn adds its time to their end, as the engine adds it to the items' (판정 1-2).
+        /// </summary>
+        public void Stagger(int atMs, int ms)
+        {
+            _stunEndMs = System.Math.Max(_stunEndMs, atMs) + ms;
+        }
+
+        /// <summary>The battle time the stagger's stars turn until, or -1 when none has come.</summary>
+        public int StunEndMs => _stunEndMs;
+
+        /// <summary>
+        /// Round 104 (판정 2-6): how much of the unit's shield and thorns (hundredths) belongs to the battle's opening steps still to come. The
+        /// marks show the rest; the presenter lowers it to 0 as the steps play.
+        /// </summary>
+        public void HoldBack(int shield, int thorns)
+        {
+            _heldShield = shield;
+            _heldThorns = thorns;
         }
 
         /// <summary>Writes a state's stacks into its chip's text when they changed since the last render.</summary>
@@ -318,6 +465,13 @@ namespace F1.UI
             return unit.Shield > 0 ? Rim.Shield : Rim.None;
         }
 
+        /// <summary>The rim as this view shows it: a shield the opening still holds back does not light it.</summary>
+        Rim RimShownFor(bool targetable)
+        {
+            Rim rim = RimFor(_unit, targetable);
+            return rim == Rim.Shield && ShieldShown <= 0 ? Rim.None : rim;
+        }
+
         static Color ColorOf(Rim rim)
         {
             switch (rim)
@@ -344,10 +498,11 @@ namespace F1.UI
                 _hpBar.Set(_unit.Hp, _unit.MaxHp);
             }
 
-            if (_unit.Shield != _shownShield)
+            int shield = ShieldShown;
+            if (shield != _shownShield)
             {
-                _shownShield = _unit.Shield;
-                _badgeNumber.text = UiStrings.Get(UiKeys.Battle.Shield, UiText.Amount(_unit.Shield));
+                _shownShield = shield;
+                _badgeNumber.text = UiStrings.Get(UiKeys.Battle.Shield, UiText.Amount(shield));
             }
 
             if (_unit.Burn != _shownBurn)
@@ -369,10 +524,11 @@ namespace F1.UI
                 _regen.text = UiStrings.Get(UiKeys.Battle.Regen, _unit.Regen);
             }
 
-            if (_unit.Thorns != _shownThorns)
+            int thorns = ThornsShown;
+            if (thorns != _shownThorns)
             {
-                _shownThorns = _unit.Thorns;
-                _thorns.text = UiStrings.Get(UiKeys.Battle.Thorns, UiText.Amount(_unit.Thorns));
+                _shownThorns = thorns;
+                _thorns.text = UiStrings.Get(UiKeys.Battle.Thorns, UiText.Amount(thorns));
             }
 
             // The seven states (stage 45, Round 91): each its stacks.
@@ -392,7 +548,7 @@ namespace F1.UI
             SetShown(_burnChip, !_unit.InDog && _unit.Burn > 0);
             SetShown(_bleedChip, !_unit.InDog && _unit.Bleed > 0);
             SetShown(_regenChip, !_unit.InDog && _unit.Regen > 0);
-            SetShown(_thornsChip, !_unit.InDog && _unit.Thorns > 0);
+            SetShown(_thornsChip, !_unit.InDog && thorns > 0);
             SetShown(_freezeChip, !_unit.InDog && _unit.Freeze > 0);
             SetShown(_blindChip, !_unit.InDog && _unit.Blind > 0);
             SetShown(_aimChip, !_unit.InDog && _unit.Aim > 0);
@@ -402,7 +558,7 @@ namespace F1.UI
             SetShown(_vulnerableChip, !_unit.InDog && _unit.Vulnerable > 0);
 
             // The badge at the bar's end: the skull at death's door, the shield with its number while there is one.
-            Sprite badge = _unit.InDog ? _dangerBadge : _unit.Shield > 0 ? _shieldBadge : null;
+            Sprite badge = _unit.InDog ? _dangerBadge : shield > 0 ? _shieldBadge : null;
             SetShown(_badge.gameObject, badge != null);
             if (badge != null && _badge.sprite != badge)
             {
@@ -412,7 +568,7 @@ namespace F1.UI
             SetShown(_badgeNumber.gameObject, !_unit.InDog);
 
             _button.interactable = targetable && _unit.Alive;
-            Rim rim = RimFor(_unit, targetable);
+            Rim rim = RimShownFor(targetable);
             if (rim != _shownRim)
             {
                 _shownRim = rim;
@@ -424,6 +580,16 @@ namespace F1.UI
             if (_targetLight.enabled != lit)
             {
                 _targetLight.enabled = lit;
+            }
+
+            // Round 104: the stagger's stars, fading over the last moment of the push.
+            if (_unit.Alive && timeMs < _stunEndMs)
+            {
+                _stars.Show(Mathf.Min(1f, (float)(_stunEndMs - timeMs) / StarsFadeMs));
+            }
+            else
+            {
+                _stars.Hide();
             }
         }
 

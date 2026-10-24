@@ -2078,6 +2078,182 @@ MonoBehaviour:
       \uC54A\uC558\uC2B5\uB2C8\uB2E4 (\uC77C\uC2DD\uC758 \uB0A0)"
     m_Metadata:
       m_Items: []
+  - m_Id: 8550042418798592
+    m_Localized: "\uAC00\uC2DC +{0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381504
+    m_Localized: "\uCDA9\uC804 {0}\uCD08"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381505
+    m_Localized: '{0} {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381506
+    m_Localized: "\uD574\uB85C\uC6B4 \uC0C1\uD0DC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381507
+    m_Localized: "\uC774\uB85C\uC6B4 \uC0C1\uD0DC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381508
+    m_Localized: "\uBC29\uC5B4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381509
+    m_Localized: "\uC704\uD5D8"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381510
+    m_Localized: "\uBCF4\uD638\uB9C9"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381511
+    m_Localized: "\uBE48\uC0AC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381512
+    m_Localized: "\uD654\uC0C1"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381513
+    m_Localized: "\uCD9C\uD608"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381514
+    m_Localized: "\uC7AC\uC0DD"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381515
+    m_Localized: "\uAC00\uC2DC"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381516
+    m_Localized: "\uD53C\uD574\uB97C HP\uBCF4\uB2E4 \uBA3C\uC800 {0} \uB9C9\uB294\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381517
+    m_Localized: "\uCD9C\uD608\uC740 \uB9C9\uC9C0 \uBABB\uD55C\uB2E4 \xB7 \uC804\uD22C\uAC00
+      \uB05D\uB098\uBA74 \uC0AC\uB77C\uC9C4\uB2E4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381518
+    m_Localized: "\uD53C\uACA9\uB9C8\uB2E4 \uC0AC\uB9DD \uD310\uC815 {0}%"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381519
+    m_Localized: "HP\uB97C \uD68C\uBCF5\uD558\uBA74 \uBC97\uC5B4\uB09C\uB2E4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381520
+    m_Localized: "{0}\uCD08\uB9C8\uB2E4 \uD53C\uD574 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381521
+    m_Localized: "\uBCF4\uD638\uB9C9\uC774 \uBA3C\uC800 \uB9C9\uB294\uB2E4 \xB7 {0}\uCD08\uB9C8\uB2E4
+      1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381522
+    m_Localized: "{0}\uCD08\uB9C8\uB2E4 \uD53C\uD574 {1} (\uBCF4\uD638\uB9C9\uC744
+      \uB6AB\uB294\uB2E4)"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381523
+    m_Localized: "{0}\uCD08\uB9C8\uB2E4 1\uC529 \uC900\uB2E4 \xB7 \uD68C\uBCF5 \uD55C
+      \uBC88\uC5D0 1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381524
+    m_Localized: "{0}\uCD08\uB9C8\uB2E4 \uD68C\uBCF5 {1}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381525
+    m_Localized: "\uADFC\uC811 \uBB34\uAE30\uB85C \uB54C\uB9B0 \uC801\uC5D0\uAC8C
+      \uD53C\uD574 {0}"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381526
+    m_Localized: "\uC804\uD22C\uAC00 \uB05D\uB0A0 \uB54C\uAE4C\uC9C0 \uB0A8\uB294\uB2E4"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381527
+    m_Localized: "\uC544\uC774\uD15C\uC758 \uCFE8\uB2E4\uC6B4\uC774 {0}% \uB290\uB824\uC9C4\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381528
+    m_Localized: "\uC544\uC774\uD15C\uC758 \uCFE8\uB2E4\uC6B4\uC774 {0}% \uBE68\uB77C\uC9C4\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381529
+    m_Localized: "\uC911\uCCA9 1\uC5D0 {0}% \xB7 \uB2E4\uC74C \uBC1C\uB3D9\uBD80\uD130
+      \xB7 {1}\uCD08\uB9C8\uB2E4 1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381530
+    m_Localized: "\uBB3C\uB9AC \uACF5\uACA9\uC758 \uBA85\uC911 -{0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381531
+    m_Localized: "\uB9C8\uBC95\uC740 \uC5B8\uC81C\uB098 \uB9DE\uB294\uB2E4 \xB7 {0}\uCD08\uB9C8\uB2E4
+      1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381532
+    m_Localized: "\uBB3C\uB9AC \uACF5\uACA9\uC758 \uBA85\uC911 +{0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381533
+    m_Localized: "\uCE58\uBA85\uD0C0 \uD655\uB960 +{0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381534
+    m_Localized: "\uCE58\uBA85\uD0C0 \uBC30\uC218 +{0}%p"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381535
+    m_Localized: "\uC911\uCCA9 1\uC5D0 {0}%p \xB7 {1}\uCD08\uB9C8\uB2E4 1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381536
+    m_Localized: "\uBC1B\uB294 \uBB34\uAE30\xB7\uACF5\uACA9 \uC544\uC774\uD15C\uC758
+      \uD53C\uD574 +{0}%"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381537
+    m_Localized: "\uC911\uCCA9 1\uC5D0 {0}% \xB7 \uD654\uC0C1\xB7\uCD9C\uD608\xB7\uAC00\uC2DC\xB7\uD3ED\uD48D\uC740
+      \uADF8\uB300\uB85C \xB7 {1}\uCD08\uB9C8\uB2E4 1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
+  - m_Id: 8550042431381538
+    m_Localized: "{0}\uCD08\uB9C8\uB2E4 1\uC529 \uC900\uB2E4"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375845
   references:
     version: 2
     RefIds:
@@ -2317,3 +2493,26 @@ MonoBehaviour:
         - id: 8319612088213506
         - id: 8369793756291072
         - id: 8369793756291073
+        - id: 8550042418798592
+        - id: 8550042431381504
+        - id: 8550042431381505
+        - id: 8550042431381516
+        - id: 8550042431381518
+        - id: 8550042431381520
+        - id: 8550042431381521
+        - id: 8550042431381522
+        - id: 8550042431381523
+        - id: 8550042431381524
+        - id: 8550042431381525
+        - id: 8550042431381527
+        - id: 8550042431381528
+        - id: 8550042431381529
+        - id: 8550042431381530
+        - id: 8550042431381531
+        - id: 8550042431381532
+        - id: 8550042431381533
+        - id: 8550042431381534
+        - id: 8550042431381535
+        - id: 8550042431381536
+        - id: 8550042431381537
+        - id: 8550042431381538

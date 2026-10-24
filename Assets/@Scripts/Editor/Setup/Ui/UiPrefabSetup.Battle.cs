@@ -528,6 +528,7 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(screen, "_logEnemyFallen", logEnemyFallen);
             UiBuild.SetReference(screen, "_logClose", logClose.Button);
             UiBuild.SetReference(screen, "_tooltip", BuildItemTooltip(frame, "ItemTooltip"));
+            UiBuild.SetReference(screen, "_effectTooltip", BuildEffectTooltip(frame));
             UiBuild.SetReference(screen, "_boardPanel", panel.rectTransform);
             UiBuild.SetReferences(screen, "_lootBoards", lootBoards);
             UiBuild.SetReference(screen, "_lootDropTemplate", lootDropTemplate);
@@ -783,6 +784,8 @@ namespace F1.Editor.Setup
             // The figure's place, as wide as the column. A click on it counts for the unit.
             RectTransform figure = BuildFigure(root, "UnitFigure", takesClicks: true, out FigureView figureView);
             UiBuild.Line(figure, 0f, BattleFigureHeight);
+            // Round 104: the stagger's stars, over the art; the view puts them over the head when it binds the unit.
+            StunStarsView stars = BuildStunStars(figure);
 
             // The marks: HP with its badge and rim, the fatigue pips (a party unit's; the view hides them for an enemy), then the
             // line of states. The row and the name are on the unit's board.
@@ -857,8 +860,122 @@ namespace F1.Editor.Setup
             UiBuild.SetReference(view, "_pipsRow", marks.PipsRow.gameObject);
             UiBuild.SetReferences(view, "_fatiguePips", marks.Pips);
             UiBuild.SetReference(view, "_fatigueState", fatigueState);
+            UiBuild.SetReference(view, "_stars", stars);
+
+            // Round 104 (판정 3): the badge and every chip take a right click (the effect's card); a left click passes on to the unit.
+            marks.Badge.raycastTarget = true;
+            TakesRightClick(marks.Badge.gameObject);
+            foreach (GameObject chip in new[] { statusChip, burnChip, bleedChip, regenChip, thornsChip, freezeChip, blindChip, aimChip, keenChip, furyChip, hasteChip, vulnerableChip })
+            {
+                var hit = chip.AddComponent<Image>();
+                hit.color = Color.clear;
+                hit.raycastTarget = true;
+                TakesRightClick(chip);
+            }
 
             root.gameObject.SetActive(false);
+            return view;
+        }
+
+        static void TakesRightClick(GameObject thing)
+        {
+            var click = thing.AddComponent<RightClick>();
+            UiBuild.SetBool(click, "_passOtherClicks", true);
+        }
+
+        /// <summary>
+        /// Round 104 (판정 1 A): the stars of a stagger — five, each the item star's art twice (a dark edge under a yellow fill, as the board's stars
+        /// are), on a flat ellipse whose middle the view puts over the unit's head. Hidden until a stagger; they take no clicks.
+        /// </summary>
+        static StunStarsView BuildStunStars(RectTransform figure)
+        {
+            const int count = 5;
+            const float fill = 20f;
+            const float edge = 25f;
+            RectTransform root = UiBuild.Rect("UnitStars", figure);
+            UiBuild.Place(root, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, BattleFigureHeight),
+                new Vector2(2f * StunStarsView.RadiusX + edge, 2f * StunStarsView.RadiusY + edge));
+            var stars = new Object[count];
+            var edges = new Object[count];
+            var fills = new Object[count];
+            for (int i = 0; i < count; i++)
+            {
+                RectTransform star = UiBuild.Rect("UnitStar" + i, root);
+                UiBuild.Place(star, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(edge, edge));
+                Image edgeImage = StarPart(star, "UnitStarEdge" + i, UiArt.Star, edge);
+                edgeImage.color = UiPalette.StarLitEdge;
+                Image fillImage = StarPart(star, "UnitStarFill" + i, UiArt.Star, fill);
+                fillImage.color = UiPalette.StunStar;
+                stars[i] = star;
+                edges[i] = edgeImage;
+                fills[i] = fillImage;
+            }
+
+            var view = root.gameObject.AddComponent<StunStarsView>();
+            UiBuild.SetReferences(view, "_stars", stars);
+            UiBuild.SetReferences(view, "_edges", edges);
+            UiBuild.SetReferences(view, "_fills", fills);
+            root.gameObject.SetActive(false);
+            return view;
+        }
+
+        /// <summary>
+        /// Round 104 (판정 3 A): the card of an effect chip — the trait card's look (Round 84): the dark panel in a 2px brass rim, a brass notch under
+        /// it pointing at the chip; the effect's icon and its title on top, its kind under them, what it does now in its colour, and its rule. It
+        /// stands over everything in the screen and takes no clicks.
+        /// </summary>
+        static EffectTooltipView BuildEffectTooltip(Transform frame)
+        {
+            const float icon = 34f;
+            const float iconTop = 16f;
+            const float height = 158f;
+            RectTransform card = UiBuild.Rect("EffectTooltip", frame);
+            card.anchorMin = new Vector2(0.5f, 0.5f);
+            card.anchorMax = new Vector2(0.5f, 0.5f);
+            card.pivot = new Vector2(0.5f, 0f);
+            card.sizeDelta = new Vector2(EffectTooltipView.MinWidth, height);
+            UiBuild.Stretch(UiBuild.Image("EffectTooltipLine", card, UiPalette.Brass).rectTransform);
+            UiBuild.Stretch(UiBuild.Image("EffectTooltipFill", card, UiPalette.Panel).rectTransform, 2f, 2f, 2f, 2f);
+            RectTransform notch = OutOfLayout(UiBuild.Rect("EffectTooltipNotch", card));
+            notch.gameObject.AddComponent<RectMask2D>();
+            notch.anchorMin = new Vector2(0.5f, 0f);
+            notch.anchorMax = new Vector2(0.5f, 0f);
+            notch.pivot = new Vector2(0.5f, 1f);
+            notch.sizeDelta = new Vector2(TooltipNotch * 2f, TooltipNotch);
+            notch.anchoredPosition = Vector2.zero;
+            Diamond("EffectTooltipNotchFill", notch, UiPalette.Brass, TooltipNotch, new Vector2(0.5f, 1f));
+
+            Image iconImage = KitIcon("EffectTooltipIcon", card, UiArt.Shield);
+            UiBuild.Box(iconImage.rectTransform, EffectTooltipView.Padding, iconTop, icon, icon);
+            float titleLeft = EffectTooltipView.Padding + icon + 12f;
+            TextMeshProUGUI title = UiBuild.SingleLine(UiBuild.Label("EffectTooltipTitle", card, 26f, UiPalette.Text));
+            UiBuild.Box(title.rectTransform, titleLeft, iconTop, 200f, icon);
+            TextMeshProUGUI kind = UiBuild.SingleLine(UiBuild.Label("EffectTooltipKind", card, 18f, UiPalette.TextDim));
+            UiBuild.Box(kind.rectTransform, EffectTooltipView.Padding, 58f, 260f, 26f);
+            TextMeshProUGUI effect = UiBuild.SingleLine(UiBuild.Label("EffectTooltipEffect", card, 22f, UiPalette.Text));
+            UiBuild.Box(effect.rectTransform, EffectTooltipView.Padding, 86f, 260f, 30f);
+            TextMeshProUGUI rule = UiBuild.SingleLine(UiBuild.Label("EffectTooltipRule", card, 18f, UiPalette.TextDim));
+            UiBuild.Box(rule.rectTransform, EffectTooltipView.Padding, 120f, 260f, 26f);
+
+            foreach (Graphic graphic in card.GetComponentsInChildren<Graphic>(true))
+            {
+                graphic.raycastTarget = false;
+            }
+
+            var view = card.gameObject.AddComponent<EffectTooltipView>();
+            UiBuild.SetReference(view, "_icon", iconImage);
+            UiBuild.SetReference(view, "_title", title);
+            UiBuild.SetReference(view, "_kind", kind);
+            UiBuild.SetReference(view, "_effect", effect);
+            UiBuild.SetReference(view, "_rule", rule);
+            UiBuild.SetReference(view, "_notch", notch);
+            // In the order of BattleUnitView.EffectChip.
+            UiBuild.SetReferences(view, "_icons",
+                UiArt.Load(UiArt.Shield), UiArt.Load(UiArt.DeathsDoor), UiArt.Load(UiArt.Burn), UiArt.Load(UiArt.Bleed), UiArt.Load(UiArt.Regen),
+                UiArt.Load(UiArt.Thorns), UiArt.Load(UiArt.Freeze), UiArt.Load(UiArt.Blind), UiArt.Load(UiArt.Aim), UiArt.Load(UiArt.Keen),
+                UiArt.Load(UiArt.Fury), UiArt.Load(UiArt.Haste), UiArt.Load(UiArt.Vulnerable));
+            UiBuild.SetFloat(view, "_titleLeft", titleLeft);
+            card.gameObject.SetActive(false);
             return view;
         }
 

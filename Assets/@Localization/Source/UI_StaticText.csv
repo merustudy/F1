@@ -407,6 +407,8 @@ Fx.Miss,"Rises over a unit an attack missed (Slice D stage 33, Round 81), grey, 
 Fx.Phase,"Rises over a boss that entered a phase (stage 28). {0} = the phase number.",페이즈 {0},Phase {0}
 Fx.CritDamage,"A critical hit's HP lost (stage 22), under Fx.Crit. {0} = HP lost.",-{0}!,-{0}!
 Fx.Collapsed,"The word over a mercenary whose fatigue reached its maximum, in the moment of its exhaustion (stage 48; it was the collapse: it went to death's door, or died there). The unit's name is written under it.",탈진했다,Exhausted
+Fx.Thorns,Round 104: rises over a unit the battle's opening gave thorns. {0} = thorns (whole).,가시 +{0},Thorns +{0}
+Fx.Charge,Round 104: rises over a unit the battle's opening charged. {0} = seconds.,충전 {0}초,Charge {0}s
 Stat.Str,"A stat's name (Slice D stage 32, Round 81; 2026-10-20 스탯 개정): the barracks' lines, the candidates, the party popup and the item cards. Strength: the power of physical weapons.",힘,STR
 Stat.Dex,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Dexterity: the speed, hit and critical chance of physical equipment, and dodge.",민첩,DEX
 Stat.Con,"A stat's name (Slice D stage 32; 2026-10-20 스탯 개정). Constitution: the maximum HP.",체력,CON
@@ -436,3 +438,37 @@ Trait.DogDeath,A trait's effect (Slice D stage 37): on the death chance of a hit
 Trait.Virtue,A trait's effect (Slice D stage 37): on the chance of a virtue at the breakdown. {0} = signed percent points.,각성 확률 {0}%p,Virtue chance {0}%p
 Trait.Fatigue,A trait's effect (Slice D stage 37): on the fatigue the mercenary gains. {0} = signed percent.,오르는 피로 {0}%,Fatigue gained {0}%
 Trait.MaxHp,A trait's effect (Slice D stage 37): on the mercenary's maximum HP. {0} = signed percent.,최대 HP {0}%,Max HP {0}%
+EffectCard.Title,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). Its title. {0} = the effect's name. {1} = its stacks or amount.",{0} {1},{0} {1}
+EffectCard.KindHarmful,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The kind of a harmful state.",해로운 상태,Harmful state
+EffectCard.KindHelpful,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The kind of a helpful state.",이로운 상태,Helpful state
+EffectCard.KindDefence,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The kind of the shield.",방어,Defence
+EffectCard.KindDanger,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The kind of death's door.",위험,Danger
+EffectCard.NameShield,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The shield's name.",보호막,Shield
+EffectCard.NameDeathsDoor,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). Death's door's name.",빈사,Death's Door
+EffectCard.NameBurn,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The burn's name.",화상,Burn
+EffectCard.NameBleed,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The bleed's name.",출혈,Bleed
+EffectCard.NameRegen,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The regen's name.",재생,Regen
+EffectCard.NameThorns,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The thorns' name.",가시,Thorns
+EffectCard.ShieldEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = the shield (whole).",피해를 HP보다 먼저 {0} 막는다,Blocks {0} damage before HP
+EffectCard.ShieldRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The shield's rule.",출혈은 막지 못한다 · 전투가 끝나면 사라진다,Bleed goes through · gone after the battle
+EffectCard.DeathsDoorEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = the death chance per hit, in percent.",피격마다 사망 판정 {0}%,Each hit: {0}% chance to die
+EffectCard.DeathsDoorRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). Death's door's rule.",HP를 회복하면 벗어난다,Healing lifts it
+EffectCard.BurnEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick. {1} = damage a tick.",{0}초마다 피해 {1},{1} damage every {0}s
+EffectCard.BurnRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick.",보호막이 먼저 막는다 · {0}초마다 1씩 준다,Shield blocks it first · -1 every {0}s
+EffectCard.BleedEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick. {1} = damage a tick.",{0}초마다 피해 {1} (보호막을 뚫는다),{1} damage every {0}s (through shield)
+EffectCard.BleedRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick.",{0}초마다 1씩 준다 · 회복 한 번에 1씩 준다,-1 every {0}s · -1 per heal
+EffectCard.RegenEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick. {1} = HP a tick.",{0}초마다 회복 {1},Heals {1} every {0}s
+EffectCard.ThornsEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = thorns (whole).",근접 무기로 때린 적에게 피해 {0},Deals {0} to melee attackers
+EffectCard.ThornsRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The thorns' rule.",전투가 끝날 때까지 남는다,Lasts the battle
+EffectCard.FreezeEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent slower.",아이템의 쿨다운이 {0}% 느려진다,Item cooldowns {0}% slower
+EffectCard.HasteEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent faster.",아이템의 쿨다운이 {0}% 빨라진다,Item cooldowns {0}% faster
+EffectCard.CooldownRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). Freeze's and haste's rule. {0} = percent a stack. {1} = seconds of a tick.",중첩 1에 {0}% · 다음 발동부터 · {1}초마다 1씩 준다,{0}% a stack · from the next use · -1 every {1}s
+EffectCard.BlindEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent points lower.",물리 공격의 명중 -{0}%p,Physical hit chance -{0}%p
+EffectCard.BlindRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = seconds of a tick.",마법은 언제나 맞는다 · {0}초마다 1씩 준다,Magic always hits · -1 every {0}s
+EffectCard.AimEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent points higher.",물리 공격의 명중 +{0}%p,Physical hit chance +{0}%p
+EffectCard.KeenEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent points higher.",치명타 확률 +{0}%p,Critical chance +{0}%p
+EffectCard.FuryEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent points higher.",치명타 배수 +{0}%p,Critical damage +{0}%p
+EffectCard.FuryRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent points a stack. {1} = seconds of a tick.",중첩 1에 {0}%p · {1}초마다 1씩 준다,{0}%p a stack · -1 every {1}s
+EffectCard.VulnerableEffect,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent more.",받는 무기·공격 아이템의 피해 +{0}%,Item damage taken +{0}%
+EffectCard.VulnerableRule,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). {0} = percent a stack. {1} = seconds of a tick.",중첩 1에 {0}% · 화상·출혈·가시·폭풍은 그대로 · {1}초마다 1씩 준다,"{0}% a stack · not burn, bleed, thorns or storm · -1 every {1}s"
+EffectCard.Decay,"Round 104: the card a right click on an effect chip under a unit opens (Docs/Architecture/12_UI.md ""효과 칩의 카드""). The rule of a state that only wears off. {0} = seconds of a tick.",{0}초마다 1씩 준다,-1 every {0}s

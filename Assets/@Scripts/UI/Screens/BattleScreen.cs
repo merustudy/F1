@@ -106,6 +106,9 @@ namespace F1.UI
 
         static readonly int[] Speeds = { 100, 200, 400 };
 
+        /// <summary>Round 104: the most of the battle's opening a frame moves on, in seconds.</summary>
+        const float OpeningMaxStep = 0.1f;
+
         [SerializeField] Image _background;
         [SerializeField] TMP_Text _title;
         [SerializeField] TMP_Text _clockTime;
@@ -151,6 +154,7 @@ namespace F1.UI
         [SerializeField] TMP_Text _logEnemyFallen;
         [SerializeField] Button _logClose;
         [SerializeField] ItemTooltipView _tooltip;
+        [SerializeField] EffectTooltipView _effectTooltip;
         [SerializeField] RectTransform _boardPanel;
         [SerializeField] PartyBoardView[] _lootBoards;
         [SerializeField] LootDropView _lootDropTemplate;
@@ -500,10 +504,10 @@ namespace F1.UI
             _stageRest = frameRect.center;
             _presenter = new BattlePresenter(engine, Managers.Data.Data, _fx, UnitViewOf, BoardViewOf, _candle.Rect, PushCaption, OnPartyFell,
                 KillMomentsOn, OnKillingBlow, Managers.Sound.PlayEffect, OnBreakdown);
-            // A battle that opens now shows its armour's activations at 0 ms (Round 87); the loot alone has no battle to show.
+            // A battle that opens now shows its items' activations at 0 ms one by one while the clock holds (Round 104); the loot alone has no battle.
             if (_battle != null)
             {
-                _presenter.PlayOpeningArmour();
+                _presenter.BeginOpening();
             }
             RenderCaptions();
             Managers.Sound.PlayMusic(IsBossBattle() ? MusicTrack.Boss : MusicTrack.Dungeon);
@@ -893,10 +897,22 @@ namespace F1.UI
             AdvanceKillMoment(Time.unscaledDeltaTime);
             if (_battle != null && !_battle.IsFinished)
             {
-                int stepMs = _clock.Step(Time.unscaledDeltaTime);
-                if (stepMs > 0)
+                if (_presenter.OpeningPlaying)
                 {
-                    Managers.Expedition.AdvanceBattle(stepMs);
+                    // Round 104 (판정 2): the clock stands at 0.0 s while the opening plays, as long at x1 as the opening says and shorter at
+                    // a higher speed; a pause holds it too. A long frame (the screen opening) moves it by a tenth of a second at most.
+                    if (!_clock.Paused)
+                    {
+                        _presenter.AdvanceOpening(Mathf.Min(Time.unscaledDeltaTime, OpeningMaxStep) * _clock.SpeedPercent / 100f);
+                    }
+                }
+                else
+                {
+                    int stepMs = _clock.Step(Time.unscaledDeltaTime);
+                    if (stepMs > 0)
+                    {
+                        Managers.Expedition.AdvanceBattle(stepMs);
+                    }
                 }
             }
 
@@ -1060,6 +1076,8 @@ namespace F1.UI
             {
                 view.Bind(unit, _art.OfEnemy(id), _art.ScaleOfEnemy(id), _art.AttackPoseOfEnemy(id), _art.HitPoseOfEnemy(id));
             }
+
+            view.EffectRightClicked += OnEffectRightClicked;
             return view;
         }
 
@@ -1075,12 +1093,35 @@ namespace F1.UI
                 return;
             }
 
+            _effectTooltip.Hide();
             bool party = board.Unit.Side == BattleSide.Party;
             _tooltip.ShowBeside(item.Equipped, (RectTransform)view.transform, party, _boardPanel, withFatigue: party,
                 starLine: party ? BattleStarLine(board.Unit, item) : null, starDamage: item.StarDamage, ownerStats: board.Unit.Setup.Stats, ownerAccuracy: board.Unit.Setup.Accuracy, ownerPassive: board.Unit.Setup.Passive,
                 ownerTraits: board.Unit.Setup.Traits, ownerIsEnemy: !party);
             Managers.Sound.PlayEffect(SoundEffect.Button);
         }
+
+        /// <summary>
+        /// Round 104 (판정 3): a right click on a unit's badge or on a chip of its state line opens that effect's card over it, as an item's cell
+        /// opens the item's: while the battle goes on and no potion waits for a target. The item card closes for it.
+        /// </summary>
+        void OnEffectRightClicked(BattleUnitView view, BattleUnitView.EffectChip chip)
+        {
+            if (_battle == null || _battle.IsFinished || _armedPotion >= 0 || _resultShown || !view.ChipShown(chip))
+            {
+                return;
+            }
+
+            _tooltip.Hide();
+            _effectTooltip.Show(view, chip, _engine.Setup.Balance);
+            Managers.Sound.PlayEffect(SoundEffect.Button);
+        }
+
+        /// <summary>The card of a right-clicked effect chip (Round 104). For tests.</summary>
+        public EffectTooltipView EffectTooltip => _effectTooltip;
+
+        /// <summary>True while the battle's opening plays and the clock holds at 0.0 s (Round 104). For tests.</summary>
+        public bool OpeningPlaying => _presenter != null && _presenter.OpeningPlaying;
 
         /// <summary>
         /// What the stars say of a party item in battle (stage 20): the battle's items are the member's board in reading order, unchanged
@@ -1394,6 +1435,7 @@ namespace F1.UI
             _resultShown = true;
             _armedPotion = -1;
             _tooltip.Hide();
+            _effectTooltip.Hide();
 
             // Round 47: a win with the expedition going on keeps the stage: the band, the loot on the floor, the node map's boards.
             // A lost battle, a retreat and the boss's win (the expedition is over) keep the result window.

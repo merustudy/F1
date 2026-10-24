@@ -2015,6 +2015,174 @@ MonoBehaviour:
     m_Localized: 'Back early: no time passed (the day of the eclipse)'
     m_Metadata:
       m_Items: []
+  - m_Id: 8550042418798592
+    m_Localized: Thorns +{0}
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381504
+    m_Localized: Charge {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381505
+    m_Localized: '{0} {1}'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381506
+    m_Localized: Harmful state
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381507
+    m_Localized: Helpful state
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381508
+    m_Localized: Defence
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381509
+    m_Localized: Danger
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381510
+    m_Localized: Shield
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381511
+    m_Localized: Death's Door
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381512
+    m_Localized: Burn
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381513
+    m_Localized: Bleed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381514
+    m_Localized: Regen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381515
+    m_Localized: Thorns
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381516
+    m_Localized: Blocks {0} damage before HP
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381517
+    m_Localized: "Bleed goes through \xB7 gone after the battle"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381518
+    m_Localized: 'Each hit: {0}% chance to die'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381519
+    m_Localized: Healing lifts it
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381520
+    m_Localized: '{1} damage every {0}s'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381521
+    m_Localized: "Shield blocks it first \xB7 -1 every {0}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381522
+    m_Localized: '{1} damage every {0}s (through shield)'
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381523
+    m_Localized: "-1 every {0}s \xB7 -1 per heal"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381524
+    m_Localized: Heals {1} every {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381525
+    m_Localized: Deals {0} to melee attackers
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381526
+    m_Localized: Lasts the battle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 8550042431381527
+    m_Localized: Item cooldowns {0}% slower
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381528
+    m_Localized: Item cooldowns {0}% faster
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381529
+    m_Localized: "{0}% a stack \xB7 from the next use \xB7 -1 every {1}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381530
+    m_Localized: Physical hit chance -{0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381531
+    m_Localized: "Magic always hits \xB7 -1 every {0}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381532
+    m_Localized: Physical hit chance +{0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381533
+    m_Localized: Critical chance +{0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381534
+    m_Localized: Critical damage +{0}%p
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381535
+    m_Localized: "{0}%p a stack \xB7 -1 every {1}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381536
+    m_Localized: Item damage taken +{0}%
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381537
+    m_Localized: "{0}% a stack \xB7 not burn, bleed, thorns or storm \xB7 -1 every
+      {1}s"
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
+  - m_Id: 8550042431381538
+    m_Localized: -1 every {0}s
+    m_Metadata:
+      m_Items:
+      - rid: 636489278608375844
   references:
     version: 2
     RefIds:
@@ -2254,3 +2422,26 @@ MonoBehaviour:
         - id: 8319612088213506
         - id: 8369793756291072
         - id: 8369793756291073
+        - id: 8550042418798592
+        - id: 8550042431381504
+        - id: 8550042431381505
+        - id: 8550042431381516
+        - id: 8550042431381518
+        - id: 8550042431381520
+        - id: 8550042431381521
+        - id: 8550042431381522
+        - id: 8550042431381523
+        - id: 8550042431381524
+        - id: 8550042431381525
+        - id: 8550042431381527
+        - id: 8550042431381528
+        - id: 8550042431381529
+        - id: 8550042431381530
+        - id: 8550042431381531
+        - id: 8550042431381532
+        - id: 8550042431381533
+        - id: 8550042431381534
+        - id: 8550042431381535
+        - id: 8550042431381536
+        - id: 8550042431381537
+        - id: 8550042431381538

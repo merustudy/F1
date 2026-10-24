@@ -464,6 +464,49 @@ namespace F1.UI
             public const string Phase = "Fx.Phase";
             public const string CritDamage = "Fx.CritDamage";
             public const string Collapsed = "Fx.Collapsed";
+
+            /// <summary>Round 104: the words of thorns and a charge the battle's opening gave.</summary>
+            public const string Thorns = "Fx.Thorns";
+            public const string Charge = "Fx.Charge";
+        }
+
+        /// <summary>Round 104: the card of an effect chip under a unit (EffectTooltipView).</summary>
+        public static class EffectCard
+        {
+            public const string Title = "EffectCard.Title";
+            public const string KindHarmful = "EffectCard.KindHarmful";
+            public const string KindHelpful = "EffectCard.KindHelpful";
+            public const string KindDefence = "EffectCard.KindDefence";
+            public const string KindDanger = "EffectCard.KindDanger";
+            public const string NameShield = "EffectCard.NameShield";
+            public const string NameDeathsDoor = "EffectCard.NameDeathsDoor";
+            public const string NameBurn = "EffectCard.NameBurn";
+            public const string NameBleed = "EffectCard.NameBleed";
+            public const string NameRegen = "EffectCard.NameRegen";
+            public const string NameThorns = "EffectCard.NameThorns";
+            public const string ShieldEffect = "EffectCard.ShieldEffect";
+            public const string ShieldRule = "EffectCard.ShieldRule";
+            public const string DeathsDoorEffect = "EffectCard.DeathsDoorEffect";
+            public const string DeathsDoorRule = "EffectCard.DeathsDoorRule";
+            public const string BurnEffect = "EffectCard.BurnEffect";
+            public const string BurnRule = "EffectCard.BurnRule";
+            public const string BleedEffect = "EffectCard.BleedEffect";
+            public const string BleedRule = "EffectCard.BleedRule";
+            public const string RegenEffect = "EffectCard.RegenEffect";
+            public const string ThornsEffect = "EffectCard.ThornsEffect";
+            public const string ThornsRule = "EffectCard.ThornsRule";
+            public const string FreezeEffect = "EffectCard.FreezeEffect";
+            public const string HasteEffect = "EffectCard.HasteEffect";
+            public const string CooldownRule = "EffectCard.CooldownRule";
+            public const string BlindEffect = "EffectCard.BlindEffect";
+            public const string BlindRule = "EffectCard.BlindRule";
+            public const string AimEffect = "EffectCard.AimEffect";
+            public const string KeenEffect = "EffectCard.KeenEffect";
+            public const string FuryEffect = "EffectCard.FuryEffect";
+            public const string FuryRule = "EffectCard.FuryRule";
+            public const string VulnerableEffect = "EffectCard.VulnerableEffect";
+            public const string VulnerableRule = "EffectCard.VulnerableRule";
+            public const string Decay = "EffectCard.Decay";
         }
 
         public static class Log

@@ -3041,8 +3041,8 @@ namespace F1.Tests
 
         /// <summary>
         /// Slice D stage 39 (Round 87): the armour. On the node map the helm's card says it activates at the start of battle (no cooldown), what it
-        /// takes off the critical chance and its fatigue; in battle both pieces fired once at 0 ms — their cells stay lit with no charge, their
-        /// "방어 +N" rises once the screen is laid out, and the shield counts them.
+        /// takes off the critical chance and its fatigue; in battle both pieces fired once at 0 ms — their cells stay lit with no charge — and the
+        /// screen plays them one by one while its clock holds (Round 104): their "방어 +N" rises in turn and the badge counts each as it plays.
         /// </summary>
         [UnityTest]
         public IEnumerator Armour_TheCardSaysWhenItActivates_AndTheBattleOpensWithItsShield()
@@ -3079,19 +3079,36 @@ namespace F1.Tests
             }
 
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
-            battle.Clock.Paused = true;
             BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
+            BattleUnitView unit = UiTestUtil.Views<BattleUnitView>(battle).Single(v => v.Unit == board.Unit);
             List<BattleItemState> items = board.Unit.Items.ToList();
             int armourIndex = items.FindIndex(i => i.Equipped == armour);
             int helmIndex = items.FindIndex(i => i.Equipped == helm);
             Assert.IsTrue(board.Unit.Shield >= armour.Item.Effects[0].Min + helm.Item.Effects[0].Min, "Both pieces shielded their owner at 0 ms.");
+
+            // Round 104: the screen plays the two activations one by one while its clock holds at 0.0 s; the badge counts each piece's shield
+            // when its step plays.
+            Assert.IsTrue(battle.OpeningPlaying);
+            Assert.Less(unit.ShieldShown, board.Unit.Shield, "The pieces' shield waits for their steps.");
             BattleFxLayer fx = battle.GetComponentInChildren<BattleFxLayer>(true);
-            for (int frame = 0; frame < 5 && fx.FloatingPlayed < 2; frame++)
+            BattleEngine engine = Managers.Expedition.Battle.Engine;
+            float started = Time.unscaledTime;
+            while (battle.OpeningPlaying && Time.unscaledTime - started < 5f)
+            {
+                Assert.AreEqual(0, engine.TimeMs, "The clock holds while the opening plays.");
+                yield return null;
+            }
+
+            Assert.IsFalse(battle.OpeningPlaying);
+            Assert.GreaterOrEqual(fx.FloatingPlayed, 2, "The two pieces' \"방어 +N\" rose, one after the other.");
+            Assert.AreEqual(board.Unit.Shield, unit.ShieldShown, "Both counted on the badge.");
+            for (int frame = 0; frame < 30 && engine.TimeMs == 0; frame++)
             {
                 yield return null;
             }
 
-            Assert.GreaterOrEqual(fx.FloatingPlayed, 2, "The two pieces' \"방어 +N\" rose when the battle opened.");
+            Assert.Greater(engine.TimeMs, 0, "Then the battle runs.");
+            battle.Clock.Paused = true;
             Assert.AreEqual(1f, board.Items[armourIndex].Charge, "The armour never charges: always lit.");
             Assert.AreEqual(1f, board.Items[helmIndex].Charge);
         }

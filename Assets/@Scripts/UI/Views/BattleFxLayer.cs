@@ -166,9 +166,14 @@ namespace F1.UI
 
         /// <summary>A text that rises from the top centre of a place on the screen.</summary>
         /// <param name="big">True for a heavy moment: a large hit, death's door, a death.</param>
-        public void Float(RectTransform over, string text, Color color, bool big)
+        /// <param name="overRising">
+        /// Round 104: start above every text near it that is still on its way up, instead of a step for each that started a moment ago. The
+        /// battle's opening plays its steps a third of a second apart, and a text rises fast and then slows: one started later from a step above
+        /// would catch the other up. From above where the other is now the gap only grows (Round 104's mock: the later word over the earlier).
+        /// </param>
+        public void Float(RectTransform over, string text, Color color, bool big, bool overRising = false)
         {
-            Rise(over, text, color, big ? 1.4f : 1f, big ? 1.4f : 1.05f);
+            Rise(over, text, color, big ? 1.4f : 1f, big ? 1.4f : 1.05f, overRising);
         }
 
         /// <summary>
@@ -189,7 +194,7 @@ namespace F1.UI
         const float CriticalLife = 1.4f;
         const int CriticalWordPercent = 45;
 
-        bool Rise(RectTransform over, string text, Color color, float scale, float life)
+        bool Rise(RectTransform over, string text, Color color, float scale, float life, bool overRising = false)
         {
             if (over == null)
             {
@@ -213,11 +218,34 @@ namespace F1.UI
             }
 
             Vector2 top = LocalPoint(over, new Vector2(over.rect.center.x, over.rect.yMax));
-            top += new Vector2(0f, StackStep * CountRecentNear(top));
+            if (overRising)
+            {
+                top.y = AboveRising(top, view);
+            }
+            else
+            {
+                top += new Vector2(0f, StackStep * CountRecentNear(top));
+            }
+
             _launches.Add(new Launch { Point = top, Time = Time.time });
             view.Play(top, text, color, scale, life);
             FloatingPlayed++;
             return true;
+        }
+
+        /// <summary>The height a step above the highest text near this point still on its way up (not one far under it), or the point's own.</summary>
+        float AboveRising(Vector2 point, FloatingTextView starting)
+        {
+            float y = point.y;
+            foreach (FloatingTextView other in _floats)
+            {
+                if (other != starting && other.Playing && Mathf.Abs(other.Position.x - point.x) < StackDistance && other.Position.y >= point.y - StackStep)
+                {
+                    y = Mathf.Max(y, other.Position.y + StackStep);
+                }
+            }
+
+            return y;
         }
 
         /// <summary>How many texts started near this point a moment ago. Old launches are forgotten here.</summary>

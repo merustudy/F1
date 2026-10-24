@@ -65,6 +65,28 @@ namespace F1.UI
         /// <summary>The image of the art, for a ghost of it. Disabled while the placeholder stands in.</summary>
         public Image ArtImage => _art;
 
+        /// <summary>
+        /// Round 104: how high over the place's bottom (the floor line) the figure's head is — the top of its art at its scale, or the top of the
+        /// place for the placeholder. The stagger's stars turn there.
+        /// </summary>
+        public float HeadHeight
+        {
+            get
+            {
+                if (_figure == null)
+                {
+                    return ((RectTransform)transform).rect.height;
+                }
+
+                if (!_artBaseKnown)
+                {
+                    SetScale(_scale);
+                }
+
+                return ArtTop.Of(_figure) * _artBase.y * _scale;
+            }
+        }
+
         /// <param name="art">Null for a unit without art.</param>
         public void Show(Sprite art)
         {

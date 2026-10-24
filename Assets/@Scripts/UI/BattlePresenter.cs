@@ -89,34 +89,143 @@ namespace F1.UI
         }
 
         /// <summary>
-        /// Round 87 (Slice D stage 39): a battle that opens at 0 ms plays what its armour did then — each piece's activation (the cell's flash,
-        /// the sound, the caption) and its "방어 +N" — which the engine logged before the screen opened. Nothing else of the opening is replayed
-        /// (a job's passive shield shows on the badge only, as before). It plays on the second frame, once the screen is laid out.
+        /// Round 104 (판정 2, replacing Round 87's all-at-once): a battle that opens at 0 ms plays what its items that activate when a battle
+        /// starts did then (<see cref="BattleOpening"/>), one activation at a time — the item's swell in its cell, its owner's motion and sound,
+        /// the caption, and its words ("방어 +N", "가시 +N", "충전 N초") — while the screen holds the clock at 0.0 s. The shield and the thorns of a
+        /// step still to come are held back from the unit's marks until it plays. The maximum HP is there from the first frame, its caption told at
+        /// once. A job's passive shield shows on the badge from the start, as before. A battle continued from a save (past 0 ms) has no opening.
         /// </summary>
-        public void PlayOpeningArmour()
+        public void BeginOpening()
         {
             if (_engine.TimeMs != 0)
             {
                 return;
             }
 
-            IReadOnlyList<BattleEvent> events = _engine.Events;
-            _opening = new List<int>();
-            for (int i = 0; i < events.Count; i++)
+            _opening = BattleOpening.Of(_engine.Events, id => _data.Items.Contains(id) && _data.Items.Get(id).Trigger == ItemTrigger.BattleStart);
+            _openingAge = 0f;
+            _openingPlayed = 0;
+            foreach (int index in _opening.AtOnce)
             {
-                BattleEvent e = events[i];
-                bool armour = e.Id != null && _data.Items.Contains(e.Id) && _data.Items.Get(e.Id).Trigger == ItemTrigger.BattleStart;
-                if (armour && (e.Kind == BattleEventKind.ItemActivated || e.Kind == BattleEventKind.ShieldGained || e.Kind == BattleEventKind.MaxHpRaised))
+                Caption(_engine.Events[index]);
+            }
+
+            HoldBack();
+            if (_opening.Steps.Count == 0)
+            {
+                _opening = null;
+            }
+        }
+
+        BattleOpening _opening;
+        float _openingAge;
+        int _openingPlayed;
+
+        /// <summary>True while an opening step plays: its words start above the earlier steps' still rising over the unit.</summary>
+        bool _overRising;
+
+        /// <summary>True while the opening plays: the screen holds the battle's clock.</summary>
+        public bool OpeningPlaying => _opening != null;
+
+        /// <summary>Moves the opening on by this many seconds of x1 (the screen scales them by the speed) and plays the steps that came due.</summary>
+        public void AdvanceOpening(float seconds)
+        {
+            if (_opening == null)
+            {
+                return;
+            }
+
+            _openingAge += seconds;
+            IReadOnlyList<BattleOpening.Step> steps = _opening.Steps;
+            IReadOnlyList<BattleEvent> events = _engine.Events;
+            while (_openingPlayed < steps.Count && steps[_openingPlayed].At <= _openingAge)
+            {
+                _overRising = true;
+                foreach (int index in steps[_openingPlayed].Events)
                 {
-                    _opening.Add(i);
+                    PlayOpeningEvent(events[index], index);
+                }
+
+                _overRising = false;
+
+                _openingPlayed++;
+                HoldBack();
+            }
+
+            if (_openingAge >= _opening.Length)
+            {
+                _opening = null;
+            }
+        }
+
+        /// <summary>The battle moved past 0 ms without the screen's clock (a test stepping it): the opening is over, its steps left unplayed.</summary>
+        void CutOpening()
+        {
+            _opening = null;
+            HoldBack();
+        }
+
+        /// <summary>One event of an opening step: as in battle, and the words of thorns and a charge, which only the opening raises (판정 2-7).</summary>
+        void PlayOpeningEvent(BattleEvent e, int index)
+        {
+            if (e.Kind == BattleEventKind.MaxHpRaised)
+            {
+                Caption(e);
+                return;
+            }
+
+            PlayOne(e, index);
+            if (e.Kind == BattleEventKind.ThornsGained && UiText.Amount(e.A) > 0)
+            {
+                FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Thorns, UiText.Amount(e.A)), UiPalette.Thorns, false);
+            }
+            else if (e.Kind == BattleEventKind.Charged)
+            {
+                FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Charge, UiText.Seconds(e.A)), UiPalette.ChargeEdge, false);
+            }
+        }
+
+        /// <summary>Tells every unit's view how much of its shield and thorns belongs to the opening's steps still to come.</summary>
+        void HoldBack()
+        {
+            var shield = new Dictionary<UnitRef, int>();
+            var thorns = new Dictionary<UnitRef, int>();
+            IReadOnlyList<BattleEvent> events = _engine.Events;
+            for (int s = _openingPlayed; _opening != null && s < _opening.Steps.Count; s++)
+            {
+                foreach (int index in _opening.Steps[s].Events)
+                {
+                    BattleEvent e = events[index];
+                    if (e.Kind == BattleEventKind.ShieldGained)
+                    {
+                        shield[e.Target] = (shield.TryGetValue(e.Target, out int held) ? held : 0) + e.A;
+                    }
+                    else if (e.Kind == BattleEventKind.ThornsGained)
+                    {
+                        thorns[e.Target] = (thorns.TryGetValue(e.Target, out int held) ? held : 0) + e.A;
+                    }
                 }
             }
 
-            _openingFrames = 1;
+            foreach (BattleUnit unit in _engine.Party)
+            {
+                _unitView(unit.Ref)?.HoldBack(shield.TryGetValue(unit.Ref, out int s) ? s : 0, thorns.TryGetValue(unit.Ref, out int t) ? t : 0);
+            }
+
+            foreach (BattleUnit unit in _engine.Enemies)
+            {
+                _unitView(unit.Ref)?.HoldBack(shield.TryGetValue(unit.Ref, out int s) ? s : 0, thorns.TryGetValue(unit.Ref, out int t) ? t : 0);
+            }
         }
 
-        List<int> _opening;
-        int _openingFrames;
+        void Caption(BattleEvent e)
+        {
+            string caption = BattleLogText.Caption(e, _engine);
+            if (caption != null)
+            {
+                _caption(caption);
+            }
+        }
 
         /// <summary>How many events of the log have been passed, played or skipped.</summary>
         public int Played => _played;
@@ -124,17 +233,12 @@ namespace F1.UI
         /// <summary>Plays the events logged since the last call, as far as they are recent.</summary>
         public void Play()
         {
-            IReadOnlyList<BattleEvent> events = _engine.Events;
-            if (_opening != null && _openingFrames-- <= 0)
+            if (_opening != null && _engine.TimeMs > 0)
             {
-                foreach (int index in _opening)
-                {
-                    PlayOne(events[index], index);
-                }
-
-                _opening = null;
+                CutOpening();
             }
 
+            IReadOnlyList<BattleEvent> events = _engine.Events;
             for (; _played < events.Count; _played++)
             {
                 BattleEvent e = events[_played];
@@ -171,12 +275,7 @@ namespace F1.UI
 
         void PlayOne(BattleEvent e, int index)
         {
-            string caption = BattleLogText.Caption(e, _engine);
-            if (caption != null)
-            {
-                _caption(caption);
-            }
-
+            Caption(e);
             switch (e.Kind)
             {
                 case BattleEventKind.ItemActivated:
@@ -214,6 +313,14 @@ namespace F1.UI
                     }
 
                     Sound(SoundEffect.Shield);
+                    break;
+                case BattleEventKind.Staggered:
+                    // Round 104 (판정 1): stars turn over the head of a unit whose items the stagger pushed back, as long as it pushed them.
+                    if (e.B > 0)
+                    {
+                        _unitView(e.Target)?.Stagger(e.TimeMs, e.A);
+                    }
+
                     break;
                 case BattleEventKind.BurnApplied:
                     FloatOver(e.Target, UiStrings.Get(UiKeys.Fx.Burn, e.A), UiPalette.Burn, false);
@@ -437,7 +544,7 @@ namespace F1.UI
             BattleUnitView view = _unitView(unit);
             if (view != null)
             {
-                _fx.Float(view.FigureRect, text, color, big);
+                _fx.Float(view.FigureRect, text, color, big, _overRising);
             }
         }
 

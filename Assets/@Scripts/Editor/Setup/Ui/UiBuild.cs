@@ -497,6 +497,14 @@ namespace F1.Editor.Setup
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        /// <summary>Sets a serialized switch of a view.</summary>
+        public static void SetBool(UnityEngine.Object target, string propertyName, bool value)
+        {
+            var serialized = new SerializedObject(target);
+            Find(serialized, target, propertyName).boolValue = value;
+            serialized.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         public static void SetReferences(UnityEngine.Object target, string propertyName, params UnityEngine.Object[] values)
         {
             var serialized = new SerializedObject(target);

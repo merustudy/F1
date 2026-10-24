@@ -31,6 +31,9 @@ namespace F1.UI
 
         public string Text => _text.text;
 
+        /// <summary>Where it is now, in the fx layer's coordinates (it started lower and rises).</summary>
+        public Vector2 Position => _rect != null ? _rect.anchoredPosition : Vector2.zero;
+
         /// <param name="position">Where it starts, in the fx layer's coordinates.</param>
         /// <param name="scale">1 for an ordinary number, more for a heavy one.</param>
         /// <param name="life">Seconds until it is gone.</param>

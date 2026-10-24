@@ -2200,6 +2200,186 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673638919864323
+  - m_Id: 8550042418798592
+    m_Key: Fx.Thorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502720
+  - m_Id: 8550042431381504
+    m_Key: Fx.Charge
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502721
+  - m_Id: 8550042431381505
+    m_Key: EffectCard.Title
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502722
+  - m_Id: 8550042431381506
+    m_Key: EffectCard.KindHarmful
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502723
+  - m_Id: 8550042431381507
+    m_Key: EffectCard.KindHelpful
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502724
+  - m_Id: 8550042431381508
+    m_Key: EffectCard.KindDefence
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502725
+  - m_Id: 8550042431381509
+    m_Key: EffectCard.KindDanger
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502726
+  - m_Id: 8550042431381510
+    m_Key: EffectCard.NameShield
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502727
+  - m_Id: 8550042431381511
+    m_Key: EffectCard.NameDeathsDoor
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502728
+  - m_Id: 8550042431381512
+    m_Key: EffectCard.NameBurn
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502729
+  - m_Id: 8550042431381513
+    m_Key: EffectCard.NameBleed
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502730
+  - m_Id: 8550042431381514
+    m_Key: EffectCard.NameRegen
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502731
+  - m_Id: 8550042431381515
+    m_Key: EffectCard.NameThorns
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502732
+  - m_Id: 8550042431381516
+    m_Key: EffectCard.ShieldEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502733
+  - m_Id: 8550042431381517
+    m_Key: EffectCard.ShieldRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502734
+  - m_Id: 8550042431381518
+    m_Key: EffectCard.DeathsDoorEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502735
+  - m_Id: 8550042431381519
+    m_Key: EffectCard.DeathsDoorRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502736
+  - m_Id: 8550042431381520
+    m_Key: EffectCard.BurnEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502737
+  - m_Id: 8550042431381521
+    m_Key: EffectCard.BurnRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502738
+  - m_Id: 8550042431381522
+    m_Key: EffectCard.BleedEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502739
+  - m_Id: 8550042431381523
+    m_Key: EffectCard.BleedRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502740
+  - m_Id: 8550042431381524
+    m_Key: EffectCard.RegenEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502741
+  - m_Id: 8550042431381525
+    m_Key: EffectCard.ThornsEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502742
+  - m_Id: 8550042431381526
+    m_Key: EffectCard.ThornsRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502743
+  - m_Id: 8550042431381527
+    m_Key: EffectCard.FreezeEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502744
+  - m_Id: 8550042431381528
+    m_Key: EffectCard.HasteEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502745
+  - m_Id: 8550042431381529
+    m_Key: EffectCard.CooldownRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502746
+  - m_Id: 8550042431381530
+    m_Key: EffectCard.BlindEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502747
+  - m_Id: 8550042431381531
+    m_Key: EffectCard.BlindRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502748
+  - m_Id: 8550042431381532
+    m_Key: EffectCard.AimEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502749
+  - m_Id: 8550042431381533
+    m_Key: EffectCard.KeenEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502750
+  - m_Id: 8550042431381534
+    m_Key: EffectCard.FuryEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502751
+  - m_Id: 8550042431381535
+    m_Key: EffectCard.FuryRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502752
+  - m_Id: 8550042431381536
+    m_Key: EffectCard.VulnerableEffect
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502753
+  - m_Id: 8550042431381537
+    m_Key: EffectCard.VulnerableRule
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502754
+  - m_Id: 8550042431381538
+    m_Key: EffectCard.Decay
+    m_Metadata:
+      m_Items:
+      - rid: 8623673650185502755
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4232,3 +4412,217 @@ MonoBehaviour:
       data:
         m_CommentText: In place of Settle.NoDays on the day of the eclipse (Round
           103).
+    - rid: 8623673650185502720
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Round 104: rises over a unit the battle''s opening gave thorns.
+          {0} = thorns (whole).'
+    - rid: 8623673650185502721
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'Round 104: rises over a unit the battle''s opening charged.
+          {0} = seconds.'
+    - rid: 8623673650185502722
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          Its title. {0} = the effect's name. {1} = its stacks or amount."
+    - rid: 8623673650185502723
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The kind of a harmful state."
+    - rid: 8623673650185502724
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The kind of a helpful state."
+    - rid: 8623673650185502725
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The kind of the shield."
+    - rid: 8623673650185502726
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The kind of death's door."
+    - rid: 8623673650185502727
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The shield's name."
+    - rid: 8623673650185502728
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          Death's door's name."
+    - rid: 8623673650185502729
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The burn's name."
+    - rid: 8623673650185502730
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The bleed's name."
+    - rid: 8623673650185502731
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The regen's name."
+    - rid: 8623673650185502732
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The thorns' name."
+    - rid: 8623673650185502733
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = the shield (whole)."
+    - rid: 8623673650185502734
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The shield's rule."
+    - rid: 8623673650185502735
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = the death chance per hit, in percent."
+    - rid: 8623673650185502736
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          Death's door's rule."
+    - rid: 8623673650185502737
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick. {1} = damage a tick."
+    - rid: 8623673650185502738
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick."
+    - rid: 8623673650185502739
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick. {1} = damage a tick."
+    - rid: 8623673650185502740
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick."
+    - rid: 8623673650185502741
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick. {1} = HP a tick."
+    - rid: 8623673650185502742
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = thorns (whole)."
+    - rid: 8623673650185502743
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The thorns' rule."
+    - rid: 8623673650185502744
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent slower."
+    - rid: 8623673650185502745
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent faster."
+    - rid: 8623673650185502746
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          Freeze's and haste's rule. {0} = percent a stack. {1} = seconds of a tick."
+    - rid: 8623673650185502747
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent points lower."
+    - rid: 8623673650185502748
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = seconds of a tick."
+    - rid: 8623673650185502749
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent points higher."
+    - rid: 8623673650185502750
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent points higher."
+    - rid: 8623673650185502751
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent points higher."
+    - rid: 8623673650185502752
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent points a stack. {1} = seconds of a tick."
+    - rid: 8623673650185502753
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent more."
+    - rid: 8623673650185502754
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          {0} = percent a stack. {1} = seconds of a tick."
+    - rid: 8623673650185502755
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: "Round 104: the card a right click on an effect chip under
+          a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
+          The rule of a state that only wears off. {0} = seconds of a tick."

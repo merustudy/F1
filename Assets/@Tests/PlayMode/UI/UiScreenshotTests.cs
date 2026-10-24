@@ -507,16 +507,82 @@ namespace F1.Tests
                 yield return UiTestUtil.GoIntoTheFirstNode();
             }
 
+            // Round 104: the opening plays the pieces one by one while the clock holds; caught as the helm's "방어 +N" rises over the armour's.
             BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            BattleUnitView frontView = UiTestUtil.Views<BattleUnitView>(battle).Single(v => v.Unit.Setup.SourceId == front.MercenaryId);
+            float started = Time.unscaledTime;
+            while (frontView.ShieldShown < frontView.Unit.Shield && Time.unscaledTime - started < 5f)
+            {
+                yield return null;
+            }
+
+            yield return new WaitForSecondsRealtime(0.15f);
             battle.Clock.Paused = true;
-            yield return null;
-            yield return null;
             yield return Capture("ko_80_battle_armour_start");
 
             BattleBoardView board = UiTestUtil.Views<BattleBoardView>(battle).Single(b => b.Unit.Setup.SourceId == front.MercenaryId);
             UiTestUtil.RightClick(board.Items[board.Unit.Items.ToList().FindIndex(i => i.Equipped == helm)]);
             yield return UiTestUtil.WaitForRedraw();
             yield return Capture("ko_81_battle_armour_card");
+        }
+
+        /// <summary>
+        /// Round 104 (the user's play feedback): the stagger's stars over an enemy the front's frost flask staggered, the card of a freeze chip on an
+        /// enemy (with a vulnerable chip beside it), and the card of the front's shield badge.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator TheBattleFeedback_Korean()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            StaticData data = Managers.Data.Data;
+            yield return UiTestUtil.NewRunToLobby();
+            yield return UiTestUtil.FillParty(UiTestUtil.Screen<LobbyScreen>());
+            yield return UiTestUtil.DepartFromLobby();
+            int row = UiTestUtil.FlatRow(melee: true);
+            ExpeditionMember front = Managers.Expedition.Expedition.Members.Find(m => m.Alive && m.Row == row);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("frost_flask")), 0, 1);
+            UiTestUtil.Put(front, new EquippedItem(data.Items.Get("iron_helm")), 2, 1, turns: 1);
+            UiTestUtil.Screen<NodeMapScreen>().Refresh();
+            yield return null;
+            while (Managers.Expedition.Phase != GamePhase.Battle)
+            {
+                yield return UiTestUtil.GoIntoTheFirstNode();
+            }
+
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            float started = Time.unscaledTime;
+            while (battle.OpeningPlaying && Time.unscaledTime - started < 5f)
+            {
+                yield return null;
+            }
+
+            battle.Clock.Paused = true;
+            BattleUnitView stunned = null;
+            for (int step = 0; step < 400 && stunned == null && !Managers.Expedition.Battle.IsFinished; step++)
+            {
+                Managers.Expedition.AdvanceBattle(100);
+                yield return null;
+                stunned = UiTestUtil.Views<BattleUnitView>(battle).FirstOrDefault(v => v.Stars.Shown);
+            }
+
+            Assume.That(stunned, Is.Not.Null, "The flask staggered an enemy.");
+            yield return new WaitForSecondsRealtime(0.2f);
+            yield return Capture("ko_103_battle_stun_stars");
+
+            BattleUnitView enemy = UiTestUtil.Views<BattleUnitView>(battle).First(v => v.Unit.Side == BattleSide.Enemy && v.Unit.Alive);
+            enemy.Unit.SetStacks(EffectKind.Freeze, 3);
+            enemy.Unit.SetStacks(EffectKind.Vulnerable, 2);
+            yield return UiTestUtil.WaitForRedraw();
+            enemy.RightClickChip(BattleUnitView.EffectChip.Freeze);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_104_battle_effect_card");
+
+            UiTestUtil.PressTheBackground();
+            yield return null;
+            BattleUnitView frontView = UiTestUtil.Views<BattleUnitView>(battle).Single(v => v.Unit.Setup.SourceId == front.MercenaryId);
+            frontView.RightClickChip(BattleUnitView.EffectChip.Shield);
+            yield return UiTestUtil.WaitForRedraw();
+            yield return Capture("ko_105_battle_shield_card");
         }
 
         /// <summary>

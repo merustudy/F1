@@ -141,6 +141,9 @@ namespace F1.UI
         public static readonly Color StarHollow = Rgb(0x3A, 0x38, 0x34);
         public static readonly Color StarHollowEdge = Rgb(0x96, 0x92, 0x88);
 
+        /// <summary>Round 104: the stagger's stars over a unit's head — the item star's art in a brighter yellow, with the lit star's dark edge.</summary>
+        public static readonly Color StunStar = Rgb(0xFF, 0xD8, 0x4A);
+
         /// <summary>The words over a ghost and other small labels: Diablo's black box with a grey line, white words (red where it cannot go).</summary>
         public static readonly Color LabelBox = new Color(0f, 0f, 0f, 0.88f);
         public static readonly Color LabelLine = Rgb(0x46, 0x46, 0x46);
