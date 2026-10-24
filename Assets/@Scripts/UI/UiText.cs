@@ -539,7 +539,14 @@ namespace F1.UI
 
             if (data.Trigger == ItemTrigger.BattleStart)
             {
-                return UiStrings.Get(UiKeys.Item.BattleStart);
+                // Slice D stage 56 (Design/38 판정 4): an item that only raises the maximum HP shows it on the board at once.
+                bool onlyMaxHp = true;
+                foreach (ItemEffect effect in data.Effects)
+                {
+                    onlyMaxHp &= effect.Kind == EffectKind.MaxHp;
+                }
+
+                return UiStrings.Get(onlyMaxHp ? UiKeys.Item.WhileEquipped : UiKeys.Item.BattleStart);
             }
 
             BalanceData balance = Managers.Data.Data.Balance;

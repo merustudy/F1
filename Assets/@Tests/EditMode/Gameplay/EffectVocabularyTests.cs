@@ -193,6 +193,16 @@ namespace F1.Tests
             Assert.IsFalse(ItemEffect.CountsWhole(EffectKind.MaxHp) || ItemEffect.Hurts(EffectKind.MaxHp), "Hundredths, and it helps.");
         }
 
+        [Test]
+        public void MaxHp_RaisesItsOwnersOwnOnly()
+        {
+            // Slice D stage 56 (Design/38 판정 1): the expedition's screens show it on the owner, reading the owner's board alone.
+            foreach (TargetMode target in new[] { TargetMode.AllyAll, TargetMode.AllyLowestHp })
+            {
+                Assert.Throws<DataException>(() => StartItem("belt", EffectKind.MaxHp, target, 500, ItemCategory.Armor), target.ToString());
+            }
+        }
+
         // ---- Thorns ----
 
         [Test]

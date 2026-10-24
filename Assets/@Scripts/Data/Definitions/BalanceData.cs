@@ -99,7 +99,6 @@ namespace F1.Data
             new KeySpec(nameof(PotionCooldownMs), 0, Big),
             new KeySpec(nameof(RetreatChancePercent), 0, 100),
             new KeySpec(nameof(RetreatCooldownMs), 0, Big),
-            new KeySpec(nameof(PostBattleHealPercent), 0, 100),
             new KeySpec(nameof(MinCooldownMs), 50, Big),
             new KeySpec(nameof(DropCount), 1, MaxLootCards),
             new KeySpec(nameof(EliteDropCount), 1, MaxLootCards),
@@ -387,7 +386,6 @@ namespace F1.Data
         public int PotionCooldownMs => _values[nameof(PotionCooldownMs)];
         public int RetreatChancePercent => _values[nameof(RetreatChancePercent)];
         public int RetreatCooldownMs => _values[nameof(RetreatCooldownMs)];
-        public int PostBattleHealPercent => _values[nameof(PostBattleHealPercent)];
         public int MinCooldownMs => _values[nameof(MinCooldownMs)];
         /// <summary>How many of the items the enemies of a won battle carried drop as loot (Slice B stage 18); an elite group drops <see cref="EliteDropCount"/>.</summary>
         public int DropCount => _values[nameof(DropCount)];

@@ -321,6 +321,7 @@ namespace F1.UI
             public const string Melee = "Item.Melee";
             public const string NoActivation = "Item.NoActivation";
             public const string BattleStart = "Item.BattleStart";
+            public const string WhileEquipped = "Item.WhileEquipped";
             public const string CritTaken = "Item.CritTaken";
             public const string StarDamage = "Item.StarDamage";
             public const string Crit = "Item.Crit";

@@ -99,6 +99,22 @@ namespace F1.Gameplay
         public bool DeathsDoor;
     }
 
+    /// <summary>
+    /// A member's HP and maximum HP as the expedition's screens show them (Slice D stage 56, <see cref="ExpeditionRules.ShownHp"/>): with what the board's
+    /// maximum HP items raise, the HP in proportion.
+    /// </summary>
+    public readonly struct MemberHp
+    {
+        public MemberHp(int hp, int maxHp)
+        {
+            Hp = hp;
+            MaxHp = maxHp;
+        }
+
+        public int Hp { get; }
+        public int MaxHp { get; }
+    }
+
     /// <summary>Who goes on an expedition, where they stand and how tired they leave.</summary>
     public readonly struct PartyMember
     {

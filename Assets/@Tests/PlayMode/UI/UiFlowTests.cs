@@ -1581,6 +1581,103 @@ namespace F1.Tests
             StringAssert.DoesNotContain(UiText.Name(focused.Description), UiTestUtil.TextAt(map, "Frame/BoardPanel/PartyDetail"));
         }
 
+        /// <summary>The first placement of a member's board where an inventory item can go now.</summary>
+        static Placement FreePlacement(ExpeditionManager manager, int inventoryIndex, int memberIndex)
+        {
+            return Enumerable.Range(0, BoardFrame.Width * BoardFrame.Height)
+                .Select(i => new Placement(i % BoardFrame.Width, i / BoardFrame.Width, 0))
+                .First(p => manager.CanPlaceFromInventory(inventoryIndex, memberIndex, p));
+        }
+
+        /// <summary>
+        /// Slice D stage 56 (Design/38 판정 1~4, the user's "상점 등에서 최대 체력 아이템 장착/해제시 바로 ui에 적용되게, 현재 체력도 비율적으로 증가/감소"):
+        /// a leather belt put on the board shows on the HP bar's numbers at once, the HP in proportion; taken off, the same HP is back — the member's own
+        /// HP never moved. Its card says it holds while worn.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator PartySide_AMaximumHpItem_ShowsOnTheHpBarAtOnce_AndTakenOffGivesTheSameHpBack()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            StaticData data = Managers.Data.Data;
+            ExpeditionManager manager = Managers.Expedition;
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            PartySideView party = map.GetComponentInChildren<PartySideView>();
+            PartyColumnView row1 = party.ColumnOfRow(1);
+            ExpeditionMember front = manager.Expedition.Members[row1.Member];
+            front.Hp = front.MaxHp / 2 + 3;
+            int hp = front.Hp;
+            int maxHp = front.MaxHp;
+            ItemData belt = data.Items.Get("leather_belt");
+            manager.Expedition.Inventory.Add(new EquippedItem(belt));
+            int index = manager.Expedition.Inventory.Count - 1;
+            map.Refresh();
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(hp), UiText.Hp(maxHp)), row1.HpLine, "In the inventory it raises nothing.");
+
+            Placement at = FreePlacement(manager, index, row1.Member);
+            manager.PlaceFromInventory(index, row1.Member, at);
+            map.Refresh();
+            yield return null;
+            int raised = maxHp + belt.Effects.Single().Min;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(MaxHpRules.Scale(hp, maxHp, raised)), UiText.Hp(raised)), row1.HpLine,
+                "On the board: raised at once, the HP in proportion.");
+            Assert.AreEqual((hp, maxHp), (front.Hp, front.MaxHp), "The member's own HP stays without the item.");
+
+            UiTestUtil.RightClickSquare(row1.BoardView, at.X, at.Y);
+            yield return null;
+            string facts = UiTestUtil.TextAt(party.Tooltip, "ItemTooltipFacts");
+            StringAssert.Contains(UiStrings.Get(UiKeys.Item.WhileEquipped), facts, "판정 4: while worn.");
+            StringAssert.DoesNotContain(UiStrings.Get(UiKeys.Item.BattleStart), facts);
+            UiTestUtil.PressTheBackground();
+            yield return null;
+
+            manager.MoveToInventory(row1.Member, at.X, at.Y);
+            map.Refresh();
+            yield return null;
+            Assert.AreEqual(UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(hp), UiText.Hp(maxHp)), row1.HpLine, "Taken off: the same HP back.");
+        }
+
+        /// <summary>
+        /// Slice D stage 56 (Design/38 판정 2): after a win the party's HP bars follow the expedition's HP — the battle's own, as a win heals nothing
+        /// (2026-10-24) — and a belt put on while picking up the loot shows at once.
+        /// </summary>
+        [UnityTest]
+        public IEnumerator Loot_AfterTheWin_ThePartysBarsShowTheExpeditionsHp_AndABeltPutOnShowsAtOnce()
+        {
+            yield return UiTestUtil.BootToTitle(_saveRoot, "ko-KR");
+            yield return DepartToTheMap();
+            UiTestUtil.StageChampion();
+            NodeMapScreen map = UiTestUtil.Screen<NodeMapScreen>();
+            map.Refresh();
+            yield return null;
+            UiTestUtil.Click(UiTestUtil.Views<MapNodeView>(map).First(n => n.Button.interactable).Button);
+            UiTestUtil.Click(map, "Frame/BoardPanel/Enter");
+            yield return UiTestUtil.WaitForScreen(ScreenId.Battle);
+            BattleScreen battle = UiTestUtil.Screen<BattleScreen>();
+            yield return UiTestUtil.EndBattle(battle);
+            Assert.IsTrue(battle.AfterWin);
+            yield return null;
+
+            ExpeditionManager manager = Managers.Expedition;
+            ExpeditionState expedition = manager.Expedition;
+            int m = expedition.Members.FindIndex(member => member.Alive);
+            ExpeditionMember shown = expedition.Members[m];
+            BattleUnitView view = UiTestUtil.Views<BattleUnitView>(battle).Single(v => v.Unit.Side == BattleSide.Party && v.Unit.Setup.SourceId == shown.MercenaryId);
+            MemberHp before = manager.ShownHp(m);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.Hp, UiText.Hp(before.Hp), UiText.Hp(before.MaxHp)), view.HpLine, "After the win: the expedition's HP.");
+
+            ItemData belt = Managers.Data.Data.Items.Get("leather_belt");
+            expedition.Inventory.Add(new EquippedItem(belt));
+            int index = expedition.Inventory.Count - 1;
+            manager.PlaceFromInventory(index, m, FreePlacement(manager, index, m));
+            battle.Refresh();
+            yield return null;
+            MemberHp worn = manager.ShownHp(m);
+            Assert.AreEqual(before.MaxHp + belt.Effects.Single().Min, worn.MaxHp);
+            Assert.AreEqual(UiStrings.Get(UiKeys.Battle.Hp, UiText.Hp(worn.Hp), UiText.Hp(worn.MaxHp)), view.HpLine, "A belt put on while picking up the loot shows at once.");
+        }
+
         /// <summary>
         /// In battle the party's units carry the fatigue pips (the enemies none), and the breakdown at the threshold is a moment on the
         /// stage (round 38, B): the battle slows, the stage darkens but the unit and draws in on it, the unit holds its state pose with the

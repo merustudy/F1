@@ -121,6 +121,10 @@ namespace F1.UI
 
         BattleUnit _unit;
         int _shownHp = -1;
+        int _shownMaxHp = -1;
+
+        /// <summary>After a win, the expedition's HP the bar shows instead of the battle's (stage 56, <see cref="ShowHp"/>); null while the battle's own.</summary>
+        MemberHp? _expeditionHp;
         int _shownShield = -1;
         int _shownBurn = -1;
         int _shownBleed = -1;
@@ -162,6 +166,9 @@ namespace F1.UI
 
         public Button Button => _button;
         public BattleUnit Unit => _unit;
+
+        /// <summary>The numbers on the HP bar, as shown.</summary>
+        public string HpLine => _hp.text;
 
         /// <summary>Round 104: a right click on the badge or a chip of the state line, with the effect it shows.</summary>
         public event System.Action<BattleUnitView, EffectChip> EffectRightClicked;
@@ -243,6 +250,7 @@ namespace F1.UI
             _stunEndMs = -1;
             _heldShield = 0;
             _heldThorns = 0;
+            _expeditionHp = null;
         }
 
         void Awake()
@@ -342,6 +350,15 @@ namespace F1.UI
             _heldThorns = thorns;
         }
 
+        /// <summary>
+        /// Slice D stage 56 (Design/38 판정 2): after a win the bar and its numbers follow the expedition's HP as its screens show it — the battle's taken
+        /// back in proportion and raised again by what the board's maximum HP items raise — so a belt put on while picking up the loot shows at once.
+        /// </summary>
+        public void ShowHp(MemberHp hp)
+        {
+            _expeditionHp = hp;
+        }
+
         /// <summary>Writes a state's stacks into its chip's text when they changed since the last render.</summary>
         static void RenderStacks(int stacks, ref int shown, TMP_Text text, string key)
         {
@@ -356,6 +373,7 @@ namespace F1.UI
         public void Invalidate()
         {
             _shownHp = -1;
+            _shownMaxHp = -1;
             _shownShield = -1;
             _shownBurn = -1;
             _shownBleed = -1;
@@ -491,11 +509,14 @@ namespace F1.UI
             BalanceData balance = engine.Setup.Balance;
             int timeMs = engine.TimeMs;
 
-            if (_unit.Hp != _shownHp)
+            int hp = _expeditionHp?.Hp ?? _unit.Hp;
+            int maxHp = _expeditionHp?.MaxHp ?? _unit.MaxHp;
+            if (hp != _shownHp || maxHp != _shownMaxHp)
             {
-                _shownHp = _unit.Hp;
-                _hp.text = UiStrings.Get(UiKeys.Battle.Hp, UiText.Hp(_unit.Hp), UiText.Hp(_unit.MaxHp));
-                _hpBar.Set(_unit.Hp, _unit.MaxHp);
+                _shownHp = hp;
+                _shownMaxHp = maxHp;
+                _hp.text = UiStrings.Get(UiKeys.Battle.Hp, UiText.Hp(hp), UiText.Hp(maxHp));
+                _hpBar.Set(hp, maxHp);
             }
 
             int shield = ShieldShown;

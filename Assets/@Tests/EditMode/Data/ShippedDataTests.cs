@@ -242,9 +242,9 @@ namespace F1.Tests
         public void TheMaximumHpItems_AreArmourThatRaisesItWhenTheBattleStarts()
         {
             // 2026-10-23 (Design/35 판정 6): the leather belt and the guardian's amulet, asking for constitution.
-            // Their values since stage 43 round 2 (the user's "깃발·로브·최대 체력 아이템 조정"): 24 and 12.
+            // Their values since stage 56 (Design/38 판정 5, the user's "최대 체력 아이템 1/3로 너프"): 8 and 4 — a third of stage 43 round 2's 24 and 12.
             StaticData data = LoadShipped();
-            foreach ((string id, int value, int req) in new[] { ("leather_belt", 2400, 3), ("guardian_amulet", 1200, 5) })
+            foreach ((string id, int value, int req) in new[] { ("leather_belt", 800, 3), ("guardian_amulet", 400, 5) })
             {
                 ItemData item = data.Items.Get(id);
                 Assert.AreEqual(ItemCategory.Armor, item.Category, id);
@@ -253,6 +253,22 @@ namespace F1.Tests
                 Assert.AreEqual(((Stat?)Stat.Con, req), (item.ReqStat, item.ReqValue), id);
                 Assert.IsTrue(item.ShopWeight > 0 && item.DropWeight > 0 && item.Price > 0, id + ": sold and dropped.");
             }
+        }
+
+        /// <summary>
+        /// Stage 56 (Design/38 판정 6·7, the user's "목걸이 예리, 격분 너무 강함(방어구 처럼 최초 1회 적용하거나 쿨타임을 늘리는 방향)"): the bloodlust charm
+        /// gives its wearer keen 12 and fury 12 once, when the battle starts, instead of 8 and 8 every five seconds — which outran the decay of one a second
+        /// and piled up without end at the higher tiers. Still a support item on the shelves.
+        /// </summary>
+        [Test]
+        public void TheBloodlustCharm_GivesKeenAndFuryOnce_WhenTheBattleStarts()
+        {
+            StaticData data = LoadShipped();
+            ItemData charm = data.Items.Get("bloodlust_charm");
+            Assert.AreEqual((ItemCategory.Support, ItemTrigger.BattleStart, 0), (charm.Category, charm.Trigger, charm.CooldownMs));
+            CollectionAssert.AreEqual(new[] { (EffectKind.Keen, TargetMode.Self, 12), (EffectKind.Fury, TargetMode.Self, 12) },
+                charm.Effects.Select(e => (e.Kind, e.Target, e.Min)));
+            Assert.IsTrue(charm.ShopWeight > 0 && charm.DropWeight > 0);
         }
 
         /// <summary>

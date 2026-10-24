@@ -2380,6 +2380,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8623673650185502755
+  - m_Id: 8610332627951616
+    m_Key: Item.WhileEquipped
+    m_Metadata:
+      m_Items:
+      - rid: 8623673653953560576
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
@@ -4626,3 +4631,9 @@ MonoBehaviour:
         m_CommentText: "Round 104: the card a right click on an effect chip under
           a unit opens (Docs/Architecture/12_UI.md \"\uD6A8\uACFC \uCE69\uC758 \uCE74\uB4DC\").
           The rule of a state that only wears off. {0} = seconds of a tick."
+    - rid: 8623673653953560576
+      type: {class: Comment, ns: UnityEngine.Localization.Metadata, asm: Unity.Localization}
+      data:
+        m_CommentText: 'In an item''s facts in place of its cooldown (Slice D stage
+          56, Design/38): an item that only raises the maximum HP, which shows on
+          the board at once.'

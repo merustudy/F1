@@ -1169,13 +1169,14 @@ namespace F1.Gameplay
         /// <summary>
         /// Raises the target's maximum HP for this battle (2026-10-23, Design/35 판정 6: "전투 시작시에 최대 체력, 현재 체력은 비율로 올라감"): the HP
         /// rises in the same proportion, rounded down. When the battle ends the expedition takes the HP back in that proportion
-        /// (<see cref="ExpeditionRules"/>), so equipping and unequipping such an item never heals.
+        /// (<see cref="ExpeditionRules"/>), so equipping and unequipping such an item never heals. The expedition's screens show the same values before the
+        /// battle (stage 56, <see cref="ExpeditionRules.ShownHp"/>): both count with <see cref="MaxHpRules.Scale"/>.
         /// </summary>
         void RaiseMaxHp(BattleUnit target, int amount, UnitRef source, string cause)
         {
             int before = target.MaxHp;
             target.MaxHpBonus += amount;
-            target.Hp = (int)((long)target.Hp * target.MaxHp / before);
+            target.Hp = MaxHpRules.Scale(target.Hp, before, target.MaxHp);
             Log(BattleEventKind.MaxHpRaised, source, target.Ref, cause, amount, target.Hp, target.MaxHp);
         }
 

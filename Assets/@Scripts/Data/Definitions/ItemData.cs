@@ -238,6 +238,12 @@ namespace F1.Data
                 {
                     throw new DataException($"{DefinitionName} '{id}': a maximum HP effect belongs to an item that activates when a battle starts.");
                 }
+
+                // Slice D stage 56 (Design/38 판정 1): the expedition's screens show it on the owner, reading the owner's board alone.
+                if (effect != null && effect.Kind == EffectKind.MaxHp && effect.Target != TargetMode.Self)
+                {
+                    throw new DataException($"{DefinitionName} '{id}': a maximum HP effect raises its owner's own (Target Self).");
+                }
             }
 
             if (trigger == ItemTrigger.BattleStart)

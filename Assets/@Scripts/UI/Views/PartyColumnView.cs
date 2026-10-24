@@ -62,6 +62,9 @@ namespace F1.UI
         /// <summary>The state line's words: the job, and the member's state after it while it is in one.</summary>
         public string JobLine => _job.text;
 
+        /// <summary>The numbers on the HP bar, as shown (stage 56: with what the board's maximum HP items raise).</summary>
+        public string HpLine => _hp.text;
+
         /// <summary>The click on the state line. Live only while the member is in a state.</summary>
         public Button StateButton => _state;
 
@@ -110,21 +113,22 @@ namespace F1.UI
             _board.SetActive(false);
         }
 
+        /// <param name="hp">The member's HP as the screens show it: with what its board's maximum HP items raise (stage 56, <see cref="ExpeditionManager.ShownHp"/>).</param>
         /// <param name="art">Where the figure of the member's job and the icons of its items come from.</param>
         /// <param name="picked">The member's board item held now, or null.</param>
         /// <param name="pickedBag">The member's bag held now, or null.</param>
         /// <param name="merges">Whether the held item would merge into an item of the board (round 35): its piece is marked. Null for none.</param>
         /// <param name="ghost">The held thing's ghost on this board, or null.</param>
         /// <param name="showFrame">Whether the frame shows outside the bags: while a bag is held.</param>
-        public void Show(int memberIndex, ExpeditionMember member, ExpeditionArt art, bool canMoveForward, bool canMoveBack, BoardItem picked, BoardBag pickedBag,
+        public void Show(int memberIndex, ExpeditionMember member, MemberHp hp, ExpeditionArt art, bool canMoveForward, bool canMoveBack, BoardItem picked, BoardBag pickedBag,
             Func<BoardItem, bool> merges, GridGhost ghost, bool showFrame, IReadOnlyList<StarMark> stars = null, bool lifted = false)
         {
             Member = memberIndex;
             _figure.SetActive(true);
             _figureView.Show(art.OfJob(member.JobId));
             _info.SetActive(true);
-            _hp.text = UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(member.Hp), UiText.Hp(member.MaxHp));
-            _hpBar.Set(member.Hp, member.MaxHp);
+            _hp.text = UiStrings.Get(UiKeys.Board.Hp, UiText.Hp(hp.Hp), UiText.Hp(hp.MaxHp));
+            _hpBar.Set(hp.Hp, hp.MaxHp);
             _forward.interactable = canMoveForward;
             _back.interactable = canMoveBack;
 

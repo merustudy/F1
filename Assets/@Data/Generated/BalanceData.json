@@ -294,10 +294,6 @@
       "Value": 150
     },
     {
-      "Key": "PostBattleHealPercent",
-      "Value": 10
-    },
-    {
       "Key": "PotionCooldownMs",
       "Value": 1500
     },

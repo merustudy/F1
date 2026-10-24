@@ -81,7 +81,6 @@ namespace F1.Tests
                 { "PotionCooldownMs", 1500 },
                 { "RetreatChancePercent", 100 },
                 { "RetreatCooldownMs", 5000 },
-                { "PostBattleHealPercent", 10 },
                 { "MinCooldownMs", 200 },
                 { "DropCount", 2 },
                 { "EliteDropCount", 3 },

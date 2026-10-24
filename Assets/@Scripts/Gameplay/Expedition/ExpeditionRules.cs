@@ -286,12 +286,13 @@ namespace F1.Gameplay
             }
 
             state.BattlesWon++;
+            // A win heals nothing (2026-10-24, the user's "전투에서 이기면 살아남은 용병이 최대 체력의 10%를 회복하는 규칙-삭제"); one who came through at
+            // death's door still starts the next battle above 0 (Docs/Design/03_Dungeon_Structure.md §6).
             foreach (ExpeditionMember member in state.Members)
             {
                 if (member.Alive)
                 {
-                    int healed = member.Hp + member.MaxHp * data.Balance.PostBattleHealPercent / 100;
-                    member.Hp = Math.Max(1, Math.Min(member.MaxHp, healed));
+                    member.Hp = Math.Max(1, member.Hp);
                 }
             }
 
@@ -420,8 +421,60 @@ namespace F1.Gameplay
                 return unit.Hp;
             }
 
-            int hp = (int)((long)unit.Hp * unit.Setup.MaxHp / unit.MaxHp);
+            int hp = MaxHpRules.Scale(unit.Hp, unit.MaxHp, unit.Setup.MaxHp);
             return Math.Max(1, hp);
+        }
+
+        /// <summary>
+        /// What the expedition's screens show of a member's HP (Slice D stage 56, Design/38 판정 1, the user's "최대 체력 아이템 장착/해제시 바로 ui에
+        /// 적용되게, 현재 체력도 비율적으로"): the maximum its board's maximum HP items raise and the HP in proportion — the values the battle starts with,
+        /// counted the same way (the board in reading order, the items that work in the member's row, the effect's size at its tier and the owner's power,
+        /// <see cref="MaxHpRules.Scale"/>). The member's own <see cref="ExpeditionMember.Hp"/> and <see cref="ExpeditionMember.MaxHp"/> stay without the
+        /// items, so putting an item on and taking it off as often as one likes never changes the HP. A dead member shows its own values.
+        /// </summary>
+        public static MemberHp ShownHp(StaticData data, ExpeditionState state, int memberIndex)
+        {
+            ExpeditionMember member = state.Members[memberIndex];
+            int maxHp = member.MaxHp;
+            int hp = member.Hp;
+            if (!member.Alive)
+            {
+                return new MemberHp(hp, maxHp);
+            }
+
+            // The battle lines the living up in rows 1..n, and an item works by the row it stands in and that length.
+            int lineLength = 0;
+            foreach (ExpeditionMember other in state.Members)
+            {
+                if (other.Alive)
+                {
+                    lineLength++;
+                }
+            }
+
+            foreach (EquippedItem item in member.Board.InReadingOrder())
+            {
+                ItemData itemData = item.Item;
+                if (itemData.Trigger != ItemTrigger.BattleStart || itemData.IsPassive || !itemData.UsableIn(member.Row, lineLength))
+                {
+                    continue;
+                }
+
+                int statPercent = StatRules.PowerPercent(data.Balance, member.Stats, itemData);
+                foreach (ItemEffect effect in itemData.Effects)
+                {
+                    if (effect.Kind != EffectKind.MaxHp)
+                    {
+                        continue;
+                    }
+
+                    int before = maxHp;
+                    maxHp += StatRules.Scale(item.Magnitude(data.Balance, effect), statPercent);
+                    hp = MaxHpRules.Scale(hp, before, maxHp);
+                }
+            }
+
+            return new MemberHp(hp, maxHp);
         }
 
         /// <summary>

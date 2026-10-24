@@ -2183,6 +2183,10 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 636489278608375844
+  - m_Id: 8610332627951616
+    m_Localized: While equipped
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

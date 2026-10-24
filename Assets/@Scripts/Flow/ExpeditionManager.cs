@@ -142,6 +142,15 @@ namespace F1.Flow
             Commit();
         }
 
+        /// <summary>
+        /// A member's HP as the expedition's screens show it (Slice D stage 56, Design/38 판정 1): with what the board's maximum HP items raise, the HP in
+        /// proportion — the values the next battle starts with (<see cref="ExpeditionRules.ShownHp"/>). The member's own HP stays without the items.
+        /// </summary>
+        public MemberHp ShownHp(int memberIndex)
+        {
+            return ExpeditionRules.ShownHp(_data.Data, Expedition, memberIndex);
+        }
+
         // ---- Node map ------------------------------------------------------------------------
 
         /// <summary>Nodes that can be entered now. Empty outside the node map.</summary>

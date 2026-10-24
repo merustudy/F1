@@ -230,9 +230,9 @@ namespace F1.Tests
         }
 
         [Test]
-        public void CompleteBattle_OnVictory_CarriesHpOver_HealsABit_AndDropsLoot()
+        public void CompleteBattle_OnVictory_CarriesHpOver_HealingNothing_AndDropsLoot()
         {
-            StaticData data = TestData.Data(("PostBattleHealPercent", 10));
+            StaticData data = TestData.Data();
             ExpeditionState state = Create(data);
 
             BattleEngine battle = Fight(data, state, ExpeditionRules.AvailableNodes(state)[0].Id);
@@ -242,7 +242,7 @@ namespace F1.Tests
             Assert.AreEqual(ExpeditionPhase.PickingLoot, state.Phase);
             BattleUnit tankUnit = battle.Party.Single(u => u.Setup.SourceId == "anna");
             Assert.Less(tankUnit.Hp, 100, "The tank was hit.");
-            Assert.AreEqual(Math.Min(100, tankUnit.Hp + 10), state.Members[0].Hp, "HP carries over plus 10% of max HP.");
+            Assert.AreEqual(tankUnit.Hp, state.Members[0].Hp, "HP carries over as it is: a win heals nothing (2026-10-24, the user's \"규칙-삭제\").");
             Assert.AreEqual(data.Balance.DropCount, state.Loot.Count, "Two grunts carried two claws: as many as drop.");
             Assert.IsTrue(state.Loot.All(d => d != null && d.Kind == OfferKind.Item), "Every drop lies there, and only items drop.");
         }

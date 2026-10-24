@@ -441,6 +441,7 @@ namespace F1.UI
                 column.Show(
                     m,
                     shown,
+                    manager.ShownHp(m),
                     _art,
                     manager.CanMoveToRow(m, row - 1),
                     manager.CanMoveToRow(m, row + 1),

@@ -1845,6 +1845,17 @@ namespace F1.UI
                     true);
             }
 
+            // Slice D stage 56 (Design/38 판정 2): the party's bars follow the expedition's HP as its screens show it, so a maximum HP item put on
+            // or taken off while picking up the loot shows at once.
+            foreach (BattleUnitView view in _partyViews)
+            {
+                int index = view.Unit == null ? -1 : expedition.Members.FindIndex(member => member.Alive && member.MercenaryId == view.Unit.Setup.SourceId);
+                if (index >= 0)
+                {
+                    view.ShowHp(manager.ShownHp(index));
+                }
+            }
+
             _heldPointer.ShowHand(_afterWin ? _lootHand : null, expedition, _art);
 
             _lootToInventory.interactable = _pickedDrop >= 0 && manager.CanTakeLootToInventory(_pickedDrop);

@@ -304,7 +304,7 @@
       "Category": "Support",
       "Width": 2,
       "Height": 1,
-      "CooldownMs": 5000,
+      "CooldownMs": 0,
       "Rows": {
         "From": "Front",
         "Reach": 4
@@ -314,15 +314,15 @@
           "Kind": "Keen",
           "Target": "Self",
           "Reach": 0,
-          "Min": 8,
-          "Max": 8
+          "Min": 12,
+          "Max": 12
         },
         {
           "Kind": "Fury",
           "Target": "Self",
           "Reach": 0,
-          "Min": 8,
-          "Max": 8
+          "Min": 12,
+          "Max": 12
         }
       ],
       "ShopWeight": 6,
@@ -335,7 +335,7 @@
       "Unique": false,
       "DropWeight": 6,
       "School": null,
-      "Trigger": "Cooldown",
+      "Trigger": "BattleStart",
       "CritTakenPercent": 0,
       "CritDamagePercent": 0,
       "ReqStat": null,
@@ -1106,8 +1106,8 @@
           "Kind": "MaxHp",
           "Target": "Self",
           "Reach": 0,
-          "Min": 1200,
-          "Max": 1200
+          "Min": 400,
+          "Max": 400
         }
       ],
       "ShopWeight": 8,
@@ -1496,8 +1496,8 @@
           "Kind": "MaxHp",
           "Target": "Self",
           "Reach": 0,
-          "Min": 2400,
-          "Max": 2400
+          "Min": 800,
+          "Max": 800
         }
       ],
       "ShopWeight": 8,
